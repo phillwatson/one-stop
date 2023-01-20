@@ -1,0 +1,14 @@
+.bank-detail {
+    width: 500px;
+}
+
+.label {
+    display: inline-block;
+    width: 100px;
+    padding-left: 7px;
+}
+.value {
+    display: inline-block;
+    font-weight: bold;
+    width: auto;
+}

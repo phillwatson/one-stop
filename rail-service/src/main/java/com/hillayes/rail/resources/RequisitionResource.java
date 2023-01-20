@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
-@Path("/requisitions")
+@Path("/api/v1/requisitions")
 @Produces("application/json")
 @Consumes("application/json")
 @Slf4j

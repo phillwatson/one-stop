@@ -1,4 +1,4 @@
-package com.hillayes.rail;
+package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.model.EndUserAgreementRequest;
 import io.quarkus.test.junit.QuarkusTest;
@@ -31,7 +31,7 @@ public class AgreementResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(agreement)
-                .when().post("/agreements")
+                .when().post("/api/v1/agreements")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -45,7 +45,7 @@ public class AgreementResourceTest extends TestBase {
         given()
                 .queryParam("limit", 100)
                 .queryParam("offset", 0)
-                .when().get("/agreements")
+                .when().get("/api/v1/agreements")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -54,7 +54,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().get("/agreements/{id}")
+                .when().get("/api/v1/agreements/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -66,7 +66,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().delete("/agreements/{id}")
+                .when().delete("/api/v1/agreements/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -74,7 +74,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().get("/agreements/{id}")
+                .when().get("/api/v1/agreements/{id}")
                 .then()
                 .statusCode(404);
     }

@@ -1,4 +1,4 @@
-package com.hillayes.rail;
+package com.hillayes.rail.resources;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -12,13 +12,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 
 @QuarkusTest
-public class InstitutionResourceTest {
+public class CountryResourceTest {
     @Test
-    public void testListBanks() {
+    public void testListCountries() {
         List<Map<String,Object>> response = given()
-                .queryParam("country", "GB")
-                .queryParam("payments_enabled", false)
-                .when().get("/banks")
+                .when().get("/api/v1/countries")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -30,13 +28,13 @@ public class InstitutionResourceTest {
         );
     }
     @Test
-    public void testGetBank() {
+    public void testGetCountry() {
         given()
-                .pathParam("id", "FIRST_DIRECT_MIDLGB22")
-                .when().get("/banks/{id}")
+                .pathParam("id", "GB")
+                .when().get("/api/v1/countries/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
-                .body("name", is("First Direct"));
+                .body("name", is("Great Britain"));
     }
 }

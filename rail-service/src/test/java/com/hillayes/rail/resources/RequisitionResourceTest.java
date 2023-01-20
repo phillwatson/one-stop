@@ -1,4 +1,4 @@
-package com.hillayes.rail;
+package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.model.*;
 import io.quarkus.test.junit.QuarkusTest;
@@ -33,7 +33,7 @@ public class RequisitionResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(agreement)
-                .when().post("/agreements")
+                .when().post("/api/v1/agreements")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -51,7 +51,7 @@ public class RequisitionResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(requisition)
-                .when().post("/requisitions")
+                .when().post("/api/v1/requisitions")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -67,7 +67,7 @@ public class RequisitionResourceTest extends TestBase {
         given()
                 .queryParam("limit", 100)
                 .queryParam("offset", 0)
-                .when().get("/requisitions")
+                .when().get("/api/v1/requisitions")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -76,7 +76,7 @@ public class RequisitionResourceTest extends TestBase {
 
         String acceptanceLink = given()
                 .pathParam("id", requisitionId)
-                .when().get("/requisitions/{id}")
+                .when().get("/api/v1/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -90,7 +90,7 @@ public class RequisitionResourceTest extends TestBase {
 
         given()
                 .pathParam("id", requisitionId)
-                .when().delete("/requisitions/{id}")
+                .when().delete("/api/v1/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -98,7 +98,7 @@ public class RequisitionResourceTest extends TestBase {
 
         given()
                 .pathParam("id", requisitionId)
-                .when().get("/requisitions/{id}")
+                .when().get("/api/v1/requisitions/{id}")
                 .then()
                 .statusCode(404);
     }

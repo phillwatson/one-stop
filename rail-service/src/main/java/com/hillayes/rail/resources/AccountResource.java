@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
-@Path("/accounts")
+@Path("/api/v1/accounts")
 @Produces("application/json")
 @Consumes("application/json")
 @Slf4j

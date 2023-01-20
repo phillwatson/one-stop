@@ -1,4 +1,4 @@
-package com.hillayes.rail;
+package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.model.EndUserAgreement;
 import com.hillayes.rail.services.model.PaginatedList;

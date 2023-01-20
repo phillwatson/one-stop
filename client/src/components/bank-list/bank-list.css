@@ -1,0 +1,22 @@
+.bank-list {
+    text-align: left;
+    list-style: none;
+}
+
+.bank-list li {
+    margin-top: 2px;
+    margin-bottom: 3px;
+    margin-right: 25px;
+}
+
+.bank-list li:hover {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.bank-list-item {
+}
+
+.bank-list-item-active {
+    color: #f1473f;
+}

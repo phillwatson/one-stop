@@ -1,0 +1,55 @@
+.App {
+  min-height: 100vh;
+  height: 600px;
+  background-color: #f0f2f5;
+  color: #606878;
+  display: flex;
+  flex-flow: column wrap;
+  align-items: stretch;
+  border: 1px solid;
+}
+
+.col-1 {
+  align-self: stretch
+}
+
+.col-2 {
+}
+
+.country-selector {
+  border: 1px solid;
+}
+
+.bank-list {
+  height: 500px;
+  overflow: auto;
+  border: 1px solid;
+}
+
+.bank-detail {
+  border: 1px solid;
+}
+
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

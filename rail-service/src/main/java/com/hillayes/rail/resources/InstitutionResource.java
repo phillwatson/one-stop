@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import java.util.List;
 
-@Path("/banks")
+@Path("/api/v1/banks")
 @Produces("application/json")
 @Consumes("application/json")
 @Slf4j

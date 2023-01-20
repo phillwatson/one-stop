@@ -10,3 +10,14 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
+
+one-stop:
+  countries:
+    - id: GB
+      name: Great Britain
+    - id: DE
+      name: Germany
+    - id: FR
+      name: France
+    - id: IT
+      name: Italy
