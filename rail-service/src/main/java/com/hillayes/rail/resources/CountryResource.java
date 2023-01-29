@@ -1,6 +1,6 @@
 package com.hillayes.rail.resources;
 
-import com.hillayes.rail.repository.domain.Country;
+import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.services.CountryService;
 import lombok.extern.slf4j.Slf4j;
 

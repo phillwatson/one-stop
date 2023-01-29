@@ -1,8 +1,8 @@
 package com.hillayes.rail.resources;
 
-import com.hillayes.rail.services.model.EndUserAgreement;
-import com.hillayes.rail.services.model.PaginatedList;
-import com.hillayes.rail.services.model.Requisition;
+import com.hillayes.rail.model.EndUserAgreement;
+import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.rail.model.Requisition;
 import io.restassured.common.mapper.TypeRef;
 
 import static io.restassured.RestAssured.given;

@@ -1,17 +1,17 @@
 package com.hillayes.rail.services;
 
-import com.hillayes.rail.services.model.ObtainJwtResponse;
-import com.hillayes.rail.services.model.RefreshJwtResponse;
+import com.hillayes.rail.model.ObtainJwtResponse;
+import com.hillayes.rail.model.RefreshJwtResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 
+@ApplicationScoped
 @RegisterRestClient(configKey = "nordigen-api")
 @Path("/api/v2/token")
 @Produces("application/json")
 @Consumes("application/json")
-@Singleton
 public interface AuthService {
     @POST
     @Path("/new/")

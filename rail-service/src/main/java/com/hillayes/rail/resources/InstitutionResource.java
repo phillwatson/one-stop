@@ -1,6 +1,6 @@
 package com.hillayes.rail.resources;
 
-import com.hillayes.rail.services.model.Institution;
+import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.services.InstitutionService;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

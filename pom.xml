@@ -6,7 +6,7 @@
 
     <groupId>com.hillayes</groupId>
     <artifactId>one-stop</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.${revision}</version>
 
     <packaging>pom</packaging>
     <description>Hillayes One-Stop</description>
@@ -18,10 +18,16 @@
     </organization>
 
     <modules>
+        <module>executor-lib</module>
+        <module>exception-lib</module>
+        <module>events-lib</module>
+        <module>outbox-lib</module>
         <module>rail-service</module>
+        <module>user-service</module>
     </modules>
 
     <properties>
+        <revision>0-SNAPSHOT</revision>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -37,7 +43,7 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>2.15.1.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.16.0.Final</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
@@ -60,14 +66,47 @@
                 <version>1.18.22</version>
                 <scope>provided</scope>
             </dependency>
+
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>5.3.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>executor-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>exception-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>events-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>outbox-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>rail-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>user-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-container-image-jib</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>

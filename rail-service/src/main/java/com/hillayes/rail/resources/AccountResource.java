@@ -1,9 +1,9 @@
 package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.AccountService;
-import com.hillayes.rail.services.model.Account;
-import com.hillayes.rail.services.model.AccountBalanceList;
-import com.hillayes.rail.services.model.TransactionList;
+import com.hillayes.rail.model.Account;
+import com.hillayes.rail.model.AccountBalanceList;
+import com.hillayes.rail.model.TransactionList;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -23,28 +23,28 @@ public class AccountResource {
     AccountService accountService;
 
     @GET
-    @Path("{id}/")
+    @Path("/{id}")
     public Account get(@PathParam("id") UUID id) {
         log.info("Get account [id: {}]", id);
         return accountService.get(id);
     }
 
     @GET
-    @Path("{id}/balances/")
+    @Path("{id}/balances")
     public AccountBalanceList balances(@PathParam("id") UUID id) {
         log.info("Get account balances [id: {}]", id);
         return accountService.balances(id);
     }
 
     @GET
-    @Path("{id}/details/")
+    @Path("/{id}/details")
     public Map<String,Object> details(@PathParam("id") UUID id) {
         log.info("Get account details [id: {}]", id);
         return accountService.details(id);
     }
 
     @GET
-    @Path("{id}/transactions/")
+    @Path("/{id}/transactions")
     public TransactionList transactions(@PathParam("id") UUID id,
                                         @QueryParam("date_from") LocalDate dateFrom,
                                         @QueryParam("date_to") LocalDate dateTo) {

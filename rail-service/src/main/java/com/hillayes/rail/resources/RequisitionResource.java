@@ -1,9 +1,10 @@
 package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.RequisitionService;
-import com.hillayes.rail.services.model.PaginatedList;
-import com.hillayes.rail.services.model.Requisition;
-import com.hillayes.rail.services.model.RequisitionRequest;
+import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.rail.model.Requisition;
+import com.hillayes.rail.model.RequisitionRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -21,6 +22,7 @@ public class RequisitionResource {
     @Inject
     @RestClient
     RequisitionService requisitionService;
+
     @GET
     public PaginatedList<Requisition> list(@QueryParam("limit") int limit,
                                            @QueryParam("offset") int offset) {
@@ -31,7 +33,7 @@ public class RequisitionResource {
     }
 
     @GET
-    @Path("{id}/")
+    @Path("/{id}")
     public Requisition get(@PathParam("id") UUID id) {
         log.info("Get requisition [id: {}]", id);
         return requisitionService.get(id);
@@ -51,7 +53,7 @@ public class RequisitionResource {
     }
 
     @DELETE
-    @Path("{id}/")
+    @Path("/{id}")
     public Map<String, Object> delete(@PathParam("id") UUID id) {
         log.info("Delete requisition [id: {}]", id);
         return requisitionService.delete(id);

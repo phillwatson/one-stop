@@ -1,13 +1,12 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.rail.config.SupportedCountries;
-import com.hillayes.rail.repository.domain.Country;
+import com.hillayes.rail.domain.Country;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 

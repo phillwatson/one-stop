@@ -1,13 +1,13 @@
 package com.hillayes.rail.services;
 
-import com.hillayes.rail.services.model.EndUserAgreement;
-import com.hillayes.rail.services.model.EndUserAgreementAccepted;
-import com.hillayes.rail.services.model.EndUserAgreementRequest;
-import com.hillayes.rail.services.model.PaginatedList;
+import com.hillayes.rail.model.EndUserAgreement;
+import com.hillayes.rail.model.EndUserAgreementAccepted;
+import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.rail.model.PaginatedList;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Path("/api/v2/agreements/enduser/")
 @Produces("application/json")
 @Consumes("application/json")
-@Singleton
+@ApplicationScoped
 public interface AgreementService {
     @GET
     public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,

@@ -1,10 +1,10 @@
 package com.hillayes.rail.resources;
 
 import com.hillayes.rail.services.AgreementService;
-import com.hillayes.rail.services.model.EndUserAgreement;
-import com.hillayes.rail.services.model.EndUserAgreementAccepted;
-import com.hillayes.rail.services.model.EndUserAgreementRequest;
-import com.hillayes.rail.services.model.PaginatedList;
+import com.hillayes.rail.model.EndUserAgreement;
+import com.hillayes.rail.model.EndUserAgreementAccepted;
+import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.rail.model.PaginatedList;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -44,7 +44,7 @@ public class AgreementResource {
     }
 
     @PUT
-    @Path("{id}/")
+    @Path("/{id}")
     public EndUserAgreement accept(@PathParam("id") UUID id,
                                    EndUserAgreementAccepted acceptance) {
         log.info("Accept agreement [id: {}]", id);
@@ -52,14 +52,14 @@ public class AgreementResource {
     }
 
     @GET
-    @Path("{id}/")
+    @Path("/{id}")
     public EndUserAgreement get(@PathParam("id") UUID id) {
         log.info("Get agreement [id: {}]", id);
         return agreementService.get(id);
     }
 
     @DELETE
-    @Path("{id}/")
+    @Path("/{id}")
     public Map<String,Object> delete(@PathParam("id") UUID id) {
         log.info("Delete agreement [id: {}]", id);
         return agreementService.delete(id);

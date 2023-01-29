@@ -1,6 +1,7 @@
 package com.hillayes.rail.resources;
 
-import com.hillayes.rail.services.model.*;
+import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.rail.model.RequisitionRequest;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,8 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 public class RequisitionResourceTest extends TestBase {

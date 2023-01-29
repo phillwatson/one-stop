@@ -33,24 +33,32 @@ function App() {
   }, [ banks ]);
 
   return (
-    <div className="App">
-        <div className="col-1">
+    <div className="window">
+      <div className="container col">
+          <div className="col">
             <div className="country-selector">
-                Select Country: <CountrySelector countries={ countries }
-                                 activeCountryId={ (activeCountry === undefined) ? undefined : activeCountry.id }
-                                 onSelectCountry={ setActiveCountry }/>
+              Select Country: <CountrySelector countries={ countries }
+                               activeCountryId={ (activeCountry === undefined) ? undefined : activeCountry.id }
+                               onSelectCountry={ setActiveCountry }/>
             </div>
-            <div className="bank-list">
-                <BankList banks={ banks }
-                          activeBankId={ (activeBank === undefined) ? undefined : activeBank.id }
-                          onSelectBank={ setActiveBank }/>
-            </div>
-        </div>
-        <div className="col-2">
-          <div className="bank-detail">
-              <BankDetail bank={ activeBank } />
           </div>
+          <div className="col">
+            <div className="container row">
+              <div className="row">
+                <div className="bank-list">
+                    <BankList banks={ banks }
+                              activeBankId={ (activeBank === undefined) ? undefined : activeBank.id }
+                              onSelectBank={ setActiveBank }/>
+                </div>
+              </div>
+              <div className="row">
+                <div className="bank-detail">
+                  <BankDetail bank={ activeBank } />
+                </div>
+              </div>
+            </div>
         </div>
+      </div>
     </div>
   );
 }

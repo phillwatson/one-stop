@@ -1,13 +1,12 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.repository.domain.Country;
+import com.hillayes.rail.domain.Country;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import javax.inject.Inject;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @QuarkusTest

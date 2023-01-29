@@ -1,15 +1,15 @@
 package com.hillayes.rail.services;
 
+import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.repository.CountryRepository;
-import com.hillayes.rail.repository.domain.Country;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Optional;
 
-@Singleton
+@ApplicationScoped
 @Slf4j
 public class CountryService {
     @Inject
