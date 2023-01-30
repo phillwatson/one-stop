@@ -33,6 +33,7 @@ public class ProducerFactory {
         if (producer == null) {
             synchronized (this) {
                 if (producer == null) {
+                    log.info("Creating new event Kafka Producer");
                     producer = new KafkaProducer<>(producerConfig);
                 }
             }

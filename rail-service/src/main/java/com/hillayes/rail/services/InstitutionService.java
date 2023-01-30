@@ -6,13 +6,14 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @RegisterRestClient(configKey = "nordigen-api")
 @RegisterClientHeaders(BearerHeaderFactory.class)
 @Path("/api/v2/institutions/")
-@Produces("application/json")
-@Consumes("application/json")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 public interface InstitutionService {
     @GET

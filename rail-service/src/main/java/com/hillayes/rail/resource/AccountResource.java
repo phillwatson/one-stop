@@ -1,4 +1,4 @@
-package com.hillayes.rail.resources;
+package com.hillayes.rail.resource;
 
 import com.hillayes.rail.services.AccountService;
 import com.hillayes.rail.model.Account;
@@ -9,13 +9,14 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
 @Path("/api/v1/accounts")
-@Produces("application/json")
-@Consumes("application/json")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
 public class AccountResource {
     @Inject

@@ -1,23 +1,22 @@
-package com.hillayes.rail.resources;
+package com.hillayes.rail.resource;
 
-import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.services.UserConsentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.UUID;
 
 @Path("/api/v1/consents")
-@Produces("application/json")
-@Consumes("application/json")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
 public class UserConsentResource {
-    @Inject
-    UserConsentService userConsentService;
+    private final UserConsentService userConsentService;
 
     @POST
     public Response register(String institutionId) {

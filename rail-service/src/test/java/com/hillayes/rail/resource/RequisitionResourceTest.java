@@ -1,4 +1,4 @@
-package com.hillayes.rail.resources;
+package com.hillayes.rail.resource;
 
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import com.hillayes.rail.model.RequisitionRequest;

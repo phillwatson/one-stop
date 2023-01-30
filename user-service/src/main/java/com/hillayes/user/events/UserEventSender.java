@@ -19,10 +19,11 @@ public class UserEventSender {
         log.debug("Sending UserCreated event [username: {}]", user.getUsername());
 
         UserCreated event = UserCreated.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .dateCreated(user.getDateCreated())
-                .build();
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .dateCreated(user.getDateCreated())
+            .build();
         eventSender.send(Topic.USER_CREATED, event);
     }
 
@@ -30,16 +31,18 @@ public class UserEventSender {
         log.debug("Sending UserDeclined event [username: {}]", user.getUsername());
 
         UserDeclined event = UserDeclined.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .dateCreated(user.getDateCreated())
-                .build();
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .dateCreated(user.getDateCreated())
+            .build();
         eventSender.send(Topic.USER_DECLINED, event);
     }
 
     public void sendUserOnboarded(User user) {
         log.debug("Sending UserOnboarded event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER_ONBOARDED, UserOnboarded.builder()
+            .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
@@ -50,6 +53,7 @@ public class UserEventSender {
     public void sendUserUpdated(User user) {
         log.debug("Sending UserUpdated event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER_UPDATED, UserUpdated.builder()
+            .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
@@ -60,6 +64,7 @@ public class UserEventSender {
     public void sendUserDeleted(User user) {
         log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER_DELETED, UserDeleted.builder()
+            .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())

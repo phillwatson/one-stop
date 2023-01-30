@@ -7,12 +7,16 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDeclined {
+    @NotNull
+    private UUID id;
+
     @NotNull
     private String username;
 

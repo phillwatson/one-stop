@@ -1,4 +1,4 @@
-package com.hillayes.rail.resources;
+package com.hillayes.rail.resource;
 
 import com.hillayes.rail.services.AgreementService;
 import com.hillayes.rail.model.EndUserAgreement;
@@ -10,13 +10,14 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
 @Path("/api/v1/agreements")
-@Produces("application/json")
-@Consumes("application/json")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
 public class AgreementResource {
     @Inject

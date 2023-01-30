@@ -2,19 +2,19 @@ package com.hillayes.rail.repository;
 
 import com.hillayes.rail.config.SupportedCountries;
 import com.hillayes.rail.domain.Country;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Singleton
+@RequiredArgsConstructor
 @Slf4j
 public class CountryRepository {
-    @Inject
-    SupportedCountries countries;
+    private final SupportedCountries countries;
 
     public Collection<Country> getCountries() {
         log.info("Get all countries");

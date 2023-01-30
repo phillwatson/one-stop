@@ -8,6 +8,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
@@ -16,8 +17,8 @@ import java.util.UUID;
 @RegisterRestClient(configKey = "nordigen-api")
 @RegisterClientHeaders(BearerHeaderFactory.class)
 @Path("/api/v2/accounts/")
-@Produces("application/json")
-@Consumes("application/json")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public interface AccountService {
     @GET
     @Path("{id}/")

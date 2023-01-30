@@ -1,4 +1,4 @@
-package com.hillayes.rail.resources;
+package com.hillayes.rail.resource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;

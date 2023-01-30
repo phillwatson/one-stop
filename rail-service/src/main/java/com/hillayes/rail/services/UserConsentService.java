@@ -4,17 +4,15 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.UserConsentRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ServerErrorException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -96,7 +94,7 @@ public class UserConsentService {
 
             // delete the registration record
             userConsentRepository.delete(userConsent);
-            throw new ServerErrorException("Failed to register bank " + institutionId, 500);
+            throw new InternalServerErrorException("Failed to register bank " + institutionId);
         }
     }
 
