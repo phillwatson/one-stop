@@ -1,0 +1,98 @@
+version: '3'
+
+# to compile the services
+# ./mvnw clean package -Dquarkus.container-image.build=true
+
+volumes:
+  db-data:
+
+networks:
+  one-stop-db-network:
+  one-stop-event-network:
+
+services:
+  zookeeper:
+    restart: unless-stopped
+    image: confluentinc/cp-zookeeper:7.0.1
+    networks:
+      - one-stop-event-network
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  kafka:
+    # view topics: kafka-console-consumer --bootstrap-server kafka:9092 --topic user_created --from-beginning
+    restart: unless-stopped
+    image: confluentinc/cp-kafka:5.3.1
+    depends_on:
+      - zookeeper
+    networks:
+      - one-stop-event-network
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  db:
+    restart: unless-stopped
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_DB: one-stop
+      POSTGRES_USER: one-stop
+      POSTGRES_PASSWORD: one-stop
+    networks:
+      - one-stop-db-network
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  user:
+    restart: unless-stopped
+    image: one-stop/user-service:1.0.0-SNAPSHOT
+    depends_on:
+      - db
+      - kafka
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
+      QUARKUS_DATASOURCE_USERNAME: one-stop
+      QUARKUS_DATASOURCE_PASSWORD: one-stop
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: false
+      QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: false
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    networks:
+      - one-stop-db-network
+      - one-stop-event-network
+    ports:
+      - "8080:8080"
+      - "5002:5005"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"

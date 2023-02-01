@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOnboarded {
+public class UserLogin {
     @NotNull
     private UUID userId;
 
@@ -24,8 +24,5 @@ public class UserOnboarded {
     private String email;
 
     @NotNull
-    private Instant dateCreated;
-
-    @NotNull
-    private Instant dateOnboarded;
+    private Instant dateLogin;
 }

@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserCreated {
     @NotNull
-    private UUID id;
+    private UUID userId;
 
     @NotNull
     private String username;

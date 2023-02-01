@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Singleton
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
@@ -24,7 +25,6 @@ public class UserService {
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
 
-    @Transactional
     public User createUser(String username, char[] password, String email) {
         log.info("Creating user [username: {}]", username);
         User user = userRepository.save(User.builder()
@@ -39,7 +39,6 @@ public class UserService {
         return user;
     }
 
-    @Transactional
     public Optional<User> onboardUser(UUID id) {
         log.info("Onboard user [id: {}]", id);
 

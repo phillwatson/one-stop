@@ -11,7 +11,7 @@ mp:
   jwt:
     token:
       header: Cookie
-      cookie: 'access-token'
+      cookie: 'access_token'
     verify:
       issuer: https://hillayes.com/one-stop
 
@@ -45,3 +45,7 @@ quarkus:
         level: DEBUG
 
 one-stop:
+  jwt:
+    refresh-token:
+      cookie: 'refresh_token'
+      duration-secs: 1800

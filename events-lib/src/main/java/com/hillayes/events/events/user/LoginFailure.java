@@ -7,25 +7,18 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOnboarded {
-    @NotNull
-    private UUID userId;
-
+public class LoginFailure {
     @NotNull
     private String username;
 
     @NotNull
-    private String email;
+    private Instant dateLogin;
 
     @NotNull
-    private Instant dateCreated;
-
-    @NotNull
-    private Instant dateOnboarded;
+    private String reason;
 }

@@ -10,6 +10,8 @@ public enum Topic {
     USER_DECLINED("User has declined invitation."),
     USER_UPDATED("User profile has been updated."),
     USER_DELETED("User profile has been deleted."),
+    USER_LOGIN("User profile has logged in."),
+    LOGIN_FAILED("User logged in failed."),
 
     PAYMENT_AUDIT("Auditable action on a payment."),
 

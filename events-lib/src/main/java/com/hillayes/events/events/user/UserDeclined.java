@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserDeclined {
     @NotNull
-    private UUID id;
+    private UUID userId;
 
     @NotNull
     private String username;
