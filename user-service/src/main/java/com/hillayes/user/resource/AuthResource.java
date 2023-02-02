@@ -11,7 +11,8 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.util.Map;
+import java.time.Instant;
+import java.util.Date;
 
 @Path("/api/v1/auth")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,32 +26,59 @@ public class AuthResource {
     @ConfigProperty(name = "one-stop.jwt.refresh-token.cookie")
     String refreshCookieName;
 
+    @ConfigProperty(name = "one-stop.jwt.access-token.duration-secs")
+    long accessDuration;
+
+    @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
+    long refreshDuration;
+
     private final JsonWebToken jwt;
     private final AuthService authService;
 
     @POST
     @Path("login")
+    @PermitAll
     public Response login(LoginRequest loginRequest) {
-        log.info("Auth user login");
+        log.info("Auth user login initiated");
         String[] tokens = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 
-        return buildCookies(tokens);
+        return buildCookies(tokens, accessDuration, refreshDuration);
     }
 
     @GET
     @Path("refresh")
+    @PermitAll
     public Response refresh(@Context HttpHeaders headers) {
-        log.info("Auth user login");
-        Map<String, Cookie> cookies = headers.getCookies();
-        Cookie refreshTokenCookie = cookies.get(refreshCookieName);
+        log.info("Auth user refresh initiated");
+        Cookie refreshTokenCookie = headers.getCookies().get(refreshCookieName);
+        if (refreshTokenCookie == null) {
+            log.info("No refresh token cookie found.");
+            throw new NotAuthorizedException("refresh-token");
+        }
 
         String[] tokens = authService.refresh(refreshTokenCookie.getValue());
-        return buildCookies(tokens);
+
+        return buildCookies(tokens, accessDuration, refreshDuration);
     }
 
-    private Response buildCookies(String[] tokens) {
-        NewCookie accessToken = new NewCookie(accessCookieName, tokens[0]);
-        NewCookie refreshToken = new NewCookie(refreshCookieName, tokens[1]);
+    @GET
+    @Path("logout")
+    @PermitAll
+    public Response logout() {
+        log.info("Auth user logout initiated");
+        return buildCookies(new String[] {"",""}, 0, 0);
+    }
+
+    private Response buildCookies(String[] tokens, long accessTTL, long refreshTTL) {
+        NewCookie accessToken = new NewCookie(accessCookieName, tokens[0],
+            "/api","localhost", NewCookie.DEFAULT_VERSION,null,
+            (int)accessTTL, Date.from(Instant.now().plusSeconds(accessTTL)),
+            false, true);
+
+        NewCookie refreshToken = new NewCookie(refreshCookieName, tokens[1],
+            "/api","localhost", NewCookie.DEFAULT_VERSION,null,
+            (int)refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
+            false, true);
 
         return Response.noContent()
             .cookie(accessToken, refreshToken)

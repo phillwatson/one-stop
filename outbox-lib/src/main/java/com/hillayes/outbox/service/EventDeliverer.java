@@ -68,8 +68,7 @@ public class EventDeliverer {
 
         Producer<String, EventPacket> producer = producerFactory.getProducer();
         List<EventRecord> records = events.stream()
-                .map(event -> send(producer, event))
-                .collect(Collectors.toList());
+            .map(event -> send(producer, event)).toList();
 
         for (EventRecord record : records) {
             try {

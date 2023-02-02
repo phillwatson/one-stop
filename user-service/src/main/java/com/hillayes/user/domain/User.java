@@ -7,11 +7,14 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -19,9 +22,11 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(generator = "uuid2")
+    @ToString.Include
     private UUID id;
 
     @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(nullable = false)
     private String username;
 
@@ -56,6 +61,10 @@ public class User {
     @Version
     @JsonIgnore
     private Integer version;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Set<String> roles = new HashSet<>();
+
 
     @JsonIgnore
     public String getPasswordHash() {

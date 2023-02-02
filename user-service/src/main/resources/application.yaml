@@ -46,6 +46,8 @@ quarkus:
 
 one-stop:
   jwt:
+    access-token:
+      duration-secs: 300
     refresh-token:
       cookie: 'refresh_token'
       duration-secs: 1800

@@ -79,6 +79,7 @@ services:
       - db
       - kafka
     environment:
+      QUARKUS_LOG_LEVEL: INFO
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: one-stop
