@@ -8,13 +8,13 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.time.Instant;
 import java.util.Date;
 
 @Path("/api/v1/auth")
+@PermitAll
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
@@ -37,7 +37,6 @@ public class AuthResource {
 
     @POST
     @Path("login")
-    @PermitAll
     public Response login(LoginRequest loginRequest) {
         log.info("Auth user login initiated");
         String[] tokens = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
@@ -47,7 +46,6 @@ public class AuthResource {
 
     @GET
     @Path("refresh")
-    @PermitAll
     public Response refresh(@Context HttpHeaders headers) {
         log.info("Auth user refresh initiated");
         Cookie refreshTokenCookie = headers.getCookies().get(refreshCookieName);
@@ -63,7 +61,6 @@ public class AuthResource {
 
     @GET
     @Path("logout")
-    @PermitAll
     public Response logout() {
         log.info("Auth user logout initiated");
         return buildCookies(new String[] {"",""}, 0, 0);
@@ -83,43 +80,5 @@ public class AuthResource {
         return Response.noContent()
             .cookie(accessToken, refreshToken)
             .build();
-    }
-
-    @GET
-    @Path("permit-all")
-    @PermitAll
-    public Response permitAll(@Context SecurityContext ctx) {
-        logIt(ctx);
-        return Response.noContent().build();
-    }
-
-    @GET
-    @Path("user-allowed")
-    @RolesAllowed({"user"})
-    public Response userAllowed(@Context SecurityContext ctx) {
-        logIt(ctx);
-        return Response.noContent().build();
-    }
-
-    @GET
-    @Path("admin-allowed")
-    @RolesAllowed({"admin"})
-    public Response adminAllowed(@Context SecurityContext ctx) {
-        logIt(ctx);
-        return Response.noContent().build();
-    }
-
-    private void logIt(SecurityContext ctx) {
-        String name;
-        if (ctx.getUserPrincipal() == null) {
-            name = "anonymous";
-        } else if (!ctx.getUserPrincipal().getName().equals(jwt.getName())) {
-            throw new InternalServerErrorException("Principal and JsonWebToken names do not match");
-        } else {
-            name = ctx.getUserPrincipal().getName();
-        }
-
-        log.info("hello {}, isHttps: {}, authScheme: {}, claims: {}",
-            name, ctx.isSecure(), ctx.getAuthenticationScheme(), jwt.getClaimNames());
     }
 }
