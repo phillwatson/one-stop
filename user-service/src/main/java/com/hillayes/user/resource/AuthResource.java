@@ -94,9 +94,17 @@ public class AuthResource {
     }
 
     @GET
-    @Path("roles-allowed")
+    @Path("user-allowed")
     @RolesAllowed({"user"})
-    public Response roleAllowed(@Context SecurityContext ctx) {
+    public Response userAllowed(@Context SecurityContext ctx) {
+        logIt(ctx);
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("admin-allowed")
+    @RolesAllowed({"admin"})
+    public Response adminAllowed(@Context SecurityContext ctx) {
         logIt(ctx);
         return Response.noContent().build();
     }

@@ -12,7 +12,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import javax.enterprise.context.ApplicationScoped;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 @ApplicationScoped
 public class JwtFactory {

@@ -1,6 +1,6 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.config.SupportedCountries;
+import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Country;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class CountryRepository {
-    private final SupportedCountries countries;
+    private final ServiceConfiguration config;
 
-    public Collection<Country> getCountries() {
+    public Collection<Country> getConfig() {
         log.info("Get all countries");
-        Collection<Country> result = countries.countries()
+        Collection<Country> result = config.countries()
                 .stream()
                 .map(entry -> Country.builder()
                         .id(entry.id())
@@ -33,7 +33,7 @@ public class CountryRepository {
     public Optional<Country> getCountry(String id) {
         log.info("Get country [id: {}]", id);
 
-        Optional<Country> result = countries.countries()
+        Optional<Country> result = config.countries()
                 .stream()
                 .filter(c -> c.id().equalsIgnoreCase(id))
                 .findAny()

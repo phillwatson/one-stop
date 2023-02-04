@@ -17,7 +17,7 @@ public class CountryService {
 
     public Collection<Country> list() {
         log.info("List countries");
-        Collection<Country> result = countryRepository.getCountries();
+        Collection<Country> result = countryRepository.getConfig();
         log.info("List countries [size: {}]", result.size());
         return result;
     }

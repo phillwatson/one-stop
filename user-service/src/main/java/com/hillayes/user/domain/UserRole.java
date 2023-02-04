@@ -5,6 +5,8 @@ import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
@@ -15,14 +17,16 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserRole {
+public class UserRole implements Serializable {
+    @Id
+    @Column(name = "user_id", nullable = false)
     @EqualsAndHashCode.Include
     @ToString.Include
-    @Column(nullable = false)
     private UUID userId;
 
+    @Id
+    @Column(nullable = false)
     @EqualsAndHashCode.Include
     @ToString.Include
-    @Column(nullable = false)
     private String role;
 }

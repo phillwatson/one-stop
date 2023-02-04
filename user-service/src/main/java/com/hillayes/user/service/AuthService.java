@@ -2,6 +2,7 @@ package com.hillayes.user.service;
 
 import com.hillayes.user.auth.PasswordCrypto;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.domain.UserRole;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
@@ -13,14 +14,15 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import java.security.GeneralSecurityException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Singleton
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
@@ -94,15 +96,12 @@ public class AuthService {
             .issuer(issuer)
             .upn(user.getId().toString())
             .subject(user.getUsername())
-            .claim("purpose", "access")
             .expiresIn(accessDuration)
-            .groups("user")
+            .groups(user.getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()))
             .sign();
         String refreshToken = Jwt
             .issuer(issuer)
             .upn(user.getId().toString())
-            .subject(user.getUsername())
-            .claim("purpose", "refresh")
             .expiresIn(refreshDuration)
             .sign();
         return new String[]{accessToken, refreshToken};

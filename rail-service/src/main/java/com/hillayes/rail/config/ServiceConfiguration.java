@@ -5,7 +5,9 @@ import io.smallrye.config.ConfigMapping;
 import java.util.List;
 
 @ConfigMapping(prefix = "one-stop")
-public interface SupportedCountries {
+public interface ServiceConfiguration {
+    String callbackUrl();
+
     List<Country> countries();
 
     interface Country {

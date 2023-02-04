@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -62,9 +62,10 @@ public class User {
     @JsonIgnore
     private Integer version;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private Set<String> roles = new HashSet<>();
-
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private Set<UserRole> roles = new HashSet<>();
 
     @JsonIgnore
     public String getPasswordHash() {

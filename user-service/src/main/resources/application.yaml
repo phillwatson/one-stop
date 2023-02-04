@@ -15,18 +15,20 @@ mp:
     verify:
       issuer: https://hillayes.com/one-stop
 
+# configure production datasource
+"%prod":
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      username: one-stop
+      password: password
+      jdbc:
+        url: jdbc:postgresql://db:5432/one-stop
+
 quarkus:
   native:
     resources:
       includes: auth/**
-
-  # configure datasource
-  datasource:
-    db-kind: postgresql
-    username: one-stop
-    password: password
-    jdbc:
-      url: jdbc:postgresql://db:5432/one-stop
 
   flyway:
     migrate-at-start: true

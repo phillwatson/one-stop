@@ -15,7 +15,11 @@ import java.util.stream.Collectors;
 public class MensaExceptionMapper implements ExceptionMapper<MensaException> {
     @Override
     public Response toResponse(MensaException aException) {
-        log.error(aException.getMessage(), aException);
+        if (aException.getErrorCode().getSeverity() == ErrorCode.Severity.error) {
+            log.error(aException.getMessage(), aException);
+        } else {
+            log.info(aException.getMessage(), aException);
+        }
 
         ErrorCode errorCode = aException.getErrorCode();
         String correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
