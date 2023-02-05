@@ -18,6 +18,7 @@
     </organization>
 
     <modules>
+        <module>client</module>
         <module>executor-lib</module>
         <module>exception-lib</module>
         <module>events-lib</module>
