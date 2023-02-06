@@ -1,66 +1,20 @@
-import React from 'react';
-import './App.css';
-import Country from './model/country.model';
-import CountryService from './service/country.service';
-import CountrySelector from './components/country-selector/country-selector'
-import Bank from './model/bank.model';
-import BankService from './service/bank.service';
-import BankList from './components/bank-list/bank-list'
-import BankDetail from './components/bank-detail/bank-detail'
+import "./styles.css";
+import React from "react";
+import Navbar from "./components/Navbar";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages";
+import About from "./pages/about";
+import Institutions from "./pages/institutions";
 
-function App() {
-  const [countries, setCountries] = React.useState<Array<Country> | undefined>(undefined);
-  const [activeCountry, setActiveCountry] = React.useState<Country | undefined>(undefined);
-
-  const [banks, setBanks] = React.useState<Array<Bank> | undefined>(undefined);
-  const [activeBank, setActiveBank] = React.useState<Bank | undefined>(undefined);
-
-  React.useEffect(() => {
-    CountryService.getAll().then((response) => {
-      setCountries(response.data);
-    });
-  }, []);
-
-  React.useEffect(() => {
-    var countryId = (activeCountry === undefined) ? 'GB' : activeCountry.id;
-    BankService.getAll(countryId).then((response) => {
-      setBanks(response.data);
-    });
-  }, [ activeCountry ]);
-
-  React.useEffect(() => {
-    setActiveBank(undefined);
-  }, [ banks ]);
-
+export default function App() {
   return (
-    <div className="window">
-      <div className="container col">
-          <div className="col">
-            <div className="country-selector">
-              Select Country: <CountrySelector countries={ countries }
-                               activeCountryId={ (activeCountry === undefined) ? undefined : activeCountry.id }
-                               onSelectCountry={ setActiveCountry }/>
-            </div>
-          </div>
-          <div className="col">
-            <div className="container row">
-              <div className="row">
-                <div className="bank-list">
-                    <BankList banks={ banks }
-                              activeBankId={ (activeBank === undefined) ? undefined : activeBank.id }
-                              onSelectBank={ setActiveBank }/>
-                </div>
-              </div>
-              <div className="row">
-                <div className="bank-detail">
-                  <BankDetail bank={ activeBank } />
-                </div>
-              </div>
-            </div>
-        </div>
-      </div>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" exact element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/institutions" element={<Institutions />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;
