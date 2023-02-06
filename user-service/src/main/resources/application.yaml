@@ -26,6 +26,13 @@ mp:
         url: jdbc:postgresql://db:5432/one-stop
 
 quarkus:
+  http:
+    same-site-cookie:
+      access_token:
+        value: Strict
+      refresh_token:
+        value: Strict
+
   native:
     resources:
       includes: auth/**

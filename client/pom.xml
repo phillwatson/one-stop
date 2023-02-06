@@ -12,8 +12,8 @@
     <artifactId>client</artifactId>
 
     <properties>
-        <frontend-src-dir>${project.basedir}/src</frontend-src-dir>
-        <node.version>v18.14.0</node.version>
+        <frontend-src-dir>${project.basedir}</frontend-src-dir>
+        <node.version>v19.6.0</node.version>
         <yarn.version>v1.22.19</yarn.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
     </properties>
