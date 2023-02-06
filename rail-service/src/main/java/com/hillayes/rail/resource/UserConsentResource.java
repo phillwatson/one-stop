@@ -36,7 +36,7 @@ public class UserConsentResource {
         URI consentLink = userConsentService.register(userId, request.getInstitutionId());
 
         log.info("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
-        return Response.temporaryRedirect(consentLink).build();
+        return Response.seeOther(consentLink).build();
     }
 
     @GET
