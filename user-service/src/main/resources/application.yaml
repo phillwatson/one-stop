@@ -27,6 +27,7 @@ mp:
 
 quarkus:
   http:
+    # sets the same-site property on generated cookies
     same-site-cookie:
       access_token:
         value: Strict
@@ -34,6 +35,7 @@ quarkus:
         value: Strict
 
   native:
+    # defines which resources are included in native image
     resources:
       includes: auth/**
 
