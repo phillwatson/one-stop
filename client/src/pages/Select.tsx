@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
-import Country from './model/country.model';
-import CountryService from './service/country.service';
-import CountrySelector from './components/country-selector/country-selector'
-import Bank from './model/bank.model';
-import BankService from './service/bank.service';
-import BankList from './components/bank-list/bank-list'
-import BankDetail from './components/bank-detail/bank-detail'
+import Country from '../model/country.model';
+import CountryService from '../service/country.service';
+import CountrySelector from '../components/country-selector/country-selector'
+import Bank from '../model/bank.model';
+import BankService from '../service/bank.service';
+import BankList from '../components/bank-list/bank-list'
+import BankDetail from '../components/bank-detail/bank-detail'
 
 function App() {
   const [countries, setCountries] = React.useState<Array<Country> | undefined>(undefined);
