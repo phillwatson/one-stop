@@ -2,15 +2,8 @@ import React from "react";
 
 export default function Institutions() {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "Right",
-        alignItems: "Right",
-        height: "100vh"
-      }}
-    >
-      <h1>GeeksforGeeks is a Computer Science portal for geeks.</h1>
+    <div>
+      <h1>Select your institution.</h1>
     </div>
   );
 }
