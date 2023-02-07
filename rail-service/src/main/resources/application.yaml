@@ -1,3 +1,20 @@
+smallrye:
+  jwt:
+    verify:
+      key:
+        location: auth/publicKey.pem
+#    sign:
+#      key:
+#        location: auth/privateKey.pem
+
+mp:
+  jwt:
+    token:
+      header: Cookie
+      cookie: 'access_token'
+#    verify:
+#      issuer: https://hillayes.com/one-stop
+
 quarkus:
 
   # configure datasource
@@ -29,7 +46,7 @@ quarkus:
         level: DEBUG
 
 one-stop:
-  callback-url: /api/v1/consents/accepted
+  # callback-url: /api/v1/consents/accepted
 
   countries:
     - id: GB

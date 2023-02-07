@@ -40,11 +40,23 @@ public class UserConsentResource {
     }
 
     @GET
-    @Path("/accepted")
+    @Path("/response")
     @PermitAll
-    public Response accepted(@QueryParam("ref") String userConsentId) {
-        log.info("User consent accepted [userConsentId: {}]", userConsentId);
-        userConsentService.consentAccepted(UUID.fromString(userConsentId));
+    public Response accepted(@QueryParam("ref") String userConsentId,
+                             @QueryParam("error") String error,
+                             @QueryParam("details") String details) {
+        // http://5.81.68.243/api/v1/consents/response
+        // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
+        // &error=UserCancelledSession
+        // &details=User+cancelled+the+session.
+
+        log.info("User consent accepted [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
+        UUID consentId = UUID.fromString(userConsentId);
+        if ((error == null) || (error.isBlank())) {
+            userConsentService.consentAccepted(consentId);
+        } else {
+            userConsentService.consentDenied(consentId, error, details);
+        }
         return Response.temporaryRedirect(URI.create("/")).build();
     }
 }

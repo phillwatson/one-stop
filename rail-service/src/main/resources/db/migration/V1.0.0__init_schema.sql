@@ -9,7 +9,9 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     agreement_expires timestamp NOT NUlL,
     max_history int NOT NULL,
     requisition_id varchar(256) NULL,
-    status varchar(256) NOT NULL
+    status varchar(256) NOT NULL,
+    error_code varchar(256) NULL,
+    error_detail varchar(256) NULL
 );
 
 CREATE UNIQUE INDEX unq_user_institute ON ${flyway:defaultSchema}.userconsent (user_id, institution_id);

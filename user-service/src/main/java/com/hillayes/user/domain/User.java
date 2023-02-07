@@ -62,10 +62,11 @@ public class User {
     @JsonIgnore
     private Integer version;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "user_id")
+    @ElementCollection
+    @CollectionTable(name="userrole", joinColumns=@JoinColumn(name="user_id"))
+    @Column(name="role")
     @JsonIgnore
-    private Set<UserRole> roles = new HashSet<>();
+    private Set<String> roles = new HashSet<>();
 
     @JsonIgnore
     public String getPasswordHash() {

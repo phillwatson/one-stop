@@ -31,7 +31,7 @@ public class UserConsent {
     private Instant dateCreated = Instant.now();
 
     @EqualsAndHashCode.Include
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
     @EqualsAndHashCode.Include
@@ -54,4 +54,12 @@ public class UserConsent {
     @Setter
     @Column(nullable = false)
     private ConsentStatus status;
+
+    @Setter
+    @Column(nullable = false)
+    private String errorCode;
+
+    @Setter
+    @Column(nullable = false)
+    private String errorDetail;
 }

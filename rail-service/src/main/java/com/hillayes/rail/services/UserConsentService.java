@@ -92,19 +92,32 @@ public class UserConsentService {
             log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]", userId, institutionId, requisition.link);
             return URI.create(requisition.link);
         } catch (Exception e) {
-            // delete the registration record
-            userConsentRepository.delete(userConsent);
             throw new BankRegistrationException(userId, institutionId, e);
         }
     }
 
-    public void consentAccepted(UUID userBankId) {
-        log.info("User's consent received [userBankId: {}]", userBankId);
-        UserConsent userConsent = userConsentRepository.findById(userBankId)
-            .orElseThrow(() -> new NotFoundException("userBank", userBankId));
+    public void consentAccepted(UUID userConsentId) {
+        log.info("User's consent received [userConsentId: {}]", userConsentId);
+        UserConsent userConsent = userConsentRepository.findById(userConsentId)
+            .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
-        log.debug("Recording consent [userId: {}, institutionId: {}, expires: {}]",
-            userConsent.getUserId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+        log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+            userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
         userConsent.setStatus(ConsentStatus.GIVEN);
+    }
+
+    public void consentDenied(UUID userConsentId, String error, String details) {
+        log.info("User's consent denied [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
+        userConsentRepository.findById(userConsentId)
+            .ifPresent(userConsent -> {
+                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+                userConsent.setStatus(ConsentStatus.REFUSED);
+                userConsent.setErrorCode(error);
+                userConsent.setErrorDetail(details);
+
+                // delete the requisition
+                requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
+            });
     }
 }

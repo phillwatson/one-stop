@@ -2,7 +2,6 @@ package com.hillayes.user.service;
 
 import com.hillayes.user.auth.PasswordCrypto;
 import com.hillayes.user.domain.User;
-import com.hillayes.user.domain.UserRole;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
@@ -20,7 +19,6 @@ import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import java.security.GeneralSecurityException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Singleton
 @Transactional
@@ -97,7 +95,7 @@ public class AuthService {
             .upn(user.getId().toString())
             .subject(user.getUsername())
             .expiresIn(accessDuration)
-            .groups(user.getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()))
+            .groups(user.getRoles())
             .sign();
         String refreshToken = Jwt
             .issuer(issuer)

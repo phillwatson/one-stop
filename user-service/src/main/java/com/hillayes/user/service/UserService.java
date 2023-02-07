@@ -2,13 +2,11 @@ package com.hillayes.user.service;
 
 import com.hillayes.user.auth.PasswordCrypto;
 import com.hillayes.user.domain.User;
-import com.hillayes.user.domain.UserRole;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
 
 import javax.inject.Singleton;
@@ -37,6 +35,7 @@ public class UserService {
         user = userRepository.save(user.toBuilder()
             .username(username)
             .passwordHash(passwordCrypto.getHash(password))
+            .roles(Set.of("user"))
             .build());
 
         userEventSender.sendUserCreated(user);
@@ -113,10 +112,7 @@ public class UserService {
         log.info("Retrieving user roles [userId: {}]", userId);
         Collection<String> result = userRepository.findById(userId)
             .map(User::getRoles)
-            .orElse(Collections.emptySet())
-            .stream()
-            .map(UserRole::getRole)
-            .toList();
+            .orElse(Collections.emptySet());
 
         log.debug("Retrieved user roles [userId: {}, size: {}]", userId, result.size());
         return result;
