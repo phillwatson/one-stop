@@ -9,9 +9,10 @@ RAILS_SECRET_KEY: <the secret issue by Nordigen>
 ONE_STOP_CALLBACK_URL: http://5.81.68.243/api/v1/consents/response
 ```
 
-### To start docker image
+### To build and start docker image
 ```
-docker run -i --rm -p 8080:8080 one-stop/rail-service:1.0-SNAPSHOT
+mvn clean package
+docker compose up -d
 ```
 
 ### The generate auth key pairs:
