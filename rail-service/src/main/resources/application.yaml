@@ -3,27 +3,28 @@ smallrye:
     verify:
       key:
         location: auth/publicKey.pem
-#    sign:
-#      key:
-#        location: auth/privateKey.pem
 
 mp:
   jwt:
     token:
       header: Cookie
       cookie: 'access_token'
-#    verify:
-#      issuer: https://hillayes.com/one-stop
+
+# configure production datasource
+"%prod":
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      #username: one-stop
+      #password: password
+      jdbc:
+        url: jdbc:postgresql://db:5432/one-stop
 
 quarkus:
-
-  # configure datasource
-  datasource:
-    db-kind: postgresql
-    username: one-stop
-    password: password
-    jdbc:
-      url: jdbc:postgresql://db:5432/one-stop
+  native:
+    # defines which resources are included in native image
+    resources:
+      includes: auth/**
 
   flyway:
     migrate-at-start: true

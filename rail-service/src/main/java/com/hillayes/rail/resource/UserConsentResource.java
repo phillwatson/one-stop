@@ -16,7 +16,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.UUID;
 
-@Path("/api/v1/consents")
+@Path("/api/v1/rails/consents")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class UserConsentResource {
     private final JsonWebToken jwt;
 
     @POST
-    @RolesAllowed({"user"})
+    @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
                              UserConsentRequest request) {
         String principal = ctx.getUserPrincipal().getName();

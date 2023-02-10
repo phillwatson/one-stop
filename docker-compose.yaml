@@ -1,6 +1,7 @@
 networks:
   onestop-db-network:
   onestop-event-network:
+  onestop-http-network:
 
 volumes:
   db-data:
@@ -9,6 +10,7 @@ volumes:
   zookeeper-secrets:
   kafka-data:
   kafka-secrets:
+  client-data:
 
 services:
   zookeeper:
@@ -100,12 +102,12 @@ services:
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ONE_STOP_CALLBACK_URL: https://hillayes.com/api/v1/consents/response
+      MP_JWT_VERIFY_ISSUER: https://hillayes.com/one-stop
     networks:
       - onestop-db-network
       - onestop-event-network
-    ports:
-      - "8081:8080"
-      - "5002:5005"
+      - onestop-http-network
     logging:
       driver: "json-file"
       options:
@@ -123,12 +125,27 @@ services:
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MP_JWT_VERIFY_ISSUER: https://hillayes.com/one-stop
     networks:
       - onestop-db-network
       - onestop-event-network
+      - onestop-http-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  client:
+    restart: unless-stopped
+    image: one-stop/client:1.0.0
+    depends_on:
+      - rail-service
+      - user-service
     ports:
-      - "8080:8080"
-      - "5001:5005"
+      - "80:80"
+    networks:
+      - onestop-http-network
     logging:
       driver: "json-file"
       options:

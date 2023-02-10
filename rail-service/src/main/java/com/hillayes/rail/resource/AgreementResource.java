@@ -8,6 +8,7 @@ import com.hillayes.rail.model.PaginatedList;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,7 +16,8 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
-@Path("/api/v1/agreements")
+@Path("/api/v1/rails/agreements")
+@RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j

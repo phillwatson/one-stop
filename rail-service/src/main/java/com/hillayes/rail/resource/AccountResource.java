@@ -7,6 +7,7 @@ import com.hillayes.rail.model.TransactionList;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,7 +15,8 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
-@Path("/api/v1/accounts")
+@Path("/api/v1/rails/accounts")
+@RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j

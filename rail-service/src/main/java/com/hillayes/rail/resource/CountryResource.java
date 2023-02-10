@@ -4,12 +4,14 @@ import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.services.CountryService;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 
-@Path("/api/v1/countries")
+@Path("/api/v1/rails/countries")
+@RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
