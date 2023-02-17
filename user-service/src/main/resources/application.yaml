@@ -3,9 +3,9 @@ smallrye:
     verify:
       key:
         location: auth/publicKey.pem
-    sign:
-      key:
-        location: auth/privateKey.pem
+#    sign:
+#      key:
+#        location: auth/privateKey.pem
 
 mp:
   jwt:
@@ -60,3 +60,5 @@ one-stop:
     refresh-token:
       cookie: 'refresh_token'
       duration-secs: 1800
+  jwk:
+    set-size: 2

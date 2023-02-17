@@ -1,5 +1,6 @@
 package com.hillayes.user.service;
 
+import com.hillayes.user.auth.RotatedJwkSet;
 import com.hillayes.user.auth.PasswordCrypto;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
@@ -13,15 +14,22 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.util.UUID;
 
+/**
+ * refresh duration 30 minutes - governs how long user session can be inactive
+ * access duration 5 minutes - governs how often user account is checked (deleted/blocked)
+ * key rotation 30 minutes - must be no less than refresh duration
+ */
 @Singleton
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
@@ -34,11 +42,31 @@ public class AuthService {
     @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
     long refreshDuration;
 
+    @ConfigProperty(name = "onestop.jwk.set-size", defaultValue = "2")
+    int jwkSetSize;
+
     private final UserRepository userRepository;
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
     private final JWTParser jwtParser;
 
+    private RotatedJwkSet jwkSet;
+
+    @PostConstruct
+    void init() {
+        jwkSet = new RotatedJwkSet(jwkSetSize, refreshDuration);
+    }
+
+    @PreDestroy
+    void destroy() {
+        jwkSet.destroy();
+    }
+
+    public String getJwkSet() {
+        return jwkSet.toJson();
+    }
+
+    @Transactional(dontRollbackOn = NotAuthorizedException.class)
     public String[] login(String username, char[] password) {
         log.info("Auth login initiated [issuer: {}]", issuer);
 
@@ -48,6 +76,13 @@ public class AuthService {
                 userEventSender.sendLoginFailed("username", "User not found.");
                 return new NotAuthorizedException("username/password");
             });
+
+        if ((user.isDeleted()) || (user.getBlockedOn() != null)) {
+            log.info("User login failed [id: {}, deleted: {}, blocked: {}]",
+                user.getId(), user.isDeleted(), user.getBlockedOn());
+            userEventSender.sendLoginFailed("username", "User blocked or deleted.");
+            throw new NotAuthorizedException("username/password");
+        }
 
         try {
             if (!passwordCrypto.verify(password, user.getPasswordHash())) {
@@ -66,6 +101,7 @@ public class AuthService {
         return tokens;
     }
 
+    @Transactional(dontRollbackOn = NotAuthorizedException.class)
     public String[] refresh(String jwt) {
         try {
             log.info("Auth refresh tokens initiated [issuer: {}]", issuer);
@@ -74,6 +110,8 @@ public class AuthService {
 
             UUID userId = UUID.fromString(jsonWebToken.getClaim(Claims.upn));
             User user = userRepository.findById(userId)
+                .filter(u -> !u.isDeleted())
+                .filter(u -> u.getBlockedOn() == null)
                 .orElseThrow(() -> {
                     log.info("User name failed verification [userId: {}]", userId);
                     userEventSender.sendLoginFailed("username", "User not found.");
@@ -85,23 +123,29 @@ public class AuthService {
             return tokens;
         } catch (ParseException e) {
             log.error("Failed to verify refresh token.", e);
-            throw new NotAuthorizedException("username/password");
+            throw new InternalServerErrorException(e);
         }
     }
 
     private String[] buildTokens(User user) {
+        PrivateKey privateKey = jwkSet.getCurrentPrivateKey();
+
         String accessToken = Jwt
             .issuer(issuer)
-            .upn(user.getId().toString())
+            .audience("com.hillayes")
+            .upn(user.getId().toString()) // this will be the Principal of the security context
             .subject(user.getUsername())
             .expiresIn(accessDuration)
             .groups(user.getRoles())
-            .sign();
+            .sign(privateKey);
+
         String refreshToken = Jwt
             .issuer(issuer)
-            .upn(user.getId().toString())
+            .audience("com.hillayes")
+            .upn(user.getId().toString()) // this will be the Principal of the security context
             .expiresIn(refreshDuration)
-            .sign();
+            .sign(privateKey);
+
         return new String[]{accessToken, refreshToken};
     }
 }

@@ -18,29 +18,27 @@ public class UserEventSender {
 
     public void sendUserCreated(User user) {
         log.debug("Sending UserCreated event [username: {}]", user.getUsername());
-        UserCreated event = UserCreated.builder()
+        eventSender.send(Topic.USER, UserCreated.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
-            .build();
-        eventSender.send(Topic.USER_CREATED, event);
+            .build());
     }
 
     public void sendUserDeclined(User user) {
         log.debug("Sending UserDeclined event [username: {}]", user.getUsername());
-        UserDeclined event = UserDeclined.builder()
+        eventSender.send(Topic.USER, UserDeclined.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
-            .build();
-        eventSender.send(Topic.USER_DECLINED, event);
+            .build());
     }
 
     public void sendUserOnboarded(User user) {
         log.debug("Sending UserOnboarded event [username: {}]", user.getUsername());
-        eventSender.send(Topic.USER_ONBOARDED, UserOnboarded.builder()
+        eventSender.send(Topic.USER, UserOnboarded.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -51,7 +49,7 @@ public class UserEventSender {
 
     public void sendUserUpdated(User user) {
         log.debug("Sending UserUpdated event [username: {}]", user.getUsername());
-        eventSender.send(Topic.USER_UPDATED, UserUpdated.builder()
+        eventSender.send(Topic.USER, UserUpdated.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -62,7 +60,7 @@ public class UserEventSender {
 
     public void sendUserDeleted(User user) {
         log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
-        eventSender.send(Topic.USER_DELETED, UserDeleted.builder()
+        eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -73,7 +71,7 @@ public class UserEventSender {
 
     public void sendUserLogin(User user) {
         log.debug("Sending UserLogin event [username: {}]", user.getUsername());
-        eventSender.send(Topic.USER_LOGIN, UserLogin.builder()
+        eventSender.send(Topic.USER_AUTH, UserLogin.builder()
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -82,8 +80,8 @@ public class UserEventSender {
     }
 
     public void sendLoginFailed(String username, String reason) {
-        log.debug("Sending LoginFailed event [username: {}]", username);
-        eventSender.send(Topic.LOGIN_FAILED, LoginFailure.builder()
+        log.debug("Sending LoginFailed event [username: {}, reason: {}]", username, reason);
+        eventSender.send(Topic.USER_AUTH, LoginFailure.builder()
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)

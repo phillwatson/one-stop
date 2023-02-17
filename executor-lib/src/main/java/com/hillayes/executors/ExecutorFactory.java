@@ -10,25 +10,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ExecutorFactory {
     public static ExecutorService newExecutor(ExecutorConfiguration aConfig) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating executorService: {}", aConfig);
-        }
+        log.debug("Creating executorService: {}", aConfig);
 
         ThreadFactory threadFactory = new DefaultThreadFactory(aConfig.getName());
-        switch (aConfig.getExecutorType()) {
-            case CACHED:
-                return Executors.newCachedThreadPool(threadFactory);
+        int numberOfThreads = aConfig.getNumberOfThreads();
 
-            case SCHEDULED:
-                return Executors.newScheduledThreadPool(aConfig.getNumberOfThreads(), threadFactory);
-
-            case WORK_STEALING:
-                return Executors.newWorkStealingPool(aConfig.getNumberOfThreads());
-
-            case FIXED:
-            default:
-                return Executors.newFixedThreadPool(aConfig.getNumberOfThreads(), threadFactory);
-        }
+        return switch (aConfig.getExecutorType()) {
+            case CACHED -> Executors.newCachedThreadPool(threadFactory);
+            case SCHEDULED -> Executors.newScheduledThreadPool(numberOfThreads, threadFactory);
+            case WORK_STEALING -> Executors.newWorkStealingPool(numberOfThreads);
+            default -> Executors.newFixedThreadPool(numberOfThreads, threadFactory);
+        };
     }
 
     /**
@@ -41,8 +33,7 @@ public class ExecutorFactory {
         private final String namePrefix;
 
         DefaultThreadFactory(String aName) {
-            SecurityManager s = System.getSecurityManager();
-            this.group = s != null ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            this.group = Thread.currentThread().getThreadGroup();
             this.namePrefix = aName + '-';
         }
 

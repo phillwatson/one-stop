@@ -102,7 +102,7 @@ services:
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      ONE_STOP_CALLBACK_URL: https://hillayes.com/api/v1/consents/response
+      ONE_STOP_CALLBACK_URL: https://hillayes.com/api/v1/rails/consents/response
       MP_JWT_VERIFY_ISSUER: https://hillayes.com/one-stop
     networks:
       - onestop-db-network

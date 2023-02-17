@@ -45,7 +45,7 @@ public class UserConsentResource {
     public Response accepted(@QueryParam("ref") String userConsentId,
                              @QueryParam("error") String error,
                              @QueryParam("details") String details) {
-        // http://5.81.68.243/api/v1/consents/response
+        // http://5.81.68.243/api/v1/rails/consents/response
         // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
         // &error=UserCancelledSession
         // &details=User+cancelled+the+session.

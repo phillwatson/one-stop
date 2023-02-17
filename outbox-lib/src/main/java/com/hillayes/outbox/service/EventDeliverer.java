@@ -119,7 +119,7 @@ public class EventDeliverer {
     }
 
     private EventRecord send(Producer<String, EventPacket> producer, EventEntity event) {
-        ProducerRecord<String, EventPacket> record = new ProducerRecord<>(event.getTopic().topicName(), null, event.toEntityPacket());
+        ProducerRecord<String, EventPacket> record = new ProducerRecord<>(event.getTopic().topicName(), event.toEntityPacket());
         return EventRecord.builder()
                 .event(event)
                 .eventResponse(producer.send(record))

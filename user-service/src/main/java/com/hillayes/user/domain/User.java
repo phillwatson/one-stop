@@ -58,6 +58,18 @@ public class User {
     @Column(name = "date_onboarded")
     private Instant dateOnboarded;
 
+    @Setter
+    @Column(name="deleted")
+    private boolean deleted;
+
+    @Setter
+    @Column(name="blocked_on")
+    private Instant blockedOn;
+
+    @Setter
+    @Column(name="blocked_reason")
+    private Instant blockedReason;
+
     @Version
     @JsonIgnore
     private Integer version;

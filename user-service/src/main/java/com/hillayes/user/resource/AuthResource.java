@@ -35,6 +35,14 @@ public class AuthResource {
     private final JsonWebToken jwt;
     private final AuthService authService;
 
+    @GET
+    @Path("jwks.json")
+    public Response getJwkSet() {
+        log.info("Retrieving JWK-Set");
+        String jwkSet = authService.getJwkSet();
+        return Response.ok(jwkSet).build();
+    }
+
     @POST
     @Path("login")
     public Response login(LoginRequest loginRequest) {

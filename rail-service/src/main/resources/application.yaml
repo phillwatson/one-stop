@@ -47,7 +47,7 @@ quarkus:
         level: DEBUG
 
 one-stop:
-  # callback-url: /api/v1/consents/accepted
+  # callback-url: /api/v1/rails/consents/accepted
 
   countries:
     - id: GB

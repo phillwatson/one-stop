@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     phone_number varchar(256),
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_onboarded timestamp,
+    deleted boolean DEFAULT FALSE,
+    blocked_on timestamp,
+    blocked_reason varchar(256),
     version integer NOT NULL DEFAULT 0
 );
 

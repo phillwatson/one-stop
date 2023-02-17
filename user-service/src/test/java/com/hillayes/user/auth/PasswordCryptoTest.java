@@ -2,7 +2,6 @@ package com.hillayes.user.auth;
 
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 
 public class PasswordCryptoTest {

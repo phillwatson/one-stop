@@ -51,12 +51,14 @@ public class EventPacket {
     private Instant timestamp;
 
     /**
-     * The topic on which the event was sent. This will match the topic on which the consumer is listening.
+     * The topic on which the event was sent. This will match the topic on which the consumer is listening
+     * and is only included here for information.
      */
     private Topic topic;
 
     /**
-     * The class of the payload data. Allows the payload to be deserialized.
+     * The class of the payload data. Allows the payload to be deserialized. It can also be used to filter
+     * events of different types issued on the same topic.
      */
     private String payloadClass;
 
