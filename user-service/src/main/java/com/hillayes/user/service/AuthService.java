@@ -1,7 +1,7 @@
 package com.hillayes.user.service;
 
-import com.hillayes.user.auth.RotatedJwkSet;
 import com.hillayes.user.auth.PasswordCrypto;
+import com.hillayes.user.auth.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
@@ -21,8 +21,10 @@ import javax.transaction.Transactional;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * refresh duration 30 minutes - governs how long user session can be inactive
@@ -35,6 +37,11 @@ import java.util.UUID;
 public class AuthService {
     @ConfigProperty(name = "mp.jwt.verify.issuer")
     String issuer;
+
+    @ConfigProperty(name = "mp.jwt.verify.audiences")
+    String audiencesList;
+
+    private Set<String> audiences;
 
     @ConfigProperty(name = "one-stop.jwt.access-token.duration-secs")
     long accessDuration;
@@ -55,6 +62,11 @@ public class AuthService {
     @PostConstruct
     void init() {
         jwkSet = new RotatedJwkSet(jwkSetSize, refreshDuration);
+
+        // audiences config prop is a comma-delimited list - we need a Set
+        audiences = Arrays.stream(audiencesList.split(","))
+            .map(String::trim)
+            .collect(Collectors.toSet());
     }
 
     @PreDestroy
@@ -128,23 +140,18 @@ public class AuthService {
     }
 
     private String[] buildTokens(User user) {
-        PrivateKey privateKey = jwkSet.getCurrentPrivateKey();
-
-        String accessToken = Jwt
+        String accessToken = jwkSet.signClaims(Jwt
             .issuer(issuer)
-            .audience("com.hillayes")
+            .audience(audiences)
             .upn(user.getId().toString()) // this will be the Principal of the security context
-            .subject(user.getUsername())
             .expiresIn(accessDuration)
-            .groups(user.getRoles())
-            .sign(privateKey);
+            .groups(user.getRoles()));
 
-        String refreshToken = Jwt
+        String refreshToken = jwkSet.signClaims(Jwt
             .issuer(issuer)
-            .audience("com.hillayes")
+            .audience(audiences)
             .upn(user.getId().toString()) // this will be the Principal of the security context
-            .expiresIn(refreshDuration)
-            .sign(privateKey);
+            .expiresIn(refreshDuration));
 
         return new String[]{accessToken, refreshToken};
     }

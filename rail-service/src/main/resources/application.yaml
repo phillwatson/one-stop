@@ -1,14 +1,25 @@
-smallrye:
-  jwt:
-    verify:
-      key:
-        location: auth/publicKey.pem
+#smallrye:
+#  jwt:
+#    verify:
+#      key:
+#        location: auth/publicKey.pem
 
 mp:
   jwt:
+    verify:
+      audiences: com.hillayes
+      issuer: https://hillayes.com/one-stop
+      publickey:
+        location: http://user-service:8080/api/v1/auth/jwks.json
     token:
       header: Cookie
       cookie: 'access_token'
+
+smallrye:
+  jwt:
+    jwks:
+      refresh-interval: 15
+      forced-refresh-interval: 5
 
 # configure production datasource
 "%prod":

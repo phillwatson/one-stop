@@ -3,6 +3,7 @@ package com.hillayes.user.auth;
 import com.hillayes.executors.ExecutorConfiguration;
 import com.hillayes.executors.ExecutorFactory;
 import com.hillayes.executors.ExecutorType;
+import io.smallrye.jwt.build.JwtClaimsBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.RsaJsonWebKey;
@@ -32,9 +33,9 @@ public class RotatedJwkSet implements Destroyable {
     private final Deque<RsaJsonWebKey> stack = new LinkedList<>();
 
     /**
-     * The ID to be assigned to the next generated key.
+     * The ID assigned to the most recently generated key.
      */
-    private int nextKid = 1;
+    private int currentKid = 0;
 
     private final ScheduledExecutorService executor;
 
@@ -77,7 +78,7 @@ public class RotatedJwkSet implements Destroyable {
         log.debug("Rotating JWK-Set");
         synchronized (stack) {
             try {
-                stack.addLast(newJWK(String.valueOf(nextKid++)));
+                stack.addLast(newJWK(String.valueOf(++currentKid)));
                 while (stack.size() > maxKeys) {
                     disposeOf(stack.pop());
                 }
@@ -104,7 +105,6 @@ public class RotatedJwkSet implements Destroyable {
         RsaJsonWebKey result = RsaJwkGenerator.generateJwk(2048);
         result.setKeyId(kid);
 
-
         return result;
     }
 
@@ -113,5 +113,22 @@ public class RotatedJwkSet implements Destroyable {
             jwk.getPrivateKey().destroy();
         } catch (DestroyFailedException ignore) {
         }
+    }
+
+    /**
+     * Signs the given JWT claims with the most recent private key. Also sets the "kid"
+     * claim with the ID of the most recent public key, so that the key can later be
+     * identified when verifying the signature.
+     *
+     * @param jwtClaimsBuilder the JWT claims to be signed.
+     * @return the signed JWT token.
+     */
+    public String signClaims(JwtClaimsBuilder jwtClaimsBuilder) {
+        PrivateKey privateKey = getCurrentPrivateKey();
+
+        return jwtClaimsBuilder
+            .jws()
+            .keyId(String.valueOf(currentKid))
+            .sign(privateKey);
     }
 }
