@@ -21,10 +21,13 @@ export default function Institutions() {
   }, []);
 
   React.useEffect(() => {
-    var countryId = (activeCountry === undefined) ? 'GB' : activeCountry.id;
-    BankService.getAll(countryId).then((response) => {
-      setBanks(response.data);
-    });
+    if (activeCountry === undefined) {
+        setBanks(undefined);
+    } else {
+        BankService.getAll(activeCountry.id).then((response) => {
+          setBanks(response.data);
+        });
+    }
   }, [ activeCountry ]);
 
   React.useEffect(() => {

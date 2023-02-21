@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.UserConsentRequest;
 import com.hillayes.rail.services.UserConsentService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/rails/consents")
@@ -25,6 +27,19 @@ public class UserConsentResource {
     private final UserConsentService userConsentService;
     private final JsonWebToken jwt;
 
+    @GET
+    @RolesAllowed("user")
+    public Response getConsents(@Context SecurityContext ctx) {
+        String principal = ctx.getUserPrincipal().getName();
+        log.info("Listing user's bank [userId: {}]", principal);
+
+        UUID userId = UUID.fromString(principal);
+        List<UserConsent> result = userConsentService.listConsents(userId);
+
+        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
+        return Response.ok(result).build();
+    }
+
     @POST
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
@@ -35,7 +50,7 @@ public class UserConsentResource {
         UUID userId = UUID.fromString(principal);
         URI consentLink = userConsentService.register(userId, request.getInstitutionId());
 
-        log.info("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
+        log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
         return Response.seeOther(consentLink).build();
     }
 

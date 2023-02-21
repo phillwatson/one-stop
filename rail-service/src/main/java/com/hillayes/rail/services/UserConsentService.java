@@ -38,6 +38,13 @@ public class UserConsentService {
     @RestClient
     RequisitionService requisitionService;
 
+    public List<UserConsent> listConsents(UUID userId) {
+        log.info("Listing user's banks [userId: {}]", userId);
+        List<UserConsent> result = userConsentRepository.findByUserId(userId);
+        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
+        return result;
+    }
+
     public URI register(UUID userId, String institutionId) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
         if (userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).size() > 0) {

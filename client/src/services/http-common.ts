@@ -37,21 +37,25 @@ class HttpService {
   }
 
   private checkError(error: AxiosError) {
-    console.log(`checking error [status: ${error.response!.status}, inflight: ${this.inflight} ]`);
-    if (!this.inflight && error.response!.status === 401) {
+    var requestUrl: string = error.request.responseURL;
+    console.log(`checking error [url: ${requestUrl}, status: ${error.response!.status}, inflight: ${this.inflight} ]`);
+    if ((!requestUrl.includes("/auth/login")) && (!this.inflight) && (error.response!.status === 401)) {
       this.inflight = true;
-      try {
-        console.log("Trying token refresh");
-        return this.http.get("/auth/refresh").then((response) => {
+      console.log("Trying token refresh");
+      return this.http.get("/auth/refresh")
+        .then((response) => {
           console.log(`Refresh response: ${response.statusText}`);
-
+          this.inflight = false;
           return new Promise((resolve) => {
             resolve(this.http.request(error.config!));
+          })
+        .catch((e) => {
+          this.inflight = false;
+          return new Promise((resolve) => {
+            resolve(error);
           });
         });
-      } finally {
-        this.inflight = false;
-      }
+      });
     }
 
     return Promise.reject(error);
@@ -59,5 +63,5 @@ class HttpService {
 }
 
 var instance = new HttpService("http://localhost:3000/api/v1");
-instance.post("/auth/login", '{ "username": "admin", "password": "password" }')
+//instance.post("/auth/login", '{ "username": "admin", "password": "password" }')
 export default instance;

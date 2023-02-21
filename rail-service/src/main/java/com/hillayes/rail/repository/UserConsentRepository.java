@@ -9,5 +9,7 @@ import java.util.UUID;
 
 @Singleton
 public interface UserConsentRepository extends JpaRepository<UserConsent, UUID> {
+    public List<UserConsent> findByUserId(UUID userId);
+
     public List<UserConsent> findByUserIdAndInstitutionId(UUID userId, String institutionId);
 }

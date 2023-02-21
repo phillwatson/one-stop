@@ -1,0 +1,32 @@
+@media all and (min-width: 480px) {
+  .Login {
+    padding: 60px 0;
+  }
+
+  .Login form {
+    margin: 0 auto;
+    max-width: 320px;
+  }
+
+  .panel {
+    padding: 21px 5px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .field {
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .error-panel {
+    margin-top: 40px;
+    padding: 21px 5px;
+    border: 1px solid;
+    color: red;
+  }
+}

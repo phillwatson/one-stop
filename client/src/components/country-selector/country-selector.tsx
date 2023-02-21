@@ -10,12 +10,17 @@ interface Props {
 export default function CountrySelector(props: Props) {
   return (
     <select className="country-list">
+      <option className="country-list-item"
+        onClick={() => { props.onSelectCountry(undefined); } }
+        key={""}
+      >
+      </option>
       { props.countries && props.countries
         .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
-        .map((country: Country, index: number) =>
+        .map((country: Country) =>
           <option className="country-list-item"
             onClick={() => { props.onSelectCountry(country); } }
-            key={index}
+            key={country.id}
           >
             { country.name }
           </option>
