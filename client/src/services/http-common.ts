@@ -6,12 +6,15 @@ import axios, {
 } from "axios";
 
 class HttpService {
+
   private http: AxiosInstance;
   private inflight: boolean = false;
 
   constructor(baseUrl: string) {
     this.http = axios.create({
       baseURL: baseUrl,
+      xsrfCookieName: "XSRF-TOKEN",
+      xsrfHeaderName: "X-XSRF-TOKEN",
       headers: {
         "Content-type": "application/json"
       }

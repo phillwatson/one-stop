@@ -14,9 +14,7 @@ import SignIn from "./pages/sign-in";
 function HeaderLayout() {
   return (
     <>
-      <header>
-        <ToolBar />
-      </header>
+      <ToolBar />
       <Outlet />
     </>
   );

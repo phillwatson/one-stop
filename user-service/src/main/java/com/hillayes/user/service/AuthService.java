@@ -65,8 +65,8 @@ public class AuthService {
 
         // audiences config prop is a comma-delimited list - we need a Set
         audiences = Arrays.stream(audiencesList.split(","))
-            .map(String::trim)
-            .collect(Collectors.toSet());
+                        .map(String::trim)
+                        .collect(Collectors.toSet());
     }
 
     @PreDestroy
@@ -83,11 +83,11 @@ public class AuthService {
         log.info("Auth login initiated [issuer: {}]", issuer);
 
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> {
-                log.info("User name failed verification");
-                userEventSender.sendLoginFailed("username", "User not found.");
-                return new NotAuthorizedException("username/password");
-            });
+                        .orElseThrow(() -> {
+                            log.info("User name failed verification");
+                            userEventSender.sendLoginFailed("username", "User not found.");
+                            return new NotAuthorizedException("username/password");
+                        });
 
         if ((user.isDeleted()) || (user.getBlockedOn() != null)) {
             log.info("User login failed [id: {}, deleted: {}, blocked: {}]",
@@ -122,13 +122,13 @@ public class AuthService {
 
             UUID userId = UUID.fromString(jsonWebToken.getClaim(Claims.upn));
             User user = userRepository.findById(userId)
-                .filter(u -> !u.isDeleted())
-                .filter(u -> u.getBlockedOn() == null)
-                .orElseThrow(() -> {
-                    log.info("User name failed verification [userId: {}]", userId);
-                    userEventSender.sendLoginFailed("username", "User not found.");
-                    return new NotAuthorizedException("username/password");
-                });
+                            .filter(u -> !u.isDeleted())
+                            .filter(u -> u.getBlockedOn() == null)
+                            .orElseThrow(() -> {
+                                log.info("User name failed verification [userId: {}]", userId);
+                                userEventSender.sendLoginFailed("username", "User not found.");
+                                return new NotAuthorizedException("username/password");
+                            });
 
             String[] tokens = buildTokens(user);
             log.debug("User tokens refreshed [userId: {}]", user.getId());
@@ -140,8 +140,7 @@ public class AuthService {
     }
 
     private String[] buildTokens(User user) {
-        String accessToken = jwkSet.signClaims(Jwt
-            .issuer(issuer)
+        String accessToken = jwkSet.signClaims(Jwt.issuer(issuer)
             .audience(audiences)
             .upn(user.getId().toString()) // this will be the Principal of the security context
             .expiresIn(accessDuration)

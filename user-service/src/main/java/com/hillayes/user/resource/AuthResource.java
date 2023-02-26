@@ -7,11 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import javax.annotation.Priority;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.*;
+import javax.ws.rs.ext.Provider;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Path("/api/v1/auth")
 @PermitAll
@@ -20,6 +25,9 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResource {
+    private static final String XSRF_TOKEN_COOKIE = "XSRF-TOKEN";
+    private static final String XSRF_TOKEN_HEADER = "X-XSRF-TOKEN";
+
     @ConfigProperty(name = "mp.jwt.token.cookie")
     String accessCookieName;
 
@@ -71,22 +79,58 @@ public class AuthResource {
     @Path("logout")
     public Response logout() {
         log.info("Auth user logout initiated");
-        return buildCookies(new String[] {"",""}, 0, 0);
+        return buildCookies(new String[]{"", ""}, 0, 0);
     }
 
     private Response buildCookies(String[] tokens, long accessTTL, long refreshTTL) {
         NewCookie accessToken = new NewCookie(accessCookieName, tokens[0],
-            "/api","localhost", NewCookie.DEFAULT_VERSION,null,
-            (int)accessTTL, Date.from(Instant.now().plusSeconds(accessTTL)),
+            "/api", null, NewCookie.DEFAULT_VERSION, null,
+            (int) accessTTL, Date.from(Instant.now().plusSeconds(accessTTL)),
             false, true);
 
         NewCookie refreshToken = new NewCookie(refreshCookieName, tokens[1],
-            "/api","localhost", NewCookie.DEFAULT_VERSION,null,
-            (int)refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
+            "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,
+            (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
             false, true);
 
+        // xsrf token - set httpOnly=false and path="/" to allow script to read it
+        NewCookie xsrfToken = new NewCookie(XSRF_TOKEN_COOKIE, tokens[0].isBlank() ? "" : UUID.randomUUID().toString(),
+            "/", null, NewCookie.DEFAULT_VERSION, null,
+            (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
+            false, false);
+
         return Response.noContent()
-            .cookie(accessToken, refreshToken)
-            .build();
+                   .cookie(accessToken, refreshToken, xsrfToken)
+                   .build();
     }
+
+    /**
+     * An implementation of ContainerRequestFilter to validate the XSRF token in the
+     * incoming request.
+     */
+    /* find a way of excluding un-authenticated end-points
+    @Provider
+    @Priority(Priorities.AUTHENTICATION)
+    public static class XsrfAuthFilter implements ContainerRequestFilter {
+        @Override
+        public void filter(ContainerRequestContext ctx) {
+            String xsrfTokenHeader = ctx.getHeaders().getFirst(XSRF_TOKEN_HEADER);
+            if ((xsrfTokenHeader == null) || (xsrfTokenHeader.isBlank())) {
+                log.debug("No XSRF header found [name: {}]", XSRF_TOKEN_HEADER);
+                ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            Cookie xsrfTokenCookie = ctx.getCookies().get(XSRF_TOKEN_COOKIE);
+            if (xsrfTokenCookie == null) {
+                log.debug("No XSRF token found [name: {}]", XSRF_TOKEN_COOKIE);
+                ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            if (!xsrfTokenHeader.equals(xsrfTokenCookie.getValue())) {
+                log.debug("XSRF token mismatch");
+                ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+        }
+    }
+    */
 }
