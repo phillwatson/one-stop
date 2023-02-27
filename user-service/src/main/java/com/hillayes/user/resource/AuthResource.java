@@ -7,13 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.annotation.Priority;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.*;
-import javax.ws.rs.ext.Provider;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -25,8 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResource {
-    private static final String XSRF_TOKEN_COOKIE = "XSRF-TOKEN";
-    private static final String XSRF_TOKEN_HEADER = "X-XSRF-TOKEN";
+    private static final String XSRF_TOKEN_COOKIE_NAME = "XSRF-TOKEN";
+    private static final String XSRF_TOKEN_HEADER_NAME = "X-XSRF-TOKEN";
 
     @ConfigProperty(name = "mp.jwt.token.cookie")
     String accessCookieName;
@@ -94,7 +90,7 @@ public class AuthResource {
             false, true);
 
         // xsrf token - set httpOnly=false and path="/" to allow script to read it
-        NewCookie xsrfToken = new NewCookie(XSRF_TOKEN_COOKIE, tokens[0].isBlank() ? "" : UUID.randomUUID().toString(),
+        NewCookie xsrfToken = new NewCookie(XSRF_TOKEN_COOKIE_NAME, tokens[0].isBlank() ? "" : UUID.randomUUID().toString(),
             "/", null, NewCookie.DEFAULT_VERSION, null,
             (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
             false, false);
@@ -114,15 +110,15 @@ public class AuthResource {
     public static class XsrfAuthFilter implements ContainerRequestFilter {
         @Override
         public void filter(ContainerRequestContext ctx) {
-            String xsrfTokenHeader = ctx.getHeaders().getFirst(XSRF_TOKEN_HEADER);
+            String xsrfTokenHeader = ctx.getHeaders().getFirst(XSRF_TOKEN_HEADER_NAME);
             if ((xsrfTokenHeader == null) || (xsrfTokenHeader.isBlank())) {
-                log.debug("No XSRF header found [name: {}]", XSRF_TOKEN_HEADER);
+                log.debug("No XSRF header found [name: {}]", XSRF_TOKEN_HEADER_NAME);
                 ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-            Cookie xsrfTokenCookie = ctx.getCookies().get(XSRF_TOKEN_COOKIE);
+            Cookie xsrfTokenCookie = ctx.getCookies().get(XSRF_TOKEN_COOKIE_NAME);
             if (xsrfTokenCookie == null) {
-                log.debug("No XSRF token found [name: {}]", XSRF_TOKEN_COOKIE);
+                log.debug("No XSRF token found [name: {}]", XSRF_TOKEN_COOKIE_NAME);
                 ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
