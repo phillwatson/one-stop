@@ -1,6 +1,6 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.user.auth.XsrfHandler;
+import com.hillayes.user.auth.XsrfGenerator;
 import com.hillayes.user.model.LoginRequest;
 import com.hillayes.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -46,14 +46,14 @@ public class AuthResource {
 
     private final JsonWebToken jwt;
     private final AuthService authService;
-    private XsrfHandler xsrfHandler;
+    private XsrfGenerator xsrfGenerator;
 
     @PostConstruct
     public void init() {
-        xsrfHandler = new XsrfHandler(ConfigProvider.getConfig().getValue("one-stop.xsrf.secret", String.class));
-        xsrfHandler.setCookieName(xsrfTokenCookieName);
-        xsrfHandler.setHeaderName(xsrfTokenHeaderName);
-        xsrfHandler.setTimeout(xsrfTokenDuration * 1000);
+        xsrfGenerator = new XsrfGenerator(ConfigProvider.getConfig().getValue("one-stop.xsrf.secret", String.class));
+        xsrfGenerator.setCookieName(xsrfTokenCookieName);
+        xsrfGenerator.setHeaderName(xsrfTokenHeaderName);
+        xsrfGenerator.setTimeout(xsrfTokenDuration * 1000);
     }
 
     @GET
@@ -80,7 +80,7 @@ public class AuthResource {
         Cookie refreshTokenCookie = headers.getCookies().get(refreshCookieName);
         if (refreshTokenCookie == null) {
             log.info("No refresh token cookie found.");
-            throw new NotAuthorizedException("refresh-token");
+            return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
         String[] tokens = authService.refresh(refreshTokenCookie.getValue());
@@ -107,8 +107,8 @@ public class AuthResource {
             false, true);
 
         // xsrf token - set httpOnly=false and path="/" to allow client script to read it
-        String xsrfToken = (tokens[0] == null) ? null : xsrfHandler.generateToken();
-        NewCookie xsrfCookie = new NewCookie(xsrfHandler.getCookieName(), xsrfToken,
+        String xsrfToken = (tokens[0] == null) ? null : xsrfGenerator.generateToken();
+        NewCookie xsrfCookie = new NewCookie(xsrfGenerator.getCookieName(), xsrfToken,
             "/", null, NewCookie.DEFAULT_VERSION, null,
             (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
             false, false);

@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class XsrfHandlerTest {
-    private XsrfHandler fixture = new XsrfHandler(UUID.randomUUID().toString());
+public class XsrfGeneratorTest {
+    private final XsrfGenerator fixture = new XsrfGenerator(UUID.randomUUID().toString());
 
     @Test
     public void testValidation() {
@@ -24,8 +24,8 @@ public class XsrfHandlerTest {
 
     @Test
     public void testValidation_differentHander_sameSecret() {
-        String token = new XsrfHandler("this is a secret").generateToken();
-        assertTrue(new XsrfHandler("this is a secret").validateTokens(token, token));
+        String token = new XsrfGenerator("this is a secret").generateToken();
+        assertTrue(new XsrfGenerator("this is a secret").validateTokens(token, token));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class XsrfHandlerTest {
     @Test
     public void testTokenMismatch_differentHandler_differentSecret() {
         String token1 = fixture.generateToken();
-        String token2 = new XsrfHandler("this is a different secret").generateToken();
+        String token2 = new XsrfGenerator("this is a different secret").generateToken();
 
         HttpHeaders headers = mock();
         when(headers.getCookies()).thenReturn(Map.of(fixture.getCookieName(), new Cookie(fixture.getCookieName(), token1)));
@@ -130,8 +130,8 @@ public class XsrfHandlerTest {
 
     @Test
     public void testTokenMismatch_differentHandler_sameSecret() {
-        String token1 = new XsrfHandler("this is a secret").generateToken();
-        String token2 = new XsrfHandler("this is a secret").generateToken();
+        String token1 = new XsrfGenerator("this is a secret").generateToken();
+        String token2 = new XsrfGenerator("this is a secret").generateToken();
 
         HttpHeaders headers = mock();
         when(headers.getCookies()).thenReturn(Map.of(fixture.getCookieName(), new Cookie(fixture.getCookieName(), token1)));
