@@ -69,3 +69,9 @@ one-stop:
       name: France
     - id: IT
       name: Italy
+
+  xsrf:
+    cookie-name: 'XSRF-TOKEN'
+    header-name: 'X-XSRF-TOKEN'
+    duration-secs: 1800
+    # secret: 'this will be passed in'

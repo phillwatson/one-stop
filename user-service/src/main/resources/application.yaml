@@ -67,3 +67,8 @@ one-stop:
       duration-secs: 1800
   jwk:
     set-size: 2
+  xsrf:
+    cookie-name: 'XSRF-TOKEN'
+    header-name: 'X-XSRF-TOKEN'
+    duration-secs: 1800
+    # secret: 'this will be passed in'
