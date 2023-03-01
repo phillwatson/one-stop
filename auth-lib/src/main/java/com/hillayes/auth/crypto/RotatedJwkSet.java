@@ -1,4 +1,4 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.crypto;
 
 import com.hillayes.executors.ExecutorConfiguration;
 import com.hillayes.executors.ExecutorFactory;

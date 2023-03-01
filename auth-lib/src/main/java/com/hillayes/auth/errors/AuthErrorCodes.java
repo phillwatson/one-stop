@@ -1,4 +1,4 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.errors;
 
 import com.hillayes.exception.ErrorCode;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public enum AuthErrorCodes implements ErrorCode {
     }
 
     AuthErrorCodes(String message) {
-        this(Severity.error, message, INTERNAL_SERVER_ERROR_STATUS);
+        this(Severity.error, message, ErrorCode.INTERNAL_SERVER_ERROR_STATUS);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.hillayes.user.service;
 
-import com.hillayes.user.auth.PasswordCrypto;
+import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.events.UserEventSender;

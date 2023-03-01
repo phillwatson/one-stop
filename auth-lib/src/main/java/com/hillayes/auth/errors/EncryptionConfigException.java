@@ -1,4 +1,4 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.errors;
 
 import java.security.GeneralSecurityException;
 

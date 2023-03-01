@@ -1,4 +1,4 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.xsrf;
 
 import org.junit.jupiter.api.Test;
 
@@ -91,7 +91,7 @@ public class XsrfGeneratorTest {
 
     @Test
     public void testTimeout() throws InterruptedException {
-        fixture.setTimeout(1000);
+        fixture.setTimeoutSecs(1);
         String token = fixture.generateToken();
         synchronized (token) {
             token.wait(1000);

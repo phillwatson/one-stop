@@ -1,5 +1,6 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.crypto;
 
+import com.hillayes.auth.crypto.RotatedJwkSet;
 import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;

@@ -1,4 +1,6 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.crypto;
+
+import com.hillayes.auth.errors.EncryptionConfigException;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;

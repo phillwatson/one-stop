@@ -1,12 +1,14 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.xsrf;
 
-import io.vertx.core.http.HttpServerRequest;
+import com.hillayes.auth.errors.EncryptionConfigException;
+import io.quarkus.arc.properties.IfBuildProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -18,8 +20,9 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
+@ApplicationScoped
+@IfBuildProperty(name = "xsrf-auth", stringValue = "true")
 @Slf4j
 public class XsrfGenerator {
     private static final String SIGNATURE_ALG = "HmacSHA256";
@@ -32,26 +35,24 @@ public class XsrfGenerator {
      * The name of the cookie, in the incoming request, that holds the XSRF token
      * to be compared with that held in the named http header.
      */
-    @Getter
-    @Setter
+    @Getter @Setter
     private String cookieName = "XSRF-TOKEN";
 
     /**
      * The name of the http header, in the incoming request, that holds the XSRF
      * token to be compared with that held in the named request cookie.
      */
-    @Getter
-    @Setter
+    @Getter @Setter
     private String headerName = "X-XSRF-TOKEN";
 
     /**
-     * The duration for which the generated XSRF token is valid - in milliseconds.
+     * The duration for which the generated XSRF token is valid - in seconds.
      */
-    @Getter
-    @Setter
-    private long timeout = Duration.ofMinutes(30).toMillis();
+    @Getter @Setter
+    private long timeoutSecs = Duration.ofMinutes(30).toSeconds();
 
     public XsrfGenerator(String secret) {
+        log.info("Creating XSRF generator");
         try {
             random = new Random();
             mac = Mac.getInstance(SIGNATURE_ALG);
@@ -104,7 +105,8 @@ public class XsrfGenerator {
             return false;
         }
 
-        if (System.currentTimeMillis() > timestamp + timeout) {
+        long timeoutMillis = timeoutSecs * 1000;
+        if (System.currentTimeMillis() > timestamp + timeoutMillis) {
             log.warn("XSRF token validation failed - token expired");
             return false;
         }
@@ -194,43 +196,6 @@ public class XsrfGenerator {
         if ((headerList == null) || (headerList.size() != 1)) {
             log.trace("XSRF token header invalid [name: {}, size: {}]",
                 headerName, (headerList == null) ? 0 : headerList.size());
-            return false;
-        }
-
-        String headerValue = headerList.get(0);
-        if (isBlank(headerValue)) {
-            log.trace("XSRF token header blank [name: {}]", headerName);
-            return false;
-        }
-
-        return validateTokens(cookieValue, headerValue);
-    }
-
-    /**
-     * Provides an entry point for validating an XSRF token passed on the header
-     * properties of the given io.vertx HttpServerRequest.
-     *
-     * @param request the http request on which the XSRF token is expected.
-     * @return true if the request contains a valid XSRF token.
-     */
-    public boolean validateToken(HttpServerRequest request) {
-        log.trace("Validating XSRF tokens in server request");
-
-        Set<io.vertx.core.http.Cookie> cookies = request.cookies(cookieName);
-        if (cookies.size() != 1) {
-            log.trace("XSRF token cookie invalid [name: {}, size: {}]", cookieName, cookies.size());
-            return false;
-        }
-
-        String cookieValue = cookies.stream().findFirst().map(c -> c.getValue()).orElse("");
-        if (isBlank(cookieValue)) {
-            log.trace("XSRF token cookie blank [name: {}]", cookieName);
-            return false;
-        }
-
-        List<String> headerList = request.headers().getAll(headerName);
-        if (headerList.size() != 1) {
-            log.trace("XSRF token header invalid [name: {}, size: {}]", headerName, headerList.size());
             return false;
         }
 

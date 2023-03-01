@@ -1,4 +1,4 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.errors;
 
 import com.hillayes.exception.ErrorCode;
 import com.hillayes.exception.MensaException;

@@ -23,6 +23,7 @@
         <module>exception-lib</module>
         <module>events-lib</module>
         <module>outbox-lib</module>
+        <module>auth-lib</module>
         <module>rail-service</module>
         <module>user-service</module>
     </modules>
@@ -87,6 +88,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>events-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>auth-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

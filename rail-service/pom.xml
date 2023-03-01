@@ -72,6 +72,10 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>auth-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
         </dependency>
         <dependency>

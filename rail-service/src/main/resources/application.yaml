@@ -58,20 +58,22 @@ quarkus:
         level: DEBUG
 
 one-stop:
-  # callback-url: /api/v1/rails/consents/accepted
+  rail:
+    # callback-url: /api/v1/rails/consents/accepted
 
-  countries:
-    - id: GB
-      name: Great Britain
-    - id: DE
-      name: Germany
-    - id: FR
-      name: France
-    - id: IT
-      name: Italy
+    countries:
+      - id: GB
+        name: Great Britain
+      - id: DE
+        name: Germany
+      - id: FR
+        name: France
+      - id: IT
+        name: Italy
 
-  xsrf:
-    cookie-name: 'XSRF-TOKEN'
-    header-name: 'X-XSRF-TOKEN'
-    duration-secs: 1800
-    # secret: 'this will be passed in'
+  auth:
+    xsrf:
+      cookie-name: 'XSRF-TOKEN'
+      header-name: 'X-XSRF-TOKEN'
+      duration-secs: 1800
+      # secret: 'this will be passed in via docker env'

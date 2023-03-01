@@ -1,14 +1,12 @@
-package com.hillayes.user.auth;
+package com.hillayes.auth.xsrf;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
@@ -20,25 +18,8 @@ import java.lang.reflect.Method;
 public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Response ACCESS_UNAUTHORIZED = Response.status(Response.Status.UNAUTHORIZED).build();
 
-    @ConfigProperty(name = "one-stop.xsrf.cookie-name")
-    String xsrfTokenCookieName;
-
-    @ConfigProperty(name = "one-stop.xsrf.header-name")
-    String xsrfTokenHeaderName;
-
-    @ConfigProperty(name = "one-stop.xsrf.duration-secs")
-    long xsrfTokenDuration;
-
-    private XsrfGenerator xsrfGenerator;
-
-    @PostConstruct
-    public void init() {
-        log.trace("Creating XSRF Handler");
-        xsrfGenerator = new XsrfGenerator(ConfigProvider.getConfig().getValue("one-stop.xsrf.secret", String.class));
-        xsrfGenerator.setCookieName(xsrfTokenCookieName);
-        xsrfGenerator.setHeaderName(xsrfTokenHeaderName);
-        xsrfGenerator.setTimeout(xsrfTokenDuration * 1000);
-    }
+    @Inject
+    XsrfGenerator xsrfGenerator;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {

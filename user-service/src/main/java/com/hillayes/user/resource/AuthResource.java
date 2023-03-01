@@ -1,15 +1,13 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.user.auth.XsrfGenerator;
+import com.hillayes.auth.xsrf.XsrfGenerator;
 import com.hillayes.user.model.LoginRequest;
 import com.hillayes.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -23,15 +21,6 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResource {
-    @ConfigProperty(name = "one-stop.xsrf.cookie-name")
-    String xsrfTokenCookieName;
-
-    @ConfigProperty(name = "one-stop.xsrf.header-name")
-    String xsrfTokenHeaderName;
-
-    @ConfigProperty(name = "one-stop.xsrf.duration-secs")
-    long xsrfTokenDuration;
-
     @ConfigProperty(name = "mp.jwt.token.cookie")
     String accessCookieName;
 
@@ -46,15 +35,7 @@ public class AuthResource {
 
     private final JsonWebToken jwt;
     private final AuthService authService;
-    private XsrfGenerator xsrfGenerator;
-
-    @PostConstruct
-    public void init() {
-        xsrfGenerator = new XsrfGenerator(ConfigProvider.getConfig().getValue("one-stop.xsrf.secret", String.class));
-        xsrfGenerator.setCookieName(xsrfTokenCookieName);
-        xsrfGenerator.setHeaderName(xsrfTokenHeaderName);
-        xsrfGenerator.setTimeout(xsrfTokenDuration * 1000);
-    }
+    private final XsrfGenerator xsrfGenerator;
 
     @GET
     @Path("jwks.json")
