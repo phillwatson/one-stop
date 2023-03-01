@@ -13,6 +13,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.lang.reflect.Method;
 
+/**
+ * Intercepts all incoming HTTP requests and, if required, validates the XSRF token
+ * contained in the request headers and cookies. The request is rejected if the token
+ * is deemed to be invalid.
+ */
 @Provider
 @Slf4j
 public class XsrfInterceptor implements ContainerRequestFilter {
