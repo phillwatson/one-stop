@@ -11,6 +11,12 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
+/**
+ * A class for generating an encrypted hash value of a given password. This hash
+ * can be safely persisted without revealing the password itself. Later the same
+ * password can be verified by repeating the same hash generation and comparing
+ * the result with the original, persisted hash.
+ */
 @ApplicationScoped
 public class PasswordCrypto {
     /**

@@ -1,9 +1,3 @@
-#smallrye:
-#  jwt:
-#    verify:
-#      key:
-#        location: auth/publicKey.pem
-
 mp:
   jwt:
     verify:

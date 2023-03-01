@@ -35,7 +35,7 @@ public class RotatedJwkSet implements Destroyable {
     /**
      * The ID assigned to the most recently generated key.
      */
-    private int currentKid = 0;
+    private long currentKid = 0;
 
     private final ScheduledExecutorService executor;
 
@@ -78,7 +78,8 @@ public class RotatedJwkSet implements Destroyable {
         log.debug("Rotating JWK-Set");
         synchronized (stack) {
             try {
-                stack.addLast(newJWK(String.valueOf(++currentKid)));
+                currentKid = System.currentTimeMillis();
+                stack.addLast(newJWK(String.valueOf(currentKid)));
                 while (stack.size() > maxKeys) {
                     disposeOf(stack.pop());
                 }
@@ -124,11 +125,13 @@ public class RotatedJwkSet implements Destroyable {
      * @return the signed JWT token.
      */
     public String signClaims(JwtClaimsBuilder jwtClaimsBuilder) {
-        PrivateKey privateKey = getCurrentPrivateKey();
+        synchronized (stack) {
+            PrivateKey privateKey = getCurrentPrivateKey();
 
-        return jwtClaimsBuilder
-            .jws()
-            .keyId(String.valueOf(currentKid))
-            .sign(privateKey);
+            return jwtClaimsBuilder
+                .jws()
+                .keyId(String.valueOf(currentKid))
+                .sign(privateKey);
+        }
     }
 }
