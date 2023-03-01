@@ -1,14 +1,12 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.errors.EncryptionConfigException;
-import io.quarkus.arc.properties.IfBuildProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -21,8 +19,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
-@ApplicationScoped
-@IfBuildProperty(name = "xsrf-auth", stringValue = "true")
+//@ApplicationScoped
 @Slf4j
 public class XsrfGenerator {
     private static final String SIGNATURE_ALG = "HmacSHA256";
