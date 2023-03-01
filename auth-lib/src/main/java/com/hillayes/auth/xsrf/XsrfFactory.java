@@ -2,6 +2,7 @@ package com.hillayes.auth.xsrf;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 
@@ -23,11 +24,14 @@ public class XsrfFactory {
 
     /**
      * The duration for which the generated XSRF token is valid - in seconds.
+     * As the XSRF token is generated whenever a refresh-token is created, this
+     * should be at least equal to the time-to-live duration of the refresh-token.
      */
     @ConfigProperty(name = "one-stop.auth.xsrf.duration-secs", defaultValue = "1800")
     private long timeoutSecs;
 
     @Produces
+    @ApplicationScoped
     public XsrfGenerator xsrfGenerator(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
         XsrfGenerator result = new XsrfGenerator(secret);
         result.setCookieName(cookieName);

@@ -87,12 +87,7 @@ public class AuthResource {
             (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
             false, true);
 
-        // xsrf token - set httpOnly=false and path="/" to allow client script to read it
-        String xsrfToken = (tokens[0] == null) ? null : xsrfGenerator.generateToken();
-        NewCookie xsrfCookie = new NewCookie(xsrfGenerator.getCookieName(), xsrfToken,
-            "/", null, NewCookie.DEFAULT_VERSION, null,
-            (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
-            false, false);
+        NewCookie xsrfCookie = xsrfGenerator.generateCookie();
 
         return Response.noContent()
             .cookie(accessToken, refreshToken, xsrfCookie)

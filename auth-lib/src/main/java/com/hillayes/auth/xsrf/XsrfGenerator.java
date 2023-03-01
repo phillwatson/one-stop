@@ -10,16 +10,18 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.NewCookie;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-//@ApplicationScoped
 @Slf4j
 public class XsrfGenerator {
     private static final String SIGNATURE_ALG = "HmacSHA256";
@@ -73,6 +75,14 @@ public class XsrfGenerator {
         String signature = BASE64_ENCODER.encodeToString(mac.doFinal(saltPlusToken.getBytes(StandardCharsets.US_ASCII)));
 
         return saltPlusToken + "." + signature;
+    }
+
+    public NewCookie generateCookie() {
+        // set httpOnly=false and path="/" to allow client script to read it
+        return new NewCookie(getCookieName(), generateToken(),
+            "/", null, NewCookie.DEFAULT_VERSION, null,
+            (int) getTimeoutSecs(), Date.from(Instant.now().plusSeconds(getTimeoutSecs())),
+            false, false);
     }
 
     /**
