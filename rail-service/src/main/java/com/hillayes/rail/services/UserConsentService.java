@@ -6,6 +6,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.events.ConsentEventSender;
 import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.UserConsentRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ public class UserConsentService {
     @Inject
     @RestClient
     RequisitionService requisitionService;
+    @Inject
+    ConsentEventSender consentEventSender;
 
     public List<UserConsent> listConsents(UUID userId) {
         log.info("Listing user's banks [userId: {}]", userId);
@@ -77,6 +80,8 @@ public class UserConsentService {
             .agreementExpires(expires)
             .status(ConsentStatus.INITIATED)
             .build();
+
+        // save to generate ID
         userConsent = userConsentRepository.saveAndFlush(userConsent);
 
         try {
@@ -95,6 +100,9 @@ public class UserConsentService {
             userConsent.setRequisitionId(requisition.id.toString());
             userConsent.setStatus(ConsentStatus.WAITING);
 
+            // send consent initiated event notification
+            consentEventSender.sendConsentInitiated(userConsent);
+
             // return link for user consent
             log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]", userId, institutionId, requisition.link);
             return URI.create(requisition.link);
@@ -111,6 +119,10 @@ public class UserConsentService {
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
         userConsent.setStatus(ConsentStatus.GIVEN);
+        userConsent = userConsentRepository.save(userConsent);
+
+        // send consent accepted event notification
+        consentEventSender.sendConsentAccepted(userConsent);
     }
 
     public void consentDenied(UUID userConsentId, String error, String details) {
@@ -122,9 +134,13 @@ public class UserConsentService {
                 userConsent.setStatus(ConsentStatus.REFUSED);
                 userConsent.setErrorCode(error);
                 userConsent.setErrorDetail(details);
+                userConsent = userConsentRepository.save(userConsent);
 
                 // delete the requisition
                 requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
+
+                // send consent denied event notification
+                consentEventSender.sendConsentDenied(userConsent);
             });
     }
 }

@@ -72,7 +72,7 @@ public class AuthResource {
     @GET
     @Path("logout")
     public Response logout() {
-        log.info("Auth user logout initiated");
+        log.info("Auth user logout");
         return buildCookies(new String[]{null, null}, 0, 0);
     }
 

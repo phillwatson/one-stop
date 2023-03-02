@@ -30,10 +30,9 @@ public class UserConsentResource {
     @GET
     @RolesAllowed("user")
     public Response getConsents(@Context SecurityContext ctx) {
-        String principal = ctx.getUserPrincipal().getName();
-        log.info("Listing user's bank [userId: {}]", principal);
+        UUID userId = getUserId(ctx);
+        log.info("Listing user's bank [userId: {}]", userId);
 
-        UUID userId = UUID.fromString(principal);
         List<UserConsent> result = userConsentService.listConsents(userId);
 
         log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
@@ -44,10 +43,9 @@ public class UserConsentResource {
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
                              UserConsentRequest request) {
-        String principal = ctx.getUserPrincipal().getName();
-        log.info("Registering user's bank [userId: {}, institutionId: {}]", principal, request.getInstitutionId());
+        UUID userId = getUserId(ctx);
+        log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, request.getInstitutionId());
 
-        UUID userId = UUID.fromString(principal);
         URI consentLink = userConsentService.register(userId, request.getInstitutionId());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
@@ -60,6 +58,7 @@ public class UserConsentResource {
     public Response accepted(@QueryParam("ref") String userConsentId,
                              @QueryParam("error") String error,
                              @QueryParam("details") String details) {
+        // A typical consent callback request:
         // http://5.81.68.243/api/v1/rails/consents/response
         // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
         // &error=UserCancelledSession
@@ -73,5 +72,9 @@ public class UserConsentResource {
             userConsentService.consentDenied(consentId, error, details);
         }
         return Response.temporaryRedirect(URI.create("/")).build();
+    }
+
+    private UUID getUserId(SecurityContext context) {
+        return UUID.fromString(context.getUserPrincipal().getName());
     }
 }

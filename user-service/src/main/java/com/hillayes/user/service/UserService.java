@@ -27,6 +27,7 @@ public class UserService {
     public User createUser(String username, char[] password, User user) {
         log.info("Creating user [username: {}]", username);
 
+        // includes deleted users in duplicate username comparison
         userRepository.findByUsername(username)
             .ifPresent(existing -> {
                 throw new DuplicateUsernameException(username);
@@ -48,6 +49,7 @@ public class UserService {
         log.info("Onboard user [userId: {}]", id);
 
         return userRepository.findById(id)
+            .filter(user -> !user.isDeleted())
             .map(user -> {
                 if (user.getDateOnboarded() != null) {
                     throw new BadRequestException("User is already onboard");
@@ -72,7 +74,11 @@ public class UserService {
 
     public Collection<User> listUsers() {
         log.info("Retrieving users");
-        Collection<User> result = userRepository.findAll(Sort.by("username").ascending());
+        Collection<User> result = userRepository
+            .findAll(Sort.by("username").ascending())
+            .stream()
+            .filter(user -> !user.isDeleted())
+            .toList();
 
         log.debug("Retrieved users [size: {}]", result.size());
         return result;
@@ -82,6 +88,7 @@ public class UserService {
         log.info("Updating user [userId: {}]", id);
 
         return userRepository.findById(id)
+            .filter(user -> !user.isDeleted())
             .map(user -> {
                 user.setEmail(modifiedUser.getEmail());
                 user.setGivenName(modifiedUser.getGivenName());
@@ -100,7 +107,8 @@ public class UserService {
 
         return userRepository.findById(id)
             .map(user -> {
-                userRepository.delete(user);
+                user.setDeleted(true);
+                user = userRepository.save(user);
 
                 userEventSender.sendUserDeleted(user);
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
@@ -111,6 +119,7 @@ public class UserService {
     public Collection<String> getUserRoles(UUID userId) {
         log.info("Retrieving user roles [userId: {}]", userId);
         Collection<String> result = userRepository.findById(userId)
+            .filter(user -> !user.isDeleted())
             .map(User::getRoles)
             .orElse(Collections.emptySet());
 

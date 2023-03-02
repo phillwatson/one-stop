@@ -77,7 +77,6 @@ public class User {
     @ElementCollection
     @CollectionTable(name="userrole", joinColumns=@JoinColumn(name="user_id"))
     @Column(name="role")
-    @JsonIgnore
     private Set<String> roles = new HashSet<>();
 
     @JsonIgnore

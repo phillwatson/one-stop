@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -15,10 +16,11 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.UUID;
 
-@Path("/api/v1/admin/users")
+@Path("/api/v1/users")
 @RolesAllowed({"admin"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserAdminResource {
