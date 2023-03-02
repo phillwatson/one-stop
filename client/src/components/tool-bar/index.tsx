@@ -6,7 +6,7 @@ export default function ToolBar() {
     <nav className="toolbar">
       <NavLink className="item" to="sign-in">Sign In</NavLink>
       <NavLink className="item" to="about">About</NavLink>
-      <NavLink className="item" to="institutions">Institutions</NavLink>
+      <NavLink className="item" to="accounts">Accounts</NavLink>
     </nav>
   );
 };

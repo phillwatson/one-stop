@@ -5,41 +5,77 @@ import {
   Outlet
 } from "react-router-dom";
 
-import ToolBar from "./components/tool-bar";
-import Home from "./pages";
-import About from "./pages/about";
-import Institutions from "./pages/institutions";
-import SignIn from "./pages/sign-in";
+import Box from '@mui/material/Box';
+import AppHeader from "./components/app-header/app-header";
+import SideBar from './components/side-bar/side-bar';
 
-function HeaderLayout() {
+import SignIn from "./pages/sign-in";
+import Institutions from "./pages/institutions";
+import Accounts from "./pages/accounts";
+import { AppMenu, AppMenuItem } from "./components/app-menu";
+import { MenuItem } from "./components/app-menu/app-menu-item";
+import Logout from '@mui/icons-material/Logout';
+import AccountBalance from '@mui/icons-material/AccountBalance';
+import Savings from '@mui/icons-material/Savings';
+import MainPanel from "./components/main-panel/main-panel";
+
+const appTitle = "One Stop";
+const drawerWidth = 240;
+
+const menuItems: MenuItem[] = [
+ { label: 'Accounts', route: 'accounts', icon: <Savings/> },
+ { label: 'Institutions', route: 'institutions', icon: <AccountBalance/> },
+ { label: 'Logout', route: 'sign-in', icon: <Logout/> }
+];
+
+function MainPage() {
+  const [open, setOpen] = React.useState(true);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <>
-      <ToolBar />
-      <Outlet />
-    </>
+    <Box sx={{ display: 'flex' }}>
+      <AppHeader drawerWidth={ drawerWidth } open={ open } onClick={ handleDrawerOpen } title={ appTitle }/>
+      <SideBar drawerWidth={ drawerWidth } open={open} onClose={ handleDrawerClose }>
+        <AppMenu>
+          {menuItems && menuItems.map((item, index) => 
+            <AppMenuItem key={ index } { ...item }/>
+          )}
+        </AppMenu>
+      </SideBar>
+      <MainPanel drawerWidth={ drawerWidth } open={ open }>
+        <Outlet />
+      </MainPanel>
+    </Box>
   );
 }
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HeaderLayout />,
+    element: <MainPage />,
     children: [
       {
         path: "/",
-        element: <Home />
-      },
-      {
-        path: "about",
-        element: <About />
-      },
-      {
-        path: "institutions",
-        element: <Institutions />
+        element: <SignIn />
       },
       {
         path: "sign-in",
         element: <SignIn />
+      },
+      {
+        path: "accounts",
+        element: <Accounts />
+      },
+      {
+        path: "institutions",
+        element: <Institutions />
       },
     ],
   },

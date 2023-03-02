@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from '@mui/material/Button';
 import Snackbar from "@mui/material/Snackbar";
 import Alert, { AlertColor } from "@mui/material/Alert";
+import { useNavigate } from "react-router-dom";
 
 import http from "../../services/http-common"
 import "./login-form.css";
@@ -12,13 +13,10 @@ interface ErrorMessage {
 }
 
 export default function LoginForm() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Array<ErrorMessage>>([]);
-
-  React.useEffect(() => {
-    http.get("/auth/logout");
-  }, []);
 
   function validateForm() {
     return username.length > 0 && password.length > 0;
@@ -27,7 +25,7 @@ export default function LoginForm() {
   function handleSubmit(event: any) {
     event.preventDefault();
     http.post("/auth/login", JSON.stringify({ username, password }))
-      .then(() => null)
+      .then(() => navigate("/accounts"))
       .catch(e => {
         setErrors(() => [ { severity: "warning", message: e.response.statusText }, ...errors ] );
       });

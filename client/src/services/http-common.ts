@@ -42,18 +42,24 @@ class HttpService {
   private checkError(error: AxiosError) {
     var requestUrl: string = error.request.responseURL;
     console.log(`checking error [url: ${requestUrl}, status: ${error.response!.status}, inflight: ${this.inflight} ]`);
-    if ((!requestUrl.includes("/auth/login")) && (!this.inflight) && (error.response!.status === 401)) {
+
+    if ((!this.inflight) && (error.response!.status === 401) && (!requestUrl.includes("/auth/login"))) {
       this.inflight = true;
+
       console.log("Trying token refresh");
       return this.http.get("/auth/refresh")
         .then((response) => {
           console.log(`Refresh response: ${response.statusText}`);
           this.inflight = false;
+
+          // retry the original request
           return new Promise((resolve) => {
             resolve(this.http.request(error.config!));
           })
-        .catch((e) => {
+        .catch(() => {
           this.inflight = false;
+
+          // return the original error
           return new Promise((resolve) => {
             resolve(error);
           });
