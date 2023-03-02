@@ -7,7 +7,7 @@ an aggregation.
 ## Docker Configuration
 The following must be added to ```environment:``` section of the docker compose
 services.
-### All Services
+### User and Rail Services
 ```
 // the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars>
