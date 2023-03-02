@@ -2,8 +2,8 @@ import { styled } from '@mui/material/styles';
 
 const drawerWidth = 240;
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
-  open?: boolean;
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth' })<{
+  open?: boolean, drawerWidth: number;
 }>(({ theme, open }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
@@ -28,8 +28,8 @@ interface MainPanelProps extends React.PropsWithChildren {
 
 export default function MainPanel(props: MainPanelProps) {
   return (
-    <Main open={ props.open } style={{ paddingTop: "90px" }}>
-    { props.children }
+    <Main open={ props.open } drawerWidth={ props.drawerWidth } style={{ paddingTop: "90px" }}>
+      { props.children }
     </Main>
   );
 }
