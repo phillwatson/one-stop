@@ -131,7 +131,7 @@ public class UserConsentService {
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                 userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
-                userConsent.setStatus(ConsentStatus.REFUSED);
+                userConsent.setStatus(ConsentStatus.DENIED);
                 userConsent.setErrorCode(error);
                 userConsent.setErrorDetail(details);
                 userConsent = userConsentRepository.save(userConsent);

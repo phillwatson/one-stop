@@ -4,5 +4,5 @@ public enum ConsentStatus {
     INITIATED,
     WAITING,
     GIVEN,
-    REFUSED;
+    DENIED;
 }

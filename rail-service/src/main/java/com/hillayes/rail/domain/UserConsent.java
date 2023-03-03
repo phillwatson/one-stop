@@ -34,32 +34,56 @@ public class UserConsent {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    /**
+     * The rail ID for the institution to which the consent refers.
+     */
     @EqualsAndHashCode.Include
     @Column(name = "institution_id", nullable = false)
     private String institutionId;
 
+    /**
+     * The rail ID for the agreement to which the consent refers.
+     */
     @Column(name = "agreement_id", nullable = false)
     private String agreementId;
 
+    /**
+     * The date-time on which the agreement expires.
+     */
     @Column(name = "agreement_expires", nullable = false)
     private Instant agreementExpires;
 
+    /**
+     * The agreed number of past days for which transaction data can be obtained.
+     */
     @Column(name = "max_history", nullable = false)
     private int maxHistory;
 
+    /**
+     * The rail ID for the requisition for access to which the consent refers.
+     */
     @Setter
     @Column(name = "requisition_id", nullable = true)
     private String requisitionId;
 
+    /**
+     * Indicates the position in the flow to obtain consent from the user.
+     */
     @Setter
     @Column(nullable = false)
     private ConsentStatus status;
 
+    /**
+     * If consent is denied, this records the error code returned by the rail.
+     */
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String errorCode;
 
+    /**
+     * If consent is denied, this records the detail of the error returned by the rail.
+     */
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String errorDetail;
 }
