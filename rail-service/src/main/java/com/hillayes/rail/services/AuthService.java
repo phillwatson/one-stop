@@ -2,26 +2,25 @@ package com.hillayes.rail.services;
 
 import com.hillayes.rail.model.ObtainJwtResponse;
 import com.hillayes.rail.model.RefreshJwtResponse;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import com.hillayes.rail.repository.AuthRepository;
+import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.inject.Inject;
 
 @ApplicationScoped
-@RegisterRestClient(configKey = "nordigen-api")
-@Path("/api/v2/token")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public interface AuthService {
-    @POST
-    @Path("/new/")
-    @Consumes("application/x-www-form-urlencoded")
-    public ObtainJwtResponse newToken(@FormParam("secret_id") String secretId,
-                                      @FormParam("secret_key") String secretKey);
+public class AuthService {
+    @Inject
+    @RestClient
+    AuthRepository authRepository;
 
-    @POST
-    @Path("/refresh/")
-    @Consumes("application/x-www-form-urlencoded")
-    public RefreshJwtResponse refreshToken(@FormParam("refresh") String refresh);
+    public ObtainJwtResponse newToken(String secretId,
+                                      String secretKey) {
+        return authRepository.newToken(secretId, secretKey);
+    }
+
+    public RefreshJwtResponse refreshToken(String refresh) {
+        return authRepository.refreshToken(refresh);
+    }
 }

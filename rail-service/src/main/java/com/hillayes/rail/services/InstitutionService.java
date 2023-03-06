@@ -1,25 +1,28 @@
 package com.hillayes.rail.services;
 
 import com.hillayes.rail.model.Institution;
-import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import com.hillayes.rail.repository.InstitutionRepository;
+import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.inject.Inject;
 import java.util.List;
 
-@RegisterRestClient(configKey = "nordigen-api")
-@RegisterClientHeaders(BearerHeaderFactory.class)
-@Path("/api/v2/institutions/")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public interface InstitutionService {
-    @GET
-    public List<Institution> list(@QueryParam("country") String countryCode,
-                                  @QueryParam("payments_enabled") Boolean paymentsEnabled);
-    @GET
-    @Path("{id}/")
-    public Institution get(@PathParam("id") String id);
+public class InstitutionService {
+    @Inject
+    @RestClient
+    InstitutionRepository institutionRepository;
+
+    public List<Institution> list(String countryCode,
+                                  Boolean paymentsEnabled) {
+        List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);
+        list.add(get("SANDBOXFINANCE_SFIN0000"));
+        return list;
+    }
+
+    public Institution get(String id) {
+        return institutionRepository.get(id);
+    }
 }

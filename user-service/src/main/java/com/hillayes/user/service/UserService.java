@@ -9,13 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 import java.util.*;
 
-@Singleton
+@ApplicationScoped
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
@@ -114,16 +114,5 @@ public class UserService {
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return user;
             });
-    }
-
-    public Collection<String> getUserRoles(UUID userId) {
-        log.info("Retrieving user roles [userId: {}]", userId);
-        Collection<String> result = userRepository.findById(userId)
-            .filter(user -> !user.isDeleted())
-            .map(User::getRoles)
-            .orElse(Collections.emptySet());
-
-        log.debug("Retrieved user roles [userId: {}, size: {}]", userId, result.size());
-        return result;
     }
 }

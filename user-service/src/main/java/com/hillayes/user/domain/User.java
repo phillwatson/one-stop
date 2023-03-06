@@ -74,7 +74,7 @@ public class User {
     @JsonIgnore
     private Integer version;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="userrole", joinColumns=@JoinColumn(name="user_id"))
     @Column(name="role")
     private Set<String> roles = new HashSet<>();

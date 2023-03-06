@@ -3,7 +3,6 @@ package com.hillayes.rail.resource;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.services.InstitutionService;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -18,7 +17,6 @@ import java.util.List;
 @Slf4j
 public class InstitutionResource {
     @Inject
-    @RestClient
     InstitutionService institutionService;
 
     @GET

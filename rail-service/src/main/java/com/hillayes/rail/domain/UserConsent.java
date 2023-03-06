@@ -30,6 +30,21 @@ public class UserConsent {
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 
+    @Builder.Default
+    @Column(name = "date_accepted", nullable = true)
+    @Setter
+    private Instant dateAccepted = Instant.now();
+
+    @Builder.Default
+    @Column(name = "date_denied", nullable = true)
+    @Setter
+    private Instant dateDenied = Instant.now();
+
+    @Builder.Default
+    @Column(name = "date_cancelled", nullable = true)
+    @Setter
+    private Instant dateCancelled = Instant.now();
+
     @EqualsAndHashCode.Include
     @Column(name = "user_id", nullable = false)
     private UUID userId;
@@ -77,13 +92,13 @@ public class UserConsent {
      * If consent is denied, this records the error code returned by the rail.
      */
     @Setter
-    @Column(nullable = true)
+    @Column(name="error_code", nullable = true)
     private String errorCode;
 
     /**
      * If consent is denied, this records the detail of the error returned by the rail.
      */
     @Setter
-    @Column(nullable = true)
+    @Column(name="error_detail", nullable = true)
     private String errorDetail;
 }

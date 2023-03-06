@@ -1,12 +1,11 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.services.AgreementService;
 import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementAccepted;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.rail.services.AgreementService;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -23,7 +22,6 @@ import java.util.UUID;
 @Slf4j
 public class AgreementResource {
     @Inject
-    @RestClient
     AgreementService agreementService;
 
     @GET

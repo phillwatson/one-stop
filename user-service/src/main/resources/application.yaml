@@ -64,3 +64,8 @@ one-stop:
       header-name: 'X-XSRF-TOKEN'
       duration-secs: 1800
       # secret: 'this will be passed in via docker env'
+"%test":
+  one-stop:
+    auth:
+      xsrf:
+        secret: this is a secret for xsrf tokens

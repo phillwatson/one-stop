@@ -3,6 +3,9 @@ CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
 CREATE TABLE ${flyway:defaultSchema}.userconsent (
     id uuid NOT NULL CONSTRAINT userconsent_pkey PRIMARY KEY,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_accepted timestamp NULL,
+    date_denied timestamp NULL,
+    date_cancelled timestamp NULL,
     user_id UUID NOT NULL,
     institution_id varchar(256) NOT NULL,
     agreement_id varchar(256) NOT NULL,

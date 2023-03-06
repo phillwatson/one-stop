@@ -2,6 +2,7 @@ package com.hillayes.rail.events;
 
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.ConsentAccepted;
+import com.hillayes.events.events.consent.ConsentCancelled;
 import com.hillayes.events.events.consent.ConsentDenied;
 import com.hillayes.events.events.consent.ConsentInitiated;
 import com.hillayes.outbox.sender.EventSender;
@@ -37,7 +38,7 @@ public class ConsentEventSender {
             userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
         eventSender.send(Topic.CONSENT, ConsentAccepted.builder()
             .consentId(userConsent.getId())
-            .dateAccepted(Instant.now())
+            .dateAccepted(userConsent.getDateAccepted())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
             .agreementId(userConsent.getAgreementId())
@@ -51,7 +52,21 @@ public class ConsentEventSender {
             userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
         eventSender.send(Topic.CONSENT, ConsentDenied.builder()
             .consentId(userConsent.getId())
-            .dateDenied(Instant.now())
+            .dateDenied(userConsent.getDateDenied())
+            .userId(userConsent.getId())
+            .institutionId(userConsent.getInstitutionId())
+            .agreementId(userConsent.getAgreementId())
+            .agreementExpires(userConsent.getAgreementExpires())
+            .requisitionId(userConsent.getRequisitionId())
+            .build());
+    }
+
+    public void sendConsentCancelled(UserConsent userConsent) {
+        log.debug("Sending ConsentCancelled event [consentId: {}, userId: {}, institutionId: {}]",
+            userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
+        eventSender.send(Topic.CONSENT, ConsentCancelled.builder()
+            .consentId(userConsent.getId())
+            .dateCancelled(userConsent.getDateCancelled())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
             .agreementId(userConsent.getAgreementId())

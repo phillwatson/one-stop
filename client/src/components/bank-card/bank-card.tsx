@@ -13,10 +13,12 @@ import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 
 import Bank from '../../model/bank.model';
+import UserConsent from '../../model/user-consent.model';
 
 interface Props {
     bank: Bank;
-    active: boolean;
+    consent?: UserConsent;
+    onLinkSelect?: (bank: Bank, link: boolean) => void;
 }
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -37,45 +39,61 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 export default function BankCard(props: Props) {
   const [expanded, setExpanded] = React.useState(false);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
+  function handleExpandClick() {
+    if (props.consent) {
+      setExpanded(!expanded);
+    }
   };
+
+  function isActionAvailable() {
+    return props.onLinkSelect !== undefined
+  }
+
+  function handleConnectToBank(bank: Bank, link: boolean) {
+    if (props.onLinkSelect !== undefined) {
+      props.onLinkSelect(bank, link);
+    }
+  }
 
   return (
     <Card>
       <CardHeader
-        avatar={
-          <Avatar aria-label={ props.bank.name } src={ props.bank.logo } />
-        }
-        title={ props.bank.name }
-        subheader={ props.bank.bic }
+        avatar={ <Avatar aria-label={ props.bank.name } src={ props.bank.logo } /> }
+        title={ props.bank.name } subheader={ props.bank.bic }
+        onClickCapture={ handleExpandClick }
       />
-        { !props.active &&
-        <CardActions disableSpacing>
-          <IconButton aria-label="connect to bank">
-            <LinkIcon />
-          </IconButton>
-        </CardActions>
+        { !props.consent && isActionAvailable() &&
+          <CardActions disableSpacing>
+            <IconButton aria-label="connect to bank" onClick={ () => handleConnectToBank(props.bank, false) }>
+              <LinkIcon />
+            </IconButton>
+          </CardActions>
         }
-        { props.active &&
-        <CardActions disableSpacing>
-          <IconButton aria-label="close connection">
-            <LinkOffIcon />
-          </IconButton>
-          <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show accounts">
-            <ExpandMoreIcon />
-          </ExpandMore>
-        </CardActions>
+        { props.consent &&
+          <CardActions disableSpacing>
+            <ExpandMore
+              expand={expanded}
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="show accounts">
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </CardActions>
         }
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography paragraph>Method:</Typography>
-          <Typography paragraph>Show accounts and balances.</Typography>
-        </CardContent>
+        { props.consent &&
+          <CardContent>
+            <Typography paragraph>Consent Status: { props.consent!.status }</Typography>
+            <Typography paragraph>Show accounts and balances.</Typography>
+          </CardContent>
+        }
+        { props.consent && props.consent.status !== "CANCELLED" && props.consent.status !== "DENIED" && isActionAvailable() &&
+          <CardActions disableSpacing>
+            <IconButton aria-label="close connection" onClick={ () => handleConnectToBank(props.bank, true) }>
+              <LinkOffIcon />
+            </IconButton>
+          </CardActions>
+        }
       </Collapse>
     </Card>
   );

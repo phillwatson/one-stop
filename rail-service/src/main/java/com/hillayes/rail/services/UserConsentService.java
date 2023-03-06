@@ -10,7 +10,6 @@ import com.hillayes.rail.events.ConsentEventSender;
 import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.UserConsentRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,38 +18,52 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
 @Slf4j
 public class UserConsentService {
+    // until proven - all requests will use this sandbox institution-id
+    private static final String SANDBOX_INSTITUTION_ID = "SANDBOXFINANCE_SFIN0000";
+
     @Inject
     ServiceConfiguration config;
     @Inject
     UserConsentRepository userConsentRepository;
     @Inject
-    @RestClient
     InstitutionService institutionService;
     @Inject
-    @RestClient
     AgreementService agreementService;
     @Inject
-    @RestClient
     RequisitionService requisitionService;
     @Inject
     ConsentEventSender consentEventSender;
 
     public List<UserConsent> listConsents(UUID userId) {
         log.info("Listing user's banks [userId: {}]", userId);
-        List<UserConsent> result = userConsentRepository.findByUserId(userId);
+        List<UserConsent> result = userConsentRepository.findByUserId(userId).stream()
+            .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
+            .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
+            .toList();
         log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
         return result;
     }
 
+    public Optional<UserConsent> getUserConsent(UUID userId, String institutionId) {
+        institutionId = SANDBOX_INSTITUTION_ID;
+        log.info("Looking for user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
+        return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).stream()
+            .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
+            .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
+            .findFirst();
+    }
+
     public URI register(UUID userId, String institutionId) {
+        institutionId = SANDBOX_INSTITUTION_ID;
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
-        if (userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).size() > 0) {
+        if (getUserConsent(userId, institutionId).isPresent()) {
             throw new BankAlreadyRegisteredException(userId, institutionId);
         }
 
@@ -114,11 +127,13 @@ public class UserConsentService {
     public void consentAccepted(UUID userConsentId) {
         log.info("User's consent received [userConsentId: {}]", userConsentId);
         UserConsent userConsent = userConsentRepository.findById(userConsentId)
+            .filter(consent -> consent.getStatus() == ConsentStatus.WAITING)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
         userConsent.setStatus(ConsentStatus.GIVEN);
+        userConsent.setDateAccepted(Instant.now());
         userConsent = userConsentRepository.save(userConsent);
 
         // send consent accepted event notification
@@ -132,15 +147,34 @@ public class UserConsentService {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                 userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.DENIED);
+                userConsent.setDateDenied(Instant.now());
                 userConsent.setErrorCode(error);
                 userConsent.setErrorDetail(details);
                 userConsent = userConsentRepository.save(userConsent);
 
-                // delete the requisition
+                // delete the requisition - and the associated agreement
                 requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
 
                 // send consent denied event notification
                 consentEventSender.sendConsentDenied(userConsent);
+            });
+    }
+
+    public void consentCancelled(UUID userConsentId) {
+        log.info("User's consent cancelled [userConsentId: {}]", userConsentId);
+        userConsentRepository.findById(userConsentId)
+            .ifPresent(userConsent -> {
+                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                    userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+                userConsent.setStatus(ConsentStatus.CANCELLED);
+                userConsent.setDateCancelled(Instant.now());
+                userConsent = userConsentRepository.save(userConsent);
+
+                // delete the requisition - and the associated agreement
+                requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
+
+                // send consent denied event notification
+                consentEventSender.sendConsentCancelled(userConsent);
             });
     }
 }

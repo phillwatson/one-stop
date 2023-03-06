@@ -1,14 +1,28 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.auth.xsrf.XsrfGenerator;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import javax.ws.rs.container.ContainerRequestContext;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
 @QuarkusTest
-public class UserResourceTest {
+public class UserAdminResourceTest {
+    @InjectMock
+    XsrfGenerator xsrfGenerator;
+
+    @BeforeEach
+    public void init() {
+        Mockito.when(xsrfGenerator.validateToken(Mockito.any(ContainerRequestContext.class))).thenReturn(true);
+    }
+
     @AfterEach
     public void cleanup() {
     }

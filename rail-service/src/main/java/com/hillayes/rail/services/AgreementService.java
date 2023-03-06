@@ -4,39 +4,39 @@ import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementAccepted;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import com.hillayes.rail.model.PaginatedList;
-import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import com.hillayes.rail.repository.AgreementRepository;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.UUID;
 
-@RegisterRestClient(configKey = "nordigen-api")
-@RegisterClientHeaders(BearerHeaderFactory.class)
-@Path("/api/v2/agreements/enduser/")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public interface AgreementService {
-    @GET
-    public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,
-                                                @QueryParam("offset") int offset);
+public class AgreementService {
+    @Inject
+    @RestClient
+    AgreementRepository agreementRepository;
 
-    @POST
-    public EndUserAgreement create(EndUserAgreementRequest agreement);
+    public PaginatedList<EndUserAgreement> list(int limit,
+                                                int offset) {
+        return agreementRepository.list(limit, offset);
+    }
 
-    @PUT
-    @Path("{id}/")
-    public EndUserAgreement accept(@PathParam("id") UUID id,
-                                   EndUserAgreementAccepted acceptance);
+    public EndUserAgreement create(EndUserAgreementRequest agreement) {
+        return agreementRepository.create(agreement);
+    }
 
-    @GET
-    @Path("{id}/")
-    public EndUserAgreement get(@PathParam("id") UUID id);
+    public EndUserAgreement accept(UUID id,
+                                   EndUserAgreementAccepted acceptance) {
+        return agreementRepository.accept(id, acceptance);
+    }
 
-    @DELETE
-    @Path("{id}/")
-    public Map<String,Object> delete(@PathParam("id") UUID id);
+    public EndUserAgreement get(UUID id) {
+        return agreementRepository.get(id);
+    }
+
+    public Map<String,Object> delete(UUID id) {
+        return agreementRepository.delete(id);
+    }
 }

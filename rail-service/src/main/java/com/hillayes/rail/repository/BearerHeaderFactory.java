@@ -1,4 +1,4 @@
-package com.hillayes.rail.services;
+package com.hillayes.rail.repository;
 
 import com.hillayes.rail.model.ObtainJwtResponse;
 import com.hillayes.rail.model.RefreshJwtResponse;
@@ -20,7 +20,7 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
 
     @Inject
     @RestClient
-    AuthService authService;
+    AuthRepository authService;
 
     private Token accessToken;
     private Token refreshToken;

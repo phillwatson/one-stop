@@ -1,11 +1,10 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.services.AccountService;
 import com.hillayes.rail.model.Account;
 import com.hillayes.rail.model.AccountBalanceList;
 import com.hillayes.rail.model.TransactionList;
+import com.hillayes.rail.services.AccountService;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -22,7 +21,6 @@ import java.util.UUID;
 @Slf4j
 public class AccountResource {
     @Inject
-    @RestClient
     AccountService accountService;
 
     @GET

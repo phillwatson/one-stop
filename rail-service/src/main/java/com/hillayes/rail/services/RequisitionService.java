@@ -3,33 +3,35 @@ package com.hillayes.rail.services;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
-import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import com.hillayes.rail.repository.RequisitionRepository;
+import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.UUID;
 
-@RegisterRestClient(configKey = "nordigen-api")
-@RegisterClientHeaders(BearerHeaderFactory.class)
-@Path("/api/v2/requisitions/")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public interface RequisitionService {
-    @GET
-    public PaginatedList<Requisition> list(@QueryParam("limit") int limit,
-                                           @QueryParam("offset") int offset);
-    @GET
-    @Path("{id}/")
-    public Requisition get(@PathParam("id") UUID id);
+public class RequisitionService {
+    @Inject
+    @RestClient
+    RequisitionRepository requisitionRepository;
 
-    @POST
-    public Requisition create(RequisitionRequest requisition);
+    public PaginatedList<Requisition> list(int limit,
+                                           int offset) {
+        return requisitionRepository.list(limit, offset);
+    }
 
-    @DELETE
-    @Path("{id}/")
-    public Map<String, Object> delete(@PathParam("id") UUID id);
+    public Requisition get(UUID id) {
+        return requisitionRepository.get(id);
+    }
+
+    public Requisition create(RequisitionRequest requisition) {
+        return requisitionRepository.create(requisition);
+    }
+
+    public Map<String, Object> delete(UUID id) {
+        return requisitionRepository.delete(id);
+    }
 }

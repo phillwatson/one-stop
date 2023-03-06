@@ -1,12 +1,10 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.services.RequisitionService;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
-import lombok.RequiredArgsConstructor;
+import com.hillayes.rail.services.RequisitionService;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -23,7 +21,6 @@ import java.util.UUID;
 @Slf4j
 public class RequisitionResource {
     @Inject
-    @RestClient
     RequisitionService requisitionService;
 
     @GET

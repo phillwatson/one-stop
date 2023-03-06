@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.UserConsentRequest;
 import com.hillayes.rail.services.UserConsentService;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Path("/api/v1/rails/consents")
@@ -37,6 +39,37 @@ public class UserConsentResource {
 
         log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
         return Response.ok(result).build();
+    }
+
+    @GET
+    @Path("{institutionId}")
+    @RolesAllowed("user")
+    public Response getConsentForInstitution(@Context SecurityContext ctx,
+                                             @PathParam("institutionId") String institutionId) {
+        UUID userId = getUserId(ctx);
+        log.info("Getting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
+
+        UserConsent result = userConsentService.getUserConsent(userId, institutionId)
+            .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
+
+        log.info("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",
+            userId, institutionId, result.getId());
+        return Response.ok(result).build();
+    }
+
+    @DELETE
+    @Path("{institutionId}")
+    @RolesAllowed("user")
+    public Response deleteConsent(@Context SecurityContext ctx,
+                                  @PathParam("institutionId") String institutionId) {
+        UUID userId = getUserId(ctx);
+        log.info("Deleting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
+
+        UserConsent result = userConsentService.getUserConsent(userId, institutionId)
+            .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
+
+        userConsentService.consentCancelled(result.getId());
+        return Response.noContent().build();
     }
 
     @POST
