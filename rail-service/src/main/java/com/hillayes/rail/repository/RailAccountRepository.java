@@ -19,7 +19,7 @@ import java.util.UUID;
 @Path("/api/v2/accounts/")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface AccountRepository {
+public interface RailAccountRepository {
     @GET
     @Path("{id}/")
     public Account get(@PathParam("id") UUID id);

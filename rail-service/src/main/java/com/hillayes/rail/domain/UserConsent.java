@@ -26,24 +26,20 @@ public class UserConsent {
     @GeneratedValue(generator = "uuid2")
     private UUID id;
 
-    @Builder.Default
     @Column(name = "date_created", nullable = false)
-    private Instant dateCreated = Instant.now();
+    private Instant dateCreated;
 
-    @Builder.Default
     @Column(name = "date_accepted", nullable = true)
     @Setter
-    private Instant dateAccepted = Instant.now();
+    private Instant dateAccepted;
 
-    @Builder.Default
     @Column(name = "date_denied", nullable = true)
     @Setter
-    private Instant dateDenied = Instant.now();
+    private Instant dateDenied;
 
-    @Builder.Default
     @Column(name = "date_cancelled", nullable = true)
     @Setter
-    private Instant dateCancelled = Instant.now();
+    private Instant dateCancelled;
 
     @EqualsAndHashCode.Include
     @Column(name = "user_id", nullable = false)

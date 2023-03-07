@@ -6,8 +6,7 @@ import UserConsent from '../../model/user-consent.model';
 interface Props {
     banks: Array<Bank> | undefined;
     userConsents: Array<UserConsent> | undefined;
-    onSelectBank: (bank: Bank, isActive: boolean) => void;
-    onLinkSelect: (bank: Bank, link: boolean) => void;
+    onLinkSelect?: (bank: Bank, link: boolean) => void;
 }
 
 export default function BankList(props: Props) {

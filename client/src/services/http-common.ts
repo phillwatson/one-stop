@@ -71,6 +71,5 @@ class HttpService {
   }
 }
 
-var instance = new HttpService("http://localhost:3000/api/v1");
-//instance.post("/auth/login", '{ "username": "admin", "password": "password" }')
+const instance = new HttpService("http://localhost:3000/api/v1");
 export default instance;

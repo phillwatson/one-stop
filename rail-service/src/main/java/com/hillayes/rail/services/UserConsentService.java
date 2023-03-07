@@ -86,6 +86,7 @@ public class UserConsentService {
         // record agreement
         log.debug("Recording agreement [userId: {}, institutionId: {}, expires: {}]", userId, institutionId, expires);
         UserConsent userConsent = UserConsent.builder()
+            .dateCreated(Instant.now())
             .userId(userId)
             .institutionId(agreement.institutionId)
             .agreementId(agreement.id.toString())
@@ -127,7 +128,6 @@ public class UserConsentService {
     public void consentAccepted(UUID userConsentId) {
         log.info("User's consent received [userConsentId: {}]", userConsentId);
         UserConsent userConsent = userConsentRepository.findById(userConsentId)
-            .filter(consent -> consent.getStatus() == ConsentStatus.WAITING)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",

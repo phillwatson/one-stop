@@ -71,11 +71,7 @@ export default function BankCard(props: Props) {
         }
         { props.consent &&
           <CardActions disableSpacing>
-            <ExpandMore
-              expand={expanded}
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="show accounts">
+            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show accounts">
               <ExpandMoreIcon />
             </ExpandMore>
           </CardActions>
@@ -84,7 +80,7 @@ export default function BankCard(props: Props) {
         { props.consent &&
           <CardContent>
             <Typography paragraph>Consent Status: { props.consent!.status }</Typography>
-            <Typography paragraph>Show accounts and balances.</Typography>
+            <Typography>Show accounts and balances.</Typography>
           </CardContent>
         }
         { props.consent && props.consent.status !== "CANCELLED" && props.consent.status !== "DENIED" && isActionAvailable() &&

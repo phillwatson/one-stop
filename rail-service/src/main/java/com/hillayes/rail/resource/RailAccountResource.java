@@ -3,7 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.rail.model.Account;
 import com.hillayes.rail.model.AccountBalanceList;
 import com.hillayes.rail.model.TransactionList;
-import com.hillayes.rail.services.AccountService;
+import com.hillayes.rail.services.RailAccountService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
@@ -14,34 +14,34 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
-@Path("/api/v1/rails/accounts")
+@Path("/api/v1/rails/rails-accounts")
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class AccountResource {
+public class RailAccountResource {
     @Inject
-    AccountService accountService;
+    RailAccountService railAccountService;
 
     @GET
     @Path("/{id}")
     public Account get(@PathParam("id") UUID id) {
         log.info("Get account [id: {}]", id);
-        return accountService.get(id);
+        return railAccountService.get(id);
     }
 
     @GET
     @Path("{id}/balances")
     public AccountBalanceList balances(@PathParam("id") UUID id) {
         log.info("Get account balances [id: {}]", id);
-        return accountService.balances(id);
+        return railAccountService.balances(id);
     }
 
     @GET
     @Path("/{id}/details")
     public Map<String,Object> details(@PathParam("id") UUID id) {
         log.info("Get account details [id: {}]", id);
-        return accountService.details(id);
+        return railAccountService.details(id);
     }
 
     @GET
@@ -50,6 +50,6 @@ public class AccountResource {
                                         @QueryParam("date_from") LocalDate dateFrom,
                                         @QueryParam("date_to") LocalDate dateTo) {
         log.info("Get account transactions [id: {}]", id);
-        return accountService.transactions(id, dateFrom, dateTo);
+        return railAccountService.transactions(id, dateFrom, dateTo);
     }
 }

@@ -17,8 +17,6 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     error_detail varchar(256) NULL
 );
 
-CREATE UNIQUE INDEX unq_user_institute ON ${flyway:defaultSchema}.userconsent (user_id, institution_id);
-
 CREATE TABLE ${flyway:defaultSchema}.useraccount (
 	id uuid NOT NULL CONSTRAINT userbankac_pkey PRIMARY KEY,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

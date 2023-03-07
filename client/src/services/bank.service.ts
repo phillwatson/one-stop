@@ -13,5 +13,5 @@ class BankService {
   }
 }
 
-var instance = new BankService();
+const instance = new BankService();
 export default instance;

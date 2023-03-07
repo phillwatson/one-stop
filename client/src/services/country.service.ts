@@ -13,5 +13,5 @@ class CountryService {
   }
 }
 
-var instance = new CountryService();
+const instance = new CountryService();
 export default instance;

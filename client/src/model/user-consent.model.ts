@@ -1,6 +1,9 @@
 export default interface UserConsent {
   id: any,
   dateCreated: Date,
+  dateAccepted?: Date,
+  dateDenied?: Date,
+  dateCancelled?: Date,
   userId: any,
 
   /**
