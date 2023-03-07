@@ -3,7 +3,6 @@ package com.hillayes.rail.services;
 import com.hillayes.rail.model.ObtainJwtResponse;
 import com.hillayes.rail.model.RefreshJwtResponse;
 import com.hillayes.rail.repository.AuthRepository;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;

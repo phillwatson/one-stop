@@ -4,7 +4,6 @@ import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.repository.RequisitionRepository;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;

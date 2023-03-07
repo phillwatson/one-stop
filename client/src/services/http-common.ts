@@ -8,7 +8,7 @@ import axios, {
 class HttpService {
 
   private http: AxiosInstance;
-  private inflight: boolean = false;
+  private refreshInflight?: Promise<any> = undefined;
 
   constructor(baseUrl: string) {
     this.http = axios.create({
@@ -39,34 +39,45 @@ class HttpService {
     return this.http.put(url, data, config);
   }
 
+  /**
+   * An interceptor implementation for handling HTTP error responses. Checks the
+   * response for auth failure and attempts a token refresh.
+   * 
+   * @param error the error to be inspected
+   * @returns 
+   */
   private checkError(error: AxiosError) {
     var requestUrl: string = error.request.responseURL;
-    console.log(`checking error [url: ${requestUrl}, status: ${error.response!.status}, inflight: ${this.inflight} ]`);
 
-    if ((!this.inflight) && (error.response!.status === 401) && (!requestUrl.includes("/auth/login"))) {
-      this.inflight = true;
-
-      console.log("Trying token refresh");
-      return this.http.get("/auth/refresh")
-        .then((response) => {
-          console.log(`Refresh response: ${response.statusText}`);
-          this.inflight = false;
-
+    // if it's an auth error BUT not a request to login
+    if ((error.response!.status === 401) && (!requestUrl.includes("/auth/login"))) {
+      // if a refresh has already been started
+      if (this.refreshInflight) {
+        // wait for the refresh to complete
+        return this.refreshInflight.then(() => new Promise((resolve) => {
           // retry the original request
-          return new Promise((resolve) => {
-            resolve(this.http.request(error.config!));
+          return resolve(this.http.request(error.config!));
+        } ));
+      }
+      
+      else {
+        // attempt to refresh the tokens
+        this.refreshInflight = this.http.get("/auth/refresh")
+          .then(() => {
+            // if the refresh was successful - retry the original request
+            return new Promise((resolve) => resolve(this.http.request(error.config!)));
           })
-        .catch(() => {
-          this.inflight = false;
+          .catch(() => {
+            // if refresh failed - return the original error
+            return new Promise((resolve) => resolve(error) );
+          })
+          .finally(() => this.refreshInflight = undefined );
 
-          // return the original error
-          return new Promise((resolve) => {
-            resolve(error);
-          });
-        });
-      });
+        return this.refreshInflight;
+      }
     }
 
+    // non-401 error OR a login failure
     return Promise.reject(error);
   }
 }
