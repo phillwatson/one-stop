@@ -19,11 +19,13 @@
 
     <modules>
         <module>client</module>
+        <module>commons</module>
         <module>executor-lib</module>
         <module>exception-lib</module>
         <module>events-lib</module>
         <module>outbox-lib</module>
         <module>auth-lib</module>
+        <module>audit-service</module>
         <module>rail-service</module>
         <module>user-service</module>
     </modules>
@@ -77,6 +79,11 @@
 
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>executor-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -98,6 +105,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>outbox-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>audit-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

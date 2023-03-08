@@ -1,8 +1,8 @@
 package com.hillayes.rail.services;
 
+import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.repository.InstitutionRepository;
-import com.hillayes.rail.util.Cache;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

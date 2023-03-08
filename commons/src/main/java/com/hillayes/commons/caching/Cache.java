@@ -1,11 +1,11 @@
-package com.hillayes.rail.util;
+package com.hillayes.commons.caching;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
 
 /**
- * A simple cache to avoid calling making expensive calls for data that rarely
- * changes. We could use Quarkus @CacheResult, but we want it to have a time-to-live.
+ * A simple cache to avoid making expensive calls for data that rarely changes.
+ * We could use Quarkus @CacheResult, but we want it to have a time-to-live.
  */
 public class Cache<K,T> {
     /**
@@ -16,7 +16,7 @@ public class Cache<K,T> {
     /**
      * The cache of entries.
      */
-    private final HashMap<K, Entry<T>> value = new HashMap<>();
+    private final HashMap<K, Entry<T>> values = new HashMap<>();
 
     public Cache(long timeToLive) {
         this.timeToLive = timeToLive;
@@ -31,12 +31,17 @@ public class Cache<K,T> {
      * @return the cached value,
      */
     public T getValueOrCall(K key, Supplier<T> supplier) {
-        Entry<T> entry = value.get(key);
+        Entry<T> entry = values.get(key);
         if ((entry == null) || (entry.isExpired(timeToLive))) {
             entry = new Entry<>(supplier.get());
-            value.put(key, entry);
+            values.put(key, entry);
         }
         return entry.value;
+    }
+
+    public T remove(K key) {
+        Entry<T> entry = values.remove(key);
+        return entry == null ? null : entry.value;
     }
 
     private static class Entry<T> {
