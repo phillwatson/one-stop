@@ -11,4 +11,30 @@
 
     <artifactId>audit-service</artifactId>
 
+    <dependencies>
+        <dependency>
+            <!-- causes build of docker images on package -->
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>events-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>executor-lib</artifactId>
+        </dependency>
+    </dependencies>
 </project>
