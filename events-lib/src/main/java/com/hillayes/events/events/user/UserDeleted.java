@@ -18,14 +18,5 @@ public class UserDeleted {
     private UUID userId;
 
     @NotNull
-    private String username;
-
-    @NotNull
-    private String email;
-
-    @NotNull
-    private Instant dateCreated;
-
-    @NotNull
-    private Instant dateOnboarded;
+    private Instant dateDeleted;
 }

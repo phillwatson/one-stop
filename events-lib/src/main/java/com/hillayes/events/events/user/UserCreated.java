@@ -23,6 +23,10 @@ public class UserCreated {
     @NotNull
     private String email;
 
+    private String givenName;
+
+    private String familyName;
+
     @NotNull
     private Instant dateCreated;
 }

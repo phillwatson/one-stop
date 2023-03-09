@@ -23,9 +23,10 @@ public class UserUpdated {
     @NotNull
     private String email;
 
-    @NotNull
-    private Instant dateCreated;
+    private String givenName;
+
+    private String familyName;
 
     @NotNull
-    private Instant dateOnboarded;
+    private Instant dateUpdated;
 }

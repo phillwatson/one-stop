@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -13,10 +14,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class SendEmail {
     @NotNull
-    private String toAddress;
-
-    @NotNull
-    private String fromAddress;
+    private UUID userId;
 
     @NotNull
     private String templateId;

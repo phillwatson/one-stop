@@ -4,6 +4,18 @@ A PoC for interacting with the Nordigen Open-Banking API. Attempts to
 allow users connect to their bank accounts and view the transactions in
 an aggregation.
 
+## Architecture
+One-Stop has been designed in using a micro-service architecture, where
+each service has a specific area of responsibility. However, to keep the
+PoC build simple, the Maven module of parent POM and sub-modules has been
+adopted; with each module adopting the same version as the parent.
+
+In a production environment it would be more appropriate to separate each
+module into its own Maven project, and have each module (library or service)
+follow its own versioning history. Dependant modules would then adopt the
+version of the modules on which they depend - updating their dependencies
+as and when necessary.
+
 ## Docker Configuration
 The following must be added to ```environment:``` section of the docker compose
 services.

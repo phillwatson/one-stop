@@ -26,6 +26,7 @@
         <module>outbox-lib</module>
         <module>auth-lib</module>
         <module>audit-service</module>
+        <module>email-service</module>
         <module>rail-service</module>
         <module>user-service</module>
     </modules>
@@ -110,6 +111,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>audit-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>email-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,4 +1,4 @@
-package com.hillayes.events.events.user;
+package com.hillayes.events.events.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,18 +7,16 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginFailure {
+public class UserLogin {
     @NotNull
-    private String username;
+    private UUID userId;
 
     @NotNull
     private Instant dateLogin;
-
-    @NotNull
-    private String reason;
 }

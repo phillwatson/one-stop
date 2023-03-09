@@ -18,11 +18,5 @@ public class UserDeclined {
     private UUID userId;
 
     @NotNull
-    private String username;
-
-    @NotNull
-    private String email;
-
-    @NotNull
-    private Instant dateCreated;
+    private Instant dateDeclined;
 }

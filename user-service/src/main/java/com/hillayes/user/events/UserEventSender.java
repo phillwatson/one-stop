@@ -1,6 +1,8 @@
 package com.hillayes.user.events;
 
 import com.hillayes.events.domain.Topic;
+import com.hillayes.events.events.auth.LoginFailure;
+import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.User;
@@ -22,6 +24,8 @@ public class UserEventSender {
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
+            .givenName(user.getGivenName())
+            .familyName(user.getFamilyName())
             .dateCreated(user.getDateCreated())
             .build());
     }
@@ -30,9 +34,7 @@ public class UserEventSender {
         log.debug("Sending UserDeclined event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER, UserDeclined.builder()
             .userId(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
+            .dateDeclined(Instant.now())
             .build());
     }
 
@@ -40,9 +42,6 @@ public class UserEventSender {
         log.debug("Sending UserOnboarded event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER, UserOnboarded.builder()
             .userId(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded())
             .build());
     }
@@ -53,8 +52,9 @@ public class UserEventSender {
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
-            .dateOnboarded(user.getDateOnboarded())
+            .givenName(user.getGivenName())
+            .familyName(user.getFamilyName())
+            .dateUpdated(Instant.now())
             .build());
     }
 
@@ -62,10 +62,7 @@ public class UserEventSender {
         log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
-            .dateOnboarded(user.getDateOnboarded())
+            .dateDeleted(Instant.now())
             .build());
     }
 
@@ -73,8 +70,6 @@ public class UserEventSender {
         log.debug("Sending UserLogin event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER_AUTH, UserLogin.builder()
             .userId(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
             .dateLogin(Instant.now())
             .build());
     }

@@ -9,7 +9,7 @@
         <version>1.0.${revision}</version>
     </parent>
 
-    <artifactId>audit-service</artifactId>
+    <artifactId>email-service</artifactId>
 
     <dependencies>
         <dependency>

@@ -26,11 +26,6 @@ smallrye:
         url: jdbc:postgresql://db:5432/one-stop
 
 quarkus:
-  native:
-    # defines which resources are included in native image
-    resources:
-      includes: auth/**
-
   flyway:
     migrate-at-start: true
     schemas: rails
