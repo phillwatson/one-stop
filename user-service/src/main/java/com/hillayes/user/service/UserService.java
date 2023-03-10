@@ -36,8 +36,9 @@ public class UserService {
 
         // excludes deleted users in duplicate email comparison
         String email = user.getEmail();
-        userRepository.findByEmail(email)
+        userRepository.findByEmail(email).stream()
             .filter(existing -> !existing.isDeleted())
+            .findFirst()
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
             });
