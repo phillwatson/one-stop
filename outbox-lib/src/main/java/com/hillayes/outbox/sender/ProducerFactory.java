@@ -2,13 +2,12 @@ package com.hillayes.outbox.sender;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.outbox.config.ProducerConfig;
-import io.quarkus.runtime.ShutdownEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,7 +40,8 @@ public class ProducerFactory {
         return producer;
     }
 
-    void onStop(@Observes ShutdownEvent ev) {
+    @PreDestroy
+    public void onStop() {
         log.info("Shutting down Message Producers - started");
         shutdown.set(true);
         if (producer != null) {

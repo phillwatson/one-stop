@@ -66,6 +66,12 @@ public class User {
     @Column(name = "date_onboarded")
     private Instant dateOnboarded;
 
+    @Transient
+    @JsonIgnore
+    public boolean isOnboarded() {
+        return dateOnboarded != null;
+    }
+
     @Setter
     @Column(name="date_deleted")
     private Instant dateDeleted;

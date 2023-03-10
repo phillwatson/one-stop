@@ -61,7 +61,7 @@ public class UserService {
         return userRepository.findById(id)
             .filter(user -> !user.isDeleted())
             .map(user -> {
-                if (user.getDateOnboarded() != null) {
+                if (user.isOnboarded()) {
                     throw new BadRequestException("User is already onboard");
                 }
 
