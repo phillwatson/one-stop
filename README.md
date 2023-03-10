@@ -5,15 +5,15 @@ allow users connect to their bank accounts and view the transactions in
 an aggregation.
 
 ## Architecture
-One-Stop has been designed in using a micro-service architecture, where
+One-Stop has been designed using a micro-service architecture, where
 each service has a specific area of responsibility. However, to keep the
-PoC build simple, the Maven module of parent POM and sub-modules has been
+PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 
 In a production environment it would be more appropriate to separate each
-module into its own Maven project, and have each module (library or service)
+module (library or service) into its own project, and have each project
 follow its own versioning history. Dependant modules would then adopt the
-version of the modules on which they depend - updating their dependencies
+version of the project on which they depend - updating their dependencies
 as and when necessary.
 
 ## Docker Configuration
