@@ -2,6 +2,7 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
@@ -31,6 +32,14 @@ public class UserService {
         userRepository.findByUsername(username)
             .ifPresent(existing -> {
                 throw new DuplicateUsernameException(username);
+            });
+
+        // excludes deleted users in duplicate email comparison
+        String email = user.getEmail();
+        userRepository.findByEmail(email)
+            .filter(existing -> !existing.isDeleted())
+            .ifPresent(existing -> {
+                throw new DuplicateEmailAddressException(email);
             });
 
         user = userRepository.save(user.toBuilder()
@@ -91,10 +100,12 @@ public class UserService {
             .filter(user -> !user.isDeleted())
             .map(user -> {
                 user.setEmail(modifiedUser.getEmail());
+                user.setTitle(modifiedUser.getTitle());
                 user.setGivenName(modifiedUser.getGivenName());
                 user.setFamilyName(modifiedUser.getFamilyName());
+                user.setPreferredName(modifiedUser.getPreferredName());
                 user.setPhoneNumber(modifiedUser.getPhoneNumber());
-                userRepository.save(user);
+                user = userRepository.save(user);
 
                 userEventSender.sendUserUpdated(user);
                 log.debug("Updated user [username: {}, userId: {}]", user.getUsername(), user.getId());
@@ -106,8 +117,9 @@ public class UserService {
         log.info("Deleting user [userId: {}]", id);
 
         return userRepository.findById(id)
+            .filter(user -> !user.isDeleted())
             .map(user -> {
-                user.setDeleted(true);
+                user.setDateDeleted(Instant.now());
                 user = userRepository.save(user);
 
                 userEventSender.sendUserDeleted(user);

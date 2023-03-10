@@ -24,8 +24,11 @@ public class UserEventSender {
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
+            .title(user.getTitle())
             .givenName(user.getGivenName())
             .familyName(user.getFamilyName())
+            .preferredName(user.getPreferredName())
+            .phoneNumber(user.getPhoneNumber())
             .dateCreated(user.getDateCreated())
             .build());
     }
@@ -52,8 +55,11 @@ public class UserEventSender {
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
+            .title(user.getTitle())
             .givenName(user.getGivenName())
             .familyName(user.getFamilyName())
+            .preferredName(user.getPreferredName())
+            .phoneNumber(user.getPhoneNumber())
             .dateUpdated(Instant.now())
             .build());
     }
@@ -62,7 +68,7 @@ public class UserEventSender {
         log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
         eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())
-            .dateDeleted(Instant.now())
+            .dateDeleted(user.getDateDeleted())
             .build());
     }
 

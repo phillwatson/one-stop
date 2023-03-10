@@ -39,15 +39,23 @@ public class User {
     private String email;
 
     @Setter
+    @Column(name="title", nullable = true)
+    private String title;
+
+    @Setter
     @Column(name = "given_name", nullable = false)
     private String givenName;
 
     @Setter
-    @Column(name = "family_name", nullable = false)
+    @Column(name = "family_name", nullable = true)
     private String familyName;
 
     @Setter
-    @Column(name = "phone_number", nullable = false)
+    @Column(name="preferred_name", nullable = true)
+    private String preferredName;
+
+    @Setter
+    @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
     @Builder.Default
@@ -59,12 +67,24 @@ public class User {
     private Instant dateOnboarded;
 
     @Setter
-    @Column(name="deleted")
-    private boolean deleted;
+    @Column(name="date_deleted")
+    private Instant dateDeleted;
+
+    @Transient
+    @JsonIgnore
+    public boolean isDeleted() {
+        return dateDeleted != null;
+    }
 
     @Setter
-    @Column(name="blocked_on")
-    private Instant blockedOn;
+    @Column(name="date_blocked")
+    private Instant dateBlocked;
+
+    @Transient
+    @JsonIgnore
+    public boolean isBlocked() {
+        return dateBlocked != null;
+    }
 
     @Setter
     @Column(name="blocked_reason")

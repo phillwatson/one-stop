@@ -1,9 +1,6 @@
 package com.hillayes.events.events.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -23,9 +20,15 @@ public class UserCreated {
     @NotNull
     private String email;
 
+    private String title;
+
     private String givenName;
 
     private String familyName;
+
+    private String preferredName;
+
+    private String phoneNumber;
 
     @NotNull
     private Instant dateCreated;

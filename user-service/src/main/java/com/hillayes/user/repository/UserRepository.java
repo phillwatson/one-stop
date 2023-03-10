@@ -10,4 +10,5 @@ import java.util.UUID;
 @Singleton
 public interface UserRepository extends JpaRepository<User, UUID> {
     public Optional<User> findByUsername(String username);
+    public Optional<User> findByEmail(String email);
 }

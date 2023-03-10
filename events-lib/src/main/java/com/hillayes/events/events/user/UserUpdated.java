@@ -23,9 +23,15 @@ public class UserUpdated {
     @NotNull
     private String email;
 
+    private String title;
+
     private String givenName;
 
     private String familyName;
+
+    private String preferredName;
+
+    private String phoneNumber;
 
     @NotNull
     private Instant dateUpdated;

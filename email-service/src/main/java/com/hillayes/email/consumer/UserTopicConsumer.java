@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class UserTopicConsumer {
     private final UserService userService;
     
     @Incoming("user")
+    @Transactional
     public void consume(EventPacket eventPacket) {
         Correlation.setCorrelationId(eventPacket.getCorrelationId());
         try {
@@ -26,6 +28,10 @@ public class UserTopicConsumer {
 
             if (UserCreated.class.getName().equals(payloadClass)) {
                 processUserCreated(eventPacket.getPayloadContent());
+            }
+
+            else if (UserOnboarded.class.getName().equals(payloadClass)) {
+                processUserOnboarded(eventPacket.getPayloadContent());
             }
 
             else if (UserDeclined.class.getName().equals(payloadClass)) {
@@ -45,35 +51,39 @@ public class UserTopicConsumer {
     }
 
     private void processUserCreated(UserCreated event) {
-        log.info("User created [username: {}]", event.getUsername());
         User user = User.builder()
             .id(event.getUserId())
             .username(event.getUsername())
             .email(event.getEmail())
+            .title(event.getTitle())
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
+            .preferredName(event.getPreferredName())
             .build();
         userService.createUser(user);
     }
 
+    private void processUserOnboarded(UserOnboarded event) {
+        userService.onboardUser(event.getUserId());
+    }
+
     private void processUserDeclined(UserDeclined event) {
-        log.info("User declined [userId: {}]", event.getUserId());
         userService.deleteUser(event.getUserId());
     }
 
     private void processUserDeleted(UserDeleted event) {
-        log.info("User deleted [userId: {}]", event.getUserId());
         userService.deleteUser(event.getUserId());
     }
 
     private void processUserUpdated(UserUpdated event) {
-        log.info("User updated [username: {}]", event.getUsername());
         User user = User.builder()
             .id(event.getUserId())
             .username(event.getUsername())
             .email(event.getEmail())
+            .title(event.getTitle())
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
+            .preferredName(event.getPreferredName())
             .build();
         userService.updateUser(user);
     }

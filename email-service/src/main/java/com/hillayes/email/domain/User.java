@@ -31,12 +31,20 @@ public class User {
     private String email;
 
     @Setter
+    @Column(name="title", nullable = true)
+    private String title;
+
+    @Setter
     @Column(name = "given_name", nullable = false)
     private String givenName;
 
     @Setter
-    @Column(name = "family_name", nullable = false)
+    @Column(name = "family_name", nullable = true)
     private String familyName;
+
+    @Setter
+    @Column(name="preferred_name", nullable = true)
+    private String preferredName;
 
     @Version
     @JsonIgnore

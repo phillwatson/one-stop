@@ -89,9 +89,9 @@ public class AuthService {
                 return new NotAuthorizedException("username/password");
             });
 
-        if ((user.isDeleted()) || (user.getBlockedOn() != null)) {
+        if ((user.isDeleted()) || (user.isBlocked())) {
             log.info("User login failed [id: {}, deleted: {}, blocked: {}]",
-                user.getId(), user.isDeleted(), user.getBlockedOn());
+                user.getId(), user.isDeleted(), user.isBlocked());
             userEventSender.sendLoginFailed("username", "User blocked or deleted.");
             throw new NotAuthorizedException("username/password");
         }
@@ -122,8 +122,7 @@ public class AuthService {
 
             UUID userId = UUID.fromString(jsonWebToken.getClaim(Claims.upn));
             User user = userRepository.findById(userId)
-                .filter(u -> !u.isDeleted())
-                .filter(u -> u.getBlockedOn() == null)
+                .filter(u -> !u.isDeleted() && !u.isBlocked())
                 .orElseThrow(() -> {
                     log.info("User name failed verification [userId: {}]", userId);
                     userEventSender.sendLoginFailed("username", "User not found.");

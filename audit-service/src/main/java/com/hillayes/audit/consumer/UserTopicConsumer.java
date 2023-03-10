@@ -19,7 +19,7 @@ public class UserTopicConsumer {
         Correlation.setCorrelationId(eventPacket.getCorrelationId());
         try {
             String payloadClass = eventPacket.getPayloadClass();
-            log.info("Received user_auth event [payloadClass: {}]", payloadClass);
+            log.info("Received user event [payloadClass: {}]", payloadClass);
 
             if (UserCreated.class.getName().equals(payloadClass)) {
                 processUserCreated(eventPacket.getPayloadContent());
