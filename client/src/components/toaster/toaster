@@ -1,0 +1,259 @@
+import React, { useState, useEffect } from 'react';
+import Toast from './Toast';
+
+const ToastStack = ({ errors }) => {
+  const [toasts, setToasts] = useState([]);
+
+  useEffect(() => {
+    if (errors.length > 0) {
+      const newToast = { id: Date.now(), message: errors[0], type: 'error' };
+      setToasts((prevToasts) => [...prevToasts, newToast]);
+    }
+  }, [errors]);
+
+  const handleToastClose = (id) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  };
+
+  return (
+    <div className="toast-stack">
+      {toasts.map((toast) => (
+        <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => handleToastClose(toast.id)} />
+      ))}
+    </div>
+  );
+};
+
+export default ToastStack;
+
+
+-----
+
+import React, { useState } from 'react';
+import ToastStack from './ToastStack';
+
+const App = () => {
+  const [errors, setErrors] = useState([]);
+
+  const handleButtonClick = () => {
+    setErrors((prevErrors) => [...prevErrors, 'An error occurred']);
+  };
+
+  return (
+    <div>
+      <button onClick={handleButtonClick}>Trigger error</button>
+      <ToastStack errors={errors} />
+    </div>
+  );
+};
+
+export default App;
+
+
+---
+
+import React from 'react';
+import ToastStack from './ToastStack';
+
+const withErrorToasts = (WrappedComponent) => {
+  return class extends React.Component {
+    state = {
+      errors: [],
+    };
+
+    addErrorToast = (error) => {
+      this.setState((prevState) => ({
+        errors: [...prevState.errors, error],
+      }));
+    };
+
+    render() {
+      return (
+        <div>
+          <WrappedComponent {...this.props} addErrorToast={this.addErrorToast} />
+          <ToastStack errors={this.state.errors} />
+        </div>
+      );
+    }
+  };
+};
+
+export default withErrorToasts;
+
+---
+
+This HOC takes a wrapped component as an argument and returns a new component that includes the ToastStack component and a addErrorToast method in its props.
+
+The addErrorToast method allows the wrapped component to add error messages to the ToastStack. When the method is called, it updates the errors state in the HOC's component, causing the ToastStack to render a new error toast.
+
+Here's an example of how to use this HOC in your app:
+
+import React from 'react';
+import withErrorToasts from './withErrorToasts';
+
+const MyComponent = ({ addErrorToast }) => {
+  const handleClick = () => {
+    addErrorToast('An error occurred');
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>Trigger error</button>
+    </div>
+  );
+};
+
+export default withErrorToasts(MyComponent);
+
+--
+
+it's possible to call the addErrorToast method from a service.
+
+To do this, you'll need to pass the addErrorToast method down through your component tree as a prop, and then pass it down again to any child components that need it.
+
+Here's an example of how you could do this:
+
+// App.js
+
+import React from 'react';
+import withErrorToasts from './withErrorToasts';
+import MyComponent from './MyComponent';
+
+const App = () => {
+  return (
+    <div>
+      <MyComponent />
+    </div>
+  );
+};
+
+export default withErrorToasts(App);
+
+
+// MyComponent.js
+
+import React from 'react';
+import MyService from './MyService';
+
+const MyComponent = ({ addErrorToast }) => {
+  const handleClick = async () => {
+    try {
+      await MyService.doSomething();
+    } catch (error) {
+      addErrorToast('An error occurred');
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>Trigger error</button>
+    </div>
+  );
+};
+
+export default MyComponent;
+
+
+// MyService.js
+
+import { addErrorToast } from './withErrorToasts';
+
+const MyService = {
+  async doSomething() {
+    try {
+      // Do something that might throw an error
+    } catch (error) {
+      addErrorToast('An error occurred');
+      throw error;
+    }
+  },
+};
+
+export default MyService;
+
+
+In this example, the MyService module exports a doSomething method that might throw an error. If an error occurs, it calls the addErrorToast method from the withErrorToasts higher-order component to display the error message in the ToastStack.
+
+The MyComponent component is passed the addErrorToast method as a prop from the withErrorToasts higher-order component. When the button is clicked, it calls the doSomething method from the MyService module. If an error occurs, it calls the addErrorToast method to display the error message.
+
+By passing the addErrorToast method down through the component tree as a prop, you can call it from anywhere in your app, including from a service.
+
+--
+
+typescript
+
+import React from 'react';
+import ToastStack from './ToastStack';
+
+interface ErrorToastsProps {
+  addErrorToast: (error: string) => void;
+}
+
+const withErrorToasts = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
+  return class extends React.Component<P & ErrorToastsProps> {
+    state = {
+      errors: [] as string[],
+    };
+
+    addErrorToast = (error: string) => {
+      this.setState((prevState) => ({
+        errors: [...prevState.errors, error],
+      }));
+    };
+
+    render() {
+      const { addErrorToast, ...props } = this.props;
+
+      return (
+        <div>
+          <WrappedComponent {...props as P} addErrorToast={this.addErrorToast} />
+          <ToastStack errors={this.state.errors} />
+        </div>
+      );
+    }
+  };
+};
+
+export default withErrorToasts;
+
+---
+
+In this version of the HOC, we've added types for the addErrorToast method and the component props.
+
+The withErrorToasts function takes a generic type parameter P that represents the props of the wrapped component. The HOC returns a new component that includes the ToastStack component and the addErrorToast method in its props, as well as the props of the wrapped component.
+
+We've also added types for the addErrorToast method and the errors state array.
+
+To use this HOC with TypeScript, you'll need to add types to your component props and make sure to pass the correct props down to the wrapped component.
+
+Here's an example of how to use the HOC with TypeScript:
+
+import React from 'react';
+import withErrorToasts from './withErrorToasts';
+
+interface MyComponentProps {
+  foo: string;
+  bar: number;
+  addErrorToast: (error: string) => void;
+}
+
+const MyComponent: React.FC<MyComponentProps> = ({ foo, bar, addErrorToast }) => {
+  const handleClick = async () => {
+    try {
+      // Do something that might throw an error
+    } catch (error) {
+      addErrorToast('An error occurred');
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>Trigger error</button>
+    </div>
+  );
+};
+
+export default withErrorToasts(MyComponent);
+
+In this example, we've added types to the MyComponent props and passed them down to the component. The addErrorToast method is included in the props, allowing the component to call it when an error occurs.
+
