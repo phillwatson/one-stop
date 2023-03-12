@@ -39,7 +39,7 @@ public class EventDeliverer {
      * A scheduled service to read pending events from the event outbox table and
      * send them to the message broker.
      */
-    @Scheduled(cron = "${mensa.events.cron:1/5 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron = "${mensa.events.cron:0/1 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void deliverEvents() throws Exception {
         if (!MUTEX.compareAndSet(false, true)) {
             return;
@@ -57,7 +57,7 @@ public class EventDeliverer {
      */
     @Transactional(rollbackOn = Exception.class)
     protected void _deliverEvents() throws Exception {
-        log.trace("Event delivery started");
+        log.trace("Event batch delivery started");
         List<EventEntity> events = eventRepository.listUndelivered(25);
         log.trace("Found events for delivery [size: {}]", events.size());
 
