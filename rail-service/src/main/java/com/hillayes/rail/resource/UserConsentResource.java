@@ -82,7 +82,7 @@ public class UserConsentResource {
         URI consentLink = userConsentService.register(userId, request.getInstitutionId());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
-        return Response.seeOther(consentLink).build();
+        return Response.ok(consentLink).build();
     }
 
     @GET

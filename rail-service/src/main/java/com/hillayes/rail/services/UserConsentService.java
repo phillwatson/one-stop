@@ -1,5 +1,6 @@
 package com.hillayes.rail.services;
 
+import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -101,12 +102,16 @@ public class UserConsentService {
         try {
             // create requisition
             log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]", userId, institutionId, userConsent.getId());
+
+            String callbackUrl = config.callbackUrl().replace("{{host-ip}}", Network.getMyIpAddress());
+            log.debug("Registration callback URL: {}", callbackUrl);
+
             Requisition requisition = requisitionService.create(RequisitionRequest.builder()
                 .institutionId(agreement.institutionId)
                 .agreement(agreement.id)
                 .userLanguage("EN")
                 .reference(userConsent.getId().toString())
-                .redirect(config.callbackUrl())
+                .redirect(callbackUrl)
                 .redirectImmediate(Boolean.FALSE)
                 .build());
 

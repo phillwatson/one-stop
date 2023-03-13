@@ -47,9 +47,9 @@ public class RailAccountResource {
     @GET
     @Path("/{id}/transactions")
     public TransactionList transactions(@PathParam("id") UUID id,
-                                        @QueryParam("date_from") LocalDate dateFrom,
-                                        @QueryParam("date_to") LocalDate dateTo) {
-        log.info("Get account transactions [id: {}]", id);
-        return railAccountService.transactions(id, dateFrom, dateTo);
+                                        @QueryParam("date_from") String dateFrom,
+                                        @QueryParam("date_to") String dateTo) {
+        log.info("Get account transactions [id: {}, dateFrom: {}, dateTo: {}]", id, dateFrom, dateTo);
+        return railAccountService.transactions(id, LocalDate.parse(dateFrom), LocalDate.parse(dateTo));
     }
 }

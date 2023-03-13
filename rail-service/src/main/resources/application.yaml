@@ -48,7 +48,11 @@ quarkus:
 
 one-stop:
   rail:
-    # callback-url: /api/v1/rails/consents/accepted
+    # callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
+
+    caches: # the duration of various caches - specified as Duration string
+      institutions: PT6H
+      account-details: PT5H
 
     countries:
       - id: GB
