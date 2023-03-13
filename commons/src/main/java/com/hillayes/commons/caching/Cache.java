@@ -1,5 +1,6 @@
 package com.hillayes.commons.caching;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
@@ -20,6 +21,10 @@ public class Cache<K,T> {
 
     public Cache(long timeToLive) {
         this.timeToLive = timeToLive;
+    }
+
+    public Cache(Duration timeToLive) {
+        this(timeToLive.toMillis());
     }
 
     /**
