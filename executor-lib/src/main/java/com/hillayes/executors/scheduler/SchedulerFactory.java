@@ -70,12 +70,12 @@ public class SchedulerFactory {
     /**
      * Schedules a job of work for the named Jobbing task, to process the given payload.
      *
-     * @param name the name of the Jobbing task to pass the payload to for processing.
+     * @param name    the name of the Jobbing task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
     public String addJob(String name, Object payload) {
-        Task<Object> task = (Task<Object>)jobbingTasks.get(name);
+        Task<Object> task = (Task<Object>) jobbingTasks.get(name);
         if (task == null) {
             throw new IllegalArgumentException("No Jobbing Task found named \"" + name + "\"");
         }
@@ -91,7 +91,7 @@ public class SchedulerFactory {
      * Configures the recurring tasks from the given collection of NamedTasks. Only
      * those tasks for which a configuration is given will be created.
      *
-     * @param namedTasks the collection of NamedTasks to be configured.
+     * @param namedTasks    the collection of NamedTasks to be configured.
      * @param configuration the configurations to be matched to the NamedTasks.
      * @return the configured collection of recurring tasks.
      */
@@ -158,8 +158,8 @@ public class SchedulerFactory {
      * Creates a new Scheduler of the given configuration. The given collections of
      * jobbing and recurring tasks are started.
      *
-     * @param configuration the scheduler configuration.
-     * @param jobbingTasks the collection of Jobbing tasks to be started.
+     * @param configuration  the scheduler configuration.
+     * @param jobbingTasks   the collection of Jobbing tasks to be started.
      * @param recurringTasks the collection of recurring tasks to be started.
      * @return the new scheduler. Will be null if no tasks are given.
      */
@@ -189,30 +189,27 @@ public class SchedulerFactory {
         FrequencyConfig frequencyConfig = config.frequency()
             .orElseThrow(() -> new IllegalArgumentException("Schedule frequency may not be null - taskName: " + taskName));
 
-        Schedule result = null;
+        Optional<Schedule> result = Optional.empty();
         if (frequencyConfig != null) {
             result = frequencyConfig.recurs()
-                .map(Schedules::fixedDelay)
-                .orElse(null);
+                .map(Schedules::fixedDelay);
 
-            if (result == null) {
+            if (result.isEmpty()) {
                 result = frequencyConfig.timeOfDay()
                     .map(LocalTime::parse)
-                    .map(Schedules::daily)
-                    .orElse(null);
+                    .map(Schedules::daily);
             }
 
-            if (result == null) {
+            if (result.isEmpty()) {
                 result = frequencyConfig.cron()
-                    .map(Schedules::cron)
-                    .orElse(null);
+                    .map(Schedules::cron);
             }
         }
 
-        if (result == null) {
+        if (result.isEmpty()) {
             throw new IllegalArgumentException("Schedule period may not be null - taskName: " + taskName);
         }
 
-        return result;
+        return result.get();
     }
 }
