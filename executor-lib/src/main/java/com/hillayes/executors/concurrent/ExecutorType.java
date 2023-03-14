@@ -1,4 +1,4 @@
-package com.hillayes.executors;
+package com.hillayes.executors.concurrent;
 
 /**
  * The type of ExecutorService to be used. The value maps to those types of

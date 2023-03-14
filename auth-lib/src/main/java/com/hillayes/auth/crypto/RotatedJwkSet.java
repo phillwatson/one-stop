@@ -1,8 +1,8 @@
 package com.hillayes.auth.crypto;
 
-import com.hillayes.executors.ExecutorConfiguration;
-import com.hillayes.executors.ExecutorFactory;
-import com.hillayes.executors.ExecutorType;
+import com.hillayes.executors.concurrent.ExecutorConfiguration;
+import com.hillayes.executors.concurrent.ExecutorFactory;
+import com.hillayes.executors.concurrent.ExecutorType;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwk.JsonWebKeySet;

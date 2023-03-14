@@ -1,4 +1,4 @@
-package com.hillayes.executors;
+package com.hillayes.executors.concurrent;
 
 import lombok.Builder;
 import lombok.Data;
