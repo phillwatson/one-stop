@@ -187,7 +187,7 @@ public class SchedulerFactory {
 
     private Schedule parseSchedule(String taskName, NamedTaskConfig config) {
         FrequencyConfig frequencyConfig = config.frequency()
-            .orElseThrow(() -> new IllegalArgumentException("Schedule frequency may not be null - taskName: " + taskName));
+            .orElseThrow(() -> new IllegalArgumentException("Schedule frequency is null - taskName: " + taskName));
 
         Optional<Schedule> result = Optional.empty();
         if (frequencyConfig != null) {
@@ -207,7 +207,7 @@ public class SchedulerFactory {
         }
 
         if (result.isEmpty()) {
-            throw new IllegalArgumentException("Schedule period may not be null - taskName: " + taskName);
+            throw new IllegalArgumentException("Schedule period is null - taskName: " + taskName);
         }
 
         return result.get();
