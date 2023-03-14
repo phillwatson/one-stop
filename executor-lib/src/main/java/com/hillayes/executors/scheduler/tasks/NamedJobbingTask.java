@@ -8,5 +8,8 @@ import java.util.function.Consumer;
  * @see com.hillayes.executors.scheduler.SchedulerFactory#addJob(String, Object)
  */
 public interface NamedJobbingTask<T> extends Consumer<T>, NamedTask {
+    /**
+     * Returns the class for the payload that the tasks accepts for processing.
+     */
     public Class<T> getDataClass();
 }

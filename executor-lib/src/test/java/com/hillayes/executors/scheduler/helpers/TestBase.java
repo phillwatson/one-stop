@@ -1,6 +1,6 @@
 package com.hillayes.executors.scheduler.helpers;
 
-import com.hillayes.executors.scheduler.config.ScheduleConfig;
+import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 
 import javax.sql.DataSource;
@@ -30,8 +30,8 @@ public abstract class TestBase {
         }
     }
 
-    public ScheduleConfig mockConfiguration(Map<String, NamedTaskConfig> taskConfigs) {
-        return new ScheduleConfig() {
+    public SchedulerConfig mockConfiguration(Map<String, NamedTaskConfig> taskConfigs) {
+        return new SchedulerConfig() {
             @Override
             public Optional<Integer> threadCount() {
                 return Optional.empty();

@@ -10,7 +10,7 @@ import java.util.Optional;
  * See the db-scheduler lib documentation for more information:
  * https://github.com/kagkarlsson/db-scheduler#configuration
  */
-public interface ScheduleConfig {
+public interface SchedulerConfig {
     Integer DEFAULT_THREAD_COUNT = Integer.valueOf(10);
     Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(5);
     Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofMinutes(5);

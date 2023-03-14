@@ -8,7 +8,7 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedules;
 import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.executors.scheduler.config.FrequencyConfig;
-import com.hillayes.executors.scheduler.config.ScheduleConfig;
+import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
@@ -19,7 +19,6 @@ import javax.sql.DataSource;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Creates a facade around the kagkarlsson db-scheduler library; with the aim of
@@ -32,20 +31,20 @@ import java.util.function.Consumer;
  * processing. These worker threads will remain running until the service is shutdown.
  * <p>
  * In this facade, the initialisation of the scheduler is governed by the configuration
- * (see {@link ScheduleConfig}), and a coll
+ * (see {@link SchedulerConfig}), and a coll
  */
 @Slf4j
 public class SchedulerFactory {
     private final DataSource dataSource;
 
-    private final ScheduleConfig configuration;
+    private final SchedulerConfig configuration;
 
     private final Scheduler scheduler;
 
     private final Map<String, Task<?>> jobbingTasks;
 
     public SchedulerFactory(DataSource dataSource,
-                            ScheduleConfig configuration,
+                            SchedulerConfig configuration,
                             Iterable<NamedTask> namedTasks) {
         this.dataSource = dataSource;
         this.configuration = configuration;
@@ -63,7 +62,9 @@ public class SchedulerFactory {
      * running.
      */
     public void stop() {
-        scheduler.stop();
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     /**
@@ -75,6 +76,9 @@ public class SchedulerFactory {
      */
     public String addJob(String name, Object payload) {
         Task<Object> task = (Task<Object>)jobbingTasks.get(name);
+        if (task == null) {
+            throw new IllegalArgumentException("No Jobbing Task found named \"" + name + "\"");
+        }
 
         String id = UUID.randomUUID().toString();
         log.debug("Scheduling job [name: {}, id: {}]", task.getName(), id);
@@ -92,7 +96,7 @@ public class SchedulerFactory {
      * @return the configured collection of recurring tasks.
      */
     private List<RecurringTask<?>> createScheduledTasks(Iterable<NamedTask> namedTasks,
-                                                        ScheduleConfig configuration) {
+                                                        SchedulerConfig configuration) {
         if (namedTasks == null) {
             return Collections.emptyList();
         }
@@ -138,7 +142,7 @@ public class SchedulerFactory {
                 }
 
                 // prepare a jobbing task
-                Consumer<Object> consumer = (Consumer<Object>) task;
+                NamedJobbingTask<Object> consumer = (NamedJobbingTask<Object>) task;
                 Class<?> dataClass = ((NamedJobbingTask<?>) task).getDataClass();
 
                 result.put(task.getName(), Tasks.oneTime(task.getName(), dataClass)
@@ -159,7 +163,7 @@ public class SchedulerFactory {
      * @param recurringTasks the collection of recurring tasks to be started.
      * @return the new scheduler. Will be null if no tasks are given.
      */
-    private Scheduler schedule(ScheduleConfig configuration,
+    private Scheduler schedule(SchedulerConfig configuration,
                                Collection<Task<?>> jobbingTasks,
                                Collection<RecurringTask<?>> recurringTasks) {
         if ((jobbingTasks.isEmpty()) && (recurringTasks.isEmpty())) {
@@ -169,11 +173,11 @@ public class SchedulerFactory {
         log.debug("Creating scheduler");
         Scheduler result = Scheduler.create(dataSource, new ArrayList<>(jobbingTasks))
             .startTasks(new ArrayList<>(recurringTasks))
-            .threads(configuration.threadCount().orElse(ScheduleConfig.DEFAULT_THREAD_COUNT))
-            .pollingInterval(configuration.pollingInterval().orElse(ScheduleConfig.DEFAULT_POLLING_INTERVAL))
-            .heartbeatInterval(configuration.heartbeatInterval().orElse(ScheduleConfig.DEFAULT_HEARTBEAT_INTERVAL))
-            .shutdownMaxWait(configuration.shutdownMaxWait().orElse(ScheduleConfig.DEFAULT_SHUTDOWN_MAX_WAIT))
-            .deleteUnresolvedAfter(configuration.unresolvedTimeout().orElse(ScheduleConfig.DEFAULT_UNRESOLVED_TIMEOUT))
+            .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
+            .pollingInterval(configuration.pollingInterval().orElse(SchedulerConfig.DEFAULT_POLLING_INTERVAL))
+            .heartbeatInterval(configuration.heartbeatInterval().orElse(SchedulerConfig.DEFAULT_HEARTBEAT_INTERVAL))
+            .shutdownMaxWait(configuration.shutdownMaxWait().orElse(SchedulerConfig.DEFAULT_SHUTDOWN_MAX_WAIT))
+            .deleteUnresolvedAfter(configuration.unresolvedTimeout().orElse(SchedulerConfig.DEFAULT_UNRESOLVED_TIMEOUT))
             .registerShutdownHook()
             .build();
 
@@ -182,7 +186,9 @@ public class SchedulerFactory {
     }
 
     private Schedule parseSchedule(String taskName, NamedTaskConfig config) {
-        FrequencyConfig frequencyConfig = config.frequency().orElse(null);
+        FrequencyConfig frequencyConfig = config.frequency()
+            .orElseThrow(() -> new IllegalArgumentException("Schedule frequency may not be null - taskName: " + taskName));
+
         Schedule result = null;
         if (frequencyConfig != null) {
             result = frequencyConfig.recurs()
