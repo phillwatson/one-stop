@@ -1,6 +1,7 @@
 package com.hillayes.executors.scheduler;
 
 import com.github.kagkarlsson.scheduler.Scheduler;
+import com.github.kagkarlsson.scheduler.task.FailureHandler;
 import com.github.kagkarlsson.scheduler.task.Task;
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
@@ -13,9 +14,11 @@ import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
@@ -37,24 +40,29 @@ import java.util.*;
 public class SchedulerFactory {
     private final DataSource dataSource;
 
-    private final SchedulerConfig configuration;
-
     private final Scheduler scheduler;
 
-    private final Map<String, Task<?>> jobbingTasks;
+    private final Map<String, Task<JobbingTaskData>> jobbingTasks;
 
     public SchedulerFactory(DataSource dataSource,
                             SchedulerConfig configuration,
                             Iterable<NamedTask> namedTasks) {
-        this.dataSource = dataSource;
-        this.configuration = configuration;
+        Set<String> names = new HashSet<>();
+        namedTasks.forEach(task -> {
+            if (names.contains(task.getName())) {
+                throw new IllegalArgumentException("Duplicate Task name - " + task.getName());
+            }
+            names.add(task.getName());
+        });
 
-        this.jobbingTasks = createJobbingTasks(namedTasks);
+        this.dataSource = dataSource;
+
+        this.jobbingTasks = createJobbingTasks(namedTasks, configuration);
         List<RecurringTask<?>> recurringTasks = createScheduledTasks(namedTasks, configuration);
 
         log.info("Scheduling named scheduled tasks [jobbingSize: {}, recurringSize: {}]",
             jobbingTasks.size(), recurringTasks.size());
-        this.scheduler = schedule(configuration, jobbingTasks.values(), recurringTasks);
+        this.scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
     }
 
     /**
@@ -70,19 +78,22 @@ public class SchedulerFactory {
     /**
      * Schedules a job of work for the named Jobbing task, to process the given payload.
      *
-     * @param name    the name of the Jobbing task to pass the payload to for processing.
-     * @param payload the payload to be processed.
+     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param payload     the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(String name, Object payload) {
-        Task<Object> task = (Task<Object>) jobbingTasks.get(name);
+    public String addJob(NamedJobbingTask<?> jobbingTask, Serializable payload) {
+        Task<JobbingTaskData> task = jobbingTasks.get(jobbingTask.getName());
         if (task == null) {
-            throw new IllegalArgumentException("No Jobbing Task found named \"" + name + "\"");
+            throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTask.getName() + "\"");
         }
 
         String id = UUID.randomUUID().toString();
         log.debug("Scheduling job [name: {}, id: {}]", task.getName(), id);
-        scheduler.schedule(task.instance(id, payload), Instant.now());
+
+        // schedule the job's payload - with the caller's correlation ID
+        String correlationId = Correlation.getCorrelationId().orElse(id);
+        scheduler.schedule(task.instance(id, new JobbingTaskData(correlationId, payload)), Instant.now());
 
         return id;
     }
@@ -106,15 +117,26 @@ public class SchedulerFactory {
             if (task instanceof NamedScheduledTask) {
                 // find any configuration related to the named task
                 NamedTaskConfig namedTaskConfig = configuration.tasks().get(task.getName());
-                log.debug("Scheduled Task [name: {}, configured: {}]", task.getName(), namedTaskConfig != null);
-
-                if (namedTaskConfig != null) {
+                if (namedTaskConfig == null) {
+                    log.debug("No Scheduled Task configuration found [task: {}]", task.getName());
+                } else {
                     Schedule schedule = parseSchedule(task.getName(), namedTaskConfig);
                     log.debug("Adding Scheduled Task [name: {}, schedule: {}]", task.getName(), schedule);
-                    result.add(Tasks
-                        .recurring(task.getName(), schedule)
-                        .execute((inst, ctx) -> Correlation.run(task.getName(), (Runnable) task))
-                    );
+
+                    // create and configure the recurring task
+                    Tasks.RecurringTaskBuilder<Void> builder = Tasks.recurring(task.getName(), schedule);
+                    if (namedTaskConfig.retryInterval().isPresent()) {
+                        builder.onFailure(new FailureHandler.ExponentialBackoffFailureHandler<>(
+                            namedTaskConfig.retryInterval().get(),
+                            namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT)
+                        ));
+                    }
+
+                    // add task (with call-back) to the result
+                    result.add(builder.execute((inst, ctx) ->
+                        // call the task - use the task name as a correlation ID
+                        Correlation.run(inst.getTaskAndInstance(), (Runnable) task)
+                    ));
                 }
             }
         });
@@ -124,30 +146,46 @@ public class SchedulerFactory {
 
     /**
      * Configures jobbing tasks from the given collection NamedTasks.
+     * <p>
+     * The given SchedulerConfig MAY contain configurations for the named jobbing tasks, but
+     * defaults will be applied if no config entry is found.
      *
-     * @param namedTasks the collection of NamedTasks to be configured.
+     * @param namedTasks    the collection of NamedTasks to be configured.
+     * @param configuration the configurations from which the tasks', optional, config is taken.
      * @return the configured collection of jobbing tasks.
      */
-    private Map<String, Task<?>> createJobbingTasks(Iterable<NamedTask> namedTasks) {
+    private Map<String, Task<JobbingTaskData>> createJobbingTasks(Iterable<NamedTask> namedTasks,
+                                                                  SchedulerConfig configuration) {
         if (namedTasks == null) {
             return Collections.emptyMap();
         }
 
-        Map<String, Task<?>> result = new HashMap<>();
+        Map<String, Task<JobbingTaskData>> result = new HashMap<>();
         namedTasks.forEach(task -> {
             if (task instanceof NamedJobbingTask<?>) {
                 log.debug("Adding Jobbing Task [name: {}]", task.getName());
-                if (result.containsKey(task.getName())) {
-                    throw new IllegalArgumentException("Duplicate Jobbing Task name - " + task.getName());
+
+                // find any, optional, configuration related to the named task
+                NamedTaskConfig namedTaskConfig = configuration.tasks().get(task.getName());
+                if (namedTaskConfig != null) {
+                    log.debug("Jobbing Task configuration found [task: {}]", task.getName());
                 }
 
-                // prepare a jobbing task
-                NamedJobbingTask<Object> consumer = (NamedJobbingTask<Object>) task;
-                Class<?> dataClass = ((NamedJobbingTask<?>) task).getDataClass();
+                // create and configure the one-time task
+                Tasks.OneTimeTaskBuilder<JobbingTaskData> builder = Tasks.oneTime(task.getName(), JobbingTaskData.class);
+                if ((namedTaskConfig != null) && (namedTaskConfig.retryInterval().isPresent())) {
+                    builder.onFailure(new FailureHandler.ExponentialBackoffFailureHandler<>(
+                        namedTaskConfig.retryInterval().get(),
+                        namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT)
+                    ));
+                }
 
-                result.put(task.getName(), Tasks.oneTime(task.getName(), dataClass)
-                    .execute((inst, ctx) -> Correlation.call(task.getName(), consumer, inst.getData()))
-                );
+                // add task (with call-back) to the result
+                final NamedJobbingTask<Serializable> consumer = (NamedJobbingTask<Serializable>) task;
+                result.put(task.getName(), builder.execute((inst, ctx) ->
+                    // call the task with the payload data - using the correlation ID used when job was queued
+                    Correlation.call(inst.getData().correlationId, consumer, inst.getData().payload)
+                ));
             }
         });
 
@@ -163,9 +201,9 @@ public class SchedulerFactory {
      * @param recurringTasks the collection of recurring tasks to be started.
      * @return the new scheduler. Will be null if no tasks are given.
      */
-    private Scheduler schedule(SchedulerConfig configuration,
-                               Collection<Task<?>> jobbingTasks,
-                               Collection<RecurringTask<?>> recurringTasks) {
+    private Scheduler scheduleTasks(SchedulerConfig configuration,
+                                    Collection<Task<JobbingTaskData>> jobbingTasks,
+                                    Collection<RecurringTask<?>> recurringTasks) {
         if ((jobbingTasks.isEmpty()) && (recurringTasks.isEmpty())) {
             return null;
         }
@@ -211,5 +249,17 @@ public class SchedulerFactory {
         }
 
         return result.get();
+    }
+
+    /**
+     * A data-class that is persisted with to NamedJobbingTask's queue. It records
+     * the payload to be processed by the NamedJobbingTask, and the correlation ID
+     * that was active at the time the job was queued. This allows the correlation
+     * ID to be re-activated when the task is processed.
+     */
+    @AllArgsConstructor
+    private static class JobbingTaskData implements Serializable {
+        String correlationId;
+        Serializable payload;
     }
 }

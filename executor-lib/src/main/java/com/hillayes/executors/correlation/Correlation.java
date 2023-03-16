@@ -5,6 +5,7 @@ import org.jboss.logmanager.MDC;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Manages the assignment of correlation IDs on threads, and it's inclusion in
@@ -84,12 +85,34 @@ public class Correlation {
      *
      * @param aCorrelationId the correlation ID to be set for the duration of the call.
      * @param aConsumer the function to be called.
+     * @param aArg the function's argument value.
      * @param <T> the function's argument type.
      */
     public static <T> void call(String aCorrelationId, Consumer<T> aConsumer, T aArg) {
         String prevId = setCorrelationId(aCorrelationId);
         try {
             aConsumer.accept(aArg);
+        } finally {
+            setCorrelationId(prevId);
+        }
+    }
+
+    /**
+     * A utility method to call the given function with the given argument and return its
+     * result, setting the given correlation ID for the duration of the call. Restores any
+     * previous correlation ID when the function is complete.
+     *
+     * @param aCorrelationId the correlation ID to be set for the duration of the call.
+     * @param aFunction the function to be called.
+     * @param aArg the function's argument value.
+     * @param <T> the function's argument type.
+     * @param <R> the function's return type.
+     *
+     */
+    public static <T,R> R call(String aCorrelationId, Function<T,R> aFunction, T aArg) {
+        String prevId = setCorrelationId(aCorrelationId);
+        try {
+            return aFunction.apply(aArg);
         } finally {
             setCorrelationId(prevId);
         }

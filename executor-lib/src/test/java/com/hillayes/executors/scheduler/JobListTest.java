@@ -29,9 +29,9 @@ public class JobListTest extends TestBase {
             mockConfiguration(Collections.emptyMap()), List.of(task));
 
         // queue some jobs
-        fixture.addJob(task.getName(), "one");
-        fixture.addJob(task.getName(), "two");
-        fixture.addJob(task.getName(), "three");
+        fixture.addJob(task, "one");
+        fixture.addJob(task, "two");
+        fixture.addJob(task, "three");
 
         // wait for jobs to complete
         Awaitility.await()
@@ -40,8 +40,8 @@ public class JobListTest extends TestBase {
             .until(() -> signal.get() == 3);
 
         // queue some more jobs
-        fixture.addJob(task.getName(), "four");
-        fixture.addJob(task.getName(), "five");
+        fixture.addJob(task, "four");
+        fixture.addJob(task, "five");
 
         // wait for jobs to complete
         Awaitility.await()
