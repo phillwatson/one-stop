@@ -1,4 +1,4 @@
-create table scheduled_tasks (
+CREATE TABLE IF NOT EXISTS scheduled_tasks (
     task_name varchar(100),
     task_instance varchar(100),
     task_data blob,

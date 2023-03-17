@@ -3,6 +3,7 @@ package com.hillayes.executors.scheduler;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.helpers.FrequencyConfigImpl;
 import com.hillayes.executors.scheduler.helpers.NamedTaskConfigImpl;
+import com.hillayes.executors.scheduler.helpers.SchedulerConfigImpl;
 import com.hillayes.executors.scheduler.helpers.TestBase;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
@@ -40,7 +41,10 @@ public class ScheduledTaskTest extends TestBase {
                 .build()
         );
 
-        SchedulerFactory fixture = new SchedulerFactory(getDatasource(), mockConfiguration(taskConfigs),
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(taskConfigs)
+                .build(),
             List.of(task));
 
         Awaitility.await()
@@ -70,11 +74,15 @@ public class ScheduledTaskTest extends TestBase {
                 .build()
         );
 
-        SchedulerFactory fixture = new SchedulerFactory(getDatasource(), mockConfiguration(taskConfigs),
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(taskConfigs)
+                .pollingInterval(Duration.ofSeconds(2))
+                .build(),
             List.of(task));
 
         Awaitility.await()
-            .pollInterval(3, TimeUnit.SECONDS)
+            .pollInterval(1, TimeUnit.SECONDS)
             .atMost(30, TimeUnit.SECONDS)
             .until(() -> signal.get() == 3);
 

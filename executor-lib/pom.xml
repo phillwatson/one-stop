@@ -44,11 +44,5 @@
             <version>2.7.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.micronaut.configuration</groupId>
-            <artifactId>micronaut-jdbc-hikari</artifactId>
-            <version>2.2.6</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

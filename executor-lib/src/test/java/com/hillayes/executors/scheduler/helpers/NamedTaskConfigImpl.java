@@ -11,6 +11,8 @@ import java.util.OptionalDouble;
 @Builder
 public class NamedTaskConfigImpl implements NamedTaskConfig {
     private FrequencyConfig frequency;
+    private Duration retryInterval;
+    private Double retryExponent;
 
     @Override
     public Optional<FrequencyConfig> frequency() {
@@ -19,11 +21,11 @@ public class NamedTaskConfigImpl implements NamedTaskConfig {
 
     @Override
     public Optional<Duration> retryInterval() {
-        return Optional.empty();
+        return Optional.ofNullable(retryInterval);
     }
 
     @Override
     public OptionalDouble retryExponent() {
-        return OptionalDouble.empty();
+        return (retryExponent == null) ? OptionalDouble.empty() : OptionalDouble.of(retryExponent);
     }
 }

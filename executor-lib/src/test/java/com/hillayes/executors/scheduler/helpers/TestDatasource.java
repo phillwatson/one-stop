@@ -1,7 +1,6 @@
 package com.hillayes.executors.scheduler.helpers;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
 import java.io.BufferedReader;
@@ -14,15 +13,13 @@ import java.util.function.Consumer;
 
 public class TestDatasource {
     public static DataSource initDatabase() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:hsqldb:mem:schedule_testing");
-        config.setUsername("sa");
-        config.setPassword("");
+        JDBCDataSource dataSource = new JDBCDataSource();
 
-        HikariDataSource dataSource  = new HikariDataSource(config);
+        dataSource.setURL("jdbc:hsqldb:mem:schedule_testing");
+        dataSource.setUser("sa");
+        dataSource.setPassword("");
 
         doWithConnection(dataSource, c -> {
-
             try (Statement statement = c.createStatement()) {
                 String createTables = readFile("/hsql_tables.sql");
                 statement.execute(createTables);

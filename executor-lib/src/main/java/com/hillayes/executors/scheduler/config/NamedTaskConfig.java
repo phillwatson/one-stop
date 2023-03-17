@@ -21,9 +21,13 @@ public interface NamedTaskConfig {
      * The initial interval before retrying a failed task. If required, a value of 1 minute
      * is suggested.
      * <p>
+     * Note: the scheduler's polling interval will affect the accuracy at which this
+     * interval will be applied.
+     * <p>
      * By default, Recurring tasks are rescheduled according to their Schedule one-time
      * tasks are retried again in 5 minutes.
      * @see #retryExponent
+     * @see SchedulerConfig#pollingInterval()
      */
     Optional<Duration> retryInterval();
 
