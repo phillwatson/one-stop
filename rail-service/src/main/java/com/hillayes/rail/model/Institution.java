@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Institution {
     @EqualsAndHashCode.Include
     public String id;

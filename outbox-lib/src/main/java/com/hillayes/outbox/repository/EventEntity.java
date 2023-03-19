@@ -19,39 +19,6 @@ import java.util.UUID;
 @Builder(access  = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventEntity {
-    @Id
-    @GeneratedValue(generator = "uuid2")
-    @EqualsAndHashCode.Include
-    private UUID id;
-
-    @Column(name="correlation_id")
-    private String correlationId;
-
-    @Column(name="retry_count")
-    @Setter
-    private int retryCount;
-
-    @Column(name="timestamp")
-    private Instant timestamp;
-
-    /**
-     * The date-time on which the event is scheduled to be delivered. This is generally
-     * the same as the event's "timestamp"; meaning it is scheduled as soon as possible.
-     * However, when an event fails and is to be re-delivered, the scheduled timestamp
-     * may be some-time in the future; in order to allow the event listener to recover
-     * from any error condition.
-     */
-    @Column(name="scheduled_for")
-    private Instant scheduledFor;
-
-    @Enumerated(EnumType.STRING)
-    private Topic topic;
-
-    @Column(name="payload_class")
-    private String payloadClass;
-
-    private String payload;
-
     /**
      * A factory method to create a new event entity for its initial delivery.
      * Called when an event is first submitted delivery.
@@ -94,7 +61,44 @@ public class EventEntity {
             .build();
     }
 
+    /**
+     * Converts the EventEntity into an object ready to be delivered by the message
+     * broker.
+     */
     public EventPacket toEntityPacket() {
         return new EventPacket(id, topic, correlationId, retryCount, timestamp, payloadClass, payload);
     }
+
+    @Id
+    @GeneratedValue(generator = "uuid2")
+    @EqualsAndHashCode.Include
+    private UUID id;
+
+    @Column(name="correlation_id")
+    private String correlationId;
+
+    @Column(name="retry_count")
+    @Setter
+    private int retryCount;
+
+    @Column(name="timestamp")
+    private Instant timestamp;
+
+    /**
+     * The date-time on which the event is scheduled to be delivered. This is generally
+     * the same as the event's "timestamp"; meaning it is scheduled as soon as possible.
+     * However, when an event fails and is to be re-delivered, the scheduled timestamp
+     * may be some-time in the future; in order to allow the event listener to recover
+     * from any error condition.
+     */
+    @Column(name="scheduled_for")
+    private Instant scheduledFor;
+
+    @Enumerated(EnumType.STRING)
+    private Topic topic;
+
+    @Column(name="payload_class")
+    private String payloadClass;
+
+    private String payload;
 }

@@ -23,6 +23,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A scheduled service to read pending events from the event outbox table, at periodic
+ * intervals, and send them to the message broker.
+ * It also listens for events that have failed (raised events during their processing)
+ * and re-submit them.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
@@ -64,7 +70,9 @@ public class EventDeliverer {
         Producer<String, EventPacket> producer = producerFactory.getProducer();
         List<EventTuple> records = events.stream()
             .map(entity -> {
-                ProducerRecord<String, EventPacket> record = new ProducerRecord<>(entity.getTopic().topicName(), entity.toEntityPacket());
+                ProducerRecord<String, EventPacket> record =
+                    new ProducerRecord<>(entity.getTopic().topicName(), entity.toEntityPacket());
+
                 return new EventTuple(entity, producer.send(record));
             })
             .toList();

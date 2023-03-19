@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TransactionDetail {
     @EqualsAndHashCode.Include
     public String transactionId;

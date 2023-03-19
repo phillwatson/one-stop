@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EndUserAgreement {
     @JsonProperty("id")
     @EqualsAndHashCode.Include
