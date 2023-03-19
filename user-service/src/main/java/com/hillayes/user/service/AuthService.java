@@ -85,21 +85,21 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> {
                 log.info("User name failed verification");
-                userEventSender.sendLoginFailed("username", "User not found.");
+                userEventSender.sendLoginFailed(username, "User not found.");
                 return new NotAuthorizedException("username/password");
             });
 
         if ((user.isDeleted()) || (user.isBlocked())) {
             log.info("User login failed [id: {}, deleted: {}, blocked: {}]",
                 user.getId(), user.isDeleted(), user.isBlocked());
-            userEventSender.sendLoginFailed("username", "User blocked or deleted.");
+            userEventSender.sendLoginFailed(username, "User blocked or deleted.");
             throw new NotAuthorizedException("username/password");
         }
 
         try {
             if (!passwordCrypto.verify(password, user.getPasswordHash())) {
                 log.info("User password failed verification");
-                userEventSender.sendLoginFailed("username", "Invalid password.");
+                userEventSender.sendLoginFailed(username, "Invalid password.");
                 throw new NotAuthorizedException("username/password");
             }
         } catch (GeneralSecurityException e) {
@@ -125,7 +125,7 @@ public class AuthService {
                 .filter(u -> !u.isDeleted() && !u.isBlocked())
                 .orElseThrow(() -> {
                     log.info("User name failed verification [userId: {}]", userId);
-                    userEventSender.sendLoginFailed("username", "User not found.");
+                    userEventSender.sendLoginFailed(userId.toString(), "User not found.");
                     return new NotAuthorizedException("username/password");
                 });
 

@@ -8,7 +8,10 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path("/api/v1/rails/banks")
 @RolesAllowed({"admin", "user"})
@@ -20,11 +23,12 @@ public class InstitutionResource {
     InstitutionService institutionService;
 
     @GET
-    public List<Institution> getAll(@QueryParam("country") String countryCode,
-                                    @QueryParam("payments_enabled") Boolean paymentsEnabled) {
-        log.info("List institutions [country: {}, payment: {}]", countryCode, paymentsEnabled);
-        List<Institution> result = institutionService.list(countryCode, paymentsEnabled);
-        log.info("List institutions [country: {}, payment: {}, size: {}]", countryCode, paymentsEnabled, result.size());
+    public Collection<Institution> getAll(@QueryParam("country") String countryCode) {
+        log.info("List institutions [country: {}]", countryCode);
+        Set<Institution> result = new HashSet<>(institutionService.list(countryCode, true));
+        result.addAll(institutionService.list(countryCode, false));
+
+        log.info("List institutions [country: {}, size: {}]", countryCode, result.size());
         return result;
     }
 

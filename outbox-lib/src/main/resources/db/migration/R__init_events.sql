@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.events (
   correlation_id varchar(256) NOT NULL,
   retry_count smallint NOT NULL DEFAULT 0,
   "timestamp" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  delivered_at timestamp NULL,
+  scheduled_for timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   topic text NOT NULL,
   payload_class text NOT NULL,
   payload text NOT NULL

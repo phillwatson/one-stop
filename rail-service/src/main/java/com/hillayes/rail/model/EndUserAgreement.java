@@ -1,14 +1,16 @@
 package com.hillayes.rail.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
+@EqualsAndHashCode
 public class EndUserAgreement {
     @JsonProperty("id")
-    public UUID id;
+    @EqualsAndHashCode.Include
+    public String id;
 
     @JsonProperty("created")
     public OffsetDateTime created;

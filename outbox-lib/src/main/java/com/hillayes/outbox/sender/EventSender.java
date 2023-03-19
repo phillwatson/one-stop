@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.time.Instant;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -15,13 +14,16 @@ import java.time.Instant;
 public class EventSender {
     private final EventRepository eventRepository;
 
+    /**
+     * Records the given event for delivery at the next scheduled delivery round.
+     * (see EventDeliverer#deliverEvents()).
+     *
+     * @param topic the topic on which the event will be delivered.
+     * @param event the event payload.
+     * @param <T> the type of the event payload.
+     */
     public <T> void send(Topic topic, T event) {
         log.debug("Sending event [payload: {}]", event.getClass().getName());
-        eventRepository.persist(new EventEntity(topic, event));
-    }
-
-    public <T> void send(Topic topic, T event, String correlationId, Instant timestamp) {
-        log.debug("Sending event [payload: {}]", event.getClass().getName());
-        eventRepository.persist(new EventEntity(topic, event, correlationId, timestamp));
+        eventRepository.persist(EventEntity.forInitialDelivery(topic, event));
     }
 }

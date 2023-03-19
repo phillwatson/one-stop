@@ -1,9 +1,13 @@
 package com.hillayes.rail.model;
 
+import lombok.EqualsAndHashCode;
+
 import java.time.Instant;
 import java.time.LocalDate;
 
+@EqualsAndHashCode
 public class TransactionDetail {
+    @EqualsAndHashCode.Include
     public String transactionId;
     public LocalDate bookingDate;
     public Instant bookingDateTime;

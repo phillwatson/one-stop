@@ -10,7 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Map;
-import java.util.UUID;
 
 @RegisterRestClient(configKey = "nordigen-api")
 @RegisterClientHeaders(BearerHeaderFactory.class)
@@ -24,12 +23,12 @@ public interface RequisitionRepository {
                                            @QueryParam("offset") int offset);
     @GET
     @Path("{id}/")
-    public Requisition get(@PathParam("id") UUID id);
+    public Requisition get(@PathParam("id") String id);
 
     @POST
     public Requisition create(RequisitionRequest requisition);
 
     @DELETE
     @Path("{id}/")
-    public Map<String, Object> delete(@PathParam("id") UUID id);
+    public Map<String, Object> delete(@PathParam("id") String id);
 }

@@ -13,7 +13,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
-import java.util.UUID;
 
 @Path("/api/v1/rails/agreements")
 @RolesAllowed("admin")
@@ -46,7 +45,7 @@ public class AgreementResource {
 
     @PUT
     @Path("/{id}")
-    public EndUserAgreement accept(@PathParam("id") UUID id,
+    public EndUserAgreement accept(@PathParam("id") String id,
                                    EndUserAgreementAccepted acceptance) {
         log.info("Accept agreement [id: {}]", id);
         return agreementService.accept(id, acceptance);
@@ -54,14 +53,14 @@ public class AgreementResource {
 
     @GET
     @Path("/{id}")
-    public EndUserAgreement get(@PathParam("id") UUID id) {
+    public EndUserAgreement get(@PathParam("id") String id) {
         log.info("Get agreement [id: {}]", id);
         return agreementService.get(id);
     }
 
     @DELETE
     @Path("/{id}")
-    public Map<String,Object> delete(@PathParam("id") UUID id) {
+    public Map<String,Object> delete(@PathParam("id") String id) {
         log.info("Delete agreement [id: {}]", id);
         return agreementService.delete(id);
     }

@@ -14,9 +14,9 @@ import java.util.UUID;
 @Table(name="events")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
+@AllArgsConstructor(access = AccessLevel.PRIVATE) // called by the builder
+@Builder(access  = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventEntity {
     @Id
@@ -34,9 +34,15 @@ public class EventEntity {
     @Column(name="timestamp")
     private Instant timestamp;
 
-    @Column(name="delivered_at")
-    @Setter
-    private Instant deliveredAt;
+    /**
+     * The date-time on which the event is scheduled to be delivered. This is generally
+     * the same as the event's "timestamp"; meaning it is scheduled as soon as possible.
+     * However, when an event fails and is to be re-delivered, the scheduled timestamp
+     * may be some-time in the future; in order to allow the event listener to recover
+     * from any error condition.
+     */
+    @Column(name="scheduled_for")
+    private Instant scheduledFor;
 
     @Enumerated(EnumType.STRING)
     private Topic topic;
@@ -46,17 +52,46 @@ public class EventEntity {
 
     private String payload;
 
-    public EventEntity(Topic topic, Object payloadObject) {
-        this(topic, payloadObject, Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()), Instant.now());
+    /**
+     * A factory method to create a new event entity for its initial delivery.
+     * Called when an event is first submitted delivery.
+     *
+     * @param topic the topic on which the event is to be delivered.
+     * @param payloadObject the payload to be passed in the event.
+     */
+    public static EventEntity forInitialDelivery(Topic topic, Object payloadObject) {
+        Instant now = Instant.now();
+        return EventEntity.builder()
+            .correlationId(Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()))
+            .retryCount(0)
+            .timestamp(now)
+            .scheduledFor(now)
+            .topic(topic)
+            .payloadClass(payloadObject.getClass().getName())
+            .payload(EventPacket.serialize(payloadObject))
+            .build();
     }
 
-    public EventEntity(Topic topic, Object payloadObject, String correlationId, Instant timestamp) {
-        this.correlationId = correlationId;
-        this.retryCount = 0;
-        this.timestamp = timestamp;
-        this.topic = topic;
-        this.payloadClass = payloadObject.getClass().getName();
-        this.payload = EventPacket.serialize(payloadObject);
+    /**
+     * A factory method to create a new event entity for the re-delivery of a failed
+     * event. This is called by the event dead-letter topic listener.
+     * <p>
+     * The event's retry count is incremented, and its scheduled delivery is delayed
+     * in order to allow the listeners time to recover from any error condition.
+     *
+     * @param eventPacket the event packet that failed delivery and is to be rescheduled.
+     */
+    public static EventEntity forRedelivery(EventPacket eventPacket) {
+        Instant now = Instant.now();
+        return EventEntity.builder()
+            .correlationId(eventPacket.getCorrelationId())
+            .retryCount(eventPacket.getRetryCount() + 1)
+            .timestamp(now)
+            .scheduledFor(now.plusSeconds(60L * eventPacket.getRetryCount() + 1))
+            .topic(eventPacket.getTopic())
+            .payloadClass(eventPacket.getPayloadClass())
+            .payload(eventPacket.getPayload())
+            .build();
     }
 
     public EventPacket toEntityPacket() {

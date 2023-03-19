@@ -69,7 +69,7 @@ public class EventPacket {
     private String payload;
 
     @JsonIgnore
-    private Object payloadContent;
+    private transient Object payloadContent;
 
     public EventPacket(UUID id, Topic topic, String correlationId, int retryCount, Instant timestamp,
                        String payloadClass, String payload) {

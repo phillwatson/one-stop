@@ -2,7 +2,10 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.UserConsentRequest;
+import com.hillayes.rail.model.*;
+import com.hillayes.rail.services.InstitutionService;
+import com.hillayes.rail.services.RailAccountService;
+import com.hillayes.rail.services.RequisitionService;
 import com.hillayes.rail.services.UserConsentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +14,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +27,9 @@ import java.util.UUID;
 @Slf4j
 public class UserConsentResource {
     private final UserConsentService userConsentService;
+    private final InstitutionService institutionService;
+    private final RequisitionService requisitionService;
+    private final RailAccountService railAccountService;
     private final JsonWebToken jwt;
 
     @GET
@@ -49,11 +52,28 @@ public class UserConsentResource {
         UUID userId = getUserId(ctx);
         log.info("Getting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
-        UserConsent result = userConsentService.getUserConsent(userId, institutionId)
+        UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
+        Institution institution = institutionService.get(consent.getInstitutionId());
+        Requisition requisition = requisitionService.get(consent.getRequisitionId());
+        List<Account> accounts = requisition.accounts.stream()
+            .map(railAccountService::get)
+            .toList();
+
+        UserConsentResponse result = UserConsentResponse.builder()
+            .id(consent.getId())
+            .institutionId(consent.getInstitutionId())
+            .institutionName(institution.name)
+            .dateAccepted(consent.getDateAccepted())
+            .agreementExpires(consent.getAgreementExpires())
+            .maxHistory(consent.getMaxHistory())
+            .status(consent.getStatus())
+            .accounts(accounts)
+            .build();
+
         log.info("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",
-            userId, institutionId, result.getId());
+            userId, institutionId, consent.getId());
         return Response.ok(result).build();
     }
 

@@ -13,6 +13,9 @@ import java.util.List;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class EndUserAgreementRequest {
+    @JsonProperty("institution_id")
+    private String institutionId;
+
     @JsonProperty("max_historical_days")
     private Integer maxHistoricalDays;
 
@@ -21,7 +24,4 @@ public class EndUserAgreementRequest {
 
     @JsonProperty("access_scope")
     private List<String> accessScope;
-
-    @JsonProperty("institution_id")
-    private String institutionId;
 }

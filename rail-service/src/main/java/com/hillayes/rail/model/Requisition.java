@@ -1,13 +1,15 @@
 package com.hillayes.rail.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
+@EqualsAndHashCode
 public class Requisition {
-    public UUID id;
+    @EqualsAndHashCode.Include
+    public String id;
 
     @JsonProperty("created")
     public OffsetDateTime created;
@@ -16,7 +18,7 @@ public class Requisition {
     public RequisitionStatus status;
 
     @JsonProperty("accounts")
-    public List<UUID> accounts;
+    public List<String> accounts;
 
     @JsonProperty("link")
     public String link;
@@ -28,7 +30,7 @@ public class Requisition {
     public String institutionId;
 
     @JsonProperty("agreement")
-    public UUID agreement;
+    public String agreement;
 
     @JsonProperty("reference")
     public String reference;

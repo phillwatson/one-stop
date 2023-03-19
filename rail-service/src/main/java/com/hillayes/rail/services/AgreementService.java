@@ -10,7 +10,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.UUID;
 
 @ApplicationScoped
 public class AgreementService {
@@ -27,16 +26,16 @@ public class AgreementService {
         return agreementRepository.create(agreement);
     }
 
-    public EndUserAgreement accept(UUID id,
+    public EndUserAgreement accept(String id,
                                    EndUserAgreementAccepted acceptance) {
         return agreementRepository.accept(id, acceptance);
     }
 
-    public EndUserAgreement get(UUID id) {
+    public EndUserAgreement get(String id) {
         return agreementRepository.get(id);
     }
 
-    public Map<String,Object> delete(UUID id) {
+    public Map<String,Object> delete(String id) {
         return agreementRepository.delete(id);
     }
 }

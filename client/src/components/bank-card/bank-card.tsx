@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
+import CurrencyPoundIcon from '@mui/icons-material/CurrencyPound';
 
 import Bank from '../../model/bank.model';
 import UserConsent from '../../model/user-consent.model';
@@ -62,15 +63,17 @@ export default function BankCard(props: Props) {
         title={ props.bank.name } subheader={ props.bank.bic }
         onClickCapture={ handleExpandClick }
       />
-        { !props.consent && isActionAvailable() &&
+        { (!props.consent && isActionAvailable()) &&
           <CardActions disableSpacing>
             <IconButton aria-label="connect to bank" onClick={ () => handleConnectToBank(props.bank, false) }>
               <LinkIcon />
             </IconButton>
+            { props.bank.paymentsEnabled ? <CurrencyPoundIcon /> : null}
           </CardActions>
         }
         { props.consent &&
           <CardActions disableSpacing>
+            { props.bank.paymentsEnabled ? <CurrencyPoundIcon /> : null}
             <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show accounts">
               <ExpandMoreIcon />
             </ExpandMore>

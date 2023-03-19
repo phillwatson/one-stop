@@ -22,7 +22,7 @@ public class RequisitionService {
         return requisitionRepository.list(limit, offset);
     }
 
-    public Requisition get(UUID id) {
+    public Requisition get(String id) {
         return requisitionRepository.get(id);
     }
 
@@ -30,7 +30,7 @@ public class RequisitionService {
         return requisitionRepository.create(requisition);
     }
 
-    public Map<String, Object> delete(UUID id) {
+    public Map<String, Object> delete(String id) {
         return requisitionRepository.delete(id);
     }
 }

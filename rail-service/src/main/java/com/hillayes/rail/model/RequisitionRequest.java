@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.util.UUID;
-
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,7 +18,7 @@ public class RequisitionRequest {
     private String institutionId;
 
     @JsonProperty("agreement")
-    private UUID agreement;
+    private String agreement;
 
     @JsonProperty("reference")
     private String reference;

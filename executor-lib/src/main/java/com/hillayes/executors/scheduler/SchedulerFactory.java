@@ -57,12 +57,15 @@ public class SchedulerFactory {
 
         this.dataSource = dataSource;
 
-        this.jobbingTasks = createJobbingTasks(namedTasks, configuration);
+        jobbingTasks = createJobbingTasks(namedTasks, configuration);
         List<RecurringTask<?>> recurringTasks = createScheduledTasks(namedTasks, configuration);
 
         log.info("Scheduling named scheduled tasks [jobbingSize: {}, recurringSize: {}]",
             jobbingTasks.size(), recurringTasks.size());
-        this.scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
+        scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
+
+        // inform all tasks that they have been started
+        namedTasks.forEach(task -> task.taskScheduled(this));
     }
 
     /**

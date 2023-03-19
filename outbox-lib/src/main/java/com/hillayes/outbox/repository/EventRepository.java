@@ -17,7 +17,7 @@ public class EventRepository implements PanacheRepositoryBase<EventEntity, UUID>
      * @return a stream of undelivered events.
      */
     public List<EventEntity> listUndelivered(int batchSize) {
-        return find("FROM EventEntity WHERE deliveredAt IS NULL ORDER BY timestamp")
+        return find("FROM EventEntity WHERE scheduledFor < CURRENT_TIMESTAMP ORDER BY timestamp")
                 .withLock(LockModeType.PESSIMISTIC_WRITE)
                 .page(0, batchSize)
                 .list();

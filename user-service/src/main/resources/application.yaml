@@ -35,14 +35,15 @@ quarkus:
       default-schema: users
 
   log:
+    min-level: TRACE
     level: INFO
     console:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
     category:
+      "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
+        level: INFO
       "com.hillayes":
         level: DEBUG
-      "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
-        level: TRACE
 
 one-stop:
   jwt:

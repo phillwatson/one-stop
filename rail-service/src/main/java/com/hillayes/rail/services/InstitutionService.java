@@ -32,12 +32,12 @@ public class InstitutionService {
 
     public List<Institution> list(String countryCode,
                                   Boolean paymentsEnabled) {
-        Duration x = config.caches().institutions();
-
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
         return cache.getValueOrCall(key, () -> {
             List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);
             list.add(get("SANDBOXFINANCE_SFIN0000"));
+
+            list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled);
             return list;
         });
     }

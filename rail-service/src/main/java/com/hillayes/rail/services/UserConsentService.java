@@ -158,7 +158,7 @@ public class UserConsentService {
                 userConsent = userConsentRepository.save(userConsent);
 
                 // delete the requisition - and the associated agreement
-                requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
+                requisitionService.delete(userConsent.getRequisitionId());
 
                 // send consent denied event notification
                 consentEventSender.sendConsentDenied(userConsent);
@@ -176,7 +176,7 @@ public class UserConsentService {
                 userConsent = userConsentRepository.save(userConsent);
 
                 // delete the requisition - and the associated agreement
-                requisitionService.delete(UUID.fromString(userConsent.getRequisitionId()));
+                requisitionService.delete(userConsent.getRequisitionId());
 
                 // send consent denied event notification
                 consentEventSender.sendConsentCancelled(userConsent);

@@ -12,7 +12,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
-import java.util.UUID;
 
 @Path("/api/v1/rails/requisitions")
 @RolesAllowed("admin")
@@ -34,7 +33,7 @@ public class RequisitionResource {
 
     @GET
     @Path("/{id}")
-    public Requisition get(@PathParam("id") UUID id) {
+    public Requisition get(@PathParam("id") String id) {
         log.info("Get requisition [id: {}]", id);
         return requisitionService.get(id);
     }
@@ -54,7 +53,7 @@ public class RequisitionResource {
 
     @DELETE
     @Path("/{id}")
-    public Map<String, Object> delete(@PathParam("id") UUID id) {
+    public Map<String, Object> delete(@PathParam("id") String id) {
         log.info("Delete requisition [id: {}]", id);
         return requisitionService.delete(id);
     }
