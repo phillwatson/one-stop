@@ -29,6 +29,11 @@ public class JobListTest extends TestBase {
             public void accept(String data) {
                 log.info("Task {} is running ({})", data, signal.incrementAndGet());
             }
+
+            @Override
+            public String queueJob(String payload) {
+                return null;
+            }
         };
 
         SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
@@ -75,6 +80,11 @@ public class JobListTest extends TestBase {
                 if (count < 3) {
                     throw new RuntimeException("test task failure");
                 }
+            }
+
+            @Override
+            public String queueJob(String payload) {
+                return null;
             }
         };
 

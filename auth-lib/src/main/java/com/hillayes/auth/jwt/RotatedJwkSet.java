@@ -1,4 +1,4 @@
-package com.hillayes.auth.crypto;
+package com.hillayes.auth.jwt;
 
 import com.hillayes.executors.concurrent.ExecutorConfiguration;
 import com.hillayes.executors.concurrent.ExecutorFactory;

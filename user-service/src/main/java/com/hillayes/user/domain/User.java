@@ -8,6 +8,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -96,6 +97,11 @@ public class User {
     @Column(name="blocked_reason")
     private Instant blockedReason;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<OidcIdentity> oidcIdentities = new HashSet<>();
+
     @Version
     @JsonIgnore
     private Integer version;
@@ -113,5 +119,25 @@ public class User {
     @JsonProperty
     protected void setPasswordHash(String aValue) {
         passwordHash = aValue;
+    }
+
+    @JsonIgnore
+    @Transient
+    public OidcIdentity addOidcIdentity(String issuer, String subject) {
+        OidcIdentity result = OidcIdentity.builder()
+            .user(this)
+            .issuer(issuer)
+            .subject(subject)
+            .build();
+        oidcIdentities.add(result);
+        return result;
+    }
+
+    @JsonIgnore
+    @Transient
+    public Optional<OidcIdentity> getOidcIdentity(String issuer) {
+        return oidcIdentities.stream()
+            .filter(oidc -> oidc.getIssuer().equals(issuer))
+            .findFirst();
     }
 }

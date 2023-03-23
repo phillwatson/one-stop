@@ -1,14 +1,14 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
-import com.hillayes.auth.crypto.RotatedJwkSet;
+import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
+import com.hillayes.user.oauth.google.GoogleAuth;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
@@ -16,6 +16,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import javax.ws.rs.InternalServerErrorException;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
  * key rotation 30 minutes - must be no less than refresh duration
  */
 @Singleton
-@RequiredArgsConstructor
 @Slf4j
 public class AuthService {
     @ConfigProperty(name = "mp.jwt.verify.issuer")
@@ -49,13 +49,20 @@ public class AuthService {
     @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
     long refreshDuration;
 
-    @ConfigProperty(name = "onestop.jwk.set-size", defaultValue = "2")
+    @ConfigProperty(name = "one-stop.jwk.set-size", defaultValue = "2")
     int jwkSetSize;
 
-    private final UserRepository userRepository;
-    private final PasswordCrypto passwordCrypto;
-    private final UserEventSender userEventSender;
-    private final JWTParser jwtParser;
+    @Inject
+    UserRepository userRepository;
+    @Inject
+    PasswordCrypto passwordCrypto;
+    @Inject
+    UserEventSender userEventSender;
+    @Inject
+    JWTParser jwtParser;
+
+    @Inject
+    GoogleAuth googleAuth;
 
     private RotatedJwkSet jwkSet;
 
@@ -111,6 +118,25 @@ public class AuthService {
         userEventSender.sendUserLogin(user);
         log.debug("User logged in [userId: {}]", user.getId());
         return tokens;
+    }
+
+    @Transactional
+    public String[] oauthLogin(String code,
+                               String state,
+                               String scope) {
+        try {
+            log.info("OAuth login [code: {}, state: {}, scope: {}]", code, state, scope);
+            User user = googleAuth.oauthLogin(code);
+            user = userRepository.save(user);
+
+            String[] tokens = buildTokens(user);
+
+            log.debug("User tokens created [userId: {}]", user.getId());
+            return tokens;
+        } catch (Exception e) {
+            log.error("Failed to verify OpenId auth-code.", e);
+            throw new NotAuthorizedException("jwt");
+        }
     }
 
     @Transactional(dontRollbackOn = NotAuthorizedException.class)

@@ -43,7 +43,7 @@ public class RequisitionResourceTest extends TestBase {
 
         RequisitionRequest requisition = RequisitionRequest.builder()
                 .institutionId(agreement.getInstitutionId())
-                .agreement(UUID.fromString(agreementId))
+                .agreement(agreementId)
                 .redirect("http://localhost:8080/accepted")
                 .reference(UUID.randomUUID().toString())
                 .userLanguage("EN")

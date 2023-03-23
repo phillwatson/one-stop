@@ -6,11 +6,11 @@ import com.hillayes.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.time.Instant;
 import java.util.Date;
 
@@ -33,8 +33,8 @@ public class AuthResource {
     @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
     long refreshDuration;
 
-    private final JsonWebToken jwt;
     private final AuthService authService;
+
     private final XsrfGenerator xsrfGenerator;
 
     @GET
@@ -51,7 +51,23 @@ public class AuthResource {
         log.info("Auth user login initiated");
         String[] tokens = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 
-        return buildCookies(tokens, accessDuration, refreshDuration);
+        return Response.noContent()
+            .cookie(buildCookies(tokens, accessDuration, refreshDuration))
+            .build();
+    }
+
+    @GET
+    @Path("validate")
+    public Response oauthLogin(@QueryParam("code") String code,
+                               @QueryParam("state") String state,
+                               @QueryParam("scope") String scope) {
+        log.info("OAuth login [scope: {}, state: {}]", scope, state);
+        String[] tokens = authService.oauthLogin(code, state, scope);
+
+        return Response
+            .temporaryRedirect(URI.create("http://localhost:3000/accounts"))
+            .cookie(buildCookies(tokens, accessDuration, refreshDuration))
+            .build();
     }
 
     @GET
@@ -66,17 +82,21 @@ public class AuthResource {
 
         String[] tokens = authService.refresh(refreshTokenCookie.getValue());
 
-        return buildCookies(tokens, accessDuration, refreshDuration);
+        return Response.noContent()
+            .cookie(buildCookies(tokens, accessDuration, refreshDuration))
+            .build();
     }
 
     @GET
     @Path("logout")
     public Response logout() {
         log.info("Auth user logout");
-        return buildCookies(new String[]{null, null}, 0, 0);
+        return Response.noContent()
+            .cookie(buildCookies(new String[]{null, null}, 0, 0))
+            .build();
     }
 
-    private Response buildCookies(String[] tokens, long accessTTL, long refreshTTL) {
+    private NewCookie[] buildCookies(String[] tokens, long accessTTL, long refreshTTL) {
         NewCookie accessToken = new NewCookie(accessCookieName, tokens[0],
             "/api", null, NewCookie.DEFAULT_VERSION, null,
             (int) accessTTL, Date.from(Instant.now().plusSeconds(accessTTL)),
@@ -89,8 +109,6 @@ public class AuthResource {
 
         NewCookie xsrfCookie = xsrfGenerator.generateCookie();
 
-        return Response.noContent()
-            .cookie(accessToken, refreshToken, xsrfCookie)
-            .build();
+        return new NewCookie[] { accessToken, refreshToken, xsrfCookie };
     }
 }

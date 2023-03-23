@@ -2,6 +2,7 @@ package com.hillayes.user.repository;
 
 import com.hillayes.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -28,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return the collection of users holding the given email address.
      */
     public List<User> findByEmail(String email);
+
+    @Query("SELECT DISTINCT u FROM User u JOIN u.oidcIdentities oidc WHERE oidc.issuer = ?1 AND oidc.subject = ?2")
+    public Optional<User> findByIssuerAndSubject(String issuer, String subject);
 }

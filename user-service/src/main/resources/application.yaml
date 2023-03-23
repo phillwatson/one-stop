@@ -34,6 +34,10 @@ quarkus:
     database:
       default-schema: users
 
+  rest-client:
+    google-api:
+      url: https://oauth2.googleapis.com
+
   log:
     min-level: TRACE
     level: INFO
@@ -42,6 +46,8 @@ quarkus:
     category:
       "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
         level: INFO
+      "org.jose4j.jwk":
+        level: DEBUG
       "com.hillayes":
         level: DEBUG
 
@@ -60,8 +66,27 @@ one-stop:
       header-name: 'X-XSRF-TOKEN'
       duration-secs: 1800
       # secret: 'this will be passed in via docker env'
+
+    google:
+      openid-config: 'https://accounts.google.com/.well-known/openid-configuration'
+      client-id: '284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'
+      redirect-uri: 'http://localhost/api/v1/auth/validate'
+
+    apple:
+      openid-config: 'https://appleid.apple.com/.well-known/openid-configuration'
+      client-id: 'xxxxxxxxxxxxxx'
+      redirect-uri: 'http://localhost/api/v1/auth/validate'
+
 "%test":
+  quarkus:
+    hibernate-orm:
+      log:
+        sql: true
+        bind-parameters: true
+
   one-stop:
     auth:
       xsrf:
         secret: this is a secret for xsrf tokens
+      google:
+        client-secret: 'a-google-generated-secret'

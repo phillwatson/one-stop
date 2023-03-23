@@ -17,13 +17,23 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     blocked_reason varchar(256),
     version integer NOT NULL DEFAULT 0
 );
+CREATE INDEX IF NOT EXISTS idx_useremail ON ${flyway:defaultSchema}.user (email);
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.userrole (
-    user_id uuid NOT NULL,
+    user_id uuid NOT NULL REFERENCES ${flyway:defaultSchema}.user(id) ON DELETE CASCADE,
     role varchar(256) NOT NULL
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS idx_userrole ON ${flyway:defaultSchema}.userrole (user_id, role);
+
+CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.oidcidentity (
+    id uuid PRIMARY KEY,
+    user_id uuid NOT NULL REFERENCES ${flyway:defaultSchema}.user(id) ON DELETE CASCADE,
+    issuer varchar(256) NOT NULL,
+    subject varchar(256) NOT NULL,
+    date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_disabled timestamp NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_oidcissuer ON ${flyway:defaultSchema}.oidcidentity (user_id, issuer);
 
 INSERT INTO ${flyway:defaultSchema}.user (id, username, email, given_name, password_hash)
 VALUES ('9abc5177-421d-4913-a1e4-b5f69ca1ae93', 'admin', 'watson.phill+onestop@gmail.com', 'Admin', '1000:1284d970625dbdd0103f51a06f33a6c6:460f368479614f24c19bf498733186e88ad933453c8f5087154cd53eed39b50d1c295ef1ea3bdec417fa106cc319db008fe1fca2a2fc7d6e46e1ad6f952e30e8');

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import http from "../../services/http-common"
 import "./login-form.css";
+import GoogleSignInButton from "../oauth/google-id/google-signin-button";
 
 interface ErrorMessage {
   severity: AlertColor | undefined,
@@ -57,6 +58,14 @@ export default function LoginForm() {
         </div>
         { showErrors() }
       </form>
+
+      <div>
+        <span>
+          <GoogleSignInButton
+            clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
+            redirectUri={'http://localhost/api/v1/auth/validate'}/>
+        </span>
+      </div>
     </div>
   );
 }
