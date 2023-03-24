@@ -44,8 +44,8 @@ export default function LoginForm() {
 
   return (
     <div className="Login">
-      <form onSubmit={ handleSubmit }>
-        <div className="panel">
+      <div className="panel">
+        <form onSubmit={ handleSubmit }>
           <div className="field">
             <label>Username:</label>
             <input autoFocus type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -54,17 +54,20 @@ export default function LoginForm() {
             <label>Password:</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
+          <div className="panel">
           <Button type="submit" variant="outlined" disabled={!validateForm()}>Login</Button>
-        </div>
-        { showErrors() }
-      </form>
+          </div>
+        </form>
 
-      <div>
-        <span>
+        <div className="panel">
           <GoogleSignInButton
             clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
             redirectUri={'http://localhost/api/v1/auth/validate/google'}/>
-        </span>
+        </div>
+
+        <div>
+          { showErrors() }
+        </div>
       </div>
     </div>
   );

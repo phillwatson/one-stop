@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 public abstract class OpenIdAuth {
@@ -78,7 +79,7 @@ public abstract class OpenIdAuth {
                     // if deleted OR not found - create a new User
                     .orElse(User.builder()
                         .username(email)
-                        .passwordHash(passwordCrypto.getHash("password".toCharArray()))
+                        .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
                         .email(email)
                         .givenName("")
                         .roles(Set.of("user"))
