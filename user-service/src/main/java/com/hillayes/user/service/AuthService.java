@@ -4,12 +4,14 @@ import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
+import com.hillayes.user.oauth.AuthProvider;
 import com.hillayes.user.oauth.google.GoogleAuth;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.auth.AuthProtocolState;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -121,20 +123,31 @@ public class AuthService {
     }
 
     @Transactional
-    public String[] oauthLogin(String code,
+    public String[] oauthLogin(AuthProvider authProvider,
+                               String code,
                                String state,
                                String scope) {
         try {
-            log.info("OAuth login [code: {}, state: {}, scope: {}]", code, state, scope);
+            log.info("OAuth login [provider: {}, code: {}, state: {}, scope: {}]", authProvider, code, state, scope);
             User user = googleAuth.oauthLogin(code);
+
+            boolean newUser = (user.getId() == null);
             user = userRepository.save(user);
 
-            String[] tokens = buildTokens(user);
+            if (newUser) {
+                userEventSender.sendUserCreated(user);
+                userEventSender.sendUserOnboarded(user);
+            } else {
+                userEventSender.sendUserUpdated();
+            }
 
+            String[] tokens = buildTokens(user);
+            userEventSender.sendUserLogin(user);
             log.debug("User tokens created [userId: {}]", user.getId());
             return tokens;
         } catch (Exception e) {
             log.error("Failed to verify OpenId auth-code.", e);
+            userEventSender.sendLoginFailed(code, "Invalid open-id auth-code.");
             throw new NotAuthorizedException("jwt");
         }
     }

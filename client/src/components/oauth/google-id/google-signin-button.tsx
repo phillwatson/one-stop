@@ -9,14 +9,13 @@ interface Props {
 export default function GoogleSignInButton(props: Props) {
   function buttonClick() {
     var uri = 'https://accounts.google.com/o/oauth2/auth' +
-    '?response_type=code' +
-    '&state=google' +
-    '&client_id=' + props.clientId +
-    '&scope=openid%20email' +
-    '&redirect_uri=' + encodeURIComponent(props.redirectUri);
-    console.log(uri);
+                '?response_type=code' +
+                '&state=google' +
+                '&client_id=' + props.clientId +
+                '&scope=openid email' +
+                '&redirect_uri=' + props.redirectUri;
 
-    window.location.href = uri;
+    window.location.href = encodeURI(uri);
   }
 
   return (

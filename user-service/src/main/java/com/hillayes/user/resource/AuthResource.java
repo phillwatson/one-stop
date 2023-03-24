@@ -2,6 +2,7 @@ package com.hillayes.user.resource;
 
 import com.hillayes.auth.xsrf.XsrfGenerator;
 import com.hillayes.user.model.LoginRequest;
+import com.hillayes.user.oauth.AuthProvider;
 import com.hillayes.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,12 +58,13 @@ public class AuthResource {
     }
 
     @GET
-    @Path("validate")
-    public Response oauthLogin(@QueryParam("code") String code,
+    @Path("validate/{auth-provider}")
+    public Response oauthLogin(@PathParam("auth-provider") String authProvider,
+                               @QueryParam("code") String code,
                                @QueryParam("state") String state,
                                @QueryParam("scope") String scope) {
         log.info("OAuth login [scope: {}, state: {}]", scope, state);
-        String[] tokens = authService.oauthLogin(code, state, scope);
+        String[] tokens = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
         return Response
             .temporaryRedirect(URI.create("http://localhost:3000/accounts"))

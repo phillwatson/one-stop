@@ -63,7 +63,7 @@ export default function LoginForm() {
         <span>
           <GoogleSignInButton
             clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
-            redirectUri={'http://localhost/api/v1/auth/validate'}/>
+            redirectUri={'http://localhost/api/v1/auth/validate/google'}/>
         </span>
       </div>
     </div>
