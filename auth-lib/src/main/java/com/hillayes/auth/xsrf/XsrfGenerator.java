@@ -51,7 +51,7 @@ public class XsrfGenerator {
     private long timeoutSecs = Duration.ofMinutes(30).toSeconds();
 
     public XsrfGenerator(String secret) {
-        log.info("Creating XSRF generator");
+        log.debug("Creating XSRF generator");
         try {
             random = new Random();
             mac = Mac.getInstance(SIGNATURE_ALG);

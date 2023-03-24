@@ -4,14 +4,13 @@ import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
-import com.hillayes.user.oauth.AuthProvider;
-import com.hillayes.user.oauth.google.GoogleAuth;
+import com.hillayes.user.openid.AuthProvider;
+import com.hillayes.user.openid.google.GoogleAuth;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.auth.AuthProtocolState;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -137,8 +136,6 @@ public class AuthService {
             if (newUser) {
                 userEventSender.sendUserCreated(user);
                 userEventSender.sendUserOnboarded(user);
-            } else {
-                userEventSender.sendUserUpdated();
             }
 
             String[] tokens = buildTokens(user);

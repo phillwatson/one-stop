@@ -1,4 +1,4 @@
-package com.hillayes.user.oauth;
+package com.hillayes.user.openid;
 
 /**
  * Identifies the OpenID auth-provider.

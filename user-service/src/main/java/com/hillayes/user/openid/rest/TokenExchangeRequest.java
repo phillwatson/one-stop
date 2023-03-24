@@ -1,4 +1,4 @@
-package com.hillayes.user.model;
+package com.hillayes.user.openid.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

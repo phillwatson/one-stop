@@ -15,15 +15,21 @@ public class JwtValidator {
 
     public JwtValidator(String location, String issuer, String audience) {
         keySet = new HttpsJwks(location);
-        jwtConsumer = new JwtConsumerBuilder()
+        JwtConsumerBuilder builder = new JwtConsumerBuilder()
             .setRequireExpirationTime() // the JWT must have an expiration time
             .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
             .setRequireSubject() // the JWT must have a subject claim
-            .setExpectedIssuer(issuer) // whom the JWT needs to have been issued by
-            .setExpectedAudience(audience) // to whom the JWT is intended for
             .setVerificationKeyResolver(new HttpsJwksVerificationKeyResolver(keySet)) // verify the signature with the public key
-            .setJwsAlgorithmConstraints( // only allow the expected signature algorithm(s) in the given context
-                AlgorithmConstraints.ConstraintType.PERMIT, AlgorithmIdentifiers.RSA_USING_SHA256) // which is only RS256 here
+            .setJwsAlgorithmConstraints(
+                // only allow the expected signature algorithm(s) in the given context
+                AlgorithmConstraints.ConstraintType.PERMIT,
+                AlgorithmIdentifiers.RSA_USING_SHA256 // which is only RS256 here
+            );
+
+        if (issuer != null) builder.setExpectedIssuer(issuer); // whom the JWT needs to have been issued by
+        if (audience != null) builder.setExpectedAudience(audience); // to whom the JWT is intended for
+
+        jwtConsumer = builder
             .build(); // create the JwtConsumer instance
     }
 

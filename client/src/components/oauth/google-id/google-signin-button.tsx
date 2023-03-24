@@ -3,7 +3,6 @@ import './google-signin-button.css'; // import stylesheet for styling
 interface Props {
   clientId: string;
   redirectUri: string;
-
 }
 
 export default function GoogleSignInButton(props: Props) {

@@ -1,7 +1,7 @@
-package com.hillayes.user.repository;
+package com.hillayes.user.openid.google;
 
-import com.hillayes.user.model.TokenExchangeRequest;
-import com.hillayes.user.model.TokenExchangeResponse;
+import com.hillayes.user.openid.rest.TokenExchangeRequest;
+import com.hillayes.user.openid.rest.TokenExchangeResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public interface GoogleAuthRepository {
+public interface GoogleIdRestApi {
     @POST
     @Path("token")
     public TokenExchangeResponse exchangeToken(TokenExchangeRequest request);
