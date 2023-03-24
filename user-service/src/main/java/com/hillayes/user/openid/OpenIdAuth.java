@@ -38,7 +38,7 @@ public abstract class OpenIdAuth {
 
             String issuer = idToken.getIssuer();
             String subject = idToken.getSubject();
-            String email = idToken.getClaimValue("email", String.class);
+            String email = idToken.getClaimValueAsString("email");
 
             // lookup user by Auth Provider's Identity
             User user = userRepository.findByIssuerAndSubject(issuer, subject)
@@ -77,13 +77,19 @@ public abstract class OpenIdAuth {
                         return u;
                     })
                     // if deleted OR not found - create a new User
-                    .orElse(User.builder()
-                        .username(email)
-                        .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                        .email(email)
-                        .givenName("")
-                        .roles(Set.of("user"))
-                        .build()
+                    .orElseGet(() -> {
+                        String name = idToken.getClaimValueAsString("name");
+                        String givenName = idToken.getClaimValueAsString("given_name");
+                        String familyName = idToken.getClaimValueAsString("family_name");
+                        return User.builder()
+                                .username(email)
+                                .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
+                                .email(email)
+                                .givenName(givenName == null ? name == null ? email : name : givenName)
+                                .familyName(familyName)
+                                .roles(Set.of("user"))
+                                .build();
+                        }
                     );
 
                 // record Auth Provider Identity against user

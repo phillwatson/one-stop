@@ -9,9 +9,8 @@ export default function GoogleSignInButton(props: Props) {
   function buttonClick() {
     var uri = 'https://accounts.google.com/o/oauth2/auth' +
                 '?response_type=code' +
-                '&state=google' +
                 '&client_id=' + props.clientId +
-                '&scope=openid email' +
+                '&scope=openid profile email' +
                 '&redirect_uri=' + props.redirectUri;
 
     window.location.href = encodeURI(uri);
