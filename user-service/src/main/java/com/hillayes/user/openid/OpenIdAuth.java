@@ -3,10 +3,6 @@ package com.hillayes.user.openid;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.repository.UserRepository;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -21,12 +17,32 @@ import java.util.UUID;
  * This abstract class provides the code common to all implementations, and
  * subclasses must provide the interaction with the auth-provider's API.
  */
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 public abstract class OpenIdAuth {
-    private UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
-    private PasswordCrypto passwordCrypto;
+    @Inject
+    PasswordCrypto passwordCrypto;
+
+    /**
+     * Used to select the OpenIdAuth implementation based on the given AuthProvider
+     * value. We could inject each implementation explicitly, but that would require
+     * additional work when new implementations are introduced. Instead, we inject
+     * all instances using the javax.enterprise.inject.Instance<OpenIdAuth>, and use
+     * this method to identify the appropriate instance. For example;
+     * <pre>
+     *     \@Inject \@Any
+     *     Instance<OpenIdAuth> openIdAuths;
+     * </pre>
+     * See OpenIdAuthTest for more examples.
+     *
+     * @param authProvider the AuthProvider value that identifies the implementation.
+     * @return true if this instance supports the given AuthProvider.
+     *
+     *
+     */
+    public abstract boolean isFor(AuthProvider authProvider);
 
     /**
      * Implements must call the auth-provider's auth-code verification endpoint to

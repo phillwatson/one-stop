@@ -1,6 +1,5 @@
 package com.hillayes.user.openid.google;
 
-import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.JwtValidator;
 import com.hillayes.user.openid.AuthProvider;
 import com.hillayes.user.openid.NamedAuthProvider;
@@ -8,33 +7,38 @@ import com.hillayes.user.openid.OpenIdAuth;
 import com.hillayes.user.openid.OpenIdConfiguration;
 import com.hillayes.user.openid.rest.TokenExchangeRequest;
 import com.hillayes.user.openid.rest.TokenExchangeResponse;
-import com.hillayes.user.repository.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+/**
+ * Provides the OpenIdAuth implementation for the Google auth-provider. The
+ * instance will be initialised with the Open-ID configuration and JwtValidator
+ * appropriate for Google.
+ */
+@ApplicationScoped
+@NamedAuthProvider(AuthProvider.GOOGLE)
 @Slf4j
 public class GoogleAuth extends OpenIdAuth {
-    private final OpenIdConfiguration.AuthConfig config;
+    @Inject
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    OpenIdConfiguration.AuthConfig config;
 
-    private final JwtValidator jwtValidator;
+    @Inject
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    JwtValidator jwtValidator;
 
-    private final GoogleIdRestApi googleIdRestApi;
+    @Inject
+    @RestClient
+    GoogleIdRestApi googleIdRestApi;
 
-    public GoogleAuth(OpenIdConfiguration.AuthConfig config,
-                      JwtValidator jwtValidator,
-                      GoogleIdRestApi googleIdRestApi,
-                      UserRepository userRepository,
-                      PasswordCrypto passwordCrypto) {
-        super(userRepository, passwordCrypto);
-        this.config = config;
-        this.jwtValidator = jwtValidator;
-        this.googleIdRestApi = googleIdRestApi;
+    @Override
+    public boolean isFor(AuthProvider authProvider) {
+        return authProvider == AuthProvider.GOOGLE;
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {

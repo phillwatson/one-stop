@@ -5,7 +5,6 @@ import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.openid.AuthProvider;
-import com.hillayes.user.openid.NamedAuthProvider;
 import com.hillayes.user.openid.OpenIdAuth;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
@@ -18,6 +17,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
@@ -63,9 +64,8 @@ public class AuthService {
     @Inject
     JWTParser jwtParser;
 
-    @Inject
-    @NamedAuthProvider(AuthProvider.GOOGLE)
-    OpenIdAuth googleAuth;
+    @Inject @Any
+    Instance<OpenIdAuth> openIdAuths;
 
     private RotatedJwkSet jwkSet;
 
@@ -123,6 +123,19 @@ public class AuthService {
         return tokens;
     }
 
+    /**
+     * Locates the OpenIdAuth instance that can handle authentication for the
+     * identified AuthProvider.
+     * @param authProvider the AuthProvider value that identifies the implementation.
+     * @return the identified OpenIdAuth provider.
+     */
+    private OpenIdAuth getOpenIdAuth(AuthProvider authProvider) {
+        return openIdAuths.stream()
+            .filter(instance -> instance.isFor(authProvider))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("AuthProvider not implemented:  " + authProvider));
+    }
+
     @Transactional
     public String[] oauthLogin(AuthProvider authProvider,
                                String code,
@@ -130,7 +143,7 @@ public class AuthService {
                                String scope) {
         try {
             log.info("OAuth login [provider: {}, code: {}, state: {}, scope: {}]", authProvider, code, state, scope);
-            User user = googleAuth.oauthLogin(code);
+            User user = getOpenIdAuth(authProvider).oauthLogin(code);
 
             boolean newUser = (user.getId() == null);
             user = userRepository.save(user);

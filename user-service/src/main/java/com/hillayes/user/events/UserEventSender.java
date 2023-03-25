@@ -19,7 +19,7 @@ public class UserEventSender {
     private final EventSender eventSender;
 
     public void sendUserCreated(User user) {
-        log.debug("Sending UserCreated event [username: {}]", user.getUsername());
+        log.debug("Sending UserCreated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserCreated.builder()
             .userId(user.getId())
             .username(user.getUsername())
@@ -34,7 +34,7 @@ public class UserEventSender {
     }
 
     public void sendUserDeclined(User user) {
-        log.debug("Sending UserDeclined event [username: {}]", user.getUsername());
+        log.debug("Sending UserDeclined event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserDeclined.builder()
             .userId(user.getId())
             .dateDeclined(Instant.now())
@@ -42,7 +42,7 @@ public class UserEventSender {
     }
 
     public void sendUserOnboarded(User user) {
-        log.debug("Sending UserOnboarded event [username: {}]", user.getUsername());
+        log.debug("Sending UserOnboarded event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserOnboarded.builder()
             .userId(user.getId())
             .dateOnboarded(user.getDateOnboarded())
@@ -50,7 +50,7 @@ public class UserEventSender {
     }
 
     public void sendUserUpdated(User user) {
-        log.debug("Sending UserUpdated event [username: {}]", user.getUsername());
+        log.debug("Sending UserUpdated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserUpdated.builder()
             .userId(user.getId())
             .username(user.getUsername())
@@ -65,7 +65,7 @@ public class UserEventSender {
     }
 
     public void sendUserDeleted(User user) {
-        log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
+        log.debug("Sending UserDeleted event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())
             .dateDeleted(user.getDateDeleted())
@@ -73,7 +73,7 @@ public class UserEventSender {
     }
 
     public void sendUserLogin(User user) {
-        log.debug("Sending UserLogin event [username: {}]", user.getUsername());
+        log.debug("Sending UserLogin event [userId: {}]", user.getId());
         eventSender.send(Topic.USER_AUTH, UserLogin.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
