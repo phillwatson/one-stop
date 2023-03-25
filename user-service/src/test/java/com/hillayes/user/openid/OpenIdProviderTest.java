@@ -1,7 +1,6 @@
 package com.hillayes.user.openid;
 
 import com.hillayes.auth.jwt.JwtValidator;
-import com.hillayes.user.openid.google.GoogleAuth;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -12,23 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 public class OpenIdProviderTest {
     @Inject
-    @AuthProviderNamed(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GOOGLE)
     OpenIdConfiguration.AuthConfig googleConfig;
 
     @Inject
-    @AuthProviderNamed(AuthProvider.APPLE)
+    @NamedAuthProvider(AuthProvider.APPLE)
     OpenIdConfiguration.AuthConfig appleConfig;
 
     @Inject
-    @AuthProviderNamed(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GOOGLE)
     JwtValidator googleValidator;
 
     @Inject
-    @AuthProviderNamed(AuthProvider.APPLE)
+    @NamedAuthProvider(AuthProvider.APPLE)
     JwtValidator appleValidator;
-
-    @Inject
-    GoogleAuth googleAuth;
 
     @Test
     public void testQualifiedInjections() {
@@ -37,7 +33,5 @@ public class OpenIdProviderTest {
         assertNotNull(googleValidator);
         assertNotNull(appleValidator);
         assertNotSame(googleValidator, appleValidator);
-
-        assertEquals("OpenIdAuth[https://accounts.google.com/.well-known/openid-configuration]", googleAuth.toString());
     }
 }

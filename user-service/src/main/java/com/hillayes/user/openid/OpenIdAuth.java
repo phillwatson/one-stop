@@ -3,6 +3,10 @@ package com.hillayes.user.openid;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.repository.UserRepository;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -12,14 +16,27 @@ import javax.ws.rs.NotAuthorizedException;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Provides implementations to perform Auth-Code Flow authentication.
+ * This abstract class provides the code common to all implementations, and
+ * subclasses must provide the interaction with the auth-provider's API.
+ */
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 public abstract class OpenIdAuth {
-    @Inject
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
-    @Inject
-    PasswordCrypto passwordCrypto;
+    private PasswordCrypto passwordCrypto;
 
+    /**
+     * Implements must call the auth-provider's auth-code verification endpoint to
+     * exchange the given auth-code for access-token, refresh-token and the user's
+     * ID-token (a JWT containing information pertaining to the authenticated user).
+     *
+     * @param authCode the auth-code to be verified.
+     * @return the JWT claims from the authenticated user's ID-Token.
+     * @throws InvalidJwtException if the obtained ID-token is not valid.
+     */
     public abstract JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException;
 
     public User oauthLogin(String authCode) {

@@ -49,16 +49,10 @@ import java.time.Duration;
  * The value is case-sensitive.
  * </dd>
  * </dl>
- * After creating the JWT, sign it using the Elliptic Curve Digital Signature Algorithm (ECDSA) with the P-256 curve and the SHA-256 hash algorithm.
+ * After creating the JWT, sign it using the Elliptic Curve Digital Signature Algorithm (ECDSA)
+ * with the P-256 curve and the SHA-256 hash algorithm.
  */
 public class ClientSecretGenerator {
-    // aka - bundle ID
-    private static final String CLIENT_ID = "velopaymentsHibanaPayQA";
-    private static final String TEAM_ID = "S5474NHS5U";
-    private static final String KEY_ID = "69V4Q9N572";
-
-    private static final SignatureAlgorithm ALGORITHM = SignatureAlgorithm.ES256;
-
     public PrivateKey readPrivateKey(String file,
                                      String algorithm) throws GeneralSecurityException, IOException {
         return readPrivateKey(file, SignatureAlgorithm.fromAlgorithm(algorithm));
@@ -101,17 +95,5 @@ public class ClientSecretGenerator {
             .keyId(kid)
             .algorithm(algorithm)
             .sign(privateKey);
-    }
-
-    public static void main(String[] args) throws IOException, GeneralSecurityException {
-        ClientSecretGenerator instance = new ClientSecretGenerator();
-
-        PrivateKey privateKey = instance.readPrivateKey("apple-id.p8", ALGORITHM);
-
-        String signedToken = instance.createSignedToken(privateKey,
-            KEY_ID, TEAM_ID, CLIENT_ID, "https://appleid.apple.com",
-            Duration.ofHours(15), ALGORITHM);
-        System.out.println(signedToken);
-
     }
 }

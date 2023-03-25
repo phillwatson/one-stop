@@ -5,7 +5,8 @@ import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.openid.AuthProvider;
-import com.hillayes.user.openid.google.GoogleAuth;
+import com.hillayes.user.openid.NamedAuthProvider;
+import com.hillayes.user.openid.OpenIdAuth;
 import com.hillayes.user.repository.UserRepository;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
@@ -63,7 +64,8 @@ public class AuthService {
     JWTParser jwtParser;
 
     @Inject
-    GoogleAuth googleAuth;
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    OpenIdAuth googleAuth;
 
     private RotatedJwkSet jwkSet;
 

@@ -44,7 +44,9 @@ public interface OpenIdConfiguration {
 
         /**
          * The unique secret assigned to our application by the Auth-Provider.
-         * Used to verify communications with that Auth-Provider.
+         * Used to verify communications with that Auth-Provider. This is optional
+         * as, for some providers (e.g. Apple), the client-secret is a generated
+         * value.
          */
         Optional<String> clientSecret();
 

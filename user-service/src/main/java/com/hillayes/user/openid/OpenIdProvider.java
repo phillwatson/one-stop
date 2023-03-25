@@ -1,9 +1,14 @@
 package com.hillayes.user.openid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.JwtValidator;
+import com.hillayes.user.openid.google.GoogleAuth;
+import com.hillayes.user.openid.google.GoogleIdRestApi;
 import com.hillayes.user.openid.rest.OpenIdConfigResponse;
+import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -14,12 +19,12 @@ import java.net.URL;
 /**
  * A collection of Producer/Factory methods to inject and configure the OpenID
  * auth provider implementations. Each configuration can be injected using the
- * Qualifier @AuthProviderNamed. For example; to inject a JwtValidator for
+ * Qualifier @NamedAuthProvider. For example; to inject a JwtValidator for
  * validating Google ID-Tokens:
  *
  * <pre>
- *   @Inject
- *   @AuthProviderNamed(AuthProvider.GOOGLE)
+ *   &amp;Inject
+ *   &amp;NamedAuthProvider(AuthProvider.GOOGLE)
  *   JwtValidator jwtValidator;
  * </pre>
  */
@@ -32,35 +37,65 @@ public class OpenIdProvider {
     public OpenIdConfiguration openIdConfiguration;
 
     /**
-     * Provides the open-id configuration for Google-ID.
+     * Provides the OpenIdAuth implementation for the Google auth-provider. The
+     * returned instance will be initialised with the Open-ID configuration and
+     * JwtValidator appropriate for Google.
      */
     @Produces
-    @AuthProviderNamed(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    @Singleton
+    public OpenIdAuth googleAuth(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,
+                                 @NamedAuthProvider(AuthProvider.GOOGLE) JwtValidator jwtValidator,
+                                 @RestClient GoogleIdRestApi googleIdRestApi,
+                                 UserRepository userRepository,
+                                 PasswordCrypto passwordCrypto) {
+        log.debug("Retrieving Google OpenId Authenticator");
+        return new GoogleAuth(config, jwtValidator, googleIdRestApi, userRepository, passwordCrypto);
+    }
+
+    /**
+     * Provides the open-id configuration for the Google auth-provider.
+     */
+    @Produces
+    @NamedAuthProvider(AuthProvider.GOOGLE)
     @Singleton
     public OpenIdConfiguration.AuthConfig googleConfig() {
         log.debug("Retrieving Google OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GOOGLE);
     }
 
+    /**
+     * Provides the open-id configuration for the Apple auth-provider.
+     */
     @Produces
-    @AuthProviderNamed(AuthProvider.APPLE)
+    @NamedAuthProvider(AuthProvider.APPLE)
     @Singleton
     public OpenIdConfiguration.AuthConfig appleConfig() {
         log.debug("Retrieving Apple OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.APPLE);
     }
 
+    /**
+     * Provides the JwtValidator instance for validating ID-Tokens from the Google
+     * auth-provider. The validator will use the Json Web Key-Set referenced by the
+     * URI found in Google's "well-known" config resource.
+     */
     @Produces
-    @AuthProviderNamed(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GOOGLE)
     @Singleton
-    public JwtValidator googleValidator(@AuthProviderNamed(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config) throws IOException {
+    public JwtValidator googleValidator(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config) throws IOException {
         return jwtValidator(config);
     }
 
     @Produces
-    @AuthProviderNamed(AuthProvider.APPLE)
+    /**
+     * Provides the JwtValidator instance for validating ID-Tokens from the Apple
+     * auth-provider. The validator will use the Json Web Key-Set referenced by the
+     * URI found in Apple's "well-known" config resource.
+     */
+    @NamedAuthProvider(AuthProvider.APPLE)
     @Singleton
-    public JwtValidator appleValidator(@AuthProviderNamed(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config) throws IOException {
+    public JwtValidator appleValidator(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config) throws IOException {
         return jwtValidator(config);
     }
 

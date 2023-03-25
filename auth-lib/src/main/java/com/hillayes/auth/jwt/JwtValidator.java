@@ -10,20 +10,19 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
 
 public class JwtValidator {
-    private final HttpsJwks keySet;
     private final JwtConsumer jwtConsumer;
 
     public JwtValidator(String location, String issuer, String audience) {
-        keySet = new HttpsJwks(location);
+        HttpsJwks keySet = new HttpsJwks(location);
+
         JwtConsumerBuilder builder = new JwtConsumerBuilder()
-            .setRequireExpirationTime() // the JWT must have an expiration time
-            .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
-            .setRequireSubject() // the JWT must have a subject claim
-            .setVerificationKeyResolver(new HttpsJwksVerificationKeyResolver(keySet)) // verify the signature with the public key
+            .setRequireExpirationTime()
+            .setAllowedClockSkewInSeconds(30)
+            .setRequireSubject()
+            .setVerificationKeyResolver(new HttpsJwksVerificationKeyResolver(keySet))
             .setJwsAlgorithmConstraints(
-                // only allow the expected signature algorithm(s) in the given context
-                AlgorithmConstraints.ConstraintType.PERMIT,
-                AlgorithmIdentifiers.RSA_USING_SHA256 // which is only RS256 here
+                // only allow the expected signature algorithm(s)
+                AlgorithmConstraints.ConstraintType.PERMIT, AlgorithmIdentifiers.RSA_USING_SHA256
             );
 
         if (issuer != null) builder.setExpectedIssuer(issuer); // whom the JWT needs to have been issued by

@@ -1,34 +1,41 @@
 package com.hillayes.user.openid.google;
 
+import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.JwtValidator;
 import com.hillayes.user.openid.AuthProvider;
-import com.hillayes.user.openid.AuthProviderNamed;
+import com.hillayes.user.openid.NamedAuthProvider;
 import com.hillayes.user.openid.OpenIdAuth;
 import com.hillayes.user.openid.OpenIdConfiguration;
 import com.hillayes.user.openid.rest.TokenExchangeRequest;
 import com.hillayes.user.openid.rest.TokenExchangeResponse;
+import com.hillayes.user.repository.UserRepository;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-@ApplicationScoped
 @Slf4j
 public class GoogleAuth extends OpenIdAuth {
-    @Inject
-    @AuthProviderNamed(AuthProvider.GOOGLE)
-    OpenIdConfiguration.AuthConfig config;
+    private final OpenIdConfiguration.AuthConfig config;
 
-    @Inject
-    @AuthProviderNamed(AuthProvider.GOOGLE)
-    JwtValidator jwtValidator;
+    private final JwtValidator jwtValidator;
 
-    @Inject
-    @RestClient
-    GoogleIdRestApi googleIdRestApi;
+    private final GoogleIdRestApi googleIdRestApi;
+
+    public GoogleAuth(OpenIdConfiguration.AuthConfig config,
+                      JwtValidator jwtValidator,
+                      GoogleIdRestApi googleIdRestApi,
+                      UserRepository userRepository,
+                      PasswordCrypto passwordCrypto) {
+        super(userRepository, passwordCrypto);
+        this.config = config;
+        this.jwtValidator = jwtValidator;
+        this.googleIdRestApi = googleIdRestApi;
+    }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {
         TokenExchangeRequest request = TokenExchangeRequest.builder()

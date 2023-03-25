@@ -16,6 +16,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Retention(RUNTIME)
 @Target({METHOD, FIELD, PARAMETER, TYPE})
-public @interface AuthProviderNamed {
+public @interface NamedAuthProvider {
+    /**
+     * The auth-provider on which to qualifier the injected bean.
+     */
     AuthProvider value();
 }
