@@ -1,7 +1,8 @@
 package com.hillayes.user.openid;
 
 /**
- * Identifies the OpenID auth-provider.
+ * Identifies the Open-ID auth-provider to which this application has
+ * been registered.
  */
 public enum AuthProvider {
     GOOGLE,

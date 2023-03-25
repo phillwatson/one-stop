@@ -1,6 +1,8 @@
 package com.hillayes.user.openid.google;
 
 import com.hillayes.auth.jwt.JwtValidator;
+import com.hillayes.user.openid.AuthProvider;
+import com.hillayes.user.openid.AuthProviderNamed;
 import com.hillayes.user.openid.OpenIdAuth;
 import com.hillayes.user.openid.OpenIdConfiguration;
 import com.hillayes.user.openid.rest.TokenExchangeRequest;
@@ -12,17 +14,16 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 @ApplicationScoped
 @Slf4j
 public class GoogleAuth extends OpenIdAuth {
     @Inject
-    @Named("googleConfig")
+    @AuthProviderNamed(AuthProvider.GOOGLE)
     OpenIdConfiguration.AuthConfig config;
 
     @Inject
-    @Named("googleValidator")
+    @AuthProviderNamed(AuthProvider.GOOGLE)
     JwtValidator jwtValidator;
 
     @Inject
@@ -35,13 +36,16 @@ public class GoogleAuth extends OpenIdAuth {
             .redirectUri(config.redirectUri())
             .code(authCode)
             .clientId(config.clientId())
-            .clientSecret(config.clientSecret())
+            .clientSecret(config.clientSecret().get())
             .build();
 
-//        TokenExchangeResponse response = googleIdRestApi.exchangeToken(request);
-//        log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
-//
-//        return jwtValidator.verify(response.idToken);
-        return null;
+        TokenExchangeResponse response = googleIdRestApi.exchangeToken(request);
+        log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
+
+        return jwtValidator.verify(response.idToken);
+    }
+
+    public String toString() {
+        return "OpenIdAuth["+ config.configUri() + "]";
     }
 }

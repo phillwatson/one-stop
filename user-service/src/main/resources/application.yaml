@@ -68,12 +68,12 @@ one-stop:
       # secret: 'this will be passed in via docker env'
 
     openid:
-      google:
+      GOOGLE:
         config-uri: 'https://accounts.google.com/.well-known/openid-configuration'
         client-id: '284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'
         redirect-uri: 'http://localhost/api/v1/auth/validate/google'
 
-      apple:
+      APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         client-id: 'xxxxxxxxxxxxxx'
         redirect-uri: 'http://localhost/api/v1/auth/validate/apple'
@@ -90,7 +90,7 @@ one-stop:
       xsrf:
         secret: this is a secret for xsrf tokens
       openid:
-        google:
+        GOOGLE:
           client-secret: 'a-google-generated-secret'
-        apple:
+        APPLE:
           client-secret: 'an-apple-generated-secret'
