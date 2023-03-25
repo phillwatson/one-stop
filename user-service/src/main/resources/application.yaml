@@ -89,5 +89,8 @@ one-stop:
     auth:
       xsrf:
         secret: this is a secret for xsrf tokens
-      google:
-        client-secret: 'a-google-generated-secret'
+      openid:
+        google:
+          client-secret: 'a-google-generated-secret'
+        apple:
+          client-secret: 'an-apple-generated-secret'

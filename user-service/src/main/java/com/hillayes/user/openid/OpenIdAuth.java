@@ -2,7 +2,6 @@ package com.hillayes.user.openid;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
-import com.hillayes.user.events.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
@@ -10,7 +9,6 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,9 +19,6 @@ public abstract class OpenIdAuth {
 
     @Inject
     PasswordCrypto passwordCrypto;
-
-    @Inject
-    UserEventSender userEventSender;
 
     public abstract JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException;
 
@@ -55,12 +50,6 @@ public abstract class OpenIdAuth {
                         log.debug("User's OpenID is disabled");
                         return new NotAuthorizedException("jwt");
                     });
-
-                // take the opportunity to update the email address
-                if (!Objects.equals(user.getEmail(), email)) {
-                    user.setEmail(email);
-                    userEventSender.sendUserUpdated(user);
-                }
             } else {
                 log.debug("Did not find user by OpenID subject [issuer: {}, subject: {}]", issuer, subject);
 
