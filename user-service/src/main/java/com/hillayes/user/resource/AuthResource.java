@@ -1,8 +1,8 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.xsrf.XsrfGenerator;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.model.LoginRequest;
-import com.hillayes.user.openid.AuthProvider;
 import com.hillayes.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

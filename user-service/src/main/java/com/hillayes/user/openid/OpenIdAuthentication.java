@@ -1,12 +1,16 @@
 package com.hillayes.user.openid;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.openid.AuthProvider;
+import com.hillayes.openid.OpenIdAuth;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 import java.util.Set;
@@ -17,49 +21,36 @@ import java.util.UUID;
  * This abstract class provides the code common to all implementations, and
  * subclasses must provide the interaction with the auth-provider's API.
  */
+@ApplicationScoped
 @Slf4j
-public abstract class OpenIdAuth {
+public class OpenIdAuthentication {
     @Inject
     UserRepository userRepository;
 
     @Inject
     PasswordCrypto passwordCrypto;
 
+    @Inject @Any
+    Instance<OpenIdAuth> openIdAuths;
+
     /**
-     * Used to select the OpenIdAuth implementation based on the given AuthProvider
-     * value. We could inject each implementation explicitly, but that would require
-     * additional work when new implementations are introduced. Instead, we inject
-     * all instances using the javax.enterprise.inject.Instance<OpenIdAuth>, and use
-     * this method to identify the appropriate instance. For example;
-     * <pre>
-     *     \@Inject \@Any
-     *     Instance<OpenIdAuth> openIdAuths;
-     * </pre>
-     * See OpenIdAuthTest for more examples.
-     *
+     * Locates the OpenIdAuthentication instance that can handle authentication for the
+     * identified AuthProvider.
      * @param authProvider the AuthProvider value that identifies the implementation.
-     * @return true if this instance supports the given AuthProvider.
-     *
-     *
+     * @return the identified OpenIdAuthentication provider.
      */
-    public abstract boolean isFor(AuthProvider authProvider);
+    private OpenIdAuth getOpenIdAuth(AuthProvider authProvider) {
+        return openIdAuths.stream()
+            .filter(instance -> instance.isFor(authProvider))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("AuthProvider not implemented:  " + authProvider));
+    }
 
-    /**
-     * Implements must call the auth-provider's auth-code verification endpoint to
-     * exchange the given auth-code for access-token, refresh-token and the user's
-     * ID-token (a JWT containing information pertaining to the authenticated user).
-     *
-     * @param authCode the auth-code to be verified.
-     * @return the JWT claims from the authenticated user's ID-Token.
-     * @throws InvalidJwtException if the obtained ID-token is not valid.
-     */
-    public abstract JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException;
-
-    public User oauthLogin(String authCode) {
+    public User oauthLogin(AuthProvider authProvider, String authCode) {
         try {
             log.info("OAuth login");
 
-            JwtClaims idToken = exchangeAuthToken(authCode);
+            JwtClaims idToken = getOpenIdAuth(authProvider).exchangeAuthToken(authCode);
             if (log.isTraceEnabled()) {
                 idToken.getClaimNames().forEach(name -> log.trace("ID Token [{}: {}]", name, idToken.getClaimValue(name)));
             }

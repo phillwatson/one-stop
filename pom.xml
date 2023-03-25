@@ -25,6 +25,8 @@
         <module>events-lib</module>
         <module>outbox-lib</module>
         <module>auth-lib</module>
+        <module>openid-lib</module>
+
         <module>audit-service</module>
         <module>email-service</module>
         <module>rail-service</module>
@@ -101,6 +103,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>auth-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>openid-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

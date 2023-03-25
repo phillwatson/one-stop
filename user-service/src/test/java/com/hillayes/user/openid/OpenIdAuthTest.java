@@ -1,5 +1,8 @@
 package com.hillayes.user.openid;
 
+import com.hillayes.openid.AuthProvider;
+import com.hillayes.openid.NamedAuthProvider;
+import com.hillayes.openid.OpenIdAuth;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
