@@ -1,6 +1,5 @@
 package com.hillayes.openid.google;
 
-import com.hillayes.auth.jwt.JwtValidator;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeRequest;

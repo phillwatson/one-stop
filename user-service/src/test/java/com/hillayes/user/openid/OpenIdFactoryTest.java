@@ -1,7 +1,7 @@
 package com.hillayes.user.openid;
 
-import com.hillayes.auth.jwt.JwtValidator;
 import com.hillayes.openid.AuthProvider;
+import com.hillayes.openid.JwtValidator;
 import com.hillayes.openid.NamedAuthProvider;
 import com.hillayes.openid.OpenIdConfiguration;
 import com.hillayes.openid.rest.OpenIdTokenApi;

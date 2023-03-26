@@ -1,7 +1,6 @@
 package com.hillayes.openid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.auth.jwt.JwtValidator;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import lombok.extern.slf4j.Slf4j;
