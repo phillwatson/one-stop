@@ -12,12 +12,6 @@ public class OpenIdConfigResponse {
     @JsonProperty("jwks_uri")
     public String jwksUri;
 
-    @JsonProperty("id_token")
-    public String idToken;
-
-    @JsonProperty("scope")
-    public String scope;
-
-    @JsonProperty("token_type")
-    public String tokenType;
+    @JsonProperty("token_endpoint")
+    public String tokenEndpoint;
 }

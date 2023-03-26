@@ -10,14 +10,20 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
  */
 public interface OpenIdAuth {
     /**
-     * Used to select the OpenIdAuth implementation based on the given AuthProvider
-     * value. We could inject each implementation explicitly, but that would require
-     * additional work when new implementations are introduced. Instead, we inject
-     * all instances using the javax.enterprise.inject.Instance<OpenIdAuth>, and use
+     * Used when we have a collection of OpenIdAuth implementations, and we want to
+     * select the correct instance based on the given AuthProvider value.
+     * <p>
+     * We could use the NamedAuthProvider qualifier to inject specific instances, but
+     * that is only appropriate when we know the instance we want at compile time.
+     * <p>
+     * We could also inject all implementations explicitly and individually, but that
+     * would require additional work when new implementations are introduced.
+     * <p>
+     * Instead, we inject all instances using the class Instance<OpenIdAuth>, and use
      * this method to identify the appropriate instance. For example;
      * <pre>
      *     \@Inject \@Any
-     *     Instance<OpenIdAuth> openIdAuths;
+     *     javax.enterprise.inject.Instance<OpenIdAuth> openIdAuths;
      * </pre>
      * See OpenIdAuthTest for more examples.
      *

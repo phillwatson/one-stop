@@ -9,6 +9,11 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
 
+/**
+ * Maintains a cached list of the Json Web Keys found at the given URI,
+ * periodically refreshing the cache. With those public keys it can
+ * parse JWT tokens and verify the claims and signatures of those tokens.
+ */
 public class JwtValidator {
     private final JwtConsumer jwtConsumer;
 
@@ -32,6 +37,13 @@ public class JwtValidator {
             .build(); // create the JwtConsumer instance
     }
 
+    /**
+     * Parse and verify the claims of the given JWT (given as a raw string).
+     *
+     * @param jwt the Json web Token to be parsed and verified.
+     * @return the claims found in the given JWT.
+     * @throws InvalidJwtException if the token is invalid.
+     */
     public JwtClaims verify(String jwt) throws InvalidJwtException {
         //  Validate the JWT and process it to the Claims
         return jwtConsumer.processToClaims(jwt);

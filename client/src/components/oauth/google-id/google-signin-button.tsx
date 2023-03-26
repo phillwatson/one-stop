@@ -7,7 +7,7 @@ interface Props {
 
 export default function GoogleSignInButton(props: Props) {
   function buttonClick() {
-    var uri = 'https://accounts.google.com/o/oauth2/auth' +
+    var uri = 'https://accounts.google.com/o/oauth2/v2/auth' +
                 '?response_type=code' +
                 '&client_id=' + props.clientId +
                 '&scope=openid profile email' +

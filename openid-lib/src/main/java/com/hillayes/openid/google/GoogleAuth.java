@@ -1,14 +1,11 @@
 package com.hillayes.openid.google;
 
 import com.hillayes.auth.jwt.JwtValidator;
-import com.hillayes.openid.AuthProvider;
-import com.hillayes.openid.NamedAuthProvider;
-import com.hillayes.openid.OpenIdAuth;
-import com.hillayes.openid.OpenIdConfiguration;
+import com.hillayes.openid.*;
+import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeRequest;
 import com.hillayes.openid.rest.TokenExchangeResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
@@ -33,8 +30,8 @@ public class GoogleAuth implements OpenIdAuth {
     JwtValidator jwtValidator;
 
     @Inject
-    @RestClient
-    GoogleIdRestApi googleIdRestApi;
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    OpenIdTokenApi openIdTokenApi;
 
     @Override
     public boolean isFor(AuthProvider authProvider) {
@@ -50,7 +47,7 @@ public class GoogleAuth implements OpenIdAuth {
             .clientSecret(config.clientSecret().get())
             .build();
 
-        TokenExchangeResponse response = googleIdRestApi.exchangeToken(request);
+        TokenExchangeResponse response = openIdTokenApi.exchangeToken(request);
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
         return jwtValidator.verify(response.idToken);

@@ -9,9 +9,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * A qualifier for naming an OpenID Auth Provider implementation, and
- * its configuration.
+ * its configuration beans.
  *
- * See OpenIdProvider and OpenIdProviderTest for examples of its use.
+ * See OpenIdFactory and OpenIdFactoryTest for examples of its use.
  */
 @Qualifier
 @Retention(RUNTIME)

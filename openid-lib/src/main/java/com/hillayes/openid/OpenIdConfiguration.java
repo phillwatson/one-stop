@@ -11,7 +11,7 @@ import java.util.Optional;
  * registered properties used to identify the application when communicating
  * with the Auth-Provider.
  * <p>
- * See OpenIdProvider for producer methods to inject configurations
+ * See OpenIdFactory for producer methods to inject configurations
  * required for a given Auth Provider.
  */
 @ConfigMapping(prefix = "one-stop.auth.openid")
