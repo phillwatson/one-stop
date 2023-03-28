@@ -10,7 +10,7 @@ public class TokenExchangeResponse {
     public String refreshToken;
 
     @JsonProperty("expiresIn")
-    public String expiresIn;
+    public Long expiresIn;
 
     @JsonProperty("id_token")
     public String idToken;

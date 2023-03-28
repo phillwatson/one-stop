@@ -16,13 +16,13 @@ import java.net.URL;
 /**
  * A collection of Producer/Factory methods to inject and configure the OpenID
  * auth provider implementations. Each configuration can be injected using the
- * Qualifier @NamedAuthProvider. For example; to inject a JwtValidator for
+ * Qualifier @NamedAuthProvider. For example; to inject a IdTokenValidator for
  * validating Google ID-Tokens:
  *
  * <pre>
  *   \@Inject
  *   \@NamedAuthProvider(AuthProvider.GOOGLE)
- *   JwtValidator jwtValidator;
+ *   IdTokenValidator idTokenValidator;
  * </pre>
  */
 @Slf4j
@@ -86,16 +86,16 @@ public class OpenIdFactory {
     }
 
     /**
-     * Provides the JwtValidator instance for validating ID-Tokens from the Google
+     * Provides the IdTokenValidator instance for validating ID-Tokens from the Google
      * auth-provider. The validator will use the Json Web Key-Set referenced by the
      * URI found in Google's "well-known" config resource.
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GOOGLE)
     @Singleton
-    public JwtValidator googleValidator(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,
-                                        @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
-        return jwtValidator(config, openIdConfig);
+    public IdTokenValidator googleValidator(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,
+                                            @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
+        return idTokenValidator(config, openIdConfig);
     }
 
     /**
@@ -139,22 +139,22 @@ public class OpenIdFactory {
     }
 
     /**
-     * Provides the JwtValidator instance for validating ID-Tokens from the Apple
+     * Provides the IdTokenValidator instance for validating ID-Tokens from the Apple
      * auth-provider. The validator will use the Json Web Key-Set referenced by the
      * URI found in Apple's "well-known" config resource.
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
     @Singleton
-    public JwtValidator appleValidator(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,
-                                       @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
-        return jwtValidator(config, openIdConfig);
+    public IdTokenValidator appleValidator(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,
+                                           @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
+        return idTokenValidator(config, openIdConfig);
     }
 
-    private JwtValidator jwtValidator(OpenIdConfiguration.AuthConfig config,
-                                      OpenIdConfigResponse openIdConfig) {
+    private IdTokenValidator idTokenValidator(OpenIdConfiguration.AuthConfig config,
+                                            OpenIdConfigResponse openIdConfig) {
         log.debug("Using key-set [url: {}]", openIdConfig.jwksUri);
-        return new JwtValidator(openIdConfig.jwksUri, openIdConfig.issuer, config.clientId());
+        return new IdTokenValidator(openIdConfig.jwksUri, openIdConfig.issuer, config.clientId());
     }
 
     private OpenIdConfigResponse openApiConfig(OpenIdConfiguration.AuthConfig config) throws IOException {

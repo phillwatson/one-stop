@@ -1,12 +1,14 @@
-package com.hillayes.auth.jwt;
+package com.hillayes.openid.apple;
 
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtSignatureException;
 import io.smallrye.jwt.util.KeyUtils;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.io.IOException;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.time.Duration;
 
 /**
@@ -52,32 +54,53 @@ import java.time.Duration;
  * After creating the JWT, sign it using the Elliptic Curve Digital Signature Algorithm (ECDSA)
  * with the P-256 curve and the SHA-256 hash algorithm.
  */
+@ApplicationScoped
 public class ClientSecretGenerator {
-    public PrivateKey readPrivateKey(String file,
-                                     String algorithm) throws GeneralSecurityException, IOException {
-        return readPrivateKey(file, SignatureAlgorithm.fromAlgorithm(algorithm));
-    }
-
+    /**
+     * Reads a private key from the PEM (Privacy Enhanced Mail) file whose path is given.
+     *
+     * @param file the path of the PEM file - specified as per [Class.getResourceAsStream].
+     * @param algorithm the key signature algorithm.
+     * @return the resolved Private Key.
+     */
     public PrivateKey readPrivateKey(String file,
                                      SignatureAlgorithm algorithm) throws GeneralSecurityException, IOException {
         return KeyUtils.readPrivateKey(file, algorithm);
     }
 
-    public String createSignedToken(PrivateKey privateKey,
-                                    String kid,
-                                    String issuer,
-                                    String subject,
-                                    String audience,
-                                    Duration duration,
-                                    String algorithm) throws JwtSignatureException {
-        return createSignedToken(privateKey, kid, issuer, subject, audience, duration,
-            SignatureAlgorithm.fromAlgorithm(algorithm));
+    /**
+     * Reads a private key from the given PEM (Privacy Enhanced Mail) payload.
+     *
+     * @param pem the path of the PEM payload.
+     * @param algorithm the key signature algorithm.
+     * @return the resolved Private Key.
+     */
+    public PrivateKey decodePrivateKey(String pem,
+                                       SignatureAlgorithm algorithm) throws GeneralSecurityException {
+        return KeyUtils.decodePrivateKey(pem, algorithm);
     }
 
-    public String createSignedToken(PrivateKey privateKey,
+    /**
+     * Creates a Json Web Token with the given claims and signs it with the given
+     * Private Key.
+     *
+     * The *kid* parameter is allocated by Apple and will be placed in the generated
+     * JWT's headers. The recipient of the JWT will then use that value to locate the
+     * Public Key by which the JWT's signature can be verified.
+     *
+     * @param privateKey the Private Key with which to sign to the generated JWT.
+     * @param kid the Key Identifier to be placed in the JWT headers.
+     * @param teamId the JWT issuer claim value. (e.g. the Team ID)
+     * @param clientId the JWT subject claim value. (e.g. the Client ID)
+     * @param audience the JWT audience claim value. (e.g. https://appleid.apple.com)
+     * @param duration the duration to be used for the JWT expiry claim value.
+     * @param algorithm the algorithm to be used to sign the generated JWT.
+     * @return a string holding the encoded signed JWT.
+     */
+    public String createClientSecret(PrivateKey privateKey,
                                     String kid,
-                                    String issuer,
-                                    String subject,
+                                    String teamId,
+                                    String clientId,
                                     String audience,
                                     Duration duration,
                                     SignatureAlgorithm algorithm) throws JwtSignatureException {
@@ -85,8 +108,8 @@ public class ClientSecretGenerator {
         // openssl pkey -pubout -in apple-id.p8
 
         return Jwt.claims()
-            .issuer(issuer)
-            .subject(subject)
+            .issuer(teamId)
+            .subject(clientId)
             .audience(audience)
             .issuedAt(System.currentTimeMillis() / 1000L)
             .expiresIn(duration)

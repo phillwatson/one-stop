@@ -3,6 +3,8 @@ package com.hillayes.openid;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import java.security.GeneralSecurityException;
+
 /**
  * Provides implementations to perform Auth-Code Flow authentication.
  * This abstract class provides the code common to all implementations, and
@@ -41,5 +43,5 @@ public interface OpenIdAuth {
      * @return the JWT claims from the authenticated user's ID-Token.
      * @throws InvalidJwtException if the obtained ID-token is not valid.
      */
-    JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException;
+    JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException, GeneralSecurityException;
 }

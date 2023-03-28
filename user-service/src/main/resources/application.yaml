@@ -75,8 +75,9 @@ one-stop:
 
       APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
-        client-id: 'xxxxxxxxxxxxxx'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/apple'
+        client-id: 'my-apple-registered-client-id'
+        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
+        team-id: 'my-apple-team-id'
 
 "%test":
   quarkus:
@@ -93,4 +94,5 @@ one-stop:
         GOOGLE:
           client-secret: 'a-google-generated-secret'
         APPLE:
+          key-id: 'my-apple-key-id'
           client-secret: 'an-apple-generated-secret'

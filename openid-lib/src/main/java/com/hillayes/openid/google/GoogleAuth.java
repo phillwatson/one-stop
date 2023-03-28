@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 /**
  * Provides the OpenIdAuth implementation for the Google auth-provider. The
- * instance will be initialised with the Open-ID configuration and JwtValidator
+ * instance will be initialised with the Open-ID configuration and IdTokenValidator
  * appropriate for Google.
  */
 @ApplicationScoped
@@ -26,7 +26,7 @@ public class GoogleAuth implements OpenIdAuth {
 
     @Inject
     @NamedAuthProvider(AuthProvider.GOOGLE)
-    JwtValidator jwtValidator;
+    IdTokenValidator idTokenValidator;
 
     @Inject
     @NamedAuthProvider(AuthProvider.GOOGLE)
@@ -49,7 +49,7 @@ public class GoogleAuth implements OpenIdAuth {
         TokenExchangeResponse response = openIdTokenApi.exchangeToken(request);
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
-        return jwtValidator.verify(response.idToken);
+        return idTokenValidator.verify(response.idToken);
     }
 
     public String toString() {

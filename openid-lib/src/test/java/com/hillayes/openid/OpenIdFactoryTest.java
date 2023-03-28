@@ -1,9 +1,5 @@
-package com.hillayes.user.openid;
+package com.hillayes.openid;
 
-import com.hillayes.openid.AuthProvider;
-import com.hillayes.openid.JwtValidator;
-import com.hillayes.openid.NamedAuthProvider;
-import com.hillayes.openid.OpenIdConfiguration;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -20,7 +16,7 @@ public class OpenIdFactoryTest {
 
     @Inject
     @NamedAuthProvider(AuthProvider.GOOGLE)
-    JwtValidator googleValidator;
+    IdTokenValidator googleValidator;
 
     @Inject
     @NamedAuthProvider(AuthProvider.GOOGLE)
@@ -32,7 +28,7 @@ public class OpenIdFactoryTest {
 
     @Inject
     @NamedAuthProvider(AuthProvider.APPLE)
-    JwtValidator appleValidator;
+    IdTokenValidator appleValidator;
 
     @Inject
     @NamedAuthProvider(AuthProvider.APPLE)

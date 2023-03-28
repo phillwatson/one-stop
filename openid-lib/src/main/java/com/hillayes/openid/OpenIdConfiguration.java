@@ -58,5 +58,31 @@ public interface OpenIdConfiguration {
          * authenticated user's details.
          */
         String redirectUri();
+
+        /**
+         * The Public Key identifier allocated by the Auth-Provider (Apple). This
+         * will be placed in the header of the generated client-secret JWT. The
+         * Auth-Provider will use this to identify the public key used to verify
+         * the signature of the client-secret JWT.
+         *
+         * Note: This is only required for Apple.
+         */
+        Optional<String> keyId();
+
+        /**
+         * The unique identifier assigned to our application by the Auth-Provider.
+         * See https://developer.apple.com/help/account/manage-your-team/locate-your-team-id/
+         *
+         * Note: This is only required for Apple.
+         */
+        Optional<String> teamId();
+
+        /**
+         * The private key used to sign the client-secret JWT. This is a PKCS#8
+         * formatted private key.
+         *
+         * Note: This is only required for Apple.
+         */
+        Optional<String> privateKey();
     }
 }

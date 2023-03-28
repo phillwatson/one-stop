@@ -14,10 +14,10 @@ import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
  * periodically refreshing the cache. With those public keys it can
  * parse JWT tokens and verify the claims and signatures of those tokens.
  */
-public class JwtValidator {
+public class IdTokenValidator {
     private final JwtConsumer jwtConsumer;
 
-    public JwtValidator(String location, String issuer, String audience) {
+    public IdTokenValidator(String location, String issuer, String audience) {
         HttpsJwks keySet = new HttpsJwks(location);
 
         JwtConsumerBuilder builder = new JwtConsumerBuilder()
