@@ -117,7 +117,7 @@ public class OpenIdAuthentication {
             }
             return user;
         } catch (Exception e) {
-            log.error("Failed to verify refresh token.", e);
+            log.error("Failed to verify auth token.", e);
             throw new NotAuthorizedException("jwt");
         }
     }

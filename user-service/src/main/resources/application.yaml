@@ -10,6 +10,10 @@ mp:
       cookie: 'access_token'
 
 smallrye:
+  config:
+    mapping:
+      validate-unknown: false # ignore unknown config properties
+
   jwt:
     jwks:
       refresh-interval: 15
@@ -75,9 +79,12 @@ one-stop:
 
       APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
-        client-id: 'my-apple-registered-client-id'
-        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
         team-id: 'my-apple-team-id'
+        client-id: 'my-apple-registered-client-id'
+        key-id: 'my-apple-key-id'
+        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
+        # not a real private key, just for testing
+        private-key: "-----BEGIN PRIVATE KEY-----\nMEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCA6nm1eLiBDy75X8MVo\ncS9FmrW/F0Aivh5YGZQ0MpZkAQ==\n-----END PRIVATE KEY-----"
 
 "%test":
   quarkus:
