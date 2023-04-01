@@ -65,7 +65,7 @@ public class UserConsentResource {
             .id(consent.getId())
             .institutionId(consent.getInstitutionId())
             .institutionName(institution.name)
-            .dateAccepted(consent.getDateAccepted())
+            .dateGiven(consent.getDateGiven())
             .agreementExpires(consent.getAgreementExpires())
             .maxHistory(consent.getMaxHistory())
             .status(consent.getStatus())
@@ -108,19 +108,19 @@ public class UserConsentResource {
     @GET
     @Path("/response")
     @PermitAll
-    public Response accepted(@QueryParam("ref") String userConsentId,
-                             @QueryParam("error") String error,
-                             @QueryParam("details") String details) {
+    public Response consentResponse(@QueryParam("ref") String userConsentId,
+                                    @QueryParam("error") String error,
+                                    @QueryParam("details") String details) {
         // A typical consent callback request:
         // http://5.81.68.243/api/v1/rails/consents/response
         // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
         // &error=UserCancelledSession
         // &details=User+cancelled+the+session.
 
-        log.info("User consent accepted [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
+        log.info("User consent response [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
         UUID consentId = UUID.fromString(userConsentId);
         if ((error == null) || (error.isBlank())) {
-            userConsentService.consentAccepted(consentId);
+            userConsentService.consentGiven(consentId);
         } else {
             userConsentService.consentDenied(consentId, error, details);
         }

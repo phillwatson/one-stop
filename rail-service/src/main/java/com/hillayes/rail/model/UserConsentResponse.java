@@ -28,7 +28,7 @@ public class UserConsentResponse {
 
     private List<Account> accounts;
 
-    private Instant dateAccepted;
+    private Instant dateGiven;
 
     /**
      * The date-time on which the agreement expires.

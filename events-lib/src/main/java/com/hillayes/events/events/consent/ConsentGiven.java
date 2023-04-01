@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsentAccepted {
+public class ConsentGiven {
     /**
      * The ID of the user from whom consent is being obtained.
      */
@@ -25,10 +25,10 @@ public class ConsentAccepted {
     private UUID userId;
 
     /**
-     * The date-time on which the consent was accepted.
+     * The date-time on which the consent was given.
      */
     @NotNull
-    private Instant dateAccepted;
+    private Instant dateGiven;
 
     /**
      * The ID of the consent record held user-consent table.

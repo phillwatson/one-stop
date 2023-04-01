@@ -1,7 +1,7 @@
 package com.hillayes.rail.events;
 
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.consent.ConsentAccepted;
+import com.hillayes.events.events.consent.ConsentGiven;
 import com.hillayes.events.events.consent.ConsentCancelled;
 import com.hillayes.events.events.consent.ConsentDenied;
 import com.hillayes.events.events.consent.ConsentInitiated;
@@ -33,12 +33,12 @@ public class ConsentEventSender {
             .build());
     }
 
-    public void sendConsentAccepted(UserConsent userConsent) {
-        log.debug("Sending ConsentAccepted event [consentId: {}, userId: {}, institutionId: {}]",
+    public void sendConsentGiven(UserConsent userConsent) {
+        log.debug("Sending ConsentGiven event [consentId: {}, userId: {}, institutionId: {}]",
             userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
-        eventSender.send(Topic.CONSENT, ConsentAccepted.builder()
+        eventSender.send(Topic.CONSENT, ConsentGiven.builder()
             .consentId(userConsent.getId())
-            .dateAccepted(userConsent.getDateAccepted())
+            .dateGiven(userConsent.getDateGiven())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
             .agreementId(userConsent.getAgreementId())

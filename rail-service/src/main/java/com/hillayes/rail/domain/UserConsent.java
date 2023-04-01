@@ -29,9 +29,9 @@ public class UserConsent {
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated;
 
-    @Column(name = "date_accepted", nullable = true)
+    @Column(name = "date_given", nullable = true)
     @Setter
-    private Instant dateAccepted;
+    private Instant dateGiven;
 
     @Column(name = "date_denied", nullable = true)
     @Setter

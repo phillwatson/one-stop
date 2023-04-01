@@ -130,7 +130,7 @@ public class UserConsentService {
         }
     }
 
-    public void consentAccepted(UUID userConsentId) {
+    public void consentGiven(UUID userConsentId) {
         log.info("User's consent received [userConsentId: {}]", userConsentId);
         UserConsent userConsent = userConsentRepository.findById(userConsentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
@@ -138,11 +138,11 @@ public class UserConsentService {
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
         userConsent.setStatus(ConsentStatus.GIVEN);
-        userConsent.setDateAccepted(Instant.now());
+        userConsent.setDateGiven(Instant.now());
         userConsent = userConsentRepository.save(userConsent);
 
-        // send consent accepted event notification
-        consentEventSender.sendConsentAccepted(userConsent);
+        // send consent-given event notification
+        consentEventSender.sendConsentGiven(userConsent);
     }
 
     public void consentDenied(UUID userConsentId, String error, String details) {
@@ -161,7 +161,7 @@ public class UserConsentService {
                 userConsent.setErrorDetail(details);
                 userConsent = userConsentRepository.save(userConsent);
 
-                // send consent denied event notification
+                // send consent-denied event notification
                 consentEventSender.sendConsentDenied(userConsent);
             });
     }
