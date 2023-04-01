@@ -52,7 +52,9 @@ public class AuthResource {
         log.info("Auth user login initiated");
         String[] tokens = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 
-        return setCookies(Response.noContent(), buildCookies(tokens, accessDuration, refreshDuration))
+        return cookieResponse(
+            Response.noContent(),
+            buildCookies(tokens, accessDuration, refreshDuration))
             .build();
     }
 
@@ -65,7 +67,8 @@ public class AuthResource {
         log.info("OAuth login [scope: {}, state: {}]", scope, state);
         String[] tokens = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        return setCookies(Response.temporaryRedirect(URI.create("http://localhost:3000/accounts")),
+        return cookieResponse(
+            Response.temporaryRedirect(URI.create("http://localhost:3000/accounts")),
             buildCookies(tokens, accessDuration, refreshDuration))
             .build();
     }
@@ -82,7 +85,9 @@ public class AuthResource {
 
         String[] tokens = authService.refresh(refreshTokenCookie.getValue());
 
-        return setCookies(Response.noContent(), buildCookies(tokens, accessDuration, refreshDuration))
+        return cookieResponse(
+            Response.noContent(),
+            buildCookies(tokens, accessDuration, refreshDuration))
             .build();
     }
 
@@ -108,18 +113,18 @@ public class AuthResource {
 
         NewCookie xsrfCookie = xsrfGenerator.generateCookie();
 
-        return new NewCookie[] { accessToken, refreshToken, xsrfCookie };
+        return new NewCookie[]{accessToken, refreshToken, xsrfCookie};
     }
 
     /**
      * Set cookies in the response, adding the SameSite=Strict attribute to each cookie.
      *
      * @param responseBuilder the response builder to which the cookies are to be added.
-     * @param cookies the cookies to be added.
+     * @param cookies         the cookies to be added.
      * @return the given response builder with the cookies added.
      */
-    public Response.ResponseBuilder setCookies(Response.ResponseBuilder responseBuilder,
-                                               NewCookie ... cookies) {
+    public Response.ResponseBuilder cookieResponse(Response.ResponseBuilder responseBuilder,
+                                                   NewCookie... cookies) {
         for (NewCookie cookie : cookies) {
             responseBuilder.header("Set-Cookie", cookie + ";SameSite=Strict");
         }
