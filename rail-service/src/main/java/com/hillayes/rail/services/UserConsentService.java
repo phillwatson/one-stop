@@ -151,14 +151,15 @@ public class UserConsentService {
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                 userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+
+                // delete the requisition - and the associated agreement
+                requisitionService.delete(userConsent.getRequisitionId());
+
                 userConsent.setStatus(ConsentStatus.DENIED);
                 userConsent.setDateDenied(Instant.now());
                 userConsent.setErrorCode(error);
                 userConsent.setErrorDetail(details);
                 userConsent = userConsentRepository.save(userConsent);
-
-                // delete the requisition - and the associated agreement
-                requisitionService.delete(userConsent.getRequisitionId());
 
                 // send consent denied event notification
                 consentEventSender.sendConsentDenied(userConsent);

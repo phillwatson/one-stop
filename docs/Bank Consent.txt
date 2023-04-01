@@ -1,0 +1,66 @@
+title Bank Consent
+
+actor Client
+participant rail-service
+participant database
+participant broker
+participant nordigen
+
+Client->rail-service:GET: banks
+activate rail-service
+Client<--rail-service:[bank-a, bank-b, ...]
+deactivateafter rail-service
+space
+
+Client->rail-service:POST: /api/v1/rails/consents\n(user-id, bank-id)
+activate rail-service
+rail-service->nordigen: POST:/api/v2/agreements/enduser/
+activate nordigen
+note over rail-service,broker#e5ffbe:institution_id:\nmax_historical_days:\naccess_valid_for_days:\naccess_scope: ["balances", "details", "transactions"]
+nordigen-->rail-service: agreement created
+deactivateafter nordigen
+note over database,nordigen#e5ffbe:response:\n"id": "47d393bc-6ae8-45a3-bd4e-658ba03c1d9c",\n"created": "2023-01-28T11:58:42.907354Z",\n"max_historical_days": 90,\n"access_valid_for_days": 90,\n"access_scope": [\n  "balances",\n  "details",\n  "transactions"\n],\n"accepted": null,\n"institution_id": "SANDBOXFINANCE_SFIN0000"
+
+rail-service->database:UserConsent.persist
+rbox over rail-service,database#bee7ff:id: UUID,\nuser-id: UUID,\ninstitution-id: String\nagreement-id: String\nstatus: String "INITIATED"
+
+rail-service->nordigen: POST:/api/v2/requisitions/
+activate nordigen
+note over rail-service,broker#e5ffbe:institution-id: "SANDBOXFINANCE_SFIN0000"\nredirect: "http://5.81.68.243:7878/api/v1/acceptance"\nagreement: "urn:uuid:47d393bc-6ae8-45a3-bd4e-658ba03c1d9c"\nreference: "<user-bank-record-id>"
+nordigen-->rail-service: requisition created
+deactivateafter nordigen
+
+note over database,nordigen#e5ffbe:{\n    "id": "406f0012-50b3-4851-be42-c5f523b0f2d5",\n    "created": "2023-01-28T11:58:47.699410Z",\n    "redirect": "http://5.81.68.243:7878/api/v1/countries",\n    "status": "CR",\n    "institution_id": "SANDBOXFINANCE_SFIN0000",\n    "agreement": "47d393bc-6ae8-45a3-bd4e-658ba03c1d9c",\n    "reference": "<user-bank-record-id>",\n    "accounts": [],\n    "user_language": "EN",\n    "link": "https://ob.nordigen.com/psd2/start/406f0012/...",\n    "ssn": null,\n    "account_selection": false,\n    "redirect_immediate": false\n}
+
+rail-service->database:UserConsent.update
+rbox over rail-service,database#bee7ff:id: UUID,\nrequisition-id: String\nstatus: String "WAITING"
+
+rail-service->broker:CONSENT_INITIATED
+rail-service-->Client: redirect to requisition link
+deactivateafter rail-service
+Client->nordigen: submit consent
+activate nordigen
+
+nordigen->rail-service:GET: /api/v1/rails/consents/response\nUserConsent.id, error
+activate rail-service
+alt#lightblue error or denied
+rail-service->database:UserConsent.get
+rail-service->nordigen:DELETE: /api/v2/requisitions
+activate nordigen
+deactivateafter nordigen
+
+rail-service->database:UserConsent.update
+rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "DENIED"\ndate-denied: Instant\nerror: String
+rail-service->broker:CONSENT_DENIED
+else accepted
+rail-service->database:UserConsent.get
+rail-service->database:UserConsent.update
+rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "GIVEN"\ndate-accepted: Instant
+rail-service->broker:CONSENT_ACCEPTED
+end
+
+rail-service-->nordigen:redirect to accounts page
+deactivateafter rail-service
+
+Client<--nordigen:redirect
+deactivateafter nordigen
