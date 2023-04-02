@@ -1,6 +1,6 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.model.Account;
+import com.hillayes.rail.model.AccountDetail;
 import com.hillayes.rail.model.AccountBalance;
 import com.hillayes.rail.model.TransactionList;
 import com.hillayes.rail.services.RailAccountService;
@@ -25,7 +25,7 @@ public class RailAccountResource {
 
     @GET
     @Path("/{id}")
-    public Account get(@PathParam("id") String id) {
+    public AccountDetail get(@PathParam("id") String id) {
         log.info("Get account [id: {}]", id);
         return railAccountService.get(id);
     }

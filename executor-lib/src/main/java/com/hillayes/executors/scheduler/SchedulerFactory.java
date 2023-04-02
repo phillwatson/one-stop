@@ -47,6 +47,7 @@ public class SchedulerFactory {
     public SchedulerFactory(DataSource dataSource,
                             SchedulerConfig configuration,
                             Iterable<NamedTask> namedTasks) {
+        log.info("Initialising SchedulerFactory");
         Set<String> names = new HashSet<>();
         namedTasks.forEach(task -> {
             if (names.contains(task.getName())) {
@@ -212,13 +213,17 @@ public class SchedulerFactory {
         }
 
         log.debug("Creating scheduler");
+        String tableName = configuration.schema()
+            .map(schema -> schema + "." + "scheduled_tasks")
+            .orElse("scheduled_tasks");
         Scheduler result = Scheduler.create(dataSource, new ArrayList<>(jobbingTasks))
-            .startTasks(new ArrayList<>(recurringTasks))
+            .tableName(tableName)
             .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
             .pollingInterval(configuration.pollingInterval().orElse(SchedulerConfig.DEFAULT_POLLING_INTERVAL))
             .heartbeatInterval(configuration.heartbeatInterval().orElse(SchedulerConfig.DEFAULT_HEARTBEAT_INTERVAL))
             .shutdownMaxWait(configuration.shutdownMaxWait().orElse(SchedulerConfig.DEFAULT_SHUTDOWN_MAX_WAIT))
             .deleteUnresolvedAfter(configuration.unresolvedTimeout().orElse(SchedulerConfig.DEFAULT_UNRESOLVED_TIMEOUT))
+            .startTasks(new ArrayList<>(recurringTasks))
             .registerShutdownHook()
             .build();
 

@@ -17,10 +17,62 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     error_detail varchar(256) NULL
 );
 
-CREATE TABLE ${flyway:defaultSchema}.useraccount (
+CREATE TABLE ${flyway:defaultSchema}.account (
 	id uuid NOT NULL CONSTRAINT userbankac_pkey PRIMARY KEY,
+	userconsent_id UUID NOT NULL CONSTRAINT fk_userconsent REFERENCES ${flyway:defaultSchema}.userconsent (id) ON DELETE CASCADE,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	userconsent_id UUID NOT NULL,
-	account_id varchar(256) NOT NULL,
-	CONSTRAINT fk_userconsent FOREIGN KEY (userconsent_id) REFERENCES ${flyway:defaultSchema}.userconsent (id) ON DELETE CASCADE
+	rail_account_id varchar(256) NOT NULL
 );
+
+CREATE TABLE ${flyway:defaultSchema}.account_balance (
+	id uuid NOT NULL CONSTRAINT balance_pkey PRIMARY KEY,
+	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
+	date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    amount numeric(19,2) NOT NULL,
+    currency varchar(12) NOT NULL,
+    balance_type varchar(256) NULL,
+    reference_date date NULL
+);
+
+CREATE INDEX idx_account_balance_date ON ${flyway:defaultSchema}.account_balance (account_id, date_created);
+
+CREATE TABLE ${flyway:defaultSchema}.account_transaction (
+	id uuid NOT NULL CONSTRAINT transaction_pkey PRIMARY KEY,
+	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
+	date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    booking_date date NOT NULL,
+    internal_transaction_id varchar(256) NULL,
+    transaction_amount numeric(19,2) NOT NULL,
+    transaction_currency varchar(12) NOT NULL,
+    transaction_id varchar(256) NULL,
+    booking_datetime timestamp NULL,
+    value_date date NULL,
+    value_datetime timestamp NULL,
+    additional_information varchar(256) NULL,
+    additional_information_structured varchar(256) NULL,
+    balance_after_transaction varchar(256) NULL,
+    bank_transaction_code varchar(256) NULL,
+    check_id varchar(256) NULL,
+    creditor_iban varchar(256) NULL,
+    creditor_agent varchar(256) NULL,
+    creditor_id varchar(256) NULL,
+    creditor_name varchar(256) NULL,
+    currency_exchange varchar(256) NULL,
+    debtor_iban varchar(256) NULL,
+    debtor_agent varchar(256) NULL,
+    debtor_name varchar(256) NULL,
+    end_to_end_id varchar(256) NULL,
+    entry_reference varchar(256) NULL,
+    mandate_id varchar(256) NULL,
+    merchant_category_code varchar(256) NULL,
+    proprietary_bank_transaction_code varchar(256) NULL,
+    purpose_code varchar(256) NULL,
+    remittance_information_structured varchar(256) NULL,
+    remittance_information_structured_array varchar(256) NULL,
+    remittance_information_unstructured varchar(256) NULL,
+    remittance_information_unstructured_array varchar(256) NULL,
+    ultimate_creditor varchar(256) NULL,
+    ultimate_debtor varchar(256) NULL
+);
+
+CREATE INDEX idx_account_trans_date ON ${flyway:defaultSchema}.account_transaction (account_id, booking_date);

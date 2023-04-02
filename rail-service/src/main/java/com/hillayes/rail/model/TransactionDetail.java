@@ -1,14 +1,17 @@
 package com.hillayes.rail.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionDetail {
     @EqualsAndHashCode.Include
     public String transactionId;
+    @EqualsAndHashCode.Include
     public LocalDate bookingDate;
     public Instant bookingDateTime;
     public LocalDate valueDate;
@@ -29,6 +32,7 @@ public class TransactionDetail {
     public String debtorName;
     public String endToEndId;
     public String entryReference;
+    @EqualsAndHashCode.Include
     public String internalTransactionId;
     public String mandateId;
     public String merchantCategoryCode;

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.time.OffsetDateTime;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Account {
+public class AccountDetail {
     @JsonProperty("id")
     @EqualsAndHashCode.Include
     public String id;

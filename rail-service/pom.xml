@@ -11,6 +11,11 @@
 
     <artifactId>rail-service</artifactId>
 
+    <properties>
+        <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
+        </quarkus.jib.jvm-additional-arguments>
+    </properties>
+
     <dependencies>
         <dependency>
             <!-- causes build of docker images on package -->

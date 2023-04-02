@@ -51,10 +51,6 @@ one-stop:
   rail:
     # callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
 
-    caches: # the duration of various caches - specified as Duration string
-      institutions: PT6H
-      account-details: PT5H
-
     countries:
       - id: GB
         name: Great Britain
@@ -64,6 +60,18 @@ one-stop:
         name: France
       - id: IT
         name: Italy
+
+    caches: # the duration of various caches - specified as Duration string
+      institutions: PT6H
+      account-details: PT5H
+
+    scheduler:
+      schema: rails
+      tasks:
+        poll-accounts:
+          frequency:
+            time-of-day: "02:00:00"
+          retry-interval: PT1M
 
   auth:
     xsrf:

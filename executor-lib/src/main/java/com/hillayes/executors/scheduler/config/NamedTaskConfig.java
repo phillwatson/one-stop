@@ -18,8 +18,8 @@ public interface NamedTaskConfig {
     Optional<FrequencyConfig> frequency();
 
     /**
-     * The initial interval before retrying a failed task. If required, a value of 1 minute
-     * is suggested.
+     * The initial interval before retrying a failed task. If required, a value of 1
+     * minute is suggested.
      * <p>
      * Note: the scheduler's polling interval will affect the accuracy at which this
      * interval will be applied.

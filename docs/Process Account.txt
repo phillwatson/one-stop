@@ -13,14 +13,14 @@ alt#lightblue if NOT already processed within configured grace
 rail-service->database:Transaction.getMostRecent(accountId)
 rbox over rail-service,nordigen#bee7ff:determine the start date for next transaction request\nusing the account's most recent transaction
 
-rail-service->nordigen:GET: /api/v2/accounts/{id}/transactions/
+rail-service->nordigen:GET: /api/v2/accountDetails/{id}/transactions/
 rail-service<--nordigen:transactions
 note over rail-service,nordigen#e5ffbe:{\n  "booked": [\n    {\n      "transactionId": "2023033101927908-1",\n      "bookingDate": "2023-03-31",\n      "bookingDateTime": null,\n      "valueDate": "2023-03-31",\n      "valueDateTime": null,\n      "transactionAmount": {\n        "amount": -15.0,\n        "currency": "EUR"\n      },\n....\n    },\n....\n  ],\n  "pending": [\n    {\n      "transactionId": null,\n      "bookingDate": null,\n      "bookingDateTime": null,\n      "valueDate": "2023-03-30",\n      "valueDateTime": null,\n      "transactionAmount": {\n        "amount": 10.0,\n        "currency": "EUR"\n      },\n....\n    }\n....\n  ]\n}\n
 loop #ffd4d4 for each booked transaction
 rail-service->database:Transaction.persist
 end
 
-rail-service->nordigen:GET: /api/v2/accounts/{id}/balances/
+rail-service->nordigen:GET: /api/v2/accountDetails/{id}/balances/
 activate nordigen
 rail-service<--nordigen:balance info
 note over rail-service,nordigen#e5ffbe:[\n  {\n    "balanceAmount": {\n      "amount": 1913.12,\n      "currency": "EUR"\n    },\n    "balanceType": "expected",\n    "referenceDate": "2023-04-01"\n  },\n  {\n    "balanceAmount": {\n      "amount": 1913.12,\n      "currency": "EUR"\n    },\n    "balanceType": "interimAvailable",\n    "referenceDate": "2023-04-01"\n  }\n]

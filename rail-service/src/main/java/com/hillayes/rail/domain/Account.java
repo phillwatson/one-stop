@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Records the identifiers of the bank accounts to which a user has given
+ * Records the identifiers of the bank accountDetails to which a user has given
  * consent.
  */
 @Entity
@@ -20,8 +20,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserAccount {
+public class Account {
     @Id
     @GeneratedValue(generator = "uuid2")
     private UUID id;
@@ -33,6 +32,6 @@ public class UserAccount {
     @Column(name = "userconsent_id", nullable = false)
     private UUID userConsentId;
 
-    @Column(name = "account_id", nullable = false)
-    private String accountId;
+    @Column(name = "rails_account_id", nullable = false)
+    private String railsAccountId;
 }

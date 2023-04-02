@@ -11,34 +11,43 @@ import java.util.Optional;
  * https://github.com/kagkarlsson/db-scheduler#configuration
  */
 public interface SchedulerConfig {
-    Integer DEFAULT_THREAD_COUNT = Integer.valueOf(10);
-    Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(5);
-    Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofMinutes(5);
-    Duration DEFAULT_SHUTDOWN_MAX_WAIT = Duration.ofMinutes(30);
-    Duration DEFAULT_UNRESOLVED_TIMEOUT = Duration.ofDays(14);
+    final static Integer DEFAULT_THREAD_COUNT = 10;
+    final static Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(5);
+    final static Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofMinutes(5);
+    final static Duration DEFAULT_SHUTDOWN_MAX_WAIT = Duration.ofMinutes(30);
+    final static Duration DEFAULT_UNRESOLVED_TIMEOUT = Duration.ofDays(14);
 
     /**
-     * The number of threads used to process work.
+     * The name of the DB schema in which the scheduler tables are stored.
+     */
+    Optional<String> schema();
+
+    /**
+     * The number of threads used to process work. The default is 10.
      */
     Optional<Integer> threadCount();
 
     /**
-     * Determines the rate at which the scheduler will poll for work.
+     * Determines the rate at which the scheduler will poll for work. The default
+     * is 5 seconds.
      */
     Optional<Duration> pollingInterval();
 
     /**
-     * How often to update the heartbeat timestamp for running executions.
+     * How often to update the heartbeat timestamp for running executions. The default
+     * is 5 minutes.
      */
     Optional<Duration> heartbeatInterval();
 
     /**
      * How long the scheduler will wait before interrupting executor-service threads.
+     * The default is 30 minutes.
      */
     Optional<Duration> shutdownMaxWait();
 
     /**
      * The time after which executions with unknown tasks are automatically deleted.
+     * The default is 14 days.
      */
     Optional<Duration> unresolvedTimeout();
 

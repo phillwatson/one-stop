@@ -57,7 +57,7 @@ public class UserConsentResource {
 
         Institution institution = institutionService.get(consent.getInstitutionId());
         Requisition requisition = requisitionService.get(consent.getRequisitionId());
-        List<Account> accounts = requisition.accounts.stream()
+        List<AccountDetail> accountDetails = requisition.accounts.stream()
             .map(railAccountService::get)
             .toList();
 
@@ -69,7 +69,7 @@ public class UserConsentResource {
             .agreementExpires(consent.getAgreementExpires())
             .maxHistory(consent.getMaxHistory())
             .status(consent.getStatus())
-            .accounts(accounts)
+            .accounts(accountDetails)
             .build();
 
         log.info("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",

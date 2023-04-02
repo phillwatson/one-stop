@@ -14,6 +14,11 @@ public class SchedulerConfigImpl implements SchedulerConfig {
     private Duration pollingInterval;
 
     @Override
+    public Optional<String> schema() {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Integer> threadCount() {
         return Optional.empty();
     }

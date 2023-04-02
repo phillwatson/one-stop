@@ -30,7 +30,7 @@ note over rail-service,broker#e5ffbe:institution-id: "SANDBOXFINANCE_SFIN0000"\n
 nordigen-->rail-service: requisition created
 deactivateafter nordigen
 
-note over database,nordigen#e5ffbe:{\n    "id": "406f0012-50b3-4851-be42-c5f523b0f2d5",\n    "created": "2023-01-28T11:58:47.699410Z",\n    "redirect": "http://5.81.68.243:7878/api/v1/countries",\n    "status": "CR",\n    "institution_id": "SANDBOXFINANCE_SFIN0000",\n    "agreement": "47d393bc-6ae8-45a3-bd4e-658ba03c1d9c",\n    "reference": "<user-bank-record-id>",\n    "accounts": [],\n    "user_language": "EN",\n    "link": "https://ob.nordigen.com/psd2/start/406f0012/...",\n    "ssn": null,\n    "account_selection": false,\n    "redirect_immediate": false\n}
+note over database,nordigen#e5ffbe:{\n    "id": "406f0012-50b3-4851-be42-c5f523b0f2d5",\n    "created": "2023-01-28T11:58:47.699410Z",\n    "redirect": "http://5.81.68.243:7878/api/v1/countries",\n    "status": "CR",\n    "institution_id": "SANDBOXFINANCE_SFIN0000",\n    "agreement": "47d393bc-6ae8-45a3-bd4e-658ba03c1d9c",\n    "reference": "<user-bank-record-id>",\n    "accountDetails": [],\n    "user_language": "EN",\n    "link": "https://ob.nordigen.com/psd2/start/406f0012/...",\n    "ssn": null,\n    "account_selection": false,\n    "redirect_immediate": false\n}
 
 rail-service->database:UserConsent.update
 rbox over rail-service,database#bee7ff:id: UUID,\nrequisition-id: String\nstatus: String "WAITING"
@@ -59,7 +59,7 @@ rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "GIVEN"\ndate-a
 rail-service->broker:CONSENT_ACCEPTED
 end
 
-rail-service-->nordigen:redirect to accounts page
+rail-service-->nordigen:redirect to accountDetails page
 deactivateafter rail-service
 
 Client<--nordigen:redirect

@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Records a user's consent to provide access to their accounts held at a
+ * Records a user's consent to provide access to their accountDetails held at a
  * given bank.
  */
 @Entity
@@ -20,7 +20,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserConsent {
     @Id
     @GeneratedValue(generator = "uuid2")
