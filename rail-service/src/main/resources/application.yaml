@@ -68,9 +68,16 @@ one-stop:
     scheduler:
       schema: rails
       tasks:
-        poll-accounts:
+        # nightly task to refresh all account details
+        poll-all-accounts:
           frequency:
             time-of-day: "02:00:00"
+          max-retry: 3
+          retry-interval: PT1M
+
+        # jobbing tasks to refresh the identified account details
+        poll-account:
+          max-retry: 5
           retry-interval: PT1M
 
   auth:

@@ -9,8 +9,8 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedules;
 import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.executors.scheduler.config.FrequencyConfig;
-import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
+import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
@@ -64,9 +65,10 @@ public class SchedulerFactory {
         log.info("Scheduling named scheduled tasks [jobbingSize: {}, recurringSize: {}]",
             jobbingTasks.size(), recurringTasks.size());
         scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
-
-        // inform all tasks that they have been started
-        namedTasks.forEach(task -> task.taskScheduled(this));
+        if (scheduler != null) {
+            // inform all tasks that they have been started
+            namedTasks.forEach(task -> task.taskScheduled(this));
+        }
     }
 
     /**
@@ -129,12 +131,9 @@ public class SchedulerFactory {
 
                     // create and configure the recurring task
                     Tasks.RecurringTaskBuilder<Void> builder = Tasks.recurring(task.getName(), schedule);
-                    if (namedTaskConfig.retryInterval().isPresent()) {
-                        builder.onFailure(new FailureHandler.ExponentialBackoffFailureHandler<>(
-                            namedTaskConfig.retryInterval().get(),
-                            namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT)
-                        ));
-                    }
+
+                    Optional<FailureHandler<Void>> handler = configureFailureHandler(namedTaskConfig);
+                    handler.ifPresent(builder::onFailure);
 
                     // add task (with call-back) to the result
                     result.add(builder.execute((inst, ctx) ->
@@ -169,19 +168,17 @@ public class SchedulerFactory {
             if (task instanceof NamedJobbingTask<?>) {
                 log.debug("Adding Jobbing Task [name: {}]", task.getName());
 
+                // create one-time-task
+                Tasks.OneTimeTaskBuilder<JobbingTaskData> builder = Tasks.oneTime(task.getName(), JobbingTaskData.class);
+
                 // find any, optional, configuration related to the named task
                 NamedTaskConfig namedTaskConfig = configuration.tasks().get(task.getName());
                 if (namedTaskConfig != null) {
                     log.debug("Jobbing Task configuration found [task: {}]", task.getName());
-                }
 
-                // create and configure the one-time task
-                Tasks.OneTimeTaskBuilder<JobbingTaskData> builder = Tasks.oneTime(task.getName(), JobbingTaskData.class);
-                if ((namedTaskConfig != null) && (namedTaskConfig.retryInterval().isPresent())) {
-                    builder.onFailure(new FailureHandler.ExponentialBackoffFailureHandler<>(
-                        namedTaskConfig.retryInterval().get(),
-                        namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT)
-                    ));
+                    // use the configured failure handler
+                    Optional<FailureHandler<JobbingTaskData>> handler = configureFailureHandler(namedTaskConfig);
+                    handler.ifPresent(builder::onFailure);
                 }
 
                 // add task (with call-back) to the result
@@ -257,6 +254,39 @@ public class SchedulerFactory {
         }
 
         return result.get();
+    }
+
+    /**
+     * Constructs a FailureHandler from the given NamedTaskConfig. The handler may consist of
+     * composite handlers.
+     *
+     * @param namedTaskConfig the configuration from which to create the handler.
+     * @return the configured FailureHandler.
+     */
+    private <T> Optional<FailureHandler<T>> configureFailureHandler(NamedTaskConfig namedTaskConfig) {
+        FailureHandler<T> result = null;
+
+        // if a retry config is given
+        if (namedTaskConfig.retryInterval().isPresent()) {
+            // create a back-off failure handler
+            result = new FailureHandler.ExponentialBackoffFailureHandler<>(
+                namedTaskConfig.retryInterval().get(),
+                namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT));
+        }
+
+        // if a max-retry config is given
+        if (namedTaskConfig.maxRetries().isPresent()) {
+            // if no retry config was given, use a default
+            if (result == null) {
+                result = new FailureHandler.OnFailureRetryLater<>(Duration.ofMinutes(1));
+            }
+
+            // create max-retry failure handler - wrapping the retry handler
+            result = new FailureHandler.MaxRetriesFailureHandler<>(
+                namedTaskConfig.maxRetries().getAsInt(), result);
+        }
+
+        return Optional.ofNullable(result);
     }
 
     /**

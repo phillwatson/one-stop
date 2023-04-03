@@ -3,6 +3,7 @@ package com.hillayes.executors.scheduler.config;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 /**
  * Configures a named task. Each entry is listed within a Map, keyed on the
@@ -35,7 +36,13 @@ public interface NamedTaskConfig {
      * The exponential rate at which a failed task will be retried. The retryInterval will
      * be increased by this factor on each retry. This will only apply if retryInterval is
      * specified.
-     * If required, a value of 1.5 is suggested.
+     * If retryInterval is specified, a default value of 1.5 is applies.
      */
     OptionalDouble retryExponent();
+
+    /**
+     * The maximum number of times a failed task will be retried. If required, a value of
+     * 5 is suggested.
+     */
+    OptionalInt maxRetries();
 }

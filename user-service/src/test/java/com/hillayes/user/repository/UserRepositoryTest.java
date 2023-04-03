@@ -44,4 +44,9 @@ public class UserRepositoryTest {
         userRepository.delete(user);
         assertTrue(userRepository.findByEmail(user.getEmail()).isEmpty());
     }
+
+    @Test
+    public void testFind() {
+
+    }
 }

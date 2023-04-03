@@ -63,8 +63,16 @@ public class AuthResource {
     public Response oauthLogin(@PathParam("auth-provider") String authProvider,
                                @QueryParam("code") String code,
                                @QueryParam("state") String state,
-                               @QueryParam("scope") String scope) {
-        log.info("OAuth login [scope: {}, state: {}]", scope, state);
+                               @QueryParam("scope") String scope,
+                               @QueryParam("error") String error,
+                               @QueryParam("error_uri") String errorUri) {
+        log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
+        if (error != null) {
+            return Response.temporaryRedirect(URI.create("http://localhost:3000/sign-in?error=" + error))
+                .cookie(buildCookies(new String[]{null, null}, 0, 0))
+                .build();
+        }
+
         String[] tokens = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
         return cookieResponse(
