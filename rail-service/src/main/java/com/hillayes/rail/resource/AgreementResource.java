@@ -4,7 +4,7 @@ import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementAccepted;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import com.hillayes.rail.model.PaginatedList;
-import com.hillayes.rail.services.AgreementService;
+import com.hillayes.rail.service.AgreementService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;

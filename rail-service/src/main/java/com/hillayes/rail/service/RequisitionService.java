@@ -1,4 +1,4 @@
-package com.hillayes.rail.services;
+package com.hillayes.rail.service;
 
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
@@ -9,7 +9,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 @ApplicationScoped
 public class RequisitionService {
@@ -22,7 +22,7 @@ public class RequisitionService {
         return requisitionRepository.list(limit, offset);
     }
 
-    public Requisition get(String id) {
+    public Optional<Requisition> get(String id) {
         return requisitionRepository.get(id);
     }
 

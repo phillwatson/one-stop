@@ -1,4 +1,4 @@
-package com.hillayes.rail.services;
+package com.hillayes.rail.service;
 
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.repository.CountryRepository;

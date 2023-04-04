@@ -1,7 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.rail.domain.Country;
-import com.hillayes.rail.services.CountryService;
+import com.hillayes.rail.service.CountryService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;

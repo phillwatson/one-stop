@@ -1,9 +1,10 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
-import com.hillayes.rail.services.RequisitionService;
+import com.hillayes.rail.service.RequisitionService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
@@ -35,7 +36,8 @@ public class RequisitionResource {
     @Path("/{id}")
     public Requisition get(@PathParam("id") String id) {
         log.info("Get requisition [id: {}]", id);
-        return requisitionService.get(id);
+        return requisitionService.get(id)
+            .orElseThrow(() -> new NotFoundException("Requisition", id));
     }
 
     @POST

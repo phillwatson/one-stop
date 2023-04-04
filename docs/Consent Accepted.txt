@@ -1,6 +1,7 @@
 title Consent Accepted
 
 participant broker
+participant scheduler
 participant email-service
 participant rail-service
 
@@ -28,9 +29,9 @@ note over rail-service,nordigen#e5ffbe:"id": "47d393bc-6ae8-45a3-bd4e-658ba03c1d
 loop #ffd4d4 for each account-id
 rail-service->nordigen:GET: /api/v2/accountDetails/{id}/
 activate nordigen
+rail-service<--nordigen:account summary
 note over rail-service,nordigen#e5ffbe:{\n  "id": "7e944232-bda9-40bc-b784-660c7ab5fe78",\n  "created": "2022-02-21T13:43:55.595903Z",\n  "last_accessed": "2023-04-01T12:00:57.475383Z",\n  "iban": "GL3343697694912188",\n  "institution_id": "SANDBOXFINANCE_SFIN0000",\n  "status": "READY",\n  "owner_name": "John Doe"\n}
 
-rail-service<--nordigen:account summary
 deactivateafter nordigen
 
 rail-service->nordigen:GET: /api/v2/accountDetails/{id}/details/
@@ -40,8 +41,8 @@ note over rail-service,nordigen#e5ffbe:{\n  "account": {\n    "resourceId": "01F
 deactivateafter nordigen
 
 rail-service->database:Account.persist
-rbox over rail-service,database#bee7ff:user-id: UUID\naccount-id: String\ninstitution-id: String\naccount-name: String\ntype: String\niban: String\nowner-name: String\ncurrency: String\ndate-processed: Instant
-broker<-rail-service:PROCESS_ACCOUNT
+rbox over rail-service,database#bee7ff:id: UUID\nuser_id: UUID\ninstitution_id: String\nrail_account-id: String\naccount_name: String\naccount_type: String\niban: String\nowner_name: String\ncurrency: String\ndate_last_polled: Instant
+scheduler<-rail-service:POLL_ACCOUNT
 end
 
 deactivateafter rail-service

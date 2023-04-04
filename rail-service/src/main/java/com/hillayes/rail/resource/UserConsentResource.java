@@ -3,10 +3,10 @@ package com.hillayes.rail.resource;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.*;
-import com.hillayes.rail.services.InstitutionService;
-import com.hillayes.rail.services.RailAccountService;
-import com.hillayes.rail.services.RequisitionService;
-import com.hillayes.rail.services.UserConsentService;
+import com.hillayes.rail.service.InstitutionService;
+import com.hillayes.rail.service.RailAccountService;
+import com.hillayes.rail.service.RequisitionService;
+import com.hillayes.rail.service.UserConsentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -16,9 +16,8 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Path("/api/v1/rails/consents")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -56,8 +55,10 @@ public class UserConsentResource {
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
         Institution institution = institutionService.get(consent.getInstitutionId());
-        Requisition requisition = requisitionService.get(consent.getRequisitionId());
-        List<AccountDetail> accountDetails = requisition.accounts.stream()
+        List<AccountDetail> accountDetails = requisitionService.get(consent.getRequisitionId())
+            .map(requisition -> requisition.accounts)
+            .orElse(Collections.emptyList())
+            .stream()
             .map(railAccountService::get)
             .toList();
 

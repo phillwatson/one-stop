@@ -1,4 +1,4 @@
-package com.hillayes.rail.services;
+package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.config.ServiceConfiguration;
@@ -11,7 +11,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.time.Duration;
 import java.util.List;
 
 @ApplicationScoped

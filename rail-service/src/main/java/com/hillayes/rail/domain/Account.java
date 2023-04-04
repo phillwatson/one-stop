@@ -16,6 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -32,6 +33,33 @@ public class Account {
     @Column(name = "userconsent_id", nullable = false)
     private UUID userConsentId;
 
-    @Column(name = "rails_account_id", nullable = false)
-    private String railsAccountId;
+    @Column(name = "institution_id", nullable = false)
+    private String institutionId;
+
+    @Column(name = "rail_account_id", nullable = false)
+    private String railAccountId;
+
+    @Column(name = "iban", nullable = true)
+    private String iban;
+
+    @Column(name = "account_name", nullable = true)
+    private String accountName;
+
+    @Column(name = "account_type", nullable = true)
+    private String accountType;
+
+    @Column(name = "owner_name", nullable = true)
+    private String ownerName;
+
+    @Column(name = "currency", nullable = true)
+    private String currencyCode;
+
+    /**
+     * The date-time that the account details were last polled. The account details
+     * won't be polled again until a configured grace period has elapsed.
+     *
+     * @See ServiceConfiguration.accountPollingInterval()
+     */
+    @Column(name = "date_last_polled", nullable = true)
+    private Instant dateLastPolled;
 }

@@ -1,7 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.rail.model.Institution;
-import com.hillayes.rail.services.InstitutionService;
+import com.hillayes.rail.service.InstitutionService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
@@ -10,7 +10,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Path("/api/v1/rails/banks")

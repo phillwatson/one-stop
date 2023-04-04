@@ -3,7 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.rail.model.AccountDetail;
 import com.hillayes.rail.model.AccountBalance;
 import com.hillayes.rail.model.TransactionList;
-import com.hillayes.rail.services.RailAccountService;
+import com.hillayes.rail.service.RailAccountService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;

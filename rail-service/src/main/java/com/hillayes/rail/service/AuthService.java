@@ -1,4 +1,4 @@
-package com.hillayes.rail.services;
+package com.hillayes.rail.service;
 
 import com.hillayes.rail.model.ObtainJwtResponse;
 import com.hillayes.rail.model.RefreshJwtResponse;

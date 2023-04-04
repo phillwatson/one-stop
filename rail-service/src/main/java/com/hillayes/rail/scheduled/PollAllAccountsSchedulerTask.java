@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class PollAllAccountsSchedulerTask implements NamedScheduledTask {
     }
 
     @Override
+    @Transactional
     public void run() {
         log.info("PollAllAccountsSchedulerTask.run()");
         accountRepository.findAll().forEach(account -> {

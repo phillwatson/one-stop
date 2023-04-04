@@ -1,11 +1,11 @@
 title Process Account
 
-participant broker
+participant scheduler
 participant rail-service
 participant database
 participant nordigen
 
-broker->rail-service:PROCESS_ACCOUNT
+scheduler->rail-service:POLL_ACCOUNT
 activate rail-service
 rail-service->database:Account.get(accountId)
 

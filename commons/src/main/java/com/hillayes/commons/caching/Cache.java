@@ -30,6 +30,7 @@ public class Cache<K,T> {
     /**
      * Returns the value for the given key. If not cached, or expired, the given supplier
      * will be called, and it's value cached and returned.
+     * If the supplier throws an exception, the cache will not be updated.
      *
      * @param key the key of the cached value.
      * @param supplier the callback to call if the entry is not cached, or has expired.
