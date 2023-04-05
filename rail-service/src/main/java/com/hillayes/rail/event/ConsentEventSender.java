@@ -1,4 +1,4 @@
-package com.hillayes.rail.events;
+package com.hillayes.rail.event;
 
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.ConsentGiven;

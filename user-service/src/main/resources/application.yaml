@@ -85,21 +85,3 @@ one-stop:
         redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
         # not a real private key, just for testing
         private-key: "-----BEGIN PRIVATE KEY-----\nMEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCA6nm1eLiBDy75X8MVo\ncS9FmrW/F0Aivh5YGZQ0MpZkAQ==\n-----END PRIVATE KEY-----"
-
-"%test":
-  quarkus:
-    hibernate-orm:
-      log:
-        sql: true
-        bind-parameters: true
-
-  one-stop:
-    auth:
-      xsrf:
-        secret: this is a secret for xsrf tokens
-      openid:
-        GOOGLE:
-          client-secret: 'a-google-generated-secret'
-        APPLE:
-          key-id: 'my-apple-key-id'
-          client-secret: 'an-apple-generated-secret'

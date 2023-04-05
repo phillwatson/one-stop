@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Entity
+@Entity(name="account_transaction")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
@@ -81,8 +81,8 @@ public class AccountTransaction {
     /**
      * The currency of the transaction as billed to the account.
      */
-    @Column(name = "transaction_currency", nullable = true)
-    public String transactionCurrency;
+    @Column(name = "transaction_currency_code", nullable = true)
+    public String transactionCurrencyCode;
 
     /**
      * Might be used by the financial institution to transport additional transaction related information
@@ -113,7 +113,7 @@ public class AccountTransaction {
      * "PMNT-MCOP-OTHR" for specific standing orders which have a dynamical amount to move left
      *      funds e.g. on month end to a saving account
      */
-    @Column(name = "balance_transaction_code", nullable = true)
+    @Column(name = "bank_transaction_code", nullable = true)
     public String bankTransactionCode;
 
     /**
@@ -164,7 +164,7 @@ public class AccountTransaction {
     /**
      * Is the identification of the transaction as used for reference given by financial institution.
      */
-    @Column(name = "entity_reference", nullable = true)
+    @Column(name = "entry_reference", nullable = true)
     public String entryReference;
 
     /**

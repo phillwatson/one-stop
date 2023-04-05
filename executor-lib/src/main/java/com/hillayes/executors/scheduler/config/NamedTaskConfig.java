@@ -44,5 +44,5 @@ public interface NamedTaskConfig {
      * The maximum number of times a failed task will be retried. If required, a value of
      * 5 is suggested.
      */
-    OptionalInt maxRetries();
+    OptionalInt maxRetry();
 }

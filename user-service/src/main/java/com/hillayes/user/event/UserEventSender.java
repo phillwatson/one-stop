@@ -1,4 +1,4 @@
-package com.hillayes.user.events;
+package com.hillayes.user.event;
 
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.LoginFailure;

@@ -17,7 +17,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Path("/api/v1/rails/consents")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -54,12 +53,19 @@ public class UserConsentResource {
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
-        Institution institution = institutionService.get(consent.getInstitutionId());
-        List<AccountDetail> accountDetails = requisitionService.get(consent.getRequisitionId())
+        Institution institution = institutionService.get(consent.getInstitutionId())
+            .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
+
+        List<AccountSummary> accountSummaries = requisitionService.get(consent.getRequisitionId())
             .map(requisition -> requisition.accounts)
-            .orElse(Collections.emptyList())
+            .orElse(List.of())
             .stream()
-            .map(railAccountService::get)
+            .map(accountId -> railAccountService.get(accountId).orElseGet(() -> {
+                    log.info("Failed to retrieve rail account [accountId: {}]", accountId);
+                    return null;
+                })
+            )
+            .filter(Objects::nonNull)
             .toList();
 
         UserConsentResponse result = UserConsentResponse.builder()
@@ -70,7 +76,7 @@ public class UserConsentResource {
             .agreementExpires(consent.getAgreementExpires())
             .maxHistory(consent.getMaxHistory())
             .status(consent.getStatus())
-            .accounts(accountDetails)
+            .accounts(accountSummaries)
             .build();
 
         log.info("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",

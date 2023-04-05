@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementAccepted;
 import com.hillayes.rail.model.EndUserAgreementRequest;
@@ -48,14 +49,16 @@ public class AgreementResource {
     public EndUserAgreement accept(@PathParam("id") String id,
                                    EndUserAgreementAccepted acceptance) {
         log.info("Accept agreement [id: {}]", id);
-        return agreementService.accept(id, acceptance);
+        return agreementService.accept(id, acceptance)
+            .orElseThrow(() -> new NotFoundException("Aggrement", id));
     }
 
     @GET
     @Path("/{id}")
     public EndUserAgreement get(@PathParam("id") String id) {
         log.info("Get agreement [id: {}]", id);
-        return agreementService.get(id);
+        return agreementService.get(id)
+            .orElseThrow(() -> new NotFoundException("Aggrement", id));
     }
 
     @DELETE

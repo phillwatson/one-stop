@@ -24,7 +24,7 @@ public interface RequisitionRepository {
                                            @QueryParam("offset") int offset);
     @GET
     @Path("{id}/")
-    public Optional<Requisition> get(@PathParam("id") String id);
+    public Requisition get(@PathParam("id") String id);
 
     @POST
     public Requisition create(RequisitionRequest requisition);

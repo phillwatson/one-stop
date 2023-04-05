@@ -7,8 +7,9 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
-import com.hillayes.rail.events.ConsentEventSender;
+import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.model.*;
+import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,19 +27,24 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class UserConsentService {
-    // until proven - all requests will use this sandbox institution-id
-    private static final String SANDBOX_INSTITUTION_ID = "SANDBOXFINANCE_SFIN0000";
-
     @Inject
     ServiceConfiguration config;
+
     @Inject
     UserConsentRepository userConsentRepository;
+
+    @Inject
+    AccountRepository accountRepository;
+
     @Inject
     InstitutionService institutionService;
+
     @Inject
     AgreementService agreementService;
+
     @Inject
     RequisitionService requisitionService;
+
     @Inject
     ConsentEventSender consentEventSender;
 
@@ -53,7 +59,6 @@ public class UserConsentService {
     }
 
     public Optional<UserConsent> getUserConsent(UUID userId, String institutionId) {
-        institutionId = SANDBOX_INSTITUTION_ID;
         log.info("Looking for user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
         return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).stream()
             .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
@@ -62,13 +67,13 @@ public class UserConsentService {
     }
 
     public URI register(UUID userId, String institutionId) {
-        institutionId = SANDBOX_INSTITUTION_ID;
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
         if (getUserConsent(userId, institutionId).isPresent()) {
             throw new BankAlreadyRegisteredException(userId, institutionId);
         }
 
-        Institution institution = institutionService.get(institutionId);
+        Institution institution = institutionService.get(institutionId)
+            .orElseThrow(() -> new NotFoundException("Institution", institutionId));
 
         // create agreement
         log.debug("Requesting agreement [userId: {}, institutionId: {}]", userId, institutionId);
@@ -178,6 +183,10 @@ public class UserConsentService {
 
                 // delete the requisition - and the associated agreement
                 requisitionService.delete(userConsent.getRequisitionId());
+
+                // delete the account records
+                accountRepository.findByUserConsentId(userConsent.getId())
+                    .forEach(accountRepository::delete);
 
                 // send consent denied event notification
                 consentEventSender.sendConsentCancelled(userConsent);

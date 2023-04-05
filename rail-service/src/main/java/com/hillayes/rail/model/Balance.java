@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
-public class AccountBalance {
+public class Balance {
     @JsonProperty("balanceAmount")
     public CurrencyAmount balanceAmount;
 

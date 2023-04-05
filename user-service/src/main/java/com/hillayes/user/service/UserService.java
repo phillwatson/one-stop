@@ -4,7 +4,7 @@ import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
-import com.hillayes.user.events.UserEventSender;
+import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

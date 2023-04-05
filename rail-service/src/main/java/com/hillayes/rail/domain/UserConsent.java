@@ -3,10 +3,7 @@ package com.hillayes.rail.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,6 +14,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -25,9 +23,12 @@ public class UserConsent {
     @GeneratedValue(generator = "uuid2")
     private UUID id;
 
+    @Builder.Default
+    @ToString.Include
     @Column(name = "date_created", nullable = false)
-    private Instant dateCreated;
+    private Instant dateCreated = Instant.now();
 
+    @ToString.Include
     @Column(name = "date_given", nullable = true)
     @Setter
     private Instant dateGiven;
@@ -41,6 +42,7 @@ public class UserConsent {
     private Instant dateCancelled;
 
     @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
@@ -48,12 +50,14 @@ public class UserConsent {
      * The rail ID for the institution to which the consent refers.
      */
     @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "institution_id", nullable = false)
     private String institutionId;
 
     /**
      * The rail ID for the agreement to which the consent refers.
      */
+    @ToString.Include
     @Column(name = "agreement_id", nullable = false)
     private String agreementId;
 
@@ -72,6 +76,7 @@ public class UserConsent {
     /**
      * The rail ID for the requisition for access to which the consent refers.
      */
+    @ToString.Include
     @Setter
     @Column(name = "requisition_id", nullable = true)
     private String requisitionId;
@@ -79,8 +84,10 @@ public class UserConsent {
     /**
      * Indicates the position in the flow to obtain consent from the user.
      */
+    @ToString.Include
     @Setter
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ConsentStatus status;
 
     /**

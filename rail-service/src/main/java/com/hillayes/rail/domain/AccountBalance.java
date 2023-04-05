@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "account_balance")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
@@ -32,8 +32,8 @@ public class AccountBalance {
     @Column(name = "amount", nullable = false)
     public double amount;
 
-    @Column(name = "currency", nullable = false)
-    public String currency;
+    @Column(name = "currency_code", nullable = false)
+    public String currencyCode;
 
     @Column(name = "balance_type", nullable = false)
     public String balanceType;

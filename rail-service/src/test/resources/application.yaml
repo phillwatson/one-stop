@@ -1,0 +1,18 @@
+quarkus:
+  hibernate-orm:
+    log:
+      sql: true
+      bind-parameters: true
+
+one-stop:
+  auth:
+    xsrf:
+      secret: "this is a secret for xsrf tokens"
+
+  rail:
+    callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
+
+rails:
+  secret:
+    id: e9309c
+    key: 8653cb

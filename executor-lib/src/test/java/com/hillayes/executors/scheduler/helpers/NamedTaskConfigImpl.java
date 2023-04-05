@@ -7,6 +7,7 @@ import lombok.Builder;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 @Builder
 public class NamedTaskConfigImpl implements NamedTaskConfig {
@@ -27,5 +28,10 @@ public class NamedTaskConfigImpl implements NamedTaskConfig {
     @Override
     public OptionalDouble retryExponent() {
         return (retryExponent == null) ? OptionalDouble.empty() : OptionalDouble.of(retryExponent);
+    }
+
+    @Override
+    public OptionalInt maxRetry() {
+        return OptionalInt.empty();
     }
 }

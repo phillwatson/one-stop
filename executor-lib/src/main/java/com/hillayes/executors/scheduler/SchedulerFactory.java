@@ -275,7 +275,7 @@ public class SchedulerFactory {
         }
 
         // if a max-retry config is given
-        if (namedTaskConfig.maxRetries().isPresent()) {
+        if (namedTaskConfig.maxRetry().isPresent()) {
             // if no retry config was given, use a default
             if (result == null) {
                 result = new FailureHandler.OnFailureRetryLater<>(Duration.ofMinutes(1));
@@ -283,7 +283,7 @@ public class SchedulerFactory {
 
             // create max-retry failure handler - wrapping the retry handler
             result = new FailureHandler.MaxRetriesFailureHandler<>(
-                namedTaskConfig.maxRetries().getAsInt(), result);
+                namedTaskConfig.maxRetry().getAsInt(), result);
         }
 
         return Optional.ofNullable(result);

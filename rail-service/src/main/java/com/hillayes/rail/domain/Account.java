@@ -18,6 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -30,12 +31,18 @@ public class Account {
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "userconsent_id", nullable = false)
     private UUID userConsentId;
 
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "institution_id", nullable = false)
     private String institutionId;
 
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "rail_account_id", nullable = false)
     private String railAccountId;
 
@@ -51,7 +58,7 @@ public class Account {
     @Column(name = "owner_name", nullable = true)
     private String ownerName;
 
-    @Column(name = "currency", nullable = true)
+    @Column(name = "currency_code", nullable = true)
     private String currencyCode;
 
     /**

@@ -3,7 +3,7 @@ package com.hillayes.user.service;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.RotatedJwkSet;
 import com.hillayes.user.domain.User;
-import com.hillayes.user.events.UserEventSender;
+import com.hillayes.user.event.UserEventSender;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;

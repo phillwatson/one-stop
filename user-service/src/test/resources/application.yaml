@@ -1,0 +1,16 @@
+quarkus:
+  hibernate-orm:
+    log:
+      sql: true
+      bind-parameters: true
+
+one-stop:
+  auth:
+    xsrf:
+      secret: this is a secret for xsrf tokens
+    openid:
+      GOOGLE:
+        client-secret: 'a-google-generated-secret'
+      APPLE:
+        key-id: 'my-apple-key-id'
+        client-secret: 'an-apple-generated-secret'

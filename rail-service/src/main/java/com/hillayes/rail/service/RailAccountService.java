@@ -2,20 +2,23 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.config.ServiceConfiguration;
-import com.hillayes.rail.model.AccountDetail;
-import com.hillayes.rail.model.AccountBalanceList;
-import com.hillayes.rail.model.TransactionsResponse;
+import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.RailAccountRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
-public class RailAccountService {
+@Slf4j
+public class RailAccountService extends AbstractRailService {
     @Inject
     @RestClient
     RailAccountRepository railAccountRepository;
@@ -23,30 +26,86 @@ public class RailAccountService {
     @Inject
     ServiceConfiguration config;
 
-    private Cache<String, Map<String,Object>> accountDetailCache;
+    private Cache<String, Map<String, Object>> accountDetailCache;
 
     @PostConstruct
     public void init() {
         accountDetailCache = new Cache<>(config.caches().accountDetails());
     }
 
-    public AccountDetail get(String id) {
-        return railAccountRepository.get(id);
+    public Optional<AccountSummary> get(String accountId) {
+        log.debug("Retrieving account summary [id: {}]", accountId);
+        try {
+            return Optional.ofNullable(railAccountRepository.get(accountId));
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                // indicate account-not-found
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
-    public AccountBalanceList balances(String id) {
-        return railAccountRepository.balances(id);
+    public Optional<List<Balance>> balances(String accountId) {
+        log.debug("Retrieving account balances [id: {}]", accountId);
+        try {
+            AccountBalanceList balanceList = railAccountRepository.balances(accountId);
+            if ((balanceList == null) || (balanceList.balances == null)) {
+                return Optional.of(List.of());
+            }
+            return Optional.of(balanceList.balances);
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                // indicate account-not-found
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
-    public Map<String,Object> details(String id) {
-        return accountDetailCache.getValueOrCall(id, () ->
-            railAccountRepository.details(id)
-        );
+    public Map<String, Object> details(String accountId) {
+        log.debug("Retrieving account detail [id: {}]", accountId);
+        try {
+            return accountDetailCache.getValueOrCall(accountId, () ->
+                railAccountRepository.details(accountId)
+            );
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                return Map.of();
+            }
+            throw e;
+        }
     }
 
-    public TransactionsResponse transactions(String id,
-                                             LocalDate dateFrom,
-                                             LocalDate dateTo) {
-        return railAccountRepository.transactions(id, dateFrom, dateTo);
+    /**
+     * Returns the transactions for the identified account for the given period.
+     * If the account cannot be found, the result will be an empty optional.
+     *
+     * @param accountId the rail account's unique identifier.
+     * @param dateFrom the date of the start of the period to be searched, inclusive.
+     * @param dateTo the date of the end of the period to be searched, inclusive.
+     * @return the optional list of booked and pending transactions.
+     */
+    public Optional<TransactionList> transactions(String accountId,
+                                        LocalDate dateFrom,
+                                        LocalDate dateTo) {
+        log.debug("Retrieving account transaction [id: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
+        try {
+            // call the rail service endpoint
+            TransactionsResponse response = railAccountRepository.transactions(accountId, dateFrom, dateTo);
+
+            // if the result is null
+            if ((response == null) || (response.transactions == null)) {
+                // return an non-empty result - empty would indicate account-not-found
+                return Optional.of(TransactionList.NULL_LIST);
+            }
+            return Optional.of(response.transactions);
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                // indicate account-not-found
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 }

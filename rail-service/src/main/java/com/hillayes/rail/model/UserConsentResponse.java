@@ -26,7 +26,7 @@ public class UserConsentResponse {
      */
     private ConsentStatus status;
 
-    private List<AccountDetail> accounts;
+    private List<AccountSummary> accounts;
 
     private Instant dateGiven;
 

@@ -1,4 +1,4 @@
-package com.hillayes.audit.consumer;
+package com.hillayes.audit.event.consumer;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.events.auth.LoginFailure;

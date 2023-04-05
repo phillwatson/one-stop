@@ -11,10 +11,12 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
-public class InstitutionService {
+public class InstitutionService extends AbstractRailService {
     @Inject
     @RestClient
     InstitutionRepository institutionRepository;
@@ -34,15 +36,23 @@ public class InstitutionService {
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
         return cache.getValueOrCall(key, () -> {
             List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);
-            list.add(get("SANDBOXFINANCE_SFIN0000"));
+            get("SANDBOXFINANCE_SFIN0000")
+                .ifPresent(list::add);
 
             list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled);
             return list;
         });
     }
 
-    public Institution get(String id) {
-        return institutionRepository.get(id);
+    public Optional<Institution> get(String id) {
+        try {
+            return Optional.ofNullable(institutionRepository.get(id));
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
     @RequiredArgsConstructor

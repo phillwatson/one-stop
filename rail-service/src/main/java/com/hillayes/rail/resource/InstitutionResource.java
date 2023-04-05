@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class InstitutionResource {
     @Path("/{id}")
     public Institution getById(@PathParam("id") String id) {
         log.info("Get institution [id: {}]", id);
-        return institutionService.get(id);
+        return institutionService.get(id)
+            .orElseThrow(() -> new NotFoundException("Institution", id));
     }
 }
