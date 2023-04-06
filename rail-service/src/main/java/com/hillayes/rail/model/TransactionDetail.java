@@ -1,11 +1,13 @@
 package com.hillayes.rail.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionDetail {

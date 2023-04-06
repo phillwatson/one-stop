@@ -44,6 +44,10 @@ quarkus:
     console:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
     category:
+      "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
+        level: TRACE
+      "org.jose4j.jwk":
+        level: TRACE
       "com.hillayes":
         level: DEBUG
 

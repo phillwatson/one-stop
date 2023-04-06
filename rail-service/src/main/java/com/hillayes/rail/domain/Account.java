@@ -33,6 +33,11 @@ public class Account {
 
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "userconsent_id", nullable = false)
     private UUID userConsentId;
 

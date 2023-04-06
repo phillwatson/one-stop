@@ -1,4 +1,4 @@
-openapi: "3.0.2"
+openapi: "3.1.0"
 info:
   version: "1.0.0"
   title: "One Stop API"
@@ -10,9 +10,20 @@ servers:
   - url: http://localhost/api/v1
     description: Development server
 
+tags:
+  - name: "users"
+    description: "Operations about users"
+  - name: "rails"
+    description: "Operations about rails"
+  - name: "accounts"
+    description: "Operations about accounts"
+  - name: "transactions"
+    description: "Operations about account transactions"
+
 paths:
   /users:
     get:
+      tags: [ "users" ]
       summary: "Get all users"
       description: "This can only be done by the logged in user."
       operationId: "getAllUsers"
@@ -22,15 +33,14 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/NewUserData"
+                $ref: "#/components/schemas/PaginatedUsers"
         "401":
           description: "Unauthorized"
         "500":
           description: "Internal server error"
 
     post:
+      tags: [ "users" ]
       summary: "Create user"
       description: "This can only be done by the logged in user."
       operationId: "createUser"
@@ -39,7 +49,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserData"
+              $ref: "#/components/schemas/NewUserRequest"
         required: true
       responses:
         "200":
@@ -47,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserData"
+                $ref: "#/components/schemas/UserResponse"
         "400":
           description: "Invalid user supplied"
         "401":
@@ -57,6 +67,7 @@ paths:
 
   /users/{id}:
     get:
+      tags: [ "users" ]
       summary: "Get user by id"
       description: "This can only be done by the logged in user."
       operationId: "getUserById"
@@ -74,7 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserData"
+                $ref: "#/components/schemas/UserResponse"
         "400":
           description: "Invalid ID supplied"
         "401":
@@ -85,6 +96,7 @@ paths:
           description: "Internal server error"
 
     put:
+      tags: [ "users" ]
       summary: "Update user"
       description: "This can only be done by the logged in user."
       operationId: "updateUser"
@@ -101,7 +113,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserData"
+              $ref: "#/components/schemas/UserResponse"
         required: true
       responses:
         "200":
@@ -109,7 +121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserData"
+                $ref: "#/components/schemas/UserResponse"
         "401":
           description: "Unauthorized"
         "404":
@@ -118,6 +130,7 @@ paths:
           description: "Internal server error"
 
     delete:
+      tags: [ "users" ]
       summary: "Delete user"
       description: "This can only be done by the logged in user."
       operationId: "deleteUser"
@@ -141,6 +154,7 @@ paths:
 
   /rails/banks:
     get:
+      tags: [ "rails" ]
       summary: "Get all banks"
       description: "This can only be done by the logged in user."
       operationId: "getAllBanks"
@@ -150,9 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Bank"
+                $ref: "#/components/schemas/PaginatedBanks"
         "401":
           description: "Unauthorized"
         "500":
@@ -160,6 +172,7 @@ paths:
 
   /rails/banks/{id}:
     get:
+      tags: [ "rails" ]
       summary: "Get bank by id"
       description: "This can only be done by the logged in user."
       operationId: "getBankById"
@@ -170,14 +183,13 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
       responses:
         "200":
           description: "successful operation"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Bank"
+                $ref: "#/components/schemas/BankResponse"
         "400":
           description: "Invalid ID supplied"
         "401":
@@ -187,9 +199,153 @@ paths:
         "500":
           description: "Internal server error"
 
+  /rails/accounts:
+    get:
+      tags: [ "accounts" ]
+      summary: "Get all accounts"
+      description: "Get all accounts for the authenticated user"
+      operationId: "getAllAccounts"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page number"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: "page-size"
+          in: "query"
+          description: "Number of items per page"
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedAccounts"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal server error"
+
+  /rails/accounts/{id}:
+    get:
+      tags: [ "accounts" ]
+      summary: "Get account by id"
+      description: "Get account by id for the authenticated user"
+      operationId: "getAccountById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of account to return"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Account not found"
+        "500":
+          description: "Internal server error"
+
+  /rails/accounts/{id}/transactions:
+    get:
+      tags: [ "transactions" ]
+      summary: "Get all transactions for an account"
+      description: "Get all transactions for an account for the authenticated user"
+      operationId: "getAllTransactionsForAccount"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of account to return transactions for"
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "page"
+          in: "query"
+          description: "Page number"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: "page-size"
+          in: "query"
+          description: "Number of items per page"
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedTransactions"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Account not found"
+        "500":
+          description: "Internal server error"
+
+  /rails/accounts/{id}/transactions/{transactionId}:
+    get:
+      tags: [ "transactions" ]
+      summary: "Get transaction by id"
+      description: "Get transaction by id for the authenticated user"
+      operationId: "getTransactionById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of account to return transaction for"
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "transactionId"
+          in: "path"
+          description: "ID of transaction to return"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionSummaryResponse"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Transaction not found"
+        "500":
+          description: "Internal server error"
+
 components:
   schemas:
-    NewUserData:
+    NewUserRequest:
       type: object
       required:
         - username
@@ -228,9 +384,9 @@ components:
           description: The user's phone number
           example: 0123456789
 
-    UserData:
+    UserResponse:
       allOf:
-        - $ref: "#/components/schemas/NewUserData"
+        - $ref: "#/components/schemas/NewUserRequest"
         - type: object
           required:
             - id
@@ -266,19 +422,18 @@ components:
                 type: string
                 description: The authorisation roles that the user holds
                 example: admin
-    Bank:
+
+    BankResponse:
       type: object
       required:
         - id
         - name
         - bic
-        - countries
       properties:
         id:
           type: string
-          format: uuid
           description: The bank Id
-          example: 07061d76-74f3-4163-aa07-fb6909681f81
+          example: 07061d7674f3
         name:
           type: string
           description: The bank's name
@@ -291,9 +446,220 @@ components:
           type: string
           description: The bank's logo
           example: https://www.bankofengland.co.uk/-/media/boe/images/logos/bank-of-england-logo.png
-        countries:
+
+    AccountResponse:
+      type: object
+      required:
+        - id
+        - name
+        - iban
+        - bank
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The account Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        name:
+          type: string
+          description: The account's name
+          example: My Current Account
+        iban:
+          type: string
+          description: The account's IBAN
+          example: GB29NWBK60161331926819
+        bank:
+          $ref: "#/components/schemas/BankResponse"
+
+    TransactionSummaryResponse:
+      type: object
+      required:
+        - id
+        - amount
+        - date
+        - description
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The transaction Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        amount:
+          type: number
+          description: The transaction amount
+          example: 123.45
+        date:
+          type: string
+          format: date-time
+          description: The transaction date
+          example: 2019-01-01T00:00:00.000Z
+        description:
+          type: string
+          description: The transaction description
+          example: My transaction description
+        accountId:
+          type: string
+          format: uuid
+          description: The account Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+
+    PaginatedBanks:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: The total number of items in the list
+          example: 292
+        count:
+          type: integer
+          description: The number of items in the page
+          example: 20
+        page:
+          type: integer
+          description: The current page number
+          example: 2
+        pageSize:
+          type: integer
+          description: The requested number of items per page
+          example: 25
+        first:
+          type: string
+          description: The URL of the first page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        next:
+          type: string
+          description: The URL of the next page of items
+          example: https://api.example.com/accounts?page=3&page-size=20
+        previous:
+          type: string
+          description: The URL of the previous page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        last:
+          type: string
+          description: The URL of the last page of items
+          example: https://api.example.com/accounts?page=20&page-size=20
+        items:
           type: array
+          description: The list of banks
           items:
-            type: string
-            description: The bank's country
-            example: GB
+            $ref: "#/components/schemas/BankResponse"
+
+    PaginatedUsers:
+      properties:
+        total:
+          type: integer
+          description: The total number of items in the list
+          example: 292
+        count:
+          type: integer
+          description: The number of items in the page
+          example: 20
+        page:
+          type: integer
+          description: The current page number
+          example: 2
+        pageSize:
+          type: integer
+          description: The requested number of items per page
+          example: 25
+        first:
+          type: string
+          description: The URL of the first page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        next:
+          type: string
+          description: The URL of the next page of items
+          example: https://api.example.com/accounts?page=3&page-size=20
+        previous:
+          type: string
+          description: The URL of the previous page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        last:
+          type: string
+          description: The URL of the last page of items
+          example: https://api.example.com/accounts?page=20&page-size=20
+        items:
+          type: array
+          description: The list of users
+          items:
+            $ref: "#/components/schemas/UserResponse"
+
+    PaginatedAccounts:
+      properties:
+        total:
+          type: integer
+          description: The total number of items in the list
+          example: 292
+        count:
+          type: integer
+          description: The number of items in the page
+          example: 20
+        page:
+          type: integer
+          description: The current page number
+          example: 2
+        pageSize:
+          type: integer
+          description: The requested number of items per page
+          example: 25
+        first:
+          type: string
+          description: The URL of the first page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        next:
+          type: string
+          description: The URL of the next page of items
+          example: https://api.example.com/accounts?page=3&page-size=20
+        previous:
+          type: string
+          description: The URL of the previous page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        last:
+          type: string
+          description: The URL of the last page of items
+          example: https://api.example.com/accounts?page=20&page-size=20
+        items:
+          type: array
+          description: The list of accounts
+          items:
+            $ref: "#/components/schemas/AccountResponse"
+
+    PaginatedTransactions:
+      properties:
+        total:
+          type: integer
+          description: The total number of items in the list
+          example: 292
+        count:
+          type: integer
+          description: The number of items in the page
+          example: 20
+        page:
+          type: integer
+          description: The current page number
+          example: 2
+        pageSize:
+          type: integer
+          description: The requested number of items per page
+          example: 25
+        first:
+          type: string
+          description: The URL of the first page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        next:
+          type: string
+          description: The URL of the next page of items
+          example: https://api.example.com/accounts?page=3&page-size=20
+        previous:
+          type: string
+          description: The URL of the previous page of items
+          example: https://api.example.com/accounts?page=1&page-size=20
+        last:
+          type: string
+          description: The URL of the last page of items
+          example: https://api.example.com/accounts?page=20&page-size=20
+        items:
+          type: array
+          description: The list of transactions
+          items:
+            $ref: "#/components/schemas/TransactionSummaryResponse"

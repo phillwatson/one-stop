@@ -31,7 +31,7 @@ public class AgreementResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(agreement)
-                .when().post("/api/v1/agreements")
+                .when().post("/api/v1/rails/agreements")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -45,7 +45,7 @@ public class AgreementResourceTest extends TestBase {
         given()
                 .queryParam("limit", 100)
                 .queryParam("offset", 0)
-                .when().get("/api/v1/agreements")
+                .when().get("/api/v1/rails/agreements")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -54,7 +54,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().get("/api/v1/agreements/{id}")
+                .when().get("/api/v1/rails/agreements/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -66,7 +66,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().delete("/api/v1/agreements/{id}")
+                .when().delete("/api/v1/rails/agreements/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -74,7 +74,7 @@ public class AgreementResourceTest extends TestBase {
 
         given()
                 .pathParam("id", agreementId)
-                .when().get("/api/v1/agreements/{id}")
+                .when().get("/api/v1/rails/agreements/{id}")
                 .then()
                 .statusCode(404);
     }

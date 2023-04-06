@@ -35,7 +35,7 @@ public class RequisitionResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(agreement)
-                .when().post("/api/v1/agreements")
+                .when().post("/api/v1/rails/agreements")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -53,7 +53,7 @@ public class RequisitionResourceTest extends TestBase {
                 .request()
                 .contentType(JSON)
                 .body(requisition)
-                .when().post("/api/v1/requisitions")
+                .when().post("/api/v1/rails/requisitions")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
@@ -78,7 +78,7 @@ public class RequisitionResourceTest extends TestBase {
 
         String acceptanceLink = given()
                 .pathParam("id", requisitionId)
-                .when().get("/api/v1/requisitions/{id}")
+                .when().get("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -92,7 +92,7 @@ public class RequisitionResourceTest extends TestBase {
 
         given()
                 .pathParam("id", requisitionId)
-                .when().delete("/api/v1/requisitions/{id}")
+                .when().delete("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -100,7 +100,7 @@ public class RequisitionResourceTest extends TestBase {
 
         given()
                 .pathParam("id", requisitionId)
-                .when().get("/api/v1/requisitions/{id}")
+                .when().get("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(404);
     }

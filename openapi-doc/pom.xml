@@ -12,7 +12,7 @@
     <artifactId>openapi-doc</artifactId>
 
     <properties>
-        <openapi-generator.version>6.3.0</openapi-generator.version>
+        <openapi-generator.version>6.4.0</openapi-generator.version>
     </properties>
 
     <dependencies>
@@ -27,6 +27,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
         </dependency>
     </dependencies>
 

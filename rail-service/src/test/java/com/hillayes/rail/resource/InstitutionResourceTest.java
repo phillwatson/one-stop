@@ -18,7 +18,7 @@ public class InstitutionResourceTest {
         List<Map<String,Object>> response = given()
                 .queryParam("country", "GB")
                 .queryParam("payments_enabled", false)
-                .when().get("/api/v1/banks")
+                .when().get("/api/v1/rails/banks")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -33,7 +33,7 @@ public class InstitutionResourceTest {
     public void testGetBank() {
         given()
                 .pathParam("id", "FIRST_DIRECT_MIDLGB22")
-                .when().get("/api/v1/banks/{id}")
+                .when().get("/api/v1/rails/banks/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)

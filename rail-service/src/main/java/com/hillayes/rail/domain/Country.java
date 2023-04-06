@@ -10,5 +10,5 @@ import lombok.Getter;
 public class Country {
     private String id;
     private String name;
-    private String flag;
+    private String flagUrl;
 }

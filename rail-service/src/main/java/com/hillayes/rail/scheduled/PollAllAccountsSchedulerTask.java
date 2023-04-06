@@ -15,7 +15,7 @@ import javax.transaction.Transactional;
 public class PollAllAccountsSchedulerTask implements NamedScheduledTask {
     private final AccountRepository accountRepository;
 
-    private final PollAccountSchedulerTask pollAccountSchedulerTask;
+    private final PollAccountJobbingTask pollAccountJobbingTask;
 
     @Override
     public String getName() {
@@ -32,7 +32,7 @@ public class PollAllAccountsSchedulerTask implements NamedScheduledTask {
     public void run() {
         log.info("PollAllAccountsSchedulerTask.run()");
         accountRepository.findAll().forEach(account -> {
-            pollAccountSchedulerTask.queueJob(account.getId());
+            pollAccountJobbingTask.queueJob(account.getId());
         });
     }
 }

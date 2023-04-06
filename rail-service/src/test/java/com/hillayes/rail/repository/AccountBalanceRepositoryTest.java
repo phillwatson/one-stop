@@ -65,6 +65,7 @@ public class AccountBalanceRepositoryTest {
         for (int i = 0; i < count; i++) {
             result.add(accountRepository.save(Account.builder()
                 .userConsentId(userConsent.getId())
+                .userId(userConsent.getUserId())
                 .institutionId(userConsent.getInstitutionId())
                 .railAccountId(UUID.randomUUID().toString())
                 .build()));

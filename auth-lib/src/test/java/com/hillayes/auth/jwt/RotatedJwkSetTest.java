@@ -1,4 +1,4 @@
-package com.hillayes.auth.crypto;
+package com.hillayes.auth.jwt;
 
 import com.hillayes.auth.jwt.RotatedJwkSet;
 import org.junit.jupiter.api.Test;

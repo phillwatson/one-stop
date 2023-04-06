@@ -83,7 +83,7 @@
 
             <dependency>
                 <groupId>com.hillayes</groupId>
-                <artifactId>openid-lib</artifactId>
+                <artifactId>openapi-doc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

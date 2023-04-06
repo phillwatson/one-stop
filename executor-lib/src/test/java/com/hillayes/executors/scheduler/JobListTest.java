@@ -108,4 +108,55 @@ public class JobListTest extends TestBase {
             .until(() -> signal.get() == 3);
         fixture.stop();
     }
+
+    @Test
+    public void testMaxRetry() {
+        final AtomicInteger signal = new AtomicInteger();
+
+        NamedJobbingTask<String> task = new NamedJobbingTask<>() {
+            public String getName() {
+                return "test-jobs";
+            }
+
+            // the task will fail on each run
+            public void accept(String data) {
+                int count = signal.incrementAndGet();
+                log.info("Task {} is running ({})", data, count);
+                throw new RuntimeException("test task failure");
+            }
+
+            @Override
+            public String queueJob(String payload) {
+                return null;
+            }
+        };
+
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(Map.of(task.getName(), NamedTaskConfigImpl.builder()
+                    .retryInterval(Duration.ofSeconds(1))
+                    .retryExponent(1.0)
+                    .maxRetry(3) // specify a max-retry for test
+                    .build()))
+                .pollingInterval(Duration.ofSeconds(1))
+                .build(),
+            List.of(task));
+
+        // queue some jobs
+        fixture.addJob(task, "one");
+
+        // wait for jobs to complete
+        Awaitility.await()
+            .pollInterval(2, TimeUnit.SECONDS)
+            .atMost(10, TimeUnit.SECONDS)
+            .until(() -> signal.get() == 4); // initial attempt plus 3 retries
+
+        // no more retry attempts will be made
+        Awaitility.await()
+            .during(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
+            .atMost(Duration.ofSeconds(6)) // timeout
+            .until(() -> signal.get() == 4 ); // no increment of the signal shows job was not retried
+
+        fixture.stop();
+    }
 }

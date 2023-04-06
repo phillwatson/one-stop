@@ -1,10 +1,12 @@
 package com.hillayes.rail.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class AccountSummary {
     @JsonProperty("id")

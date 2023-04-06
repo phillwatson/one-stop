@@ -19,12 +19,13 @@ public class CountryRepository {
     public Collection<Country> getConfig() {
         log.info("Get all countries");
         Collection<Country> result = config.countries()
-                .stream()
-                .map(entry -> Country.builder()
-                        .id(entry.id())
-                        .name(entry.name())
-                        .build())
-                .collect(Collectors.toSet());
+            .stream()
+            .map(entry -> Country.builder()
+                .id(entry.id())
+                .name(entry.name())
+                .flagUrl(entry.flagUrl().orElse(null))
+                .build())
+            .collect(Collectors.toSet());
 
         log.info("Get all countries [size: {}]", result.size());
         return result;
@@ -34,14 +35,15 @@ public class CountryRepository {
         log.info("Get country [id: {}]", id);
 
         Optional<Country> result = config.countries()
-                .stream()
-                .filter(c -> c.id().equalsIgnoreCase(id))
-                .findAny()
-                .map(c -> Country.builder()
-                                .id(c.id())
-                                .name(c.name())
-                                .build()
-                );
+            .stream()
+            .filter(c -> c.id().equalsIgnoreCase(id))
+            .findAny()
+            .map(c -> Country.builder()
+                .id(c.id())
+                .name(c.name())
+                .flagUrl(c.flagUrl().orElse(null))
+                .build()
+            );
 
         if (result.isEmpty()) {
             log.info("Get country - not found [id: {}]", id);

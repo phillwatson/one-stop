@@ -24,17 +24,19 @@ public class InstitutionService extends AbstractRailService {
     @Inject
     ServiceConfiguration config;
 
-    private Cache<CacheKey,List<Institution>> cache;
+    private Cache<CacheKey,List<Institution>> cacheByCountry;
+    private Cache<String,Institution> cacheById;
 
     @PostConstruct
     public void init() {
-        cache = new Cache<>(config.caches().institutions());
+        cacheByCountry = new Cache<>(config.caches().institutions());
+        cacheById = new Cache<>(config.caches().institutions());
     }
 
     public List<Institution> list(String countryCode,
                                   Boolean paymentsEnabled) {
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
-        return cache.getValueOrCall(key, () -> {
+        return cacheByCountry.getValueOrCall(key, () -> {
             List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);
             get("SANDBOXFINANCE_SFIN0000")
                 .ifPresent(list::add);
@@ -46,7 +48,7 @@ public class InstitutionService extends AbstractRailService {
 
     public Optional<Institution> get(String id) {
         try {
-            return Optional.ofNullable(institutionRepository.get(id));
+            return Optional.ofNullable(cacheById.getValueOrCall(id, () -> institutionRepository.get(id)));
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Optional.empty();

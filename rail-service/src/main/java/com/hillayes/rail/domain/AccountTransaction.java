@@ -25,6 +25,11 @@ public class AccountTransaction {
     @Column(name = "account_id", nullable = false)
     private UUID accountId;
 
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
     @Builder.Default
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();

@@ -8,7 +8,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
-import com.hillayes.rail.scheduled.PollAccountSchedulerTask;
+import com.hillayes.rail.scheduled.PollAccountJobbingTask;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.RequisitionService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ConsentTopicConsumer {
     private final AccountRepository accountRepository;
     private final RequisitionService requisitionService;
     private final RailAccountService railAccountService;
-    private final PollAccountSchedulerTask pollAccountSchedulerTask;
+    private final PollAccountJobbingTask pollAccountJobbingTask;
 
     @Incoming("consent")
     @Transactional
@@ -80,6 +80,7 @@ public class ConsentTopicConsumer {
                 final Account account = accountRepository.findByRailAccountId(railAccountId)
                     .orElse(Account.builder()
                         .userConsentId(userConsent.getId())
+                        .userId(userConsent.getUserId())
                         .institutionId(userConsent.getInstitutionId())
                         .railAccountId(railAccountId)
                         .build());
@@ -104,7 +105,7 @@ public class ConsentTopicConsumer {
                 UUID accountId = accountRepository.save(account).getId();
 
                 // schedule the polling of account transactions
-                pollAccountSchedulerTask.queueJob(accountId);
+                pollAccountJobbingTask.queueJob(accountId);
             })
         );
     }

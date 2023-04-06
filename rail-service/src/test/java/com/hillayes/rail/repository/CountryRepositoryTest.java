@@ -18,7 +18,7 @@ public class CountryRepositoryTest {
     public void testGetAll() {
         Collection<Country> countries = countryRepository.getConfig();
         assertNotNull(countries);
-        assertEquals(3, countries.size());
+        assertEquals(4, countries.size());
     }
 
     @Test

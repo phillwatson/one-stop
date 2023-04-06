@@ -63,6 +63,7 @@ public class AccountRepositoryTest {
         for (int i = 0; i < count; i++) {
             result.add(fixture.save(Account.builder()
                 .userConsentId(userConsent.getId())
+                .userId(userConsent.getUserId())
                 .institutionId(userConsent.getInstitutionId())
                 .railAccountId(UUID.randomUUID().toString())
                 .build()));

@@ -46,6 +46,7 @@ public class AccountTransactionRepositoryTest {
         // and: a linked account
         Account account = accountRepository.save(Account.builder()
             .userConsentId(consent.getId())
+            .userId(consent.getUserId())
             .institutionId(consent.getInstitutionId())
             .railAccountId(UUID.randomUUID().toString())
             .build());
@@ -55,6 +56,7 @@ public class AccountTransactionRepositoryTest {
         LocalDate bookingDate = LocalDate.now().minusWeeks(5);
         while (bookingDate.isBefore(LocalDate.now())) {
             transactions.add(AccountTransaction.builder()
+                    .userId(account.getUserId())
                 .accountId(account.getId())
                 .internalTransactionId(UUID.randomUUID().toString())
                 .bookingDate(bookingDate)

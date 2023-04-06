@@ -2,12 +2,14 @@ import AccountReference from "./account-reference.model";
 import CurrencyAmount from "./currency-amount.model";
 
 export default interface Transaction {
+       id: string,
        transactionId: string,
        bookingDate: Date,
        bookingDateTime: Date,
        valueDate: Date,
        valueDateTime: Date,
-       transactionAmount: CurrencyAmount,
+       transactionAmount: number,
+       transactionCurrency: string,
        additionalInformation: string,
        additionalInformationStructured: string,
        balanceAfterTransaction: string,

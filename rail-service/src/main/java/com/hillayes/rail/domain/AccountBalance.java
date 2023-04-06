@@ -13,6 +13,7 @@ import java.util.UUID;
 
 @Entity(name = "account_balance")
 @Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

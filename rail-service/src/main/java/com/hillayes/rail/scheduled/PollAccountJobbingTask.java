@@ -33,7 +33,7 @@ import java.util.UUID;
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class PollAccountSchedulerTask implements NamedJobbingTask<UUID> {
+public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
     private final ServiceConfiguration configuration;
     private final UserConsentRepository userConsentRepository;
     private final AccountRepository accountRepository;
@@ -50,13 +50,13 @@ public class PollAccountSchedulerTask implements NamedJobbingTask<UUID> {
 
     @Override
     public void taskScheduled(SchedulerFactory scheduler) {
-        log.info("PollAccountTask.taskScheduled()");
+        log.info("taskScheduled()");
         this.scheduler = scheduler;
     }
 
     @Override
     public String queueJob(UUID accountId) {
-        log.info("Queuing PollAccountTask job [accountId: {}]", accountId);
+        log.info("Queuing Poll Account job [accountId: {}]", accountId);
         return scheduler.addJob(this, accountId);
     }
 
@@ -71,7 +71,7 @@ public class PollAccountSchedulerTask implements NamedJobbingTask<UUID> {
     @Override
     @Transactional
     public void accept(UUID accountId) {
-        log.info("Processing PollAccountTask job [accountId: {}]", accountId);
+        log.info("Processing Poll Account job [accountId: {}]", accountId);
 
         // if the account has been polled after this grace period, don't poll it again
         Instant grace = Instant.now().minus(configuration.accountPollingInterval());
@@ -89,7 +89,15 @@ public class PollAccountSchedulerTask implements NamedJobbingTask<UUID> {
             })
             .ifPresent(account -> userConsentRepository.findById(account.getUserConsentId())
                 // ensure consent is still active
-                .filter(consent -> consent.getStatus() == ConsentStatus.GIVEN)
+                .filter(consent -> {
+                    if (consent.getStatus() == ConsentStatus.GIVEN) {
+                        return true;
+                    }
+
+                    log.debug("Skipping account transaction update [accountId: {}, consentId: {}, status: {}]",
+                        accountId, consent.getId(), consent.getStatus());
+                    return false;
+                })
                 .ifPresent(consent -> {
                     log.debug("Polling account [accountId: {}, railAccountId: {}]", accountId, account.getRailAccountId());
                     updateBalances(account);
@@ -153,6 +161,7 @@ public class PollAccountSchedulerTask implements NamedJobbingTask<UUID> {
      */
     private AccountTransaction marshalTransaction(Account account, TransactionDetail detail) {
         return AccountTransaction.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .internalTransactionId(detail.internalTransactionId == null ? UUID.randomUUID().toString() : detail.internalTransactionId)
             .transactionId(detail.transactionId)

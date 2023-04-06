@@ -14,6 +14,7 @@ public class NamedTaskConfigImpl implements NamedTaskConfig {
     private FrequencyConfig frequency;
     private Duration retryInterval;
     private Double retryExponent;
+    private Integer maxRetry;
 
     @Override
     public Optional<FrequencyConfig> frequency() {
@@ -32,6 +33,6 @@ public class NamedTaskConfigImpl implements NamedTaskConfig {
 
     @Override
     public OptionalInt maxRetry() {
-        return OptionalInt.empty();
+        return (maxRetry == null) ? OptionalInt.empty() : OptionalInt.of(maxRetry);
     }
 }

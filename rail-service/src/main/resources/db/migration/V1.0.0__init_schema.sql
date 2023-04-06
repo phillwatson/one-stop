@@ -18,7 +18,8 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
 );
 
 CREATE TABLE ${flyway:defaultSchema}.account (
-	id uuid NOT NULL CONSTRAINT userbankac_pkey PRIMARY KEY,
+	id uuid NOT NULL CONSTRAINT account_pkey PRIMARY KEY,
+    user_id UUID NOT NULL,
 	userconsent_id UUID NOT NULL CONSTRAINT fk_userconsent REFERENCES ${flyway:defaultSchema}.userconsent (id) ON DELETE CASCADE,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     institution_id varchar(256) NOT NULL,
@@ -31,6 +32,7 @@ CREATE TABLE ${flyway:defaultSchema}.account (
 	date_last_polled timestamp NULL
 );
 CREATE INDEX idx_account_rail_id ON ${flyway:defaultSchema}.account (rail_account_id);
+CREATE INDEX idx_account_user_id ON ${flyway:defaultSchema}.account (user_id);
 
 CREATE TABLE ${flyway:defaultSchema}.account_balance (
 	id uuid NOT NULL CONSTRAINT balance_pkey PRIMARY KEY,
@@ -45,6 +47,7 @@ CREATE INDEX idx_account_balance_date ON ${flyway:defaultSchema}.account_balance
 
 CREATE TABLE ${flyway:defaultSchema}.account_transaction (
 	id uuid NOT NULL CONSTRAINT transaction_pkey PRIMARY KEY,
+    user_id UUID NOT NULL,
 	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
 	date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     booking_date date NOT NULL,
@@ -82,3 +85,4 @@ CREATE TABLE ${flyway:defaultSchema}.account_transaction (
     ultimate_debtor varchar(256) NULL
 );
 CREATE INDEX idx_account_trans_date ON ${flyway:defaultSchema}.account_transaction (account_id, booking_date);
+CREATE INDEX idx_account_user_date ON ${flyway:defaultSchema}.account_transaction (user_id, booking_date);

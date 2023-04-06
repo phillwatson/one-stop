@@ -46,6 +46,14 @@ public class RailAccountService extends AbstractRailService {
         }
     }
 
+    /**
+     * Returns the balance records for the identified account. If no balance records
+     * are found, an empty list is returned.
+     * If the account cannot be found, an empty value is returned.
+     *
+     * @param accountId the account identifier.
+     * @return an optional list of balance records.
+     */
     public Optional<List<Balance>> balances(String accountId) {
         log.debug("Retrieving account balances [id: {}]", accountId);
         try {
@@ -89,7 +97,7 @@ public class RailAccountService extends AbstractRailService {
     public Optional<TransactionList> transactions(String accountId,
                                         LocalDate dateFrom,
                                         LocalDate dateTo) {
-        log.debug("Retrieving account transaction [id: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
+        log.debug("Retrieving account transactions [id: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
         try {
             // call the rail service endpoint
             TransactionsResponse response = railAccountRepository.transactions(accountId, dateFrom, dateTo);
