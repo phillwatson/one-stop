@@ -1,12 +1,19 @@
 package com.hillayes.auth.xsrf;
 
+import io.quarkus.arc.DefaultBean;
+import io.quarkus.arc.profile.IfBuildProfile;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.NewCookie;
+import java.util.UUID;
 
 @Dependent
+@Slf4j
 public class XsrfFactory {
     /**
      * The name of the cookie, in the incoming request, that holds the XSRF token
@@ -32,11 +39,31 @@ public class XsrfFactory {
 
     @Produces
     @ApplicationScoped
-    public XsrfGenerator xsrfGenerator(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
+    @DefaultBean
+    public XsrfValidator xsrfGenerator(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
+        log.info("Using XSRF default instance");
         XsrfGenerator result = new XsrfGenerator(secret);
         result.setCookieName(cookieName);
         result.setHeaderName(headerName);
         result.setTimeoutSecs(timeoutSecs);
         return result;
+    }
+
+    @Produces
+    @ApplicationScoped
+    @IfBuildProfile("test")
+    public XsrfValidator xsrfTestInstance(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
+        log.info("Using XSRF test instance");
+        return new XsrfValidator() {
+            @Override
+            public boolean validateToken(ContainerRequestContext requestContext) {
+                return true;
+            }
+
+            @Override
+            public NewCookie generateCookie() {
+                return new NewCookie("mock-xsrf", UUID.randomUUID().toString());
+            }
+        };
     }
 }

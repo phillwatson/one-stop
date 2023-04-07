@@ -1,12 +1,13 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.rail.domain.AccountTransaction;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface AccountTransactionRepository extends JpaRepository<AccountTransaction, UUID> {
-    public List<AccountTransaction> findByAccountId(UUID accountId, Pageable pageable);
+    public Page<AccountTransaction> findByUserId(UUID userId, Pageable pageable);
+    public Page<AccountTransaction> findByAccountId(UUID accountId, Pageable pageable);
 }

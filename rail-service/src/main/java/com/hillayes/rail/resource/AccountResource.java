@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -29,8 +30,10 @@ import java.util.UUID;
 public class AccountResource extends AbstractResource {
     private static final String PAGE_LINK = "/api/v1/rails/accounts?page=%d&page-size=%d";
 
-    private final AccountService accountService;
-    private final InstitutionService institutionService;
+    @Inject
+    AccountService accountService;
+    @Inject
+    InstitutionService institutionService;
 
     @GET
     public Response getAccounts(@Context SecurityContext ctx,
@@ -41,11 +44,12 @@ public class AccountResource extends AbstractResource {
         PaginatedAccounts response = new PaginatedAccounts()
             .page(page)
             .pageSize(pageSize)
-            .count(accountsPage.getSize())
+            .count(accountsPage.getNumberOfElements())
             .total(accountsPage.getTotalElements())
-            .items(accountsPage.getContent().stream().map(this::marshal).toArray())
+            .items(accountsPage.getContent().stream().map(this::marshal).toList())
             .first(String.format(PAGE_LINK, 0, pageSize))
             .last(String.format(PAGE_LINK, accountsPage.getTotalPages() - 1, pageSize));
+
 
         if (page > 0) {
             response.previous(String.format(PAGE_LINK, page - 1, pageSize));

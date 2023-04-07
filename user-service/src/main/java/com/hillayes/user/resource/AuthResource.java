@@ -1,6 +1,6 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.auth.xsrf.XsrfGenerator;
+import com.hillayes.auth.xsrf.XsrfValidator;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.model.LoginRequest;
 import com.hillayes.user.service.AuthService;
@@ -36,7 +36,7 @@ public class AuthResource {
 
     private final AuthService authService;
 
-    private final XsrfGenerator xsrfGenerator;
+    private final XsrfValidator xsrfValidator;
 
     @GET
     @Path("jwks.json")
@@ -119,7 +119,7 @@ public class AuthResource {
             (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
             false, true);
 
-        NewCookie xsrfCookie = xsrfGenerator.generateCookie();
+        NewCookie xsrfCookie = xsrfValidator.generateCookie();
 
         return new NewCookie[]{accessToken, refreshToken, xsrfCookie};
     }

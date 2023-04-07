@@ -479,6 +479,7 @@ components:
           example: 07061d76-74f3-4163-aa07-fb6909681f81
         amount:
           type: number
+          format: double
           description: The transaction amount
           example: 123.45
         date:
@@ -496,23 +497,27 @@ components:
           description: The account Id
           example: 07061d76-74f3-4163-aa07-fb6909681f81
 
-    PaginatedBanks:
+    PaginatedItems:
       type: object
       properties:
         total:
           type: integer
+          format: int64
           description: The total number of items in the list
           example: 292
         count:
           type: integer
+          format: int32
           description: The number of items in the page
           example: 20
         page:
           type: integer
+          format: int32
           description: The current page number
           example: 2
         pageSize:
           type: integer
+          format: int32
           description: The requested number of items per page
           example: 25
         first:
@@ -531,128 +536,47 @@ components:
           type: string
           description: The URL of the last page of items
           example: https://api.example.com/accounts?page=20&page-size=20
-        items:
-          type: array
-          description: The list of banks
-          items:
-            $ref: "#/components/schemas/BankResponse"
+
+    PaginatedBanks:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of banks
+              items:
+                $ref: "#/components/schemas/BankResponse"
 
     PaginatedUsers:
-      properties:
-        total:
-          type: integer
-          description: The total number of items in the list
-          example: 292
-        count:
-          type: integer
-          description: The number of items in the page
-          example: 20
-        page:
-          type: integer
-          description: The current page number
-          example: 2
-        pageSize:
-          type: integer
-          description: The requested number of items per page
-          example: 25
-        first:
-          type: string
-          description: The URL of the first page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        next:
-          type: string
-          description: The URL of the next page of items
-          example: https://api.example.com/accounts?page=3&page-size=20
-        previous:
-          type: string
-          description: The URL of the previous page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        last:
-          type: string
-          description: The URL of the last page of items
-          example: https://api.example.com/accounts?page=20&page-size=20
-        items:
-          type: array
-          description: The list of users
-          items:
-            $ref: "#/components/schemas/UserResponse"
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of users
+              items:
+                $ref: "#/components/schemas/UserResponse"
 
     PaginatedAccounts:
-      properties:
-        total:
-          type: integer
-          description: The total number of items in the list
-          example: 292
-        count:
-          type: integer
-          description: The number of items in the page
-          example: 20
-        page:
-          type: integer
-          description: The current page number
-          example: 2
-        pageSize:
-          type: integer
-          description: The requested number of items per page
-          example: 25
-        first:
-          type: string
-          description: The URL of the first page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        next:
-          type: string
-          description: The URL of the next page of items
-          example: https://api.example.com/accounts?page=3&page-size=20
-        previous:
-          type: string
-          description: The URL of the previous page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        last:
-          type: string
-          description: The URL of the last page of items
-          example: https://api.example.com/accounts?page=20&page-size=20
-        items:
-          type: array
-          description: The list of accounts
-          items:
-            $ref: "#/components/schemas/AccountResponse"
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of accounts
+              items:
+                $ref: "#/components/schemas/AccountResponse"
 
     PaginatedTransactions:
-      properties:
-        total:
-          type: integer
-          description: The total number of items in the list
-          example: 292
-        count:
-          type: integer
-          description: The number of items in the page
-          example: 20
-        page:
-          type: integer
-          description: The current page number
-          example: 2
-        pageSize:
-          type: integer
-          description: The requested number of items per page
-          example: 25
-        first:
-          type: string
-          description: The URL of the first page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        next:
-          type: string
-          description: The URL of the next page of items
-          example: https://api.example.com/accounts?page=3&page-size=20
-        previous:
-          type: string
-          description: The URL of the previous page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
-        last:
-          type: string
-          description: The URL of the last page of items
-          example: https://api.example.com/accounts?page=20&page-size=20
-        items:
-          type: array
-          description: The list of transactions
-          items:
-            $ref: "#/components/schemas/TransactionSummaryResponse"
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of transactions
+              items:
+                $ref: "#/components/schemas/TransactionSummaryResponse"

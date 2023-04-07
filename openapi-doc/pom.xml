@@ -28,11 +28,11 @@
             <artifactId>jackson-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>jackson-databind-nullable</artifactId>
-            <version>0.2.6</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.openapitools</groupId>-->
+<!--            <artifactId>jackson-databind-nullable</artifactId>-->
+<!--            <version>0.2.6</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -52,11 +52,13 @@
                             <configOptions>
                                 <modelPackage>com.hillayes.onestop.api</modelPackage>
                                 <sourceFolder>src/main/java</sourceFolder>
+                                <openApiNullable>false</openApiNullable>
+                                <dateLibrary>java8</dateLibrary>
+                                <library>resttemplate</library>
                             </configOptions>
                             <inputSpec>${project.basedir}/src/main/spec/one-stop-openapi.yaml</inputSpec>
 
                             <generatorName>java</generatorName>
-                            <library>resttemplate</library>
                             <typeMappings>
                                 <typeMapping>OffsetDateTime=Instant</typeMapping>
                             </typeMappings>

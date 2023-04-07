@@ -17,6 +17,7 @@ import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.service.RailAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -98,7 +99,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(List.of());
+        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
 
         // and: the rail account balances are available
         List<Balance> balances = List.of(mockBalance(), mockBalance());
@@ -158,7 +159,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(List.of());
+        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
 
         // and: NO rail account balances are available
         List<Balance> balances = List.of();
@@ -218,7 +219,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(List.of());
+        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
 
         // and: the rail account balances are available
         List<Balance> balances = List.of(mockBalance(), mockBalance());

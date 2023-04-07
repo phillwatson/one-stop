@@ -23,6 +23,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -133,7 +134,7 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
         PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDate").descending());
         LocalDate startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
             .stream().findFirst()
-            .map(AccountTransaction::getBookingDate) // take date of most recent transaction
+            .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
             .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found
         log.debug("Looking for transactions [accountId: {}, startDate: {}]", account.getId(), startDate);
 
@@ -165,10 +166,8 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
             .accountId(account.getId())
             .internalTransactionId(detail.internalTransactionId == null ? UUID.randomUUID().toString() : detail.internalTransactionId)
             .transactionId(detail.transactionId)
-            .bookingDate(detail.bookingDate)
-            .bookingDateTime(detail.bookingDateTime)
-            .valueDate(detail.valueDate)
-            .valueDateTime(detail.valueDateTime)
+            .bookingDateTime(bestOf(detail.bookingDate, detail.bookingDateTime))
+            .valueDateTime(bestOf(detail.valueDate, detail.valueDateTime))
             .transactionAmount((detail.transactionAmount == null) ? 0 : detail.transactionAmount.amount)
             .transactionCurrencyCode((detail.transactionAmount == null) ? null : detail.transactionAmount.currency)
             .additionalInformation(Strings.toStringOrNull(detail.additionalInformation))
@@ -197,5 +196,19 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
             .ultimateCreditor(detail.ultimateCreditor)
             .ultimateDebtor(detail.ultimateDebtor)
             .build();
+    }
+
+    /**
+     * Takes the best of the given date and instant; preferring the instant if both are present.
+     * If neither are present, returns null.
+     * @param date the date to use if instant is null.
+     * @param instant the instant to use if not null.
+     * @return the best of the given date and instant.
+     */
+    private Instant bestOf(LocalDate date, Instant instant) {
+        if (instant != null) {
+            return instant;
+        }
+        return (date == null) ? instant : date.atStartOfDay(ZoneOffset.UTC).toInstant();
     }
 }

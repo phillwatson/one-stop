@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity(name="account_transaction")
@@ -51,28 +50,18 @@ public class AccountTransaction {
     public String transactionId;
 
     /**
-     * The date when an entry is posted to an account on the financial institutions books.
+     * The date and time when an entry is posted to an account on the financial institutions books.
      */
     @EqualsAndHashCode.Include
     @ToString.Include
-    @Column(name = "booking_date", nullable = true)
-    public LocalDate bookingDate;
-
-    /**
-     * The date and time when an entry is posted to an account on the financial institutions books.
-     */
-    @Column(name = "booking_datetime", nullable = true)
+    @Column(name = "booking_datetime", nullable = false)
     public Instant bookingDateTime;
-
-    /**
-     * The Date at which assets become available to the account owner in case of a credit.
-     */
-    @Column(name = "value_date", nullable = true)
-    public LocalDate valueDate;
 
     /**
      * The date and time at which assets become available to the account owner in case of a credit.
      */
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "value_datetime", nullable = true)
     public Instant valueDateTime;
 

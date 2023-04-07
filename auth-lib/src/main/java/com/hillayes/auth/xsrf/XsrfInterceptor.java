@@ -24,7 +24,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Response ACCESS_UNAUTHORIZED = Response.status(Response.Status.UNAUTHORIZED).build();
 
     @Inject
-    XsrfGenerator xsrfGenerator;
+    XsrfValidator xsrfValidator;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -47,7 +47,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             (method.getDeclaringClass().isAnnotationPresent(RolesAllowed.class))) {
             log.trace("Named roles allowed");
             // method requires authentication - so check xsrf token
-            if (!xsrfGenerator.validateToken(requestContext)) {
+            if (!xsrfValidator.validateToken(requestContext)) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }

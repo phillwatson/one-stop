@@ -50,14 +50,16 @@ CREATE TABLE ${flyway:defaultSchema}.account_transaction (
     user_id UUID NOT NULL,
 	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
 	date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    booking_date date NOT NULL,
     internal_transaction_id varchar(256) NOT NULL,
+    transaction_id varchar(256) NULL,
+    booking_datetime timestamp NOT NULL,
+    value_datetime timestamp NULL,
     transaction_amount numeric(19,2) NOT NULL,
     transaction_currency_code varchar(12) NOT NULL,
-    transaction_id varchar(256) NULL,
-    booking_datetime timestamp NULL,
-    value_date date NULL,
-    value_datetime timestamp NULL,
+    remittance_information_structured varchar(1024) NULL,
+    remittance_information_unstructured varchar(1024) NULL,
+    remittance_information_structured_array varchar(1024) NULL,
+    remittance_information_unstructured_array varchar(1024) NULL,
     additional_information varchar(1024) NULL,
     additional_information_structured varchar(1024) NULL,
     balance_after_transaction varchar(256) NULL,
@@ -77,12 +79,8 @@ CREATE TABLE ${flyway:defaultSchema}.account_transaction (
     merchant_category_code varchar(256) NULL,
     proprietary_bank_transaction_code varchar(256) NULL,
     purpose_code varchar(256) NULL,
-    remittance_information_structured varchar(1024) NULL,
-    remittance_information_structured_array varchar(1024) NULL,
-    remittance_information_unstructured varchar(1024) NULL,
-    remittance_information_unstructured_array varchar(1024) NULL,
     ultimate_creditor varchar(256) NULL,
     ultimate_debtor varchar(256) NULL
 );
-CREATE INDEX idx_account_trans_date ON ${flyway:defaultSchema}.account_transaction (account_id, booking_date);
-CREATE INDEX idx_account_user_date ON ${flyway:defaultSchema}.account_transaction (user_id, booking_date);
+CREATE INDEX idx_account_trans_date ON ${flyway:defaultSchema}.account_transaction (account_id, booking_datetime);
+CREATE INDEX idx_account_user_date ON ${flyway:defaultSchema}.account_transaction (user_id, booking_datetime);

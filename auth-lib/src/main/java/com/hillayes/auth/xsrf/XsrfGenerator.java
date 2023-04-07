@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 @Slf4j
-public class XsrfGenerator {
+public class XsrfGenerator implements XsrfValidator {
     private static final String SIGNATURE_ALG = "HmacSHA256";
     private static final Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
@@ -147,7 +147,7 @@ public class XsrfGenerator {
      * @param headers the http request on which the XSRF token is expected.
      * @return true if the request contains a valid XSRF token.
      */
-    public boolean validateToken(HttpHeaders headers) {
+    protected boolean validateToken(HttpHeaders headers) {
         log.trace("Validating XSRF tokens in request headers");
 
         Cookie cookie = headers.getCookies().get(cookieName);
