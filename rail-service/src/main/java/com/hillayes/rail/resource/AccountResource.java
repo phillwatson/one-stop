@@ -50,7 +50,6 @@ public class AccountResource extends AbstractResource {
             .first(String.format(PAGE_LINK, 0, pageSize))
             .last(String.format(PAGE_LINK, accountsPage.getTotalPages() - 1, pageSize));
 
-
         if (page > 0) {
             response.previous(String.format(PAGE_LINK, page - 1, pageSize));
         }

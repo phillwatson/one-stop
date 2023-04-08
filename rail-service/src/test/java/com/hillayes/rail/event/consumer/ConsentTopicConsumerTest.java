@@ -7,7 +7,6 @@ import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.AccountStatus;
 import com.hillayes.rail.model.AccountSummary;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.repository.AccountRepository;
@@ -18,13 +17,11 @@ import com.hillayes.rail.service.RequisitionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static com.hillayes.rail.utils.TestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -59,10 +56,11 @@ public class ConsentTopicConsumerTest {
             railAccountService,
             pollAccountJobbingTask);
     }
+
     @Test
     public void testHappyPath() {
         // given: a UserConsent record
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
+        UserConsent userConsent = mockUserConsent(UUID.randomUUID(), ConsentStatus.GIVEN);
         when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
 
         // and: rail accounts to which consent is given
@@ -121,7 +119,7 @@ public class ConsentTopicConsumerTest {
     @Test
     public void testUserConsentNotFound() {
         // given: a UserConsent record
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
+        UserConsent userConsent = mockUserConsent(UUID.randomUUID(), ConsentStatus.GIVEN);
 
         // and: a ConsentGiven event
         EventPacket eventPacket = spy(mockEventPacket(userConsent));
@@ -157,7 +155,7 @@ public class ConsentTopicConsumerTest {
     @Test
     public void testUserConsentNoLongerActive() {
         // given: a UserConsent record
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
+        UserConsent userConsent = mockUserConsent(UUID.randomUUID(), ConsentStatus.GIVEN);
         when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
 
         // and: a ConsentGiven event
@@ -191,20 +189,6 @@ public class ConsentTopicConsumerTest {
         verify(pollAccountJobbingTask, never()).queueJob(any());
     }
 
-    private UserConsent mockUserConsent(ConsentStatus status) {
-        return UserConsent.builder()
-            .id(UUID.randomUUID())
-            .userId(UUID.randomUUID())
-            .institutionId(UUID.randomUUID().toString())
-            .requisitionId(UUID.randomUUID().toString())
-            .agreementId(UUID.randomUUID().toString())
-            .agreementExpires(Instant.now().plusSeconds(1000))
-            .maxHistory(90)
-            .status(status)
-            .dateGiven(Instant.now().minusSeconds(2))
-            .build();
-    }
-
     private EventPacket mockEventPacket(UserConsent userConsent) {
         ConsentGiven consentGiven = ConsentGiven.builder()
             .dateGiven(userConsent.getDateGiven())
@@ -218,26 +202,5 @@ public class ConsentTopicConsumerTest {
         // and: the event is marshalled for delivery
         EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.CONSENT, consentGiven);
         return eventEntity.toEntityPacket();
-    }
-
-    private Requisition mockRequisition(UserConsent userConsent, AccountSummary ... accountSummaries) {
-        return Requisition.builder()
-            .id(userConsent.getRequisitionId())
-            .institutionId(userConsent.getInstitutionId())
-            .agreement(userConsent.getAgreementId())
-            .accounts(Arrays.stream(accountSummaries).map(a -> a.id).toList())
-            .build();
-    }
-
-    private AccountSummary mockAccountSummary(String institutionId) {
-        return AccountSummary.builder()
-            .id(UUID.randomUUID().toString())
-            .institutionId(institutionId)
-            .iban(randomAlphanumeric(12))
-            .ownerName(randomAlphanumeric(22))
-            .status(AccountStatus.READY)
-            .created(OffsetDateTime.now().minusDays(10))
-            .lastAccessed(OffsetDateTime.now().minusDays(2))
-            .build();
     }
 }

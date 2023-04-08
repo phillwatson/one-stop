@@ -52,7 +52,7 @@ public class XsrfFactory {
     @Produces
     @ApplicationScoped
     @IfBuildProfile("test")
-    public XsrfValidator xsrfTestInstance(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
+    public XsrfValidator xsrfTestInstance() {
         log.info("Using XSRF test instance");
         return new XsrfValidator() {
             @Override
@@ -62,7 +62,7 @@ public class XsrfFactory {
 
             @Override
             public NewCookie generateCookie() {
-                return new NewCookie("mock-xsrf", UUID.randomUUID().toString());
+                return new NewCookie(cookieName, UUID.randomUUID().toString());
             }
         };
     }

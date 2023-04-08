@@ -7,8 +7,6 @@ import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.Balance;
-import com.hillayes.rail.model.CurrencyAmount;
-import com.hillayes.rail.model.TransactionDetail;
 import com.hillayes.rail.model.TransactionList;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
@@ -26,9 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextFloat;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static com.hillayes.rail.utils.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -106,7 +102,7 @@ public class PollAccountJobbingTaskTest {
         when(railAccountService.balances(any())).thenReturn(Optional.of(balances));
 
         // and: the rail account transaction are available
-        TransactionList railTransactions = mockTransactionList();
+        TransactionList railTransactions = mockTransactionList(2, 2);
         when(railAccountService.transactions(any(), any(), any())).thenReturn(Optional.of(railTransactions));
 
         // and: a grace period of 1 hour
@@ -166,7 +162,7 @@ public class PollAccountJobbingTaskTest {
         when(railAccountService.balances(any())).thenReturn(Optional.of(balances));
 
         // and: the rail account transaction are available
-        TransactionList railTransactions = mockTransactionList();
+        TransactionList railTransactions = mockTransactionList(2, 2);
         when(railAccountService.transactions(any(), any(), any())).thenReturn(Optional.of(railTransactions));
 
         // and: a grace period of 1 hour
@@ -356,43 +352,5 @@ public class PollAccountJobbingTaskTest {
         // and: the account's last-polled date is NOT updated
         assertNotNull(account.getDateLastPolled());
         verify(accountRepository, never()).save(any());
-    }
-
-    private UserConsent mockUserConsent(ConsentStatus status) {
-        return UserConsent.builder()
-            .id(UUID.randomUUID())
-            .userId(UUID.randomUUID())
-            .institutionId(UUID.randomUUID().toString())
-            .requisitionId(UUID.randomUUID().toString())
-            .agreementId(UUID.randomUUID().toString())
-            .agreementExpires(Instant.now().plusSeconds(1000))
-            .maxHistory(90)
-            .status(status)
-            .dateGiven(Instant.now().minusSeconds(2))
-            .build();
-    }
-
-    private Balance mockBalance() {
-        return Balance.builder()
-            .balanceAmount(CurrencyAmount.builder().amount(nextFloat()).currency("GBP").build())
-            .referenceDate(LocalDate.now().minusDays(nextInt()))
-            .balanceType(randomAlphanumeric(5))
-            .build();
-    }
-
-    private TransactionList mockTransactionList() {
-        return TransactionList.builder()
-            .booked(List.of(mockTransactionDetail(), mockTransactionDetail()))
-            .pending(List.of(mockTransactionDetail(), mockTransactionDetail()))
-            .build();
-    }
-
-    private TransactionDetail mockTransactionDetail() {
-        return TransactionDetail.builder()
-            .bookingDate(LocalDate.now().minusDays(nextInt()))
-            .internalTransactionId(UUID.randomUUID().toString())
-            .transactionId(UUID.randomUUID().toString())
-            .transactionAmount(CurrencyAmount.builder().amount(nextFloat()).currency("GBP").build())
-            .build();
     }
 }
