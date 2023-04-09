@@ -12,7 +12,9 @@ class UserConsentService {
 
   registerConsent(bankId: string) {
     console.log(`Registering bank [name: ${bankId}]`);
-    return http.post(`/rails/consents`, `{ "institutionId": "${bankId}" }`);
+    
+    var callbackUri = window.location.origin + "/accounts";
+    return http.post(`/rails/consents`, `{ "institutionId": "${bankId}", "callbackUri": "${callbackUri}" }`);
   }
 
   cancelConsent(bankId: string) {

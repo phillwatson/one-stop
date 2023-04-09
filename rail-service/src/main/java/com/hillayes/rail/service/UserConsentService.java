@@ -66,7 +66,7 @@ public class UserConsentService {
             .findFirst();
     }
 
-    public URI register(UUID userId, String institutionId) {
+    public URI register(UUID userId, String institutionId, String callbackUrl) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
         if (getUserConsent(userId, institutionId).isPresent()) {
             throw new BankAlreadyRegisteredException(userId, institutionId);
@@ -98,6 +98,7 @@ public class UserConsentService {
             .agreementId(agreement.id.toString())
             .maxHistory(agreement.maxHistoricalDays)
             .agreementExpires(expires)
+            .callbackUrl(callbackUrl)
             .status(ConsentStatus.INITIATED)
             .build();
 
@@ -108,15 +109,15 @@ public class UserConsentService {
             // create requisition
             log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]", userId, institutionId, userConsent.getId());
 
-            String callbackUrl = config.callbackUrl().replace("{{host-ip}}", Network.getMyIpAddress());
-            log.debug("Registration callback URL: {}", callbackUrl);
+            String registrationCallbackUrl = config.callbackUrl().replace("{{host-ip}}", Network.getMyIpAddress());
+            log.debug("Registration callback URL: {}", registrationCallbackUrl);
 
             Requisition requisition = requisitionService.create(RequisitionRequest.builder()
                 .institutionId(agreement.institutionId)
                 .agreement(agreement.id)
                 .userLanguage("EN")
                 .reference(userConsent.getId().toString())
-                .redirect(callbackUrl)
+                .redirect(registrationCallbackUrl)
                 .redirectImmediate(Boolean.FALSE)
                 .build());
 
@@ -135,40 +136,49 @@ public class UserConsentService {
         }
     }
 
-    public void consentGiven(UUID userConsentId) {
+    public URI consentGiven(UUID userConsentId) {
         log.info("User's consent received [userConsentId: {}]", userConsentId);
         UserConsent userConsent = userConsentRepository.findById(userConsentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+
+        URI redirectUrl = URI.create(userConsent.getCallbackUrl());
         userConsent.setStatus(ConsentStatus.GIVEN);
         userConsent.setDateGiven(Instant.now());
+        userConsent.setCallbackUrl(null);
         userConsent = userConsentRepository.save(userConsent);
 
         // send consent-given event notification
         consentEventSender.sendConsentGiven(userConsent);
+
+        return redirectUrl;
     }
 
-    public void consentDenied(UUID userConsentId, String error, String details) {
+    public URI consentDenied(UUID userConsentId, String error, String details) {
         log.info("User's consent denied [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
-        userConsentRepository.findById(userConsentId)
-            .ifPresent(userConsent -> {
-                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
-                userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+        UserConsent userConsent = userConsentRepository.findById(userConsentId)
+            .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
-                // delete the requisition - and the associated agreement
-                requisitionService.delete(userConsent.getRequisitionId());
+        log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+        userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
-                userConsent.setStatus(ConsentStatus.DENIED);
-                userConsent.setDateDenied(Instant.now());
-                userConsent.setErrorCode(error);
-                userConsent.setErrorDetail(details);
-                userConsent = userConsentRepository.save(userConsent);
+        // delete the requisition - and the associated agreement
+        requisitionService.delete(userConsent.getRequisitionId());
 
-                // send consent-denied event notification
-                consentEventSender.sendConsentDenied(userConsent);
-            });
+        URI redirectUrl = URI.create(userConsent.getCallbackUrl());
+        userConsent.setStatus(ConsentStatus.DENIED);
+        userConsent.setDateDenied(Instant.now());
+        userConsent.setCallbackUrl(null);
+        userConsent.setErrorCode(error);
+        userConsent.setErrorDetail(details);
+        userConsent = userConsentRepository.save(userConsent);
+
+        // send consent-denied event notification
+        consentEventSender.sendConsentDenied(userConsent);
+
+        return redirectUrl;
     }
 
     public void consentCancelled(UUID userConsentId) {

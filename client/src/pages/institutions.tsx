@@ -55,7 +55,7 @@ export default function Institutions() {
         });
 
         console.log(`Redirecting to ${response.data}`);
-        window.open(response.data, '_blank');
+        window.location = response.data;
       });
     }
   }

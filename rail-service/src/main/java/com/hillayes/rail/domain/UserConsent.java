@@ -82,6 +82,13 @@ public class UserConsent {
     private String requisitionId;
 
     /**
+     * The URL to which the client will be redirected after consent request is completed.
+     */
+    @Setter
+    @Column(name = "callback_url", nullable = true)
+    private String callbackUrl;
+
+    /**
      * Indicates the position in the flow to obtain consent from the user.
      */
     @ToString.Include

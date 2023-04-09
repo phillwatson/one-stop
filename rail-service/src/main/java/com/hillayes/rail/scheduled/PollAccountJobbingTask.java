@@ -21,9 +21,7 @@ import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,7 +129,7 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
     private void updateTransactions(Account account, int maxHistory) {
         log.debug("Updating transactions [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
-        PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDate").descending());
+        PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
         LocalDate startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
             .stream().findFirst()
             .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction

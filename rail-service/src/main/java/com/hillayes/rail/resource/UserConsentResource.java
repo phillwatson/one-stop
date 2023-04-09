@@ -2,33 +2,40 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.*;
+import com.hillayes.rail.model.AccountSummary;
+import com.hillayes.rail.model.Institution;
+import com.hillayes.rail.model.UserConsentRequest;
+import com.hillayes.rail.model.UserConsentResponse;
 import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.RequisitionService;
 import com.hillayes.rail.service.UserConsentService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Path("/api/v1/rails/consents")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
 @Slf4j
-public class UserConsentResource {
-    private final UserConsentService userConsentService;
-    private final InstitutionService institutionService;
-    private final RequisitionService requisitionService;
-    private final RailAccountService railAccountService;
-    private final JsonWebToken jwt;
+public class UserConsentResource extends AbstractResource {
+    @Inject
+    UserConsentService userConsentService;
+    @Inject
+    InstitutionService institutionService;
+    @Inject
+    RequisitionService requisitionService;
+    @Inject
+    RailAccountService railAccountService;
 
     @GET
     @RolesAllowed("user")
@@ -102,11 +109,11 @@ public class UserConsentResource {
     @POST
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
-                             UserConsentRequest request) {
+                             UserConsentRequest consentRequest) {
         UUID userId = getUserId(ctx);
-        log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, request.getInstitutionId());
+        log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, consentRequest.getInstitutionId());
 
-        URI consentLink = userConsentService.register(userId, request.getInstitutionId());
+        URI consentLink = userConsentService.register(userId, consentRequest.getInstitutionId(), consentRequest.getCallbackUri());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
         return Response.ok(consentLink).build();
@@ -115,7 +122,8 @@ public class UserConsentResource {
     @GET
     @Path("/response")
     @PermitAll
-    public Response consentResponse(@QueryParam("ref") String userConsentId,
+    public Response consentResponse(@Context HttpHeaders headers,
+                                    @QueryParam("ref") String userConsentId,
                                     @QueryParam("error") String error,
                                     @QueryParam("details") String details) {
         // A typical consent callback request:
@@ -125,16 +133,13 @@ public class UserConsentResource {
         // &details=User+cancelled+the+session.
 
         log.info("User consent response [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
-        UUID consentId = UUID.fromString(userConsentId);
-        if ((error == null) || (error.isBlank())) {
-            userConsentService.consentGiven(consentId);
-        } else {
-            userConsentService.consentDenied(consentId, error, details);
-        }
-        return Response.temporaryRedirect(URI.create("/")).build();
-    }
+        logHeaders(headers);
 
-    private UUID getUserId(SecurityContext context) {
-        return UUID.fromString(context.getUserPrincipal().getName());
+        UUID consentId = UUID.fromString(userConsentId);
+        URI redirectUri = ((error == null) || (error.isBlank()))
+            ? userConsentService.consentGiven(consentId)
+            : userConsentService.consentDenied(consentId, error, details);
+
+        return Response.temporaryRedirect(redirectUri).build();
     }
 }

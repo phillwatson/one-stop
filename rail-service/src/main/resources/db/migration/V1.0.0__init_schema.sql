@@ -12,6 +12,7 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     agreement_expires timestamp NOT NUlL,
     max_history int NOT NULL,
     requisition_id varchar(256) NULL,
+    callback_url varchar(256) NULL,
     status varchar(256) NOT NULL,
     error_code varchar(256) NULL,
     error_detail varchar(256) NULL
