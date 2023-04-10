@@ -1,13 +1,13 @@
 mp:
   jwt:
     verify:
-      audiences: com.hillayes
-      issuer: https://hillayes.com/one-stop
+      audiences: ${one-stop.auth.access-token.audiences}
+      issuer: ${one-stop.auth.access-token.issuer}
       publickey:
         location: http://user-service:8080/api/v1/auth/jwks.json
     token:
       header: Cookie
-      cookie: 'access_token'
+      cookie: ${one-stop.auth.access-token.cookie}
 
 smallrye:
   config:
@@ -56,19 +56,21 @@ quarkus:
         level: DEBUG
 
 one-stop:
-  jwt:
+  auth:
+    jwk:
+      set-size: 2
     access-token:
+      cookie: 'access_token'
+      issuer: https://hillayes.com/one-stop
+      audiences: com.hillayes
       duration-secs: 300
     refresh-token:
       cookie: 'refresh_token'
       duration-secs: 1800
-  jwk:
-    set-size: 2
-  auth:
     xsrf:
       cookie-name: 'XSRF-TOKEN'
       header-name: 'X-XSRF-TOKEN'
-      duration-secs: 1800
+      duration-secs: ${one-stop.auth.refresh-token.duration-secs}
       # secret: 'this will be passed in via docker env'
 
     openid:

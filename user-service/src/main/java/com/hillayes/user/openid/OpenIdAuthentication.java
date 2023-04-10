@@ -2,7 +2,6 @@ package com.hillayes.user.openid;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.openid.AuthProvider;
-import com.hillayes.openid.NamedAuthProvider;
 import com.hillayes.openid.OpenIdAuth;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.repository.UserRepository;

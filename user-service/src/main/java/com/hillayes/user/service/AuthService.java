@@ -36,21 +36,21 @@ import java.util.stream.Collectors;
 @Singleton
 @Slf4j
 public class AuthService {
-    @ConfigProperty(name = "mp.jwt.verify.issuer")
+    @ConfigProperty(name = "one-stop.auth.access-token.issuer")
     String issuer;
 
-    @ConfigProperty(name = "mp.jwt.verify.audiences")
+    @ConfigProperty(name = "one-stop.auth.access-token.audiences")
     String audiencesList;
 
     private Set<String> audiences;
 
-    @ConfigProperty(name = "one-stop.jwt.access-token.duration-secs")
+    @ConfigProperty(name = "one-stop.auth.access-token.duration-secs")
     long accessDuration;
 
-    @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
+    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
     long refreshDuration;
 
-    @ConfigProperty(name = "one-stop.jwk.set-size", defaultValue = "2")
+    @ConfigProperty(name = "one-stop.auth.jwk.set-size", defaultValue = "2")
     int jwkSetSize;
 
     @Inject

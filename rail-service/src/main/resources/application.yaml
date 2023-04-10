@@ -1,13 +1,13 @@
 mp:
   jwt:
     verify:
-      audiences: com.hillayes
-      issuer: https://hillayes.com/one-stop
+      audiences: ${one-stop.auth.access-token.audiences}
+      issuer: ${one-stop.auth.access-token.issuer}
       publickey:
         location: http://user-service:8080/api/v1/auth/jwks.json
     token:
       header: Cookie
-      cookie: 'access_token'
+      cookie: ${one-stop.auth.access-token.cookie}
 
 smallrye:
   jwt:
@@ -45,9 +45,9 @@ quarkus:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
     category:
       "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
-        level: TRACE
+        level: INFO
       "org.jose4j.jwk":
-        level: TRACE
+        level: INFO
       "com.hillayes":
         level: DEBUG
 
@@ -85,6 +85,12 @@ one-stop:
           retry-interval: PT1M
 
   auth:
+    access-token:
+      cookie: 'access_token'
+      issuer: https://hillayes.com/one-stop
+      audiences: com.hillayes
+    refresh-token:
+      cookie: 'refresh_token'
     xsrf:
       cookie-name: 'XSRF-TOKEN'
       header-name: 'X-XSRF-TOKEN'

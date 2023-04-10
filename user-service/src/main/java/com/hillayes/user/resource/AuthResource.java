@@ -22,16 +22,16 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResource {
-    @ConfigProperty(name = "mp.jwt.token.cookie")
+    @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;
 
-    @ConfigProperty(name = "one-stop.jwt.refresh-token.cookie")
+    @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
     String refreshCookieName;
 
-    @ConfigProperty(name = "one-stop.jwt.access-token.duration-secs")
+    @ConfigProperty(name = "one-stop.auth.access-token.duration-secs")
     long accessDuration;
 
-    @ConfigProperty(name = "one-stop.jwt.refresh-token.duration-secs")
+    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
     long refreshDuration;
 
     private final AuthService authService;

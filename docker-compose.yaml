@@ -102,8 +102,8 @@ services:
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      MP_JWT_VERIFY_ISSUER: https://hillayes.com/one-stop
-      MP_JWT_VERIFY_AUDIENCES: com.hillayes
+      ONE_STOP_AUTH_ACCESS_TOKEN_ISSUER: https://hillayes.com/one-stop
+      ONE_STOP_AUTH_ACCESS_TOKEN_AUDIENCES: com.hillayes
     networks:
       - onestop-db-network
       - onestop-event-network
@@ -127,8 +127,8 @@ services:
       QUARKUS_DATASOURCE_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ONE_STOP_RAIL_CALLBACK_URL: https://hillayes.com/api/v1/rails/consents/response
-      MP_JWT_VERIFY_ISSUER: https://hillayes.com/one-stop
-      MP_JWT_VERIFY_AUDIENCES: com.hillayes
+      ONE_STOP_AUTH_ACCESS_TOKEN_ISSUER: https://hillayes.com/one-stop
+      ONE_STOP_AUTH_ACCESS_TOKEN_AUDIENCES: com.hillayes
     networks:
       - onestop-db-network
       - onestop-event-network
