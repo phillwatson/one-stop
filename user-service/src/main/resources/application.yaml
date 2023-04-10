@@ -57,8 +57,6 @@ quarkus:
 
 one-stop:
   auth:
-    jwk:
-      set-size: 2
     access-token:
       cookie: 'access_token'
       issuer: https://hillayes.com/one-stop
@@ -67,10 +65,12 @@ one-stop:
     refresh-token:
       cookie: 'refresh_token'
       duration-secs: 1800
+    jwk:
+      set-size: 2
+      rotation-interval: ${one-stop.auth.refresh-token.duration-secs}
     xsrf:
       cookie-name: 'XSRF-TOKEN'
       header-name: 'X-XSRF-TOKEN'
-      duration-secs: ${one-stop.auth.refresh-token.duration-secs}
       # secret: 'this will be passed in via docker env'
 
     openid:

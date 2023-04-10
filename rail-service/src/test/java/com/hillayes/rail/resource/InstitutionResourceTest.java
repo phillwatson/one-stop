@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,8 +13,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 
 @QuarkusTest
-public class InstitutionResourceTest {
+public class InstitutionResourceTest extends TestBase {
     @Test
+    @TestSecurity(user = adminIdStr, roles = "admin")
     public void testListBanks() {
         List<Map<String,Object>> response = given()
                 .queryParam("country", "GB")
@@ -30,6 +32,7 @@ public class InstitutionResourceTest {
         );
     }
     @Test
+    @TestSecurity(user = adminIdStr, roles = "admin")
     public void testGetBank() {
         given()
                 .pathParam("id", "FIRST_DIRECT_MIDLGB22")

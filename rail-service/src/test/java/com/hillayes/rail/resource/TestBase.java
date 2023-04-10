@@ -1,15 +1,24 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.auth.xsrf.XsrfInterceptor;
 import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.common.mapper.TypeRef;
+import org.junit.jupiter.api.BeforeEach;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.equalTo;
 
 public class TestBase {
+    protected static final String adminIdStr = "0945990c-13d6-4aad-8b67-29291c9ba717";
+    protected static final String userIdStr = "0945990c-13d6-4aad-8b67-29291c9ba716";
+
+    @InjectMock(convertScopes = true)
+    XsrfInterceptor xsrfInterceptor;
+
     public void deleteAgreements() {
         PaginatedList<EndUserAgreement> agreements = given()
                 .queryParam("limit", 100)

@@ -31,9 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-public class AccountResourceTest {
-    private static final String userIdStr = "0945990c-13d6-4aad-8b67-29291c9ba716";
-
+public class AccountResourceTest extends TestBase {
     @InjectMock
     AccountService accountService;
 

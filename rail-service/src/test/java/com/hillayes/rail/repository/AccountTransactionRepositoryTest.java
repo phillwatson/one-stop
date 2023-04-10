@@ -71,7 +71,7 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the most recent transaction by bookingDate is queried
-        PageRequest byBookedDate = PageRequest.of(0, 1, Sort.by("bookingDate").descending());
+        PageRequest byBookedDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
         Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), byBookedDate);
 
         // then: the result contains only the most recent transaction

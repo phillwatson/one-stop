@@ -5,13 +5,16 @@ import com.hillayes.executors.concurrent.ExecutorFactory;
 import com.hillayes.executors.concurrent.ExecutorType;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.lang.JoseException;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.security.auth.DestroyFailedException;
-import javax.security.auth.Destroyable;
 import java.security.PrivateKey;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -23,9 +26,14 @@ import java.util.concurrent.TimeUnit;
  * generating a new key-pair, discarding the oldest key-pair when the max-keys has been
  * reached.
  */
+@ApplicationScoped
 @Slf4j
-public class RotatedJwkSet implements Destroyable {
-    private final int maxKeys;
+public class RotatedJwkSet {
+    @ConfigProperty(name = "one-stop.auth.jwk.rotation-interval")
+    long rotationInterval;
+
+    @ConfigProperty(name = "one-stop.auth.jwk.set-size", defaultValue = "2")
+    int jwkSetSize;
 
     /**
      * The lifo stack of key-pairs.
@@ -37,18 +45,14 @@ public class RotatedJwkSet implements Destroyable {
      */
     private long currentKid = 0;
 
-    private final ScheduledExecutorService executor;
+    private ScheduledExecutorService executor;
 
     /**
      * Constructs a JWK Set that does not exceed the given maximum number of keys, and
      * are rotated at the given interval (in seconds).
-     *
-     * @param aMaxKeys         the maximum number of keys to be held.
-     * @param rotationInterval the interval (in seconds) at which new keys are to be generated.
      */
-    public RotatedJwkSet(int aMaxKeys, long rotationInterval) {
-        maxKeys = aMaxKeys;
-
+    @PostConstruct
+    public void init() {
         rotateKeys();
         executor =
             (ScheduledExecutorService) ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
@@ -61,6 +65,7 @@ public class RotatedJwkSet implements Destroyable {
             rotationInterval, rotationInterval, TimeUnit.SECONDS);
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Shutting down keyset");
         executor.shutdown();
@@ -70,17 +75,13 @@ public class RotatedJwkSet implements Destroyable {
         }
     }
 
-    public boolean isDestroyed() {
-        return executor.isShutdown();
-    }
-
     public void rotateKeys() {
         log.debug("Rotating JWK-Set");
         synchronized (stack) {
             try {
                 currentKid = System.currentTimeMillis();
                 stack.addLast(newJWK(String.valueOf(currentKid)));
-                while (stack.size() > maxKeys) {
+                while (stack.size() > jwkSetSize) {
                     disposeOf(stack.pop());
                 }
             } catch (JoseException e) {

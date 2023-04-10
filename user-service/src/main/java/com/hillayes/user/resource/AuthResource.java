@@ -1,19 +1,22 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.auth.xsrf.XsrfValidator;
+import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.openid.AuthProvider;
+import com.hillayes.user.domain.User;
 import com.hillayes.user.model.LoginRequest;
 import com.hillayes.user.service.AuthService;
+import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.time.Instant;
-import java.util.Date;
 
 @Path("/api/v1/auth")
 @PermitAll
@@ -22,21 +25,9 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResource {
-    @ConfigProperty(name = "one-stop.auth.access-token.cookie")
-    String accessCookieName;
-
-    @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
-    String refreshCookieName;
-
-    @ConfigProperty(name = "one-stop.auth.access-token.duration-secs")
-    long accessDuration;
-
-    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
-    long refreshDuration;
-
     private final AuthService authService;
 
-    private final XsrfValidator xsrfValidator;
+    private final AuthTokens authTokens;
 
     @GET
     @Path("jwks.json")
@@ -50,12 +41,9 @@ public class AuthResource {
     @Path("login")
     public Response login(LoginRequest loginRequest) {
         log.info("Auth user login initiated");
-        String[] tokens = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
+        User user = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 
-        return cookieResponse(
-            Response.noContent(),
-            buildCookies(tokens, accessDuration, refreshDuration))
-            .build();
+        return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
     }
 
     @GET
@@ -68,74 +56,42 @@ public class AuthResource {
                                @QueryParam("error_uri") String errorUri) {
         log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
         if (error != null) {
-            return Response.temporaryRedirect(URI.create("http://localhost:3000/sign-in?error=" + error))
-                .cookie(buildCookies(new String[]{null, null}, 0, 0))
-                .build();
+            URI redirect = URI.create("http://localhost:3000/sign-in?error=" + error);
+            return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
-        String[] tokens = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
+        User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        return cookieResponse(
-            Response.temporaryRedirect(URI.create("http://localhost:3000/accounts")),
-            buildCookies(tokens, accessDuration, refreshDuration))
-            .build();
+        URI redirect = URI.create("http://localhost:3000/accounts");
+        return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 
     @GET
     @Path("refresh")
     public Response refresh(@Context HttpHeaders headers) {
         log.info("Auth user refresh initiated");
-        Cookie refreshTokenCookie = headers.getCookies().get(refreshCookieName);
-        if (refreshTokenCookie == null) {
-            log.info("No refresh token cookie found.");
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        try {
+            JsonWebToken refreshToken = authTokens.getRefreshToken(headers.getCookies())
+                .orElse(null);
+
+            if (refreshToken == null) {
+                log.info("No refresh token cookie found.");
+                return Response.status(Response.Status.UNAUTHORIZED).build();
+            }
+
+            User user = authService.refresh(refreshToken);
+            return authTokens.authResponse(
+                Response.noContent(), user.getId(), user.getRoles());
+        } catch (ParseException e) {
+            log.error("Failed to verify refresh token.", e);
+            throw new InternalServerErrorException(e);
         }
-
-        String[] tokens = authService.refresh(refreshTokenCookie.getValue());
-
-        return cookieResponse(
-            Response.noContent(),
-            buildCookies(tokens, accessDuration, refreshDuration))
-            .build();
     }
 
     @GET
     @Path("logout")
     public Response logout() {
         log.info("Auth user logout");
-        return Response.noContent()
-            .cookie(buildCookies(new String[]{null, null}, 0, 0))
-            .build();
-    }
-
-    private NewCookie[] buildCookies(String[] tokens, long accessTTL, long refreshTTL) {
-        NewCookie accessToken = new NewCookie(accessCookieName, tokens[0],
-            "/api", null, NewCookie.DEFAULT_VERSION, null,
-            (int) accessTTL, Date.from(Instant.now().plusSeconds(accessTTL)),
-            false, true);
-
-        NewCookie refreshToken = new NewCookie(refreshCookieName, tokens[1],
-            "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,
-            (int) refreshTTL, Date.from(Instant.now().plusSeconds(refreshTTL)),
-            false, true);
-
-        NewCookie xsrfCookie = xsrfValidator.generateCookie();
-
-        return new NewCookie[]{accessToken, refreshToken, xsrfCookie};
-    }
-
-    /**
-     * Set cookies in the response, adding the SameSite=Strict attribute to each cookie.
-     *
-     * @param responseBuilder the response builder to which the cookies are to be added.
-     * @param cookies         the cookies to be added.
-     * @return the given response builder with the cookies added.
-     */
-    public Response.ResponseBuilder cookieResponse(Response.ResponseBuilder responseBuilder,
-                                                   NewCookie... cookies) {
-        for (NewCookie cookie : cookies) {
-            responseBuilder.header("Set-Cookie", cookie + ";SameSite=Strict");
-        }
-        return responseBuilder;
+        return authTokens.deleteCookies(Response.noContent());
     }
 }

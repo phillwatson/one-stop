@@ -28,7 +28,15 @@
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-jwt-build</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
 
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>commons</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>exception-lib</artifactId>

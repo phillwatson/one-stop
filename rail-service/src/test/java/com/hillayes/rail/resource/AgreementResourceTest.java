@@ -2,6 +2,7 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,7 @@ public class AgreementResourceTest extends TestBase {
     }
 
     @Test
+    @TestSecurity(user = adminIdStr, roles = "admin")
     public void testFlow() {
         EndUserAgreementRequest agreement = EndUserAgreementRequest.builder()
                 .institutionId("SANDBOXFINANCE_SFIN0000")

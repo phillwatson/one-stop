@@ -2,31 +2,21 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.RotatedJwkSet;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
-import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
-import io.smallrye.jwt.auth.principal.JWTParser;
-import io.smallrye.jwt.auth.principal.ParseException;
-import io.smallrye.jwt.build.Jwt;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * refresh duration 30 minutes - governs how long user session can be inactive
@@ -36,23 +26,6 @@ import java.util.stream.Collectors;
 @Singleton
 @Slf4j
 public class AuthService {
-    @ConfigProperty(name = "one-stop.auth.access-token.issuer")
-    String issuer;
-
-    @ConfigProperty(name = "one-stop.auth.access-token.audiences")
-    String audiencesList;
-
-    private Set<String> audiences;
-
-    @ConfigProperty(name = "one-stop.auth.access-token.duration-secs")
-    long accessDuration;
-
-    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
-    long refreshDuration;
-
-    @ConfigProperty(name = "one-stop.auth.jwk.set-size", defaultValue = "2")
-    int jwkSetSize;
-
     @Inject
     UserRepository userRepository;
     @Inject
@@ -60,35 +33,17 @@ public class AuthService {
     @Inject
     UserEventSender userEventSender;
     @Inject
-    JWTParser jwtParser;
-
-    @Inject
     OpenIdAuthentication openIdAuth;
-
-    private RotatedJwkSet jwkSet;
-
-    @PostConstruct
-    void init() {
-        jwkSet = new RotatedJwkSet(jwkSetSize, refreshDuration);
-
-        // audiences config prop is a comma-delimited list - we need a Set
-        audiences = Arrays.stream(audiencesList.split(","))
-            .map(String::trim)
-            .collect(Collectors.toSet());
-    }
-
-    @PreDestroy
-    void destroy() {
-        jwkSet.destroy();
-    }
+    @Inject
+    RotatedJwkSet jwkSet;
 
     public String getJwkSet() {
         return jwkSet.toJson();
     }
 
     @Transactional(dontRollbackOn = NotAuthorizedException.class)
-    public String[] login(String username, char[] password) {
-        log.info("Auth login initiated [issuer: {}]", issuer);
+    public User login(String username, char[] password) {
+        log.info("Auth login initiated");
 
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> {
@@ -115,14 +70,13 @@ public class AuthService {
             throw new InternalServerErrorException(e);
         }
 
-        String[] tokens = buildTokens(user);
         userEventSender.sendUserLogin(user);
         log.debug("User logged in [userId: {}]", user.getId());
-        return tokens;
+        return user;
     }
 
     @Transactional
-    public String[] oauthLogin(AuthProvider authProvider,
+    public User oauthLogin(AuthProvider authProvider,
                                String code,
                                String state,
                                String scope) {
@@ -138,10 +92,9 @@ public class AuthService {
                 userEventSender.sendUserOnboarded(user);
             }
 
-            String[] tokens = buildTokens(user);
             userEventSender.sendUserLogin(user);
             log.debug("User tokens created [userId: {}]", user.getId());
-            return tokens;
+            return user;
         } catch (Exception e) {
             log.error("Failed to verify OpenId auth-code.", e);
             userEventSender.sendLoginFailed(code, "Invalid open-id auth-code.");
@@ -150,44 +103,19 @@ public class AuthService {
     }
 
     @Transactional(dontRollbackOn = NotAuthorizedException.class)
-    public String[] refresh(String jwt) {
-        try {
-            log.info("Auth refresh tokens initiated [issuer: {}]", issuer);
+    public User refresh(JsonWebToken jsonWebToken) {
+        log.info("Auth refresh tokens initiated");
 
-            JsonWebToken jsonWebToken = jwtParser.parse(jwt);
+        UUID userId = UUID.fromString(jsonWebToken.getName());
+        User user = userRepository.findById(userId)
+            .filter(u -> !u.isDeleted() && !u.isBlocked())
+            .orElseThrow(() -> {
+                log.info("User name failed verification [userId: {}]", userId);
+                userEventSender.sendLoginFailed(userId.toString(), "User not found.");
+                return new NotAuthorizedException("username/password");
+            });
 
-            UUID userId = UUID.fromString(jsonWebToken.getClaim(Claims.upn));
-            User user = userRepository.findById(userId)
-                .filter(u -> !u.isDeleted() && !u.isBlocked())
-                .orElseThrow(() -> {
-                    log.info("User name failed verification [userId: {}]", userId);
-                    userEventSender.sendLoginFailed(userId.toString(), "User not found.");
-                    return new NotAuthorizedException("username/password");
-                });
-
-            String[] tokens = buildTokens(user);
-            log.debug("User tokens refreshed [userId: {}]", user.getId());
-            return tokens;
-        } catch (ParseException e) {
-            log.error("Failed to verify refresh token.", e);
-            throw new InternalServerErrorException(e);
-        }
-    }
-
-    private String[] buildTokens(User user) {
-        String accessToken = jwkSet.signClaims(Jwt
-            .issuer(issuer)
-            .audience(audiences)
-            .upn(user.getId().toString()) // this will be the Principal of the security context
-            .expiresIn(accessDuration)
-            .groups(user.getRoles()));
-
-        String refreshToken = jwkSet.signClaims(Jwt
-            .issuer(issuer)
-            .audience(audiences)
-            .upn(user.getId().toString()) // this will be the Principal of the security context
-            .expiresIn(refreshDuration));
-
-        return new String[]{accessToken, refreshToken};
+        log.debug("User tokens refreshed [userId: {}]", user.getId());
+        return user;
     }
 }

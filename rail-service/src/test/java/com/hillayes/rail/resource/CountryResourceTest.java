@@ -3,6 +3,7 @@ package com.hillayes.rail.resource;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,15 +17,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 
 @QuarkusTest
-public class CountryResourceTest {
+public class CountryResourceTest extends TestBase {
     @InjectMock
     SecurityIdentity identity;
 
-    @BeforeEach
-    public void setup() {
-        Mockito.when(identity.hasRole("admin")).thenReturn(true);
-    }
     @Test
+    @TestSecurity(user = userIdStr, roles = "user")
     public void testListCountries() {
         List<Map<String,Object>> response = given()
                 .when().get("/api/v1/rails/countries")
@@ -38,7 +36,9 @@ public class CountryResourceTest {
             System.out.println(m.get("id") + ": " + m.get("name"))
         );
     }
+
     @Test
+    @TestSecurity(user = userIdStr, roles = "user")
     public void testGetCountry() {
         given()
                 .pathParam("id", "GB")

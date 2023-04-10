@@ -1,33 +1,18 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.auth.xsrf.XsrfValidator;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import javax.ws.rs.container.ContainerRequestContext;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
 @QuarkusTest
 public class UserAdminResourceTest {
-    @InjectMock
-    XsrfValidator xsrfValidator;
-
-    @BeforeEach
-    public void init() {
-        Mockito.when(xsrfValidator.validateToken(Mockito.any(ContainerRequestContext.class))).thenReturn(true);
-    }
-
-    @AfterEach
-    public void cleanup() {
-    }
+    private static final String userIdStr = "0945990c-13d6-4aad-8b67-29291c9ba716";
 
     @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
     public void testListUsers() {
         String response = given()
             .when().get("/api/v1/users")
