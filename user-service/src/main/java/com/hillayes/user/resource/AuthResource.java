@@ -1,6 +1,7 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.auth.xsrf.XsrfRequired;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.model.LoginRequest;
@@ -48,26 +49,33 @@ public class AuthResource {
 
     @GET
     @Path("validate/{auth-provider}")
-    public Response oauthLogin(@PathParam("auth-provider") String authProvider,
+    public Response oauthLogin(@Context HttpHeaders headers,
+                               @PathParam("auth-provider") String authProvider,
                                @QueryParam("code") String code,
                                @QueryParam("state") String state,
                                @QueryParam("scope") String scope,
                                @QueryParam("error") String error,
                                @QueryParam("error_uri") String errorUri) {
         log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
+
+        StringBuilder redirectUri = new StringBuilder()
+            .append(headers.getHeaderString("x-forwarded-proto")).append("://")
+            .append(headers.getHeaderString("x-forwarded-host"));
+
         if (error != null) {
-            URI redirect = URI.create("http://localhost:3000/sign-in?error=" + error);
+            URI redirect = URI.create(redirectUri.append("/sign-in?error=").append(error).toString());
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
         User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        URI redirect = URI.create("http://localhost:3000/accounts");
+        URI redirect = URI.create(redirectUri.append("/accounts").toString());
         return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 
     @GET
     @Path("refresh")
+    @XsrfRequired
     public Response refresh(@Context HttpHeaders headers) {
         log.info("Auth user refresh initiated");
         try {

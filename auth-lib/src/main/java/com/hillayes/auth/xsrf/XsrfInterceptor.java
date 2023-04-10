@@ -1,6 +1,7 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -34,6 +35,9 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;
 
+    @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
+    String refreshCookieName;
+
     @ConfigProperty(name = "one-stop.auth.xsrf.header-name", defaultValue = "X-XSRF-TOKEN")
     String xsrfHeaderName;
 
@@ -66,9 +70,16 @@ public class XsrfInterceptor implements ContainerRequestFilter {
 
         if ((isAnnotationPresent(methodAnnotations, RolesAllowed.class)) ||
             (isAnnotationPresent(classAnnotations, RolesAllowed.class))) {
-            log.trace("Named roles allowed");
-            // method requires authentication - so check xsrf token
-            if (!validateToken(requestContext)) {
+            log.trace("Method requires authentication");
+            // check xsrf token in access-token cookie
+            if (!validateToken(requestContext, accessCookieName)) {
+                requestContext.abortWith(ACCESS_UNAUTHORIZED);
+            }
+        } else if ((isAnnotationPresent(methodAnnotations, XsrfRequired.class)) ||
+            (isAnnotationPresent(classAnnotations, XsrfRequired.class))) {
+            log.trace("Method requires XSRF validation");
+            // check xsrf token in refresh-token cookie
+            if (!validateToken(requestContext, refreshCookieName)) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }
@@ -91,20 +102,21 @@ public class XsrfInterceptor implements ContainerRequestFilter {
      * @param request the http request on which the XSRF token is expected.
      * @return true if the request contains a valid XSRF token.
      */
-    public boolean validateToken(ContainerRequestContext request) {
+    public boolean validateToken(ContainerRequestContext request,
+                                 String cookieName) {
         log.trace("Validating XSRF tokens in context request");
 
-        JsonWebToken accessToken = jwtTokens.getToken(accessCookieName, request.getCookies())
+        JsonWebToken accessToken = jwtTokens.getToken(cookieName, request.getCookies())
             .orElse(null);
 
         if (accessToken == null) {
-            log.warn("XSRF token cookie missing");
+            log.warn("XSRF token cookie missing [name: {}]", cookieName);
             return false;
         }
 
         String cookieValue = accessToken.getClaim("xsrf");
         if (isBlank(cookieValue)) {
-            log.warn("XSRF token cookie blank");
+            log.warn("XSRF token cookie blank [name: {}]", cookieName);
             return false;
         }
 
