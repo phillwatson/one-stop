@@ -12,6 +12,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.Form;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.time.Duration;
@@ -55,13 +56,14 @@ public class AppleAuth implements OpenIdAuth {
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException, GeneralSecurityException {
         log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
-        TokenExchangeResponse response = openIdTokenApi.exchangeToken(
-            "authorization_code",
-            config.clientId(),
-            getClientSecret(),
-            authCode,
-            config.redirectUri()
-        );
+        Form tokenExchangeRequest = new Form()
+            .param("grant_type", "authorization_code")
+            .param("client_id", config.clientId())
+            .param("client_secret", getClientSecret())
+            .param("code", authCode)
+            .param("redirect_uri", config.redirectUri());
+
+        TokenExchangeResponse response = openIdTokenApi.exchangeToken(tokenExchangeRequest);
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
         return idTokenValidator.verify(response.idToken);
@@ -97,6 +99,6 @@ public class AppleAuth implements OpenIdAuth {
     }
 
     public String toString() {
-        return "OpenIdAuth["+ config.configUri() + "]";
+        return "OpenIdAuth[" + config.configUri() + "]";
     }
 }

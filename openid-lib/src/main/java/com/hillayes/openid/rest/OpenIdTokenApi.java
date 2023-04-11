@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
  * <p>
  * This REST client is instantiates by the OpenIdFactory.
  */
-@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface OpenIdTokenApi {
     /**
@@ -28,6 +27,7 @@ public interface OpenIdTokenApi {
      * @return the access, refresh and ID tokens exchanged for the given auth-token.
      */
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     public TokenExchangeResponse exchangeToken(TokenExchangeRequest request);
 
     /**
@@ -39,7 +39,6 @@ public interface OpenIdTokenApi {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
     public TokenExchangeResponse exchangeToken(@FormParam("grant_type") String grantType,
                                                @FormParam("client_id") String clientId,
                                                @FormParam("client_secret") String clientSecret,
@@ -56,6 +55,5 @@ public interface OpenIdTokenApi {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
     public TokenExchangeResponse exchangeToken(Form form);
 }
