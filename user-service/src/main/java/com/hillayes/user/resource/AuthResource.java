@@ -88,8 +88,7 @@ public class AuthResource {
             }
 
             User user = authService.refresh(refreshToken);
-            return authTokens.authResponse(
-                Response.noContent(), user.getId(), user.getRoles());
+            return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
         } catch (ParseException e) {
             log.error("Failed to verify refresh token.", e);
             throw new InternalServerErrorException(e);
