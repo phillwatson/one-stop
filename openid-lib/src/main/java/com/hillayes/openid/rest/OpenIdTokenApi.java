@@ -1,8 +1,10 @@
 package com.hillayes.openid.rest;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -27,4 +29,33 @@ public interface OpenIdTokenApi {
      */
     @POST
     public TokenExchangeResponse exchangeToken(TokenExchangeRequest request);
+
+    /**
+     * Calls the auth-provider's token-endpoint to exchange an auth-token for the
+     * access and refresh tokens. The response will also include an ID-Token, from
+     * which the user's details can be read.
+     *
+     * @return the access, refresh and ID tokens exchanged for the given auth-token.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public TokenExchangeResponse exchangeToken(@FormParam("grant_type") String grantType,
+                                               @FormParam("client_id") String clientId,
+                                               @FormParam("client_secret") String clientSecret,
+                                               @FormParam("code") String authorizationCode,
+                                               @FormParam("redirect_uri") String redirectUri);
+
+    /**
+     * Calls the auth-provider's token-endpoint to exchange an auth-token for the
+     * access and refresh tokens. The response will also include an ID-Token, from
+     * which the user's details can be read.
+     *
+     * @param form the request containing the auth-token to be verified and exchanged.
+     * @return the access, refresh and ID tokens exchanged for the given auth-token.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public TokenExchangeResponse exchangeToken(Form form);
 }

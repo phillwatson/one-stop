@@ -54,15 +54,14 @@ public class AppleAuth implements OpenIdAuth {
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException, GeneralSecurityException {
-        TokenExchangeRequest request = TokenExchangeRequest.builder()
-            .grantType("authorization_code")
-            .redirectUri(config.redirectUri())
-            .code(authCode)
-            .clientId(config.clientId())
-            .clientSecret(getClientSecret())
-            .build();
-
-        TokenExchangeResponse response = openIdTokenApi.exchangeToken(request);
+        log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
+        TokenExchangeResponse response = openIdTokenApi.exchangeToken(
+            "authorization_code",
+            config.clientId(),
+            getClientSecret(),
+            authCode,
+            config.redirectUri()
+        );
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
         return idTokenValidator.verify(response.idToken);

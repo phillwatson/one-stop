@@ -38,6 +38,7 @@ public class GoogleAuth implements OpenIdAuth {
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {
+        log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
         TokenExchangeRequest request = TokenExchangeRequest.builder()
             .grantType("authorization_code")
             .redirectUri(config.redirectUri())
