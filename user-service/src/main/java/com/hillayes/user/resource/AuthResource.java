@@ -49,8 +49,7 @@ public class AuthResource {
 
     @GET
     @Path("validate/{auth-provider}")
-    public Response oauthLogin(@Context HttpHeaders headers,
-                               @PathParam("auth-provider") String authProvider,
+    public Response oauthLogin(@PathParam("auth-provider") String authProvider,
                                @QueryParam("code") String code,
                                @QueryParam("state") String state,
                                @QueryParam("scope") String scope,
@@ -58,18 +57,15 @@ public class AuthResource {
                                @QueryParam("error_uri") String errorUri) {
         log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
 
-        StringBuilder redirectUri = new StringBuilder()
-            .append(headers.getHeaderString("x-forwarded-proto")).append("://")
-            .append(headers.getHeaderString("x-forwarded-host"));
-
+        URI redirect = URI.create("http://localhost:3000");
         if (error != null) {
-            URI redirect = URI.create(redirectUri.append("/sign-in?error=").append(error).toString());
+            redirect = redirect.resolve("/sign-in?error=" + error);
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
         User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        URI redirect = URI.create(redirectUri.append("/accounts").toString());
+        redirect = redirect.resolve("/accounts");
         return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 

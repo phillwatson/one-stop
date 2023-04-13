@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MultivaluedMap;
 import java.security.*;
 import java.time.Duration;
 import java.util.UUID;
@@ -62,7 +64,7 @@ public class AppleAuthTest {
             .thenReturn("mock-client-secret");
 
         // given a token-exchange request and response
-        ArgumentCaptor<TokenExchangeRequest> tokenExchangeCaptor = ArgumentCaptor.forClass(TokenExchangeRequest.class);
+        ArgumentCaptor<Form> tokenExchangeCaptor = ArgumentCaptor.forClass(Form.class);
         TokenExchangeResponse tokenExchangeResponse = mockTokenExchangeResponse();
         when(openIdTokenApi.exchangeToken(tokenExchangeCaptor.capture())).thenReturn(tokenExchangeResponse);
 
@@ -70,20 +72,21 @@ public class AppleAuthTest {
         JwtClaims claims = new JwtClaims();
         when(idTokenValidator.verify(anyString())).thenReturn(claims);
 
-        // when we call the Google auth implementation
+        // when we call the Apple auth implementation
         JwtClaims idToken = fixture.exchangeAuthToken("mock-auth-code");
         assertNotNull(idToken);
 
         // then the token API is called with the token-exchange request
-        verify(openIdTokenApi).exchangeToken(any(TokenExchangeRequest.class));
+        verify(openIdTokenApi).exchangeToken(any(Form.class));
 
         // and the token exchange request is correct
-        TokenExchangeRequest request = tokenExchangeCaptor.getValue();
-        assertEquals("authorization_code", request.grantType);
-        assertEquals("mock-auth-code", request.code);
-        assertEquals(config.clientId(), request.clientId);
-        assertEquals("mock-client-secret", request.clientSecret);
-        assertEquals(config.redirectUri(), request.redirectUri);
+        Form request = tokenExchangeCaptor.getValue();
+        MultivaluedMap<String, String> paramMap = request.asMap();
+        assertEquals("authorization_code", paramMap.get("grant_type").get(0));
+        assertEquals("mock-auth-code", paramMap.get("code").get(0));
+        assertEquals(config.clientId(), paramMap.get("client_id").get(0));
+        assertEquals("mock-client-secret", paramMap.get("client_secret").get(0));
+        assertEquals(config.redirectUri(), paramMap.get("redirect_uri").get(0));
 
         // and the client secret is generated correctly
         verify(clientSecretGenerator).decodePrivateKey(eq(config.privateKey().get()), eq(SignatureAlgorithm.ES256));
