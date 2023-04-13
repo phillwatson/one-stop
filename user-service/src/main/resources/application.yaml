@@ -78,12 +78,12 @@ one-stop:
         config-uri: 'https://accounts.google.com/.well-known/openid-configuration'
         client-id: '284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'
         redirect-uri: 'http://localhost/api/v1/auth/validate/google'
+        # client-secret: 'this will be passed in via docker env'
 
       APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'
         client-id: 'my-apple-registered-client-id'
-        key-id: 'my-apple-key-id'
-        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
-        # not a real private key, just for testing
-        private-key: "-----BEGIN PRIVATE KEY-----\nMEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCA6nm1eLiBDy75X8MVo\ncS9FmrW/F0Aivh5YGZQ0MpZkAQ==\n-----END PRIVATE KEY-----"
+        redirect-uri: 'http://localhost/api/v1/auth/validate/apple'
+        # key-id: 'this will be passed in via docker env'
+        # private-key: 'this will be passed in via docker env'
