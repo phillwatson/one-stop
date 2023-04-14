@@ -1,6 +1,7 @@
 package com.hillayes.user.openid;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.commons.Strings;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.openid.OpenIdAuth;
 import com.hillayes.user.domain.User;
@@ -74,7 +75,20 @@ public class OpenIdAuthentication {
                         log.debug("User's OpenID is disabled");
                         return new NotAuthorizedException("jwt");
                     });
-            } else {
+
+                // take opportunity to update email address
+                if (!Strings.isBlank(email)) {
+                    user.setEmail(email);
+                }
+            }
+
+            // if no email was provided by Auth Provider
+            else if (Strings.isBlank(email)) {
+                throw new NotAuthorizedException("jwt");
+            }
+
+            // look-up user by their email
+            else {
                 log.debug("Did not find user by OpenID subject [issuer: {}, subject: {}]", issuer, subject);
 
                 // look-up user by email from Auth Provider
