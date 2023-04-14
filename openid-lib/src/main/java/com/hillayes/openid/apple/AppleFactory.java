@@ -4,6 +4,7 @@ import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import lombok.extern.slf4j.Slf4j;
+import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
@@ -64,6 +65,18 @@ public class AppleFactory extends OpenIdFactory {
     }
 
     /**
+     * Returns a resolver to retrieve the Json Web (Public) Keys used to validate
+     * signed JWT tokens from Apple. The resolver will use the Json Web Key-Set
+     * referenced by the URI found in Google's "well-known" config resource.
+     */
+    @Produces
+    @NamedAuthProvider(AuthProvider.APPLE)
+    @Singleton
+    public VerificationKeyResolver appleKeys(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
+        return verificationKeys(openIdConfig);
+    }
+
+    /**
      * Provides the IdTokenValidator instance for validating ID-Tokens from the Apple
      * auth-provider. The validator will use the Json Web Key-Set referenced by the
      * URI found in Apple's "well-known" config resource.
@@ -71,8 +84,9 @@ public class AppleFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
     @Singleton
-    public IdTokenValidator appleTokenValidator(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,
+    public IdTokenValidator appleTokenValidator(@NamedAuthProvider(AuthProvider.APPLE) VerificationKeyResolver verificationKeys,
+                                                @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,
                                                 @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
-        return idTokenValidator(config, openIdConfig);
+        return idTokenValidator(verificationKeys, config, openIdConfig);
     }
 }

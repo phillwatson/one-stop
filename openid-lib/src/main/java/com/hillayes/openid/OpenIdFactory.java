@@ -5,6 +5,9 @@ import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
+import org.jose4j.jwk.HttpsJwks;
+import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
+import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -38,15 +41,22 @@ public abstract class OpenIdFactory {
      * for all OpenId providers supported by the application.
      * <p>
      * From this the auth provider's own configuration can be retrieved.
+     *
      * @see #openApiConfig(OpenIdConfiguration.AuthConfig)
      */
     @Inject
     public OpenIdConfiguration openIdConfiguration;
 
-    protected IdTokenValidator idTokenValidator(OpenIdConfiguration.AuthConfig config,
-                                            OpenIdConfigResponse openIdConfig) {
+    protected VerificationKeyResolver verificationKeys(OpenIdConfigResponse openIdConfig) {
         log.debug("Using key-set [url: {}]", openIdConfig.jwksUri);
-        return new IdTokenValidator(openIdConfig.jwksUri, openIdConfig.issuer, config.clientId());
+        return new HttpsJwksVerificationKeyResolver(new HttpsJwks(openIdConfig.jwksUri));
+    }
+
+    protected IdTokenValidator idTokenValidator(VerificationKeyResolver verificationKeys,
+                                                OpenIdConfiguration.AuthConfig config,
+                                                OpenIdConfigResponse openIdConfig) {
+        log.debug("Creating token validator [issuer: {}]", openIdConfig.issuer);
+        return new IdTokenValidator(verificationKeys, openIdConfig.issuer, config.clientId());
     }
 
     protected OpenIdConfigResponse openApiConfig(OpenIdConfiguration.AuthConfig config) throws IOException {

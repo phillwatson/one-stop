@@ -4,6 +4,7 @@ import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import lombok.extern.slf4j.Slf4j;
+import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
@@ -64,15 +65,27 @@ public class GoogleFactory extends OpenIdFactory {
     }
 
     /**
-     * Provides the IdTokenValidator instance for validating ID-Tokens from the Google
-     * auth-provider. The validator will use the Json Web Key-Set referenced by the
-     * URI found in Google's "well-known" config resource.
+     * Returns a resolver to retrieve the Json Web (Public) Keys used to validate
+     * signed JWT tokens from Google. The resolver will use the Json Web Key-Set
+     * referenced by the URI found in Google's "well-known" config resource.
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GOOGLE)
     @Singleton
-    public IdTokenValidator googleTokenValidator(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,
+    public VerificationKeyResolver googleKeys(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
+        return verificationKeys(openIdConfig);
+    }
+
+    /**
+     * Provides the IdTokenValidator instance for validating ID-Tokens from the Google
+     * auth-provider.
+     */
+    @Produces
+    @NamedAuthProvider(AuthProvider.GOOGLE)
+    @Singleton
+    public IdTokenValidator googleTokenValidator(@NamedAuthProvider(AuthProvider.GOOGLE) VerificationKeyResolver verificationKeys,
+                                                 @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,
                                                  @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
-        return idTokenValidator(config, openIdConfig);
+        return idTokenValidator(verificationKeys, config, openIdConfig);
     }
 }
