@@ -1,11 +1,13 @@
 package com.hillayes.auth.crypto;
 
 import com.hillayes.auth.errors.EncryptionConfigException;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.enterprise.context.ApplicationScoped;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -18,6 +20,7 @@ import java.util.Random;
  * the result with the original, persisted hash.
  */
 @ApplicationScoped
+@Slf4j
 public class PasswordCrypto {
     /**
      * The number of iterations that the encryption algorithm will use.
@@ -87,26 +90,29 @@ public class PasswordCrypto {
      * @param aSecret   the encrypted form of the original password to which this given password is to
      *                  be verified.
      * @return <code>true</code> if the given password is a match for the given encrypted form.
-     * @throws InvalidKeySpecException if the given parameters ar inappropriate for the algorithm to
-     *                                 produce a hash.
      */
-    public boolean verify(char[] aPassword, String aSecret) throws InvalidKeySpecException {
+    public boolean verify(char[] aPassword, String aSecret) {
         String[] parts = aSecret.split(String.valueOf(PasswordCrypto.DELIMITER));
         int iterations = Integer.parseInt(parts[0]);
         byte[] salt = fromHex(parts[1]);
         byte[] hash = fromHex(parts[2]);
 
-        byte[] newHash = getPBKDF2(aPassword, salt, iterations, hash.length * 8);
+        try {
+            byte[] newHash = getPBKDF2(aPassword, salt, iterations, hash.length * 8);
 
-        if (hash.length == newHash.length) {
-            // compare the hash values byte-for-byte
-            for (int i = 0; i < hash.length; i++) {
-                if (hash[i] != newHash[i])
-                    return false;
+            if (hash.length == newHash.length) {
+                // compare the hash values byte-for-byte
+                for (int i = 0; i < hash.length; i++) {
+                    if (hash[i] != newHash[i])
+                        return false;
+                }
+
+                return true;
             }
-
-            return true;
+        } catch (GeneralSecurityException e) {
+            log.warn("Unable to verify password", e);
         }
+
         return false;
     }
 
@@ -159,7 +165,7 @@ public class PasswordCrypto {
 
         int paddingLength = (aBytes.length * 2) - result.length();
         if (paddingLength > 0) {
-            result = String.format("%0" + paddingLength + "d", Integer.valueOf(0)) + result;
+            result = String.format("%0" + paddingLength + "d", 0) + result;
         }
 
         return result;

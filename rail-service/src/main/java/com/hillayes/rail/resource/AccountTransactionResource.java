@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
@@ -12,10 +13,7 @@ import org.springframework.data.domain.Page;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.util.UUID;
 
 @Path("/api/v1/rails/transactions")
@@ -25,13 +23,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AccountTransactionResource extends AbstractResource {
-    private static final String PAGE_LINK = "/api/v1/rails/transactions?page=%d&page-size=%d";
+    private static final String PAGE_LINK = "%s?page=%d&page-size=%d";
 
     @Inject
     AccountTransactionService accountTransactionService;
 
     @GET
     public Response getTransactions(@Context SecurityContext ctx,
+                                    @Context UriInfo uriInfo,
                                     @QueryParam("page") @DefaultValue("0") int page,
                                     @QueryParam("page-size") @DefaultValue("20") int pageSize,
                                     @QueryParam("account-id") UUID accountId) {
@@ -44,15 +43,17 @@ public class AccountTransactionResource extends AbstractResource {
             .count(transactionsPage.getNumberOfElements())
             .total(transactionsPage.getTotalElements())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .first(getPageLink(0, pageSize, accountId))
-            .last(getPageLink(transactionsPage.getTotalPages() - 1, pageSize, accountId));
+            .links(new PageLinks()
+                .first(getPageLink(uriInfo.getPath(),0, pageSize, accountId))
+                .last(getPageLink(uriInfo.getPath(),transactionsPage.getTotalPages() - 1, pageSize, accountId))
+            );
 
         if (page > 0) {
-            response.previous(getPageLink(page - 1, pageSize, accountId));
+            response.getLinks().previous(getPageLink(uriInfo.getPath(), page - 1, pageSize, accountId));
         }
 
         if (page < transactionsPage.getTotalPages() - 1) {
-            response.next(getPageLink(page + 1, pageSize, accountId));
+            response.getLinks().next(getPageLink(uriInfo.getPath(),page + 1, pageSize, accountId));
         }
 
         return Response.ok(response).build();
@@ -78,8 +79,8 @@ public class AccountTransactionResource extends AbstractResource {
                 : transaction.remittanceInformationStructured);
     }
 
-    private String getPageLink(int page, int pageSize, UUID accountId) {
-        String result = String.format(PAGE_LINK, page, pageSize);
+    private String getPageLink(String path, int page, int pageSize, UUID accountId) {
+        String result = String.format(PAGE_LINK, path, page, pageSize);
         if (accountId != null) {
             result += "&account-id=" + accountId;
         }

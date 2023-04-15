@@ -94,10 +94,10 @@ public class AccountResourceTest extends TestBase {
         assertEquals(pageRequest.getPageSize(), response.getPageSize());
 
         // and: all page links are present
-        assertEquals("/api/v1/rails/accounts?page=0&page-size=20", response.getFirst());
-        assertEquals("/api/v1/rails/accounts?page=11&page-size=20", response.getNext());
-        assertEquals("/api/v1/rails/accounts?page=9&page-size=20", response.getPrevious());
-        assertEquals("/api/v1/rails/accounts?page=15&page-size=20", response.getLast());
+        assertEquals("/api/v1/rails/accounts?page=0&page-size=20", response.getLinks().getFirst());
+        assertEquals("/api/v1/rails/accounts?page=11&page-size=20", response.getLinks().getNext());
+        assertEquals("/api/v1/rails/accounts?page=9&page-size=20", response.getLinks().getPrevious());
+        assertEquals("/api/v1/rails/accounts?page=15&page-size=20", response.getLinks().getLast());
 
         // and: each account is found in the response
         accounts.forEach(account -> {

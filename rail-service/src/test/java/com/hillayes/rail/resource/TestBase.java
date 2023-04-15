@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.equalTo;
 
-public class TestBase {
+public abstract class TestBase {
     protected static final String adminIdStr = "0945990c-13d6-4aad-8b67-29291c9ba717";
     protected static final String userIdStr = "0945990c-13d6-4aad-8b67-29291c9ba716";
 

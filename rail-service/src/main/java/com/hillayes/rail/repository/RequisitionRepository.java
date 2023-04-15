@@ -10,7 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Map;
-import java.util.Optional;
 
 @RegisterRestClient(configKey = "nordigen-api")
 @RegisterClientHeaders(BearerHeaderFactory.class)

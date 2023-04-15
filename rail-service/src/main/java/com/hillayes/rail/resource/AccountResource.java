@@ -3,6 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.BankResponse;
+import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Institution;
@@ -15,10 +16,7 @@ import org.springframework.data.domain.Page;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.util.UUID;
 
 @Path("/api/v1/rails/accounts")
@@ -28,7 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AccountResource extends AbstractResource {
-    private static final String PAGE_LINK = "/api/v1/rails/accounts?page=%d&page-size=%d";
+    private static final String PAGE_LINK = "%s?page=%d&page-size=%d";
 
     @Inject
     AccountService accountService;
@@ -37,7 +35,8 @@ public class AccountResource extends AbstractResource {
 
     @GET
     public Response getAccounts(@Context SecurityContext ctx,
-                                @QueryParam("page") @DefaultValue("0") int page,
+                                @Context UriInfo uriInfo,
+                                @QueryParam("page")@DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         Page<Account> accountsPage = accountService.getAccounts(getUserId(ctx), page, pageSize);
 
@@ -47,14 +46,16 @@ public class AccountResource extends AbstractResource {
             .count(accountsPage.getNumberOfElements())
             .total(accountsPage.getTotalElements())
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
-            .first(String.format(PAGE_LINK, 0, pageSize))
-            .last(String.format(PAGE_LINK, accountsPage.getTotalPages() - 1, pageSize));
+            .links(new PageLinks()
+                .first(String.format(PAGE_LINK, uriInfo.getPath(), 0, pageSize))
+                .last(String.format(PAGE_LINK, uriInfo.getPath(), accountsPage.getTotalPages() - 1, pageSize))
+            );
 
         if (page > 0) {
-            response.previous(String.format(PAGE_LINK, page - 1, pageSize));
+            response.getLinks().previous(String.format(PAGE_LINK, uriInfo.getPath(), page - 1, pageSize));
         }
         if (page < accountsPage.getTotalPages() - 1) {
-            response.next(String.format(PAGE_LINK, page + 1, pageSize));
+            response.getLinks().next(String.format(PAGE_LINK, uriInfo.getPath(), page + 1, pageSize));
         }
 
         return Response.ok(response).build();

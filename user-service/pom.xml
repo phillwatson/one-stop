@@ -79,6 +79,10 @@
             <groupId>com.hillayes</groupId>
             <artifactId>outbox-lib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>openapi-doc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.rest-assured</groupId>

@@ -6,9 +6,9 @@ import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
+import org.springframework.data.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
@@ -82,16 +82,34 @@ public class UserService {
         return result;
     }
 
-    public Collection<User> listUsers() {
-        log.info("Retrieving users");
-        Collection<User> result = userRepository
-            .findAll(Sort.by("username").ascending())
-            .stream()
-            .filter(user -> !user.isDeleted())
-            .toList();
+    public Page<User> listUsers(int page, int pageSize) {
+        log.info("Listing user [page: {}, pageSize: {}]", page, pageSize);
 
-        log.debug("Retrieved users [size: {}]", result.size());
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("username").ascending());
+        Page<User> result = userRepository.findByDateDeletedIsNull(pageRequest);
+        log.debug("Listing users [page: {}, pageSize: {}, size: {}]",
+            page, pageSize, result.getNumberOfElements());
+
         return result;
+    }
+
+    public Optional<User> updatePassword(UUID userId,
+                               char[] oldPassword,
+                               char[] newPassword) {
+        log.info("Updating password [userId: {}]", userId);
+
+        return userRepository.findById(userId)
+            .filter(user -> !user.isDeleted())
+            .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
+            .map(user -> {
+                user = userRepository.save(user.toBuilder()
+                    .passwordHash(passwordCrypto.getHash(newPassword))
+                    .build());
+
+                userEventSender.sendUserUpdated(user);
+                log.debug("Updated password [username: {}, userId: {}]", user.getUsername(), user.getId());
+                return user;
+            });
     }
 
     public Optional<User> updateUser(UUID id, User modifiedUser) {

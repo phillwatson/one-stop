@@ -59,15 +59,10 @@ public class AuthService {
             throw new NotAuthorizedException("username/password");
         }
 
-        try {
-            if (!passwordCrypto.verify(password, user.getPasswordHash())) {
-                log.info("User password failed verification");
-                userEventSender.sendLoginFailed(username, "Invalid password.");
-                throw new NotAuthorizedException("username/password");
-            }
-        } catch (GeneralSecurityException e) {
-            log.error("Failed to verify password", e);
-            throw new InternalServerErrorException(e);
+        if (!passwordCrypto.verify(password, user.getPasswordHash())) {
+            log.info("User password failed verification");
+            userEventSender.sendLoginFailed(username, "Invalid password.");
+            throw new NotAuthorizedException("username/password");
         }
 
         userEventSender.sendUserLogin(user);

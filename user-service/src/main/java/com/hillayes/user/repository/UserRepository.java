@@ -1,6 +1,8 @@
 package com.hillayes.user.repository;
 
 import com.hillayes.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -11,6 +13,8 @@ import java.util.UUID;
 
 @Singleton
 public interface UserRepository extends JpaRepository<User, UUID> {
+    public Page<User> findByDateDeletedIsNull(Pageable pageable);
+
     /**
      * Returns the user with the given username. Usernames are unique, even across
      * deleted users.
