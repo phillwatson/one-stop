@@ -5,6 +5,7 @@ import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
+import com.hillayes.user.errors.UserAlreadyOnboardedException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
@@ -62,7 +63,7 @@ public class UserService {
         return userRepository.findById(id)
             .map(user -> {
                 if (user.isOnboarded()) {
-                    throw new BadRequestException("User is already onboard");
+                    throw new UserAlreadyOnboardedException(user);
                 }
 
                 user.setDateOnboarded(Instant.now());

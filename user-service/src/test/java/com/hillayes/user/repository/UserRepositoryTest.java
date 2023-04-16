@@ -7,10 +7,12 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.hillayes.user.utils.TestData.mockUser;
+import static com.hillayes.user.utils.TestData.mockUsers;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -20,22 +22,72 @@ public class UserRepositoryTest {
     UserRepository userRepository;
 
     @Test
-    public void testInsert() {
-        User user = mockUser();
-        OidcIdentity googleId = user.addOidcIdentity("google", UUID.randomUUID().toString());
-        user.addOidcIdentity("apple", UUID.randomUUID().toString());
+    public void testFindByIssuerAndSubject() {
+        // given: some users in the database with some oidc identities
+        List<User> users = mockUsers(3).stream()
+            .map(user -> {
+                user.addOidcIdentity("google", UUID.randomUUID().toString());
+                user.addOidcIdentity("apple", UUID.randomUUID().toString());
+                return user;
+            })
+            .toList();
+        users = userRepository.saveAll(users);
 
-        user = userRepository.save(user);
+        users.forEach(user -> {
+            user.getOidcIdentities().forEach(oidc -> {
+                // when: we search for each user by their issuer and subject
+                Optional<User> found = userRepository.findByIssuerAndSubject(oidc.getIssuer(), oidc.getSubject());
 
-        Optional<User> users = userRepository.findByEmail(user.getEmail());
-        assertTrue(users.isPresent());
-        assertEquals(2, users.get().getOidcIdentities().size());
+                // then: we should find the user
+                assertTrue(found.isPresent());
+                assertEquals(user.getId(), found.get().getId());
+            });
+        });
+    }
 
-        assertTrue(userRepository.findByIssuerAndSubject(googleId.getIssuer(), googleId.getSubject()).isPresent());
-        assertFalse(userRepository.findByIssuerAndSubject(googleId.getIssuer(), UUID.randomUUID().toString()).isPresent());
-        assertFalse(userRepository.findByIssuerAndSubject(UUID.randomUUID().toString(), googleId.getSubject()).isPresent());
+    @Test
+    public void testFindByIssuerAndSubject_NotFound() {
+        // given: some users in the database with some oidc identities
+        userRepository.saveAll(
+            mockUsers(3).stream()
+                .peek(user -> {
+                    user.addOidcIdentity("google", UUID.randomUUID().toString());
+                    user.addOidcIdentity("apple", UUID.randomUUID().toString());
+                })
+                .toList());
 
-        userRepository.delete(user);
-        assertTrue(userRepository.findByEmail(user.getEmail()).isEmpty());
+        // when: we search for a user by unknown issue and subject
+        Optional<User> found = userRepository.findByIssuerAndSubject("google", UUID.randomUUID().toString());
+
+        // then: we should NOT find the user
+        assertTrue(found.isEmpty());
+    }
+
+    @Test
+    public void testFindByEmail() {
+        // given: some users in the database
+        List<User> users = userRepository.saveAll(mockUsers(3));
+
+        users.forEach(user -> {
+            // when: we search for a user with an existing email
+            Optional<User> found = userRepository.findByEmail(user.getEmail());
+
+            // then: we should find the user
+            assertTrue(found.isPresent());
+            assertEquals(user.getEmail(), found.get().getEmail());
+            assertEquals(user.getId(), found.get().getId());
+        });
+    }
+
+    @Test
+    public void testFindByEmail_NotFound() {
+        // given: some users in the database
+        userRepository.saveAll(mockUsers(3));
+
+        // when: we search for a user with a non-existent email
+        Optional<User> found = userRepository.findByEmail("mock-user@work.com");
+
+        // then: we should not find any user
+        assertFalse(found.isPresent());
     }
 }

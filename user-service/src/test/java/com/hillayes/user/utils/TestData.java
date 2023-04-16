@@ -28,4 +28,10 @@ public class TestData {
             .roles(Set.of("user"))
             .build();
     }
+
+    public static User mockUser(UUID id) {
+        return mockUser().toBuilder()
+            .id(id)
+            .build();
+    }
 }

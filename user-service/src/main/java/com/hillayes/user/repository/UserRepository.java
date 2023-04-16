@@ -27,6 +27,13 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      */
     public Optional<User> findByEmail(String email);
 
+    /**
+     * Returns the user with a link to the given Open-ID Connect identity.
+     *
+     * @param issuer the issuer of the Open-ID Connect identity.
+     * @param subject the subject of the Open-ID Connect identity.
+     * @return the user with a link to the given Open-ID Connect identity.
+     */
     @Query("SELECT DISTINCT u FROM User u JOIN u.oidcIdentities oidc WHERE oidc.issuer = ?1 AND oidc.subject = ?2")
     public Optional<User> findByIssuerAndSubject(String issuer, String subject);
 }
