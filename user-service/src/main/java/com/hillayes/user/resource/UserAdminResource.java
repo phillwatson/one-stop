@@ -149,7 +149,6 @@ public class UserAdminResource {
             .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded())
             .dateBlocked(user.getDateBlocked())
-            .dateDeleted(user.getDateDeleted())
             .roles(user.getRoles().stream().toList());
     }
 }

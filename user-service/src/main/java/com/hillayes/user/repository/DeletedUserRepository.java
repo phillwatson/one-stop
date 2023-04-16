@@ -1,15 +1,15 @@
 package com.hillayes.user.repository;
 
-import com.hillayes.user.domain.User;
+import com.hillayes.user.domain.DeletedUser;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Singleton
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface DeletedUserRepository extends JpaRepository<DeletedUser, UUID> {
     /**
      * Returns the user with the given username. Usernames are unique, even across
      * deleted users.
@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @param username the username to search for.
      * @return the user record found with the given username, if any.
      */
-    public Optional<User> findByUsername(String username);
+    public Optional<DeletedUser> findByUsername(String username);
 
     /**
      * Returns all users holding the given email address. Although only one user
@@ -27,8 +27,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @param email the email address to be searched.
      * @return the collection of users holding the given email address.
      */
-    public Optional<User> findByEmail(String email);
-
-    @Query("SELECT DISTINCT u FROM User u JOIN u.oidcIdentities oidc WHERE oidc.issuer = ?1 AND oidc.subject = ?2")
-    public Optional<User> findByIssuerAndSubject(String issuer, String subject);
+    public List<DeletedUser> findByEmail(String email);
 }

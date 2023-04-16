@@ -92,9 +92,7 @@ public class OpenIdAuthentication {
                 log.debug("Did not find user by OpenID subject [issuer: {}, subject: {}]", issuer, subject);
 
                 // look-up user by email from Auth Provider
-                user = userRepository.findByEmail(email).stream()
-                    .filter(existing -> !existing.isDeleted())
-                    .findFirst()
+                user = userRepository.findByEmail(email)
                     .map(u -> {
                         log.debug("Found user by OpenID email [userId: {}, email: {}]", u.getId(), email);
                         if (u.isBlocked()) {

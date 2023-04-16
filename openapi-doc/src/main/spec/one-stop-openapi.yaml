@@ -578,11 +578,6 @@ components:
               format: date-time
               description: The date the user was onboarded
               example: 2019-01-01T00:00:00.000Z
-            dateDeleted:
-              type: string
-              format: date-time
-              description: The date the user account was deleted
-              example: 2019-01-01T00:00:00.000Z
             dateBlocked:
               type: string
               format: date-time

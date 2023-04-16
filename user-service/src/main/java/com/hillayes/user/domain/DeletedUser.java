@@ -7,20 +7,17 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "deleted_user")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class User {
+public class DeletedUser {
     @Id
     @GeneratedValue(generator = "uuid2")
     @ToString.Include
@@ -40,7 +37,7 @@ public class User {
     private String email;
 
     @Setter
-    @Column(name="title", nullable = true)
+    @Column(name = "title", nullable = true)
     private String title;
 
     @Setter
@@ -52,7 +49,7 @@ public class User {
     private String familyName;
 
     @Setter
-    @Column(name="preferred_name", nullable = true)
+    @Column(name = "preferred_name", nullable = true)
     private String preferredName;
 
     @Setter
@@ -74,7 +71,11 @@ public class User {
     }
 
     @Setter
-    @Column(name="date_blocked")
+    @Column(name = "date_deleted")
+    private Instant dateDeleted;
+
+    @Setter
+    @Column(name = "date_blocked")
     private Instant dateBlocked;
 
     @Transient
@@ -84,22 +85,12 @@ public class User {
     }
 
     @Setter
-    @Column(name="blocked_reason")
+    @Column(name = "blocked_reason")
     private Instant blockedReason;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Set<OidcIdentity> oidcIdentities = new HashSet<>();
 
     @Version
     @JsonIgnore
     private Integer version;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="userrole", joinColumns=@JoinColumn(name="user_id"))
-    @Column(name="role")
-    private Set<String> roles = new HashSet<>();
 
     @JsonIgnore
     public String getPasswordHash() {
@@ -111,23 +102,23 @@ public class User {
         passwordHash = aValue;
     }
 
-    @JsonIgnore
-    @Transient
-    public OidcIdentity addOidcIdentity(String issuer, String subject) {
-        OidcIdentity result = OidcIdentity.builder()
-            .user(this)
-            .issuer(issuer)
-            .subject(subject)
+    public static DeletedUser fromUser(User user) {
+        return DeletedUser.builder()
+            .dateDeleted(Instant.now())
+            .id(user.getId())
+            .username(user.getUsername())
+            .passwordHash(user.getPasswordHash())
+            .email(user.getEmail())
+            .title(user.getTitle())
+            .givenName(user.getGivenName())
+            .familyName(user.getFamilyName())
+            .preferredName(user.getPreferredName())
+            .phoneNumber(user.getPhoneNumber())
+            .dateCreated(user.getDateCreated())
+            .dateOnboarded(user.getDateOnboarded())
+            .dateBlocked(user.getDateBlocked())
+            .blockedReason(user.getBlockedReason())
+            .version(user.getVersion())
             .build();
-        oidcIdentities.add(result);
-        return result;
-    }
-
-    @JsonIgnore
-    @Transient
-    public Optional<OidcIdentity> getOidcIdentity(String issuer) {
-        return oidcIdentities.stream()
-            .filter(oidc -> oidc.getIssuer().equals(issuer))
-            .findFirst();
     }
 }

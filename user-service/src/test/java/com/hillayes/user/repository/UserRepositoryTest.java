@@ -5,16 +5,12 @@ import com.hillayes.user.domain.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import javax.inject.Inject;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.hillayes.user.utils.TestData.mockUser;
-import static com.hillayes.user.utils.TestData.mockUsers;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -31,9 +27,9 @@ public class UserRepositoryTest {
 
         user = userRepository.save(user);
 
-        List<User> users = userRepository.findByEmail(user.getEmail());
-        assertEquals(1, users.size());
-        assertEquals(2, users.get(0).getOidcIdentities().size());
+        Optional<User> users = userRepository.findByEmail(user.getEmail());
+        assertTrue(users.isPresent());
+        assertEquals(2, users.get().getOidcIdentities().size());
 
         assertTrue(userRepository.findByIssuerAndSubject(googleId.getIssuer(), googleId.getSubject()).isPresent());
         assertFalse(userRepository.findByIssuerAndSubject(googleId.getIssuer(), UUID.randomUUID().toString()).isPresent());
@@ -41,21 +37,5 @@ public class UserRepositoryTest {
 
         userRepository.delete(user);
         assertTrue(userRepository.findByEmail(user.getEmail()).isEmpty());
-    }
-
-    @Test
-    public void testFindPaged() {
-        List<User> users = mockUsers(20);
-        userRepository.saveAll(users);
-
-        int pageSize = 5;
-        PageRequest pageRequest = PageRequest.of(1, pageSize, Sort.by("username").ascending());
-        Page<User> result = userRepository.findByDateDeletedIsNull(pageRequest);
-
-        assertEquals(21, result.getTotalElements());
-        assertEquals(5, result.getTotalPages());
-        assertEquals(pageSize, result.getContent().size());
-        assertEquals(1, result.getNumber());
-        assertEquals(5, result.getSize());
     }
 }

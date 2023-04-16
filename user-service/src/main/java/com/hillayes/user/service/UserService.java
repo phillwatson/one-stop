@@ -1,10 +1,12 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.event.UserEventSender;
+import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
 import org.springframework.data.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.*;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final DeletedUserRepository deletedUserRepository;
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
 
@@ -36,9 +39,7 @@ public class UserService {
 
         // excludes deleted users in duplicate email comparison
         String email = user.getEmail();
-        userRepository.findByEmail(email).stream()
-            .filter(existing -> !existing.isDeleted())
-            .findFirst()
+        userRepository.findByEmail(email)
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
             });
@@ -59,7 +60,6 @@ public class UserService {
         log.info("Onboard user [userId: {}]", id);
 
         return userRepository.findById(id)
-            .filter(user -> !user.isDeleted())
             .map(user -> {
                 if (user.isOnboarded()) {
                     throw new BadRequestException("User is already onboard");
@@ -86,7 +86,7 @@ public class UserService {
         log.info("Listing user [page: {}, pageSize: {}]", page, pageSize);
 
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("username").ascending());
-        Page<User> result = userRepository.findByDateDeletedIsNull(pageRequest);
+        Page<User> result = userRepository.findAll(pageRequest);
         log.debug("Listing users [page: {}, pageSize: {}, size: {}]",
             page, pageSize, result.getNumberOfElements());
 
@@ -94,12 +94,11 @@ public class UserService {
     }
 
     public Optional<User> updatePassword(UUID userId,
-                               char[] oldPassword,
-                               char[] newPassword) {
+                                         char[] oldPassword,
+                                         char[] newPassword) {
         log.info("Updating password [userId: {}]", userId);
 
         return userRepository.findById(userId)
-            .filter(user -> !user.isDeleted())
             .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
             .map(user -> {
                 user = userRepository.save(user.toBuilder()
@@ -116,7 +115,6 @@ public class UserService {
         log.info("Updating user [userId: {}]", id);
 
         return userRepository.findById(id)
-            .filter(user -> !user.isDeleted())
             .map(user -> {
                 user.setEmail(modifiedUser.getEmail());
                 user.setTitle(modifiedUser.getTitle());
@@ -136,12 +134,11 @@ public class UserService {
         log.info("Deleting user [userId: {}]", id);
 
         return userRepository.findById(id)
-            .filter(user -> !user.isDeleted())
             .map(user -> {
-                user.setDateDeleted(Instant.now());
-                user = userRepository.save(user);
+                DeletedUser deletedUser = deletedUserRepository.save(DeletedUser.fromUser(user));
+                userRepository.delete(user);
 
-                userEventSender.sendUserDeleted(user);
+                userEventSender.sendUserDeleted(deletedUser);
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return user;
             });

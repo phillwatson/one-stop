@@ -5,6 +5,7 @@ import com.hillayes.events.events.auth.LoginFailure;
 import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
+import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,7 @@ public class UserEventSender {
             .build());
     }
 
-    public void sendUserDeleted(User user) {
+    public void sendUserDeleted(DeletedUser user) {
         log.debug("Sending UserDeleted event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())

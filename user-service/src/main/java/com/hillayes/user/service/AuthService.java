@@ -13,9 +13,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
-import java.security.GeneralSecurityException;
 import java.util.UUID;
 
 /**
@@ -52,9 +50,8 @@ public class AuthService {
                 return new NotAuthorizedException("username/password");
             });
 
-        if ((user.isDeleted()) || (user.isBlocked())) {
-            log.info("User login failed [id: {}, deleted: {}, blocked: {}]",
-                user.getId(), user.isDeleted(), user.isBlocked());
+        if (user.isBlocked()) {
+            log.info("User login failed [id: {}, blocked: {}]", user.getId(), user.isBlocked());
             userEventSender.sendLoginFailed(username, "User blocked or deleted.");
             throw new NotAuthorizedException("username/password");
         }
@@ -103,7 +100,7 @@ public class AuthService {
 
         UUID userId = UUID.fromString(jsonWebToken.getName());
         User user = userRepository.findById(userId)
-            .filter(u -> !u.isDeleted() && !u.isBlocked())
+            .filter(u -> !u.isBlocked())
             .orElseThrow(() -> {
                 log.info("User name failed verification [userId: {}]", userId);
                 userEventSender.sendLoginFailed(userId.toString(), "User not found.");
