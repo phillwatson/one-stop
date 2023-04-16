@@ -8,8 +8,4 @@ public class EventPacketSerializer extends ObjectMapperSerializer<EventPacket> {
     public EventPacketSerializer() {
         super();
     }
-
-    public EventPacketSerializer(ObjectMapper objectMapper) {
-        super(objectMapper);
-    }
 }

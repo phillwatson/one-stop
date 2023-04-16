@@ -74,13 +74,14 @@ public class UserAdminResource {
     }
 
     @POST
-    public Response createUser(UserUpdateRequest userRequest) {
+    public Response createUser(@Context UriInfo uriInfo,
+                               UserUpdateRequest userRequest) {
         log.info("Creating user [username: {}]", userRequest.getUsername());
         User user = userService.createUser(userRequest.getUsername(), "password".toCharArray(), marshal(userRequest));
 
         log.debug("Created user [username: {}, id: {}]", user.getUsername(), user.getId());
         return Response
-            .created(URI.create("/api/v1/admin/users/" + user.getId()))
+            .created(URI.create(uriInfo.getPath() + "/" + user.getId()))
             .entity(marshal(user))
             .build();
     }
