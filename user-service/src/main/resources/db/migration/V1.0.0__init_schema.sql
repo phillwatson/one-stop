@@ -42,7 +42,7 @@ INSERT INTO ${flyway:defaultSchema}.userrole (user_id, role) VALUES ('9abc5177-4
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.deleted_user (
     id uuid PRIMARY KEY,
-    username varchar(256) NOT NULL UNIQUE,
+    username varchar(256) NOT NULL,
     password_hash varchar(256) NOT NULL,
     email varchar(256) NOT NULL,
     title varchar(256),

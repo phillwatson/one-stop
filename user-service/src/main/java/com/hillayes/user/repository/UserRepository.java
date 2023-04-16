@@ -20,12 +20,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     public Optional<User> findByUsername(String username);
 
     /**
-     * Returns all users holding the given email address. Although only one user
-     * can be "active" for a given email address, users marked as deleted may share
-     * duplicate email addresses.
+     * Returns the users holding the given email address.
      *
      * @param email the email address to be searched.
-     * @return the collection of users holding the given email address.
+     * @return the user holding the given email address.
      */
     public Optional<User> findByEmail(String email);
 

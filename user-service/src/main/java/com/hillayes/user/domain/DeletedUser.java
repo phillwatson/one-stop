@@ -19,7 +19,6 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeletedUser {
     @Id
-    @GeneratedValue(generator = "uuid2")
     @ToString.Include
     private UUID id;
 
