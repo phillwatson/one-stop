@@ -25,3 +25,42 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
+
+one-stop:
+  email:
+    disabled: false
+    templates:
+      user-created:
+        subject: "Please confirm your email address"
+        sender:
+          name: "One Stop"
+          email: "watson.phill+onestop@gmail.com"
+        template: "user-created.html"
+
+      user-onboarded:
+        subject: "Welcome to One Stop"
+        sender:
+          name: "One Stop"
+          email: "watson.phill+onestop@gmail.com"
+        template: "user-onboarded.html"
+
+      user-declined:
+        subject: "Sorry you decided not to join us"
+        sender:
+          name: "One Stop"
+          email: "watson.phill+onestop@gmail.com"
+        template: "user-declined.html"
+
+      user-updated:
+        subject: "You account has been updated"
+        sender:
+          name: "One Stop"
+          email: "watson.phill+onestop@gmail.com"
+        template: "user-updated.html"
+
+      user-deleted:
+        subject: "Sorry to see you go"
+        sender:
+          name: "One Stop"
+          email: "watson.phill+onestop@gmail.com"
+        template: "user-deleted.html"

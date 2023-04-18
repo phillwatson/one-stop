@@ -1,0 +1,9 @@
+quarkus:
+  hibernate-orm:
+    log:
+      sql: true
+      bind-parameters: true
+
+one-stop:
+  email:
+    api-key: xxxxx

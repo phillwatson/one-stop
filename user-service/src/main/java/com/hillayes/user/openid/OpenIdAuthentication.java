@@ -112,6 +112,7 @@ public class OpenIdAuthentication {
                                 .email(email)
                                 .givenName(givenName == null ? name == null ? email : name : givenName)
                                 .familyName(familyName)
+                                .preferredName(givenName == null ? name == null ? email : name : givenName)
                                 .roles(Set.of("user"))
                                 .build();
                         }
