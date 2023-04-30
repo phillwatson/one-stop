@@ -20,10 +20,6 @@ public class UserAuthTopicConsumer {
             log.info("Received user_auth event [payloadClass: {}]", payloadClass);
 
             if (LoginFailure.class.getName().equals(payloadClass)) {
-//                log.debug("Event retried: {}", eventPacket.getRetryCount());
-//                if (eventPacket.getRetryCount() == 0) {
-//                    throw new RuntimeException("Simulating event failure ");
-//                }
                 processLoginFailure(eventPacket.getPayloadContent());
             }
 
@@ -37,6 +33,7 @@ public class UserAuthTopicConsumer {
 
     private void processLoginFailure(LoginFailure event) {
         log.info("Login failure [username: {}]", event.getUsername());
+        throw new RuntimeException("Test event retry");
     }
 
     private void processUserLogin(UserLogin event) {

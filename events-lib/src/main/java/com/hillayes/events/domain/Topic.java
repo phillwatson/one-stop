@@ -7,7 +7,8 @@ public enum Topic {
     USER("User entity related events."),
     USER_AUTH("User authentication related events."),
     CONSENT("Rail consent related events."),
-    EVENT_HOSPITAL("The dead-letter queue for failed events.");
+    RETRY_TOPIC("The queue for failed events to be retried."),
+    DEAD_LETTER_TOPIC("The dead-letter queue for failed events.");
 
     private final String summary;
 

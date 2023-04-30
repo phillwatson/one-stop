@@ -11,12 +11,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name="events")
+@Table(name = "events")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // called by the builder
-@Builder(access  = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventEntity {
     /**
@@ -24,9 +24,11 @@ public class EventEntity {
      * Called when an event is first submitted delivery.
      *
      * @param topic the topic on which the event is to be delivered.
+     * @param key the optional key of the event. Used to ensure that events with
+     *     the same key are delivered in order.
      * @param payloadObject the payload to be passed in the event.
      */
-    public static EventEntity forInitialDelivery(Topic topic, Object payloadObject) {
+    public static EventEntity forInitialDelivery(Topic topic, Object key, Object payloadObject) {
         Instant now = Instant.now();
         return EventEntity.builder()
             .correlationId(Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()))
@@ -34,6 +36,7 @@ public class EventEntity {
             .timestamp(now)
             .scheduledFor(now)
             .topic(topic)
+            .key(key == null ? null : key.toString())
             .payloadClass(payloadObject.getClass().getName())
             .payload(EventPacket.serialize(payloadObject))
             .build();
@@ -56,6 +59,7 @@ public class EventEntity {
             .timestamp(now)
             .scheduledFor(now.plusSeconds(60L * eventPacket.getRetryCount() + 1))
             .topic(eventPacket.getTopic())
+            .key(eventPacket.getKey())
             .payloadClass(eventPacket.getPayloadClass())
             .payload(eventPacket.getPayload())
             .build();
@@ -65,8 +69,8 @@ public class EventEntity {
      * Converts the EventEntity into an object ready to be delivered by the message
      * broker.
      */
-    public EventPacket toEntityPacket() {
-        return new EventPacket(id, topic, correlationId, retryCount, timestamp, payloadClass, payload);
+    public EventPacket toEventPacket() {
+        return new EventPacket(id, topic, correlationId, retryCount, timestamp, key, payloadClass, payload);
     }
 
     @Id
@@ -74,14 +78,14 @@ public class EventEntity {
     @EqualsAndHashCode.Include
     private UUID id;
 
-    @Column(name="correlation_id")
+    @Column(name = "correlation_id")
     private String correlationId;
 
-    @Column(name="retry_count")
+    @Column(name = "retry_count")
     @Setter
     private int retryCount;
 
-    @Column(name="timestamp")
+    @Column(name = "timestamp")
     private Instant timestamp;
 
     /**
@@ -91,14 +95,23 @@ public class EventEntity {
      * may be some-time in the future; in order to allow the event listener to recover
      * from any error condition.
      */
-    @Column(name="scheduled_for")
+    @Column(name = "scheduled_for")
     private Instant scheduledFor;
 
     @Enumerated(EnumType.STRING)
     private Topic topic;
 
-    @Column(name="payload_class")
+    /**
+     * The optional key of the event. Events with the same key will be delivered to the
+     * same partition. This can ensure the events are delivered in the order in which
+     * they were submitted.
+     */
+    @Column(name = "key", nullable = true)
+    private String key;
+
+    @Column(name = "payload_class")
     private String payloadClass;
 
+    @Column
     private String payload;
 }

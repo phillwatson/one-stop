@@ -57,6 +57,13 @@ public class EventPacket {
     private Topic topic;
 
     /**
+     * The optional key of the event. Events with the same key are delivered to the same partition,
+     * ensuring they are delivered in the order submitted - unless they are re-delivered due to
+     * errors whilst processing.
+     */
+    private String key;
+
+    /**
      * The class of the payload data. Allows the payload to be deserialized. It can also be used to filter
      * events of different types issued on the same topic.
      */
@@ -71,13 +78,15 @@ public class EventPacket {
     @JsonIgnore
     private transient Object payloadContent;
 
-    public EventPacket(UUID id, Topic topic, String correlationId, int retryCount, Instant timestamp,
-                       String payloadClass, String payload) {
+    public EventPacket(UUID id, Topic topic, String correlationId,
+                       int retryCount, Instant timestamp,
+                       String key, String payloadClass, String payload) {
         this.id = id;
         this.topic = topic;
         this.correlationId = correlationId;
         this.retryCount = retryCount;
         this.timestamp = timestamp;
+        this.key = key;
         this.payloadClass = payloadClass;
         this.payload = payload;
     }

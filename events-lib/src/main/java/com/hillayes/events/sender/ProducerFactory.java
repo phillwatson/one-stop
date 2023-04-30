@@ -1,7 +1,7 @@
-package com.hillayes.outbox.sender;
+package com.hillayes.events.sender;
 
 import com.hillayes.events.domain.EventPacket;
-import com.hillayes.outbox.config.ProducerConfig;
+import io.smallrye.common.annotation.Identifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -20,7 +20,7 @@ public class ProducerFactory {
 
     private volatile Producer<String, EventPacket> producer;
 
-    public ProducerFactory(@ProducerConfig Properties producerConfig) {
+    public ProducerFactory(@Identifier("event-producer-config") Properties producerConfig) {
         this.producerConfig = producerConfig;
     }
 

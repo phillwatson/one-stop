@@ -21,12 +21,11 @@ public class TopicConsumer<K, V> {
     Map<TopicPartition, OffsetAndMetadata> currentOffsets;
     int count;
 
-
     public void stop() {
         consumer.wakeup();
     }
 
-    public void run(String topic) {
+    public void run(String topic, EventConsumer<V, ?> eventConsumer) {
         consumer.subscribe(List.of(topic), new ConsumerRebalanceListener() {
             public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
                 currentOffsets = new HashMap<>();
@@ -46,25 +45,24 @@ public class TopicConsumer<K, V> {
                     log.debug("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
                         record.topic(), record.partition(), record.offset(), record.key(), record.value());
 
-                    currentOffsets.put(
-                        new TopicPartition(record.topic(), record.partition()),
-                        new OffsetAndMetadata(record.offset() + 1));
+                    try {
+                        // pass record to topic handler
+                        eventConsumer.consume(record.value());
 
-                    if (count % COMMIT_FREQUENCY == 0) {
-                        consumer.commitAsync(currentOffsets,
-                            (Map<TopicPartition, OffsetAndMetadata> offsets, Exception error) -> {
-                                if (error != null) {
-                                    log.warn("Failed to commit offsets", error);
-                                }
-                            });
+                        // commit the offset
+                        softCommit(record);
+                    } catch (WakeupException e) {
+                        throw e;
+                    } catch (Exception e) {
+                        log.warn("Error from event handler [topic: {}]", record.topic(), e);
+                        consumer.commitSync(currentOffsets);
+
+                        // call exception handler - to perform retry or dead-letter
                     }
-                    count++;
                 }
             }
         } catch (WakeupException e) {
             // ignore, we're closing
-        } catch (Exception e) {
-            log.error("Unexpected error", e);
         } finally {
             try {
                 log.info("Closing consumer and committing offsets");
@@ -74,5 +72,28 @@ public class TopicConsumer<K, V> {
                 log.info("Closed consumer and we are done");
             }
         }
+    }
+
+    /**
+     * Commits the offset for the given record to the local cache. If the number of
+     * records processed since the last commit has reached the commit frequency, the
+     * cached offsets are committed to Kafka.
+     *
+     * @param record the record whose offset is to be committed.
+     */
+    private void softCommit(ConsumerRecord<K, V> record) {
+        currentOffsets.put(
+            new TopicPartition(record.topic(), record.partition()),
+            new OffsetAndMetadata(record.offset() + 1));
+
+        if (count % COMMIT_FREQUENCY == 0) {
+            consumer.commitAsync(currentOffsets,
+                (Map<TopicPartition, OffsetAndMetadata> offsets, Exception error) -> {
+                    if (error != null) {
+                        log.warn("Failed to commit offsets", error);
+                    }
+                });
+        }
+        count++;
     }
 }

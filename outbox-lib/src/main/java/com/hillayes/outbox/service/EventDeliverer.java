@@ -3,7 +3,9 @@ package com.hillayes.outbox.service;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
-import com.hillayes.outbox.sender.ProducerFactory;
+import com.hillayes.outbox.repository.HospitalEntity;
+import com.hillayes.outbox.repository.HospitalRepository;
+import com.hillayes.events.sender.ProducerFactory;
 import io.quarkus.scheduler.Scheduled;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class EventDeliverer {
     private final ProducerFactory producerFactory;
     private final EventRepository eventRepository;
+    private final HospitalRepository hospitalRepository;
 
     private static final AtomicBoolean MUTEX = new AtomicBoolean();
 
@@ -71,7 +74,7 @@ public class EventDeliverer {
         List<EventTuple> records = events.stream()
             .map(entity -> {
                 ProducerRecord<String, EventPacket> record =
-                    new ProducerRecord<>(entity.getTopic().topicName(), entity.toEntityPacket());
+                    new ProducerRecord<>(entity.getTopic().topicName(), entity.getKey(), entity.toEventPacket());
 
                 return new EventTuple(entity, producer.send(record));
             })
@@ -102,7 +105,7 @@ public class EventDeliverer {
      *
      * @param record the record of the failed event.
      */
-    @Incoming("retry-topic")
+    @Incoming("dead-letter-topic")
     @Transactional
     public void deadLetterTopicListener(ConsumerRecord<String, EventPacket> record) {
         Headers headers = record.headers();
@@ -124,6 +127,7 @@ public class EventDeliverer {
                     event.getId(), event.getTopic(), event.getRetryCount(), reason, cause);
 
             // write the record to the event hospital table - with reason and cause
+            hospitalRepository.persist(HospitalEntity.fromEventPacket(event, reason, cause));
         }
     }
 

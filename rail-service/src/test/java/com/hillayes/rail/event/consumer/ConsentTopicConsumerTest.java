@@ -200,7 +200,7 @@ public class ConsentTopicConsumerTest {
             .build();
 
         // and: the event is marshalled for delivery
-        EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.CONSENT, consentGiven);
-        return eventEntity.toEntityPacket();
+        EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.CONSENT, null, consentGiven);
+        return eventEntity.toEventPacket();
     }
 }
