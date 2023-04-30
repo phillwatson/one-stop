@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -14,13 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserUpdated {
-    @NotNull
     private UUID userId;
 
-    @NotNull
     private String username;
 
-    @NotNull
     private String email;
 
     private String title;
@@ -33,6 +29,5 @@ public class UserUpdated {
 
     private String phoneNumber;
 
-    @NotNull
     private Instant dateUpdated;
 }

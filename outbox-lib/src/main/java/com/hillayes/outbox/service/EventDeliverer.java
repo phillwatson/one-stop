@@ -5,7 +5,6 @@ import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import com.hillayes.outbox.repository.HospitalEntity;
 import com.hillayes.outbox.repository.HospitalRepository;
-import com.hillayes.events.sender.ProducerFactory;
 import io.quarkus.scheduler.Scheduled;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +17,7 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -35,11 +35,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 @Slf4j
 public class EventDeliverer {
-    private final ProducerFactory producerFactory;
+    private final Producer<String, EventPacket> producer;
     private final EventRepository eventRepository;
     private final HospitalRepository hospitalRepository;
 
+    /**
+     * A mutex to prevent delivery of events from multiple threads.
+     */
     private static final AtomicBoolean MUTEX = new AtomicBoolean();
+
+    @PreDestroy
+    public void onStop() {
+        log.info("Shutting down EventDeliverer - started");
+        if (producer != null) {
+            log.info("Closing producer {}", producer);
+            producer.close();
+        }
+        log.info("Shutting down EventDeliverer - complete");
+    }
 
     /**
      * A scheduled service to read pending events from the event outbox table and
@@ -47,13 +60,13 @@ public class EventDeliverer {
      */
     @Scheduled(cron = "${mensa.events.cron:0/2 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void deliverEvents() throws Exception {
-        if (!MUTEX.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            _deliverEvents();
-        } finally {
-            MUTEX.set(false);
+        // if previous delivery is still in progress, skip this run
+        if (MUTEX.compareAndSet(false, true)) {
+            try {
+                _deliverEvents();
+            } finally {
+                MUTEX.set(false);
+            }
         }
     }
 
@@ -70,7 +83,6 @@ public class EventDeliverer {
         }
         log.trace("Event batch delivery started");
 
-        Producer<String, EventPacket> producer = producerFactory.getProducer();
         List<EventTuple> records = events.stream()
             .map(entity -> {
                 ProducerRecord<String, EventPacket> record =
@@ -105,7 +117,7 @@ public class EventDeliverer {
      *
      * @param record the record of the failed event.
      */
-    @Incoming("dead-letter-topic")
+    @Incoming("retry_topic")
     @Transactional
     public void deadLetterTopicListener(ConsumerRecord<String, EventPacket> record) {
         Headers headers = record.headers();

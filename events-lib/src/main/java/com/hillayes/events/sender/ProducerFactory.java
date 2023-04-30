@@ -1,53 +1,50 @@
 package com.hillayes.events.sender;
 
 import com.hillayes.events.domain.EventPacket;
+import com.hillayes.events.serializers.EventPacketSerializer;
 import io.smallrye.common.annotation.Identifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-@ApplicationScoped
 @Slf4j
 public class ProducerFactory {
-    private final Properties producerConfig;
+    @Produces()
+    @ApplicationScoped
+    @Identifier("event-producer-config")
+    public Properties getProducerConfig(@ConfigProperty(name = "kafka.producer.client", defaultValue = "hillayes.com") final String clientId,
+                                        @ConfigProperty(name = "kafka.bootstrap.servers", defaultValue = "kafka:9092") final String bootstrapServers,
+                                        @ConfigProperty(name = "kafka.producer.lingerMs", defaultValue = "0") final String lingerMs,
+                                        @ConfigProperty(name = "kafka.producer.acksConfig", defaultValue = "all") final String acksConfig,
+                                        @ConfigProperty(name = "kafka.producer.maxInFlightRequestsPerConnection", defaultValue = "3") final Integer maxInFlightRequestsPerConnection,
+                                        @ConfigProperty(name = "kafka.producer.batchSizeConfig", defaultValue = "16384") final Integer batchSizeConfig,
+                                        @ConfigProperty(name = "kafka.producer.maxBlockMsConfig", defaultValue = "60000") final Integer maxBlockMsConfig) {
+        Properties config = new Properties();
+        config.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(ProducerConfig.ACKS_CONFIG, acksConfig);
+        config.put(ProducerConfig.LINGER_MS_CONFIG, lingerMs);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventPacketSerializer.class);
+        config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, maxInFlightRequestsPerConnection);
+        config.put(ProducerConfig.BATCH_SIZE_CONFIG, batchSizeConfig);
+        config.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, maxBlockMsConfig);
 
-    private final AtomicBoolean shutdown = new AtomicBoolean(false);
-
-    private volatile Producer<String, EventPacket> producer;
-
-    public ProducerFactory(@Identifier("event-producer-config") Properties producerConfig) {
-        this.producerConfig = producerConfig;
+        log.debug("Kafka producer config: {}", config);
+        return config;
     }
 
-    public Producer<String, EventPacket> getProducer() {
-        if (shutdown.get()) {
-            throw new RuntimeException("Application shutting down. Unable to issue Message Producer");
-        }
-
-        if (producer == null) {
-            synchronized (this) {
-                if (producer == null) {
-                    log.info("Creating new event Kafka Producer");
-                    producer = new KafkaProducer<>(producerConfig);
-                }
-            }
-        }
-        return producer;
-    }
-
-    @PreDestroy
-    public void onStop() {
-        log.info("Shutting down Message Producers - started");
-        shutdown.set(true);
-        if (producer != null) {
-            log.info("Closing producer {}", producer);
-            producer.close();
-        }
-        log.info("Shutting down Message Producers - complete");
+    @Produces()
+    @ApplicationScoped
+    public Producer<String, EventPacket> getProducer(@Identifier("event-producer-config") Properties producerConfig) {
+        log.info("Creating new Kafka Producer");
+        return new KafkaProducer<>(producerConfig);
     }
 }
