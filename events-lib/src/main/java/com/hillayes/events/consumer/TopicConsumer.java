@@ -1,53 +1,87 @@
 package com.hillayes.events.consumer;
 
+import com.hillayes.events.domain.EventPacket;
+import com.hillayes.events.domain.Topic;
+import com.hillayes.executors.correlation.Correlation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 @Slf4j
-public class TopicConsumer<K, V> {
-    private static final Duration POLL_TIMEOUT = Duration.ofMinutes(2);
-    private static final int COMMIT_FREQUENCY = 250;
+public class TopicConsumer implements Runnable {
+    private static final Duration POLL_TIMEOUT = Duration.ofHours(1);
+    private static final int COMMIT_FREQUENCY = 100;
 
-    private KafkaConsumer<K, V> consumer;
+    private final KafkaConsumer<String, EventPacket> consumer;
+
+    private final EventConsumer eventConsumer;
+
+    private final Collection<String> topics;
+
+    private final ConsumerErrorHandler errorHandler;
 
     Map<TopicPartition, OffsetAndMetadata> currentOffsets;
     int count;
+
+    public TopicConsumer(Properties consumerConfig,
+                         Collection<Topic> topics,
+                         EventConsumer eventConsumer,
+                         ConsumerErrorHandler errorHandler) {
+        this.consumer = new KafkaConsumer<>(consumerConfig);
+        this.eventConsumer = eventConsumer;
+        this.topics = topics.stream().map(Topic::topicName).toList();
+        this.errorHandler = errorHandler;
+    }
 
     public void stop() {
         consumer.wakeup();
     }
 
-    public void run(String topic, EventConsumer<V, ?> eventConsumer) {
-        consumer.subscribe(List.of(topic), new ConsumerRebalanceListener() {
-            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                currentOffsets = new HashMap<>();
-                count = 0;
-            }
+    public Collection<String> getTopics() {
+        return topics;
+    }
 
-            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                log.debug("Lost partitions in re-balance. Committing current offsets");
-                consumer.commitSync(currentOffsets);
-            }
-        });
-
+    public void run() {
+        log.debug("Starting consumer [topics: {}]", topics);
         try {
+            consumer.subscribe(topics, new ConsumerRebalanceListener() {
+                public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                    log.debug("Partitions assigned [partitions: {}]", partitions);
+                    currentOffsets = new HashMap<>();
+                    count = 0;
+                }
+
+                public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                    log.debug("Lost partitions in re-balance. Committing current offsets");
+                    consumer.commitSync(currentOffsets);
+                }
+            });
+
             while (true) {
-                ConsumerRecords<K, V> records = consumer.poll(POLL_TIMEOUT);
-                for (ConsumerRecord<K, V> record : records) {
-                    log.debug("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+                log.trace("Polling for events [topics: {}]", topics);
+                ConsumerRecords<String, EventPacket> records = consumer.poll(POLL_TIMEOUT);
+                log.trace("Records polled [topics: {}, size: {}]", topics, records.count());
+
+                for (ConsumerRecord<String, EventPacket> record : records) {
+                    log.trace("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
                         record.topic(), record.partition(), record.offset(), record.key(), record.value());
 
                     try {
-                        // pass record to topic handler
-                        eventConsumer.consume(record.value());
+                        // pass record to topic handler - using the correlation id from the record
+                        String prevId = Correlation.setCorrelationId(record.value().getCorrelationId());
+                        try {
+                            eventConsumer.consume(record);
+                        } finally {
+                            Correlation.setCorrelationId(prevId);
+                        }
 
                         // commit the offset
                         softCommit(record);
@@ -55,9 +89,9 @@ public class TopicConsumer<K, V> {
                         throw e;
                     } catch (Exception e) {
                         log.warn("Error from event handler [topic: {}]", record.topic(), e);
-                        consumer.commitSync(currentOffsets);
+                        hardCommit(record);
 
-                        // call exception handler - to perform retry or dead-letter
+                        errorHandler.handle(record, e);
                     }
                 }
             }
@@ -66,7 +100,9 @@ public class TopicConsumer<K, V> {
         } finally {
             try {
                 log.info("Closing consumer and committing offsets");
-                consumer.commitSync(currentOffsets);
+                if (!currentOffsets.isEmpty()) {
+                    consumer.commitSync(currentOffsets);
+                }
             } finally {
                 consumer.close();
                 log.info("Closed consumer and we are done");
@@ -81,12 +117,12 @@ public class TopicConsumer<K, V> {
      *
      * @param record the record whose offset is to be committed.
      */
-    private void softCommit(ConsumerRecord<K, V> record) {
+    private void softCommit(ConsumerRecord<?, ?> record) {
         currentOffsets.put(
             new TopicPartition(record.topic(), record.partition()),
             new OffsetAndMetadata(record.offset() + 1));
 
-        if (count % COMMIT_FREQUENCY == 0) {
+        if (count++ % COMMIT_FREQUENCY == 0) {
             consumer.commitAsync(currentOffsets,
                 (Map<TopicPartition, OffsetAndMetadata> offsets, Exception error) -> {
                     if (error != null) {
@@ -94,6 +130,13 @@ public class TopicConsumer<K, V> {
                     }
                 });
         }
-        count++;
+    }
+
+    private void hardCommit(ConsumerRecord<?, ?> record) {
+        currentOffsets.put(
+            new TopicPartition(record.topic(), record.partition()),
+            new OffsetAndMetadata(record.offset() + 1));
+
+        consumer.commitSync(currentOffsets);
     }
 }

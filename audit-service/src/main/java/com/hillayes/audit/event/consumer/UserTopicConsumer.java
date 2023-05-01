@@ -1,10 +1,12 @@
 package com.hillayes.audit.event.consumer;
 
+import com.hillayes.events.consumer.ConsumerTopic;
+import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
+import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.*;
 import com.hillayes.executors.correlation.Correlation;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -12,9 +14,9 @@ import javax.enterprise.context.ApplicationScoped;
  * Consumes user events to maintain a local DB of user email addresses.
  */
 @ApplicationScoped
+@ConsumerTopic(topic = Topic.USER)
 @Slf4j
-public class UserTopicConsumer {
-    @Incoming("user")
+public class UserTopicConsumer implements EventConsumer {
     public void consume(EventPacket eventPacket) {
         Correlation.setCorrelationId(eventPacket.getCorrelationId());
         try {

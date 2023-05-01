@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
+import com.hillayes.events.serializers.MapperFactory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,9 +22,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventPacket {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
 
     /**
      * The event's unique identifier. This is suitable for testing whether the event
@@ -98,7 +95,7 @@ public class EventPacket {
      */
     @JsonIgnore
     public <T> T getPayloadContent() {
-        if (payloadContent == null) {
+        if ((payloadContent == null) && (payload != null)) {
             try {
                 payloadContent = MAPPER.readValue(payload, Class.forName(payloadClass));
             } catch (JsonProcessingException | ClassNotFoundException e) {

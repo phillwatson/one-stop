@@ -16,7 +16,7 @@ import java.util.Properties;
 
 @Slf4j
 public class ProducerFactory {
-    @Produces()
+    @Produces
     @ApplicationScoped
     @Identifier("event-producer-config")
     public Properties getProducerConfig(@ConfigProperty(name = "kafka.producer.client", defaultValue = "hillayes.com") final String clientId,
