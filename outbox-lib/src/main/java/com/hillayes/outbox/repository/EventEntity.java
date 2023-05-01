@@ -31,6 +31,7 @@ public class EventEntity {
     public static EventEntity forInitialDelivery(Topic topic, Object key, Object payloadObject) {
         Instant now = Instant.now();
         return EventEntity.builder()
+            .eventId(UUID.randomUUID())
             .correlationId(Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()))
             .retryCount(0)
             .timestamp(now)
@@ -54,6 +55,7 @@ public class EventEntity {
     public static EventEntity forRedelivery(EventPacket eventPacket) {
         Instant now = Instant.now();
         return EventEntity.builder()
+            .eventId(eventPacket.getId())
             .correlationId(eventPacket.getCorrelationId())
             .retryCount(eventPacket.getRetryCount() + 1)
             .timestamp(now)
@@ -70,7 +72,7 @@ public class EventEntity {
      * broker.
      */
     public EventPacket toEventPacket() {
-        return new EventPacket(id, topic, correlationId, retryCount, timestamp, key, payloadClass, payload);
+        return new EventPacket(eventId, topic, correlationId, retryCount, timestamp, key, payloadClass, payload);
     }
 
     @Id
@@ -78,6 +80,16 @@ public class EventEntity {
     @EqualsAndHashCode.Include
     private UUID id;
 
+    /**
+     * The event's own unique identifier. This is suitable for testing whether the event
+     * has been processed by the consumer - idempotency.
+     */
+    @Column(name = "event_id")
+    private UUID eventId;
+
+    /**
+     * The correlation-id assigned to the event when it was first submitted for delivery.
+     */
     @Column(name = "correlation_id")
     private String correlationId;
 

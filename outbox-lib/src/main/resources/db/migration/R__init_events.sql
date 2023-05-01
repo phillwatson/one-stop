@@ -2,6 +2,7 @@ CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.events (
   id uuid PRIMARY KEY,
+  event_id uuid NOT NULL,
   correlation_id varchar(256) NOT NULL,
   retry_count smallint NOT NULL DEFAULT 0,
   "timestamp" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.events (
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.message_hospital (
   id uuid PRIMARY KEY,
+  event_id uuid NOT NULL,
   correlation_id varchar(256) NOT NULL,
   retry_count smallint NOT NULL DEFAULT 0,
   "timestamp" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -29,6 +29,7 @@ public class HospitalEntity {
                                                  String reason, String cause) {
         Instant now = Instant.now();
         return HospitalEntity.builder()
+            .eventId(eventPacket.getId())
             .correlationId(eventPacket.getCorrelationId())
             .retryCount(eventPacket.getRetryCount())
             .timestamp(now)
@@ -46,6 +47,16 @@ public class HospitalEntity {
     @EqualsAndHashCode.Include
     private UUID id;
 
+    /**
+     * The event's own unique identifier. This is suitable for testing whether the event
+     * has been processed by the consumer - idempotency.
+     */
+    @Column(name = "event_id")
+    private UUID eventId;
+
+    /**
+     * The correlation-id assigned to the event when it was first submitted for delivery.
+     */
     @Column(name="correlation_id")
     private String correlationId;
 

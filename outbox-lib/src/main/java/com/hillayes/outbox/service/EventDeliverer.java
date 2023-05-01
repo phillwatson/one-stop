@@ -57,6 +57,7 @@ public class EventDeliverer {
         if (MUTEX.compareAndSet(false, true)) {
             try {
                 _deliverEvents();
+            } catch (Exception ignored) {
             } finally {
                 MUTEX.set(false);
             }
@@ -93,10 +94,10 @@ public class EventDeliverer {
 
                 // delete the entity
                 eventRepository.delete(record.entity);
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 EventEntity entity = record.entity;
                 log.error("Event delivery failed [id: {}, topic: {}, payload: {}]",
-                        entity.getId(), entity.getTopic(), entity.getPayloadClass());
+                        entity.getId(), entity.getTopic(), entity.getPayloadClass(), e.getCause());
                 throw e;
             }
         }
