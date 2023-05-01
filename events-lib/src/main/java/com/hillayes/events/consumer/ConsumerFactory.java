@@ -55,7 +55,6 @@ public class ConsumerFactory {
 
     @Produces
     @ApplicationScoped
-    @Startup
     public Set<TopicConsumer> consumers(@Any Instance<EventConsumer> instances,
                                         @Identifier("event-consumer-config") Properties consumerConfig,
                                         ConsumerErrorHandler errorHandler) {
@@ -65,28 +64,36 @@ public class ConsumerFactory {
             if (!topics.isEmpty()) {
                 log.debug("Registering consumer [topics: {}, class: {}]", topics, eventConsumer.getClass().getName());
                 consumerConfig.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
-
                 TopicConsumer topicConsumer = new TopicConsumer(consumerConfig, topics, eventConsumer, errorHandler);
+
                 consumers.add(topicConsumer);
             }
         });
 
+        return consumers;
+    }
+
+    @Produces
+    @ApplicationScoped
+    @Startup
+    public ExecutorService startConsumers(Set<TopicConsumer> consumers) {
         if (consumers.isEmpty()) {
             log.warn("No consumers registered");
-        } else {
-            ExecutorService executorService = ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
-                .name("topic-consumer")
-                .executorType(ExecutorType.FIXED)
-                .numberOfThreads(consumers.size())
-                .build());
-
-            consumers.forEach(topicConsumer -> {
-                log.debug("Starting consumer [topics: {}]", topicConsumer.getTopics());
-                executorService.submit(topicConsumer);
-            });
+            return null;
         }
 
-        return consumers;
+        ExecutorService executorService = ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
+            .name("topic-consumer")
+            .executorType(ExecutorType.FIXED)
+            .numberOfThreads(consumers.size())
+            .build());
+
+        consumers.forEach(topicConsumer -> {
+            log.debug("Starting consumer [topics: {}]", topicConsumer.getTopics());
+            executorService.submit(topicConsumer);
+        });
+
+        return executorService;
     }
 
     @PreDestroy
