@@ -48,6 +48,8 @@ quarkus:
         level: INFO
       "org.jose4j.jwk":
         level: INFO
+      "org.apache.kafka":
+        level: WARN
       "com.hillayes":
         level: DEBUG
 

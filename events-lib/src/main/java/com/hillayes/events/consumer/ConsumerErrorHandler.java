@@ -17,16 +17,21 @@ public class ConsumerErrorHandler {
 
     public void handle(ConsumerRecord<String, EventPacket> record, Throwable error) {
         EventPacket eventPacket = record.value();
+
         ProducerRecord<String, EventPacket> retryRecord =
             new ProducerRecord<>(Topic.RETRY_TOPIC.topicName(), eventPacket);
-        retryRecord.headers().add("dead-letter-reason", "error".getBytes(StandardCharsets.UTF_8));
-        retryRecord.headers().add("dead-letter-cause", error.getMessage().getBytes(StandardCharsets.UTF_8));
 
+        retryRecord.headers()
+            .add("dead-letter-reason", "error".getBytes(StandardCharsets.UTF_8))
+            .add("dead-letter-cause", error.getMessage().getBytes(StandardCharsets.UTF_8));
+
+        // send asynchronously to retry topic
         producer.send(retryRecord, (metadata, exception) -> {
             if (exception != null) {
-                log.error("Error sending event to topic [topic: {}, event: {}]", record.topic(), eventPacket.getTopic());
+                log.error("Error sending event to topic [topic: {}, eventId: {}, correlationId: {}]",
+                    record.topic(), eventPacket.getId(), eventPacket.getCorrelationId(), exception);
             } else {
-                log.debug("Event sent to topic [topic: {}, event: {}]", record.topic(), eventPacket.getTopic());
+                log.trace("Event sent to topic [topic: {}, event: {}]", record.topic(), eventPacket.getTopic());
             }
         });
     }

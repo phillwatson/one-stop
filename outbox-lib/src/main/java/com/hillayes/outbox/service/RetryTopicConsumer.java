@@ -18,6 +18,12 @@ import org.apache.kafka.common.header.Headers;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+/**
+ * Consumes retry-topic events, which are events that have failed delivery. All
+ * services that use the outbox library will have a retry-topic consumer. By setting
+ * them all with the same consumer group, we can ensure that only one service will
+ * attempt to process a given failed event.
+ */
 @ApplicationScoped
 @ConsumerTopic(Topic.RETRY_TOPIC)
 @ConsumerGroup("retry-topic-group")
@@ -41,12 +47,16 @@ public class RetryTopicConsumer implements EventConsumer {
         String cause = getHeader(headers, "dead-letter-cause");
 
         EventPacket event = record.value();
-        log.debug("Event failed processing [topic: {}, retryCount: {}, reason: {}, cause: {}]",
-            event.getTopic(), event.getRetryCount(), reason, cause);
+        if (log.isDebugEnabled()) {
+            log.debug("Event failed processing [topic: {}, retryCount: {}, reason: {}, cause: {}]",
+                event.getTopic(), event.getRetryCount(), reason, cause);
+        }
 
         if (event.getRetryCount() < 3) {
-            log.debug("Reposting event [topic: {}, retryCount: {}, reason: {}, cause: {}]",
-                event.getTopic(), event.getRetryCount(), reason, cause);
+            if (log.isDebugEnabled()) {
+                log.debug("Reposting event [topic: {}, retryCount: {}, reason: {}, cause: {}]",
+                    event.getTopic(), event.getRetryCount(), reason, cause);
+            }
 
             EventEntity entity = EventEntity.forRedelivery(event);
             eventRepository.persist(entity);

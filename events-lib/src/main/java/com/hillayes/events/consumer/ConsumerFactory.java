@@ -7,7 +7,7 @@ import com.hillayes.events.serializers.EventPacketDeserializer;
 import com.hillayes.executors.concurrent.ExecutorConfiguration;
 import com.hillayes.executors.concurrent.ExecutorFactory;
 import com.hillayes.executors.concurrent.ExecutorType;
-import io.quarkus.runtime.Startup;
+import io.quarkus.runtime.StartupEvent;
 import io.smallrye.common.annotation.Identifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -17,6 +17,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
@@ -28,6 +29,34 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 public class ConsumerFactory {
     private final Set<TopicConsumer> consumers = new HashSet<>();
+
+    public void startConsumers(@Observes StartupEvent ev,
+                               Set<TopicConsumer> consumers) {
+        if (consumers.isEmpty()) {
+            log.warn("No consumers registered");
+            return;
+        }
+
+        ExecutorService executorService = ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
+            .name("topic-consumer")
+            .executorType(ExecutorType.FIXED)
+            .numberOfThreads(consumers.size())
+            .build());
+
+        consumers.forEach(topicConsumer -> {
+            log.debug("Starting consumer [topics: {}]", topicConsumer.getTopics());
+            executorService.submit(topicConsumer);
+        });
+    }
+
+    @PreDestroy
+    public void shutdownConsumers() {
+        log.info("Shutting down consumers");
+        consumers.forEach(topicConsumer -> {
+            log.debug("Shutting down consumer [topics: {}]", topicConsumer.getTopics());
+            topicConsumer.stop();
+        });
+    }
 
     @Produces
     @ApplicationScoped
@@ -67,7 +96,8 @@ public class ConsumerFactory {
                 log.debug("Registering consumer [topics: {}, class: {}]", topics, eventConsumer.getClass().getName());
 
                 // Create a new config for each consumer - with defaults supplied from the global config
-                Properties config = new Properties(consumerConfig);
+                Properties config = new Properties();
+                config.putAll(consumerConfig);
                 config.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
                 consumerGroup.ifPresent(group -> config.put(ConsumerConfig.GROUP_ID_CONFIG, group));
 
@@ -76,37 +106,5 @@ public class ConsumerFactory {
         });
 
         return consumers;
-    }
-
-    @Produces
-    @ApplicationScoped
-    @Startup
-    public ExecutorService startConsumers(Set<TopicConsumer> consumers) {
-        if (consumers.isEmpty()) {
-            log.warn("No consumers registered");
-            return null;
-        }
-
-        ExecutorService executorService = ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
-            .name("topic-consumer")
-            .executorType(ExecutorType.FIXED)
-            .numberOfThreads(consumers.size())
-            .build());
-
-        consumers.forEach(topicConsumer -> {
-            log.debug("Starting consumer [topics: {}]", topicConsumer.getTopics());
-            executorService.submit(topicConsumer);
-        });
-
-        return executorService;
-    }
-
-    @PreDestroy
-    public void shutdownConsumers() {
-        log.info("Shutting down consumers");
-        consumers.forEach(topicConsumer -> {
-            log.debug("Shutting down consumer [topics: {}]", topicConsumer.getTopics());
-            topicConsumer.stop();
-        });
     }
 }

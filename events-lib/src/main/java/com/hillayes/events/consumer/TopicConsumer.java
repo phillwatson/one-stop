@@ -5,7 +5,6 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.executors.correlation.Correlation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 
@@ -17,7 +16,7 @@ import java.util.Properties;
 
 @Slf4j
 public class TopicConsumer implements Runnable {
-    private static final Duration POLL_TIMEOUT = Duration.ofHours(1);
+    private static final Duration POLL_TIMEOUT = Duration.ofDays(1);
     private static final int COMMIT_FREQUENCY = 100;
 
     private final KafkaConsumer<String, EventPacket> consumer;
@@ -71,17 +70,16 @@ public class TopicConsumer implements Runnable {
                 log.trace("Records polled [topics: {}, size: {}]", topics, records.count());
 
                 for (ConsumerRecord<String, EventPacket> record : records) {
-                    log.trace("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
-                        record.topic(), record.partition(), record.offset(), record.key(), record.value());
+                    if (log.isTraceEnabled()) {
+                        log.trace("topic = {}, partition = {}, offset = {}, customer = {}, country = {}",
+                            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+                    }
 
+                    // using the correlation id from the record
+                    String prevId = Correlation.setCorrelationId(record.value().getCorrelationId());
                     try {
-                        // pass record to topic handler - using the correlation id from the record
-                        String prevId = Correlation.setCorrelationId(record.value().getCorrelationId());
-                        try {
-                            eventConsumer.consume(record);
-                        } finally {
-                            Correlation.setCorrelationId(prevId);
-                        }
+                        // pass record to topic handler
+                        eventConsumer.consume(record);
 
                         // commit the offset
                         softCommit(record);
@@ -92,6 +90,8 @@ public class TopicConsumer implements Runnable {
                         hardCommit(record);
 
                         errorHandler.handle(record, e);
+                    } finally {
+                        Correlation.setCorrelationId(prevId);
                     }
                 }
             }

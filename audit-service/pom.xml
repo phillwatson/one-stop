@@ -45,11 +45,5 @@
             <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-test-kafka-companion</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>
