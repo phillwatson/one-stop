@@ -1,6 +1,6 @@
 package com.hillayes.audit.event.consumer;
 
-import com.hillayes.events.consumer.ConsumerTopic;
+import com.hillayes.events.annotation.ConsumerTopic;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
@@ -14,7 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
  * Consumes user events to maintain a local DB of user email addresses.
  */
 @ApplicationScoped
-@ConsumerTopic(topic = Topic.USER)
+@ConsumerTopic(Topic.USER)
 @Slf4j
 public class UserTopicConsumer implements EventConsumer {
     public void consume(EventPacket eventPacket) {

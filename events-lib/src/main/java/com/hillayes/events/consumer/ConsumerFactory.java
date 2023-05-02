@@ -1,5 +1,6 @@
 package com.hillayes.events.consumer;
 
+import com.hillayes.events.annotation.AnnotationUtils;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.serializers.EventPacketDeserializer;
@@ -60,13 +61,17 @@ public class ConsumerFactory {
                                         ConsumerErrorHandler errorHandler) {
         log.info("Registering consumers");
         instances.stream().forEach(eventConsumer -> {
-            Collection<Topic> topics = getTopics(eventConsumer);
+            Collection<Topic> topics = AnnotationUtils.getTopics(eventConsumer);
+            Optional<String> consumerGroup = AnnotationUtils.getConsumerGroup(eventConsumer);
             if (!topics.isEmpty()) {
                 log.debug("Registering consumer [topics: {}, class: {}]", topics, eventConsumer.getClass().getName());
-                consumerConfig.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
-                TopicConsumer topicConsumer = new TopicConsumer(consumerConfig, topics, eventConsumer, errorHandler);
 
-                consumers.add(topicConsumer);
+                // Create a new config for each consumer - with defaults supplied from the global config
+                Properties config = new Properties(consumerConfig);
+                config.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
+                consumerGroup.ifPresent(group -> config.put(ConsumerConfig.GROUP_ID_CONFIG, group));
+
+                consumers.add(new TopicConsumer(config, topics, eventConsumer, errorHandler));
             }
         });
 
@@ -103,18 +108,5 @@ public class ConsumerFactory {
             log.debug("Shutting down consumer [topics: {}]", topicConsumer.getTopics());
             topicConsumer.stop();
         });
-    }
-
-    private Collection<Topic> getTopics(Object instance) {
-        return getTopics(new HashSet<>(), instance.getClass());
-    }
-
-    private Collection<Topic> getTopics(Collection<Topic> topics, Class<?> clazz) {
-        if (clazz != null) {
-            for (ConsumerTopic topic : clazz.getAnnotationsByType(ConsumerTopic.class))
-                topics.add(topic.topic());
-            getTopics(topics, clazz.getSuperclass());
-        }
-        return topics;
     }
 }

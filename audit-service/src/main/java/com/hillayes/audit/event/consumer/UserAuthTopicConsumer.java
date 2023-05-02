@@ -1,6 +1,6 @@
 package com.hillayes.audit.event.consumer;
 
-import com.hillayes.events.consumer.ConsumerTopic;
+import com.hillayes.events.annotation.ConsumerTopic;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-@ConsumerTopic(topic = Topic.USER_AUTH)
+@ConsumerTopic(Topic.USER_AUTH)
 @Slf4j
 public class UserAuthTopicConsumer implements EventConsumer {
     public void consume(EventPacket eventPacket) {
