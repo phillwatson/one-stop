@@ -1,0 +1,40 @@
+title On-Boarding Users
+
+participant client
+participant user-service
+participant broker
+participant email-service
+
+client->user-service:register(email)
+activate client
+activate user-service
+alt#lightblue email not used
+user-service->user-service:createUser(email)
+user-service->user-service:generate magic-token
+rbox over user-service,broker#lightblue:magic token is a random secret\n with expiry of 5 minutes
+user-service->broker:user-registered(email,magic-token)
+client<--user-service:http 200
+else
+client<--user-service:http 409: email already used
+end
+deactivateafter user-service
+deactivateafter client
+broker->email-service:user-registered(user,magic-token)
+activate email-service
+email-service->email-service:send magic-link email
+deactivateafter email-service
+
+
+rbox right of client#lightblue:User receives email with\n magic-link
+client->user-service:acknowledge(magic-token)
+activate client
+activate user-service
+user-service->user-service:validate(magic-token)
+alt#lightblue valid
+user-service->broker:user-acknowledged(user)
+client<--user-service:http 307: landing page
+else invalid or expired
+client<--user-service:http 307: token invalid/expired
+end
+deactivateafter user-service
+deactivateafter client
