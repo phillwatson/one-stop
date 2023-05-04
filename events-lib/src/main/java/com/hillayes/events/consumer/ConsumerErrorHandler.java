@@ -9,6 +9,9 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
+import static com.hillayes.events.consumer.HeadersUtils.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -18,14 +21,30 @@ public class ConsumerErrorHandler {
     public void handle(ConsumerRecord<String, EventPacket> record, Throwable error) {
         EventPacket eventPacket = record.value();
 
+        Topic failureTopic = (eventPacket.getRetryCount() < 3)
+            ? Topic.RETRY_TOPIC
+            : Topic.HOSPITAL_TOPIC;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Reposting event [failureTopic: {}, topic: {}, retryCount: {}, cause: {}]",
+                failureTopic, eventPacket.getTopic(), eventPacket.getRetryCount(), error.getMessage());
+        }
+
         ProducerRecord<String, EventPacket> retryRecord =
-            new ProducerRecord<>(Topic.RETRY_TOPIC.topicName(), eventPacket);
+            new ProducerRecord<>(failureTopic.topicName(), eventPacket);
 
         retryRecord.headers()
-            .add("dead-letter-reason", "error".getBytes(StandardCharsets.UTF_8))
-            .add("dead-letter-cause", error.getMessage().getBytes(StandardCharsets.UTF_8));
+            .add(REASON_HEADER, error.getClass().getName().getBytes(StandardCharsets.UTF_8))
+            .add(CAUSE_HEADER, error.getMessage().getBytes(StandardCharsets.UTF_8));
 
-        // send asynchronously to retry topic
+        if (failureTopic == Topic.RETRY_TOPIC) {
+            // calculate a time to retry the event
+            Instant scheduleFor = Instant.now().plusSeconds(60L * eventPacket.getRetryCount() + 1);
+            retryRecord.headers()
+                .add(SCHEDULE_HEADER, scheduleFor.toString().getBytes(StandardCharsets.UTF_8));
+        }
+
+        // send asynchronously to chosen failure topic
         producer.send(retryRecord, (metadata, exception) -> {
             if (exception != null) {
                 log.error("Error sending event to topic [topic: {}, eventId: {}, correlationId: {}]",

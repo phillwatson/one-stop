@@ -51,15 +51,16 @@ public class EventEntity {
      * in order to allow the listeners time to recover from any error condition.
      *
      * @param eventPacket the event packet that failed delivery and is to be rescheduled.
+     * @param scheduleFor the time at which the event is to be delivered.
      */
-    public static EventEntity forRedelivery(EventPacket eventPacket) {
+    public static EventEntity forRedelivery(EventPacket eventPacket, Instant scheduleFor) {
         Instant now = Instant.now();
         return EventEntity.builder()
             .eventId(eventPacket.getId())
             .correlationId(eventPacket.getCorrelationId())
             .retryCount(eventPacket.getRetryCount() + 1)
             .timestamp(now)
-            .scheduledFor(now.plusSeconds(60L * eventPacket.getRetryCount() + 1))
+            .scheduledFor(scheduleFor)
             .topic(eventPacket.getTopic())
             .key(eventPacket.getKey())
             .payloadClass(eventPacket.getPayloadClass())

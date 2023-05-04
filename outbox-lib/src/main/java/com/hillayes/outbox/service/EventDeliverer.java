@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * A scheduled service to read pending events from the event outbox table, at periodic
  * intervals, and send them to the message broker.
- * It also listens for events that have failed (raised events during their processing)
+ * It also listens for events that have failed (raised errors during their processing)
  * and re-submit them.
  */
 @ApplicationScoped
@@ -37,6 +37,9 @@ public class EventDeliverer {
      */
     private static final AtomicBoolean MUTEX = new AtomicBoolean();
 
+    /**
+     * Ensures that the producer is closed when the application is stopped.
+     */
     @PreDestroy
     public void onStop() {
         log.info("Shutting down EventDeliverer - started");
