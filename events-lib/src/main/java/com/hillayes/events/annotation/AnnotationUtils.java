@@ -3,18 +3,24 @@ package com.hillayes.events.annotation;
 import com.hillayes.events.domain.Topic;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class AnnotationUtils {
     public static Collection<Topic> getTopics(Object instance) {
-        return getRepeatedAnnotations(instance.getClass(), TopicConsumer.class, new HashSet<>())
+        Set<Topic> result = getRepeatedAnnotations(instance.getClass(), TopicConsumer.class, new HashSet<>())
                 .stream()
                 .map(TopicConsumer::value)
                 .collect(Collectors.toSet());
+
+        getRepeatedAnnotations(instance.getClass(), TopicsConsumed.class, new HashSet<>())
+                .stream()
+                .map(TopicsConsumed::value)
+                .flatMap(Arrays::stream)
+                .map(TopicConsumer::value)
+                .forEach(result::add);
+
+        return result;
     }
 
     public static Optional<String> getConsumerGroup(Object instance) {
