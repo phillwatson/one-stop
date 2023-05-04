@@ -10,7 +10,7 @@ import java.lang.annotation.*;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(ConsumerTopics.class)
+@Repeatable(TopicsConsumed.class)
 public @interface TopicConsumer {
     Topic value();
 }
