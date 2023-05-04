@@ -21,7 +21,8 @@ public class ConsumerErrorHandler {
     public void handle(ConsumerRecord<String, EventPacket> record, Throwable error) {
         EventPacket eventPacket = record.value();
 
-        Topic failureTopic = (eventPacket.getRetryCount() < 3)
+        int retryCount = eventPacket.getRetryCount();
+        Topic failureTopic = (retryCount < 3)
             ? Topic.RETRY_TOPIC
             : Topic.HOSPITAL_TOPIC;
 
@@ -39,7 +40,7 @@ public class ConsumerErrorHandler {
 
         if (failureTopic == Topic.RETRY_TOPIC) {
             // calculate a time to retry the event
-            Instant scheduleFor = Instant.now().plusSeconds(60L * eventPacket.getRetryCount() + 1);
+            Instant scheduleFor = Instant.now().plusSeconds(20L * (retryCount + 1));
             retryRecord.headers()
                 .add(SCHEDULE_HEADER, scheduleFor.toString().getBytes(StandardCharsets.UTF_8));
         }
