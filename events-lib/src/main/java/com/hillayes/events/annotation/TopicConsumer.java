@@ -11,6 +11,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(ConsumerTopics.class)
-public @interface ConsumerTopic {
+public @interface TopicConsumer {
     Topic value();
 }

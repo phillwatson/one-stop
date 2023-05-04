@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConsumerTopics {
-    ConsumerTopic[] value();
+    TopicConsumer[] value();
 }

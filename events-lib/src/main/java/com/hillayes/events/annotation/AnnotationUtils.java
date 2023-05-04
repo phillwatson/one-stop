@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 
 public final class AnnotationUtils {
     public static Collection<Topic> getTopics(Object instance) {
-        return getRepeatedAnnotations(instance.getClass(), ConsumerTopic.class, new HashSet<>())
+        return getRepeatedAnnotations(instance.getClass(), TopicConsumer.class, new HashSet<>())
                 .stream()
-                .map(ConsumerTopic::value)
+                .map(TopicConsumer::value)
                 .collect(Collectors.toSet());
     }
 

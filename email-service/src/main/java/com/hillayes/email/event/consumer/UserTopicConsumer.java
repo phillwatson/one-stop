@@ -4,54 +4,50 @@ import com.hillayes.email.EmailConfiguration;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.service.SendEmailService;
 import com.hillayes.email.service.UserService;
+import com.hillayes.events.annotation.TopicConsumer;
+import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
+import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.*;
-import com.hillayes.executors.correlation.Correlation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 import sendinblue.ApiException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 @ApplicationScoped
+@TopicConsumer(Topic.USER)
 @RequiredArgsConstructor
 @Slf4j
-public class UserTopicConsumer {
+public class UserTopicConsumer implements EventConsumer {
     private final UserService userService;
     private final SendEmailService sendEmailService;
     private final EmailConfiguration emailConfiguration;
     
-    @Incoming("user")
     @Transactional
     public void consume(EventPacket eventPacket) throws ApiException {
-        Correlation.setCorrelationId(eventPacket.getCorrelationId());
-        try {
-            String payloadClass = eventPacket.getPayloadClass();
-            log.info("Received user event [payloadClass: {}]", payloadClass);
+        String payloadClass = eventPacket.getPayloadClass();
+        log.info("Received user event [payloadClass: {}]", payloadClass);
 
-            if (UserCreated.class.getName().equals(payloadClass)) {
-                processUserCreated(eventPacket.getPayloadContent());
-            }
+        if (UserCreated.class.getName().equals(payloadClass)) {
+            processUserCreated(eventPacket.getPayloadContent());
+        }
 
-            else if (UserDeclined.class.getName().equals(payloadClass)) {
-                processUserDeclined(eventPacket.getPayloadContent());
-            }
+        else if (UserDeclined.class.getName().equals(payloadClass)) {
+            processUserDeclined(eventPacket.getPayloadContent());
+        }
 
-            else if (UserOnboarded.class.getName().equals(payloadClass)) {
-                processUserOnboarded(eventPacket.getPayloadContent());
-            }
+        else if (UserOnboarded.class.getName().equals(payloadClass)) {
+            processUserOnboarded(eventPacket.getPayloadContent());
+        }
 
-            else if (UserUpdated.class.getName().equals(payloadClass)) {
-                processUserUpdated(eventPacket.getPayloadContent());
-            }
+        else if (UserUpdated.class.getName().equals(payloadClass)) {
+            processUserUpdated(eventPacket.getPayloadContent());
+        }
 
-            else if (UserDeleted.class.getName().equals(payloadClass)) {
-                processUserDeleted(eventPacket.getPayloadContent());
-            }
-        } finally {
-            Correlation.setCorrelationId(null);
+        else if (UserDeleted.class.getName().equals(payloadClass)) {
+            processUserDeleted(eventPacket.getPayloadContent());
         }
     }
 

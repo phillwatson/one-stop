@@ -1,7 +1,7 @@
 package com.hillayes.outbox.service;
 
 import com.hillayes.events.annotation.ConsumerGroup;
-import com.hillayes.events.annotation.ConsumerTopic;
+import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
@@ -26,7 +26,7 @@ import static com.hillayes.events.consumer.HeadersUtils.*;
  * to process a given failed event.
  */
 @ApplicationScoped
-@ConsumerTopic(Topic.RETRY_TOPIC)
+@TopicConsumer(Topic.RETRY_TOPIC)
 @ConsumerGroup("retry-topic-group")
 @RequiredArgsConstructor
 @Slf4j
