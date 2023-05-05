@@ -99,7 +99,7 @@ public class EventDeliverer {
                 eventRepository.delete(record.entity);
             } catch (ExecutionException e) {
                 EventEntity entity = record.entity;
-                log.error("Event delivery failed [id: {}, topic: {}, payload: {}]",
+                log.error("Event delivery failed will be retried [id: {}, topic: {}, payload: {}]",
                         entity.getId(), entity.getTopic(), entity.getPayloadClass(), e.getCause());
                 throw e;
             }

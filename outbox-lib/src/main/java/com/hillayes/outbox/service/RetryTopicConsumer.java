@@ -14,6 +14,7 @@ import org.apache.kafka.common.header.Headers;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.Instant;
 
 import static com.hillayes.events.consumer.HeadersUtils.*;
@@ -31,6 +32,8 @@ import static com.hillayes.events.consumer.HeadersUtils.*;
 @RequiredArgsConstructor
 @Slf4j
 public class RetryTopicConsumer implements EventConsumer {
+    public static final Duration DEFAULT_RESCHEDULE_OFFSET = Duration.ofSeconds(60);
+
     private final EventRepository eventRepository;
 
     /**
@@ -55,7 +58,7 @@ public class RetryTopicConsumer implements EventConsumer {
         // determine when to retry the event - error handler may have set a schedule-for header
         Instant scheduleFor = getHeader(headers, SCHEDULE_HEADER)
             .map(Instant::parse)
-            .orElse(Instant.now().plusSeconds(60));
+            .orElse(Instant.now().plus(DEFAULT_RESCHEDULE_OFFSET));
 
         EventEntity entity = EventEntity.forRedelivery(event, scheduleFor);
         eventRepository.persist(entity);

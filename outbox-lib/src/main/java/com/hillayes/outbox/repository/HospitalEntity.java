@@ -13,7 +13,7 @@ import java.util.UUID;
 @Table(name="message_hospital")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Builder(access  = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // called by the builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
 public class HospitalEntity {
