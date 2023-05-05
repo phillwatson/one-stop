@@ -12,14 +12,13 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 @Slf4j
 public class TopicConsumer implements Runnable {
     private static final Duration POLL_TIMEOUT = Duration.ofDays(1);
     private static final int COMMIT_FREQUENCY = 100;
 
-    private final KafkaConsumer<String, EventPacket> consumer;
+    private final KafkaConsumer<String, EventPacket> broker;
 
     private final EventConsumer eventConsumer;
 
@@ -30,18 +29,18 @@ public class TopicConsumer implements Runnable {
     Map<TopicPartition, OffsetAndMetadata> currentOffsets;
     int count;
 
-    public TopicConsumer(Properties consumerConfig,
+    public TopicConsumer(KafkaConsumer<String, EventPacket> broker,
                          Collection<Topic> topics,
                          EventConsumer eventConsumer,
                          ConsumerErrorHandler errorHandler) {
-        this.consumer = new KafkaConsumer<>(consumerConfig);
+        this.broker = broker;
         this.eventConsumer = eventConsumer;
         this.topics = topics.stream().map(Topic::topicName).toList();
         this.errorHandler = errorHandler;
     }
 
     public void stop() {
-        consumer.wakeup();
+        broker.wakeup();
     }
 
     public Collection<String> getTopics() {
@@ -51,7 +50,7 @@ public class TopicConsumer implements Runnable {
     public void run() {
         log.debug("Starting consumer [topics: {}]", topics);
         try {
-            consumer.subscribe(topics, new ConsumerRebalanceListener() {
+            broker.subscribe(topics, new ConsumerRebalanceListener() {
                 public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
                     log.debug("Partitions assigned [partitions: {}]", partitions);
                     currentOffsets = new HashMap<>();
@@ -60,13 +59,13 @@ public class TopicConsumer implements Runnable {
 
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
                     log.debug("Lost partitions in re-balance. Committing current offsets");
-                    consumer.commitSync(currentOffsets);
+                    broker.commitSync(currentOffsets);
                 }
             });
 
             while (true) {
                 log.trace("Polling for events [topics: {}]", topics);
-                ConsumerRecords<String, EventPacket> records = consumer.poll(POLL_TIMEOUT);
+                ConsumerRecords<String, EventPacket> records = broker.poll(POLL_TIMEOUT);
                 log.trace("Records polled [topics: {}, size: {}]", topics, records.count());
 
                 for (ConsumerRecord<String, EventPacket> record : records) {
@@ -101,10 +100,10 @@ public class TopicConsumer implements Runnable {
             try {
                 log.info("Closing consumer and committing offsets");
                 if (!currentOffsets.isEmpty()) {
-                    consumer.commitSync(currentOffsets);
+                    broker.commitSync(currentOffsets);
                 }
             } finally {
-                consumer.close();
+                broker.close();
                 log.info("Closed consumer and we are done");
             }
         }
@@ -123,7 +122,7 @@ public class TopicConsumer implements Runnable {
             new OffsetAndMetadata(record.offset() + 1));
 
         if (count++ % COMMIT_FREQUENCY == 0) {
-            consumer.commitAsync(currentOffsets,
+            broker.commitAsync(currentOffsets,
                 (Map<TopicPartition, OffsetAndMetadata> offsets, Exception error) -> {
                     if (error != null) {
                         log.warn("Failed to commit offsets", error);
@@ -137,6 +136,6 @@ public class TopicConsumer implements Runnable {
             new TopicPartition(record.topic(), record.partition()),
             new OffsetAndMetadata(record.offset() + 1));
 
-        consumer.commitSync(currentOffsets);
+        broker.commitSync(currentOffsets);
     }
 }

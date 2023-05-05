@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
 import com.hillayes.events.serializers.MapperFactory;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,6 +16,7 @@ import java.util.UUID;
  * A packet in which events can be transported from the sender to consumers.
  */
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventPacket {
@@ -28,6 +26,7 @@ public class EventPacket {
      * The event's unique identifier. This is suitable for testing whether the event
      * has been processed by the consumer - idempotency.
      */
+    @EqualsAndHashCode.Include
     private UUID id;
 
     /**

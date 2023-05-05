@@ -11,6 +11,7 @@ import io.quarkus.runtime.StartupEvent;
 import io.smallrye.common.annotation.Identifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -101,7 +102,7 @@ public class ConsumerFactory {
                 config.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
                 consumerGroup.ifPresent(group -> config.put(ConsumerConfig.GROUP_ID_CONFIG, group));
 
-                consumers.add(new TopicConsumer(config, topics, eventConsumer, errorHandler));
+                consumers.add(new TopicConsumer(new KafkaConsumer<>(config), topics, eventConsumer, errorHandler));
             }
         });
 
