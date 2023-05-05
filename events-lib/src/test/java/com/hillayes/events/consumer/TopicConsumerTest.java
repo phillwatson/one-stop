@@ -112,6 +112,7 @@ public class TopicConsumerTest {
             verify(eventConsumer, times(size)).consume(any(ConsumerRecord.class))
         );
 
+        // when: the consumer is stopped
         fixture.stop();
 
         // then: the consumer is woken up
