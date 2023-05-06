@@ -114,7 +114,9 @@ paths:
     put:
       tags: [ "users" ]
       summary: "Update user"
-      description: "Updates the user with the given id"
+      description: |
+        Updates the user with the given id. Used by adminstrator to update
+        a user's details.
       operationId: "updateUser"
       parameters:
         - name: "id"
@@ -148,7 +150,7 @@ paths:
     delete:
       tags: [ "users" ]
       summary: "Delete user"
-      description: "Deletes the identified user."
+      description: "Deletes the identified user. Admin only."
       operationId: "deleteUser"
       parameters:
         - name: "id"
@@ -168,27 +170,74 @@ paths:
         "500":
           description: "Internal server error"
 
-  /users/{id}/onboard:
-    put:
+  /users/onboard/register:
+    post:
       tags: [ "users" ]
-      summary: "Onboard user"
-      description: "Confirms the user has completed the onboarding process."
-      operationId: "onboardUser"
+      summary: "Register new user"
+      description: "Registers a user's email, starting the onboarding process."
+      operationId: "registerUser"
+      requestBody:
+        description: "Updated profile object"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegisterRequest"
+      responses:
+        "204":
+          description: "successful operation"
+        "409":
+          description: "Email already in use."
+        "500":
+          description: "Internal server error"
+
+  /users/onboard/acknowledge:
+    get:
+      tags: [ "users" ]
+      summary: "Acknowledge user receipt of registration email"
+      description: |
+        Confirms the user has received the registration email, verifying their email
+        address. The user will be redirected to the user confirmation page to allow a
+        username and password to be selected.
+      operationId: "acknowledgeUser"
       parameters:
-        - name: "id"
+        - name: "magicToken"
           in: "path"
-          description: "ID of user to onboard"
+          description: |
+            The magicToken emailed to the user on registration. This identifies the
+            user and verifies the email receipt. It expires after a configured duration,
+            and is revoked once used.
           required: true
           schema:
             type: string
             format: uuid
       responses:
-        "204":
-          description: "successful operation"
+        "307":
+          description: "redirected to user profile page"
         "401":
-          description: "Unauthorized"
-        "404":
-          description: "User not found"
+          description: "Token not valid or has expired"
+        "500":
+          description: "Internal server error"
+
+  /users/onboard/complete:
+    put:
+      tags: [ "users" ]
+      summary: "Completes the user's onboarding"
+      description: |
+        Sets a user's username and password, completing the onboarding process.
+      operationId: "onboardUser"
+      requestBody:
+        description: "Updated profile object"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCompleteRequest"
+      responses:
+        "204":
+          description: "Onboarding complete"
+        "401":
+          description: "Token not valid or has expired"
         "500":
           description: "Internal server error"
 
@@ -443,6 +492,41 @@ paths:
 
 components:
   schemas:
+    UserRegisterRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          description: "The email address the new user wishes to register with"
+          type: string
+          format: email
+
+    UserCompleteRequest:
+      type: object
+      required:
+        - email
+      properties:
+        username:
+          type: string
+          description: The user's selected username. Will be verified to ensure it is unique.
+          example: jane
+        password:
+          type: string
+          description: |
+            The user's new password. Must:
+              - be at least 12 characters
+              - include at least one upper-case character
+              - include at least one lower-case character
+              - include at least one alpha character
+              - include at least one numeric character
+              - include at least one non-alpha-numeric character
+          example: Simple-Banking-216
+        email:
+          description: "The email address the new user wishes to register with"
+          type: string
+          format: email
+
     UserProfileRequest:
       type: object
       required:
@@ -505,17 +589,24 @@ components:
     PasswordUpdateRequest:
       type: object
       required:
-        - currentPassword
+        - oldPassword
         - newPassword
       properties:
-        currentPassword:
+        oldPassword:
           type: string
-          description: The user's current password
-          example: password
+          description: The user's current password.
+          example: Simple-Banking-216
         newPassword:
           type: string
-          description: The user's new password
-          example: password
+          description: |
+            The user's new password. Must:
+              - be at least 12 characters
+              - include at least one upper-case character
+              - include at least one lower-case character
+              - include at least one alpha character
+              - include at least one numeric character
+              - include at least one non-alpha-numeric character
+          example: Simple-Banking-216
 
     UserUpdateRequest:
       type: object

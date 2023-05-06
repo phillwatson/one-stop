@@ -71,7 +71,7 @@ public class UserProfileResource {
         UUID id = getUserId(ctx);
         log.info("Update user password [id: {}]", id);
 
-        char[] currentPassword = request.getCurrentPassword().toCharArray();
+        char[] currentPassword = request.getOldPassword().toCharArray();
         char[] newPassword = request.getNewPassword().toCharArray();
         userService.updatePassword(id, currentPassword, newPassword)
             .orElseThrow(() -> new NotAuthorizedException("username/password"));
