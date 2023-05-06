@@ -25,7 +25,7 @@ import static com.hillayes.rail.utils.TestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ConsentTopicConsumerTest {
+public class ConsentConsumerTest {
     private UserConsentRepository userConsentRepository;
     private AccountRepository accountRepository;
     private RequisitionService requisitionService;
@@ -200,7 +200,7 @@ public class ConsentTopicConsumerTest {
             .build();
 
         // and: the event is marshalled for delivery
-        EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.CONSENT, consentGiven);
-        return eventEntity.toEntityPacket();
+        EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.CONSENT, null, consentGiven);
+        return eventEntity.toEventPacket();
     }
 }

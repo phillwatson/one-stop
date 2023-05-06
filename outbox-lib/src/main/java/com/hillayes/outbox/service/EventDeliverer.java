@@ -3,19 +3,15 @@ package com.hillayes.outbox.service;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
-import com.hillayes.outbox.sender.ProducerFactory;
 import io.quarkus.scheduler.Scheduled;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.Headers;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -26,17 +22,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * A scheduled service to read pending events from the event outbox table, at periodic
  * intervals, and send them to the message broker.
- * It also listens for events that have failed (raised events during their processing)
+ * It also listens for events that have failed (raised errors during their processing)
  * and re-submit them.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class EventDeliverer {
-    private final ProducerFactory producerFactory;
+    private final Producer<String, EventPacket> producer;
     private final EventRepository eventRepository;
 
+    /**
+     * A mutex to prevent delivery of events from multiple threads.
+     */
     private static final AtomicBoolean MUTEX = new AtomicBoolean();
+
+    /**
+     * Ensures that the producer is closed when the application is stopped.
+     */
+    @PreDestroy
+    public void onStop() {
+        log.info("Shutting down EventDeliverer - started");
+        if (producer != null) {
+            log.info("Closing producer {}", producer);
+            producer.close();
+        }
+        log.info("Shutting down EventDeliverer - complete");
+    }
 
     /**
      * A scheduled service to read pending events from the event outbox table and
@@ -44,13 +56,14 @@ public class EventDeliverer {
      */
     @Scheduled(cron = "${mensa.events.cron:0/2 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void deliverEvents() throws Exception {
-        if (!MUTEX.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            _deliverEvents();
-        } finally {
-            MUTEX.set(false);
+        // if previous delivery is still in progress, skip this run
+        if (MUTEX.compareAndSet(false, true)) {
+            try {
+                _deliverEvents();
+            } catch (Exception ignored) {
+            } finally {
+                MUTEX.set(false);
+            }
         }
     }
 
@@ -67,11 +80,10 @@ public class EventDeliverer {
         }
         log.trace("Event batch delivery started");
 
-        Producer<String, EventPacket> producer = producerFactory.getProducer();
         List<EventTuple> records = events.stream()
             .map(entity -> {
                 ProducerRecord<String, EventPacket> record =
-                    new ProducerRecord<>(entity.getTopic().topicName(), entity.toEntityPacket());
+                    new ProducerRecord<>(entity.getTopic().topicName(), entity.getKey(), entity.toEventPacket());
 
                 return new EventTuple(entity, producer.send(record));
             })
@@ -85,52 +97,16 @@ public class EventDeliverer {
 
                 // delete the entity
                 eventRepository.delete(record.entity);
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 EventEntity entity = record.entity;
-                log.error("Event delivery failed [id: {}, topic: {}, payload: {}]",
-                        entity.getId(), entity.getTopic(), entity.getPayloadClass());
+                log.error("Event delivery failed will be retried [id: {}, topic: {}, payload: {}]",
+                        entity.getId(), entity.getTopic(), entity.getPayloadClass(), e.getCause());
                 throw e;
             }
         }
         log.trace("Event delivery complete");
     }
 
-    /**
-     * Listens for events that have failed during their delivery. The event's retry-count
-     * is incremented and, if the number of retries does not exceed the max, the event is
-     * returned to the queue for delivery.
-     *
-     * @param record the record of the failed event.
-     */
-    @Incoming("retry-topic")
-    @Transactional
-    public void deadLetterTopicListener(ConsumerRecord<String, EventPacket> record) {
-        Headers headers = record.headers();
-        String reason = getHeader(headers, "dead-letter-reason");
-        String cause = getHeader(headers, "dead-letter-cause");
-
-        EventPacket event = record.value();
-        log.debug("Event failed processing [topic: {}, retryCount: {}, reason: {}, cause: {}]",
-            event.getTopic(), event.getRetryCount(), reason, cause);
-
-        if (event.getRetryCount() <= 3) {
-            log.debug("Reposting event [topic: {}, retryCount: {}, reason: {}, cause: {}]",
-                    event.getTopic(), event.getRetryCount(), reason, cause);
-
-            EventEntity entity = EventEntity.forRedelivery(event);
-            eventRepository.persist(entity);
-        } else {
-            log.error("Failed to deliver event [id: {}, topic: {}, retryCount: {}, reason: {}, cause: {}]",
-                    event.getId(), event.getTopic(), event.getRetryCount(), reason, cause);
-
-            // write the record to the event hospital table - with reason and cause
-        }
-    }
-
-    private String getHeader(Headers headers, String key) {
-        Header header = headers.lastHeader(key);
-        return (header == null) ? null:new String(header.value());
-    }
 
     @AllArgsConstructor
     private static class EventTuple {

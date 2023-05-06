@@ -23,8 +23,8 @@
             <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!-- JDBC driver dependencies -->
@@ -44,10 +44,6 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>executor-lib</artifactId>
         </dependency>
     </dependencies>
 </project>

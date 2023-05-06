@@ -1,8 +1,10 @@
 package com.hillayes.rail.event.consumer;
 
+import com.hillayes.events.annotation.TopicConsumer;
+import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
+import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.ConsentGiven;
-import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -13,7 +15,6 @@ import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.RequisitionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
@@ -21,28 +22,23 @@ import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
+@TopicConsumer(Topic.CONSENT)
 @RequiredArgsConstructor
 @Slf4j
-public class ConsentTopicConsumer {
+public class ConsentTopicConsumer implements EventConsumer {
     private final UserConsentRepository userConsentRepository;
     private final AccountRepository accountRepository;
     private final RequisitionService requisitionService;
     private final RailAccountService railAccountService;
     private final PollAccountJobbingTask pollAccountJobbingTask;
 
-    @Incoming("consent")
     @Transactional
     public void consume(EventPacket eventPacket) {
-        Correlation.setCorrelationId(eventPacket.getCorrelationId());
-        try {
-            String payloadClass = eventPacket.getPayloadClass();
-            log.debug("Received consent event [payloadClass: {}]", payloadClass);
+        String payloadClass = eventPacket.getPayloadClass();
+        log.debug("Received consent event [payloadClass: {}]", payloadClass);
 
-            if (ConsentGiven.class.getName().equals(payloadClass)) {
-                processConsentGiven(eventPacket.getPayloadContent());
-            }
-        } finally {
-            Correlation.setCorrelationId(null);
+        if (ConsentGiven.class.getName().equals(payloadClass)) {
+            processConsentGiven(eventPacket.getPayloadContent());
         }
     }
 

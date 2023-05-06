@@ -4,14 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.hillayes.events.serializers.MapperFactory;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,17 +16,17 @@ import java.util.UUID;
  * A packet in which events can be transported from the sender to consumers.
  */
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventPacket {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
 
     /**
      * The event's unique identifier. This is suitable for testing whether the event
      * has been processed by the consumer - idempotency.
      */
+    @EqualsAndHashCode.Include
     private UUID id;
 
     /**
@@ -57,6 +53,13 @@ public class EventPacket {
     private Topic topic;
 
     /**
+     * The optional key of the event. Events with the same key are delivered to the same partition,
+     * ensuring they are delivered in the order submitted - unless they are re-delivered due to
+     * errors whilst processing.
+     */
+    private String key;
+
+    /**
      * The class of the payload data. Allows the payload to be deserialized. It can also be used to filter
      * events of different types issued on the same topic.
      */
@@ -71,13 +74,15 @@ public class EventPacket {
     @JsonIgnore
     private transient Object payloadContent;
 
-    public EventPacket(UUID id, Topic topic, String correlationId, int retryCount, Instant timestamp,
-                       String payloadClass, String payload) {
+    public EventPacket(UUID id, Topic topic, String correlationId,
+                       int retryCount, Instant timestamp,
+                       String key, String payloadClass, String payload) {
         this.id = id;
         this.topic = topic;
         this.correlationId = correlationId;
         this.retryCount = retryCount;
         this.timestamp = timestamp;
+        this.key = key;
         this.payloadClass = payloadClass;
         this.payload = payload;
     }
@@ -89,7 +94,7 @@ public class EventPacket {
      */
     @JsonIgnore
     public <T> T getPayloadContent() {
-        if (payloadContent == null) {
+        if ((payloadContent == null) && (payload != null)) {
             try {
                 payloadContent = MAPPER.readValue(payload, Class.forName(payloadClass));
             } catch (JsonProcessingException | ClassNotFoundException e) {

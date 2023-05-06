@@ -22,8 +22,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-kafka-client</artifactId>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -39,7 +39,6 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
