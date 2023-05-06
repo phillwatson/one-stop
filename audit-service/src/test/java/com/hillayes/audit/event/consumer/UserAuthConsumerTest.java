@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @QuarkusTest
-public class UserAuthTopicConsumerTest {
+public class UserAuthConsumerTest {
     private ObjectMapper objectMapper = MapperFactory.defaultMapper();
 
     @Inject

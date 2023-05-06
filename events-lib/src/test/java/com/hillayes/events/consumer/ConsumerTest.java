@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public class TopicConsumerTest {
+public class ConsumerTest {
     KafkaConsumer<String, EventPacket> broker;
     EventConsumer eventConsumer;
     ConsumerErrorHandler errorHandler;
@@ -43,7 +43,7 @@ public class TopicConsumerTest {
     @Test
     public void testGetTopics() {
         // given: a consumer with two topics
-        TopicConsumer fixture = new TopicConsumer(broker, List.of(Topic.USER_AUTH, Topic.USER), eventConsumer, errorHandler);
+        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH, Topic.USER), eventConsumer, errorHandler);
 
         // when: the consumer's topics are retrieved
         Collection<String> topics = fixture.getTopics();
@@ -57,7 +57,7 @@ public class TopicConsumerTest {
     @Test
     public void testRun() {
         // given: a consumer
-        TopicConsumer fixture = new TopicConsumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // when: the consumer is run
         new Thread(fixture).start();
@@ -72,7 +72,7 @@ public class TopicConsumerTest {
     @Test
     public void testStop() {
         // given: a consumer
-        TopicConsumer fixture = new TopicConsumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: the consumer is run
         new Thread(fixture).start();
@@ -93,7 +93,7 @@ public class TopicConsumerTest {
     @Test
     public void testConsumerRecords() {
         // given: a consumer
-        TopicConsumer fixture = new TopicConsumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: the consumer is run
         new Thread(fixture).start();
@@ -131,7 +131,7 @@ public class TopicConsumerTest {
     @Test
     public void testErrorHandler() throws Exception {
         // given: a consumer
-        TopicConsumer fixture = new TopicConsumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: a faulty event consumer
         doThrow(new RuntimeException("test")).when(eventConsumer).consume(any(ConsumerRecord.class));
@@ -161,7 +161,7 @@ public class TopicConsumerTest {
     }
 
     private int postEvents(List<ConsumerRecord<String, EventPacket>> eventList) {
-        events = new ConsumerRecords(Map.of(
+        events = new ConsumerRecords<>(Map.of(
             new TopicPartition(Topic.USER_AUTH.topicName(), 0), eventList
         ));
         return eventList.size();

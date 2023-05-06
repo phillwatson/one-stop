@@ -1,6 +1,5 @@
 package com.hillayes.outbox.repository;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import lombok.*;

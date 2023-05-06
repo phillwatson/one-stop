@@ -29,10 +29,10 @@ import java.util.concurrent.ExecutorService;
 //@UnlessBuildProfile("test")
 @Slf4j
 public class ConsumerFactory {
-    private final Set<TopicConsumer> consumers = new HashSet<>();
+    private final Set<Consumer> consumers = new HashSet<>();
 
     public void startConsumers(@Observes StartupEvent ev,
-                               Set<TopicConsumer> consumers) {
+                               Set<Consumer> consumers) {
         if (consumers.isEmpty()) {
             log.warn("No consumers registered");
             return;
@@ -44,18 +44,18 @@ public class ConsumerFactory {
             .numberOfThreads(consumers.size())
             .build());
 
-        consumers.forEach(topicConsumer -> {
-            log.debug("Starting consumer [topics: {}]", topicConsumer.getTopics());
-            executorService.submit(topicConsumer);
+        consumers.forEach(consumer -> {
+            log.debug("Starting consumer [topics: {}]", consumer.getTopics());
+            executorService.submit(consumer);
         });
     }
 
     @PreDestroy
     public void shutdownConsumers() {
         log.info("Shutting down consumers");
-        consumers.forEach(topicConsumer -> {
-            log.debug("Shutting down consumer [topics: {}]", topicConsumer.getTopics());
-            topicConsumer.stop();
+        consumers.forEach(consumer -> {
+            log.debug("Shutting down consumer [topics: {}]", consumer.getTopics());
+            consumer.stop();
         });
     }
 
@@ -86,9 +86,9 @@ public class ConsumerFactory {
 
     @Produces
     @ApplicationScoped
-    public Set<TopicConsumer> consumers(@Any Instance<EventConsumer> instances,
-                                        @Identifier("event-consumer-config") Properties consumerConfig,
-                                        ConsumerErrorHandler errorHandler) {
+    public Set<Consumer> consumers(@Any Instance<EventConsumer> instances,
+                                   @Identifier("event-consumer-config") Properties consumerConfig,
+                                   ConsumerErrorHandler errorHandler) {
         log.info("Registering consumers");
         instances.stream().forEach(eventConsumer -> {
             Collection<Topic> topics = AnnotationUtils.getTopics(eventConsumer);
@@ -102,7 +102,7 @@ public class ConsumerFactory {
                 config.put(ConsumerConfig.CLIENT_ID_CONFIG, eventConsumer.getClass().getSimpleName());
                 consumerGroup.ifPresent(group -> config.put(ConsumerConfig.GROUP_ID_CONFIG, group));
 
-                consumers.add(new TopicConsumer(new KafkaConsumer<>(config), topics, eventConsumer, errorHandler));
+                consumers.add(new Consumer(new KafkaConsumer<>(config), topics, eventConsumer, errorHandler));
             }
         });
 

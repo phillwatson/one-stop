@@ -14,14 +14,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class TopicConsumer implements Runnable {
+public class Consumer implements Runnable {
     private static final Duration POLL_TIMEOUT = Duration.ofDays(1);
     private static final int COMMIT_FREQUENCY = 100;
 
     private final KafkaConsumer<String, EventPacket> broker;
 
+    /**
+     * The event consumer to which received events are passed for processing.
+     */
     private final EventConsumer eventConsumer;
 
+    /**
+     * The topics to which this consumer is subscribed.
+     */
     private final Collection<String> topics;
 
     private final ConsumerErrorHandler errorHandler;
@@ -29,10 +35,10 @@ public class TopicConsumer implements Runnable {
     Map<TopicPartition, OffsetAndMetadata> currentOffsets;
     int count;
 
-    public TopicConsumer(KafkaConsumer<String, EventPacket> broker,
-                         Collection<Topic> topics,
-                         EventConsumer eventConsumer,
-                         ConsumerErrorHandler errorHandler) {
+    public Consumer(KafkaConsumer<String, EventPacket> broker,
+                    Collection<Topic> topics,
+                    EventConsumer eventConsumer,
+                    ConsumerErrorHandler errorHandler) {
         this.broker = broker;
         this.eventConsumer = eventConsumer;
         this.topics = topics.stream().map(Topic::topicName).toList();

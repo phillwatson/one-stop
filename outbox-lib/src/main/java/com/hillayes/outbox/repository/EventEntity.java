@@ -1,6 +1,5 @@
 package com.hillayes.outbox.repository;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.executors.correlation.Correlation;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // called by the builder
 @Builder(access = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventEntity {
     /**
      * A factory method to create a new event entity for its initial delivery.

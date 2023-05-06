@@ -25,7 +25,7 @@ import static com.hillayes.rail.utils.TestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ConsentTopicConsumerTest {
+public class ConsentConsumerTest {
     private UserConsentRepository userConsentRepository;
     private AccountRepository accountRepository;
     private RequisitionService requisitionService;

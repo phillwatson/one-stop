@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class HospitalTopicConsumerTest {
+public class HospitalConsumerTest {
     private HospitalRepository hospitalRepository = mock(HospitalRepository.class);
 
     private HospitalTopicConsumer fixture = new HospitalTopicConsumer(hospitalRepository);
