@@ -502,31 +502,6 @@ components:
           type: string
           format: email
 
-    UserCompleteRequest:
-      type: object
-      required:
-        - email
-      properties:
-        username:
-          type: string
-          description: The user's selected username. Will be verified to ensure it is unique.
-          example: jane
-        password:
-          type: string
-          description: |
-            The user's new password. Must:
-              - be at least 12 characters
-              - include at least one upper-case character
-              - include at least one lower-case character
-              - include at least one alpha character
-              - include at least one numeric character
-              - include at least one non-alpha-numeric character
-          example: Simple-Banking-216
-        email:
-          description: "The email address the new user wishes to register with"
-          type: string
-          format: email
-
     UserProfileRequest:
       type: object
       required:
@@ -536,7 +511,7 @@ components:
       properties:
         username:
           type: string
-          description: The user's username
+          description: The user's selected username. Will be verified to ensure it is unique.
           example: jdoe
         title:
           type: string
@@ -565,6 +540,28 @@ components:
           type: string
           description: The user's phone number
           example: 0123456789
+
+    UserCompleteRequest:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileRequest"
+        - type: object
+          required:
+            - username
+            - password
+            - givenName
+            - email
+          properties:
+            password:
+              type: string
+              description: |
+                The user's new password. Must:
+                  - be at least 12 characters
+                  - include at least one upper-case character
+                  - include at least one lower-case character
+                  - include at least one alpha character
+                  - include at least one numeric character
+                  - include at least one non-alpha-numeric character
+              example: Simple-Banking-216
 
     UserProfileResponse:
       allOf:
