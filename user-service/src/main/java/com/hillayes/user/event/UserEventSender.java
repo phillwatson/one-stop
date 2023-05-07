@@ -6,6 +6,7 @@ import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
+import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,23 @@ import java.time.Instant;
 public class UserEventSender {
     private final EventSender eventSender;
 
+    public void sendUserRegistered(MagicToken token) {
+        log.debug("Sending UserRegistered event [email: {}]", token.getEmail());
+        eventSender.send(Topic.USER, UserRegistered.builder()
+            .email(token.getEmail())
+            .token(token.getToken())
+            .expires(token.getExpires())
+            .build());
+    }
+
+    public void sendUserAcknowledged(User user) {
+        log.debug("Sending UserAcknowledged event [userId: {}]", user.getId());
+        eventSender.send(Topic.USER, UserAcknowledged.builder()
+            .userId(user.getId())
+            .email(user.getEmail())
+            .build());
+    }
+
     public void sendUserCreated(User user) {
         log.debug("Sending UserCreated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserCreated.builder()
@@ -31,22 +49,6 @@ public class UserEventSender {
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
             .dateCreated(user.getDateCreated())
-            .build());
-    }
-
-    public void sendUserDeclined(User user) {
-        log.debug("Sending UserDeclined event [userId: {}]", user.getId());
-        eventSender.send(Topic.USER, UserDeclined.builder()
-            .userId(user.getId())
-            .dateDeclined(Instant.now())
-            .build());
-    }
-
-    public void sendUserOnboarded(User user) {
-        log.debug("Sending UserOnboarded event [userId: {}]", user.getId());
-        eventSender.send(Topic.USER, UserOnboarded.builder()
-            .userId(user.getId())
-            .dateOnboarded(user.getDateOnboarded())
             .build());
     }
 

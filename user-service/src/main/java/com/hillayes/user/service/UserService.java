@@ -2,22 +2,26 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.user.domain.DeletedUser;
+import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
-import com.hillayes.user.errors.UserAlreadyOnboardedException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
+import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
-import org.springframework.data.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
@@ -26,52 +30,85 @@ import java.util.*;
 public class UserService {
     private final UserRepository userRepository;
     private final DeletedUserRepository deletedUserRepository;
+    private final MagicTokenRepository magicTokenRepository;
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
 
-    public User createUser(String username, char[] password, User user) {
-        log.info("Creating user [username: {}]", username);
+    public void registerUser(String email) {
+        log.info("Registering user [email: {}]", email);
 
-        // includes deleted users in duplicate username comparison
-        userRepository.findByUsername(username)
-            .ifPresent(existing -> {
-                throw new DuplicateUsernameException(username);
-            });
-
-        // excludes deleted users in duplicate email comparison
-        String email = user.getEmail();
+        // ensure email is unique
         userRepository.findByEmail(email)
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
             });
 
-        user = userRepository.save(user.toBuilder()
-            .username(username)
-            .passwordHash(passwordCrypto.getHash(password))
-            .roles(Set.of("user"))
+        MagicToken token = magicTokenRepository.save(MagicToken.builder()
+            .email(email)
+            .token(UUID.randomUUID().toString())
+            .expires(Instant.now().plusSeconds(1000 * 60 * 5))
             .build());
 
-        userEventSender.sendUserCreated(user);
-
-        log.debug("Created user [username: {}, id: {}]", user.getUsername(), user.getId());
-        return user;
+        userEventSender.sendUserRegistered(token);
     }
 
-    public Optional<User> onboardUser(UUID id) {
-        log.info("Onboard user [userId: {}]", id);
+    public Optional<User> acknowledgeToken(String token) {
+        log.info("User has acknowledged onboarding token [token: {}]", token);
+
+        return magicTokenRepository.findByToken(token)
+            .filter(t -> t.getExpires().isAfter(Instant.now()))
+            .map(t -> {
+                User newUser = User.builder()
+                    .username(t.getEmail())
+                    .email(t.getEmail())
+                    .givenName(t.getEmail())
+                    .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
+                    .roles(Set.of("user"))
+                    .build();
+
+                newUser = userRepository.save(newUser);
+                magicTokenRepository.delete(t);
+
+                userEventSender.sendUserAcknowledged(newUser);
+                log.debug("Created user [username: {}, id: {}]", newUser.getUsername(), newUser.getId());
+                return newUser;
+            });
+    }
+
+    public Optional<User> completeOnboarding(UUID id, User modifiedUser, char[] password) {
+        log.info("User has completed onboarding [userId: {}]", id);
+
+        // ensure username is unique
+        userRepository.findByUsername(modifiedUser.getUsername())
+            .filter(existing -> !existing.getId().equals(id))
+            .ifPresent(existing -> {
+                throw new DuplicateUsernameException(existing.getUsername());
+            });
+
+        // ensure email is unique
+        userRepository.findByEmail(modifiedUser.getEmail())
+            .filter(existing -> !existing.getId().equals(id))
+            .ifPresent(existing -> {
+                throw new DuplicateEmailAddressException(existing.getEmail());
+            });
 
         return userRepository.findById(id)
             .map(user -> {
-                if (user.isOnboarded()) {
-                    throw new UserAlreadyOnboardedException(user);
-                }
+                user = userRepository.save(user.toBuilder()
+                    .username(modifiedUser.getUsername())
+                    .email(modifiedUser.getEmail())
+                    .title(modifiedUser.getTitle())
+                    .givenName(modifiedUser.getGivenName())
+                    .familyName(modifiedUser.getFamilyName())
+                    .preferredName(modifiedUser.getPreferredName())
+                    .phoneNumber(modifiedUser.getPhoneNumber())
+                    .passwordHash(passwordCrypto.getHash(password))
+                    .dateOnboarded(Instant.now())
+                    .build());
 
-                user.setDateOnboarded(Instant.now());
-                User result = userRepository.save(user);
-
-                userEventSender.sendUserOnboarded(result);
-                log.debug("Onboarded user [username: {}, userId: {}]", result.getUsername(), result.getId());
-                return result;
+                userEventSender.sendUserCreated(user);
+                log.debug("User has completed onboarding [id: {}, username: {}]", user.getId(), user.getUsername());
+                return user;
             });
     }
 
@@ -115,15 +152,31 @@ public class UserService {
     public Optional<User> updateUser(UUID id, User modifiedUser) {
         log.info("Updating user [userId: {}]", id);
 
+        // ensure username is unique
+        userRepository.findByUsername(modifiedUser.getUsername())
+            .filter(existing -> !existing.getId().equals(id))
+            .ifPresent(existing -> {
+                throw new DuplicateUsernameException(existing.getUsername());
+            });
+
+        // ensure email is unique
+        userRepository.findByEmail(modifiedUser.getEmail())
+            .filter(existing -> !existing.getId().equals(id))
+            .ifPresent(existing -> {
+                throw new DuplicateEmailAddressException(existing.getEmail());
+            });
+
         return userRepository.findById(id)
             .map(user -> {
-                user.setEmail(modifiedUser.getEmail());
-                user.setTitle(modifiedUser.getTitle());
-                user.setGivenName(modifiedUser.getGivenName());
-                user.setFamilyName(modifiedUser.getFamilyName());
-                user.setPreferredName(modifiedUser.getPreferredName());
-                user.setPhoneNumber(modifiedUser.getPhoneNumber());
-                user = userRepository.save(user);
+                user = userRepository.save(user.toBuilder()
+                    .username(modifiedUser.getUsername())
+                    .email(modifiedUser.getEmail())
+                    .title(modifiedUser.getTitle())
+                    .givenName(modifiedUser.getGivenName())
+                    .familyName(modifiedUser.getFamilyName())
+                    .preferredName(modifiedUser.getPreferredName())
+                    .phoneNumber(modifiedUser.getPhoneNumber())
+                    .build());
 
                 userEventSender.sendUserUpdated(user);
                 log.debug("Updated user [username: {}, userId: {}]", user.getUsername(), user.getId());

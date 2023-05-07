@@ -11,8 +11,7 @@ import java.util.UUID;
 @Singleton
 public interface UserRepository extends JpaRepository<User, UUID> {
     /**
-     * Returns the user with the given username. Usernames are unique, even across
-     * deleted users.
+     * Returns the user with the given username. Usernames are unique.
      *
      * @param username the username to search for.
      * @return the user record found with the given username, if any.

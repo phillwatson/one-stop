@@ -24,16 +24,8 @@ public class UserTopicConsumer implements EventConsumer {
             processUserCreated(eventPacket.getPayloadContent());
         }
 
-        else if (UserDeclined.class.getName().equals(payloadClass)) {
-            processUserDeclined(eventPacket.getPayloadContent());
-        }
-
         else if (UserDeleted.class.getName().equals(payloadClass)) {
             processUserDeleted(eventPacket.getPayloadContent());
-        }
-
-        else if (UserOnboarded.class.getName().equals(payloadClass)) {
-            processUserOnboarded(eventPacket.getPayloadContent());
         }
 
         else if (UserUpdated.class.getName().equals(payloadClass)) {
@@ -45,16 +37,8 @@ public class UserTopicConsumer implements EventConsumer {
         log.info("User created [username: {}]", event.getUsername());
     }
 
-    private void processUserDeclined(UserDeclined event) {
-        log.info("User declined [userId: {}]", event.getUserId());
-    }
-
     private void processUserDeleted(UserDeleted event) {
         log.info("User deleted [userId: {}]", event.getUserId());
-    }
-
-    private void processUserOnboarded(UserOnboarded event) {
-        log.info("User onboarded [userId: {}]", event.getUserId());
     }
 
     private void processUserUpdated(UserUpdated event) {

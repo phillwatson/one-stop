@@ -1,8 +1,5 @@
 package com.hillayes.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,7 +16,6 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -31,7 +27,6 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -68,7 +63,6 @@ public class User {
     private Instant dateOnboarded;
 
     @Transient
-    @JsonIgnore
     public boolean isOnboarded() {
         return dateOnboarded != null;
     }
@@ -78,7 +72,6 @@ public class User {
     private Instant dateBlocked;
 
     @Transient
-    @JsonIgnore
     public boolean isBlocked() {
         return dateBlocked != null;
     }
@@ -89,11 +82,9 @@ public class User {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<OidcIdentity> oidcIdentities = new HashSet<>();
 
     @Version
-    @JsonIgnore
     private Integer version;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -101,17 +92,14 @@ public class User {
     @Column(name="role")
     private Set<String> roles = new HashSet<>();
 
-    @JsonIgnore
     public String getPasswordHash() {
         return passwordHash;
     }
 
-    @JsonProperty
     protected void setPasswordHash(String aValue) {
         passwordHash = aValue;
     }
 
-    @JsonIgnore
     @Transient
     public OidcIdentity addOidcIdentity(String issuer, String subject) {
         OidcIdentity result = OidcIdentity.builder()
@@ -123,7 +111,6 @@ public class User {
         return result;
     }
 
-    @JsonIgnore
     @Transient
     public Optional<OidcIdentity> getOidcIdentity(String issuer) {
         return oidcIdentities.stream()

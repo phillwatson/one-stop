@@ -1,7 +1,5 @@
 package com.hillayes.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,7 +13,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeletedUser {
     @Id
     @ToString.Include
@@ -26,7 +23,6 @@ public class DeletedUser {
     @Column(nullable = false)
     private String username;
 
-    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -55,7 +51,6 @@ public class DeletedUser {
     private Instant dateOnboarded;
 
     @Transient
-    @JsonIgnore
     public boolean isOnboarded() {
         return dateOnboarded != null;
     }
@@ -67,7 +62,6 @@ public class DeletedUser {
     private Instant dateBlocked;
 
     @Transient
-    @JsonIgnore
     public boolean isBlocked() {
         return dateBlocked != null;
     }
@@ -76,10 +70,8 @@ public class DeletedUser {
     private Instant blockedReason;
 
     @Version
-    @JsonIgnore
     private Integer version;
 
-    @JsonIgnore
     public String getPasswordHash() {
         return passwordHash;
     }

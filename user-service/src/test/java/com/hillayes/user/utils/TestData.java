@@ -20,6 +20,8 @@ public class TestData {
     public static User mockUser() {
         return User.builder()
             .username(randomAlphanumeric(20))
+            .preferredName(randomAlphanumeric(20))
+            .title(randomAlphanumeric(10))
             .givenName(randomAlphanumeric(20))
             .familyName(randomAlphanumeric(20))
             .email(randomAlphanumeric(20))

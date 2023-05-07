@@ -17,7 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
 import java.util.UUID;
 
 @Path("/api/v1/users")
@@ -73,42 +72,17 @@ public class UserAdminResource {
             .orElseThrow(() -> new NotFoundException("user", id));
     }
 
-    @POST
-    public Response createUser(@Context UriInfo uriInfo,
-                               UserUpdateRequest userRequest) {
-        log.info("Creating user [username: {}]", userRequest.getUsername());
-        User user = userService.createUser(userRequest.getUsername(), "password".toCharArray(), marshal(userRequest));
-
-        log.debug("Created user [username: {}, id: {}]", user.getUsername(), user.getId());
-        return Response
-            .created(URI.create(uriInfo.getPath() + "/" + user.getId()))
-            .entity(marshal(user))
-            .build();
-    }
-
-    @PUT
-    @Path("/{id}/onboard")
-    public Response onboardUser(@PathParam("id") UUID id) {
-        log.info("Onboarding user [id: {}]", id);
-        return userService.onboardUser(id)
-            .map(user -> {
-                log.debug("Onboarded user [username: {}, id: {}]", user.getUsername(), user.getId());
-                return Response.noContent().build();
-            })
-            .orElseThrow(() -> new NotFoundException("user", id));
-    }
-
     @PUT
     @Path("/{id}")
     public Response updateUser(@PathParam("id") UUID id,
-                               UserUpdateRequest userUpdateRequest) {
+                               UserUpdateRequest request) {
         log.info("Update user [id: {}]", id);
-        return userService.updateUser(id, marshal(userUpdateRequest))
+        return userService.updateUser(id, marshal(request))
             .map(user -> {
                 log.debug("Updated user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return marshal(user);
             })
-            .map(user -> Response.noContent().build())
+            .map(user -> Response.ok(user).build())
             .orElseThrow(() -> new NotFoundException("user", id));
     }
 
@@ -124,15 +98,15 @@ public class UserAdminResource {
             .orElseThrow(() -> new NotFoundException("user", id));
     }
 
-    private User marshal(UserUpdateRequest userRequest) {
+    private User marshal(UserUpdateRequest request) {
         return User.builder()
-            .username(userRequest.getUsername())
-            .preferredName(userRequest.getPreferredName())
-            .title(userRequest.getTitle())
-            .givenName(userRequest.getGivenName())
-            .familyName(userRequest.getFamilyName())
-            .email(userRequest.getEmail())
-            .phoneNumber(userRequest.getPhone())
+            .username(request.getUsername())
+            .preferredName(request.getPreferredName())
+            .title(request.getTitle())
+            .givenName(request.getGivenName())
+            .familyName(request.getFamilyName())
+            .email(request.getEmail())
+            .phoneNumber(request.getPhone())
             .build();
     }
 

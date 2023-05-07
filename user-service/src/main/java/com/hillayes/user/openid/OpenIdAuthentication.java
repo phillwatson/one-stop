@@ -14,6 +14,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -101,7 +102,7 @@ public class OpenIdAuthentication {
                         }
                         return u;
                     })
-                    // if deleted OR not found - create a new User
+                    // if not found - create a new User
                     .orElseGet(() -> {
                         String name = idToken.getClaimValueAsString("name");
                         String givenName = idToken.getClaimValueAsString("given_name");
@@ -113,6 +114,7 @@ public class OpenIdAuthentication {
                                 .givenName(givenName == null ? name == null ? email : name : givenName)
                                 .familyName(familyName)
                                 .preferredName(givenName == null ? name == null ? email : name : givenName)
+                                .dateOnboarded(Instant.now())
                                 .roles(Set.of("user"))
                                 .build();
                         }

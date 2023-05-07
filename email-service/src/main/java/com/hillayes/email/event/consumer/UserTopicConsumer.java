@@ -34,14 +34,6 @@ public class UserTopicConsumer implements EventConsumer {
             processUserCreated(eventPacket.getPayloadContent());
         }
 
-        else if (UserDeclined.class.getName().equals(payloadClass)) {
-            processUserDeclined(eventPacket.getPayloadContent());
-        }
-
-        else if (UserOnboarded.class.getName().equals(payloadClass)) {
-            processUserOnboarded(eventPacket.getPayloadContent());
-        }
-
         else if (UserUpdated.class.getName().equals(payloadClass)) {
             processUserUpdated(eventPacket.getPayloadContent());
         }
@@ -64,14 +56,6 @@ public class UserTopicConsumer implements EventConsumer {
         user = userService.createUser(user);
 
         sendEmailService.sendEmail(emailConfiguration.templates().get("user-created"), user);
-    }
-
-    private void processUserOnboarded(UserOnboarded event) {
-        userService.onboardUser(event.getUserId());
-    }
-
-    private void processUserDeclined(UserDeclined event) {
-        userService.deleteUser(event.getUserId());
     }
 
     private void processUserDeleted(UserDeleted event) {

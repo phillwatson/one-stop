@@ -69,9 +69,9 @@ public class AuthService {
 
     @Transactional
     public User oauthLogin(AuthProvider authProvider,
-                               String code,
-                               String state,
-                               String scope) {
+                           String code,
+                           String state,
+                           String scope) {
         try {
             log.info("OAuth login [provider: {}, code: {}, state: {}, scope: {}]", authProvider, code, state, scope);
             User user = openIdAuth.oauthLogin(authProvider, code);
@@ -81,7 +81,6 @@ public class AuthService {
 
             if (newUser) {
                 userEventSender.sendUserCreated(user);
-                userEventSender.sendUserOnboarded(user);
             }
 
             userEventSender.sendUserLogin(user);

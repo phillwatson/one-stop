@@ -1,6 +1,5 @@
 package com.hillayes.user.repository;
 
-import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.hillayes.user.utils.TestData.mockUser;
 import static com.hillayes.user.utils.TestData.mockUsers;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestTransaction
 public class UserRepositoryTest {
     @Inject
-    UserRepository userRepository;
+    UserRepository fixture;
 
     @Test
     public void testFindByIssuerAndSubject() {
@@ -31,12 +29,12 @@ public class UserRepositoryTest {
                 return user;
             })
             .toList();
-        users = userRepository.saveAll(users);
+        users = fixture.saveAll(users);
 
         users.forEach(user -> {
             user.getOidcIdentities().forEach(oidc -> {
                 // when: we search for each user by their issuer and subject
-                Optional<User> found = userRepository.findByIssuerAndSubject(oidc.getIssuer(), oidc.getSubject());
+                Optional<User> found = fixture.findByIssuerAndSubject(oidc.getIssuer(), oidc.getSubject());
 
                 // then: we should find the user
                 assertTrue(found.isPresent());
@@ -48,7 +46,7 @@ public class UserRepositoryTest {
     @Test
     public void testFindByIssuerAndSubject_NotFound() {
         // given: some users in the database with some oidc identities
-        userRepository.saveAll(
+        fixture.saveAll(
             mockUsers(3).stream()
                 .peek(user -> {
                     user.addOidcIdentity("google", UUID.randomUUID().toString());
@@ -57,7 +55,7 @@ public class UserRepositoryTest {
                 .toList());
 
         // when: we search for a user by unknown issue and subject
-        Optional<User> found = userRepository.findByIssuerAndSubject("google", UUID.randomUUID().toString());
+        Optional<User> found = fixture.findByIssuerAndSubject("google", UUID.randomUUID().toString());
 
         // then: we should NOT find the user
         assertTrue(found.isEmpty());
@@ -66,11 +64,11 @@ public class UserRepositoryTest {
     @Test
     public void testFindByEmail() {
         // given: some users in the database
-        List<User> users = userRepository.saveAll(mockUsers(3));
+        List<User> users = fixture.saveAll(mockUsers(3));
 
         users.forEach(user -> {
             // when: we search for a user with an existing email
-            Optional<User> found = userRepository.findByEmail(user.getEmail());
+            Optional<User> found = fixture.findByEmail(user.getEmail());
 
             // then: we should find the user
             assertTrue(found.isPresent());
@@ -82,10 +80,38 @@ public class UserRepositoryTest {
     @Test
     public void testFindByEmail_NotFound() {
         // given: some users in the database
-        userRepository.saveAll(mockUsers(3));
+        fixture.saveAll(mockUsers(3));
 
         // when: we search for a user with a non-existent email
-        Optional<User> found = userRepository.findByEmail("mock-user@work.com");
+        Optional<User> found = fixture.findByEmail("mock-user@work.com");
+
+        // then: we should not find any user
+        assertFalse(found.isPresent());
+    }
+
+    @Test
+    public void testFindByUsername() {
+        // given: some users in the database
+        List<User> users = fixture.saveAll(mockUsers(3));
+
+        users.forEach(user -> {
+            // when: we search for a user with an existing username
+            Optional<User> found = fixture.findByUsername(user.getUsername());
+
+            // then: we should find the user
+            assertTrue(found.isPresent());
+            assertEquals(user.getUsername(), found.get().getUsername());
+            assertEquals(user.getId(), found.get().getId());
+        });
+    }
+
+    @Test
+    public void testFindByUsername_NotFound() {
+        // given: some users in the database
+        fixture.saveAll(mockUsers(3));
+
+        // when: we search for a user with a non-existent username
+        Optional<User> found = fixture.findByUsername("mock-username");
 
         // then: we should not find any user
         assertFalse(found.isPresent());

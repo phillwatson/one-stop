@@ -1,6 +1,5 @@
 package com.hillayes.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -42,7 +41,6 @@ public class OidcIdentity {
     private Instant dateDisabled;
 
     @Transient
-    @JsonIgnore
     public boolean isDisabled() {
         return dateDisabled != null;
     }

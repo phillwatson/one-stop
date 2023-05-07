@@ -73,10 +73,9 @@ public class UserProfileResource {
 
         char[] currentPassword = request.getOldPassword().toCharArray();
         char[] newPassword = request.getNewPassword().toCharArray();
-        userService.updatePassword(id, currentPassword, newPassword)
+        return userService.updatePassword(id, currentPassword, newPassword)
+            .map(user -> Response.noContent().build())
             .orElseThrow(() -> new NotAuthorizedException("username/password"));
-
-        return Response.noContent().build();
     }
 
     private UUID getUserId(SecurityContext context) {

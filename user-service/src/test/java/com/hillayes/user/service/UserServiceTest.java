@@ -1,17 +1,19 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
-import com.hillayes.user.errors.UserAlreadyOnboardedException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
+import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,9 @@ public class UserServiceTest {
     DeletedUserRepository deletedUserRepository;
 
     @InjectMock
+    MagicTokenRepository magicTokenRepository;
+
+    @InjectMock
     PasswordCrypto passwordCrypto;
 
     @InjectMock
@@ -61,126 +66,241 @@ public class UserServiceTest {
             }
             return user;
         });
+
+        // simulate the token repository returns the token with an ID
+        when(magicTokenRepository.save(any())).thenAnswer(invocation -> {
+            MagicToken token = invocation.getArgument(0);
+            if (token.getId() == null) {
+                token = token.toBuilder()
+                    .id(UUID.randomUUID())
+                    .build();
+            }
+            return token;
+        });
     }
 
     @Test
-    public void testCreateUser() {
-        // given: a new user
-        User newUser = mockUser();
-        String username = randomAlphanumeric(20);
-        String password = randomAlphanumeric(20);
+    public void testRegisterUser() {
+        // given: an email address
+        String email = randomAlphanumeric(10) + "@example.com";
 
-        // when: creating a user
-        User user = fixture.createUser(username, password.toCharArray(), newUser);
+        // when: we register a user
+        fixture.registerUser(email);
 
-        // then: the user is created
-        verify(userRepository).save(any());
+        // then: a token is registered
+        ArgumentCaptor<MagicToken> tokenCaptor = ArgumentCaptor.forClass(MagicToken.class);
+        verify(userEventSender).sendUserRegistered(tokenCaptor.capture());
 
-        // and: the user is assigned an ID
-        assertNotNull(user.getId());
+        // and: the token records the email
+        MagicToken token = tokenCaptor.getValue();
+        assertEquals(email, token.getEmail());
 
-        // and: the user is assigned a password hash
-        verify(passwordCrypto).getHash(password.toCharArray());
+        // and: the token contains a random code
+        assertNotNull(token.getToken());
 
-        // and: the saved user matches the new user
-        assertEquals(username, user.getUsername());
-        assertEquals(newUser.getEmail(), user.getEmail());
-        assertEquals(newUser.getGivenName(), user.getGivenName());
-        assertEquals(newUser.getFamilyName(), user.getFamilyName());
-        assertEquals(newUser.getPhoneNumber(), user.getPhoneNumber());
-        assertEquals(newUser.getRoles(), user.getRoles());
-
-        // and: an event is sent
-        verify(userEventSender).sendUserCreated(user);
+        // and: the token expires at some future time
+        assertTrue(token.getExpires().isAfter(Instant.now()));
     }
 
     @Test
-    public void testCreateUser_DuplicateUsername() {
-        // given: a new user
-        User newUser = mockUser();
-        String username = randomAlphanumeric(20);
-        String password = randomAlphanumeric(20);
+    public void testRegisterUser_DuplicateEmail() {
+        // given: an email address
+        String email = randomAlphanumeric(10) + "@example.com";
 
         // and: a user with the given username already exists
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser()));
+        when(userRepository.findByEmail(email))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
-        // when: creating a user - an exception is thrown
-        assertThrows(DuplicateUsernameException.class, () ->
-            fixture.createUser(username, password.toCharArray(), newUser)
-        );
-
-        // then: the user is NOT created
-        verify(userRepository, never()).save(any());
-
-        // and: an event is NOT sent
-        verify(userEventSender, never()).sendUserCreated(any());
-    }
-
-    @Test
-    public void testCreateUser_DuplicateEmail() {
-        // given: a new user
-        User newUser = mockUser();
-        String username = randomAlphanumeric(20);
-        String password = randomAlphanumeric(20);
-
-        // and: a user with the given username already exists
-        when(userRepository.findByEmail(newUser.getEmail())).thenReturn(Optional.of(mockUser()));
-
-        // when: creating a user - an exception is thrown
+        // when: registering a user - an exception is thrown
         assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.createUser(username, password.toCharArray(), newUser)
+            fixture.registerUser(email)
         );
 
-        // then: the user is NOT created
+        // then: NO token is registered
+        verify(userEventSender, never()).sendUserRegistered(any());
+    }
+
+    @Test
+    public void testAcknowledgeToken() {
+        // given: a token
+        String token = randomAlphanumeric(30);
+
+        // and: the token repository contains the token
+        MagicToken entry = MagicToken.builder()
+            .email(randomAlphanumeric(10) + "@example.com")
+            .token(token)
+            .expires(Instant.now().plusSeconds(60))
+            .build();
+        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.of(entry));
+
+        // when: acknowledging the token
+        Optional<User> user = fixture.acknowledgeToken(token);
+
+        // then: a new user is returned
+        assertTrue(user.isPresent());
+
+        // and: the user is not yet onboarded
+        assertFalse(user.get().isOnboarded());
+
+        // and: the user is persisted
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        // and: the persisted user has a role
+        User createdUser = userCaptor.getValue();
+        assertTrue(createdUser.getRoles().contains("user"));
+
+        // and: the token is deleted
+        verify(magicTokenRepository).delete(entry);
+
+        // and: the user acknowledgement is issued
+        verify(userEventSender).sendUserAcknowledged(user.get());
+    }
+
+    @Test
+    public void testAcknowledgeToken_TokenNotFound() {
+        // given: a token
+        String token = randomAlphanumeric(30);
+
+        // and: the token repository DOES NOT contain the token
+        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.empty());
+
+        // when: acknowledging the token
+        Optional<User> user = fixture.acknowledgeToken(token);
+
+        // then: NO new user is returned
+        assertFalse(user.isPresent());
+
+        // and: NO user is created
         verify(userRepository, never()).save(any());
 
-        // and: an event is NOT sent
+        // and: NO token is deleted
+        verify(magicTokenRepository, never()).delete(any());
+
+        // and: NO user acknowledgement is issued
+        verify(userEventSender, never()).sendUserAcknowledged(any());
+    }
+
+    @Test
+    public void testAcknowledgeToken_TokenIsExpired() {
+        // given: a token
+        String token = randomAlphanumeric(30);
+
+        // and: the token repository contains the expired token
+        MagicToken entry = MagicToken.builder()
+            .email(randomAlphanumeric(10) + "@example.com")
+            .token(token)
+            .expires(Instant.now().minusSeconds(60))
+            .build();
+        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.of(entry));
+
+        // when: acknowledging the token
+        Optional<User> user = fixture.acknowledgeToken(token);
+
+        // then: NO new user is returned
+        assertFalse(user.isPresent());
+
+        // and: NO user is created
+        verify(userRepository, never()).save(any());
+
+        // and: NO token is deleted
+        verify(magicTokenRepository, never()).delete(any());
+
+        // and: NO user acknowledgement is issued
+        verify(userEventSender, never()).sendUserAcknowledged(any());
+    }
+
+    @Test
+    public void testCompleteOnboarding() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser();
+
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+
+        // when: completing the onboarding
+        Optional<User> onboardedUser = fixture.completeOnboarding(userId, user, password);
+
+        // then: the user is returned
+        assertTrue(onboardedUser.isPresent());
+
+        // and: the user is onboarded
+        assertTrue(onboardedUser.get().isOnboarded());
+
+        // and: the user was updated
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        // and: the saved user contains new properties
+        User savedUser = userCaptor.getValue();
+        assertEquals(user.getUsername(), savedUser.getUsername());
+        assertEquals(user.getEmail(), savedUser.getEmail());
+        assertEquals(user.getPreferredName(), savedUser.getPreferredName());
+        assertEquals(user.getTitle(), savedUser.getTitle());
+        assertEquals(user.getGivenName(), savedUser.getGivenName());
+        assertEquals(user.getFamilyName(), savedUser.getFamilyName());
+        assertEquals(user.getPhoneNumber(), savedUser.getPhoneNumber());
+        assertNotNull(user.getPasswordHash());
+
+        // and: a notification is issued
+        verify(userEventSender).sendUserCreated(onboardedUser.get());
+    }
+
+    @Test
+    public void testCompleteOnboarding_DuplicateUsername() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser();
+
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+
+        // and: an existing user holds the same username
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: completing the onboarding
+        assertThrows(DuplicateUsernameException.class, () ->
+            fixture.completeOnboarding(userId, user, password)
+        );
+
+        // and: NO user is updated
+        verify(userRepository, never()).save(any());
+
+        // and: NO notification is issued
         verify(userEventSender, never()).sendUserCreated(any());
     }
 
     @Test
-    public void testOnboardUser() {
-        // given: a user that has not been onboarded
-        User user = mockUser(UUID.randomUUID());
-        assertNull(user.getDateOnboarded());
+    public void testCompleteOnboarding_DuplicateEmail() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser();
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
 
-        // when: onboarding the user
-        User onboardedUser = fixture.onboardUser(user.getId())
-            .orElse(null);
+        // and: an existing user holds the same email
+        when(userRepository.findByEmail(user.getEmail()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
-        // then: the user is onboarded
-        assertNotNull(onboardedUser);
-        assertEquals(user.getId(), onboardedUser.getId());
-        assertNotNull(onboardedUser.getDateOnboarded());
-
-        // and: the user is saved
-        verify(userRepository).save(any());
-
-        // and: an event is sent
-        verify(userEventSender).sendUserOnboarded(onboardedUser);
-    }
-
-    @Test
-    public void testOnboardUser_AlreadyOnboarded() {
-        // given: a user that has already been onboarded
-        User user = mockUser(UUID.randomUUID()).toBuilder()
-            .dateOnboarded(Instant.now())
-            .build();
-
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
-        // when: onboarding the user - an exception is thrown
-        assertThrows(UserAlreadyOnboardedException.class, () ->
-            fixture.onboardUser(user.getId())
+        // when: completing the onboarding
+        assertThrows(DuplicateEmailAddressException.class, () ->
+            fixture.completeOnboarding(userId, user, password)
         );
 
-        // then: the user is NOT updated
+        // and: NO user is updated
         verify(userRepository, never()).save(any());
 
-        // and: NO event is sent
-        verify(userEventSender, never()).sendUserOnboarded(any());
+        // and: NO notification is issued
+        verify(userEventSender, never()).sendUserCreated(any());
     }
 
     @Test
@@ -348,6 +468,62 @@ public class UserServiceTest {
         assertFalse(result.isPresent());
 
         // and: the user is NOT saved
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdateUser_DuplicateUsername() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an update request
+        User modifiedUser = user.toBuilder()
+            .givenName("New First Name")
+            .familyName("New Last Name")
+            .build();
+
+        // and: a user with the given username already exists
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: updating a user - an exception is thrown
+        assertThrows(DuplicateUsernameException.class, () ->
+            fixture.updateUser(user.getId(), modifiedUser)
+        );
+
+        // then: the user is NOT updated
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdateUser_DuplicateEmail() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an update request
+        User modifiedUser = user.toBuilder()
+            .givenName("New First Name")
+            .familyName("New Last Name")
+            .build();
+
+        // and: a user with the given username already exists
+        when(userRepository.findByEmail(user.getEmail()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: updating a user - an exception is thrown
+        assertThrows(DuplicateEmailAddressException.class, () ->
+            fixture.updateUser(user.getId(), modifiedUser)
+        );
+
+        // then: the user is NOT updated
         verify(userRepository, never()).save(any());
 
         // and: an event is NOT sent

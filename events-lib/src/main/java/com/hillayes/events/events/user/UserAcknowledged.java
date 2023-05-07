@@ -5,15 +5,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Issued when an onboarding user acknowledges the magic token sent in
+ * an email.
+ */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOnboarded {
+public class UserAcknowledged {
     private UUID userId;
 
-    private Instant dateOnboarded;
+    private String email;
 }
