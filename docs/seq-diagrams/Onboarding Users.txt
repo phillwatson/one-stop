@@ -17,7 +17,7 @@ user-service->user-service:generate magic-token
 rbox over user-service,magic-token-repo#lightblue:magic token is a random secret\n with expiry of 5 minutes.\na nightly task will delete expired\n token records.
 user-service->magic-token-repo:save(email,token)
 user-service->broker:user-registered(email,magic-token)
-client<--user-service:http 200
+client<--user-service:http 204
 end
 deactivateafter user-service
 deactivateafter client
@@ -38,7 +38,7 @@ else token expired
 client<--user-service:http 401
 else valid
 user-service->magic-token-repo:delete(token)
-user-service->user-repo:save(email,status: PENDING)
+user-service->user-repo:save(email)
 rbox over user-service,user-repo#lightblue:a random username and password\n are assigned.\na nightly task will delete expired\n pending users.
 user-service->broker:user-acknowledged(user)
 client<--user-service:http 307: set password page
@@ -48,7 +48,7 @@ deactivateafter client
 
 
 rbox right of client#lightblue:User completes form with a\n username and password
-client->user-service:PUT /api/v1/users/onboard/complete\n{\n  "username": "jane"\n  "password": "My-New-Account-29"\n}
+client->user-service:PUT /api/v1/users/onboard/complete\n{\n  "username": "jane",\n  "password": "My-New-Account-29",\n  ...\n}
 activate client
 activate user-service
 alt#lightblue password not acceptable
@@ -57,12 +57,12 @@ else username already taken
 
 client<--user-service:http 409
 else
-user-service->user-repo:save(username, password, status: ONBOARDED)
-user-service->broker:user-confirmed(user)
+user-service->user-repo:save(username, password, dateOnboarded = now)
+user-service->broker:user-created(user)
 client<--user-service:http 204
 end
 deactivateafter user-service
 deactivateafter client
 
-broker->email-service:user-confirmed(user)
+broker->email-service:user-created(user)
 email-service->email-service:send welcome email
