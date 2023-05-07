@@ -198,6 +198,9 @@ public class UserService {
      * @param email the email address to check
      */
     private void validateUniqueEmail(UUID userId, String email) {
+        // delete all expired onboarding tokens
+        magicTokenRepository.deleteByExpiresBefore(Instant.now());
+
         // ensure no onboarding user has the same email
         magicTokenRepository.findByEmail(email.toLowerCase())
             .ifPresent(existing -> {

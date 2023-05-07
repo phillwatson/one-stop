@@ -48,12 +48,15 @@ deactivateafter client
 
 
 rbox right of client#lightblue:User completes form with a\n username and password
-client->user-service:PUT /api/v1/users/onboard/complete\n{\n  "username": "jane",\n  "password": "My-New-Account-29",\n  ...\n}
+client->user-service:PUT /api/v1/users/onboard/complete\n{\n  "username": "jane",\n  "password": "My-New-Account-29",\n  "email": "jane@work.com"\n  ...\n}
 activate client
 activate user-service
 alt#lightblue password not acceptable
 client<--user-service:http 409
 else username already taken
+
+client<--user-service:http 409
+else email already taken
 
 client<--user-service:http 409
 else
