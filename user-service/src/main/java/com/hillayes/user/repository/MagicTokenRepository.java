@@ -22,6 +22,14 @@ public interface MagicTokenRepository extends JpaRepository<MagicToken, UUID> {
     public Optional<MagicToken> findByToken(String token);
 
     /**
+     * Returns the record holding the given email.
+     *
+     * @param email the email to search for.
+     * @return the record found with the given email, if any.
+     */
+    public Optional<MagicToken> findByEmail(String email);
+
+    /**
      * Deletes all records with an expiry date before the given date.
      *
      * @param datetime the date before which all records should be deleted.

@@ -3,6 +3,8 @@ package com.hillayes.user.resource;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
+import com.hillayes.onestop.api.UserRegisterResponse;
+import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,10 @@ public class UserOnboardResource {
     public Response registerUser(UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
 
-        userService.registerUser(request.getEmail());
-        return Response.noContent().build();
+        MagicToken magicToken = userService.registerUser(request.getEmail());
+
+        return Response.ok(new UserRegisterResponse()
+            .token(magicToken.getToken())).build();
     }
 
     @GET

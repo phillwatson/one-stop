@@ -73,4 +73,5 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.magic_token (
     expires timestamp NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_magictoken ON ${flyway:defaultSchema}.magic_token (token);
+CREATE INDEX IF NOT EXISTS idx_tokenemail ON ${flyway:defaultSchema}.magic_token (email);
 CREATE INDEX IF NOT EXISTS idx_tokenexpires ON ${flyway:defaultSchema}.magic_token (expires);

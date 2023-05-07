@@ -17,7 +17,7 @@ user-service->user-service:generate magic-token
 rbox over user-service,magic-token-repo#lightblue:magic token is a random secret\n with expiry of 5 minutes.\na nightly task will delete expired\n token records.
 user-service->magic-token-repo:save(email,token)
 user-service->broker:user-registered(email,magic-token)
-client<--user-service:http 204
+client<--user-service:http 200 (magic-token)
 end
 deactivateafter user-service
 deactivateafter client

@@ -47,6 +47,7 @@ public class UserProfileResource {
         log.info("Update user profile [id: {}]", id);
 
         User userUpdate = User.builder()
+            .username(userProfileRequest.getUsername())
             .preferredName(userProfileRequest.getPreferredName())
             .title(userProfileRequest.getTitle())
             .givenName(userProfileRequest.getGivenName())
@@ -57,7 +58,7 @@ public class UserProfileResource {
 
         return userService.updateUser(id, userUpdate)
             .map(user -> {
-                log.debug("Updated user [username: {}, id: {}]", user.getUsername(), user.getId());
+                log.debug("Updated user profile [id: {}, username: {}]", user.getId(), user.getUsername());
                 return marshal(user);
             })
             .map(user -> Response.ok(user).build())

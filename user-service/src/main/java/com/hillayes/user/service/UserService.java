@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -34,22 +35,20 @@ public class UserService {
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
 
-    public void registerUser(String email) {
+    public MagicToken registerUser(String email) {
         log.info("Registering user [email: {}]", email);
 
         // ensure email is unique
-        userRepository.findByEmail(email)
-            .ifPresent(existing -> {
-                throw new DuplicateEmailAddressException(email);
-            });
+        validateUniqueEmail(null, email);
 
         MagicToken token = magicTokenRepository.save(MagicToken.builder()
-            .email(email)
+            .email(email.toLowerCase())
             .token(UUID.randomUUID().toString())
-            .expires(Instant.now().plusSeconds(1000 * 60 * 5))
+            .expires(Instant.now().plus(5, ChronoUnit.MINUTES))
             .build());
 
         userEventSender.sendUserRegistered(token);
+        return token;
     }
 
     public Optional<User> acknowledgeToken(String token) {
@@ -58,9 +57,10 @@ public class UserService {
         return magicTokenRepository.findByToken(token)
             .filter(t -> t.getExpires().isAfter(Instant.now()))
             .map(t -> {
+                // create a user record - but not yet onboarded
                 User newUser = User.builder()
                     .username(t.getEmail())
-                    .email(t.getEmail())
+                    .email(t.getEmail().toLowerCase())
                     .givenName(t.getEmail())
                     .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
                     .roles(Set.of("user"))
@@ -86,17 +86,14 @@ public class UserService {
             });
 
         // ensure email is unique
-        userRepository.findByEmail(modifiedUser.getEmail())
-            .filter(existing -> !existing.getId().equals(id))
-            .ifPresent(existing -> {
-                throw new DuplicateEmailAddressException(existing.getEmail());
-            });
+        validateUniqueEmail(id, modifiedUser.getEmail());
 
         return userRepository.findById(id)
             .map(user -> {
+                // update and onboard user
                 user = userRepository.save(user.toBuilder()
                     .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail())
+                    .email(modifiedUser.getEmail().toLowerCase())
                     .title(modifiedUser.getTitle())
                     .givenName(modifiedUser.getGivenName())
                     .familyName(modifiedUser.getFamilyName())
@@ -160,17 +157,13 @@ public class UserService {
             });
 
         // ensure email is unique
-        userRepository.findByEmail(modifiedUser.getEmail())
-            .filter(existing -> !existing.getId().equals(id))
-            .ifPresent(existing -> {
-                throw new DuplicateEmailAddressException(existing.getEmail());
-            });
+        validateUniqueEmail(id, modifiedUser.getEmail());
 
         return userRepository.findById(id)
             .map(user -> {
                 user = userRepository.save(user.toBuilder()
                     .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail())
+                    .email(modifiedUser.getEmail().toLowerCase())
                     .title(modifiedUser.getTitle())
                     .givenName(modifiedUser.getGivenName())
                     .familyName(modifiedUser.getFamilyName())
@@ -195,6 +188,27 @@ public class UserService {
                 userEventSender.sendUserDeleted(deletedUser);
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return user;
+            });
+    }
+
+    /**
+     * Looks for any other user (onboarding or onboarded) with the same email address.
+     *
+     * @param userId the ID of the user being updated (or null if new)
+     * @param email the email address to check
+     */
+    private void validateUniqueEmail(UUID userId, String email) {
+        // ensure no onboarding user has the same email
+        magicTokenRepository.findByEmail(email.toLowerCase())
+            .ifPresent(existing -> {
+                throw new DuplicateEmailAddressException(email);
+            });
+
+        // ensure no onboarded user has the same email
+        userRepository.findByEmail(email.toLowerCase())
+            .filter(existing -> (userId == null) || (!existing.getId().equals(userId)))
+            .ifPresent(existing -> {
+                throw new DuplicateEmailAddressException(email);
             });
     }
 }
