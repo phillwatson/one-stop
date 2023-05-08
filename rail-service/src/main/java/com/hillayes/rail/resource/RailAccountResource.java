@@ -5,10 +5,10 @@ import com.hillayes.rail.model.AccountSummary;
 import com.hillayes.rail.model.Balance;
 import com.hillayes.rail.model.TransactionList;
 import com.hillayes.rail.service.RailAccountService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
@@ -19,10 +19,10 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
 public class RailAccountResource {
-    @Inject
-    RailAccountService railAccountService;
+    private final RailAccountService railAccountService;
 
     @GET
     @Path("/{id}")

@@ -158,12 +158,8 @@ paths:
             schema:
               $ref: "#/components/schemas/UserRegisterRequest"
       responses:
-        "200":
+        "204":
           description: "successful operation"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRegisterResponse'
         "409":
           description: "Email already in use."
         "500":
@@ -480,15 +476,6 @@ components:
           type: string
           format: email
 
-    UserRegisterResponse:
-      type: object
-      required:
-        - token
-      properties:
-        token:
-          description: "The unique token used to identify the registration"
-          type: string
-
     UserProfileRequest:
       type: object
       required:
@@ -528,19 +515,31 @@ components:
           description: The user's phone number
           example: 0123456789
 
+    UserRole:
+      type: string
+      description: A authorisation role assigned to user
+      enum:
+        - user
+        - admin
+
     UserUpdateRequest:
       allOf:
         - $ref: "#/components/schemas/UserProfileRequest"
         - type: object
-      type: object
-      required:
-        - username
-        - givenName
-        - email
+          required:
+            - username
+            - givenName
+            - email
+            - roles
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserRole"
 
     UserCompleteRequest:
       allOf:
-        - $ref: "#/components/schemas/UserUpdateRequest"
+        - $ref: "#/components/schemas/UserProfileRequest"
         - type: object
           required:
             - username
@@ -645,6 +644,7 @@ components:
             - username
             - givenName
             - email
+            - roles
           properties:
             id:
               type: string
@@ -747,20 +747,24 @@ components:
       properties:
         first:
           type: string
+          format: uri
           description: The URL of the first page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
+          example: https://api.example.com/accounts?page=0&page-size=19
         next:
           type: string
+          format: uri
           description: The URL of the next page of items
-          example: https://api.example.com/accounts?page=3&page-size=20
+          example: https://api.example.com/accounts?page=3&page-size=19
         previous:
           type: string
+          format: uri
           description: The URL of the previous page of items
-          example: https://api.example.com/accounts?page=1&page-size=20
+          example: https://api.example.com/accounts?page=1&page-size=19
         last:
           type: string
+          format: uri
           description: The URL of the last page of items
-          example: https://api.example.com/accounts?page=15&page-size=20
+          example: https://api.example.com/accounts?page=15&page-size=19
 
     PaginatedItems:
       type: object

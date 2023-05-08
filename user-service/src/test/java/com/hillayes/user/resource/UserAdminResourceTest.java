@@ -16,8 +16,7 @@ import java.util.List;
 import static com.hillayes.user.utils.TestData.mockUsers;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,9 +58,18 @@ public class UserAdminResourceTest extends TestBase {
         assertEquals(pageRequest.getPageSize(), response.getPageSize());
 
         // and: all page links are present
-        assertEquals("/api/v1/users?page=0&page-size=15", response.getLinks().getFirst());
-        assertEquals("/api/v1/users?page=11&page-size=15", response.getLinks().getNext());
-        assertEquals("/api/v1/users?page=9&page-size=15", response.getLinks().getPrevious());
-        assertEquals("/api/v1/users?page=20&page-size=15", response.getLinks().getLast());
+        assertEquals("/api/v1/users", response.getLinks().getFirst().getPath());
+        assertEquals("page-size=15&page=0", response.getLinks().getFirst().getQuery());
+
+        assertNotNull(response.getLinks().getPrevious());
+        assertEquals("/api/v1/users", response.getLinks().getPrevious().getPath());
+        assertEquals("page-size=15&page=9", response.getLinks().getPrevious().getQuery());
+
+        assertNotNull(response.getLinks().getNext());
+        assertEquals("/api/v1/users", response.getLinks().getNext().getPath());
+        assertEquals("page-size=15&page=11", response.getLinks().getNext().getQuery());
+
+        assertEquals("/api/v1/users", response.getLinks().getLast().getPath());
+        assertEquals("page-size=15&page=20", response.getLinks().getLast().getQuery());
     }
 }

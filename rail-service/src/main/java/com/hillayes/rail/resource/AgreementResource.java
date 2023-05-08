@@ -6,10 +6,10 @@ import com.hillayes.rail.model.EndUserAgreementAccepted;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.service.AgreementService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,10 +19,10 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
 public class AgreementResource {
-    @Inject
-    AgreementService agreementService;
+    private final AgreementService agreementService;
 
     @GET
     public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,

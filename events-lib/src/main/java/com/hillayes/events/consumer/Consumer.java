@@ -64,8 +64,8 @@ public class Consumer implements Runnable {
                 }
 
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                    log.debug("Lost partitions in re-balance. Committing current offsets");
-                    broker.commitSync(currentOffsets);
+                    log.trace("Lost partitions in re-balance. Committing current offsets");
+                    commitOffsets();
                 }
             });
 
@@ -105,9 +105,7 @@ public class Consumer implements Runnable {
         } finally {
             try {
                 log.info("Closing consumer and committing offsets");
-                if (!currentOffsets.isEmpty()) {
-                    broker.commitSync(currentOffsets);
-                }
+                commitOffsets();
             } finally {
                 broker.close();
                 log.info("Closed consumer and we are done");
@@ -123,10 +121,7 @@ public class Consumer implements Runnable {
      * @param record the record whose offset is to be committed.
      */
     private void softCommit(ConsumerRecord<?, ?> record) {
-        currentOffsets.put(
-            new TopicPartition(record.topic(), record.partition()),
-            new OffsetAndMetadata(record.offset() + 1));
-
+        commitRecord(record);
         if (count++ % COMMIT_FREQUENCY == 0) {
             broker.commitAsync(currentOffsets,
                 (Map<TopicPartition, OffsetAndMetadata> offsets, Exception error) -> {
@@ -138,10 +133,19 @@ public class Consumer implements Runnable {
     }
 
     private void hardCommit(ConsumerRecord<?, ?> record) {
+        commitRecord(record);
+        commitOffsets();
+    }
+
+    private void commitRecord(ConsumerRecord<?, ?> record) {
         currentOffsets.put(
             new TopicPartition(record.topic(), record.partition()),
             new OffsetAndMetadata(record.offset() + 1));
+    }
 
-        broker.commitSync(currentOffsets);
+    private void commitOffsets() {
+        if (!currentOffsets.isEmpty()) {
+            broker.commitSync(currentOffsets);
+        }
     }
 }

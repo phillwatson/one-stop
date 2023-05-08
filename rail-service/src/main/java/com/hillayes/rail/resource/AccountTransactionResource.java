@@ -1,7 +1,6 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
@@ -11,10 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Path("/api/v1/rails/transactions")
 @RolesAllowed("user")
@@ -22,11 +21,8 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Slf4j
-public class AccountTransactionResource extends AbstractResource {
-    private static final String PAGE_LINK = "%s?page=%d&page-size=%d";
-
-    @Inject
-    AccountTransactionService accountTransactionService;
+public class AccountTransactionResource {
+    private final AccountTransactionService accountTransactionService;
 
     @GET
     public Response getTransactions(@Context SecurityContext ctx,
@@ -35,26 +31,22 @@ public class AccountTransactionResource extends AbstractResource {
                                     @QueryParam("page-size") @DefaultValue("20") int pageSize,
                                     @QueryParam("account-id") UUID accountId) {
         Page<AccountTransaction> transactionsPage =
-            accountTransactionService.getTransactions(getUserId(ctx), accountId, page, pageSize);
+            accountTransactionService.getTransactions(ResourceUtils.getUserId(ctx), accountId, page, pageSize);
+
+        Function<UriBuilder, UriBuilder> uriDecorator = uriBuilder -> {
+            if (accountId != null) {
+                uriBuilder.queryParam("account-id", accountId);
+            }
+            return uriBuilder;
+        };
 
         PaginatedTransactions response = new PaginatedTransactions()
-            .page(page)
-            .pageSize(pageSize)
+            .page(transactionsPage.getNumber())
+            .pageSize(transactionsPage.getSize())
             .count(transactionsPage.getNumberOfElements())
             .total(transactionsPage.getTotalElements())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(new PageLinks()
-                .first(getPageLink(uriInfo.getPath(),0, pageSize, accountId))
-                .last(getPageLink(uriInfo.getPath(),transactionsPage.getTotalPages() - 1, pageSize, accountId))
-            );
-
-        if (page > 0) {
-            response.getLinks().previous(getPageLink(uriInfo.getPath(), page - 1, pageSize, accountId));
-        }
-
-        if (page < transactionsPage.getTotalPages() - 1) {
-            response.getLinks().next(getPageLink(uriInfo.getPath(),page + 1, pageSize, accountId));
-        }
+            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriDecorator));
 
         return Response.ok(response).build();
     }
@@ -63,7 +55,7 @@ public class AccountTransactionResource extends AbstractResource {
     @Path("/{transactionId}")
     public Response getTransaction(@Context SecurityContext ctx, @PathParam("transactionId") UUID transactionId) {
         AccountTransaction transaction = accountTransactionService.getTransaction(transactionId)
-            .filter(t -> t.getUserId().equals(getUserId(ctx)))
+            .filter(t -> t.getUserId().equals(ResourceUtils.getUserId(ctx)))
             .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
         return Response.ok(marshal(transaction)).build();
     }
@@ -77,13 +69,5 @@ public class AccountTransactionResource extends AbstractResource {
             .description(transaction.remittanceInformationStructured == null
                 ? transaction.creditorName
                 : transaction.remittanceInformationStructured);
-    }
-
-    private String getPageLink(String path, int page, int pageSize, UUID accountId) {
-        String result = String.format(PAGE_LINK, path, page, pageSize);
-        if (accountId != null) {
-            result += "&account-id=" + accountId;
-        }
-        return result;
     }
 }

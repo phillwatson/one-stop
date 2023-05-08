@@ -10,11 +10,11 @@ import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.RequisitionService;
 import com.hillayes.rail.service.UserConsentService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
@@ -26,21 +26,18 @@ import java.util.UUID;
 @Path("/api/v1/rails/consents")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
-public class UserConsentResource extends AbstractResource {
-    @Inject
-    UserConsentService userConsentService;
-    @Inject
-    InstitutionService institutionService;
-    @Inject
-    RequisitionService requisitionService;
-    @Inject
-    RailAccountService railAccountService;
+public class UserConsentResource {
+    private final UserConsentService userConsentService;
+    private final InstitutionService institutionService;
+    private final RequisitionService requisitionService;
+    private final RailAccountService railAccountService;
 
     @GET
     @RolesAllowed("user")
     public Response getConsents(@Context SecurityContext ctx) {
-        UUID userId = getUserId(ctx);
+        UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Listing user's bank [userId: {}]", userId);
 
         List<UserConsent> result = userConsentService.listConsents(userId);
@@ -54,7 +51,7 @@ public class UserConsentResource extends AbstractResource {
     @RolesAllowed("user")
     public Response getConsentForInstitution(@Context SecurityContext ctx,
                                              @PathParam("institutionId") String institutionId) {
-        UUID userId = getUserId(ctx);
+        UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Getting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
@@ -96,7 +93,7 @@ public class UserConsentResource extends AbstractResource {
     @RolesAllowed("user")
     public Response deleteConsent(@Context SecurityContext ctx,
                                   @PathParam("institutionId") String institutionId) {
-        UUID userId = getUserId(ctx);
+        UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Deleting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
         UserConsent result = userConsentService.getUserConsent(userId, institutionId)
@@ -110,7 +107,7 @@ public class UserConsentResource extends AbstractResource {
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
                              UserConsentRequest consentRequest) {
-        UUID userId = getUserId(ctx);
+        UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, consentRequest.getInstitutionId());
 
         URI consentLink = userConsentService.register(userId, consentRequest.getInstitutionId(), consentRequest.getCallbackUri());
@@ -141,5 +138,9 @@ public class UserConsentResource extends AbstractResource {
             : userConsentService.consentDenied(consentId, error, details);
 
         return Response.temporaryRedirect(redirectUri).build();
+    }
+
+    private void logHeaders(HttpHeaders headers) {
+        headers.getRequestHeaders().forEach((k, v) -> log.debug("Header: {} = \"{}\"", k, v));
     }
 }

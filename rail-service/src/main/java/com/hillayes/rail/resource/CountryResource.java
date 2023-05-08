@@ -2,10 +2,10 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.service.CountryService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
@@ -14,10 +14,10 @@ import java.util.Collection;
 @RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
 public class CountryResource {
-    @Inject
-    CountryService countryService;
+    private final CountryService countryService;
 
     @GET
     public Collection<Country> getAll() {

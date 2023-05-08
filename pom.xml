@@ -53,6 +53,7 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.version>2.16.7.Final</quarkus.platform.version>
 
+        <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005

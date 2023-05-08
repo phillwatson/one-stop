@@ -1,6 +1,7 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
@@ -276,6 +277,102 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testCompleteOnboarding_MissingUsername() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser().toBuilder()
+            .username(null)
+            .build();
+
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+
+        // and: an existing user holds the same username
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: completing the onboarding
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.completeOnboarding(userId, user, password)
+        );
+
+        // then: the username is the missing parameter
+        assertEquals("username", exception.getParameter("parameter-name"));
+
+        // and: NO user is updated
+        verify(userRepository, never()).save(any());
+
+        // and: NO notification is issued
+        verify(userEventSender, never()).sendUserCreated(any());
+    }
+
+    @Test
+    public void testCompleteOnboarding_MissingEmail() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser().toBuilder()
+            .email(null)
+            .build();
+
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+
+        // and: an existing user holds the same username
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: completing the onboarding
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.completeOnboarding(userId, user, password)
+        );
+
+        // and: the email is the missing parameter
+        assertEquals("email", exception.getParameter("parameter-name"));
+
+        // and: NO user is updated
+        verify(userRepository, never()).save(any());
+
+        // and: NO notification is issued
+        verify(userEventSender, never()).sendUserCreated(any());
+    }
+
+    @Test
+    public void testCompleteOnboarding_MissingGivenName() {
+        // given: a completed user request
+        UUID userId = UUID.randomUUID();
+        char[] password = randomAlphanumeric(20).toCharArray();
+        User user = mockUser().toBuilder()
+            .givenName(null)
+            .build();
+
+        // and: the user was previously registered and acknowledged
+        User registeredUser = mockUser(UUID.randomUUID());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+
+        // and: an existing user holds the same username
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: completing the onboarding
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.completeOnboarding(userId, user, password)
+        );
+
+        // and: the givenName is the missing parameter
+        assertEquals("givenName", exception.getParameter("parameter-name"));
+
+        // and: NO user is updated
+        verify(userRepository, never()).save(any());
+
+        // and: NO notification is issued
+        verify(userEventSender, never()).sendUserCreated(any());
+    }
+
+    @Test
     public void testCompleteOnboarding_DuplicateUsername() {
         // given: a completed user request
         UUID userId = UUID.randomUUID();
@@ -541,6 +638,101 @@ public class UserServiceTest {
         assertFalse(result.isPresent());
 
         // and: the user is NOT saved
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdateUser_MissingUsername() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an update request
+        User modifiedUser = user.toBuilder()
+            .username(null)
+            .givenName("New First Name")
+            .familyName("New Last Name")
+            .build();
+
+        // and: a user with the given username already exists
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: updating a user - an exception is thrown
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.updateUser(user.getId(), modifiedUser)
+        );
+
+        // then: the username is the missing parameter
+        assertEquals("username", exception.getParameter("parameter-name"));
+
+        // and: the user is NOT updated
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdateUser_MissingEmail() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an update request
+        User modifiedUser = user.toBuilder()
+            .email(null)
+            .givenName("New First Name")
+            .familyName("New Last Name")
+            .build();
+
+        // and: a user with the given username already exists
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: updating a user - an exception is thrown
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.updateUser(user.getId(), modifiedUser)
+        );
+
+        // then: the email is the missing parameter
+        assertEquals("email", exception.getParameter("parameter-name"));
+
+        // and: the user is NOT updated
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdateUser_MissingGivenName() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an update request
+        User modifiedUser = user.toBuilder()
+            .givenName(null)
+            .familyName("New Last Name")
+            .build();
+
+        // and: a user with the given username already exists
+        when(userRepository.findByUsername(user.getUsername()))
+            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
+
+        // when: updating a user - an exception is thrown
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.updateUser(user.getId(), modifiedUser)
+        );
+
+        // then: the givenName is the missing parameter
+        assertEquals("givenName", exception.getParameter("parameter-name"));
+
+        // and: the user is NOT updated
         verify(userRepository, never()).save(any());
 
         // and: an event is NOT sent

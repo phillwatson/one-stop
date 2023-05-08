@@ -3,7 +3,6 @@ package com.hillayes.user.resource;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
-import com.hillayes.onestop.api.UserRegisterResponse;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
@@ -33,9 +32,9 @@ public class UserOnboardResource {
         log.info("Registering user [email: {}]", request.getEmail());
 
         MagicToken magicToken = userService.registerUser(request.getEmail());
+        log.debug("User registered [email: {}, token: {}]", request.getEmail(), magicToken.getToken());
 
-        return Response.ok(new UserRegisterResponse()
-            .token(magicToken.getToken())).build();
+        return Response.noContent().build();
     }
 
     @GET
@@ -48,7 +47,7 @@ public class UserOnboardResource {
         return userService.acknowledgeToken(token)
             .map(user -> {
                 // redirect to the onboard page - with auth tokens in cookies
-                URI redirect = URI.create("http://localhost:3000/onboard");
+                URI redirect = uriInfo.getBaseUri().resolve("/onboard");
                 return authTokens.authResponse(Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
             })
             .orElseThrow(() -> new NotAuthorizedException("token"));
@@ -59,7 +58,7 @@ public class UserOnboardResource {
     @RolesAllowed("user")
     public Response onboardUser(@Context SecurityContext ctx,
                                 UserCompleteRequest request) {
-        UUID id = UUID.fromString(ctx.getUserPrincipal().getName());
+        UUID id = ResourceUtils.getUserId(ctx);
         log.info("Completing user registration [userId: {}, username: {}]", id, request.getUsername());
 
         User user = User.builder()

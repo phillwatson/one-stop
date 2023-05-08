@@ -13,10 +13,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.net.URI;
 
 @Path("/api/v1/auth")
@@ -49,7 +46,8 @@ public class AuthResource {
 
     @GET
     @Path("validate/{auth-provider}")
-    public Response oauthLogin(@PathParam("auth-provider") String authProvider,
+    public Response oauthLogin(@Context UriInfo uriInfo,
+                               @PathParam("auth-provider") String authProvider,
                                @QueryParam("code") String code,
                                @QueryParam("state") String state,
                                @QueryParam("scope") String scope,
@@ -57,15 +55,15 @@ public class AuthResource {
                                @QueryParam("error_uri") String errorUri) {
         log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
 
-        URI redirect = URI.create("http://localhost:3000");
+        UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         if (error != null) {
-            redirect = redirect.resolve("/sign-in?error=" + error);
+            URI redirect = uriBuilder.path("sign-in").queryParam("error", error).build();
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
         User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        redirect = redirect.resolve("/accounts");
+        URI redirect = uriBuilder.path("accounts").build();
         return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 

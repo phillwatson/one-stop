@@ -40,6 +40,17 @@ public class MensaException extends RuntimeException {
     }
 
     /**
+     * Returns the value of the named parameter, or null if the parameter is not set.
+     *
+     * @param name the name of the parameter to be returned.
+     * @return the value of the named parameter, or null if the parameter is not set.
+     * @param <T> the expected type of the parameter to be returned.
+     */
+    public <T> T getParameter(String name) {
+        return (T) getContext().get(name);
+    }
+
+    /**
      * Adds the given parameter to the exception's context. It will replace any
      * parameter of the same name. If the value is null, the named parameter will
      * be removed from the context.

@@ -1,10 +1,7 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.PageLinks;
-import com.hillayes.onestop.api.PaginatedUsers;
-import com.hillayes.onestop.api.UserResponse;
-import com.hillayes.onestop.api.UserUpdateRequest;
+import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +10,10 @@ import org.springframework.data.domain.Page;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/api/v1/users")
 @RolesAllowed({"admin"})
@@ -26,8 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class UserAdminResource {
-    private static final String PAGE_LINK = "%s?page=%d&page-size=%d";
-
     private final UserService userService;
 
     @GET
@@ -38,22 +32,12 @@ public class UserAdminResource {
 
         Page<User> usersPage = userService.listUsers(page, pageSize);
         PaginatedUsers response = new PaginatedUsers()
-            .page(page)
-            .pageSize(pageSize)
+            .page(usersPage.getNumber())
+            .pageSize(usersPage.getSize())
             .count(usersPage.getNumberOfElements())
             .total(usersPage.getTotalElements())
             .items(usersPage.getContent().stream().map(this::marshal).toList())
-            .links(new PageLinks()
-                .first(String.format(PAGE_LINK, uriInfo.getPath(), 0, pageSize))
-                .last(String.format(PAGE_LINK, uriInfo.getPath(), usersPage.getTotalPages() - 1, pageSize))
-            );
-
-        if (page > 0) {
-            response.getLinks().previous(String.format(PAGE_LINK, uriInfo.getPath(), page - 1, pageSize));
-        }
-        if (page < usersPage.getTotalPages() - 1) {
-            response.getLinks().next(String.format(PAGE_LINK, uriInfo.getPath(), page + 1, pageSize));
-        }
+            .links(ResourceUtils.buildPageLinks(uriInfo, usersPage));
 
         return Response.ok(response).build();
     }
@@ -99,6 +83,10 @@ public class UserAdminResource {
     }
 
     private User marshal(UserUpdateRequest request) {
+        Set<String> roles = request.getRoles().stream()
+            .map(UserRole::getValue)
+            .collect(Collectors.toSet());
+
         return User.builder()
             .username(request.getUsername())
             .preferredName(request.getPreferredName())
@@ -107,6 +95,7 @@ public class UserAdminResource {
             .familyName(request.getFamilyName())
             .email(request.getEmail())
             .phoneNumber(request.getPhone())
+            .roles(roles)
             .build();
     }
 

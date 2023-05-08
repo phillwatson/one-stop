@@ -1,6 +1,8 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.commons.Strings;
+import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
@@ -78,6 +80,9 @@ public class UserService {
     public Optional<User> completeOnboarding(UUID id, User modifiedUser, char[] password) {
         log.info("User has completed onboarding [userId: {}]", id);
 
+        // ensure mandatory fields are present
+        validateUserContent(modifiedUser);
+
         // ensure username is unique
         userRepository.findByUsername(modifiedUser.getUsername())
             .filter(existing -> !existing.getId().equals(id))
@@ -146,31 +151,39 @@ public class UserService {
             });
     }
 
-    public Optional<User> updateUser(UUID id, User modifiedUser) {
+    public Optional<User> updateUser(UUID id, User userRequest) {
         log.info("Updating user [userId: {}]", id);
 
+        // ensure mandatory fields are present
+        validateUserContent(userRequest);
+
         // ensure username is unique
-        userRepository.findByUsername(modifiedUser.getUsername())
+        userRepository.findByUsername(userRequest.getUsername())
             .filter(existing -> !existing.getId().equals(id))
             .ifPresent(existing -> {
                 throw new DuplicateUsernameException(existing.getUsername());
             });
 
         // ensure email is unique
-        validateUniqueEmail(id, modifiedUser.getEmail());
+        validateUniqueEmail(id, userRequest.getEmail());
 
         return userRepository.findById(id)
             .map(user -> {
-                user = userRepository.save(user.toBuilder()
-                    .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail().toLowerCase())
-                    .title(modifiedUser.getTitle())
-                    .givenName(modifiedUser.getGivenName())
-                    .familyName(modifiedUser.getFamilyName())
-                    .preferredName(modifiedUser.getPreferredName())
-                    .phoneNumber(modifiedUser.getPhoneNumber())
-                    .build());
+                User.UserBuilder userBuilder = user.toBuilder()
+                    .username(userRequest.getUsername())
+                    .email(userRequest.getEmail().toLowerCase())
+                    .title(userRequest.getTitle())
+                    .givenName(userRequest.getGivenName())
+                    .familyName(userRequest.getFamilyName())
+                    .preferredName(userRequest.getPreferredName())
+                    .phoneNumber(userRequest.getPhoneNumber());
 
+                if ((userRequest.getRoles() != null) && (!userRequest.getRoles().isEmpty())) {
+                    userBuilder.roles(userRequest.getRoles());
+                }
+
+                return userRepository.save(userBuilder.build());
+            }).map(user -> {
                 userEventSender.sendUserUpdated(user);
                 log.debug("Updated user [username: {}, userId: {}]", user.getUsername(), user.getId());
                 return user;
@@ -189,6 +202,24 @@ public class UserService {
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return user;
             });
+    }
+
+    /**
+     * Validates the content of the given user instance for mandatory fields.
+     */
+    private void validateUserContent(User user) {
+
+        if (Strings.isBlank(user.getUsername())) {
+            throw new MissingParameterException("username");
+        }
+
+        if (Strings.isBlank(user.getEmail())) {
+            throw new MissingParameterException("email");
+        }
+
+        if (Strings.isBlank(user.getGivenName())) {
+            throw new MissingParameterException("givenName");
+        }
     }
 
     /**

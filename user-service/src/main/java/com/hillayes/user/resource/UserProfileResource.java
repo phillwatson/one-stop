@@ -1,5 +1,7 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.commons.Strings;
+import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PasswordUpdateRequest;
 import com.hillayes.onestop.api.UserProfileRequest;
@@ -27,8 +29,8 @@ public class UserProfileResource {
     private final UserService userService;
 
     @GET
-    public Response getUser(@Context SecurityContext ctx) {
-        UUID id = getUserId(ctx);
+    public Response getProfile(@Context SecurityContext ctx) {
+        UUID id = ResourceUtils.getUserId(ctx);
         log.info("Getting user profile [id: {}]", id);
 
         return userService.getUser(id)
@@ -41,19 +43,19 @@ public class UserProfileResource {
     }
 
     @PUT
-    public Response updateUser(@Context SecurityContext ctx,
-                               UserProfileRequest userProfileRequest) {
-        UUID id = getUserId(ctx);
+    public Response updateProfile(@Context SecurityContext ctx,
+                                  UserProfileRequest request) {
+        UUID id = ResourceUtils.getUserId(ctx);
         log.info("Update user profile [id: {}]", id);
 
         User userUpdate = User.builder()
-            .username(userProfileRequest.getUsername())
-            .preferredName(userProfileRequest.getPreferredName())
-            .title(userProfileRequest.getTitle())
-            .givenName(userProfileRequest.getGivenName())
-            .familyName(userProfileRequest.getFamilyName())
-            .email(userProfileRequest.getEmail())
-            .phoneNumber(userProfileRequest.getPhone())
+            .username(request.getUsername())
+            .preferredName(request.getPreferredName())
+            .title(request.getTitle())
+            .givenName(request.getGivenName())
+            .familyName(request.getFamilyName())
+            .email(request.getEmail())
+            .phoneNumber(request.getPhone())
             .build();
 
         return userService.updateUser(id, userUpdate)
@@ -67,20 +69,24 @@ public class UserProfileResource {
 
     @PUT
     @Path("/password")
-    public Response updatePassword(@Context SecurityContext ctx,
+    public Response changePassword(@Context SecurityContext ctx,
                                    PasswordUpdateRequest request) {
-        UUID id = getUserId(ctx);
+        UUID id = ResourceUtils.getUserId(ctx);
         log.info("Update user password [id: {}]", id);
+
+        if (Strings.isBlank(request.getOldPassword())) {
+            throw new MissingParameterException("oldPassword");
+        }
+
+        if (Strings.isBlank(request.getNewPassword())) {
+            throw new MissingParameterException("newPassword");
+        }
 
         char[] currentPassword = request.getOldPassword().toCharArray();
         char[] newPassword = request.getNewPassword().toCharArray();
         return userService.updatePassword(id, currentPassword, newPassword)
             .map(user -> Response.noContent().build())
             .orElseThrow(() -> new NotAuthorizedException("username/password"));
-    }
-
-    private UUID getUserId(SecurityContext context) {
-        return UUID.fromString(context.getUserPrincipal().getName());
     }
 
     private UserProfileResponse marshal(User user) {

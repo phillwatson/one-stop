@@ -3,10 +3,10 @@ package com.hillayes.rail.resource;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.service.InstitutionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
@@ -17,10 +17,10 @@ import java.util.Set;
 @RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 @Slf4j
 public class InstitutionResource {
-    @Inject
-    InstitutionService institutionService;
+    private final InstitutionService institutionService;
 
     @GET
     public Collection<Institution> getAll(@QueryParam("country") String countryCode) {
