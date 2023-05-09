@@ -31,38 +31,22 @@ quarkus:
 one-stop:
   email:
     disabled: false
+    default-sender:
+      name: "One Stop"
+      email: "watson.phill+onestop@gmail.com"
     templates:
+      user-registered:
+        subject: "Please complete your registration"
+        template-id: "1"
+
       user-created:
-        subject: "Please confirm your email address"
-        sender:
-          name: "One Stop"
-          email: "watson.phill+onestop@gmail.com"
-        template: "user-created.html"
-
-      user-onboarded:
         subject: "Welcome to One Stop"
-        sender:
-          name: "One Stop"
-          email: "watson.phill+onestop@gmail.com"
-        template: "user-onboarded.html"
-
-      user-declined:
-        subject: "Sorry you decided not to join us"
-        sender:
-          name: "One Stop"
-          email: "watson.phill+onestop@gmail.com"
-        template: "user-declined.html"
+        template: "user-created.html"
 
       user-updated:
         subject: "You account has been updated"
-        sender:
-          name: "One Stop"
-          email: "watson.phill+onestop@gmail.com"
         template: "user-updated.html"
 
       user-deleted:
         subject: "Sorry to see you go"
-        sender:
-          name: "One Stop"
-          email: "watson.phill+onestop@gmail.com"
         template: "user-deleted.html"

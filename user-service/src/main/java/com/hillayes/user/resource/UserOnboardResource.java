@@ -5,6 +5,7 @@ import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
@@ -31,9 +33,7 @@ public class UserOnboardResource {
     public Response registerUser(UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
 
-        MagicToken magicToken = userService.registerUser(request.getEmail());
-        log.debug("User registered [email: {}, token: {}]", request.getEmail(), magicToken.getToken());
-
+        userService.registerUser(request.getEmail());
         return Response.noContent().build();
     }
 

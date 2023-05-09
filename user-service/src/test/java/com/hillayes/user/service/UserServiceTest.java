@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +82,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterUser() {
+    public void testRegisterUser() throws IOException {
         // given: an email address
         String email = randomAlphanumeric(10) + "@example.com";
 
@@ -90,7 +91,7 @@ public class UserServiceTest {
 
         // then: a token is registered
         ArgumentCaptor<MagicToken> tokenCaptor = ArgumentCaptor.forClass(MagicToken.class);
-        verify(userEventSender).sendUserRegistered(tokenCaptor.capture());
+        verify(userEventSender).sendUserRegistered(tokenCaptor.capture(), any());
 
         // and: the token records the email
         MagicToken token = tokenCaptor.getValue();
@@ -122,7 +123,7 @@ public class UserServiceTest {
         );
 
         // then: NO token is registered
-        verify(userEventSender, never()).sendUserRegistered(any());
+        verify(userEventSender, never()).sendUserRegistered(any(), any());
     }
 
     @Test
@@ -144,7 +145,7 @@ public class UserServiceTest {
         );
 
         // then: NO token is registered
-        verify(userEventSender, never()).sendUserRegistered(any());
+        verify(userEventSender, never()).sendUserRegistered(any(), any());
     }
 
     @Test

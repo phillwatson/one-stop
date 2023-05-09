@@ -1,6 +1,7 @@
 package com.hillayes.email.event.consumer;
 
-import com.hillayes.email.EmailConfiguration;
+import com.hillayes.email.config.EmailConfiguration;
+import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.service.SendEmailService;
 import com.hillayes.email.service.UserService;
@@ -8,42 +9,57 @@ import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.user.*;
+import com.hillayes.events.events.user.UserCreated;
+import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.events.events.user.UserRegistered;
+import com.hillayes.events.events.user.UserUpdated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import sendinblue.ApiException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @ApplicationScoped
 @TopicConsumer(Topic.USER)
 @RequiredArgsConstructor
 @Slf4j
 public class UserTopicConsumer implements EventConsumer {
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss, dd MMM yyyy vvvv");
+
     private final UserService userService;
     private final SendEmailService sendEmailService;
-    private final EmailConfiguration emailConfiguration;
-    
+
     @Transactional
-    public void consume(EventPacket eventPacket) throws ApiException {
+    public void consume(EventPacket eventPacket) throws Exception {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received user event [payloadClass: {}]", payloadClass);
 
-        if (UserCreated.class.getName().equals(payloadClass)) {
+        if (UserRegistered.class.getName().equals(payloadClass)) {
+            processUserRegistered(eventPacket.getPayloadContent());
+        } else if (UserCreated.class.getName().equals(payloadClass)) {
             processUserCreated(eventPacket.getPayloadContent());
-        }
-
-        else if (UserUpdated.class.getName().equals(payloadClass)) {
+        } else if (UserUpdated.class.getName().equals(payloadClass)) {
             processUserUpdated(eventPacket.getPayloadContent());
-        }
-
-        else if (UserDeleted.class.getName().equals(payloadClass)) {
+        } else if (UserDeleted.class.getName().equals(payloadClass)) {
             processUserDeleted(eventPacket.getPayloadContent());
         }
     }
 
-    private void processUserCreated(UserCreated event) throws ApiException {
+    private void processUserRegistered(UserRegistered event) throws Exception {
+        Recipient recipient = new Recipient(event.getEmail(), event.getEmail());
+        Map<String, Object> params = Map.of(
+            "acknowledge-uri", event.getAcknowledgerUri(),
+            "expires", format(event.getExpires())
+        );
+        sendEmailService.sendEmail(TemplateName.USER_REGISTERED, recipient, params);
+    }
+
+    private void processUserCreated(UserCreated event) throws Exception {
         User user = User.builder()
             .id(event.getUserId())
             .username(event.getUsername())
@@ -55,7 +71,7 @@ public class UserTopicConsumer implements EventConsumer {
             .build();
         user = userService.createUser(user);
 
-        sendEmailService.sendEmail(emailConfiguration.templates().get("user-created"), user);
+        sendEmailService.sendEmail(TemplateName.USER_CREATED, new Recipient(user), null);
     }
 
     private void processUserDeleted(UserDeleted event) {
@@ -73,5 +89,35 @@ public class UserTopicConsumer implements EventConsumer {
             .preferredName(event.getPreferredName())
             .build();
         userService.updateUser(user);
+    }
+
+    private String format(Instant dateTime) {
+        return DATE_TIME_FORMATTER.format(LocalDateTime.ofInstant(dateTime, ZoneId.systemDefault()));
+    }
+
+
+    private class Recipient implements EmailConfiguration.Corresponder {
+        private final String email;
+        private final String name;
+
+        public Recipient(String email, String name) {
+            this.email = email;
+            this.name = name;
+        }
+
+        public Recipient(User user) {
+            this.email = user.getEmail();
+            this.name = user.getPreferredName();
+        }
+
+        @Override
+        public String name() {
+            return name;
+        }
+
+        @Override
+        public String email() {
+            return email;
+        }
     }
 }

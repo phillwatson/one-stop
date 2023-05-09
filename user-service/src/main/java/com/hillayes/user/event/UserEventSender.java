@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.net.URI;
 import java.time.Instant;
 
 @ApplicationScoped
@@ -20,12 +21,13 @@ import java.time.Instant;
 public class UserEventSender {
     private final EventSender eventSender;
 
-    public void sendUserRegistered(MagicToken token) {
+    public void sendUserRegistered(MagicToken token, URI acknowledgerUri) {
         log.debug("Sending UserRegistered event [email: {}]", token.getEmail());
         eventSender.send(Topic.USER, UserRegistered.builder()
             .email(token.getEmail())
             .token(token.getToken())
             .expires(token.getExpires())
+            .acknowledgerUri(acknowledgerUri)
             .build());
     }
 

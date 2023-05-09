@@ -2,12 +2,14 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.commons.Strings;
+import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
+import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.MagicTokenRepository;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -49,8 +53,16 @@ public class UserService {
             .expires(Instant.now().plus(5, ChronoUnit.MINUTES))
             .build());
 
-        userEventSender.sendUserRegistered(token);
-        return token;
+        try {
+            URI acknowledgerUri = URI.create(String.format("http://%s/acknowledge/%s", Network.getMyIpAddress(), token.getToken()));
+            userEventSender.sendUserRegistered(token, acknowledgerUri);
+
+            log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
+            return token;
+        } catch (IOException e) {
+            log.warn("Failed to register email [email: {}]", email, e);
+            throw new UserRegistrationException(email);
+        }
     }
 
     public Optional<User> acknowledgeToken(String token) {

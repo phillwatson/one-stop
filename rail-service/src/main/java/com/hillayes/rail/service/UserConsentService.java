@@ -95,7 +95,7 @@ public class UserConsentService {
             .dateCreated(Instant.now())
             .userId(userId)
             .institutionId(agreement.institutionId)
-            .agreementId(agreement.id.toString())
+            .agreementId(agreement.id)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementExpires(expires)
             .callbackUrl(callbackUrl)
@@ -122,7 +122,7 @@ public class UserConsentService {
                 .build());
 
             // record requisition
-            userConsent.setRequisitionId(requisition.id.toString());
+            userConsent.setRequisitionId(requisition.id);
             userConsent.setStatus(ConsentStatus.WAITING);
 
             // send consent initiated event notification

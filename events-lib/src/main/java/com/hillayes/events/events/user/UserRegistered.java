@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
 import java.time.Instant;
 
 /**
@@ -20,4 +21,5 @@ public class UserRegistered {
     private String email;
     private String token;
     private Instant expires;
+    private URI acknowledgerUri;
 }

@@ -1,4 +1,4 @@
-package com.hillayes.email;
+package com.hillayes.email.config;
 
 import io.smallrye.config.ConfigMapping;
 
@@ -15,6 +15,8 @@ public interface EmailConfiguration {
      */
     boolean disabled();
 
+    Corresponder defaultSender();
+
     /**
      * The API key used to authenticate with the email service provider.
      */
@@ -23,7 +25,7 @@ public interface EmailConfiguration {
     /**
      * The configuration for each email template configuration, keyed by their name.
      */
-    Map<String, TemplateConfig> templates();
+    Map<TemplateName, TemplateConfig> templates();
 
     /**
      * The configuration for a single email topic.
@@ -35,15 +37,15 @@ public interface EmailConfiguration {
         String subject();
 
         /**
-         * The sender of the email.
+         * The sender of the email. If not provided, the defaultSender applies.
          */
-        CorresponderConfig sender();
+        Optional<Corresponder> sender();
 
         /**
          * The optional receiver of the email. If not present, it is assumed the receiver
          * will be identified by the context (e.g. user record).
          */
-        Optional<CorresponderConfig> receiver();
+        Optional<Corresponder> receiver();
 
         /**
          * The path to the file containing the text used to render the email body.
@@ -58,7 +60,7 @@ public interface EmailConfiguration {
         Optional<String> templateId();
     }
 
-    interface CorresponderConfig {
+    interface Corresponder {
         /**
          * The name of the sender; normally "one-stop info".
          */
