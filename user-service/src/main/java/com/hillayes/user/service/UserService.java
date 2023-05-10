@@ -14,6 +14,7 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
+import com.hillayes.user.resource.UserOnboardResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,10 +23,12 @@ import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -54,11 +57,19 @@ public class UserService {
             .build());
 
         try {
-            URI acknowledgerUri = URI.create(String.format("http://%s/api/v1/users/onboard/acknowledge/%s", Network.getMyIpAddress(), token.getToken()));
+            URI acknowledgerUri = UriBuilder
+                .fromResource(UserOnboardResource.class)
+                .path(UserOnboardResource.class, "acknowledgeUser")
+                .scheme("http")
+                .host(Network.getMyIpAddress())
+                .buildFromMap(Map.of("token", token.getToken()));
             userEventSender.sendUserRegistered(token, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
             return token;
+        } catch (IllegalArgumentException e) {
+            log.error("Failed to construct acknowledge URI [email: {}]", email, e);
+            throw new UserRegistrationException(email);
         } catch (IOException e) {
             log.warn("Failed to register email [email: {}]", email, e);
             throw new UserRegistrationException(email);
