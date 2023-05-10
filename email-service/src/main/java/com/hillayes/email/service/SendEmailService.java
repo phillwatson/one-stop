@@ -2,6 +2,7 @@ package com.hillayes.email.service;
 
 import com.hillayes.email.config.EmailConfiguration;
 import com.hillayes.email.config.TemplateName;
+import com.hillayes.email.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sendinblue.ApiException;
@@ -24,8 +25,13 @@ public class SendEmailService {
     private final EmailConfiguration configuration;
 
     public void sendEmail(TemplateName templateName,
+                          EmailConfiguration.Corresponder recipient) throws IOException, ApiException {
+        sendEmail(templateName, recipient, null);
+    }
+
+    public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient,
-                          Map<String,Object> params) throws ApiException, IOException {
+                          Map<String, Object> params) throws ApiException, IOException {
         if (configuration.disabled()) {
             log.debug("Email sending is disabled");
             return;
@@ -86,6 +92,31 @@ public class SendEmailService {
                 }
                 return result.toString();
             }
+        }
+    }
+
+    public static class Recipient implements EmailConfiguration.Corresponder {
+        private final String email;
+        private final String name;
+
+        public Recipient(String email, String name) {
+            this.email = email;
+            this.name = name;
+        }
+
+        public Recipient(User user) {
+            this.email = user.getEmail();
+            this.name = user.getPreferredName();
+        }
+
+        @Override
+        public String name() {
+            return name;
+        }
+
+        @Override
+        public String email() {
+            return email;
         }
     }
 }

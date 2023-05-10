@@ -54,7 +54,7 @@ public class UserService {
             .build());
 
         try {
-            URI acknowledgerUri = URI.create(String.format("http://%s/acknowledge/%s", Network.getMyIpAddress(), token.getToken()));
+            URI acknowledgerUri = URI.create(String.format("http://%s/api/v1/users/onboard/acknowledge/%s", Network.getMyIpAddress(), token.getToken()));
             userEventSender.sendUserRegistered(token, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);

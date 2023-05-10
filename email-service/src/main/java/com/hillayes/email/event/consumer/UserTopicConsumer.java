@@ -1,9 +1,9 @@
 package com.hillayes.email.event.consumer;
 
-import com.hillayes.email.config.EmailConfiguration;
 import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.service.SendEmailService;
+import com.hillayes.email.service.SendEmailService.Recipient;
 import com.hillayes.email.service.UserService;
 import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
@@ -19,8 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -71,7 +71,7 @@ public class UserTopicConsumer implements EventConsumer {
             .build();
         user = userService.createUser(user);
 
-        sendEmailService.sendEmail(TemplateName.USER_CREATED, new Recipient(user), null);
+        sendEmailService.sendEmail(TemplateName.USER_CREATED, new Recipient(user));
     }
 
     private void processUserDeleted(UserDeleted event) {
@@ -92,32 +92,6 @@ public class UserTopicConsumer implements EventConsumer {
     }
 
     private String format(Instant dateTime) {
-        return DATE_TIME_FORMATTER.format(LocalDateTime.ofInstant(dateTime, ZoneId.systemDefault()));
-    }
-
-
-    private class Recipient implements EmailConfiguration.Corresponder {
-        private final String email;
-        private final String name;
-
-        public Recipient(String email, String name) {
-            this.email = email;
-            this.name = name;
-        }
-
-        public Recipient(User user) {
-            this.email = user.getEmail();
-            this.name = user.getPreferredName();
-        }
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        @Override
-        public String email() {
-            return email;
-        }
+        return DATE_TIME_FORMATTER.format(ZonedDateTime.ofInstant(dateTime, ZoneId.systemDefault()));
     }
 }
