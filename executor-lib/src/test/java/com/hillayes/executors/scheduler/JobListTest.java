@@ -153,7 +153,7 @@ public class JobListTest extends TestBase {
 
         // no more retry attempts will be made
         Awaitility.await()
-            .during(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
+            .pollDelay(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(6)) // timeout
             .until(() -> signal.get() == 4 ); // no increment of the signal shows job was not retried
 

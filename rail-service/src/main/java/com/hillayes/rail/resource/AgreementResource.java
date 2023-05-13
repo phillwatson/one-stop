@@ -29,7 +29,7 @@ public class AgreementResource {
                                                 @QueryParam("offset") int offset) {
         log.info("List agreements [limit: {}, offset: {}]", limit, offset);
         PaginatedList<EndUserAgreement> result = agreementService.list(limit, offset);
-        log.info("List agreements [limit: {}, offset: {}, count: {}]", limit, offset, result.count);
+        log.debug("List agreements [limit: {}, offset: {}, count: {}]", limit, offset, result.count);
         return result;
     }
 
@@ -37,7 +37,7 @@ public class AgreementResource {
     public Response create(EndUserAgreementRequest agreement) {
         log.info("Create agreement [institution: {}, scope: {}]", agreement.getInstitutionId(), agreement.getAccessScope());
         EndUserAgreement result = agreementService.create(agreement);
-        log.info("Created agreement [institution: {}, id: {}]", agreement.getInstitutionId(), result.id);
+        log.debug("Created agreement [institution: {}, id: {}]", agreement.getInstitutionId(), result.id);
         return Response
                 .status(Response.Status.CREATED)
                 .entity(result)
@@ -50,7 +50,7 @@ public class AgreementResource {
                                    EndUserAgreementAccepted acceptance) {
         log.info("Accept agreement [id: {}]", id);
         return agreementService.accept(id, acceptance)
-            .orElseThrow(() -> new NotFoundException("Aggrement", id));
+            .orElseThrow(() -> new NotFoundException("Agreement", id));
     }
 
     @GET
@@ -58,7 +58,7 @@ public class AgreementResource {
     public EndUserAgreement get(@PathParam("id") String id) {
         log.info("Get agreement [id: {}]", id);
         return agreementService.get(id)
-            .orElseThrow(() -> new NotFoundException("Aggrement", id));
+            .orElseThrow(() -> new NotFoundException("Agreement", id));
     }
 
     @DELETE

@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.onestop.api.AccountResponse;
+import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Institution;
@@ -94,10 +95,20 @@ public class AccountResourceTest extends TestBase {
         assertEquals(pageRequest.getPageSize(), response.getPageSize());
 
         // and: all page links are present
-        assertEquals("/api/v1/rails/accounts?page=0&page-size=20", response.getLinks().getFirst());
-        assertEquals("/api/v1/rails/accounts?page=11&page-size=20", response.getLinks().getNext());
-        assertEquals("/api/v1/rails/accounts?page=9&page-size=20", response.getLinks().getPrevious());
-        assertEquals("/api/v1/rails/accounts?page=15&page-size=20", response.getLinks().getLast());
+        PageLinks links = response.getLinks();
+        assertEquals("/api/v1/rails/accounts",  links.getFirst().getPath());
+        assertEquals("page-size=20&page=0",  links.getFirst().getQuery());
+
+        assertNotNull(links.getPrevious());
+        assertEquals("/api/v1/rails/accounts",  links.getPrevious().getPath());
+        assertEquals("page-size=20&page=9",  links.getPrevious().getQuery());
+
+        assertNotNull(links.getNext());
+        assertEquals("/api/v1/rails/accounts", links.getNext().getPath());
+        assertEquals("page-size=20&page=11", links.getNext().getQuery());
+
+        assertEquals("/api/v1/rails/accounts", links.getLast().getPath());
+        assertEquals("page-size=20&page=15", links.getLast().getQuery());
 
         // and: each account is found in the response
         accounts.forEach(account -> {

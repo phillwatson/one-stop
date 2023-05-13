@@ -28,7 +28,7 @@ public class InstitutionResource {
         Set<Institution> result = new HashSet<>(institutionService.list(countryCode, true));
         result.addAll(institutionService.list(countryCode, false));
 
-        log.info("List institutions [country: {}, size: {}]", countryCode, result.size());
+        log.debug("List institutions [country: {}, size: {}]", countryCode, result.size());
         return result;
     }
 

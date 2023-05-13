@@ -1,10 +1,11 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,92 +17,94 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
-public class RequisitionResourceTest extends TestBase {
-    @AfterEach
-    public void cleanup() {
-        deleteRequisitions();
-        deleteAgreements();
-    }
-
+public class RequisitionResourceTest extends TestResourceBase {
     @Test
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testFlow() {
-        EndUserAgreementRequest agreement = EndUserAgreementRequest.builder()
+        EndUserAgreementRequest agreementRequest = EndUserAgreementRequest.builder()
                 .institutionId("SANDBOXFINANCE_SFIN0000")
                 .accessScope(List.of("balances", "details", "transactions"))
                 .accessValidForDays(10)
                 .maxHistoricalDays(60)
                 .build();
+        nordigenSimulator.listAgreements(List.of(
+            nordigenSimulator.createAgreement(agreementRequest)
+        ));
 
-        String agreementId = given()
-                .request()
-                .contentType(JSON)
-                .body(agreement)
+        // create agreement
+        EndUserAgreement agreement = given()
+                .request().contentType(JSON).body(agreementRequest)
                 .when().post("/api/v1/rails/agreements")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
-                .extract().path("id");
+                .extract().response().as(EndUserAgreement.class);
 
-        RequisitionRequest requisition = RequisitionRequest.builder()
-                .institutionId(agreement.getInstitutionId())
-                .agreement(agreementId)
+        RequisitionRequest requisitionRequest = RequisitionRequest.builder()
+                .institutionId(agreementRequest.getInstitutionId())
+                .agreement(agreement.id)
                 .redirect("http://localhost:8080/accepted")
                 .reference(UUID.randomUUID().toString())
                 .userLanguage("EN")
                 .build();
+        nordigenSimulator.listRequisitions(List.of(
+            nordigenSimulator.createRequisition(requisitionRequest)
+        ));
 
-        String requisitionId = given()
-                .request()
-                .contentType(JSON)
-                .body(requisition)
+        // create requisition
+        Requisition requisition = given()
+                .request().contentType(JSON).body(requisitionRequest)
                 .when().post("/api/v1/rails/requisitions")
                 .then()
                 .statusCode(201)
                 .contentType(JSON)
-                .body("redirect", equalTo(requisition.getRedirect()),
-                        "agreement", equalTo(requisition.getAgreement().toString()),
-                        "institution_id", equalTo(requisition.getInstitutionId()),
-                        "reference", equalTo(requisition.getReference()),
-                        "user_language", equalTo(requisition.getUserLanguage()),
+                .body("redirect", equalTo(requisitionRequest.getRedirect()),
+                        "agreement", equalTo(requisitionRequest.getAgreement()),
+                        "institution_id", equalTo(requisitionRequest.getInstitutionId()),
+                        "reference", equalTo(requisitionRequest.getReference()),
+                        "user_language", equalTo(requisitionRequest.getUserLanguage()),
                         "status", equalTo("CR"),
                         "link", notNullValue())
-                .extract().path("id");
+                .extract().response().as(Requisition.class);
 
+        // list all requisitions
         given()
                 .queryParam("limit", 100)
                 .queryParam("offset", 0)
-                .when().get("/api/v1/requisitions")
+                .when().get("/api/v1/rails/requisitions")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
                 .body("count", equalTo(1),
-                        "results[0].id", equalTo(requisitionId));
+                        "results[0].id", equalTo(requisition.id));
 
+        // get requisition
         String acceptanceLink = given()
-                .pathParam("id", requisitionId)
+                .pathParam("id", requisition.id)
                 .when().get("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
-                .body("redirect", equalTo(requisition.getRedirect()),
-                        "agreement", equalTo(requisition.getAgreement().toString()),
-                        "institution_id", equalTo(requisition.getInstitutionId()),
-                        "reference", equalTo(requisition.getReference()),
-                        "user_language", equalTo(requisition.getUserLanguage()),
+                .body("redirect", equalTo(requisition.redirect),
+                        "agreement", equalTo(requisition.agreement),
+                        "institution_id", equalTo(requisition.institutionId),
+                        "reference", equalTo(requisition.reference),
+                        "user_language", equalTo(requisition.userLanguage),
                         "status", equalTo("CR"))
                 .extract().path("link");
 
+        // delete the requisition
         given()
-                .pathParam("id", requisitionId)
+                .pathParam("id", requisition.id)
                 .when().delete("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
                 .body("summary", equalTo("Requisition deleted"));
 
+        // get requisition again (should fail)
         given()
-                .pathParam("id", requisitionId)
+                .pathParam("id", requisition.id)
                 .when().get("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(404);

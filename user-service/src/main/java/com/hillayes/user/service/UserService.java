@@ -88,7 +88,7 @@ public class UserService {
                     .email(t.getEmail().toLowerCase())
                     .givenName(t.getEmail())
                     .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                    .roles(Set.of("user"))
+                    .roles(Set.of("onboarding")) // allow user to complete onboarding but nothing else
                     .build();
 
                 newUser = userRepository.save(newUser);
@@ -129,6 +129,7 @@ public class UserService {
                     .phoneNumber(modifiedUser.getPhoneNumber())
                     .passwordHash(passwordCrypto.getHash(password))
                     .dateOnboarded(Instant.now())
+                    .roles(Set.of("user"))
                     .build());
 
                 userEventSender.sendUserCreated(user);

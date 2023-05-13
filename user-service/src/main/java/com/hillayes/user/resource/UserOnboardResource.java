@@ -52,7 +52,7 @@ public class UserOnboardResource {
 
     @POST
     @Path("/complete")
-    @RolesAllowed("user")
+    @RolesAllowed("onboarding")
     public Response onboardUser(@Context SecurityContext ctx,
                                 UserCompleteRequest request) {
         UUID id = ResourceUtils.getUserId(ctx);

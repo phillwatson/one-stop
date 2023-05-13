@@ -28,7 +28,7 @@ public class RequisitionResource {
                                            @QueryParam("offset") int offset) {
         log.info("List requisitions [limit: {}, offset: {}]", limit, offset);
         PaginatedList<Requisition> result = requisitionService.list(limit, offset);
-        log.info("List requisitions [limit: {}, offset: {}, count: {}]", limit, offset, result.count);
+        log.debug("List requisitions [limit: {}, offset: {}, count: {}]", limit, offset, result.count);
         return result;
     }
 
@@ -45,7 +45,7 @@ public class RequisitionResource {
         log.info("Create requisition [reference: {}, agreement: {}, institution: {}]",
                 requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId());
         Requisition result = requisitionService.create(requisition);
-        log.info("Created requisition [reference: {}, agreement: {}, institution: {}, id: {}]",
+        log.debug("Created requisition [reference: {}, agreement: {}, institution: {}, id: {}]",
                 requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId(), result.id);
         return Response
                 .status(Response.Status.CREATED)
