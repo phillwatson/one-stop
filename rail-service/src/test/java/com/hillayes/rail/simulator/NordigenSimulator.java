@@ -2,7 +2,6 @@ package com.hillayes.rail.simulator;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
-import com.github.tomakehurst.wiremock.common.LocalNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.hillayes.rail.model.*;
@@ -15,6 +14,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static com.hillayes.rail.utils.TestData.toJson;
 
+/**
+ * A simulator for the Nordigen API. This simulator is used to stub out the Nordigen
+ * API so that the Rail service can be tested without having to make calls to the
+ * real Nordigen API.
+ */
 @Slf4j
 public class NordigenSimulator {
     private final WireMockServer wireMockServer;
@@ -22,11 +26,11 @@ public class NordigenSimulator {
     private final Map<String, EntityStubs<EndUserAgreement>> endUserAgreements = new HashMap<>();
     private final Map<String, EntityStubs<Requisition>> requisitions = new HashMap<>();
 
-    public NordigenSimulator() {
+    public NordigenSimulator(int portNumber) {
         wireMockServer = new WireMockServer(
             options()
-                .port(8089)
-                .notifier(log.isTraceEnabled() ? new ConsoleNotifier(true) : new NullNotifier())
+                .port(portNumber)
+                .notifier(log.isDebugEnabled() ? new ConsoleNotifier(true) : new NullNotifier())
                 .extensions(
                     new DeleteAgreements(this),
                     new DeleteRequisitions(this),
@@ -36,23 +40,48 @@ public class NordigenSimulator {
         );
     }
 
+    /**
+     * Used by the DeleteStubsExtension classes to retrieve the stubs for identified
+     * EndUserAgreement and delete them. This will also remove the stubs from the
+     * simulator's internal map of stubs.
+     *
+     * @param agreementId the ID of the agreement to retrieve.
+     * @return the stubs for the agreement.
+     */
     Optional<EntityStubs<EndUserAgreement>> popAgreement(String agreementId) {
         return Optional.ofNullable(endUserAgreements.remove(agreementId));
     }
 
+    /**
+     * Used by the DeleteStubsExtension classes to retrieve the stubs for the identified
+     * Requisition and delete them. This will also remove the stubs from the simulator's
+     * internal map of stubs.
+     *
+     * @param requisitionId the ID of the requisition to retrieve.
+     * @return the stubs for the requisition.
+     */
     Optional<EntityStubs<Requisition>> popRequisition(String requisitionId) {
         return Optional.ofNullable(requisitions.remove(requisitionId));
     }
 
+    /**
+     * Starts the wiremock server. Typically called at the start of each test class.
+     */
     public void start() {
         wireMockServer.start();
     }
 
+    /**
+     * Stops the wiremock server. Typically called at the end of each test class.
+     */
     public void stop() {
         wireMockServer.resetAll();
         wireMockServer.stop();
     }
 
+    /**
+     * Resets the simulator to its initial state. Typically called before each test.
+     */
     public void reset() {
         wireMockServer.resetAll();
 
@@ -62,6 +91,9 @@ public class NordigenSimulator {
         listRequisitions();
     }
 
+    /**
+     * Mocks the endpoint to obtain access and refresh tokens from Nordigen.
+     */
     public void login() {
         ObtainJwtResponse response = new ObtainJwtResponse();
         response.access = UUID.randomUUID().toString();
@@ -76,6 +108,13 @@ public class NordigenSimulator {
         );
     }
 
+    /**
+     * Mocks all endpoints related to the creation, retrieval, and deletion the given
+     * EndUserAgreement.
+     *
+     * @param request the EndUserAgreementRequest to mock.
+     * @return the EndUserAgreement that was stubbed.
+     */
     public EndUserAgreement stubAgreement(EndUserAgreementRequest request) {
         EndUserAgreement response = new EndUserAgreement();
         response.id = UUID.randomUUID().toString();
@@ -86,9 +125,12 @@ public class NordigenSimulator {
         response.created = OffsetDateTime.now();
         response.accepted = null;
 
+        // create mock endpoints specific to this instance
         EntityStubs<EndUserAgreement> stubs = new EntityStubs<>(response)
             // mock create endpoint
             .add(wireMockServer.stubFor(post(urlEqualTo("/api/v2/agreements/enduser/"))
+                .withHeader("Content-Type", equalTo("application/json"))
+                .withRequestBody(matchingJsonPath("$.institution_id", equalTo(request.getInstitutionId())))
                 .willReturn(created()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(response)))
@@ -96,6 +138,7 @@ public class NordigenSimulator {
 
             // mock get endpoint
             .add(wireMockServer.stubFor(get(urlEqualTo("/api/v2/agreements/enduser/" + response.id + "/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(ok()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(response)))
@@ -103,6 +146,7 @@ public class NordigenSimulator {
 
             // mock accept endpoint
             .add(wireMockServer.stubFor(put(urlEqualTo("/api/v2/agreements/enduser/" + response.id + "/accept/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(ok()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(Map.of(
@@ -114,6 +158,7 @@ public class NordigenSimulator {
 
             // mock delete endpoint
             .add(wireMockServer.stubFor(delete(urlEqualTo("/api/v2/agreements/enduser/" + response.id + "/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(ok()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(Map.of(
@@ -127,6 +172,13 @@ public class NordigenSimulator {
         return response;
     }
 
+    /**
+     * Mocks all endpoints related to the creation, retrieval, and deletion the given
+     * RequisitionRequest.
+     *
+     * @param request the RequisitionRequest to mock.
+     * @return the Requisition that was stubbed.
+     */
     public Requisition stubRequisition(RequisitionRequest request) {
         String id = UUID.randomUUID().toString();
         Requisition response = Requisition.builder()
@@ -145,9 +197,12 @@ public class NordigenSimulator {
             .accounts(List.of())
             .build();
 
+        // create mock endpoints specific to this instance
         EntityStubs<Requisition> stubs = new EntityStubs<>(response)
             // mock create endpoint
             .add(wireMockServer.stubFor(post(urlEqualTo("/api/v2/requisitions/"))
+                .withHeader("Content-Type", equalTo("application/json"))
+                .withRequestBody(matchingJsonPath("$.institution_id", equalTo(request.getInstitutionId())))
                 .willReturn(created()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(response)))
@@ -155,6 +210,7 @@ public class NordigenSimulator {
 
             // mock get endpoint
             .add(wireMockServer.stubFor(get(urlEqualTo("/api/v2/requisitions/" + response.id + "/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(ok()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(response)))
@@ -162,6 +218,7 @@ public class NordigenSimulator {
 
             // mock delete endpoint
             .add(wireMockServer.stubFor(delete(urlEqualTo("/api/v2/requisitions/" + response.id + "/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(ok()
                     .withHeader("Content-Type", "application/json")
                     .withBody(toJson(Map.of(
@@ -175,24 +232,39 @@ public class NordigenSimulator {
         return response;
     }
 
+    /**
+     * Mocks all endpoints related to the retrieval of a list of EndUserAgreements.
+     * The response will be based on the EndUserAgreementRequests that have been
+     * stubbed since the most recent call to {@link #reset()}.
+     */
     private void listAgreements() {
         wireMockServer.stubFor(
             get(urlPathEqualTo("/api/v2/agreements/enduser/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(
                     aResponse().withTransformers("agreementList")
                 )
         );
     }
 
+    /**
+     * Mocks all endpoints related to the retrieval of a list of Requisitions.
+     * The response will be based on the RequisitionRequests that have been
+     * stubbed since the most recent call to {@link #reset()}.
+     */
     private void listRequisitions() {
         wireMockServer.stubFor(
             get(urlPathEqualTo("/api/v2/requisitions/"))
+                .withHeader("Content-Type", equalTo("application/json"))
                 .willReturn(
                     aResponse().withTransformers("requisitionList")
                 )
         );
     }
 
+    /**
+     * A no-op logger for the WireMock server. Used when logging is not enabled.
+     */
     private static class NullNotifier implements Notifier {
         public void info(String message) {}
         public void error(String message) {}

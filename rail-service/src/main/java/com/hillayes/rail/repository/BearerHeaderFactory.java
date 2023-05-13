@@ -9,6 +9,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -31,7 +33,8 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
     public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,
                                                  MultivaluedMap<String, String> clientOutgoingHeaders) {
         MultivaluedMap<String, String> result = new MultivaluedHashMap<>();
-        result.add("Authorization", "Bearer " + getAccessToken());
+        result.add(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken());
+        result.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         return result;
     }
 

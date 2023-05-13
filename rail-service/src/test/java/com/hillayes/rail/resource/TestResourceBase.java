@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 public class TestResourceBase extends TestBase {
-    public final static NordigenSimulator nordigenSimulator = new NordigenSimulator();
+    public final static NordigenSimulator nordigenSimulator = new NordigenSimulator(8089);
 
     @BeforeAll
     public static void beforeAll() {

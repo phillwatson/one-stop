@@ -96,12 +96,12 @@ public class AccountResourceTest extends TestBase {
 
         // and: all page links are present
         PageLinks links = response.getLinks();
-        assertEquals("/api/v1/rails/accounts",  links.getFirst().getPath());
-        assertEquals("page-size=20&page=0",  links.getFirst().getQuery());
+        assertEquals("/api/v1/rails/accounts", links.getFirst().getPath());
+        assertEquals("page-size=20&page=0", links.getFirst().getQuery());
 
         assertNotNull(links.getPrevious());
-        assertEquals("/api/v1/rails/accounts",  links.getPrevious().getPath());
-        assertEquals("page-size=20&page=9",  links.getPrevious().getQuery());
+        assertEquals("/api/v1/rails/accounts", links.getPrevious().getPath());
+        assertEquals("page-size=20&page=9", links.getPrevious().getQuery());
 
         assertNotNull(links.getNext());
         assertEquals("/api/v1/rails/accounts", links.getNext().getPath());
@@ -177,7 +177,7 @@ public class AccountResourceTest extends TestBase {
     }
 
     @Test
-    @TestSecurity(user = userIdStr, roles = { "admin", "user" })
+    @TestSecurity(user = userIdStr, roles = {"admin", "user"})
     public void testGetAccounts_MultiRoleUser() {
         UUID userId = UUID.fromString(userIdStr);
 
@@ -283,7 +283,7 @@ public class AccountResourceTest extends TestBase {
     }
 
     @Test
-    @TestSecurity(user = userIdStr, roles = { "admin", "user" })
+    @TestSecurity(user = userIdStr, roles = {"admin", "user"})
     public void testGetAccountById_MultipleRoleUser() {
         UUID userId = UUID.fromString(userIdStr);
 
