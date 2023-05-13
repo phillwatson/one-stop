@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is used to delete the stubs for a Requisition when that requisition
- * is deleted.
+ * is deleted. Also deletes the stubs for the agreement associated with the requisition.
  */
 @Slf4j
 class DeleteRequisitions extends DeleteStubsExtension {
