@@ -1,6 +1,7 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.rail.model.Institution;
+import com.hillayes.rail.model.InstitutionDetail;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
@@ -21,5 +22,5 @@ public interface InstitutionRepository {
                                   @QueryParam("payments_enabled") Boolean paymentsEnabled);
     @GET
     @Path("{id}/")
-    public Institution get(@PathParam("id") String id);
+    public InstitutionDetail get(@PathParam("id") String id);
 }

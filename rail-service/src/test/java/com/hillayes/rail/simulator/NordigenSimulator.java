@@ -87,6 +87,7 @@ public class NordigenSimulator {
 
         // set up minimum stubs
         login();
+        institutions();
         listAgreements();
         listRequisitions();
     }
@@ -94,7 +95,7 @@ public class NordigenSimulator {
     /**
      * Mocks the endpoint to obtain access and refresh tokens from Nordigen.
      */
-    public void login() {
+    private void login() {
         ObtainJwtResponse response = new ObtainJwtResponse();
         response.access = UUID.randomUUID().toString();
         response.accessExpires = 3600;
@@ -105,6 +106,43 @@ public class NordigenSimulator {
             .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(toJson(response)))
+        );
+    }
+
+    /**
+     * Mocks the endpoints for institutions - list and get detail.
+     */
+    private void institutions() {
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/institutions/"))
+            .withQueryParam("country", equalTo("GB"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .withQueryParam("payments_enabled", equalTo("false"))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBodyFile("institutions-payments-disabled.json"))
+        );
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/institutions/"))
+            //.withQueryParam("country", equalTo("GB"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .withQueryParam("payments_enabled", equalTo("true"))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBodyFile("institutions-payments-disabled.json"))
+        );
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/institutions/SANDBOXFINANCE_SFIN0000/"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(Institutions.DEFINITIONS.get("SANDBOXFINANCE_SFIN0000")))
+        );
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/institutions/FIRST_DIRECT_MIDLGB22/"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(Institutions.DEFINITIONS.get("FIRST_DIRECT_MIDLGB22")))
         );
     }
 
@@ -266,8 +304,13 @@ public class NordigenSimulator {
      * A no-op logger for the WireMock server. Used when logging is not enabled.
      */
     private static class NullNotifier implements Notifier {
-        public void info(String message) {}
-        public void error(String message) {}
-        public void error(String message, Throwable t) {}
+        public void info(String message) {
+        }
+
+        public void error(String message) {
+        }
+
+        public void error(String message, Throwable t) {
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Institution;
+import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
 import io.quarkus.test.junit.QuarkusTest;
@@ -231,7 +232,7 @@ public class AccountResourceTest extends TestBase {
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
         // and: an institution linked to that account
-        Institution institution = mockInstitution();
+        InstitutionDetail institution = mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint
@@ -266,7 +267,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        Institution bank = mockInstitution();
+        InstitutionDetail bank = mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a non-user role
@@ -290,7 +291,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        Institution bank = mockInstitution();
+        InstitutionDetail bank = mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a user with multiple roles
@@ -335,7 +336,7 @@ public class AccountResourceTest extends TestBase {
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
         // and: an institution linked to that account
-        Institution institution = mockInstitution();
+        InstitutionDetail institution = mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint

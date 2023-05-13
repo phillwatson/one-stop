@@ -3,6 +3,7 @@ package com.hillayes.rail.service;
 import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.model.Institution;
+import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.repository.InstitutionRepository;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class InstitutionService extends AbstractRailService {
     ServiceConfiguration config;
 
     private Cache<CacheKey,List<Institution>> cacheByCountry;
-    private Cache<String,Institution> cacheById;
+    private Cache<String,InstitutionDetail> cacheById;
 
     @PostConstruct
     public void init() {
@@ -46,7 +47,7 @@ public class InstitutionService extends AbstractRailService {
         });
     }
 
-    public Optional<Institution> get(String id) {
+    public Optional<InstitutionDetail> get(String id) {
         try {
             return Optional.ofNullable(cacheById.getValueOrCall(id, () -> institutionRepository.get(id)));
         } catch (WebApplicationException e) {

@@ -66,8 +66,8 @@ public class TestData {
             .build();
     }
 
-    public static Institution mockInstitution() {
-        Institution institution = new Institution();
+    public static InstitutionDetail mockInstitution() {
+        InstitutionDetail institution = new InstitutionDetail();
         institution.id = UUID.randomUUID().toString();
         institution.name = randomAlphanumeric(30);
         institution.bic = randomAlphanumeric(10);

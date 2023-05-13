@@ -1,9 +1,6 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.model.EndUserAgreement;
-import com.hillayes.rail.model.EndUserAgreementRequest;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
+import com.hillayes.rail.model.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
@@ -15,19 +12,37 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 public class RequisitionResourceTest extends TestResourceBase {
     @Test
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testFlow() {
+        List<?> institutions = given()
+            .queryParam("country", "GB")
+            .when().get("/api/v1/rails/banks")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().response().as(List.class);
+        assertEquals(34, institutions.size());
+
+        InstitutionDetail institution = given()
+            .when().get("/api/v1/rails/banks/SANDBOXFINANCE_SFIN0000")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().response().as(InstitutionDetail.class);
+        assertEquals("SANDBOXFINANCE_SFIN0000", institution.id);
+
         EndUserAgreementRequest agreementRequest = EndUserAgreementRequest.builder()
             .institutionId("SANDBOXFINANCE_SFIN0000")
             .accessScope(List.of("balances", "details", "transactions"))
             .accessValidForDays(10)
             .maxHistoricalDays(60)
             .build();
-        nordigenSimulator.stubAgreement(agreementRequest);
+        EndUserAgreement mockAgreement = nordigenSimulator.stubAgreement(agreementRequest);
 
         // create agreement
         EndUserAgreement agreement = given()
@@ -37,13 +52,15 @@ public class RequisitionResourceTest extends TestResourceBase {
             .statusCode(201)
             .contentType(JSON)
             .extract().response().as(EndUserAgreement.class);
+        assertEquals(mockAgreement, agreement);
 
         // get agreement
         given()
             .pathParam("id", agreement.id)
             .when().get("/api/v1/rails/agreements/{id}")
             .then()
-            .statusCode(200);
+            .statusCode(200)
+            .contentType(JSON);
 
         RequisitionRequest requisitionRequest = RequisitionRequest.builder()
             .agreement(agreement.id)
@@ -52,7 +69,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             .reference(UUID.randomUUID().toString())
             .userLanguage("EN")
             .build();
-        nordigenSimulator.stubRequisition(requisitionRequest);
+        Requisition mockRequisition = nordigenSimulator.stubRequisition(requisitionRequest);
 
         // create requisition
         Requisition requisition = given()
@@ -69,6 +86,7 @@ public class RequisitionResourceTest extends TestResourceBase {
                 "status", equalTo("CR"),
                 "link", notNullValue())
             .extract().response().as(Requisition.class);
+        assertEquals(mockRequisition, requisition);
 
         // list all requisitions
         given()
