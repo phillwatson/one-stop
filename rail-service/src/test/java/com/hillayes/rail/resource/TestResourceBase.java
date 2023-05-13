@@ -1,6 +1,6 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.utils.NordigenSimulator;
+import com.hillayes.rail.simulator.NordigenSimulator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Requisition {
+public class Requisition implements Comparable<Requisition> {
     @EqualsAndHashCode.Include
     public String id;
 
@@ -48,4 +48,8 @@ public class Requisition {
 
     @JsonProperty("redirect_immediate")
     public Boolean redirectImmediate;
+
+    public int compareTo(Requisition other) {
+        return (other == null) ? 1 : this.created.compareTo(other.created);
+    }
 }

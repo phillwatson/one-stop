@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class EndUserAgreement {
+public class EndUserAgreement implements Comparable<EndUserAgreement>{
     @JsonProperty("id")
     @EqualsAndHashCode.Include
     public String id;
@@ -29,4 +29,8 @@ public class EndUserAgreement {
 
     @JsonProperty("institution_id")
     public String institutionId;
+
+    public int compareTo(EndUserAgreement other) {
+        return (other == null) ? 1 : this.created.compareTo(other.created);
+    }
 }

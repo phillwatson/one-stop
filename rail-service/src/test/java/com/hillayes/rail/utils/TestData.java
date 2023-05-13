@@ -1,5 +1,7 @@
 package com.hillayes.rail.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -18,6 +20,20 @@ import static org.apache.commons.lang3.RandomUtils.nextFloat;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
 
 public class TestData {
+    /**
+     * A shared object mapper for when a test needs to serialize/deserialize objects.
+     */
+    private final static ObjectMapper objectMapper = new ObjectMapper()
+        .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+    public static String toJson(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static UserConsent mockUserConsent(UUID userId, ConsentStatus status) {
         return UserConsent.builder()
             .id(UUID.randomUUID())

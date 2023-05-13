@@ -1,6 +1,5 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -23,8 +22,7 @@ public class AgreementResourceTest extends TestResourceBase {
             .accessValidForDays(10)
             .maxHistoricalDays(60)
             .build();
-        EndUserAgreement agreement = nordigenSimulator.createAgreement(agreementRequest);
-        nordigenSimulator.listAgreements(List.of(agreement));
+        nordigenSimulator.stubAgreement(agreementRequest);
 
         // create agreement
         String agreementId = given()

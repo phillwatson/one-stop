@@ -27,9 +27,7 @@ public class RequisitionResourceTest extends TestResourceBase {
                 .accessValidForDays(10)
                 .maxHistoricalDays(60)
                 .build();
-        nordigenSimulator.listAgreements(List.of(
-            nordigenSimulator.createAgreement(agreementRequest)
-        ));
+        nordigenSimulator.stubAgreement(agreementRequest);
 
         // create agreement
         EndUserAgreement agreement = given()
@@ -40,6 +38,13 @@ public class RequisitionResourceTest extends TestResourceBase {
                 .contentType(JSON)
                 .extract().response().as(EndUserAgreement.class);
 
+        // get agreement
+        given()
+            .pathParam("id", agreement.id)
+            .when().get("/api/v1/rails/agreements/{id}")
+            .then()
+            .statusCode(200);
+
         RequisitionRequest requisitionRequest = RequisitionRequest.builder()
                 .institutionId(agreementRequest.getInstitutionId())
                 .agreement(agreement.id)
@@ -47,9 +52,7 @@ public class RequisitionResourceTest extends TestResourceBase {
                 .reference(UUID.randomUUID().toString())
                 .userLanguage("EN")
                 .build();
-        nordigenSimulator.listRequisitions(List.of(
-            nordigenSimulator.createRequisition(requisitionRequest)
-        ));
+        nordigenSimulator.stubRequisition(requisitionRequest);
 
         // create requisition
         Requisition requisition = given()
@@ -108,5 +111,12 @@ public class RequisitionResourceTest extends TestResourceBase {
                 .when().get("/api/v1/rails/requisitions/{id}")
                 .then()
                 .statusCode(404);
+
+        // get agreement (should fail)
+        given()
+            .pathParam("id", requisition.agreement)
+            .when().get("/api/v1/rails/agreements/{id}")
+            .then()
+            .statusCode(404);
     }
 }
