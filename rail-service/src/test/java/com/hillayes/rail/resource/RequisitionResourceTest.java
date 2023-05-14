@@ -10,8 +10,7 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
@@ -37,10 +36,10 @@ public class RequisitionResourceTest extends TestResourceBase {
         assertEquals("SANDBOXFINANCE_SFIN0000", institution.id);
 
         EndUserAgreementRequest agreementRequest = EndUserAgreementRequest.builder()
-            .institutionId("SANDBOXFINANCE_SFIN0000")
+            .institutionId(institution.id)
             .accessScope(List.of("balances", "details", "transactions"))
             .accessValidForDays(10)
-            .maxHistoricalDays(60)
+            .maxHistoricalDays(institution.transactionTotalDays)
             .build();
         EndUserAgreement mockAgreement = nordigenSimulator.stubAgreement(agreementRequest);
 
