@@ -96,11 +96,12 @@ public class NordigenSimulator {
      * Mocks the endpoint to obtain access and refresh tokens from Nordigen.
      */
     private void login() {
-        ObtainJwtResponse response = new ObtainJwtResponse();
-        response.access = UUID.randomUUID().toString();
-        response.accessExpires = 3600;
-        response.refresh = UUID.randomUUID().toString();
-        response.refreshExpires = 7200;
+        ObtainJwtResponse response = ObtainJwtResponse.builder()
+            .access(UUID.randomUUID().toString())
+            .accessExpires(3600)
+            .refresh(UUID.randomUUID().toString())
+            .refreshExpires(7200)
+            .build();
 
         wireMockServer.stubFor(post(urlEqualTo("/api/v2/token/new/"))
             .willReturn(aResponse()

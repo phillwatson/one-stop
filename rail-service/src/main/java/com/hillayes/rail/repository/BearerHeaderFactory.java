@@ -43,8 +43,8 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
         if (accessToken == null) {
             log.info("Get new access and refresh token [secretId: {}]", SECRET_ID);
             ObtainJwtResponse response = authService.newToken(SECRET_ID, SECRET_KEY);
-            accessToken = new Token(response.access, response.accessExpires);
-            refreshToken = new Token(response.refresh, response.refreshExpires);
+            accessToken = new Token(response.getAccess(), response.getAccessExpires());
+            refreshToken = new Token(response.getRefresh(), response.getRefreshExpires());
         }
 
         else if (accessToken.hasExpired()) {

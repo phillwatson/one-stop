@@ -2,7 +2,6 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.commons.Strings;
-import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.MagicToken;
@@ -43,6 +42,7 @@ public class UserService {
     private final MagicTokenRepository magicTokenRepository;
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
+    private final Gateway gateway;
 
     public MagicToken registerUser(String email) {
         log.info("Registering user [email: {}]", email);
@@ -60,8 +60,9 @@ public class UserService {
             URI acknowledgerUri = UriBuilder
                 .fromResource(UserOnboardResource.class)
                 .path(UserOnboardResource.class, "acknowledgeUser")
-                .scheme("http")
-                .host(Network.getMyIpAddress())
+                .scheme(gateway.getScheme())
+                .host(gateway.getHost())
+                .port(gateway.getPort())
                 .buildFromMap(Map.of("token", token.getToken()));
             userEventSender.sendUserRegistered(token, acknowledgerUri);
 

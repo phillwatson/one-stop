@@ -1,6 +1,7 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
@@ -58,7 +59,7 @@ public class UserOnboardResource {
         UUID id = ResourceUtils.getUserId(ctx);
         log.info("Completing user registration [userId: {}, username: {}]", id, request.getUsername());
 
-        User user = User.builder()
+        User userUpdate = User.builder()
             .username(request.getUsername())
             .preferredName(request.getPreferredName())
             .title(request.getTitle())
@@ -68,7 +69,8 @@ public class UserOnboardResource {
             .phoneNumber(request.getPhone())
             .build();
 
-        userService.completeOnboarding(id, user, request.getPassword().toCharArray());
-        return Response.noContent().build();
+        return userService.completeOnboarding(id, userUpdate, request.getPassword().toCharArray())
+            .map(user -> authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles()))
+            .orElseThrow(() -> new NotFoundException("user", id));
     }
 }
