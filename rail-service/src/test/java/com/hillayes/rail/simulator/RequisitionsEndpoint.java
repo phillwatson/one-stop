@@ -187,6 +187,11 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                 .build();
         }
 
+        RequisitionStatus nextStatus = entity.status.nextStatus();
+        if (nextStatus != null) {
+            entity.status = nextStatus;
+        }
+
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
             .withBody(toJson(entity))

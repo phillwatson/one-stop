@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,20 +96,22 @@ public class RequisitionResourceTest extends TestResourceBase {
             .body("count", equalTo(1),
                 "results[0].id", equalTo(requisition.id));
 
-        // get requisition
-        String acceptanceLink = given()
-            .pathParam("id", requisition.id)
-            .when().get("/api/v1/rails/requisitions/{id}")
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .body("redirect", equalTo(requisition.redirect),
-                "agreement", equalTo(requisition.agreement),
-                "institution_id", equalTo(requisition.institutionId),
-                "reference", equalTo(requisition.reference),
-                "user_language", equalTo(requisition.userLanguage),
-                "status", equalTo("CR"))
-            .extract().path("link");
+        // get requisition - until granted and linked to accounts
+        await().untilAsserted(() -> {
+            Requisition req = given()
+                .pathParam("id", requisition.id)
+                .when().get("/api/v1/rails/requisitions/{id}")
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .body("redirect", equalTo(requisition.redirect),
+                    "agreement", equalTo(requisition.agreement),
+                    "institution_id", equalTo(requisition.institutionId),
+                    "reference", equalTo(requisition.reference),
+                    "user_language", equalTo(requisition.userLanguage))
+                .extract().as(Requisition.class);
+            assertEquals(RequisitionStatus.LN, req.status);
+        });
 
         // delete the requisition
         given()
