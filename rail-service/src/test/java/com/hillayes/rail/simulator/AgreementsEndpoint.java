@@ -41,7 +41,9 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(post(urlEqualTo("/api/v2/agreements/enduser/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(AgreementsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(AgreementsEndpoint.class.getSimpleName())
             )
         );
 
@@ -50,6 +52,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
+                    .withHeader("Content-Type", "application/json")
                     .withTransformers(AgreementsEndpoint.class.getSimpleName())
                     .withTransformerParameter("list", true)
             )
@@ -59,7 +62,9 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(get(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(AgreementsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(AgreementsEndpoint.class.getSimpleName())
             )
         );
 
@@ -67,7 +72,9 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(put(urlPathMatching("/api/v2/agreements/enduser/(.*)/accept/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(AgreementsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(AgreementsEndpoint.class.getSimpleName())
             )
         );
 
@@ -75,7 +82,9 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(delete(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(AgreementsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(AgreementsEndpoint.class.getSimpleName())
             )
         );
     }
@@ -87,27 +96,26 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
                                         Parameters parameters) {
         RequestMethod method = request.getMethod();
         if (method.equals(RequestMethod.POST)) {
-            return create(request);
+            return create(request, responseDefinition);
         }
 
         if (method.equals(RequestMethod.PUT)) {
-            return accept(request);
+            return accept(request, responseDefinition);
         }
 
         if (method.equals(RequestMethod.GET)) {
             if (parameters.getBoolean("list", false)) {
-                return list(request);
+                return list(request, responseDefinition);
             }
-            return getById(request);
+            return getById(request, responseDefinition);
         }
 
         if (method.equals(RequestMethod.DELETE)) {
-            return deleteById(request);
+            return deleteById(request, responseDefinition);
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(400)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "status_code", 400,
                 "summary", "Unsupported method",
@@ -116,14 +124,14 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
-    private ResponseDefinition create(Request request) {
+    private ResponseDefinition create(Request request,
+                                      ResponseDefinition responseDefinition) {
         EndUserAgreementRequest agreementRequest = fromJson(request.getBodyAsString(), EndUserAgreementRequest.class);
 
         return agreements.values().stream()
             .filter(agreement -> agreement.institutionId.equals(agreementRequest.getInstitutionId()))
-            .map(agreement -> new ResponseDefinitionBuilder()
+            .map(agreement -> ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(409)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "summary", "Conflict",
                     "detail", "An agreement with this Institution already exists.",
@@ -144,19 +152,18 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
                     response.accepted = null;
 
                     agreements.put(response.id, response);
-                    return new ResponseDefinitionBuilder()
+                    return ResponseDefinitionBuilder.like(responseDefinition)
                         .withStatus(201)
-                        .withHeader("Content-Type", "application/json")
                         .withBody(toJson(response))
                         .build();
                 }
             );
     }
 
-    private ResponseDefinition accept(Request request) {
-        return new ResponseDefinitionBuilder()
+    private ResponseDefinition accept(Request request,
+                                      ResponseDefinition responseDefinition) {
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "summary", "Insufficient permissions",
                 "detail", "Your company doesn't have permission to accept EUA. You'll have to use our default form for this action.",
@@ -165,21 +172,21 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
-    private ResponseDefinition list(Request request) {
-        return new ResponseDefinitionBuilder()
+    private ResponseDefinition list(Request request,
+                                    ResponseDefinition responseDefinition) {
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(sublist(request, agreements.values())))
             .build();
     }
 
-    private ResponseDefinition getById(Request request) {
+    private ResponseDefinition getById(Request request,
+                                       ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 5);
         EndUserAgreement entity = agreements.get(id);
         if (entity == null) {
-            return new ResponseDefinitionBuilder()
+            return ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(404)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "summary", "Not found",
                     "detail", "End User Agreement " + id + " not found"
@@ -187,21 +194,20 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
                 .build();
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(entity))
             .build();
     }
 
-    private ResponseDefinition deleteById(Request request) {
+    private ResponseDefinition deleteById(Request request,
+                                          ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 5);
         EndUserAgreement entity = removeAgreement(id);
 
         if (entity == null) {
-            return new ResponseDefinitionBuilder()
+            return ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(404)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "status_code", 404,
                     "summary", "Not found",
@@ -210,9 +216,8 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
                 .build();
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "status_code", 200,
                 "summary", "End User Agreement deleted",

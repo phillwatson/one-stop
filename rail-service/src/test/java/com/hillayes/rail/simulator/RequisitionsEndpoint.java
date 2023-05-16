@@ -43,7 +43,9 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(post(urlEqualTo("/api/v2/requisitions/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
             )
         );
 
@@ -51,7 +53,9 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/requisitions/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
                     .withTransformerParameter("list", true)
             )
         );
@@ -60,7 +64,9 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(get(urlPathMatching("/api/v2/requisitions/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
             )
         );
 
@@ -68,7 +74,9 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(put(urlPathMatching("/api/v2/requisitions/(.*)/accept/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
             )
         );
 
@@ -76,7 +84,9 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(delete(urlPathMatching("/api/v2/requisitions/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
             )
         );
     }
@@ -88,23 +98,22 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                                         Parameters parameters) {
         RequestMethod method = request.getMethod();
         if (method.equals(RequestMethod.POST)) {
-            return create(request);
+            return create(request, responseDefinition);
         }
 
         if (method.equals(RequestMethod.GET)) {
             if (parameters.getBoolean("list", false)) {
-                return list(request);
+                return list(request, responseDefinition);
             }
-            return getById(request);
+            return getById(request, responseDefinition);
         }
 
         if (method.equals(RequestMethod.DELETE)) {
-            return deleteById(request);
+            return deleteById(request, responseDefinition);
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(400)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "status_code", 400,
                 "summary", "Unsupported method",
@@ -113,14 +122,14 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
-    private ResponseDefinition create(Request request) {
+    private ResponseDefinition create(Request request,
+                                      ResponseDefinition responseDefinition) {
         RequisitionRequest requisitionRequest = fromJson(request.getBodyAsString(), RequisitionRequest.class);
 
         return requisitions.values().stream()
             .filter(agreement -> agreement.institutionId.equals(requisitionRequest.getInstitutionId()))
-            .map(agreement -> new ResponseDefinitionBuilder()
+            .map(agreement -> ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(409)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "summary", "Conflict",
                     "detail", "An requisition with this Institution already exists.",
@@ -148,30 +157,29 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                     .build();
 
                 requisitions.put(response.id, response);
-                return new ResponseDefinitionBuilder()
+                return ResponseDefinitionBuilder.like(responseDefinition)
                         .withStatus(201)
-                        .withHeader("Content-Type", "application/json")
                         .withBody(toJson(response))
                         .build();
                 }
             );
     }
 
-    private ResponseDefinition list(Request request) {
-        return new ResponseDefinitionBuilder()
+    private ResponseDefinition list(Request request,
+                                    ResponseDefinition responseDefinition) {
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(sublist(request, requisitions.values())))
             .build();
     }
 
-    private ResponseDefinition getById(Request request) {
+    private ResponseDefinition getById(Request request,
+                                       ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 4);
         Requisition entity = requisitions.get(id);
         if (entity == null) {
-            return new ResponseDefinitionBuilder()
+            return ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(404)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "summary", "Not found",
                     "detail", "Requisition " + id + " not found"
@@ -179,21 +187,20 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                 .build();
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(entity))
             .build();
     }
 
-    private ResponseDefinition deleteById(Request request) {
+    private ResponseDefinition deleteById(Request request,
+                                          ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 4);
         Requisition entity = requisitions.remove(id);
 
         if (entity == null) {
-            return new ResponseDefinitionBuilder()
+            return ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(404)
-                .withHeader("Content-Type", "application/json")
                 .withBody(toJson(Map.of(
                     "status_code", 404,
                     "summary", "Not found",
@@ -205,9 +212,8 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         // delete associated agreements
         agreements.removeAgreement(entity.agreement);
         
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "status_code", 200,
                 "summary", "Requisition deleted",

@@ -28,6 +28,7 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
+                    .withHeader("Content-Type", "application/json")
                     .withTransformers(InstitutionsEndpoint.class.getSimpleName())
                     .withTransformerParameter("list", true)
             )
@@ -37,7 +38,9 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
         wireMockServer.stubFor(get(urlPathMatching("/api/v2/institutions/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
-                aResponse().withTransformers(InstitutionsEndpoint.class.getSimpleName())
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withTransformers(InstitutionsEndpoint.class.getSimpleName())
             )
         );
     }
@@ -51,14 +54,13 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
 
         if (method.equals(RequestMethod.GET)) {
             if (parameters.getBoolean("list", false)) {
-                return list(request);
+                return list(request, responseDefinition);
             }
-            return getById(request);
+            return getById(request, responseDefinition);
         }
 
         return new ResponseDefinitionBuilder()
             .withStatus(400)
-            .withHeader("Content-Type", "application/json")
             .withBody(toJson(Map.of(
                 "status_code", 400,
                 "summary", "Unsupported method",
@@ -67,26 +69,25 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
-    private ResponseDefinition list(Request request) {
+    private ResponseDefinition list(Request request,
+                                    ResponseDefinition responseDefinition) {
         String filename = getQueryBoolean(request, "payments_enabled")
             .filter(b -> b)
             .map(b -> "institutions-payments-enabled.json")
             .orElse("institutions-payments-disabled.json");
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBodyFile(filename)
             .build();
     }
 
-    private ResponseDefinition getById(Request request) {
+    private ResponseDefinition getById(Request request,
+                                       ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 4);
         String entity = DEFINITIONS.get(id);
         if (entity == null) {
-            return new ResponseDefinitionBuilder()
-                .withStatus(404)
-                .withHeader("Content-Type", "application/json")
+            return ResponseDefinitionBuilder.like(responseDefinition)
                 .withBody(toJson(Map.of(
                     "summary", "Not found",
                     "detail", "End User Agreement " + id + " not found"
@@ -94,9 +95,8 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
                 .build();
         }
 
-        return new ResponseDefinitionBuilder()
+        return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withHeader("Content-Type", "application/json")
             .withBody(entity)
             .build();
     }
