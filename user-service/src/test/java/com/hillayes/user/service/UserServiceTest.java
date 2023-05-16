@@ -176,7 +176,8 @@ public class UserServiceTest {
 
         // and: the persisted user has a role
         User createdUser = userCaptor.getValue();
-        assertTrue(createdUser.getRoles().contains("user"));
+        assertEquals(1, createdUser.getRoles().size());
+        assertTrue(createdUser.getRoles().contains("onboarding"));
 
         // and: the token is deleted
         verify(magicTokenRepository).delete(entry);
@@ -272,6 +273,8 @@ public class UserServiceTest {
         assertEquals(user.getFamilyName(), savedUser.getFamilyName());
         assertEquals(user.getPhoneNumber(), savedUser.getPhoneNumber());
         assertNotNull(user.getPasswordHash());
+        assertEquals(1, user.getRoles().size());
+        assertTrue(user.getRoles().contains("user"));
 
         // and: a notification is issued
         verify(userEventSender).sendUserCreated(onboardedUser.get());
