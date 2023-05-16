@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.hillayes.rail.model.ObtainJwtResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -28,6 +29,9 @@ public class NordigenSimulator {
     @Inject
     RequisitionsEndpoint requisitionsEndpoint;
 
+    @ConfigProperty(name = "one-stop.tests.nordigen.port")
+    int portNumber;
+
     private WireMockServer wireMockServer;
 
     @PostConstruct
@@ -35,7 +39,7 @@ public class NordigenSimulator {
         log.debug("Starting Nordigen NordigenSimulator");
         wireMockServer = new WireMockServer(
             options()
-                .port(8089)
+                .port(portNumber)
                 .notifier(log.isDebugEnabled() ? new ConsoleNotifier(true) : new NullNotifier())
                 .extensions(
                     institutionsEndpoint,

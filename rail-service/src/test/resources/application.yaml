@@ -16,6 +16,10 @@ one-stop:
   rail:
     callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
 
+  tests: # properties only used for testing
+    nordigen:
+      port: 8089
+
 rails:
   secret:
     id: e9309c
