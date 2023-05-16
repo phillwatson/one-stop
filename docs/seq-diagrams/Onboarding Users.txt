@@ -16,15 +16,21 @@ alt#lightblue email already exists
 client<--user-service:http 202
 rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint to search for users
 
+user-service->broker:user-registered-again(user)
 else
 user-service->user-service:generate magic-token
-rbox over user-service,magic-token-repo#lightblue:magic token is a random value\n with expiry of 5 minutes.\na nightly task will delete expired\n token records.
+rbox over user-service,user-repo#lightblue:magic token is a random value with\n expiry of 5 minutes.\na nightly task will delete expired\n token records.
 user-service->magic-token-repo:save(email,token)
 user-service->broker:user-registered(email,magic-token)
 client<--user-service:http 202
 end
 deactivateafter user-service
 deactivateafter client
+broker->email-service:user-registered-again(user)
+activate email-service
+email-service->email-service:send email to warn that "someone is attempting\n to register with your email"
+deactivateafter email-service
+
 broker->email-service:user-registered(user,magic-token)
 activate email-service
 email-service->email-service:send link to\nGET /api/v1/users/onboard/acknowledge/{magic-token}
@@ -43,8 +49,8 @@ else token expired
 client<--user-service:http 401
 else valid
 user-service->magic-token-repo:delete(token)
-user-service->user-repo:save(email, role: "onboarding")
-rbox over user-service,user-repo#lightblue:role of "onboarding" assigned to restrict what the\nuser can access.\n\na random username and password are assigned.\na nightly task will delete expired pending users.
+user-service->user-repo:save(email, role: "onboarding", created: now())
+rbox over user-service,user-repo#lightblue:role of "onboarding" assigned to restrict what the\nuser can access.\n\na random username and password are assigned.\na nightly task will delete expired onboarding users.
 user-service->broker:user-acknowledged(user)
 client<--user-service:http 307: onboard profile\n(with new JWT)
 end

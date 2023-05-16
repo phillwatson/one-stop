@@ -22,7 +22,6 @@ public class AgreementResourceTest extends TestResourceBase {
             .accessValidForDays(10)
             .maxHistoricalDays(60)
             .build();
-        nordigenSimulator.stubAgreement(agreementRequest);
 
         // create agreement
         String agreementId = given()

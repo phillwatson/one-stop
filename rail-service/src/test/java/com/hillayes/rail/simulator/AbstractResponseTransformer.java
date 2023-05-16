@@ -1,52 +1,51 @@
 package com.hillayes.rail.simulator;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.rail.model.PaginatedList;
-import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
-import static com.hillayes.rail.utils.TestData.toJson;
-
-@Slf4j
-class ListTransformer<T> extends ResponseDefinitionTransformer {
+public abstract class AbstractResponseTransformer extends ResponseDefinitionTransformer {
     private final String name;
+    private final boolean global;
 
-    // a live list of stubs that can be modified by the simulator
-    private Map<String, EntityStubs<T>> list;
+    AbstractResponseTransformer(String name) {
+        this(name, false);
+    }
 
-    ListTransformer(String name, Map<String, EntityStubs<T>> list) {
+    AbstractResponseTransformer(String name, boolean global) {
         this.name = name;
-        this.list = list;
+        this.global = global;
     }
 
     @Override
     public String getName() {
-        return name;
+        return name == null ? this.getClass().getSimpleName() : name;
     }
 
     @Override
     public boolean applyGlobally() {
-        return false;
+        return global;
     }
 
-    @Override
-    public ResponseDefinition transform(Request request,
-                                        ResponseDefinition responseDefinition,
-                                        FileSource files,
-                                        Parameters parameters) {
-        return new ResponseDefinitionBuilder()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody(toJson(sublist(request, list)))
-            .build();
+    protected String getIdFromPath(String path, int index) {
+        return path.split("/")[index];
+    }
+
+    protected Optional<QueryParameter> getQueryString(Request request, String paramName) {
+        QueryParameter param = request.queryParameter(paramName);
+        return param.isPresent() ? Optional.of(param) : Optional.empty();
+    }
+
+    protected Optional<Boolean> getQueryBoolean(Request request, String paramName) {
+        return getQueryString(request, paramName)
+            .map(QueryParameter::firstValue)
+            .map(Boolean::parseBoolean);
     }
 
     /**
@@ -58,7 +57,7 @@ class ListTransformer<T> extends ResponseDefinitionTransformer {
      * @param <T> the type of the list elements.
      * @return the extracted sub-list.
      */
-    private PaginatedList<T> sublist(Request request, Map<String, EntityStubs<T>> list) {
+    protected <T> PaginatedList<T> sublist(Request request, Collection<T> list) {
         QueryParameter offsetParam = request.queryParameter("offset");
         int offset = offsetParam.isPresent()
             ? Math.max(0, Integer.parseInt(offsetParam.firstValue())) : 0;
@@ -67,16 +66,12 @@ class ListTransformer<T> extends ResponseDefinitionTransformer {
         int limit = limitParam.isPresent()
             ? Math.max(0, Integer.parseInt(limitParam.firstValue())) : Integer.MAX_VALUE;
 
-        log.trace("Getting sublist [offset: {}, limit: {}, size: {}, url: {}]",
-            offset, limit, list.size(), request.getUrl());
-
         PaginatedList<T> response = new PaginatedList<>();
         response.count = list.size();
         response.next = null;
         response.previous = null;
         response.results = ((limit == 0) || (offset >= list.size())) ? Collections.emptyList() :
-            list.values().stream()
-                .map(EntityStubs::getEntity)
+            list.stream()
                 .sorted()
                 .skip(offset)
                 .limit(limit)
@@ -85,4 +80,3 @@ class ListTransformer<T> extends ResponseDefinitionTransformer {
         return response;
     }
 }
-

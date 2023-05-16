@@ -34,6 +34,14 @@ public class TestData {
         }
     }
 
+    public static <T> T fromJson(String json, Class<T> clazz) {
+        try {
+            return objectMapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static UserConsent mockUserConsent(UUID userId, ConsentStatus status) {
         return UserConsent.builder()
             .id(UUID.randomUUID())

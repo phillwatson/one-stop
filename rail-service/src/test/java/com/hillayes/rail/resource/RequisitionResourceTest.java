@@ -10,7 +10,8 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
@@ -25,7 +26,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             .statusCode(200)
             .contentType(JSON)
             .extract().response().as(List.class);
-        assertEquals(34, institutions.size());
+        assertEquals(107, institutions.size());
 
         InstitutionDetail institution = given()
             .when().get("/api/v1/rails/banks/SANDBOXFINANCE_SFIN0000")
@@ -41,7 +42,6 @@ public class RequisitionResourceTest extends TestResourceBase {
             .accessValidForDays(10)
             .maxHistoricalDays(institution.transactionTotalDays)
             .build();
-        EndUserAgreement mockAgreement = nordigenSimulator.stubAgreement(agreementRequest);
 
         // create agreement
         EndUserAgreement agreement = given()
@@ -51,7 +51,6 @@ public class RequisitionResourceTest extends TestResourceBase {
             .statusCode(201)
             .contentType(JSON)
             .extract().response().as(EndUserAgreement.class);
-        assertEquals(mockAgreement, agreement);
 
         // get agreement
         given()
@@ -68,7 +67,6 @@ public class RequisitionResourceTest extends TestResourceBase {
             .reference(UUID.randomUUID().toString())
             .userLanguage("EN")
             .build();
-        Requisition mockRequisition = nordigenSimulator.stubRequisition(requisitionRequest);
 
         // create requisition
         Requisition requisition = given()
@@ -85,7 +83,6 @@ public class RequisitionResourceTest extends TestResourceBase {
                 "status", equalTo("CR"),
                 "link", notNullValue())
             .extract().response().as(Requisition.class);
-        assertEquals(mockRequisition, requisition);
 
         // list all requisitions
         given()
