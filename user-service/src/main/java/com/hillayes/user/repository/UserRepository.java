@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     /**
      * Returns the users holding the given email address.
      *
-     * @param email the email address to be searched.
+     * @param email the email address to be searched. The value should be lower-case.
      * @return the user holding the given email address.
      */
     public Optional<User> findByEmail(String email);

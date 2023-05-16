@@ -51,5 +51,9 @@
             <groupId>com.hillayes</groupId>
             <artifactId>executor-lib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>exception-lib</artifactId>
+        </dependency>
     </dependencies>
 </project>

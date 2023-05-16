@@ -1,10 +1,12 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.exception.MensaException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +32,10 @@ public class UserOnboardResource {
     @PermitAll
     public Response registerUser(UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
-
         userService.registerUser(request.getEmail());
-        return Response.noContent().build();
+
+        // don't give away whether the email is registered or not
+        return Response.accepted().build();
     }
 
     @GET

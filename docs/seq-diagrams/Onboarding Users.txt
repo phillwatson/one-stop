@@ -14,9 +14,9 @@ activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
 alt#lightblue email already exists
 client<--user-service:http 202
-rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint to search for users
+rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint for phishing
 
-user-service->broker:user-registered-again(user)
+user-service->broker:user-activity(user)
 else
 user-service->user-service:generate magic-token
 rbox over user-service,user-repo#lightblue:magic token is a random value with\n expiry of 5 minutes.\na nightly task will delete expired\n token records.
@@ -26,14 +26,14 @@ client<--user-service:http 202
 end
 deactivateafter user-service
 deactivateafter client
-broker->email-service:user-registered-again(user)
+broker->email-service:user-activity(user)
 activate email-service
 email-service->email-service:send email to warn that "someone is attempting\n to register with your email"
 deactivateafter email-service
 
-broker->email-service:user-registered(user,magic-token)
+broker->email-service:user-registered(email,magic-token)
 activate email-service
-email-service->email-service:send link to\nGET /api/v1/users/onboard/acknowledge/{magic-token}
+email-service->email-service:send email with link to\nGET /api/v1/users/onboard/acknowledge/{magic-token}
 deactivateafter email-service
 
 

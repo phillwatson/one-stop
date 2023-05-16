@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sendinblue.ApiException;
 import sibApi.TransactionalEmailsApi;
+import sibModel.CreateSmtpEmail;
 import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
@@ -32,6 +33,7 @@ public class SendEmailService {
     public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient,
                           Map<String, Object> params) throws ApiException, IOException {
+        log.debug("Sending email [template: {}]", templateName);
         if (configuration.disabled()) {
             log.debug("Email sending is disabled");
             return;
@@ -39,12 +41,12 @@ public class SendEmailService {
 
         EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
         if (templateConfig == null) {
-            log.error("No template config found");
+            log.error("No template config found [templateName: {}]", templateName);
             return;
         }
 
         if ((recipient == null) && (templateConfig.receiver().isEmpty())) {
-            log.error("No recipient found");
+            log.error("No recipient found [templateName: {}]", templateName);
             return;
         }
 
@@ -75,11 +77,13 @@ public class SendEmailService {
 
         TransactionalEmailsApi emailApi = new TransactionalEmailsApi();
         emailApi.getApiClient().setApiKey(configuration.apiKey());
-        emailApi.sendTransacEmail(email);
+
+        CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
+        log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
     }
 
     private String readHtml(String path) throws IOException {
-        InputStream resource = this.getClass().getResourceAsStream("templates/" + path);
+        InputStream resource = this.getClass().getResourceAsStream("/templates/" + path);
         if (resource == null) {
             throw new IOException("Template not found: " + path);
         }

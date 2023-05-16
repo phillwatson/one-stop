@@ -1,7 +1,9 @@
 package com.hillayes.user.event;
 
 import com.hillayes.events.domain.Topic;
+import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.LoginFailure;
+import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
@@ -91,6 +93,15 @@ public class UserEventSender {
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)
+            .build());
+    }
+
+    public void sendAccountActivity(User user, SuspiciousActivity activity) {
+        log.debug("Sending AccountActivity event [userId: {}]", user.getId());
+        eventSender.send(Topic.USER, AccountActivity.builder()
+            .userId(user.getId())
+            .activity(activity)
+            .dateRecorded(Instant.now())
             .build());
     }
 }

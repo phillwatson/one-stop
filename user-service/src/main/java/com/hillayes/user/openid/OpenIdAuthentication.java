@@ -79,7 +79,7 @@ public class OpenIdAuthentication {
 
                 // take opportunity to update email address
                 if (!Strings.isBlank(email)) {
-                    user.setEmail(email);
+                    user.setEmail(email.toLowerCase());
                 }
             }
 
@@ -110,7 +110,7 @@ public class OpenIdAuthentication {
                         return User.builder()
                                 .username(email)
                                 .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                                .email(email)
+                                .email(email.toLowerCase())
                                 .givenName(givenName == null ? name == null ? email : name : givenName)
                                 .familyName(familyName)
                                 .preferredName(givenName == null ? name == null ? email : name : givenName)

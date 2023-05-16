@@ -2,6 +2,7 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.commons.Strings;
+import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.MagicToken;
@@ -44,11 +45,18 @@ public class UserService {
     private final UserEventSender userEventSender;
     private final Gateway gateway;
 
-    public MagicToken registerUser(String email) {
+    public void registerUser(String email) {
         log.info("Registering user [email: {}]", email);
 
-        // ensure email is unique
-        validateUniqueEmail(null, email);
+        try {
+            // ensure email is unique
+            validateUniqueEmail(null, email);
+        } catch (DuplicateEmailAddressException e) {
+            findUserByEmail(email).ifPresent(user ->
+                userEventSender.sendAccountActivity(user, SuspiciousActivity.EMAIL_REGISTRATION)
+            );
+            return;
+        }
 
         MagicToken token = magicTokenRepository.save(MagicToken.builder()
             .email(email.toLowerCase())
@@ -67,7 +75,6 @@ public class UserService {
             userEventSender.sendUserRegistered(token, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
-            return token;
         } catch (IllegalArgumentException e) {
             log.error("Failed to construct acknowledge URI [email: {}]", email, e);
             throw new UserRegistrationException(email);
@@ -247,6 +254,10 @@ public class UserService {
         }
     }
 
+    private Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email.toLowerCase());
+    }
+
     /**
      * Looks for any other user (onboarding or onboarded) with the same email address.
      *
@@ -264,7 +275,7 @@ public class UserService {
             });
 
         // ensure no onboarded user has the same email
-        userRepository.findByEmail(email.toLowerCase())
+        findUserByEmail(email.toLowerCase())
             .filter(existing -> (userId == null) || (!existing.getId().equals(userId)))
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
