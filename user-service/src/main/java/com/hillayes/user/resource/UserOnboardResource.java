@@ -1,10 +1,12 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.exception.MensaException;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
-import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +32,10 @@ public class UserOnboardResource {
     @PermitAll
     public Response registerUser(UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
+        userService.registerUser(request.getEmail());
 
-        MagicToken magicToken = userService.registerUser(request.getEmail());
-        log.debug("User registered [email: {}, token: {}]", request.getEmail(), magicToken.getToken());
-
-        return Response.noContent().build();
+        // don't give away whether the email is registered or not
+        return Response.accepted().build();
     }
 
     @GET
@@ -55,13 +56,13 @@ public class UserOnboardResource {
 
     @POST
     @Path("/complete")
-    @RolesAllowed("user")
+    @RolesAllowed("onboarding")
     public Response onboardUser(@Context SecurityContext ctx,
                                 UserCompleteRequest request) {
         UUID id = ResourceUtils.getUserId(ctx);
         log.info("Completing user registration [userId: {}, username: {}]", id, request.getUsername());
 
-        User user = User.builder()
+        User userUpdate = User.builder()
             .username(request.getUsername())
             .preferredName(request.getPreferredName())
             .title(request.getTitle())
@@ -71,7 +72,8 @@ public class UserOnboardResource {
             .phoneNumber(request.getPhone())
             .build();
 
-        userService.completeOnboarding(id, user, request.getPassword().toCharArray());
-        return Response.noContent().build();
+        return userService.completeOnboarding(id, userUpdate, request.getPassword().toCharArray())
+            .map(user -> authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles()))
+            .orElseThrow(() -> new NotFoundException("user", id));
     }
 }

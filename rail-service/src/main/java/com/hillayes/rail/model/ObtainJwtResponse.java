@@ -1,13 +1,23 @@
 package com.hillayes.rail.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter(AccessLevel.PROTECTED)
+@Getter
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ObtainJwtResponse {
-    public String access;
+    private String access;
+
     @JsonProperty("access_expires")
-    public Integer accessExpires;
-    public String refresh;
+    private Integer accessExpires;
+
+    private String refresh;
 
     @JsonProperty("refresh_expires")
-    public Integer refreshExpires;
+    private Integer refreshExpires;
 }

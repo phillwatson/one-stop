@@ -13,13 +13,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 
 @QuarkusTest
-public class InstitutionResourceTest extends TestBase {
+public class InstitutionResourceTest extends TestResourceBase {
     @Test
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testListBanks() {
         List<Map<String,Object>> response = given()
                 .queryParam("country", "GB")
-                .queryParam("payments_enabled", false)
                 .when().get("/api/v1/rails/banks")
                 .then()
                 .statusCode(200)

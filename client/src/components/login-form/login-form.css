@@ -1,26 +1,15 @@
-.Login {
-  padding: 60px 0;
-}
-
-.Login form {
-  margin: 0 auto;
-  max-width: 320px;
-}
-
 .panel {
-  padding: 21px 5px;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: normal;
   align-items: center;
+  align-content: stretch;
+  padding-bottom: 21px;
 }
 
 .field {
   padding: 5px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
 }
 
 .error-panel {

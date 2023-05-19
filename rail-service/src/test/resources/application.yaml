@@ -4,6 +4,10 @@ quarkus:
       sql: true
       bind-parameters: true
 
+  rest-client:
+    nordigen-api:
+      url: http://localhost:8089
+
 one-stop:
   auth:
     xsrf:
@@ -11,6 +15,10 @@ one-stop:
 
   rail:
     callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
+
+  tests: # properties only used for testing
+    nordigen:
+      port: 8089
 
 rails:
   secret:

@@ -1,6 +1,7 @@
 package com.hillayes.email.service;
 
-import com.hillayes.email.EmailConfiguration;
+import com.hillayes.email.config.EmailConfiguration;
+import com.hillayes.email.config.TemplateName;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import sendinblue.ApiException;
@@ -16,7 +17,7 @@ public class SendEmailServiceTest {
     SendEmailService fixture;
 
     @Test
-    public void testSendEmail() throws ApiException {
-        fixture.sendEmail(emailConfiguration.templates().get("user-created"), null);
+    public void testSendEmail() throws Exception {
+        fixture.sendEmail(TemplateName.USER_CREATED, null, null);
     }
 }

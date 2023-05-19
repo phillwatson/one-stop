@@ -83,7 +83,7 @@ public class UserConsentResource {
             .accounts(accountSummaries)
             .build();
 
-        log.info("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",
+        log.debug("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",
             userId, institutionId, consent.getId());
         return Response.ok(result).build();
     }

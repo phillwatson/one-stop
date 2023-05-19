@@ -58,6 +58,10 @@ quarkus:
         level: DEBUG
 
 one-stop:
+  gateway:
+    scheme: http
+    open-port: 9876
+
   auth:
     access-token:
       cookie: 'access_token'

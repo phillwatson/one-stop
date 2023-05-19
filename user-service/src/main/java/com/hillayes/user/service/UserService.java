@@ -2,16 +2,19 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.commons.Strings;
+import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
+import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
+import com.hillayes.user.resource.UserOnboardResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,8 +23,12 @@ import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -36,12 +43,20 @@ public class UserService {
     private final MagicTokenRepository magicTokenRepository;
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
+    private final Gateway gateway;
 
-    public MagicToken registerUser(String email) {
+    public void registerUser(String email) {
         log.info("Registering user [email: {}]", email);
 
-        // ensure email is unique
-        validateUniqueEmail(null, email);
+        try {
+            // ensure email is unique
+            validateUniqueEmail(null, email);
+        } catch (DuplicateEmailAddressException e) {
+            findUserByEmail(email).ifPresent(user ->
+                userEventSender.sendAccountActivity(user, SuspiciousActivity.EMAIL_REGISTRATION)
+            );
+            return;
+        }
 
         MagicToken token = magicTokenRepository.save(MagicToken.builder()
             .email(email.toLowerCase())
@@ -49,8 +64,24 @@ public class UserService {
             .expires(Instant.now().plus(5, ChronoUnit.MINUTES))
             .build());
 
-        userEventSender.sendUserRegistered(token);
-        return token;
+        try {
+            URI acknowledgerUri = UriBuilder
+                .fromResource(UserOnboardResource.class)
+                .path(UserOnboardResource.class, "acknowledgeUser")
+                .scheme(gateway.getScheme())
+                .host(gateway.getHost())
+                .port(gateway.getPort())
+                .buildFromMap(Map.of("token", token.getToken()));
+            userEventSender.sendUserRegistered(token, acknowledgerUri);
+
+            log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
+        } catch (IllegalArgumentException e) {
+            log.error("Failed to construct acknowledge URI [email: {}]", email, e);
+            throw new UserRegistrationException(email);
+        } catch (IOException e) {
+            log.warn("Failed to register email [email: {}]", email, e);
+            throw new UserRegistrationException(email);
+        }
     }
 
     public Optional<User> acknowledgeToken(String token) {
@@ -62,10 +93,10 @@ public class UserService {
                 // create a user record - but not yet onboarded
                 User newUser = User.builder()
                     .username(t.getEmail())
-                    .email(t.getEmail().toLowerCase())
+                    .email(t.getEmail())
                     .givenName(t.getEmail())
                     .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                    .roles(Set.of("user"))
+                    .roles(Set.of("onboarding")) // allow user to complete onboarding but nothing else
                     .build();
 
                 newUser = userRepository.save(newUser);
@@ -98,7 +129,7 @@ public class UserService {
                 // update and onboard user
                 user = userRepository.save(user.toBuilder()
                     .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail().toLowerCase())
+                    .email(modifiedUser.getEmail())
                     .title(modifiedUser.getTitle())
                     .givenName(modifiedUser.getGivenName())
                     .familyName(modifiedUser.getFamilyName())
@@ -106,6 +137,7 @@ public class UserService {
                     .phoneNumber(modifiedUser.getPhoneNumber())
                     .passwordHash(passwordCrypto.getHash(password))
                     .dateOnboarded(Instant.now())
+                    .roles(Set.of("user"))
                     .build());
 
                 userEventSender.sendUserCreated(user);
@@ -171,7 +203,7 @@ public class UserService {
             .map(user -> {
                 User.UserBuilder userBuilder = user.toBuilder()
                     .username(userRequest.getUsername())
-                    .email(userRequest.getEmail().toLowerCase())
+                    .email(userRequest.getEmail())
                     .title(userRequest.getTitle())
                     .givenName(userRequest.getGivenName())
                     .familyName(userRequest.getFamilyName())
@@ -222,6 +254,10 @@ public class UserService {
         }
     }
 
+    private Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email.toLowerCase());
+    }
+
     /**
      * Looks for any other user (onboarding or onboarded) with the same email address.
      *
@@ -239,7 +275,7 @@ public class UserService {
             });
 
         // ensure no onboarded user has the same email
-        userRepository.findByEmail(email.toLowerCase())
+        findUserByEmail(email.toLowerCase())
             .filter(existing -> (userId == null) || (!existing.getId().equals(userId)))
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);

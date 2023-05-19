@@ -82,5 +82,5 @@ class HttpService {
   }
 }
 
-const instance = new HttpService("http://localhost:3000/api/v1");
+const instance = new HttpService(window.location.origin + "/api/v1");
 export default instance;

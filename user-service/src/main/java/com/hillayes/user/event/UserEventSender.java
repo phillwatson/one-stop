@@ -1,7 +1,9 @@
 package com.hillayes.user.event;
 
 import com.hillayes.events.domain.Topic;
+import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.LoginFailure;
+import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.net.URI;
 import java.time.Instant;
 
 @ApplicationScoped
@@ -20,12 +23,13 @@ import java.time.Instant;
 public class UserEventSender {
     private final EventSender eventSender;
 
-    public void sendUserRegistered(MagicToken token) {
+    public void sendUserRegistered(MagicToken token, URI acknowledgerUri) {
         log.debug("Sending UserRegistered event [email: {}]", token.getEmail());
         eventSender.send(Topic.USER, UserRegistered.builder()
             .email(token.getEmail())
             .token(token.getToken())
             .expires(token.getExpires())
+            .acknowledgerUri(acknowledgerUri)
             .build());
     }
 
@@ -89,6 +93,15 @@ public class UserEventSender {
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)
+            .build());
+    }
+
+    public void sendAccountActivity(User user, SuspiciousActivity activity) {
+        log.debug("Sending AccountActivity event [userId: {}]", user.getId());
+        eventSender.send(Topic.USER, AccountActivity.builder()
+            .userId(user.getId())
+            .activity(activity)
+            .dateRecorded(Instant.now())
             .build());
     }
 }

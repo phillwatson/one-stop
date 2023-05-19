@@ -27,8 +27,8 @@ export default function SizeBar(props: SizeBarProps) {
             width: props.drawerWidth,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
-            width: props.drawerWidth,
-            boxSizing: 'border-box',
+              width: props.drawerWidth,
+              boxSizing: 'border-box',
             },
         }}
         variant="persistent"
@@ -37,9 +37,9 @@ export default function SizeBar(props: SizeBarProps) {
         >
 
         <DrawerHeader>
-            <IconButton onClick={ props.onClose }>
+          <IconButton onClick={ props.onClose }>
             <ChevronLeftIcon />
-            </IconButton>
+          </IconButton>
         </DrawerHeader>
 
         <Divider />

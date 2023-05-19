@@ -2,6 +2,7 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.Institution;
+import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +29,13 @@ public class InstitutionResource {
         Set<Institution> result = new HashSet<>(institutionService.list(countryCode, true));
         result.addAll(institutionService.list(countryCode, false));
 
-        log.info("List institutions [country: {}, size: {}]", countryCode, result.size());
+        log.debug("List institutions [country: {}, size: {}]", countryCode, result.size());
         return result;
     }
 
     @GET
     @Path("/{id}")
-    public Institution getById(@PathParam("id") String id) {
+    public InstitutionDetail getById(@PathParam("id") String id) {
         log.info("Get institution [id: {}]", id);
         return institutionService.get(id)
             .orElseThrow(() -> new NotFoundException("Institution", id));

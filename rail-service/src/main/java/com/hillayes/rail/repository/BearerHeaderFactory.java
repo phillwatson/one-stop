@@ -7,10 +7,14 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.ext.ClientHeadersFactory;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+@ApplicationScoped
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {
     @ConfigProperty(name = "rails.secret.id")
@@ -29,7 +33,8 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
     public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,
                                                  MultivaluedMap<String, String> clientOutgoingHeaders) {
         MultivaluedMap<String, String> result = new MultivaluedHashMap<>();
-        result.add("Authorization", "Bearer " + getAccessToken());
+        result.add(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken());
+        result.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         return result;
     }
 
@@ -38,8 +43,8 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
         if (accessToken == null) {
             log.info("Get new access and refresh token [secretId: {}]", SECRET_ID);
             ObtainJwtResponse response = authService.newToken(SECRET_ID, SECRET_KEY);
-            accessToken = new Token(response.access, response.accessExpires);
-            refreshToken = new Token(response.refresh, response.refreshExpires);
+            accessToken = new Token(response.getAccess(), response.getAccessExpires());
+            refreshToken = new Token(response.getRefresh(), response.getRefreshExpires());
         }
 
         else if (accessToken.hasExpired()) {
