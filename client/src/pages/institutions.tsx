@@ -62,6 +62,7 @@ export default function Institutions() {
 
   return (
     <div>
+      <h2>Institutions</h2>
       <div>
         Select Country: <CountrySelector countries={ countries }
             activeCountryId={ (activeCountry === undefined) ? undefined : activeCountry.id }

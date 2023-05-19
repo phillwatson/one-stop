@@ -93,7 +93,7 @@ public class UserService {
                 // create a user record - but not yet onboarded
                 User newUser = User.builder()
                     .username(t.getEmail())
-                    .email(t.getEmail().toLowerCase())
+                    .email(t.getEmail())
                     .givenName(t.getEmail())
                     .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
                     .roles(Set.of("onboarding")) // allow user to complete onboarding but nothing else
@@ -129,7 +129,7 @@ public class UserService {
                 // update and onboard user
                 user = userRepository.save(user.toBuilder()
                     .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail().toLowerCase())
+                    .email(modifiedUser.getEmail())
                     .title(modifiedUser.getTitle())
                     .givenName(modifiedUser.getGivenName())
                     .familyName(modifiedUser.getFamilyName())
@@ -203,7 +203,7 @@ public class UserService {
             .map(user -> {
                 User.UserBuilder userBuilder = user.toBuilder()
                     .username(userRequest.getUsername())
-                    .email(userRequest.getEmail().toLowerCase())
+                    .email(userRequest.getEmail())
                     .title(userRequest.getTitle())
                     .givenName(userRequest.getGivenName())
                     .familyName(userRequest.getFamilyName())

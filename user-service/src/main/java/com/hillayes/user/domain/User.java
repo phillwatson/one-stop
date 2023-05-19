@@ -1,6 +1,7 @@
 package com.hillayes.user.domain;
 
 import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -32,6 +33,7 @@ public class User {
 
     @Setter
     @Column(nullable = false)
+    @ColumnTransformer(write = "LOWER(?)")
     private String email;
 
     @Setter
