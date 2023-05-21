@@ -20,7 +20,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.util.UUID;
 
 @Path("/api/v1/profiles")
-@RolesAllowed("user")
+@RolesAllowed({"user", "admin"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor

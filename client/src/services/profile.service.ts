@@ -3,8 +3,8 @@ import UserProfile from '../model/user-profile.model';
 
 class ProfileService {
   get() {
-    console.log(`Retrieving user-profile`);
-    return http.get<UserProfile>(`/api/v1/profiles`);
+    console.log('Retrieving user-profile');
+    return http.get<UserProfile>('/profiles');
   }
 }
 

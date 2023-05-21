@@ -7,6 +7,6 @@ export default interface UserProfile {
   familyName: string,
   email: string,
   phone: string,
-  dateCreated: Date,
-  dateOnboarded: Date
+  dateCreated: Date | undefined,
+  dateOnboarded: Date | undefined
 }
