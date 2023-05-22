@@ -39,7 +39,7 @@ public interface ErrorCode {
     enum Severity
     {
         info,
-        warn,
+        warning,
         error;
     }
 }
