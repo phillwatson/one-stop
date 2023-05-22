@@ -41,7 +41,7 @@ type ErrorsAction =
 function errorsReducer(errors: ErrorMessage[], action: ErrorsAction): ErrorMessage[] {
   switch (action.type) {
     case 'add': {
-      return [ { id: Date.now(), message: action.message, level: action.level }, ...errors];
+      return [ { id: Date.now(), message: action.message, level: action.level }, ...errors ];
     }
 
     case 'delete': {
@@ -59,7 +59,7 @@ function errorsReducer(errors: ErrorMessage[], action: ErrorsAction): ErrorMessa
  * to changes to the list.
  */
 const ErrorsContext = createContext(Array<ErrorMessage>());
-export function useErrors() {
+export function useErrors(): ErrorMessage[] {
   return useContext(ErrorsContext);
 }
 
@@ -86,13 +86,7 @@ export default function ErrorsProvider(props: React.PropsWithChildren) {
       <ErrorsDispatchContext.Provider value={dispatch}>
         { props.children }
 
-        <TransitionGroup>
-        { errors.map((error, index) =>
-          <Collapse key={error.id}>
-            <ErrorToast error={error} dispatch={dispatch} index={index}/>
-          </Collapse>
-        )}
-        </TransitionGroup>
+        <MessageBoard errors={errors} dispatch={dispatch} />
       </ErrorsDispatchContext.Provider>
     </ErrorsContext.Provider>
   );
@@ -102,13 +96,31 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
   return <MuiAlert elevation={24} ref={ref} variant="filled" {...props} />;
 });
 
-interface ToastProps {
+
+interface MessageBoardProps {
+  errors: Array<ErrorMessage>;
+  dispatch: React.Dispatch<ErrorsAction>;
+}
+
+function MessageBoard(props: MessageBoardProps) {
+  return (
+    <TransitionGroup>
+    { props.errors.map((error, index) =>
+      <Collapse key={error.id}>
+        <Message error={error} dispatch={props.dispatch} index={index}/>
+      </Collapse>
+    )}
+    </TransitionGroup>
+  )
+}
+
+interface MessageProps {
     error: ErrorMessage;
     dispatch: React.Dispatch<ErrorsAction>;
     index: number;
 }
 
-function ErrorToast(props: ToastProps) {
+function Message(props: MessageProps) {
   const error = props.error;
   const dispatch = props.dispatch;
 
