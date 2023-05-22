@@ -118,7 +118,7 @@ function ErrorToast(props: ToastProps) {
 
   useEffect(() => {
     // set a timeout for "success" messages
-    const t = (error.level !== 'success') ? null : setTimeout(() => { handleCloseAlert(); }, 5000);
+    const t = (error.level === 'success') ? setTimeout(() => { handleCloseAlert(); }, 5000) : null;
     return () => { if (t !== null) clearTimeout(t); }
   }, [error, handleCloseAlert]);
 
