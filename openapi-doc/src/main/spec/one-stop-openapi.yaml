@@ -466,13 +466,63 @@ paths:
 
 components:
   schemas:
+    ContextAttribute:
+      description: |
+        An attribute the captures an element of the context in which an error occurred.
+        The attributes can be used to support locale translation of message templates; by
+        placing the attribute name in the message template.
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          description: the attribute identifier
+          type: string
+        value:
+          description: the attribute value
+          type: string
+
+    ServiceError:
+      type: object
+      required:
+        - correlationId
+        - severity
+        - message
+      properties:
+        correlationId:
+          description: The identifier to relate this error to server log entries.
+          type: string
+          format: uuid
+        severity:
+          description: An indication of the severity of the error.
+          type: string
+          enum: [info, warn, error]
+        messageId:
+          description: The unique identifier for the message - provides index to locale strings.
+          type: string
+        message:
+          description: |
+            A summary of the error. This is not intended to be displayed to the user.
+            Instead, a locale message, identified by the messageId, should be displayed.
+            The locale message may be a template string containing attribute place-holders
+            to be replaced with the named contextAttributes values.
+          type: string
+        contextAttributes:
+          description: |
+            An array of named values that capture the context in which the error occurred.
+            This can be used to replace place-holders within a template string for locale translation.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextAttribute'
+
+
     UserRegisterRequest:
       type: object
       required:
         - email
       properties:
         email:
-          description: "The email address the new user wishes to register with"
+          description: The email address the new user wishes to register with
           type: string
           format: email
 
