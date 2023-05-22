@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
 import { useErrorsDispatch } from "../contexts/error-context";
-import { useCurrentUser, useSetCurrentUser } from "../contexts/user-context";
+import { useCurrentUser } from "../contexts/user-context";
 import UserProfile from "../model/user-profile.model";
 
 
@@ -24,8 +24,7 @@ const emptyProfile: UserProfile = {
 
 export default function UpdateProfile() {
   const showError = useErrorsDispatch();
-  const currentUser = useCurrentUser();
-  const setCurrentUser = useSetCurrentUser();
+  const [ currentUser, setCurrentUser ] = [ ...useCurrentUser() ];
 
   const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : emptyProfile);
 

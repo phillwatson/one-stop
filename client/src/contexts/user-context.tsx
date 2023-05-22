@@ -5,22 +5,18 @@ import ProfileService from '../services/profile.service'
 // /**
 //  * An interface to describe the state that we will pass in the provider.
 //  */
-// interface UserProfileContextValue {
-//   user: UserProfile | undefined;
-//   setUser: Dispatch<SetStateAction<UserProfile | undefined>>;
-// }
+interface UserProfileContextValue {
+  user: UserProfile | undefined;
+  setUser: (user: UserProfile | undefined) => void;
+}
 
 /**
  * The context that will capture the state and the update method.
  */
-const UserContext = createContext<UserProfile | undefined>(undefined);
-export function useCurrentUser(): UserProfile | undefined {
-  return useContext(UserContext);
-}
-
-const SetUserContext = createContext(function(user: UserProfile | undefined) {});
-export function useSetCurrentUser() {
-  return useContext(SetUserContext);
+const UserContext = createContext<UserProfileContextValue>({ user: undefined, setUser: (user: UserProfile | undefined) => {} });
+export function useCurrentUser(): [UserProfile | undefined, (user: UserProfile | undefined) => void] {
+  const x = useContext(UserContext);
+  return [ x.user, x.setUser ];
 }
 
 export default function UserProfileProvider(props: PropsWithChildren) {
@@ -35,10 +31,8 @@ export default function UserProfileProvider(props: PropsWithChildren) {
   }, []);
 
   return (
-    <UserContext.Provider value={user}>
-      <SetUserContext.Provider value={setUser}>
+    <UserContext.Provider value={ { user, setUser }}>
         { props.children }
-      </SetUserContext.Provider>
     </UserContext.Provider>
   );
 }

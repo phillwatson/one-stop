@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import "./login-form.css";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
 import { useErrorsDispatch } from "../../contexts/error-context";
-import { useSetCurrentUser } from "../../contexts/user-context";
+import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 
 interface Credentials {
@@ -17,7 +17,7 @@ export default function LoginForm() {
   const [credentials, setCredentials] = useState<Credentials>({ username: "", password: "" });
 
   const showError = useErrorsDispatch();
-  const setCurrentUser = useSetCurrentUser();
+  const [, setCurrentUser ] = useCurrentUser();
 
   function validateForm() {
     const c = credentials;

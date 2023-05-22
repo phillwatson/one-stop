@@ -14,7 +14,7 @@ import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
 import { AppMenu, AppMenuItem } from "../components/app-menu";
 import { MenuItem } from "../components/app-menu/app-menu-item";
-import { useCurrentUser, useSetCurrentUser } from "../contexts/user-context";
+import { useCurrentUser } from "../contexts/user-context";
 import ProfileService from "../services/profile.service";
 import SignIn from "./sign-in";
 
@@ -51,8 +51,7 @@ export default function MainPage() {
     setOpen(false);
   };
 
-  const user = useCurrentUser();
-  const setUser = useSetCurrentUser();
+  const [user, setUser] = useCurrentUser();
 
   const menuItems: MenuItem[] = useMemo(() => {
     function logout() {
