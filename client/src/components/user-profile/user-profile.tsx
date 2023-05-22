@@ -1,5 +1,3 @@
-import { useState } from "react";
-import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
 import "./user-profile.css";
@@ -7,14 +5,15 @@ import UserProfile from "../../model/user-profile.model";
 
 interface Props {
   profile: UserProfile;
+  setter: (profile: UserProfile) => void;
 }
 
-export default function UserProfileForm(props: Props) {
 
-  const [profile, setProfile] = useState<UserProfile>(props.profile);
+export default function UserProfileForm(props: Props) {
+  const [profile, setProfile] = [ props.profile, props.setter ];
 
   return (
-    <Box className="panel" component="form" noValidate autoComplete="off">
+    <div className="panel">
       <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
         value={profile.username} onChange={e => setProfile({...profile, username: e.target.value})}/>
 
@@ -35,6 +34,6 @@ export default function UserProfileForm(props: Props) {
 
       <TextField className="field" id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
-    </Box>
+    </div>
   );
 }

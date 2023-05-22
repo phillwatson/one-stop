@@ -9,6 +9,7 @@ export interface MenuItem {
   label: string;
   icon?: ReactElement
   route: string;
+  action?: () => void;
 }
 
 export interface AppMenuItemProps extends MenuItem {
@@ -20,7 +21,7 @@ export default function AppMenuItem(props: AppMenuItemProps) {
 
   return (
     <>
-      <ListItem disablePadding onClick={ () => navigation(props.route) }>
+      <ListItem disablePadding onClick={ () => { if (props.action) { props.action(); } navigation(props.route); }}>
         <ListItemButton>
           <ListItemIcon>
             { props.icon }

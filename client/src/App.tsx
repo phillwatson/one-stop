@@ -4,11 +4,11 @@ import {
 } from "react-router-dom";
 
 import MainPage from './pages/main';
-import SignIn from "./pages/sign-in";
 import Institutions from "./pages/institutions";
 import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
 import ErrorsProvider from "./contexts/error-context";
+import UserProfileProvider from "./contexts/user-context";
 
 const router = createBrowserRouter([
   {
@@ -17,11 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <SignIn />
-      },
-      {
-        path: "sign-in",
-        element: <SignIn />
+        element: <div />
       },
       {
         path: "accounts",
@@ -43,7 +39,9 @@ export default function App() {
   return (
     <div>
       <ErrorsProvider>
-        <RouterProvider router={router} />
+        <UserProfileProvider>
+          <RouterProvider router={router} />
+        </UserProfileProvider>
       </ErrorsProvider>
     </div>
   );

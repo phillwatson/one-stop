@@ -3,32 +3,37 @@ import { useEffect, useState } from "react";
 import Button from '@mui/material/Button';
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
-import UserProfile from "../model/user-profile.model";
 import { useErrorsDispatch } from "../contexts/error-context";
+import { useCurrentUser, useSetCurrentUser } from "../contexts/user-context";
+import UserProfile from "../model/user-profile.model";
+
+
+const emptyProfile: UserProfile = {
+  id: undefined, 
+  username: '',
+  preferredName: '',
+  title: '',
+  givenName: '',
+  familyName: '',
+  email: '',
+  phone: '',
+  dateCreated: undefined,
+  dateOnboarded: undefined
+};
+
 
 export default function UpdateProfile() {
-  const emptyProfile: UserProfile = {
-    id: undefined, 
-    username: '',
-    preferredName: '',
-    title: '',
-    givenName: '',
-    familyName: '',
-    email: '',
-    phone: '',
-    dateCreated: undefined,
-    dateOnboarded: undefined
-  };
-
   const showError = useErrorsDispatch();
+  const currentUser = useCurrentUser();
+  const setCurrentUser = useSetCurrentUser();
 
-  const [profile, setProfile] = useState<UserProfile>( emptyProfile );
+  const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : emptyProfile);
 
   useEffect(() => {
     ProfileService.get()
-      .then((response) => { setProfile(response.data); } )
+      .then((response) => setCurrentUser(response.data) )
       .catch((err) => showError({ type: 'add', level: 'error', message: err}));
-  }, [showError]);
+  }, [setCurrentUser, showError]);
 
   function validateForm() {
     return true;
@@ -36,7 +41,9 @@ export default function UpdateProfile() {
 
   function handleSubmit(event: any) {
     event.preventDefault();
-    showError({ type: 'add', level: 'info', message: 'message ' + Date.now()})
+    ProfileService.update(profile)
+      .then(() => showError({ type: 'add', level: 'success', message: 'Profile updated' }))
+      .catch(error => showError({ type: 'add', level: 'error', message: error}));
   }
 
   return (
@@ -44,7 +51,7 @@ export default function UpdateProfile() {
       <h2>Profile information</h2>
       <hr></hr>
       <form onSubmit={ handleSubmit }>
-        <UserProfileForm profile={ profile }/>
+        <UserProfileForm profile={ profile } setter={ setProfile }/>
         <Button type="submit" variant="outlined" disabled={!validateForm()}>Save</Button>
       </form>
     </div>

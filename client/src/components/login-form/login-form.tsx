@@ -1,46 +1,38 @@
 import { useState } from "react";
 import Button from '@mui/material/Button';
-import Snackbar from "@mui/material/Snackbar";
-import Alert, { AlertColor } from "@mui/material/Alert";
 import TextField from '@mui/material/TextField';
-import { useNavigate } from "react-router-dom";
 
-import http from "../../services/http-common"
 import "./login-form.css";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
+import { useErrorsDispatch } from "../../contexts/error-context";
+import { useSetCurrentUser } from "../../contexts/user-context";
+import ProfileService from "../../services/profile.service";
 
-interface ErrorMessage {
-  severity: AlertColor | undefined,
-  message: String | undefined
+interface Credentials {
+  username: string,
+  password: string
 }
 
 export default function LoginForm() {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<Array<ErrorMessage>>([]);
+  const [credentials, setCredentials] = useState<Credentials>({ username: "", password: "" });
+
+  const showError = useErrorsDispatch();
+  const setCurrentUser = useSetCurrentUser();
 
   function validateForm() {
-    return username.length > 0 && password.length > 0;
+    const c = credentials;
+    return c.username.length > 0 && c.password.length > 0;
   }
 
   function handleSubmit(event: any) {
     event.preventDefault();
-    http.post("/auth/login", JSON.stringify({ username, password }))
-      .then(() => navigate("/accounts"))
+    ProfileService.login(credentials.username, credentials.password)
+      .then(() => {
+        ProfileService.get().then(user => setCurrentUser(user.data))
+      })
       .catch(e => {
-        setErrors(() => [ { severity: "warning", message: e.response.statusText }, ...errors ] );
+        showError({ type: 'add', level: "warning", message: e.response.statusText });
       });
-  }
-
-  function showErrors(): JSX.Element[] {
-    return (
-      errors.map( (e, index) => 
-      <Snackbar key={index} open={errors.length > 0} autoHideDuration={6000} anchorOrigin={{ vertical: 'top', horizontal: 'right'}}>
-        <Alert severity={e.severity} sx={{ width: '100%' }} onClose={() => {}}>{ e.message }</Alert> 
-      </Snackbar>
-      ) 
-    );
   }
 
   return (
@@ -49,11 +41,11 @@ export default function LoginForm() {
         <form onSubmit={ handleSubmit }>
           <div className="field">
             <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
-              value={username} onChange={(e) => setUsername(e.target.value)} />
+              value={credentials.username} onChange={(e) => setCredentials({ ...credentials, username: e.target.value})} />
           </div>
           <div className="field">
             <TextField className="field" id="password" label="Password" type="password" required variant="outlined" fullWidth margin="normal"
-              value={password} onChange={(e) => setPassword(e.target.value)} />
+              value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value})} />
           </div>
           <div className="panel">
             <Button type="submit" variant="outlined" disabled={!validateForm()}>Login</Button>
@@ -63,10 +55,6 @@ export default function LoginForm() {
         <GoogleSignInButton
           clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
           redirectUri={'http://localhost/api/v1/auth/validate/google'}/>
-        
-        <div>
-          { showErrors() }
-        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Outlet
 } from "react-router-dom";
@@ -14,16 +14,12 @@ import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
 import { AppMenu, AppMenuItem } from "../components/app-menu";
 import { MenuItem } from "../components/app-menu/app-menu-item";
+import { useCurrentUser, useSetCurrentUser } from "../contexts/user-context";
+import ProfileService from "../services/profile.service";
+import SignIn from "./sign-in";
 
 const appTitle = "One Stop";
 const drawerWidth = 240;
-
-const menuItems: MenuItem[] = [
- { label: 'Accounts', route: 'accounts', icon: <Savings/> },
- { label: 'Institutions', route: 'institutions', icon: <AccountBalance/> },
- { label: 'Profile', route: 'profiles', icon: <Person/> },
- { label: 'Logout', route: 'sign-in', icon: <Logout/> }
-];
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth' })
   <{ open?: boolean, drawerWidth: number; }>
@@ -54,6 +50,27 @@ export default function MainPage() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const user = useCurrentUser();
+  const setUser = useSetCurrentUser();
+
+  const menuItems: MenuItem[] = useMemo(() => {
+    function logout() {
+      ProfileService.logout().then(() => setUser(undefined) );
+    };
+
+    return [
+      { label: 'Accounts', route: 'accounts', icon: <Savings/> },
+      { label: 'Institutions', route: 'institutions', icon: <AccountBalance/> },
+      { label: 'Profile', route: 'profiles', icon: <Person/> },
+      { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
+    ];
+  }, [setUser]);
+   
+
+  if (!user) {
+    return (<SignIn/>);
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>

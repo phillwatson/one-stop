@@ -49,8 +49,10 @@ class HttpService {
   private checkError(error: AxiosError) {
     var requestUrl: string = error.request.responseURL;
 
-    // if it's an auth error BUT not a request to login
-    if ((error.response!.status === 401) && (!requestUrl.includes("/auth/login"))) {
+    // if it's an auth error BUT not a request to login or logout
+    if ((error.response!.status === 401) &&
+        (!requestUrl.includes("/auth/login")) &&
+        (!requestUrl.includes("/auth/logout"))) {
       // if a refresh has already been started
       if (this.refreshInflight) {
         // wait for the refresh to complete
