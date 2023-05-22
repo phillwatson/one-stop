@@ -4,6 +4,8 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useCallback } from 'react';
+import { useCurrentUser } from '../../contexts/user-context';
 
 interface AppHeaderProps extends MuiAppBarProps {
   drawerWidth: number;
@@ -29,6 +31,8 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' 
 }));
 
 export default function AppHeader(props: AppHeaderProps) {
+  const currentUser = useCallback(useCurrentUser, []);
+
   return (
     <AppBar position="fixed" open={ props.open } drawerWidth={ props.drawerWidth }>
       <Toolbar>
@@ -40,6 +44,7 @@ export default function AppHeader(props: AppHeaderProps) {
           <Typography variant="h6" noWrap component="div">
             { props.title }
           </Typography>
+          <span style={{ marginLeft: "auto" }}>{currentUser()?.preferredName}</span>
       </Toolbar>
     </AppBar>
   );

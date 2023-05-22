@@ -8,7 +8,6 @@ interface Props {
   setter: (profile: UserProfile) => void;
 }
 
-
 export default function UserProfileForm(props: Props) {
   const [profile, setProfile] = [ props.profile, props.setter ];
 
