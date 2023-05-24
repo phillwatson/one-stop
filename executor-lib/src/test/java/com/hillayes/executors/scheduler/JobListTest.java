@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @Slf4j
 public class JobListTest extends TestBase {
     @Test
@@ -26,8 +28,8 @@ public class JobListTest extends TestBase {
                 return "test-jobs";
             }
 
-            public void accept(String data) {
-                log.info("Task {} is running ({})", data, signal.incrementAndGet());
+            public void accept(TaskContext<String> context) {
+                log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
             }
 
             @Override
@@ -74,9 +76,9 @@ public class JobListTest extends TestBase {
                 return "test-jobs";
             }
 
-            public void accept(String data) {
+            public void accept(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
-                log.info("Task {} is running ({})", data, count);
+                log.info("Task {} is running ({})", context.getPayload(), count);
                 if (count < 3) {
                     throw new RuntimeException("test task failure");
                 }
@@ -119,9 +121,11 @@ public class JobListTest extends TestBase {
             }
 
             // the task will fail on each run
-            public void accept(String data) {
+            public void accept(TaskContext<String> context) {
+                assertEquals(signal.get(), context.getRetryCount());
+
                 int count = signal.incrementAndGet();
-                log.info("Task {} is running ({})", data, count);
+                log.info("Task {} is running ({})", context.getPayload(), count);
                 throw new RuntimeException("test task failure");
             }
 

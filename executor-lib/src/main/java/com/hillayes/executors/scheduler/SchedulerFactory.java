@@ -183,9 +183,14 @@ public class SchedulerFactory {
 
                 // add task (with call-back) to the result
                 final NamedJobbingTask<Serializable> consumer = (NamedJobbingTask<Serializable>) task;
-                result.put(task.getName(), builder.execute((inst, ctx) ->
-                    // call the task with the payload data - using the correlation ID used when job was queued
-                    Correlation.call(inst.getData().correlationId, consumer, inst.getData().payload)
+                result.put(task.getName(), builder.execute((inst, ctx) -> {
+                        // call the task with the payload data - using the correlation ID used when job was queued
+                        TaskContext<Serializable> taskContext = new TaskContext<>(
+                            ctx.getExecution().consecutiveFailures,
+                            inst.getData()
+                        );
+                        Correlation.call(inst.getData().correlationId, consumer, taskContext);
+                    }
                 ));
             }
         });

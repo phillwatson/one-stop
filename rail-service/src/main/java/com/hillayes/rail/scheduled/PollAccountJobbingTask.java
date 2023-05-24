@@ -2,6 +2,7 @@ package com.hillayes.rail.scheduled;
 
 import com.hillayes.commons.Strings;
 import com.hillayes.executors.scheduler.SchedulerFactory;
+import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Account;
@@ -65,11 +66,12 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
      * the grace period (defined in the configuration account-polling-interval)
      * then no update is performed.
      *
-     * @param accountId the identifier of the Account to be updated.
+     * @param context the context containing the identifier of the Account to be updated.
      */
     @Override
     @Transactional
-    public void accept(UUID accountId) {
+    public void accept(TaskContext<UUID> context) {
+        UUID accountId = context.getPayload();
         log.info("Processing Poll Account job [accountId: {}]", accountId);
 
         // if the account has been polled after this grace period, don't poll it again

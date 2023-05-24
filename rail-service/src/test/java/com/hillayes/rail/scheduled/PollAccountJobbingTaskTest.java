@@ -1,6 +1,7 @@
 package com.hillayes.rail.scheduled;
 
 import com.hillayes.executors.scheduler.SchedulerFactory;
+import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
@@ -109,7 +110,8 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        fixture.accept(account.getId());
+        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        fixture.accept(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -169,7 +171,8 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        fixture.accept(account.getId());
+        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        fixture.accept(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -229,7 +232,8 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        fixture.accept(account.getId());
+        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        fixture.accept(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -278,7 +282,8 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // when: the fixture is called to process the account
-        fixture.accept(account.getId());
+        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        fixture.accept(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -326,7 +331,8 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // when: the fixture is called to process the account
-        fixture.accept(account.getId());
+        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        fixture.accept(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
