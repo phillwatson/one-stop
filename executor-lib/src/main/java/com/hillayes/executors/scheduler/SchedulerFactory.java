@@ -1,6 +1,7 @@
 package com.hillayes.executors.scheduler;
 
 import com.github.kagkarlsson.scheduler.Scheduler;
+import com.github.kagkarlsson.scheduler.task.CompletionHandler;
 import com.github.kagkarlsson.scheduler.task.FailureHandler;
 import com.github.kagkarlsson.scheduler.task.Task;
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask;
@@ -10,11 +11,9 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedules;
 import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.executors.scheduler.config.FrequencyConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
+import com.hillayes.executors.scheduler.config.RetryConfig;
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
-import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
-import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
-import com.hillayes.executors.scheduler.tasks.NamedTask;
-import lombok.AllArgsConstructor;
+import com.hillayes.executors.scheduler.tasks.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -23,6 +22,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
+
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
 
 /**
  * Creates a facade around the kagkarlsson db-scheduler library; with the aim of
@@ -85,7 +87,7 @@ public class SchedulerFactory {
      * Schedules a job of work for the named Jobbing task, to process the given payload.
      *
      * @param jobbingTask the Jobbing task to pass the payload to for processing.
-     * @param payload     the payload to be processed.
+     * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
     public String addJob(NamedJobbingTask<?> jobbingTask, Serializable payload) {
@@ -108,7 +110,7 @@ public class SchedulerFactory {
      * Configures the recurring tasks from the given collection of NamedTasks. Only
      * those tasks for which a configuration is given will be created.
      *
-     * @param namedTasks    the collection of NamedTasks to be configured.
+     * @param namedTasks the collection of NamedTasks to be configured.
      * @param configuration the configurations to be matched to the NamedTasks.
      * @return the configured collection of recurring tasks.
      */
@@ -135,7 +137,7 @@ public class SchedulerFactory {
                     Optional<FailureHandler<Void>> handler = configureFailureHandler(namedTaskConfig);
                     handler.ifPresent(builder::onFailure);
 
-                    // add task (with call-back) to the result
+                    // add task - with call-back to execute
                     result.add(builder.execute((inst, ctx) ->
                         // call the task - use the task name as a correlation ID
                         Correlation.run(inst.getTaskAndInstance(), (Runnable) task)
@@ -153,7 +155,7 @@ public class SchedulerFactory {
      * The given SchedulerConfig MAY contain configurations for the named jobbing tasks, but
      * defaults will be applied if no config entry is found.
      *
-     * @param namedTasks    the collection of NamedTasks to be configured.
+     * @param namedTasks the collection of NamedTasks to be configured.
      * @param configuration the configurations from which the tasks', optional, config is taken.
      * @return the configured collection of jobbing tasks.
      */
@@ -165,33 +167,60 @@ public class SchedulerFactory {
 
         Map<String, Task<JobbingTaskData>> result = new HashMap<>();
         namedTasks.forEach(task -> {
+            Optional<NamedTaskConfig> taskConfig = Optional.ofNullable(configuration.tasks().get(task.getName()));
             if (task instanceof NamedJobbingTask<?>) {
                 log.debug("Adding Jobbing Task [name: {}]", task.getName());
 
-                // create one-time-task
-                Tasks.OneTimeTaskBuilder<JobbingTaskData> builder = Tasks.oneTime(task.getName(), JobbingTaskData.class);
+                // create a custom task
+                Tasks.TaskBuilder<JobbingTaskData> builder = Tasks.custom(task.getName(), JobbingTaskData.class);
 
                 // find any, optional, configuration related to the named task
-                NamedTaskConfig namedTaskConfig = configuration.tasks().get(task.getName());
-                if (namedTaskConfig != null) {
+                taskConfig.ifPresent(config -> {
                     log.debug("Jobbing Task configuration found [task: {}]", task.getName());
 
                     // use the configured failure handler
-                    Optional<FailureHandler<JobbingTaskData>> handler = configureFailureHandler(namedTaskConfig);
+                    Optional<FailureHandler<JobbingTaskData>> handler = configureFailureHandler(config);
                     handler.ifPresent(builder::onFailure);
-                }
+                });
 
-                // add task (with call-back) to the result
-                final NamedJobbingTask<Serializable> consumer = (NamedJobbingTask<Serializable>) task;
+                // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
-                        // call the task with the payload data - using the correlation ID used when job was queued
-                        TaskContext<Serializable> taskContext = new TaskContext<>(
-                            ctx.getExecution().consecutiveFailures,
-                            inst.getData()
-                        );
-                        Correlation.call(inst.getData().correlationId, consumer, taskContext);
+                    // construct the context for the task to run in - including the job payload
+                    TaskContext<Serializable> taskContext = new TaskContext<Serializable>(inst.getData())
+                        .setFailureCount(ctx.getExecution().consecutiveFailures)
+                        .setRepeatCount(inst.getData().repeatCount);
+
+                    // call the task using the correlation ID used when job was queued
+                    final NamedJobbingTask<Serializable> function = (NamedJobbingTask<Serializable>) task;
+                    TaskConclusion conclusion = Correlation.call(inst.getData().correlationId, function, taskContext);
+
+                    // if task has completed
+                    if (conclusion == TaskConclusion.COMPLETE) {
+                        log.debug("Task completed [instance: {}, repeatCount: {}]",
+                            inst.getTaskAndInstance(), taskContext.getRepeatCount());
+                        return new CompletionHandler.OnCompleteRemove<>();
                     }
-                ));
+
+                    // reset the consecutive failure count - as it didn't fail this time
+                    ctx.getExecution().consecutiveFailures = 0;
+
+                    // increment the repeat count
+                    inst.getData().repeatCount++;
+
+                    // determine when, and if, the incomplete task should be repeated
+                    Optional<Duration> repeatInterval = calcRepeatInterval(taskConfig, inst.getData().repeatCount);
+                    if (repeatInterval.isPresent()) {
+                        log.debug("Task not complete, rescheduling [instance: {}, repeatCount: {}, interval: {}]",
+                            inst.getTaskAndInstance(), taskContext.getRepeatCount(), repeatInterval);
+                        return new CompletionHandler.OnCompleteReschedule<>(
+                            Schedules.fixedDelay(repeatInterval.get()), inst.getData());
+                    }
+
+                    // max-repeats reached - fail the task
+                    log.error("{} has not completed after {} runs. Cancelling execution.",
+                        ctx.getExecution().taskInstance, inst.getData().repeatCount);
+                    return new CompletionHandler.OnCompleteRemove<>();
+                }));
             }
         });
 
@@ -202,8 +231,8 @@ public class SchedulerFactory {
      * Creates a new Scheduler of the given configuration. The given collections of
      * jobbing and recurring tasks are started.
      *
-     * @param configuration  the scheduler configuration.
-     * @param jobbingTasks   the collection of Jobbing tasks to be started.
+     * @param configuration the scheduler configuration.
+     * @param jobbingTasks the collection of Jobbing tasks to be started.
      * @param recurringTasks the collection of recurring tasks to be started.
      * @return the new scheduler. Will be null if no tasks are given.
      */
@@ -233,6 +262,14 @@ public class SchedulerFactory {
         return result;
     }
 
+    /**
+     * Parses the FrequencyConfiguration for a NamedScheduledTask to produce a Schedule
+     * on which the task is to be run.
+     *
+     * @param taskName the name of the NamedScheduledTask to be scheduled.
+     * @param config the task's configuration properties.
+     * @return the schedule on which the task is run.
+     */
     private Schedule parseSchedule(String taskName, NamedTaskConfig config) {
         FrequencyConfig frequencyConfig = config.frequency()
             .orElseThrow(() -> new IllegalArgumentException("Schedule frequency is null - taskName: " + taskName));
@@ -254,11 +291,8 @@ public class SchedulerFactory {
             }
         }
 
-        if (result.isEmpty()) {
-            throw new IllegalArgumentException("Schedule period is null - taskName: " + taskName);
-        }
-
-        return result.get();
+        return result
+            .orElseThrow(() -> new IllegalArgumentException("Schedule period is null - taskName: " + taskName));
     }
 
     /**
@@ -269,29 +303,60 @@ public class SchedulerFactory {
      * @return the configured FailureHandler.
      */
     private <T> Optional<FailureHandler<T>> configureFailureHandler(NamedTaskConfig namedTaskConfig) {
-        FailureHandler<T> result = null;
-
-        // if a retry config is given
-        if (namedTaskConfig.retryInterval().isPresent()) {
-            // create a back-off failure handler
-            result = new FailureHandler.ExponentialBackoffFailureHandler<>(
-                namedTaskConfig.retryInterval().get(),
-                namedTaskConfig.retryExponent().orElse(NamedTaskConfig.DEFAULT_RETRY_EXPONENT));
-        }
-
-        // if a max-retry config is given
-        if (namedTaskConfig.maxRetry().isPresent()) {
-            // if no retry config was given, use a default
-            if (result == null) {
-                result = new FailureHandler.OnFailureRetryLater<>(Duration.ofMinutes(1));
+        return namedTaskConfig.onFailure().map(retryConfig -> {
+            FailureHandler<T> result = null;
+            // if a retry config is given
+            if (retryConfig.retryInterval().isPresent()) {
+                // create a back-off failure handler
+                result = new FailureHandler.ExponentialBackoffFailureHandler<>(
+                    retryConfig.retryInterval().get(),
+                    retryConfig.retryExponent().orElse(RetryConfig.DEFAULT_RETRY_EXPONENT));
             }
 
-            // create max-retry failure handler - wrapping the retry handler
-            result = new FailureHandler.MaxRetriesFailureHandler<>(
-                namedTaskConfig.maxRetry().getAsInt(), result);
-        }
+            // if a max-retry config is given
+            if (retryConfig.maxRetry().isPresent()) {
+                // if no retry config was given, use a default
+                if (result == null) {
+                    result = new FailureHandler.OnFailureRetryLater<>(RetryConfig.DEFAULT_RETRY_INTERVAL);
+                }
 
-        return Optional.ofNullable(result);
+                // create max-retry failure handler - wrapping the retry handler
+                result = new FailureHandler.MaxRetriesFailureHandler<>(
+                    retryConfig.maxRetry().getAsInt(), result);
+            }
+            return result;
+        });
+    }
+
+    /**
+     * Calculates the delay before an INCOMPLETE NamedJobbingTask will be repeated.
+     * If no repeat configuration is given, or the max-retries has been reached,
+     * the return value will be empty.
+     *
+     * @param config the NamedJobbingTask's configuration.
+     * @param repeatCount the count of the task's repeats
+     * @return the delay after which the task will be run.
+     */
+    private Optional<Duration> calcRepeatInterval(Optional<NamedTaskConfig> config, final int repeatCount) {
+        return config
+            .flatMap(NamedTaskConfig::onIncomplete)
+            .map(c -> {
+                    if ((c.maxRetry().isPresent()) && (repeatCount > c.maxRetry().getAsInt())) {
+                        // indicate it will not be repeated
+                        return null;
+                    }
+
+                    long interval = c.retryInterval()
+                        .map(Duration::toMillis)
+                        .orElse(RetryConfig.DEFAULT_RETRY_INTERVAL.toMillis());
+
+                    double exponent = c.retryExponent().orElse(RetryConfig.DEFAULT_RETRY_EXPONENT);
+
+                    return Duration.ofMillis(c.retryExponent().isPresent()
+                        ? round(interval * pow(repeatCount, exponent))
+                        : interval);
+                }
+            );
     }
 
     /**
@@ -300,9 +365,14 @@ public class SchedulerFactory {
      * that was active at the time the job was queued. This allows the correlation
      * ID to be re-activated when the task is processed.
      */
-    @AllArgsConstructor
     private static class JobbingTaskData implements Serializable {
         String correlationId;
         Serializable payload;
+        int repeatCount;
+
+        JobbingTaskData(String correlationId, Serializable payload) {
+            this.correlationId = correlationId;
+            this.payload = payload;
+        }
     }
 }

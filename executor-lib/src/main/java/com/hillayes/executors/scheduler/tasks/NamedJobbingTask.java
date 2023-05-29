@@ -3,13 +3,16 @@ package com.hillayes.executors.scheduler.tasks;
 import com.hillayes.executors.scheduler.TaskContext;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-/**
- * A named instance of a named task that can execute jobs on an arbitrary frequency.
- *
- * @see com.hillayes.executors.scheduler.SchedulerFactory#addJob(NamedJobbingTask, Serializable)
- */
-public interface NamedJobbingTask<T extends Serializable> extends Consumer<TaskContext<T>>, NamedTask {
+public interface NamedJobbingTask<T extends Serializable>
+    extends Function<TaskContext<T>, TaskConclusion>, NamedTask {
+
+    /**
+     * Queues an instance of this task, with the given payload, for processing.
+     *
+     * @param payload the data to be processed.
+     * @return the job identifier.
+     */
     public String queueJob(T payload);
 }

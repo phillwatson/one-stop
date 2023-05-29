@@ -1,17 +1,12 @@
 package com.hillayes.executors.scheduler.config;
 
-import java.time.Duration;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 /**
  * Configures a named task. Each entry is listed within a Map, keyed on the
  * name of the task to which it refers.
  */
 public interface NamedTaskConfig {
-    double DEFAULT_RETRY_EXPONENT = 1.5;
-
     /**
      * Determines how a NamedScheduledTask is scheduled. This is not used by
      * NamedJobbingTasks, which process tasks in an ad-hoc manner.
@@ -19,30 +14,12 @@ public interface NamedTaskConfig {
     Optional<FrequencyConfig> frequency();
 
     /**
-     * The initial interval before retrying a failed task. If required, a value of 1
-     * minute is suggested.
-     * <p>
-     * Note: the scheduler's polling interval will affect the accuracy at which this
-     * interval will be applied.
-     * <p>
-     * By default, Recurring tasks are rescheduled according to their Schedule one-time
-     * tasks are retried again in 5 minutes.
-     * @see #retryExponent
-     * @see SchedulerConfig#pollingInterval()
+     * Determines how a task is to be retried should it fail with an exception.
      */
-    Optional<Duration> retryInterval();
+    Optional<RetryConfig> onFailure();
 
     /**
-     * The exponential rate at which a failed task will be retried. The retryInterval will
-     * be increased by this factor on each retry. This will only apply if retryInterval is
-     * specified.
-     * If retryInterval is specified, a default value of 1.5 is applies.
+     * Determines how a task is to be retried should it return an INCOMPLETE conclusion.
      */
-    OptionalDouble retryExponent();
-
-    /**
-     * The maximum number of times a failed task will be retried. If required, a value of
-     * 5 is suggested.
-     */
-    OptionalInt maxRetry();
+    Optional<RetryConfig> onIncomplete();
 }

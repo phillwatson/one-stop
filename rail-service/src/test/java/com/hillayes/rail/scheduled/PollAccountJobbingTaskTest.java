@@ -110,7 +110,7 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        TaskContext<UUID> context = new TaskContext<>(account.getId());
         fixture.accept(context);
 
         // then: the account is retrieved
@@ -171,7 +171,7 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        TaskContext<UUID> context = new TaskContext<>(account.getId());
         fixture.accept(context);
 
         // then: the account is retrieved
@@ -232,7 +232,7 @@ public class PollAccountJobbingTaskTest {
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        TaskContext<UUID> context = new TaskContext<>(account.getId());
         fixture.accept(context);
 
         // then: the account is retrieved
@@ -282,7 +282,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        TaskContext<UUID> context = new TaskContext<>(account.getId());
         fixture.accept(context);
 
         // then: the account is retrieved
@@ -331,7 +331,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
         // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(0, account.getId());
+        TaskContext<UUID> context = new TaskContext<>(account.getId());
         fixture.accept(context);
 
         // then: the account is retrieved

@@ -4,6 +4,7 @@ import com.hillayes.commons.Strings;
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
@@ -70,7 +71,7 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
      */
     @Override
     @Transactional
-    public void accept(TaskContext<UUID> context) {
+    public TaskConclusion apply(TaskContext<UUID> context) {
         UUID accountId = context.getPayload();
         log.info("Processing Poll Account job [accountId: {}]", accountId);
 
@@ -108,6 +109,8 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
                     accountRepository.save(account);
                 })
             );
+
+        return TaskConclusion.COMPLETE;
     }
 
     private void updateBalances(Account account) {
