@@ -7,7 +7,7 @@ import MainPage from './pages/main';
 import Institutions from "./pages/institutions";
 import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
-import ErrorsProvider from "./contexts/error-context";
+import NotificationProvider from "./contexts/notification-context";
 import UserProfileProvider from "./contexts/user-context";
 
 const router = createBrowserRouter([
@@ -38,11 +38,11 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <div>
-      <ErrorsProvider>
+      <NotificationProvider>
         <UserProfileProvider>
           <RouterProvider router={router} />
         </UserProfileProvider>
-      </ErrorsProvider>
+      </NotificationProvider>
     </div>
   );
 }

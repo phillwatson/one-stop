@@ -78,13 +78,15 @@ one-stop:
         poll-all-accounts:
           frequency:
             time-of-day: "02:00:00"
-          max-retry: 3
-          retry-interval: PT1M
+          on-failure:
+            max-retry: 3
+            retry-interval: PT1M
 
         # jobbing tasks to refresh the identified account details
         poll-account:
-          max-retry: 5
-          retry-interval: PT1M
+          on-failure:
+            max-retry: 5
+            retry-interval: PT1M
 
   auth:
     access-token:

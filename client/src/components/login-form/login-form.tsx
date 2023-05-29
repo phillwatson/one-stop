@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 
 import "./login-form.css";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
-import { useErrorsDispatch } from "../../contexts/error-context";
+import { useNotificationDispatch } from "../../contexts/notification-context";
 import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 
@@ -16,7 +16,7 @@ interface Credentials {
 export default function LoginForm() {
   const [credentials, setCredentials] = useState<Credentials>({ username: "", password: "" });
 
-  const showError = useErrorsDispatch();
+  const showNotification = useNotificationDispatch();
   const [, setCurrentUser ] = useCurrentUser();
 
   function validateForm() {
@@ -31,7 +31,7 @@ export default function LoginForm() {
         ProfileService.get().then(user => setCurrentUser(user.data))
       })
       .catch(e => {
-        showError({ type: 'add', level: "warning", message: e.response.statusText });
+        showNotification({ type: 'add', level: "warning", message: e.response.statusText });
       });
   }
 

@@ -71,6 +71,7 @@ class HttpService {
           })
           .catch(() => {
             // if refresh failed - return the original error
+            console.log(error);
             return new Promise((resolve) => resolve(error) );
           })
           .finally(() => this.refreshInflight = undefined );
@@ -78,6 +79,9 @@ class HttpService {
         return this.refreshInflight;
       }
     }
+
+    // will cause a refresh of profile context - leading to login page
+    window.location.reload();
 
     // non-401 error OR a login failure
     return Promise.reject(error);

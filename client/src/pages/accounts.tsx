@@ -40,7 +40,8 @@ export default function Accounts() {
 
   return (
     <div>
-      <h2>Accounts:</h2>
+      <h2>Accounts</h2>
+      <hr></hr>
       <BankList banks={banks} userConsents={userConsents} onLinkSelect={handleLinkSelect} />
     </div>
   );

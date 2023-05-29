@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Button from '@mui/material/Button';
+
+import { useNotificationDispatch } from "../contexts/notification-context";
+import { useCurrentUser } from "../contexts/user-context";
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
-import { useErrorsDispatch } from "../contexts/error-context";
-import { useCurrentUser } from "../contexts/user-context";
 import UserProfile from "../model/user-profile.model";
-
 
 const emptyProfile: UserProfile = {
   id: undefined, 
@@ -21,28 +21,40 @@ const emptyProfile: UserProfile = {
   dateOnboarded: undefined
 };
 
-
 export default function UpdateProfile() {
-  const showError = useErrorsDispatch();
-  const [ currentUser, setCurrentUser ] = [ ...useCurrentUser() ];
+  const showNotification = useNotificationDispatch();
+  const [ currentUser, setCurrentUser ] = useCurrentUser();
 
   const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : emptyProfile);
 
-  useEffect(() => {
-    ProfileService.get()
-      .then((response) => setCurrentUser(response.data) )
-      .catch((err) => showError({ type: 'add', level: 'error', message: err}));
-  }, [setCurrentUser, showError]);
+  function validateForm(): Array<string> {
+    const errors = Array<string>();
 
-  function validateForm() {
-    return true;
+    if (profile.username.length === 0) {
+      errors.push("Username is required");
+    }
+
+    if (profile.email.length === 0) {
+      errors.push("Email is required");
+    }
+
+    if (profile.givenName.length === 0) {
+      errors.push("Given name is required");
+    }
+
+    return errors;
   }
 
   function handleSubmit(event: any) {
     event.preventDefault();
+
+    validateForm().forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
     ProfileService.update(profile)
-      .then(() => showError({ type: 'add', level: 'success', message: 'Profile updated' }))
-      .catch(error => showError({ type: 'add', level: 'error', message: error}));
+      .then(() => {
+        setCurrentUser(profile)
+        showNotification({ type: 'add', level: 'success', message: 'Profile updated' });
+      })
+      .catch(error => showNotification({ type: 'add', level: 'error', message: error}));
   }
 
   return (
@@ -51,7 +63,7 @@ export default function UpdateProfile() {
       <hr></hr>
       <form onSubmit={ handleSubmit }>
         <UserProfileForm profile={ profile } setter={ setProfile }/>
-        <Button type="submit" variant="outlined" disabled={!validateForm()}>Save</Button>
+        <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
       </form>
     </div>
   );
