@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-public class Institution {
+public class Institution implements Comparable<Institution> {
     @EqualsAndHashCode.Include
     public String id;
 
@@ -26,4 +27,16 @@ public class Institution {
     public String logo;
 
     public boolean paymentsEnabled;
+
+    @Override
+    public int compareTo(Institution other) {
+        if (other == this) {
+            return 0;
+        }
+        if (other == null) {
+            return 1;
+        }
+
+        return this.name.compareTo(other.name);
+    }
 }

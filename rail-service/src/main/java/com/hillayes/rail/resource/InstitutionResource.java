@@ -1,6 +1,8 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.onestop.api.InstitutionResponse;
+import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.service.InstitutionService;
@@ -9,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.Collection;
+import javax.ws.rs.core.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Path("/api/v1/rails/banks")
@@ -24,20 +26,65 @@ public class InstitutionResource {
     private final InstitutionService institutionService;
 
     @GET
-    public Collection<Institution> getAll(@QueryParam("country") String countryCode) {
-        log.info("List institutions [country: {}]", countryCode);
-        Set<Institution> result = new HashSet<>(institutionService.list(countryCode, true));
-        result.addAll(institutionService.list(countryCode, false));
+    public Response getAll(@Context UriInfo uriInfo,
+                           @QueryParam("page") @DefaultValue("0") int page,
+                           @QueryParam("page-size") @DefaultValue("20") int pageSize,
+                           @QueryParam("country") String countryCode) {
+        log.info("List institutions [country: {}, page: {}, pageSize: {}]", countryCode, page, pageSize);
+        Set<Institution> allBanks = new HashSet<>(institutionService.list(countryCode, true));
+        allBanks.addAll(institutionService.list(countryCode, false));
 
-        log.debug("List institutions [country: {}, size: {}]", countryCode, result.size());
-        return result;
+        List<InstitutionResponse> bankPage = allBanks.stream()
+            .sorted()
+            .skip(((long) page) * pageSize)
+            .limit(pageSize)
+            .map(this::marshal)
+            .toList();
+
+        int totalPages = (int) Math.ceil((double) allBanks.size() / pageSize);
+        PaginatedInstitutions response = new PaginatedInstitutions()
+            .page(page)
+            .pageSize(pageSize)
+            .count(bankPage.size())
+            .total((long) allBanks.size())
+            .items(bankPage)
+            .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages,
+                uriBuilder -> {
+                    if (countryCode != null) {
+                        uriBuilder.queryParam("country", countryCode);
+                    }
+                    return uriBuilder;
+                })
+            );
+
+        log.debug("List institutions [country: {}, page: {}, pageSize: {}, count: {}]",
+            countryCode, page, pageSize, response.getCount());
+        return Response.ok(response).build();
     }
 
     @GET
     @Path("/{id}")
-    public InstitutionDetail getById(@PathParam("id") String id) {
+    public Response getById(@PathParam("id") String id) {
         log.info("Get institution [id: {}]", id);
-        return institutionService.get(id)
+        InstitutionDetail institution = institutionService.get(id)
             .orElseThrow(() -> new NotFoundException("Institution", id));
+
+        return Response.ok(marshal(institution)).build();
+    }
+
+    private InstitutionResponse marshal(Institution institution) {
+        return new InstitutionResponse()
+            .id(institution.id)
+            .name(institution.name)
+            .bic(institution.bic)
+            .logo(institution.logo);
+    }
+
+    private InstitutionResponse marshal(InstitutionDetail institution) {
+        return new InstitutionResponse()
+            .id(institution.id)
+            .name(institution.name)
+            .bic(institution.bic)
+            .logo(institution.logo);
     }
 }

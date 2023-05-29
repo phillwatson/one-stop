@@ -25,8 +25,8 @@ public class InstitutionService extends AbstractRailService {
     @Inject
     ServiceConfiguration config;
 
-    private Cache<CacheKey,List<Institution>> cacheByCountry;
-    private Cache<String,InstitutionDetail> cacheById;
+    private Cache<CacheKey, List<Institution>> cacheByCountry;
+    private Cache<String, InstitutionDetail> cacheById;
 
     @PostConstruct
     public void init() {

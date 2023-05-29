@@ -281,9 +281,30 @@ paths:
   /rails/institutions:
     get:
       tags: [ "rails" ]
-      summary: "Get all institutions"
-      description: "This can only be done by the logged in user."
+      summary: "Get all institutions for identified country"
+      description: "Returns the supported institutions within the registered country."
       operationId: "getAllInstitutions"
+      parameters:
+        - name: "countryCode"
+          in: "path"
+          required: true
+          schema:
+            type: string
+        - name: "page"
+          in: "query"
+          description: "Page number - zero indexed"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: "page-size"
+          in: "query"
+          description: "Number of items per page"
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
       responses:
         "200":
           description: "successful operation"
@@ -300,7 +321,7 @@ paths:
     get:
       tags: [ "rails" ]
       summary: "Get institution by id"
-      description: "This can only be done by the logged in user."
+      description: "Returns the details of the identified institution."
       operationId: "getInstitutionById"
       parameters:
         - name: "id"

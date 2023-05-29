@@ -13,7 +13,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Path("/api/v1/rails/transactions")
 @RolesAllowed("user")
@@ -37,20 +36,18 @@ public class AccountTransactionResource {
         Page<AccountTransaction> transactionsPage =
             accountTransactionService.getTransactions(userId, accountId, page, pageSize);
 
-        Function<UriBuilder, UriBuilder> uriDecorator = uriBuilder -> {
-            if (accountId != null) {
-                uriBuilder.queryParam("account-id", accountId);
-            }
-            return uriBuilder;
-        };
-
         PaginatedTransactions response = new PaginatedTransactions()
             .page(transactionsPage.getNumber())
             .pageSize(transactionsPage.getSize())
             .count(transactionsPage.getNumberOfElements())
             .total(transactionsPage.getTotalElements())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriDecorator));
+            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
+                if (accountId != null) {
+                    uriBuilder.queryParam("account-id", accountId);
+                }
+                return uriBuilder;
+            }));
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}]",
             userId, accountId, page, pageSize, response.getCount());

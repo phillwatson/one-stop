@@ -1,7 +1,6 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
-import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
