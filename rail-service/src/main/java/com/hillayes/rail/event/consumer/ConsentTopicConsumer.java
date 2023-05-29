@@ -86,16 +86,16 @@ public class ConsentTopicConsumer implements EventConsumer {
                     .ifPresent(summary -> {
                         account.setOwnerName(summary.ownerName);
                         account.setIban(summary.iban);
-                    });
 
-                // retrieve rail-account details
-                Map<String, Object> details = railAccountService.details(railAccountId);
-                Map<String, Object> accountProperties = (Map) details.get("account");
-                if (accountProperties != null) {
-                    account.setAccountName((String) accountProperties.get("name"));
-                    account.setAccountType((String) accountProperties.get("cashAccountType"));
-                    account.setCurrencyCode((String) accountProperties.get("currency"));
-                }
+                        // retrieve rail-account details
+                        Map<String, Object> details = railAccountService.details(railAccountId);
+                        Map<String, Object> accountProperties = (Map) details.get("account");
+                        if (accountProperties != null) {
+                            account.setAccountName((String) accountProperties.get("name"));
+                            account.setAccountType((String) accountProperties.get("cashAccountType"));
+                            account.setCurrencyCode((String) accountProperties.get("currency"));
+                        }
+                    });
 
                 // save updated account
                 UUID accountId = accountRepository.save(account).getId();

@@ -1,10 +1,8 @@
 package com.hillayes.rail.scheduled;
 
 import com.hillayes.commons.Strings;
-import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
-import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Account;
@@ -17,14 +15,15 @@ import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.service.RailAccountService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
