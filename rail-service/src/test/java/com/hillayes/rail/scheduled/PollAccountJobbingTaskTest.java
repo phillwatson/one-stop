@@ -111,7 +111,7 @@ public class PollAccountJobbingTaskTest {
 
         // when: the fixture is called to process the account
         TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.accept(context);
+        fixture.apply(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -172,7 +172,7 @@ public class PollAccountJobbingTaskTest {
 
         // when: the fixture is called to process the account
         TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.accept(context);
+        fixture.apply(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -233,7 +233,7 @@ public class PollAccountJobbingTaskTest {
 
         // when: the fixture is called to process the account
         TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.accept(context);
+        fixture.apply(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -283,7 +283,7 @@ public class PollAccountJobbingTaskTest {
 
         // when: the fixture is called to process the account
         TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.accept(context);
+        fixture.apply(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());
@@ -332,7 +332,7 @@ public class PollAccountJobbingTaskTest {
 
         // when: the fixture is called to process the account
         TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.accept(context);
+        fixture.apply(context);
 
         // then: the account is retrieved
         verify(accountRepository).findById(account.getId());

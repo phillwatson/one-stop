@@ -3,6 +3,7 @@ package com.hillayes.rail.scheduled;
 import com.hillayes.commons.Strings;
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.config.ServiceConfiguration;
@@ -32,9 +33,8 @@ import java.util.UUID;
  * Account.
  */
 @ApplicationScoped
-@RequiredArgsConstructor
 @Slf4j
-public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
+public class PollAccountJobbingTask extends AbstractNamedJobbingTask<UUID> {
     private final ServiceConfiguration configuration;
     private final UserConsentRepository userConsentRepository;
     private final AccountRepository accountRepository;
@@ -42,23 +42,19 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
     private final AccountTransactionRepository accountTransactionRepository;
     private final RailAccountService railAccountService;
 
-    private SchedulerFactory scheduler;
-
-    @Override
-    public String getName() {
-        return "poll-account";
-    }
-
-    @Override
-    public void taskScheduled(SchedulerFactory scheduler) {
-        log.info("taskScheduled()");
-        this.scheduler = scheduler;
-    }
-
-    @Override
-    public String queueJob(UUID accountId) {
-        log.info("Queuing Poll Account job [accountId: {}]", accountId);
-        return scheduler.addJob(this, accountId);
+    public PollAccountJobbingTask(ServiceConfiguration configuration,
+                                  UserConsentRepository userConsentRepository,
+                                  AccountRepository accountRepository,
+                                  AccountBalanceRepository accountBalanceRepository,
+                                  AccountTransactionRepository accountTransactionRepository,
+                                  RailAccountService railAccountService) {
+        super("poll-account");
+        this.configuration = configuration;
+        this.userConsentRepository = userConsentRepository;
+        this.accountRepository = accountRepository;
+        this.accountBalanceRepository = accountBalanceRepository;
+        this.accountTransactionRepository = accountTransactionRepository;
+        this.railAccountService = railAccountService;
     }
 
     /**

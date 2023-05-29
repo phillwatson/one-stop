@@ -85,8 +85,8 @@ public class UserConsent {
      * The URL to which the client will be redirected after consent request is completed.
      */
     @Setter
-    @Column(name = "callback_url", nullable = true)
-    private String callbackUrl;
+    @Column(name = "callback_uri", nullable = true)
+    private String callbackUri;
 
     /**
      * Indicates the position in the flow to obtain consent from the user.

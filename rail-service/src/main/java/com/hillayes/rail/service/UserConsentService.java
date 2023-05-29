@@ -12,6 +12,8 @@ import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,13 +50,12 @@ public class UserConsentService {
     @Inject
     ConsentEventSender consentEventSender;
 
-    public List<UserConsent> listConsents(UUID userId) {
+    public Page<UserConsent> listConsents(UUID userId,
+                                          int page,
+                                          int pageSize) {
         log.info("Listing user's banks [userId: {}]", userId);
-        List<UserConsent> result = userConsentRepository.findByUserId(userId).stream()
-            .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
-            .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
-            .toList();
-        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
+        Page<UserConsent> result = userConsentRepository.findByUserId(userId, PageRequest.of(page, pageSize));
+        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.getNumberOfElements());
         return result;
     }
 
@@ -66,7 +67,7 @@ public class UserConsentService {
             .findFirst();
     }
 
-    public URI register(UUID userId, String institutionId, String callbackUrl) {
+    public URI register(UUID userId, String institutionId, URI callbackUri) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
         if (getUserConsent(userId, institutionId).isPresent()) {
             throw new BankAlreadyRegisteredException(userId, institutionId);
@@ -98,7 +99,7 @@ public class UserConsentService {
             .agreementId(agreement.id)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementExpires(expires)
-            .callbackUrl(callbackUrl)
+            .callbackUri(callbackUri.toString())
             .status(ConsentStatus.INITIATED)
             .build();
 
@@ -144,10 +145,10 @@ public class UserConsentService {
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
-        URI redirectUrl = URI.create(userConsent.getCallbackUrl());
+        URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.GIVEN);
         userConsent.setDateGiven(Instant.now());
-        userConsent.setCallbackUrl(null);
+        userConsent.setCallbackUri(null);
         userConsent = userConsentRepository.save(userConsent);
 
         // send consent-given event notification
@@ -167,10 +168,10 @@ public class UserConsentService {
         // delete the requisition - and the associated agreement
         requisitionService.delete(userConsent.getRequisitionId());
 
-        URI redirectUrl = URI.create(userConsent.getCallbackUrl());
+        URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
-        userConsent.setCallbackUrl(null);
+        userConsent.setCallbackUri(null);
         userConsent.setErrorCode(error);
         userConsent.setErrorDetail(details);
         userConsent = userConsentRepository.save(userConsent);

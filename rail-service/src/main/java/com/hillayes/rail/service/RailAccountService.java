@@ -40,6 +40,7 @@ public class RailAccountService extends AbstractRailService {
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 // indicate account-not-found
+                log.info("Failed to retrieve rail account [accountId: {}]", accountId);
                 return Optional.empty();
             }
             throw e;

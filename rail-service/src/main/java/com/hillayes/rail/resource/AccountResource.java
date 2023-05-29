@@ -2,7 +2,7 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.AccountResponse;
-import com.hillayes.onestop.api.BankResponse;
+import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Institution;
@@ -32,7 +32,9 @@ public class AccountResource {
                                 @Context UriInfo uriInfo,
                                 @QueryParam("page")@DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
-        Page<Account> accountsPage = accountService.getAccounts(ResourceUtils.getUserId(ctx), page, pageSize);
+        UUID userId = ResourceUtils.getUserId(ctx);
+        log.info("Listing accounts [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
+        Page<Account> accountsPage = accountService.getAccounts(userId, page, pageSize);
 
         PaginatedAccounts response = new PaginatedAccounts()
             .page(accountsPage.getNumber())
@@ -42,6 +44,8 @@ public class AccountResource {
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, accountsPage));
 
+        log.debug("Listing accounts [userId: {}, page: {}, pageSize: {}, count: {}]",
+            userId, page, pageSize, response.getCount());
         return Response.ok(response).build();
     }
 
@@ -50,6 +54,7 @@ public class AccountResource {
     public Response getAccountById(@Context SecurityContext ctx,
                                    @PathParam("accountId") UUID accountId) {
         UUID userId = ResourceUtils.getUserId(ctx);
+        log.info("Getting account [userId: {}, accountId: {}]", userId, accountId);
         Account account = accountService.getAccount(accountId)
             .filter(acc -> acc.getUserId().equals(userId))
             .orElseThrow(() -> new NotFoundException("Account", accountId));
@@ -58,19 +63,19 @@ public class AccountResource {
     }
 
     private AccountResponse marshal(Account account) {
-        BankResponse bank = institutionService.get(account.getInstitutionId())
-            .map(this::marshal)
-            .orElse(null);
+        Institution institution = institutionService.get(account.getInstitutionId())
+            .orElseThrow(() -> new NotFoundException("Institution", account.getInstitutionId()));
 
         return new AccountResponse()
             .id(account.getId())
             .name(account.getAccountName() == null ? account.getOwnerName() : account.getAccountName())
+            .currency(account.getCurrencyCode())
             .iban(account.getIban())
-            .bank(bank);
+            .institution(marshal(institution));
     }
 
-    private BankResponse marshal(Institution institution) {
-        return new BankResponse()
+    private InstitutionResponse marshal(Institution institution) {
+        return new InstitutionResponse()
             .id(institution.id)
             .name(institution.name)
             .bic(institution.bic)

@@ -278,34 +278,34 @@ paths:
         "500":
           description: "Internal server error"
 
-  /rails/banks:
+  /rails/institutions:
     get:
       tags: [ "rails" ]
-      summary: "Get all banks"
+      summary: "Get all institutions"
       description: "This can only be done by the logged in user."
-      operationId: "getAllBanks"
+      operationId: "getAllInstitutions"
       responses:
         "200":
           description: "successful operation"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedBanks"
+                $ref: "#/components/schemas/PaginatedInstitutions"
         "401":
           description: "Unauthorized"
         "500":
           description: "Internal server error"
 
-  /rails/banks/{id}:
+  /rails/institutions/{id}:
     get:
       tags: [ "rails" ]
-      summary: "Get bank by id"
+      summary: "Get institution by id"
       description: "This can only be done by the logged in user."
-      operationId: "getBankById"
+      operationId: "getInstitutionById"
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of bank to return"
+          description: "ID of institution to return"
           required: true
           schema:
             type: string
@@ -315,13 +315,138 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BankResponse"
+                $ref: "#/components/schemas/InstitutionResponse"
         "400":
           description: "Invalid ID supplied"
         "401":
           description: "Unauthorized"
         "404":
-          description: "Bank not found"
+          description: "Institution not found"
+        "500":
+          description: "Internal server error"
+
+  /rails/consents:
+    get:
+      tags: [ "accounts" ]
+      summary: "Get all consents"
+      description: "Get all consents for the authenticated user"
+      operationId: "getAllConsents"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page number - zero indexed"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: "page-size"
+          in: "query"
+          description: "Number of items per page"
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedUserConsents"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal server error"
+
+  /rails/consents/{institutionId}:
+    get:
+      tags: [ "accounts" ]
+      summary: "Get consent for the identified institution"
+      description: "Get the consent held for the identified institution for the authenticated user"
+      operationId: "getConsentByInstitution"
+      parameters:
+        - name: "institutionId"
+          in: "path"
+          description: "ID of institution to which the consent belongs"
+          required: true
+          example: 07061d7674f3
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserConsentResponse"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Insitution or Consent not found"
+        "500":
+          description: "Internal server error"
+
+    post:
+      tags: [ "accounts" ]
+      summary: "Register for consent with the identified institution"
+      description: |
+        Initiates the registration for the application to gain the user's
+        consent to access the identified institution
+      operationId: "registerConsent"
+      parameters:
+        - name: "institutionId"
+          in: "path"
+          description: "ID of institution to which the consent belongs"
+          required: true
+          example: 07061d7674f3
+          schema:
+            type: string
+      requestBody:
+        description: "The callback URI"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserConsentRequest"
+      responses:
+        "307":
+          description: "successful operation and redirection to consent form"
+        "400":
+          description: "Invalid request"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Insitution not found"
+        "500":
+          description: "Internal server error"
+
+    delete:
+      tags: [ "accounts" ]
+      summary: "Delete the identified consent"
+      description: |
+        Deletes the consent held for the identified institution for the authenticated user; revoking
+        any related agreements.
+      operationId: "deleteConsentByInstitution"
+      parameters:
+        - name: "institutionId"
+          in: "path"
+          description: "ID of institution to which the consent belongs"
+          required: true
+          example: 07061d7674f3
+          schema:
+            type: string
+      responses:
+        "204":
+          description: "successful operation"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Insitution or Consent not found"
         "500":
           description: "Internal server error"
 
@@ -515,7 +640,6 @@ components:
           items:
             $ref: '#/components/schemas/ContextAttribute'
 
-
     UserRegisterRequest:
       type: object
       required:
@@ -708,7 +832,7 @@ components:
                 description: The authorisation roles that the user holds
                 example: admin
 
-    BankResponse:
+    InstitutionResponse:
       type: object
       required:
         - id
@@ -717,22 +841,103 @@ components:
       properties:
         id:
           type: string
-          description: The bank Id
+          description: The institution Id
           example: 07061d7674f3
         name:
           type: string
-          description: The bank's name
+          description: The institution's name
           example: Bank of England
         bic:
           type: string
-          description: The bank's BIC
+          description: The institution's BIC
           example: BOEGB2L
         logo:
           type: string
-          description: The bank's logo
+          description: The institution's logo
           example: https://www.bankofengland.co.uk/-/media/boe/images/logos/bank-of-england-logo.png
 
+    UserConsentRequest:
+      type: object
+      required:
+        - callbackUri
+      properties:
+        callbackUri:
+          type: string
+          format: uri
+          description: The URI to which the application will redirect on completion of consent.
+          example: https://api.example.com/accounts
+
+    UserConsentResponse:
+      type: object
+      required:
+        - institutionId
+        - institutionName
+        - status
+      properties:
+        institutionId:
+          type: string
+          description: Identifies the institution record to which the consent relates
+          example: 07061d7674f3
+        institutionName:
+          type: string
+          description: Names the institution to which the consent relates
+          example: Bank of England
+        dateGiven:
+          type: string
+          format: date-time
+          description: The date and time the consent was acknowledged by the user
+          example: 2019-01-01T00:00:00.000Z
+        agreementExpires:
+          type: string
+          format: date-time
+          description: The date and time the consent agreement will expire
+          example: 2019-01-01T00:00:00.000Z
+        maxHistory:
+          type: integer
+          format: int32
+          description: The agreed number of past days for which transaction data can be obtained.
+          example: 90
+        status:
+          type: string
+          description: |
+            Indicates the position in the flow to obtain consent from the user. One of 
+             - INITIATED
+             - WAITING
+             - GIVEN
+             - DENIED
+             - CANCELLED
+          example: INITIATED
+        accounts:
+          description: |
+            The summary list of bank accounts related to the consent.
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountSummaryResponse'
+
+    AccountSummaryResponse:
+      description: A summary of an account to which the user has granted consent.
+      type: object
+      required:
+        - id
+        - name
+        - iban
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The account Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        name:
+          type: string
+          description: The account's name
+          example: My Current Account
+        iban:
+          type: string
+          description: The account's IBAN
+          example: GB29NWBK60161331926819
+
     AccountResponse:
+      description: The details of an account to which the user has granted consent.
       type: object
       required:
         - id
@@ -749,12 +954,18 @@ components:
           type: string
           description: The account's name
           example: My Current Account
+        currency:
+          type: string
+          description: The ISO-4217 currency code
+          minLength: 3
+          maxLength: 3
+          example: GBP
         iban:
           type: string
           description: The account's IBAN
           example: GB29NWBK60161331926819
-        bank:
-          $ref: "#/components/schemas/BankResponse"
+        institution:
+          $ref: "#/components/schemas/InstitutionResponse"
 
     TransactionSummaryResponse:
       type: object
@@ -848,16 +1059,16 @@ components:
         links:
           $ref: "#/components/schemas/PageLinks"
 
-    PaginatedBanks:
+    PaginatedInstitutions:
       allOf:
         - $ref: "#/components/schemas/PaginatedItems"
         - type: object
           properties:
             items:
               type: array
-              description: The list of banks
+              description: The list of institutions
               items:
-                $ref: "#/components/schemas/BankResponse"
+                $ref: "#/components/schemas/InstitutionResponse"
 
     PaginatedUsers:
       allOf:
@@ -869,6 +1080,17 @@ components:
               description: The list of users
               items:
                 $ref: "#/components/schemas/UserResponse"
+
+    PaginatedUserConsents:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of consents
+              items:
+                $ref: "#/components/schemas/UserConsentResponse"
 
     PaginatedAccounts:
       allOf:

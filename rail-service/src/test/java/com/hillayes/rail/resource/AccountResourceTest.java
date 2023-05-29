@@ -125,10 +125,10 @@ public class AccountResourceTest extends TestBase {
 
             Institution institution = banks.get(account.getInstitutionId());
             assertNotNull(institution);
-            assertEquals(institution.id, accountResponse.getBank().getId());
-            assertEquals(institution.name, accountResponse.getBank().getName());
-            assertEquals(institution.bic, accountResponse.getBank().getBic());
-            assertEquals(institution.logo, accountResponse.getBank().getLogo());
+            assertEquals(institution.id, accountResponse.getInstitution().getId());
+            assertEquals(institution.name, accountResponse.getInstitution().getName());
+            assertEquals(institution.bic, accountResponse.getInstitution().getBic());
+            assertEquals(institution.logo, accountResponse.getInstitution().getLogo());
         });
     }
 
@@ -253,10 +253,10 @@ public class AccountResourceTest extends TestBase {
         assertEquals(account.getIban(), accountResponse.getIban());
 
         assertNotNull(institution);
-        assertEquals(institution.id, accountResponse.getBank().getId());
-        assertEquals(institution.name, accountResponse.getBank().getName());
-        assertEquals(institution.bic, accountResponse.getBank().getBic());
-        assertEquals(institution.logo, accountResponse.getBank().getLogo());
+        assertEquals(institution.id, accountResponse.getInstitution().getId());
+        assertEquals(institution.name, accountResponse.getInstitution().getName());
+        assertEquals(institution.bic, accountResponse.getInstitution().getBic());
+        assertEquals(institution.logo, accountResponse.getInstitution().getLogo());
     }
 
     @Test

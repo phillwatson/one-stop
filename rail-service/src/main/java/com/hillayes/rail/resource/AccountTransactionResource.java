@@ -30,8 +30,12 @@ public class AccountTransactionResource {
                                     @QueryParam("page") @DefaultValue("0") int page,
                                     @QueryParam("page-size") @DefaultValue("20") int pageSize,
                                     @QueryParam("account-id") UUID accountId) {
+        UUID userId = ResourceUtils.getUserId(ctx);
+        log.info("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
+            userId, accountId, page, pageSize);
+
         Page<AccountTransaction> transactionsPage =
-            accountTransactionService.getTransactions(ResourceUtils.getUserId(ctx), accountId, page, pageSize);
+            accountTransactionService.getTransactions(userId, accountId, page, pageSize);
 
         Function<UriBuilder, UriBuilder> uriDecorator = uriBuilder -> {
             if (accountId != null) {
@@ -48,12 +52,17 @@ public class AccountTransactionResource {
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriDecorator));
 
+        log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}]",
+            userId, accountId, page, pageSize, response.getCount());
         return Response.ok(response).build();
     }
 
     @GET
     @Path("/{transactionId}")
     public Response getTransaction(@Context SecurityContext ctx, @PathParam("transactionId") UUID transactionId) {
+        UUID userId = ResourceUtils.getUserId(ctx);
+        log.info("Getting account transaction [userId: {}, transactionId: {}]", userId, transactionId);
+
         AccountTransaction transaction = accountTransactionService.getTransaction(transactionId)
             .filter(t -> t.getUserId().equals(ResourceUtils.getUserId(ctx)))
             .orElseThrow(() -> new NotFoundException("Transaction", transactionId));

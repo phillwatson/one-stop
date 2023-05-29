@@ -1,26 +1,26 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.onestop.api.AccountSummaryResponse;
+import com.hillayes.onestop.api.PaginatedUserConsents;
+import com.hillayes.onestop.api.UserConsentRequest;
+import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.AccountSummary;
 import com.hillayes.rail.model.Institution;
-import com.hillayes.rail.model.UserConsentRequest;
-import com.hillayes.rail.model.UserConsentResponse;
+import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
-import com.hillayes.rail.service.RailAccountService;
-import com.hillayes.rail.service.RequisitionService;
 import com.hillayes.rail.service.UserConsentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Path("/api/v1/rails/consents")
@@ -31,18 +31,28 @@ import java.util.UUID;
 public class UserConsentResource {
     private final UserConsentService userConsentService;
     private final InstitutionService institutionService;
-    private final RequisitionService requisitionService;
-    private final RailAccountService railAccountService;
+    private final AccountService accountService;
 
     @GET
     @RolesAllowed("user")
-    public Response getConsents(@Context SecurityContext ctx) {
+    public Response getConsents(@Context SecurityContext ctx,
+                                @Context UriInfo uriInfo,
+                                @QueryParam("page") @DefaultValue("0") int page,
+                                @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = ResourceUtils.getUserId(ctx);
-        log.info("Listing user's bank [userId: {}]", userId);
+        log.info("Listing user's banks [userId: {}]", userId);
 
-        List<UserConsent> result = userConsentService.listConsents(userId);
+        Page<UserConsent> result = userConsentService.listConsents(userId, page, pageSize);
 
-        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.size());
+        PaginatedUserConsents response = new PaginatedUserConsents()
+            .page(result.getNumber())
+            .pageSize(result.getSize())
+            .count(result.getNumberOfElements())
+            .total(result.getTotalElements())
+            .items(result.getContent().stream().map(this::marshal).toList())
+            .links(ResourceUtils.buildPageLinks(uriInfo, result));
+
+        log.debug("Listing user's banks [userId: {}, size: {}]", userId, response.getCount());
         return Response.ok(result).build();
     }
 
@@ -57,31 +67,7 @@ public class UserConsentResource {
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
-        Institution institution = institutionService.get(consent.getInstitutionId())
-            .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
-
-        List<AccountSummary> accountSummaries = requisitionService.get(consent.getRequisitionId())
-            .map(requisition -> requisition.accounts)
-            .orElse(List.of())
-            .stream()
-            .map(accountId -> railAccountService.get(accountId).orElseGet(() -> {
-                    log.info("Failed to retrieve rail account [accountId: {}]", accountId);
-                    return null;
-                })
-            )
-            .filter(Objects::nonNull)
-            .toList();
-
-        UserConsentResponse result = UserConsentResponse.builder()
-            .id(consent.getId())
-            .institutionId(consent.getInstitutionId())
-            .institutionName(institution.name)
-            .dateGiven(consent.getDateGiven())
-            .agreementExpires(consent.getAgreementExpires())
-            .maxHistory(consent.getMaxHistory())
-            .status(consent.getStatus())
-            .accounts(accountSummaries)
-            .build();
+        UserConsentResponse result = marshal(consent);
 
         log.debug("Getting user's consent record [userId: {}, institutionId: {}, consentId: {}]",
             userId, institutionId, consent.getId());
@@ -104,13 +90,15 @@ public class UserConsentResource {
     }
 
     @POST
+    @Path("{institutionId}")
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
+                             @PathParam("institutionId") String institutionId,
                              UserConsentRequest consentRequest) {
         UUID userId = ResourceUtils.getUserId(ctx);
-        log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, consentRequest.getInstitutionId());
+        log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 
-        URI consentLink = userConsentService.register(userId, consentRequest.getInstitutionId(), consentRequest.getCallbackUri());
+        URI consentLink = userConsentService.register(userId, institutionId, consentRequest.getCallbackUri());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
         return Response.ok(consentLink).build();
@@ -142,5 +130,29 @@ public class UserConsentResource {
 
     private void logHeaders(HttpHeaders headers) {
         headers.getRequestHeaders().forEach((k, v) -> log.debug("Header: {} = \"{}\"", k, v));
+    }
+
+    private AccountSummaryResponse marshal(Account account) {
+        return new AccountSummaryResponse()
+            .id(account.getId())
+            .name(account.getAccountName())
+            .iban(account.getIban());
+    }
+
+    private UserConsentResponse marshal(UserConsent consent) {
+        Institution institution = institutionService.get(consent.getInstitutionId())
+            .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
+
+        return new UserConsentResponse()
+            .institutionId(consent.getInstitutionId())
+            .institutionName(institution.name)
+            .dateGiven(consent.getDateGiven())
+            .agreementExpires(consent.getAgreementExpires())
+            .maxHistory(consent.getMaxHistory())
+            .status(consent.getStatus().name())
+            .accounts(accountService.getAccountsByUserConsent(consent).stream()
+                .map(this::marshal)
+                .toList()
+            );
     }
 }
