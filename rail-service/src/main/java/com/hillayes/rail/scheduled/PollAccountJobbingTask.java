@@ -125,6 +125,7 @@ public class PollAccountJobbingTask implements NamedJobbingTask<UUID> {
                 .referenceDate(balance.referenceDate)
                 .currencyCode(balance.balanceAmount.currency)
                 .amount(balance.balanceAmount.amount)
+                .lastCommittedTransaction(balance.lastCommittedTransaction)
                 .build()))
             .toList();
 

@@ -4,6 +4,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @Slf4j
 public class AccountTransactionResource {
     private final AccountTransactionService accountTransactionService;
+    private final AccountService accountService;
 
     @GET
     public Response getTransactions(@Context SecurityContext ctx,
@@ -32,6 +34,13 @@ public class AccountTransactionResource {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
+
+        if (accountId != null) {
+            // verify that the account belongs to the user
+            accountService.getAccount(accountId)
+                .filter(account -> userId.equals(account.getUserId()) )
+                .orElseThrow(() -> new NotFoundException("Account", accountId));
+        }
 
         Page<AccountTransaction> transactionsPage =
             accountTransactionService.getTransactions(userId, accountId, page, pageSize);

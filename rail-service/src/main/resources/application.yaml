@@ -84,9 +84,10 @@ one-stop:
 
         # jobbing tasks to refresh the identified account details
         poll-account:
-          on-failure:
-            max-retry: 5
+          on-failure: # gives a max of 4 hours 53 minutes
+            max-retry: 15
             retry-interval: PT1M
+            retry-exponent: 1.5
 
   auth:
     access-token:

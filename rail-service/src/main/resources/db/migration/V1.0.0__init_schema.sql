@@ -42,7 +42,8 @@ CREATE TABLE ${flyway:defaultSchema}.account_balance (
     amount numeric(19,2) NOT NULL,
     currency_code varchar(12) NOT NULL,
     balance_type varchar(256) NULL,
-    reference_date date NULL
+    reference_date date NULL,
+    last_committed_transaction varchar(256) NULL
 );
 CREATE INDEX idx_account_balance_date ON ${flyway:defaultSchema}.account_balance (account_id, date_created);
 

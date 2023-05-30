@@ -41,4 +41,7 @@ public class AccountBalance {
 
     @Column(name = "reference_date", nullable = true)
     public LocalDate referenceDate;
+
+    @Column(name = "last_committed_transaction", nullable = true)
+    public String lastCommittedTransaction;
 }

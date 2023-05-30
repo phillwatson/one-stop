@@ -15,4 +15,7 @@ public class Balance {
 
     @JsonProperty("referenceDate")
     public LocalDate referenceDate;
+
+    @JsonProperty("lastCommittedTransaction")
+    public String lastCommittedTransaction;
 }
