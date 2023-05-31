@@ -150,6 +150,73 @@ public class JobbingTaskTest extends TestBase {
     }
 
     @Test
+    public void testOnFailureOnMaxRetry() {
+        final AtomicInteger signal = new AtomicInteger();
+        final AtomicBoolean maxRetrySignal = new AtomicBoolean();
+
+        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
+            // the task will run when max-retry is reached
+            public TaskConclusion apply(TaskContext<String> context) {
+                log.info("Running on-max-retry task");
+                maxRetrySignal.set(true);
+                return TaskConclusion.COMPLETE;
+            }
+        };
+
+        NamedJobbingTask<String> task = new TestJobbingTask() {
+            // the task will fail on each run
+            public TaskConclusion apply(TaskContext<String> context) {
+                assertEquals(signal.get(), context.getFailureCount());
+                int count = signal.incrementAndGet();
+                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
+                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
+
+                throw new RuntimeException("test task failure");
+            }
+        };
+
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(Map.of(
+                    onMaxRetryTask.getName(), NamedTaskConfigImpl.builder().build(),
+
+                    task.getName(), NamedTaskConfigImpl.builder()
+                    .onFailure(RetryConfigImpl.builder()
+                        .retryInterval(Duration.ofSeconds(1))
+                        .retryExponent(1.0)
+                        .maxRetry(2) // specify a max-retry for test
+                        .onMaxRetry(onMaxRetryTask.getName())
+                        .build())
+                    .build()))
+                .pollingInterval(Duration.ofSeconds(1))
+                .build(),
+            List.of(task, onMaxRetryTask));
+
+        // queue some jobs
+        fixture.addJob(task, "one");
+
+        // wait for jobs to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(1))
+            .atMost(Duration.ofSeconds(12))
+            .until(() -> signal.get() == 3); // initial attempt plus 2 retries
+
+        // no more retry attempts will be made
+        Awaitility.await()
+            .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
+            .atMost(Duration.ofSeconds(4)) // timeout
+            .until(() -> signal.get() == 3 ); // no increment of the signal shows job was not retried
+
+        // wait for on-max-retry job to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(1))
+            .atMost(Duration.ofSeconds(12))
+            .until(maxRetrySignal::get);
+
+        fixture.stop();
+    }
+
+    @Test
     public void testRepeating() {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean complete = new AtomicBoolean(false);
@@ -226,13 +293,13 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(5))
-            .until(() -> signal.get() == 1); // initial attempt plus 3 retries
+            .until(() -> signal.get() == 1); // no retries on incomplete applied
 
         // no more retry attempts will be made
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(6)) // timeout
-            .until(() -> signal.get() == 1 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 1); // no increment of the signal shows job was not retried
 
         fixture.stop();
     }
@@ -272,7 +339,7 @@ public class JobbingTaskTest extends TestBase {
         // wait for jobs to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
-            .atMost(Duration.ofSeconds(12))
+            .atMost(Duration.ofSeconds(15))
             .until(() -> signal.get() == 4); // initial attempt plus 3 retries
 
         // no more retry attempts will be made
@@ -342,9 +409,85 @@ public class JobbingTaskTest extends TestBase {
         fixture.stop();
     }
 
+    @Test
+    public void testOnRepeatingOnMaxRetry() {
+        final AtomicInteger signal = new AtomicInteger();
+        final AtomicBoolean maxRetrySignal = new AtomicBoolean();
+
+        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
+            // the task will run when max-retry is reached
+            public TaskConclusion apply(TaskContext<String> context) {
+                log.info("Running on-max-retry task");
+                maxRetrySignal.set(true);
+                return TaskConclusion.COMPLETE;
+            }
+        };
+
+        NamedJobbingTask<String> task = new TestJobbingTask() {
+            public TaskConclusion apply(TaskContext<String> context) {
+                int count = signal.incrementAndGet();
+                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
+                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
+
+                // never completes
+                return TaskConclusion.INCOMPLETE;
+            }
+        };
+
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(Map.of(
+                    onMaxRetryTask.getName(), NamedTaskConfigImpl.builder().build(),
+
+                    task.getName(), NamedTaskConfigImpl.builder()
+                        .onIncomplete(RetryConfigImpl.builder()
+                            .retryInterval(Duration.ofSeconds(1))
+                            .retryExponent(1.0)
+                            .maxRetry(2) // less than completion condition
+                            .onMaxRetry(onMaxRetryTask.getName())
+                            .build())
+                        .build()))
+                .pollingInterval(Duration.ofSeconds(1))
+                .build(),
+            List.of(task, onMaxRetryTask));
+
+        // queue some jobs
+        fixture.addJob(task, "one");
+
+        // wait for jobs to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(1))
+            .atMost(Duration.ofSeconds(12))
+            .until(() -> signal.get() == 3); // initial attempt plus 2 retries
+
+        // no more retry attempts will be made
+        Awaitility.await()
+            .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
+            .atMost(Duration.ofSeconds(4)) // timeout
+            .until(() -> signal.get() == 3 ); // no increment of the signal shows job was not retried
+
+        // wait for on-max-retry job to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(1))
+            .atMost(Duration.ofSeconds(12))
+            .until(maxRetrySignal::get);
+
+        fixture.stop();
+    }
+
     private static abstract class TestJobbingTask implements NamedJobbingTask<String> {
+        private final String name;
+
+        TestJobbingTask() {
+            this("test-jobs");
+        }
+
+        TestJobbingTask(String name) {
+            this.name = name;
+        }
+
         public String getName() {
-            return "test-jobs";
+            return name;
         }
 
         @Override

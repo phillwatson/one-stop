@@ -1,9 +1,7 @@
 package com.hillayes.executors.scheduler;
 
 import com.github.kagkarlsson.scheduler.Scheduler;
-import com.github.kagkarlsson.scheduler.task.CompletionHandler;
-import com.github.kagkarlsson.scheduler.task.FailureHandler;
-import com.github.kagkarlsson.scheduler.task.Task;
+import com.github.kagkarlsson.scheduler.task.*;
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
@@ -86,14 +84,14 @@ public class SchedulerFactory {
     /**
      * Schedules a job of work for the named Jobbing task, to process the given payload.
      *
-     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param jobbingTaskName the name of the Jobbing task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(NamedJobbingTask<?> jobbingTask, Serializable payload) {
-        Task<JobbingTaskData> task = jobbingTasks.get(jobbingTask.getName());
+    public String addJob(String jobbingTaskName, Serializable payload) {
+        Task<JobbingTaskData> task = jobbingTasks.get(jobbingTaskName);
         if (task == null) {
-            throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTask.getName() + "\"");
+            throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTaskName + "\"");
         }
 
         String id = UUID.randomUUID().toString();
@@ -104,6 +102,17 @@ public class SchedulerFactory {
         scheduler.schedule(task.instance(id, new JobbingTaskData(correlationId, payload)), Instant.now());
 
         return id;
+    }
+
+    /**
+     * Schedules a job of work for the Jobbing task, to process the given payload.
+     *
+     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param payload the payload to be processed.
+     * @return the unique identifier for the scheduled job.
+     */
+    public String addJob(NamedJobbingTask<?> jobbingTask, Serializable payload) {
+        return addJob(jobbingTask.getName(), payload);
     }
 
     /**
@@ -219,6 +228,21 @@ public class SchedulerFactory {
                     // max-repeats reached - fail the task
                     log.error("{} has not completed after {} runs. Cancelling execution.",
                         ctx.getExecution().taskInstance, inst.getData().repeatCount);
+
+                    // if an on-max-retry task was named in the config
+                    taskConfig
+                        .flatMap(NamedTaskConfig::onIncomplete)
+                        .flatMap(RetryConfig::onMaxRetry)
+                        .ifPresent(onMaxRetryTaskName -> {
+                            try {
+                                log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
+                                addJob(onMaxRetryTaskName, inst.getData());
+                            } catch (Exception e) {
+                                log.error("Failed to queue on-max-retry task", e);
+                            }
+                        });
+
+                    // stop and remove this task instance
                     return new CompletionHandler.OnCompleteRemove<>();
                 }));
             }
@@ -321,8 +345,8 @@ public class SchedulerFactory {
                 }
 
                 // create max-retry failure handler - wrapping the retry handler
-                result = new FailureHandler.MaxRetriesFailureHandler<>(
-                    retryConfig.maxRetry().getAsInt(), result);
+                result = new MaxRetriesWithAbortHandler<>(
+                    retryConfig.maxRetry().getAsInt(), retryConfig.onMaxRetry().orElse(null), result);
             }
             return result;
         });
@@ -373,6 +397,42 @@ public class SchedulerFactory {
         JobbingTaskData(String correlationId, Serializable payload) {
             this.correlationId = correlationId;
             this.payload = payload;
+        }
+    }
+
+    public class MaxRetriesWithAbortHandler<T> implements FailureHandler<T> {
+        private final int maxRetries;
+        private final String onMaxRetryTaskName;
+        private final FailureHandler<T> failureHandler;
+
+        public MaxRetriesWithAbortHandler(int maxRetries,
+                                          String onMaxRetryTaskName,
+                                          FailureHandler<T> failureHandler) {
+            this.maxRetries = maxRetries;
+            this.onMaxRetryTaskName = onMaxRetryTaskName;
+            this.failureHandler = failureHandler;
+        }
+
+        public void onFailure(ExecutionComplete executionComplete, ExecutionOperations<T> executionOperations) {
+            int consecutiveFailures = executionComplete.getExecution().consecutiveFailures;
+            int totalNumberOfFailures = consecutiveFailures + 1;
+            if (totalNumberOfFailures > this.maxRetries) {
+                log.error("Execution has failed {} times for task instance {}. Cancelling execution.", totalNumberOfFailures, executionComplete.getExecution().taskInstance);
+                executionOperations.stop();
+
+                // schedule the abort task
+                if (onMaxRetryTaskName != null) {
+                    try {
+                        log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
+                        Serializable data = (Serializable) executionComplete.getExecution().taskInstance.getData();
+                        SchedulerFactory.this.addJob(onMaxRetryTaskName, data);
+                    } catch (Exception e) {
+                        log.error("Failed to queue on-max-retry task", e);
+                    }
+                }
+            } else {
+                this.failureHandler.onFailure(executionComplete, executionOperations);
+            }
         }
     }
 }

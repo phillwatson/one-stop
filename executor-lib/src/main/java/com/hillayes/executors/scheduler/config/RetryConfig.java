@@ -36,4 +36,14 @@ public interface RetryConfig {
      * suggested.
      */
     OptionalInt maxRetry();
+
+    /**
+     * The name of an optional jobbing task to be run when the max-retry is reached.
+     * If no max-retry number is configured, this task will be queued after first
+     * unsuccessful run of this task.
+     * <p>
+     * The named jobbing task must accept the same payload as the task which this
+     * config belongs.
+     */
+    Optional<String> onMaxRetry();
 }

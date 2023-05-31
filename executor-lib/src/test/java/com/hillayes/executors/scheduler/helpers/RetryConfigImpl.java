@@ -14,6 +14,8 @@ public class RetryConfigImpl implements RetryConfig {
     private Double retryExponent;
     private Integer maxRetry;
 
+    private String onMaxRetry;
+
     @Override
     public Optional<Duration> retryInterval() {
         return Optional.ofNullable(retryInterval);
@@ -27,5 +29,9 @@ public class RetryConfigImpl implements RetryConfig {
     @Override
     public OptionalInt maxRetry() {
         return (maxRetry == null) ? OptionalInt.empty() : OptionalInt.of(maxRetry);
+    }
+
+    public Optional<String> onMaxRetry() {
+        return Optional.ofNullable(onMaxRetry);
     }
 }
