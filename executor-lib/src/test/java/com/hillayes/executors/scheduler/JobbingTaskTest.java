@@ -7,6 +7,7 @@ import com.hillayes.executors.scheduler.helpers.TestBase;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
@@ -153,11 +154,13 @@ public class JobbingTaskTest extends TestBase {
     public void testOnFailureOnMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
 
         NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
-                log.info("Running on-max-retry task");
+                log.info("Running on-max-retry task: {}", context.getPayload());
+                assertEquals(payload, context.getPayload());
                 maxRetrySignal.set(true);
                 return TaskConclusion.COMPLETE;
             }
@@ -168,9 +171,10 @@ public class JobbingTaskTest extends TestBase {
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
                 int count = signal.incrementAndGet();
-                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
-                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
+                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {}])",
+                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count, context.getPayload());
 
+                assertEquals(payload, context.getPayload());
                 throw new RuntimeException("test task failure");
             }
         };
@@ -193,7 +197,7 @@ public class JobbingTaskTest extends TestBase {
             List.of(task, onMaxRetryTask));
 
         // queue some jobs
-        fixture.addJob(task, "one");
+        fixture.addJob(task, payload);
 
         // wait for jobs to complete
         Awaitility.await()
@@ -413,11 +417,13 @@ public class JobbingTaskTest extends TestBase {
     public void testOnRepeatingOnMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
 
         NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
-                log.info("Running on-max-retry task");
+                log.info("Running on-max-retry task: {}", context.getPayload());
+                assertEquals(payload, context.getPayload());
                 maxRetrySignal.set(true);
                 return TaskConclusion.COMPLETE;
             }
@@ -426,8 +432,10 @@ public class JobbingTaskTest extends TestBase {
         NamedJobbingTask<String> task = new TestJobbingTask() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
-                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
-                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
+                log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {})",
+                    context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count, context.getPayload());
+
+                assertEquals(payload, context.getPayload());
 
                 // never completes
                 return TaskConclusion.INCOMPLETE;
@@ -452,7 +460,7 @@ public class JobbingTaskTest extends TestBase {
             List.of(task, onMaxRetryTask));
 
         // queue some jobs
-        fixture.addJob(task, "one");
+        fixture.addJob(task, payload);
 
         // wait for jobs to complete
         Awaitility.await()

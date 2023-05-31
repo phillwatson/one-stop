@@ -195,7 +195,7 @@ public class SchedulerFactory {
                 // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
                     // construct the context for the task to run in - including the job payload
-                    TaskContext<Serializable> taskContext = new TaskContext<Serializable>(inst.getData())
+                    TaskContext<Serializable> taskContext = new TaskContext<>(inst.getData().payload)
                         .setFailureCount(ctx.getExecution().consecutiveFailures)
                         .setRepeatCount(inst.getData().repeatCount);
 
@@ -236,7 +236,9 @@ public class SchedulerFactory {
                         .ifPresent(onMaxRetryTaskName -> {
                             try {
                                 log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
-                                addJob(onMaxRetryTaskName, inst.getData());
+                                Correlation.run(inst.getData().correlationId, () ->
+                                    addJob(onMaxRetryTaskName, inst.getData().payload)
+                                );
                             } catch (Exception e) {
                                 log.error("Failed to queue on-max-retry task", e);
                             }
@@ -365,22 +367,21 @@ public class SchedulerFactory {
         return config
             .flatMap(NamedTaskConfig::onIncomplete)
             .map(c -> {
-                    if ((c.maxRetry().isPresent()) && (repeatCount > c.maxRetry().getAsInt())) {
-                        // indicate it will not be repeated
-                        return null;
-                    }
-
-                    long interval = c.retryInterval()
-                        .map(Duration::toMillis)
-                        .orElse(RetryConfig.DEFAULT_RETRY_INTERVAL.toMillis());
-
-                    double exponent = c.retryExponent().orElse(RetryConfig.DEFAULT_RETRY_EXPONENT);
-
-                    return Duration.ofMillis(c.retryExponent().isPresent()
-                        ? round(interval * pow(repeatCount, exponent))
-                        : interval);
+                if ((c.maxRetry().isPresent()) && (repeatCount > c.maxRetry().getAsInt())) {
+                    // indicate it will not be repeated
+                    return null;
                 }
-            );
+
+                long interval = c.retryInterval()
+                    .map(Duration::toMillis)
+                    .orElse(RetryConfig.DEFAULT_RETRY_INTERVAL.toMillis());
+
+                double exponent = c.retryExponent().orElse(RetryConfig.DEFAULT_RETRY_EXPONENT);
+
+                return Duration.ofMillis(c.retryExponent().isPresent()
+                    ? round(interval * pow(repeatCount, exponent))
+                    : interval);
+            });
     }
 
     /**
@@ -424,8 +425,10 @@ public class SchedulerFactory {
                 if (onMaxRetryTaskName != null) {
                     try {
                         log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
-                        Serializable data = (Serializable) executionComplete.getExecution().taskInstance.getData();
-                        SchedulerFactory.this.addJob(onMaxRetryTaskName, data);
+                        JobbingTaskData taskData = (JobbingTaskData) executionComplete.getExecution().taskInstance.getData();
+                        Correlation.run(taskData.correlationId, () ->
+                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.payload)
+                        );
                     } catch (Exception e) {
                         log.error("Failed to queue on-max-retry task", e);
                     }
