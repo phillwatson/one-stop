@@ -62,8 +62,6 @@ public class SchedulerFactory {
         jobbingTasks = createJobbingTasks(namedTasks, configuration);
         List<RecurringTask<?>> recurringTasks = createScheduledTasks(namedTasks, configuration);
 
-        log.info("Scheduling named scheduled tasks [jobbingSize: {}, recurringSize: {}]",
-            jobbingTasks.size(), recurringTasks.size());
         scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
         if (scheduler != null) {
             // inform all tasks that they have been started
@@ -266,13 +264,17 @@ public class SchedulerFactory {
                                     Collection<Task<JobbingTaskData>> jobbingTasks,
                                     Collection<RecurringTask<?>> recurringTasks) {
         if ((jobbingTasks.isEmpty()) && (recurringTasks.isEmpty())) {
+            log.info("No scheduler tasks to configure.");
             return null;
         }
 
-        log.debug("Creating scheduler");
         String tableName = configuration.schema()
             .map(schema -> schema + "." + "scheduled_tasks")
             .orElse("scheduled_tasks");
+
+        log.info("Scheduling named scheduled tasks [tableName: {}, jobbingSize: {}, recurringSize: {}]",
+            tableName, jobbingTasks.size(), recurringTasks.size());
+
         Scheduler result = Scheduler.create(dataSource, new ArrayList<>(jobbingTasks))
             .tableName(tableName)
             .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
