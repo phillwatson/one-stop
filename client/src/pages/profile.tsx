@@ -50,8 +50,8 @@ export default function UpdateProfile() {
 
     validateForm().forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
     ProfileService.update(profile)
-      .then(() => {
-        setCurrentUser(profile)
+      .then(update => {
+        setCurrentUser(update)
         showNotification({ type: 'add', level: 'success', message: 'Profile updated' });
       })
       .catch(error => showNotification({ type: 'add', level: 'error', message: error}));

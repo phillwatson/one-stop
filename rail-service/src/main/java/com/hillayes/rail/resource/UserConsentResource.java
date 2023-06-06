@@ -40,20 +40,21 @@ public class UserConsentResource {
                                 @QueryParam("page") @DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = ResourceUtils.getUserId(ctx);
-        log.info("Listing user's banks [userId: {}]", userId);
+        log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
 
-        Page<UserConsent> result = userConsentService.listConsents(userId, page, pageSize);
+        Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
 
         PaginatedUserConsents response = new PaginatedUserConsents()
-            .page(result.getNumber())
-            .pageSize(result.getSize())
-            .count(result.getNumberOfElements())
-            .total(result.getTotalElements())
-            .items(result.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, result));
+            .page(consentsPage.getNumber())
+            .pageSize(consentsPage.getSize())
+            .count(consentsPage.getNumberOfElements())
+            .total(consentsPage.getTotalElements())
+            .items(consentsPage.getContent().stream().map(this::marshal).toList())
+            .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
 
-        log.debug("Listing user's banks [userId: {}, size: {}]", userId, response.getCount());
-        return Response.ok(result).build();
+        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
+            userId, page, pageSize, response.getCount());
+        return Response.ok(response).build();
     }
 
     @GET
@@ -132,13 +133,6 @@ public class UserConsentResource {
         headers.getRequestHeaders().forEach((k, v) -> log.debug("Header: {} = \"{}\"", k, v));
     }
 
-    private AccountSummaryResponse marshal(Account account) {
-        return new AccountSummaryResponse()
-            .id(account.getId())
-            .name(account.getAccountName())
-            .iban(account.getIban());
-    }
-
     private UserConsentResponse marshal(UserConsent consent) {
         Institution institution = institutionService.get(consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
@@ -154,5 +148,15 @@ public class UserConsentResource {
                 .map(this::marshal)
                 .toList()
             );
+    }
+
+    private AccountSummaryResponse marshal(Account account) {
+        return new AccountSummaryResponse()
+            .id(account.getId())
+            .name(account.getAccountName())
+            .ownerName(account.getOwnerName())
+            .currency(account.getCurrencyCode())
+            .iban(account.getIban())
+            .institutionId(account.getInstitutionId());
     }
 }

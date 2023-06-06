@@ -1,9 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.AccountResponse;
-import com.hillayes.onestop.api.InstitutionResponse;
-import com.hillayes.onestop.api.PaginatedAccounts;
+import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.service.AccountService;
@@ -68,10 +66,21 @@ public class AccountResource {
 
         return new AccountResponse()
             .id(account.getId())
-            .name(account.getAccountName() == null ? account.getOwnerName() : account.getAccountName())
+            .name(account.getAccountName())
+            .ownerName(account.getOwnerName())
             .currency(account.getCurrencyCode())
             .iban(account.getIban())
-            .institution(marshal(institution));
+            .institution(marshal(institution))
+            .balance(accountService.getMostRecentBalance(account).stream().map(balance ->
+                    new AccountBalanceResponse()
+                        .id(balance.getId())
+                        .amount(balance.getAmount())
+                        .currency(balance.getCurrencyCode())
+                        .referenceDate(balance.getReferenceDate())
+                        .dateRecorded(balance.getDateCreated())
+                        .type(balance.getBalanceType())
+                ).toList()
+            );
     }
 
     private InstitutionResponse marshal(Institution institution) {

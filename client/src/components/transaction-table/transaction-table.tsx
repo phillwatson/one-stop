@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Transaction from "../../model/transaction.model";
+import RailsTransaction from "../../model/rails-transaction.model";
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 // a component to show a table of transactions
 export default function TransactionTable() {
   // maintain a list of transactions
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<RailsTransaction[]>([]);
 
 
   return (

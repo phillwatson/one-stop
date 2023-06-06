@@ -61,7 +61,7 @@ export default function MainPage() {
     return [
       { label: 'Accounts', route: 'accounts', icon: <Savings/> },
       { label: 'Institutions', route: 'institutions', icon: <AccountBalance/> },
-      { label: 'Profile', route: 'profiles', icon: <Person/> },
+      { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
     ];
   }, [setUser]);

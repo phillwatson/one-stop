@@ -57,14 +57,14 @@ public class AuthResource {
 
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         if (error != null) {
-            URI redirect = uriBuilder.path("sign-in").queryParam("error", error).build();
+            URI redirect = uriBuilder.queryParam("error", error).build();
             log.debug("OAuth login fail [redirect: {}, errorUri: {}]", redirect, errorUri);
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
         User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
 
-        URI redirect = uriBuilder.path("accounts").build();
+        URI redirect = uriBuilder.build();
         log.debug("OAuth login success [redirect: {}]", redirect);
         return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }

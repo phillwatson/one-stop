@@ -3,8 +3,8 @@ import React from "react";
 import Country from '../model/country.model';
 import CountryService from '../services/country.service';
 import CountrySelector from '../components/country-selector/country-selector'
-import Bank from '../model/bank.model';
-import BankService from '../services/bank.service';
+import Institution from '../model/institution.model';
+import InstitutionService from '../services/institution.service';
 import BankList from '../components/bank-list/bank-list'
 import UserConsentService from '../services/consent.service';
 import UserConsent from "../model/user-consent.model";
@@ -15,47 +15,47 @@ export default function Institutions() {
   const [countries, setCountries] = React.useState<Array<Country> | undefined>(undefined);
   const [activeCountry, setActiveCountry] = React.useState<Country | undefined>(undefined);
 
-  const [banks, setBanks] = React.useState<Array<Bank> | undefined>(undefined);
+  const [institutions, setInstitutions] = React.useState<Array<Institution> | undefined>(undefined);
 
   React.useEffect(() => {
-    CountryService.getAll().then((response) => {
-      setCountries(response.data);
+    CountryService.getAll().then(data => {
+      setCountries(data);
     });
 
-    UserConsentService.getConsents().then((response) => {
-      setUserConsents(response.data);
+    UserConsentService.getConsents(0, 3000).then(data => {
+      setUserConsents(data.items);
     });
   }, []);
 
   React.useEffect(() => {
     if (activeCountry === undefined) {
-        setBanks(undefined);
+      setInstitutions(undefined);
     } else {
-        BankService.getAll(activeCountry.id).then((response) => {
-          setBanks(response.data);
+      InstitutionService.getAll(activeCountry.id, 0, 3000).then(data => {
+          setInstitutions(data.items);
         });
     }
   }, [ activeCountry, userConsents ]);
   
-  function handleLinkSelect(bank: Bank, link: boolean) {
+  function handleLinkSelect(institution: Institution, link: boolean) {
     if (link) {
-      UserConsentService.cancelConsent(bank.id).then(() => {
+      UserConsentService.cancelConsent(institution.id).then(() => {
         if (userConsents !== undefined) {
-          const update = userConsents.filter(consent => consent.institutionId !== bank.id);
+          const update = userConsents.filter(consent => consent.institutionId !== institution.id);
           setUserConsents(update);
         }
       });
     } else {
-      UserConsentService.registerConsent(bank.id).then(response => {
-        UserConsentService.getConsent(bank.id).then(response => {
+      UserConsentService.registerConsent(institution.id).then(registerUri => {
+        UserConsentService.getConsent(institution.id).then(data => {
           const update = (userConsents === undefined)
-            ? [ response.data ]
-            : userConsents.concat([ response.data]);
+            ? [ data ]
+            : userConsents.concat([ data ]);
           setUserConsents(update);
         });
 
-        console.log(`Redirecting to ${response.data}`);
-        window.location = response.data;
+        console.log(`Redirecting to ${registerUri}`);
+        window.location = registerUri;
       });
     }
   }
@@ -69,7 +69,7 @@ export default function Institutions() {
             onSelectCountry={ setActiveCountry }/>
       </div>
       <div>
-        <BankList banks={ banks } userConsents={ userConsents } onLinkSelect={ handleLinkSelect }/>
+        <BankList institutions={ institutions } userConsents={ userConsents } onLinkSelect={ handleLinkSelect }/>
       </div>
     </div>
   );

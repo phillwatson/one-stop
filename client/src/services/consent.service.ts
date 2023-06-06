@@ -1,25 +1,29 @@
 import UserConsent from '../model/user-consent.model';
+import PaginatedList from '../model/paginated-list.model';
 import http from './http-common';
 
 class UserConsentService {
-  getConsent(bankId: string) {
-    return http.get<UserConsent>(`/rails/consents/${bankId}`);
+  getConsent(bankId: string): Promise<UserConsent> {
+    return http.get<UserConsent>(`/rails/consents/${bankId}`)
+      .then(response => response.data);
   }
 
-  getConsents() {
-    return http.get<Array<UserConsent>>("/rails/consents");
+  getConsents(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<UserConsent>> {
+    return http.get<PaginatedList<UserConsent>>('/rails/consents', { params: { "page": page, "page-size": pageSize }})
+      .then(response => response.data);
   }
 
-  registerConsent(bankId: string) {
-    console.log(`Registering bank [name: ${bankId}]`);
+  registerConsent(institutionId: string): Promise<Location> {
+    console.log(`Registering institution [id: ${institutionId}]`);
     
     var callbackUri = window.location.origin + "/accounts";
-    return http.post(`/rails/consents`, `{ "institutionId": "${bankId}", "callbackUri": "${callbackUri}" }`);
+    return http.post('/rails/consents', { params: { institutionId: institutionId, callbackUri: callbackUri }})
+      .then(response => response.data);
   }
 
-  cancelConsent(bankId: string) {
-    console.log(`Closing bank [name: ${bankId}]`);
-    return http.delete(`/rails/consents/${bankId}`);
+  cancelConsent(institutionId: string) {
+    console.log(`Closing bank [name: ${institutionId}]`);
+    return http.delete(`/rails/consents/${institutionId}`);
   }
 }
 

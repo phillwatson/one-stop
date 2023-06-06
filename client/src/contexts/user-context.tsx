@@ -26,7 +26,7 @@ export default function UserProfileProvider(props: PropsWithChildren) {
   // pre-load the user profile
   useEffect(() => {
     ProfileService.get()
-      .then((response) => { setUser(response.data); } )
+      .then(user => { setUser(user); } )
       .catch(() => setUser(undefined));
   }, []);
 

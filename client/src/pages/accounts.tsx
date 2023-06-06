@@ -1,48 +1,38 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { Fab, SxProps } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
-import UserConsentService from '../services/consent.service';
-import UserConsent from "../model/user-consent.model";
-import Bank from '../model/bank.model';
-import BankService from '../services/bank.service';
-import BankList from '../components/bank-list/bank-list'
+import AccountService from '../services/account.service';
+import Account from "../model/account.model";
+import AccountList from "../components/account/account-list";
+
+const bottomFabStyle: SxProps = {
+  position: 'absolute',
+  bottom: 16,
+  right: 16,
+};
 
 export default function Accounts() {
-  const [userConsents, setUserConsents] = React.useState<Array<UserConsent> | undefined>(undefined);
-  const [banks, setBanks] = React.useState<Array<Bank> | undefined>(undefined);
+  const [ accounts, setAccounts ] = useState<Array<Account>>([]);
 
-  React.useEffect(() => {
-    UserConsentService.getConsents().then((response) => {
-      setUserConsents(response.data);
-    });
+  useEffect(() => {
+    AccountService.getAll().then( response => setAccounts(response.items));
   }, []);
 
-  React.useEffect(() => {
-    if (userConsents !== undefined) {
-      const bankRequests: Array<Promise<Bank>> = userConsents.map(consent =>
-        BankService.get(consent.institutionId).then(response => response.data)
-      );
-      Promise.all(bankRequests).then(list => setBanks(list));
-    }
-  }, [userConsents]);
-
-
-  function handleLinkSelect(bank: Bank, link: boolean) {
-    if (link) {
-      UserConsentService.cancelConsent(bank.id).then(() => {
-        if (userConsents !== undefined) {
-          const update = userConsents.filter(consent => consent.institutionId !== bank.id);
-          setUserConsents(update);
-        }
-      });
-    }
+  function handleAddInstitution() {
+    alert("Add Institution");
   }
 
-
+  function handleSelectAccount(accountId: string) {
+    alert(`selected account ${accountId}`);
+  }
   return (
     <div>
       <h2>Accounts</h2>
       <hr></hr>
-      <BankList banks={banks} userConsents={userConsents} onLinkSelect={handleLinkSelect} />
+      <AccountList accounts={accounts} onSelect={handleSelectAccount}/>
+
+      <Fab color="primary" aria-label="add" sx={bottomFabStyle} onClick={handleAddInstitution}><AddIcon /></Fab>
     </div>
   );
 }

@@ -81,8 +81,8 @@ public class AccountTransactionResource {
             .accountId(transaction.getAccountId())
             .amount(transaction.getTransactionAmount())
             .date(transaction.getBookingDateTime())
-            .description(transaction.remittanceInformationStructured == null
-                ? transaction.creditorName
-                : transaction.remittanceInformationStructured);
+            .description(transaction.getRemittanceInformationUnstructured() == null
+                ? transaction.getDebtorName()
+                : transaction.getRemittanceInformationUnstructured());
     }
 }

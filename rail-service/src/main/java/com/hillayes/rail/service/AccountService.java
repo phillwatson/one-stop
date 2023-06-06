@@ -1,7 +1,9 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.rail.domain.Account;
+import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,8 @@ import java.util.UUID;
 public class AccountService {
     @Inject
     AccountRepository accountRepository;
+    @Inject
+    AccountBalanceRepository accountBalanceRepository;
 
     public Page<Account> getAccounts(UUID userId,
                                      int page,
@@ -40,5 +44,20 @@ public class AccountService {
     public Optional<Account> getAccount(UUID accountId) {
         log.info("Get user's accounts [accountId: {}]", accountId);
         return accountRepository.findById(accountId);
+    }
+
+    /**
+     * Returns the most recent balance records for the given Account. The result is
+     * a list because, for a given date, multiple balances of different types can be
+     * produced.
+     *
+     * @param account the account for which the balances are requested.
+     * @return the list of balance records for the same, most recent date.
+     */
+    public List<AccountBalance> getMostRecentBalance(Account account) {
+        log.info("Get user's account balance [accountId: {}]", account.getId());
+        return accountBalanceRepository.findFirstByAccountIdOrderByReferenceDateDesc(account.getId())
+            .map(balance -> accountBalanceRepository.findByAccountIdAndReferenceDate(account.getId(), balance.getReferenceDate()))
+            .orElse(List.of());
     }
 }

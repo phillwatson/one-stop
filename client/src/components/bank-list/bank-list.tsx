@@ -1,28 +1,28 @@
 import './bank-list.css';
-import Bank from '../../model/bank.model';
+import Institution from '../../model/institution.model';
 import BankCard from '../bank-card/bank-card'
 import UserConsent from '../../model/user-consent.model';
 
 interface Props {
-    banks: Array<Bank> | undefined;
+    institutions: Array<Institution> | undefined;
     userConsents: Array<UserConsent> | undefined;
-    onLinkSelect?: (bank: Bank, link: boolean) => void;
+    onLinkSelect?: (institution: Institution, link: boolean) => void;
 }
 
 export default function BankList(props: Props) {
 
-  function getConsent(bank: Bank): UserConsent | undefined {
+  function getConsent(institution: Institution): UserConsent | undefined {
     return (props.userConsents) &&
-     (props.userConsents.find(consent => consent.institutionId === bank.id));
+     (props.userConsents.find(consent => consent.institutionId === institution.id));
   }
 
   return (
     <div className="bank-list">
-      { props.banks && props.banks
+      { props.institutions && props.institutions
         .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
-        .map((bank, index: number) =>
+        .map((institution, index: number) =>
           <div className="bank-item">
-            <BankCard key={ index } bank={ bank } consent={ getConsent(bank) } onLinkSelect= { props.onLinkSelect }/>
+            <BankCard key={ index } institution={ institution } consent={ getConsent(institution) } onLinkSelect= { props.onLinkSelect }/>
           </div>
         )
       }

@@ -1,27 +1,24 @@
 import http from './http-common';
-import Account from '../model/account.model';
-import TransactionList from '../model/transaction-list.model';
-import AccountBalances from '../model/account-balances.model';
+import PaginatedList from '../model/paginated-list.model';
+import Account, { AccountDetail, TransactionSummary } from '../model/account.model';
 
 class AccountService {
-  get(accountId: string) {
+  getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<Account>> {
+    console.log(`Retrieving account [page: ${page}, pageSize: ${pageSize}]`);
+    return http.get<PaginatedList<Account>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
+      .then(response => response.data);
+  }
+
+  get(accountId: string): Promise<AccountDetail> {
     console.log(`Retrieving account [id: ${accountId}]`);
-    return http.get<Array<Account>>(`/rails/rails-accounts/${accountId}`);
+    return http.get<AccountDetail>(`/rails/accounts/${accountId}`)
+      .then(response => response.data);
   }
 
-  getDetails(accountId: string) {
-    console.log(`Retrieving account details [accountId: ${accountId}]`);
-    return http.get<Map<string,any>>(`/rails/rails-accounts/${accountId}/details`);
-  }
-
-  getBalances(accountId:  string) {
-    console.log(`Retrieving balances [accountId: ${accountId}]`);
-    return http.get<Array<AccountBalances>>(`/rails/rails-accounts/${accountId}/balances`);
-  }
-
-  getTransactions(accountId: string, from: Date, to: Date) {
-    console.log(`Retrieving transactions [accountId: ${accountId}, from: ${from}, to: ${to}]`);
-    return http.get<TransactionList>(`/rails/rails-accounts/${accountId}/transactions?date_from=${from}&date_to=${to}`);
+  getTransactions(accountId: string, page: number = 0, pageSize = 25): Promise<PaginatedList<TransactionSummary>> {
+    console.log(`Retrieving account transactions [id: ${accountId}, page: ${page}, pageSize: ${pageSize}]`);
+    return http.get<PaginatedList<TransactionSummary>>('/rails/transactions', { params: { "account-id": accountId, "page": page, "page-size": pageSize }})
+      .then(response => response.data);
   }
 }
 

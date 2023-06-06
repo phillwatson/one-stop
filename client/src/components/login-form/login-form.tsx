@@ -28,7 +28,7 @@ export default function LoginForm() {
     event.preventDefault();
     ProfileService.login(credentials.username, credentials.password)
       .then(() => {
-        ProfileService.get().then(user => setCurrentUser(user.data))
+        ProfileService.get().then(user => setCurrentUser(user))
       })
       .catch(e => {
         showNotification({ type: 'add', level: "warning", message: e.response.statusText });

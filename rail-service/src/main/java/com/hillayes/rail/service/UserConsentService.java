@@ -50,12 +50,11 @@ public class UserConsentService {
     @Inject
     ConsentEventSender consentEventSender;
 
-    public Page<UserConsent> listConsents(UUID userId,
-                                          int page,
-                                          int pageSize) {
-        log.info("Listing user's banks [userId: {}]", userId);
+    public Page<UserConsent> listConsents(UUID userId, int page, int pageSize) {
+        log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         Page<UserConsent> result = userConsentRepository.findByUserId(userId, PageRequest.of(page, pageSize));
-        log.debug("Listing user's banks [userId: {}, size: {}]", userId, result.getNumberOfElements());
+        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
+            userId, page, pageSize, result.getNumberOfElements());
         return result;
     }
 

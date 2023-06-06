@@ -1,6 +1,5 @@
 package com.hillayes.rail.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -31,16 +30,16 @@ public class AccountBalance {
     private Instant dateCreated = Instant.now();
 
     @Column(name = "amount", nullable = false)
-    public double amount;
+    private double amount;
 
     @Column(name = "currency_code", nullable = false)
-    public String currencyCode;
+    private String currencyCode;
 
     @Column(name = "balance_type", nullable = false)
-    public String balanceType;
+    private String balanceType;
 
     @Column(name = "reference_date", nullable = true)
-    public LocalDate referenceDate;
+    private LocalDate referenceDate;
 
     @Column(name = "last_committed_transaction", nullable = true)
     public String lastCommittedTransaction;

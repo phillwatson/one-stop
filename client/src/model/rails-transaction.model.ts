@@ -1,7 +1,11 @@
 import AccountReference from "./account-reference.model";
-import CurrencyAmount from "./currency-amount.model";
 
-export default interface Transaction {
+export interface RailsTransactionList {
+  booked: Array<RailsTransaction>,
+  pending: Array<RailsTransaction>
+}
+
+export default interface RailsTransaction {
        id: string,
        transactionId: string,
        bookingDate: Date,

@@ -28,7 +28,7 @@ const router = createBrowserRouter([
         element: <Institutions />
       },
       {
-        path: "profiles",
+        path: "profile",
         element: <UpdateProfile />
       },
     ],

@@ -475,7 +475,7 @@ paths:
     get:
       tags: [ "accounts" ]
       summary: "Get all accounts"
-      description: "Get all accounts for the authenticated user"
+      description: "Get summary of all accounts for the authenticated user"
       operationId: "getAllAccounts"
       parameters:
         - name: "page"
@@ -935,13 +935,50 @@ components:
           items:
             $ref: '#/components/schemas/AccountSummaryResponse'
 
+    AccountBalanceResponse:
+      description: A snapshot of an account's balance
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The balance Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        type:
+          type: string
+          description: The balance type.
+          example: interimAvailable
+        referenceDate:
+          type: string
+          format: date
+          description: the date the balance refers to
+          example: 2023-05-31
+        dateRecorded:
+          type: string
+          format: date-time
+          description: the date the balance was recorded.
+          example: 2023-05-31
+        amount:
+          type: number
+          format: double
+          description: The balance amount
+          example: 123.45
+        currency:
+          type: string
+          description: The ISO-4217 currency code
+          minLength: 3
+          maxLength: 3
+          example: GBP
+
     AccountSummaryResponse:
       description: A summary of an account to which the user has granted consent.
       type: object
       required:
         - id
         - name
+        - ownerName
         - iban
+        - institutionId
       properties:
         id:
           type: string
@@ -951,11 +988,25 @@ components:
         name:
           type: string
           description: The account's name
-          example: My Current Account
+          example: Main Account
+        ownerName:
+          type: string
+          description: The account owner's name
+          example: Jane Doe
+        currency:
+          type: string
+          description: The ISO-4217 currency code
+          minLength: 3
+          maxLength: 3
+          example: GBP
         iban:
           type: string
           description: The account's IBAN
           example: GB29NWBK60161331926819
+        institutionId:
+          type: string
+          description: The institution's identifier
+          example: 07061d7674f3
 
     AccountResponse:
       description: The details of an account to which the user has granted consent.
@@ -963,6 +1014,7 @@ components:
       required:
         - id
         - name
+        - ownerName
         - iban
         - bank
       properties:
@@ -974,7 +1026,11 @@ components:
         name:
           type: string
           description: The account's name
-          example: My Current Account
+          example: Main Account
+        ownerName:
+          type: string
+          description: The account owner's name
+          example: Jane Doe
         currency:
           type: string
           description: The ISO-4217 currency code
@@ -985,6 +1041,13 @@ components:
           type: string
           description: The account's IBAN
           example: GB29NWBK60161331926819
+        balance:
+          description: |
+            The account's most recent balance. As the balance records may include different
+            types, the response includes a list of balances for the same date.
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountBalanceResponse"
         institution:
           $ref: "#/components/schemas/InstitutionResponse"
 

@@ -11,15 +11,14 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import CurrencyPoundIcon from '@mui/icons-material/CurrencyPound';
 
-import Bank from '../../model/bank.model';
+import Institution from '../../model/institution.model';
 import UserConsent from '../../model/user-consent.model';
 
 interface Props {
-    bank: Bank;
+  institution: Institution;
     consent?: UserConsent;
-    onLinkSelect?: (bank: Bank, link: boolean) => void;
+    onLinkSelect?: (institution: Institution, link: boolean) => void;
 }
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -50,30 +49,28 @@ export default function BankCard(props: Props) {
     return props.onLinkSelect !== undefined
   }
 
-  function handleConnectToBank(bank: Bank, link: boolean) {
+  function handleConnectToBank(institution: Institution, link: boolean) {
     if (props.onLinkSelect !== undefined) {
-      props.onLinkSelect(bank, link);
+      props.onLinkSelect(institution, link);
     }
   }
 
   return (
     <Card>
       <CardHeader
-        avatar={ <Avatar aria-label={ props.bank.name } src={ props.bank.logo } /> }
-        title={ props.bank.name } subheader={ props.bank.bic }
+        avatar={ <Avatar aria-label={ props.institution.name } src={ props.institution.logo } /> }
+        title={ props.institution.name } subheader={ props.institution.bic }
         onClickCapture={ handleExpandClick }
       />
         { (!props.consent && isActionAvailable()) &&
           <CardActions disableSpacing>
-            <IconButton aria-label="connect to bank" onClick={ () => handleConnectToBank(props.bank, false) }>
+            <IconButton aria-label="connect to institution" onClick={ () => handleConnectToBank(props.institution, false) }>
               <LinkIcon />
             </IconButton>
-            { props.bank.paymentsEnabled ? <CurrencyPoundIcon /> : null}
           </CardActions>
         }
         { props.consent &&
           <CardActions disableSpacing>
-            { props.bank.paymentsEnabled ? <CurrencyPoundIcon /> : null}
             <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show accounts">
               <ExpandMoreIcon />
             </ExpandMore>
@@ -88,7 +85,7 @@ export default function BankCard(props: Props) {
         }
         { props.consent && props.consent.status !== "CANCELLED" && props.consent.status !== "DENIED" && isActionAvailable() &&
           <CardActions disableSpacing>
-            <IconButton aria-label="close connection" onClick={ () => handleConnectToBank(props.bank, true) }>
+            <IconButton aria-label="close connection" onClick={ () => handleConnectToBank(props.institution, true) }>
               <LinkOffIcon />
             </IconButton>
           </CardActions>

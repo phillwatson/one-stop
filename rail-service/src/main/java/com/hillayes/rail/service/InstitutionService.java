@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +44,7 @@ public class InstitutionService extends AbstractRailService {
                 .ifPresent(list::add);
 
             list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled);
+            list.sort(null);
             return list;
         });
     }

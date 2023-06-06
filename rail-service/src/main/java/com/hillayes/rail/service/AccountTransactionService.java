@@ -20,6 +20,16 @@ public class AccountTransactionService {
     @Inject
     AccountTransactionRepository accountTransactionRepository;
 
+    /**
+     * Returns a paged list of transactions for the identified user; optionally filtered by
+     * the identified account. The transactions (and pages) are ordered by date, descending.
+     *
+     * @param userId the user to whom the transaction belong.
+     * @param accountId the, optional, account to which the transaction belong.
+     * @param page the, zero-based, page number of transactions.
+     * @param pageSize the size of a page, and the maximum number of transactions to be returned.
+     * @return the page of identified transactions.
+     */
     public Page<AccountTransaction> getTransactions(UUID userId,
                                                     UUID accountId,
                                                     int page,

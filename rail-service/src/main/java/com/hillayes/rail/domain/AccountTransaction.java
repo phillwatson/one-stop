@@ -39,7 +39,7 @@ public class AccountTransaction {
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "internal_transaction_id", nullable = false)
-    public String internalTransactionId;
+    private String internalTransactionId;
 
     /**
      * Unique transaction identifier given by financial institution.
@@ -47,7 +47,7 @@ public class AccountTransaction {
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "transaction_id", nullable = true)
-    public String transactionId;
+    private String transactionId;
 
     /**
      * The date and time when an entry is posted to an account on the financial institutions books.
@@ -55,7 +55,7 @@ public class AccountTransaction {
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "booking_datetime", nullable = false)
-    public Instant bookingDateTime;
+    private Instant bookingDateTime;
 
     /**
      * The date and time at which assets become available to the account owner in case of a credit.
@@ -63,38 +63,38 @@ public class AccountTransaction {
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "value_datetime", nullable = true)
-    public Instant valueDateTime;
+    private Instant valueDateTime;
 
     /**
      * The amount of the transaction as billed to the account.
      */
     @ToString.Include
     @Column(name = "transaction_amount", nullable = true)
-    public double transactionAmount;
+    private double transactionAmount;
 
     /**
      * The currency of the transaction as billed to the account.
      */
     @Column(name = "transaction_currency_code", nullable = true)
-    public String transactionCurrencyCode;
+    private String transactionCurrencyCode;
 
     /**
      * Might be used by the financial institution to transport additional transaction related information
      */
     @Column(name = "additional_information", nullable = true)
-    public String additionalInformation;
+    private String additionalInformation;
 
     /**
      * Is used if and only if the bookingStatus entry equals "information"
      */
     @Column(name = "additional_information_structured", nullable = true)
-    public String additionalInformationStructured;
+    private String additionalInformationStructured;
 
     /**
      * This is the balance after this transaction. Recommended balance type is interimBooked.
      */
     @Column(name = "balance_after_transaction", nullable = true)
-    public String balanceAfterTransaction;
+    private String balanceAfterTransaction;
 
     /**
      * Bank transaction code as used by the financial institution and using the sub elements of
@@ -108,101 +108,101 @@ public class AccountTransaction {
      *      funds e.g. on month end to a saving account
      */
     @Column(name = "bank_transaction_code", nullable = true)
-    public String bankTransactionCode;
+    private String bankTransactionCode;
 
     /**
      * Identification of a Cheque.
      */
     @Column(name = "check_id", nullable = true)
-    public String checkId;
+    private String checkId;
 
     @Column(name = "creditor_iban", nullable = true)
-    public String creditorIban;
+    private String creditorIban;
 
     @Column(name = "creditor_agent", nullable = true)
-    public String creditorAgent;
+    private String creditorAgent;
 
     /**
      * Identification of Creditors, e.g. a SEPA Creditor ID
      */
     @Column(name = "creditor_id", nullable = true)
-    public String creditorId;
+    private String creditorId;
 
     /**
      * Name of the creditor if a "Debited" transaction
      */
     @Column(name = "creditor_name", nullable = true)
-    public String creditorName;
+    private String creditorName;
 
     @Column(name = "currency_exchange", nullable = true)
-    public String currencyExchange;
+    private String currencyExchange;
 
     @Column(name = "debtor_iban", nullable = true)
-    public String debtorIban;
+    private String debtorIban;
 
     @Column(name = "debtor_agent", nullable = true)
-    public String debtorAgent;
+    private String debtorAgent;
 
     /**
      * Name of the debtor if a "Credited" transaction
      */
     @Column(name = "debtor_name", nullable = true)
-    public String debtorName;
+    private String debtorName;
 
     /**
      * Unique end to end ID
      */
     @Column(name = "end_to_end_id", nullable = true)
-    public String endToEndId;
+    private String endToEndId;
 
     /**
      * Is the identification of the transaction as used for reference given by financial institution.
      */
     @Column(name = "entry_reference", nullable = true)
-    public String entryReference;
+    private String entryReference;
 
     /**
      * Identification of Mandates, e.g. a SEPA Mandate ID
      */
     @Column(name = "mandate_id", nullable = true)
-    public String mandateId;
+    private String mandateId;
 
     /**
      * Merchant category code as defined by card issuer
      */
     @Column(name = "merchant_category_code", nullable = true)
-    public String merchantCategoryCode;
+    private String merchantCategoryCode;
 
     /**
      * Proprietary bank transaction code as used within a community or within a financial institution
      */
     @Column(name = "proprietary_bank_transaction_code", nullable = true)
-    public String proprietaryBankTransactionCode;
+    private String proprietaryBankTransactionCode;
 
     @Column(name = "purpose_code", nullable = true)
-    public String purposeCode;
+    private String purposeCode;
 
     /**
      * Reference as contained in the structured remittance reference structure
      */
     @Column(name = "remittance_information_structured", nullable = true)
-    public String remittanceInformationStructured;
+    private String remittanceInformationStructured;
 
     /**
      * Reference as contained in the structured remittance reference structure, as an array.
      */
     @Column(name = "remittance_information_structured_array", nullable = true)
-    public String remittanceInformationStructuredArray;
+    private String remittanceInformationStructuredArray;
 
     @Column(name = "remittance_information_unstructured", nullable = true)
-    public String remittanceInformationUnstructured;
+    private String remittanceInformationUnstructured;
 
     @Column(name = "remittance_information_unstructured_array", nullable = true)
-    public String remittanceInformationUnstructuredArray;
+    private String remittanceInformationUnstructuredArray;
 
     @Column(name = "ultimate_creditor", nullable = true)
-    public String ultimateCreditor;
+    private String ultimateCreditor;
 
     @Column(name = "ultimate_debtor", nullable = true)
-    public String ultimateDebtor;
+    private String ultimateDebtor;
 }
