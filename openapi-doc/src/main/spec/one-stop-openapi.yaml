@@ -11,6 +11,8 @@ servers:
     description: Development server
 
 tags:
+  - name: "auth"
+    description: "Operations related to authentication"
   - name: "users"
     description: "Operations about users"
   - name: "rails"
@@ -21,12 +23,63 @@ tags:
     description: "Operations about account transactions"
 
 paths:
+  /auth/login:
+    post:
+      tags: [ "auth"]
+      summary: "Username password login."
+      description: "Authenticate user by username and password credentials."
+      operationId: "login"
+      security: [ ]
+      requestBody:
+        description: "The user's credentials"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "204":
+          description: "successful login"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal server error"
+
+  /auth/logout:
+    get:
+      tags: [ "auth" ]
+      summary: "Close the user's session"
+      description: "Revoke all authentication tokens for the current session"
+      operationId: "logout"
+      security: []
+      responses:
+        "204":
+          description: "successful logout"
+
+  /auth/refresh:
+    get:
+      tags: [ "auth" ]
+      summary: "Refresh auth tokens"
+      description: "Generate new authentication tokens for the current session"
+      operationId: "refresh"
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "204":
+          description: "successful refresh"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal server error"
+
   /users:
     get:
       tags: [ "users" ]
       summary: "Get all users"
       description: "Get a paginated list of all users."
       operationId: "getAllUsers"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "page"
           in: "query"
@@ -61,6 +114,8 @@ paths:
       summary: "Get user by id"
       description: "Returns the details of the identified user"
       operationId: "getUserById"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -92,6 +147,8 @@ paths:
         Updates the user with the given id. Used by adminstrator to update
         a user's details.
       operationId: "updateUser"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -126,6 +183,8 @@ paths:
       summary: "Delete user"
       description: "Deletes the identified user. Admin only."
       operationId: "deleteUser"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -150,6 +209,7 @@ paths:
       summary: "Register new user"
       description: "Registers a user's email, starting the onboarding process."
       operationId: "registerUser"
+      security: []
       requestBody:
         description: "Updated profile object"
         required: true
@@ -174,6 +234,7 @@ paths:
         address. The user will be redirected to the user confirmation page to allow a
         username and password to be selected.
       operationId: "acknowledgeUser"
+      security: []
       parameters:
         - name: "magicToken"
           in: "path"
@@ -200,6 +261,8 @@ paths:
       description: |
         Sets a user's username and password, completing the onboarding process.
       operationId: "onboardUser"
+      security:
+        - cookieAuth: [ ]
       requestBody:
         description: "Updated profile object"
         required: true
@@ -221,6 +284,8 @@ paths:
       summary: "Get the caller's profile"
       description: "Get the profile information for the authenticated user."
       operationId: "getProfile"
+      security:
+        - cookieAuth: [ ]
       responses:
         "200":
           description: "successful operation"
@@ -238,6 +303,8 @@ paths:
       summary: "Update the caller's profile"
       description: "Update the profile information for the authenticated user."
       operationId: "updateProfile"
+      security:
+        - cookieAuth: [ ]
       requestBody:
         description: "Updated profile object"
         required: true
@@ -263,6 +330,8 @@ paths:
       summary: "Update the caller's password"
       description: "Update the password for the authenticated user."
       operationId: "updatePassword"
+      security:
+        - cookieAuth: [ ]
       requestBody:
         description: "Updated password object"
         required: true
@@ -284,6 +353,8 @@ paths:
       summary: "Get all institutions for identified country"
       description: "Returns the supported institutions within the registered country."
       operationId: "getAllInstitutions"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "countryCode"
           in: "path"
@@ -323,6 +394,8 @@ paths:
       summary: "Get institution by id"
       description: "Returns the details of the identified institution."
       operationId: "getInstitutionById"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -352,6 +425,8 @@ paths:
       summary: "Get all consents"
       description: "Get all consents for the authenticated user"
       operationId: "getAllConsents"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "page"
           in: "query"
@@ -386,6 +461,8 @@ paths:
       summary: "Get consent for the identified institution"
       description: "Get the consent held for the identified institution for the authenticated user"
       operationId: "getConsentByInstitution"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
@@ -417,6 +494,8 @@ paths:
         Initiates the registration for the application to gain the user's
         consent to access the identified institution
       operationId: "registerConsent"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
@@ -451,6 +530,8 @@ paths:
         Deletes the consent held for the identified institution for the authenticated user; revoking
         any related agreements.
       operationId: "deleteConsentByInstitution"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
@@ -477,6 +558,8 @@ paths:
       summary: "Get all accounts"
       description: "Get summary of all accounts for the authenticated user"
       operationId: "getAllAccounts"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "page"
           in: "query"
@@ -511,6 +594,8 @@ paths:
       summary: "Get account by id"
       description: "Get account by id for the authenticated user"
       operationId: "getAccountById"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -541,6 +626,8 @@ paths:
       summary: "Get all transactions for an account"
       description: "Get all transactions for an account for the authenticated user"
       operationId: "getAllTransactionsForAccount"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "account-id"
           in: "query"
@@ -586,6 +673,8 @@ paths:
       summary: "Get transaction by id"
       description: "Get transaction by id for the authenticated user"
       operationId: "getTransactionById"
+      security:
+        - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
@@ -611,7 +700,28 @@ paths:
           description: "Internal server error"
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access-token
+      description: A JWT identifying the user, the cookie (and token) have a short expiry time
+
   schemas:
+    LoginRequest:
+      description: The authentication credentials
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: the user's unique username
+        password:
+          type: string
+          description: the user's password
+
     ContextAttribute:
       description: |
         An attribute the captures an element of the context in which an error occurred.
