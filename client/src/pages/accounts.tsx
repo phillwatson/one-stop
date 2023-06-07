@@ -3,7 +3,7 @@ import { Fab, SxProps } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 
 import AccountService from '../services/account.service';
-import Account from "../model/account.model";
+import { AccountDetail } from "../model/account.model";
 import AccountList from "../components/account/account-list";
 
 const bottomFabStyle: SxProps = {
@@ -13,7 +13,7 @@ const bottomFabStyle: SxProps = {
 };
 
 export default function Accounts() {
-  const [ accounts, setAccounts ] = useState<Array<Account>>([]);
+  const [ accounts, setAccounts ] = useState<Array<AccountDetail>>([]);
 
   useEffect(() => {
     AccountService.getAll().then( response => setAccounts(response.items));

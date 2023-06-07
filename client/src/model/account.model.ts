@@ -3,6 +3,7 @@ import Institution from "./institution.model"
 export interface TransactionSummary {
   id: string;
   amount: number;
+  currency: string;
   date: Date;
   description: string;
   accountId: string;

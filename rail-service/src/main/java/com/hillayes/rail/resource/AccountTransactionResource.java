@@ -80,6 +80,7 @@ public class AccountTransactionResource {
             .id(transaction.getId())
             .accountId(transaction.getAccountId())
             .amount(transaction.getTransactionAmount())
+            .currency(transaction.getTransactionCurrencyCode())
             .date(transaction.getBookingDateTime())
             .description(transaction.getRemittanceInformationUnstructured() == null
                 ? transaction.getDebtorName()

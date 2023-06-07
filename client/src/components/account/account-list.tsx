@@ -4,15 +4,20 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-
-import CurrencyService from '../../services/currency.service';
-import Account from '../../model/account.model';
-import './account-list.css';
-import AccountRow from './account-row';
+import Collapse from '@mui/material/Collapse';
+import Box from '@mui/material/Box';
 import { SxProps } from '@mui/material/styles';
 
+import './account-list.css';
+
+import CurrencyService from '../../services/currency.service';
+import { AccountDetail } from '../../model/account.model';
+import AccountRow from './account-row';
+import TransactionSummaryList from './transaction-summary';
+import { useState } from 'react';
+
 interface Props {
-  accounts: Array<Account>;
+  accounts: Array<AccountDetail>;
   onSelect: (accountId: string) => void;
 }
 
@@ -21,9 +26,22 @@ const colhead: SxProps = {
 };
 
 export default function AccountList(props: Props) {
-  if (props.accounts === undefined) {
-    return null;
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+
+  function isSelected(accountId: string) {
+    return selectedAccounts.find(id => id === accountId) !== undefined;
   }
+
+  function handleSelectAccount(accountId: string) {
+    if (isSelected(accountId)) {
+      setSelectedAccounts(selectedAccounts.filter(id => id !== accountId))
+    } else {
+      setSelectedAccounts([...selectedAccounts, accountId])
+    }
+    //props.onSelect(accountId);
+  }
+
+
 
   return(
     <TableContainer>
@@ -48,7 +66,13 @@ export default function AccountList(props: Props) {
           { props.accounts && props.accounts
             .sort((a, b) => a.name < b.name ? -1 : 1 )
             .map(account =>
-              <AccountRow accountId={account.id} onSelect={props.onSelect}/>
+              <AccountRow account={account} onSelect={() => handleSelectAccount(account.id)}>
+                <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
+                  <Box sx={{ margin: 1 }}>
+                    <TransactionSummaryList accountId={account.id} showTransactions={isSelected(account.id)}/>
+                  </Box>
+                </Collapse>
+              </AccountRow>
             )
           }
           <TableRow>

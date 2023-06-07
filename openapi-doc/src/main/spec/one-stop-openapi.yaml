@@ -1069,6 +1069,12 @@ components:
           format: double
           description: The transaction amount
           example: 123.45
+        currency:
+          type: string
+          description: The ISO-4217 currency code
+          minLength: 3
+          maxLength: 3
+          example: GBP
         date:
           type: string
           format: date-time

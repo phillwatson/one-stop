@@ -1,11 +1,11 @@
 import http from './http-common';
 import PaginatedList from '../model/paginated-list.model';
-import Account, { AccountDetail, TransactionSummary } from '../model/account.model';
+import { AccountDetail, TransactionSummary } from '../model/account.model';
 
 class AccountService {
-  getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<Account>> {
+  getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AccountDetail>> {
     console.log(`Retrieving account [page: ${page}, pageSize: ${pageSize}]`);
-    return http.get<PaginatedList<Account>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
+    return http.get<PaginatedList<AccountDetail>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
   }
 
