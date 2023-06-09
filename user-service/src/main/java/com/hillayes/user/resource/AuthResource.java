@@ -4,7 +4,7 @@ import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.auth.xsrf.XsrfRequired;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
-import com.hillayes.user.model.LoginRequest;
+import com.hillayes.onestop.api.LoginRequest;
 import com.hillayes.user.service.AuthService;
 import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.RequiredArgsConstructor;

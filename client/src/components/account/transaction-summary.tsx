@@ -5,6 +5,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { SxProps } from '@mui/material/styles';
 
 import { useNotificationDispatch } from '../../contexts/notification-context';
 import AccountService from '../../services/account.service';
@@ -12,9 +13,12 @@ import ServiceError from '../../model/service-error';
 import CurrencyService from '../../services/currency.service';
 import { TransactionSummary } from '../../model/account.model';
 
+const colhead: SxProps = {
+  fontWeight: 'bold'
+};
+
 interface Props {
   accountId: string;
-  showTransactions: boolean;
 }
 
 export default function TransactionSummaryList(props: Props) {
@@ -22,37 +26,32 @@ export default function TransactionSummaryList(props: Props) {
   const [transactions, setTransactions] = useState<Array<TransactionSummary>>([]);
 
   useEffect(() => {
-    if ((props.showTransactions) && (transactions.length === 0)) {
-      AccountService.getTransactions(props.accountId)
+    if (transactions.length === 0) {
+      AccountService.getTransactions(props.accountId, 0, 15)
         .then(response => setTransactions(response.items))
-        .catch(err =>
-          showNotification({ type: "add", level: "error", message: (err as ServiceError).message })
-        )
+        .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }))
     }
-  }, [props.accountId, props.showTransactions, transactions.length, showNotification]);
-
-  if (! props.showTransactions) {
-    return null;
-  }
+  }, [props.accountId, transactions, showNotification]);
 
   return(
     <>
       <Table size="small" aria-label="transactions">
+        <caption><i>most recent 15 transactions</i></caption>
         <TableHead>
           <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell align="right">Amount</TableCell>
+            <TableCell sx={colhead}>Date</TableCell>
+            <TableCell sx={colhead}>Description</TableCell>
+            <TableCell sx={colhead} align="right">Debit</TableCell>
+            <TableCell sx={colhead} align="right">Credit</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           { transactions.map(transaction => (
             <TableRow key={transaction.id}>
-              <TableCell component="th" scope="row">
-                {new Date(transaction.date).toLocaleString("en-GB")}
-              </TableCell>
+              <TableCell>{new Date(transaction.date).toLocaleString("en-GB")}</TableCell>
               <TableCell>{transaction.description}</TableCell>
-              <TableCell align="right">{CurrencyService.format(transaction.amount, transaction.currency)}</TableCell>
+              <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
+              <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>
             </TableRow>
           ))}
         </TableBody>

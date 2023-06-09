@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,10 +12,9 @@ import { SxProps } from '@mui/material/styles';
 import './account-list.css';
 
 import CurrencyService from '../../services/currency.service';
-import { AccountDetail } from '../../model/account.model';
+import { AccountDetail, AccountBalance } from '../../model/account.model';
 import AccountRow from './account-row';
 import TransactionSummaryList from './transaction-summary';
-import { useState } from 'react';
 
 interface Props {
   accounts: Array<AccountDetail>;
@@ -23,6 +23,10 @@ interface Props {
 
 const colhead: SxProps = {
   fontWeight: 'bold'
+};
+
+const balanceRow: SxProps = {
+  border: 0
 };
 
 export default function AccountList(props: Props) {
@@ -41,9 +45,27 @@ export default function AccountList(props: Props) {
     //props.onSelect(accountId);
   }
 
+  const balanceTotals: Array<AccountBalance> = useMemo(() => {
+    const result = Array<AccountBalance>();
+    props.accounts.forEach(account => {
+      account.balance.forEach(balance => {
+        if (result.length == 0) {
+          result.push({...balance});
+        } else {
+          const type = result.find(i => i.type === balance.type)
+          if (type == null) {
+            result.push({...balance})
+          } else {
+            type.amount += balance.amount
+          }
+        }
+      })
+    });
 
+    return result;
+  }, [props.accounts]);
 
-  return(
+  return (
     <TableContainer>
       <Table>
         <TableHead>
@@ -52,8 +74,7 @@ export default function AccountList(props: Props) {
             <TableCell align="center" colSpan={2} sx={colhead}>Balance</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell></TableCell>
-            <TableCell sx={colhead}>Institution</TableCell>
+            <TableCell sx={colhead} colSpan={2} align='center'>Institution</TableCell>
             <TableCell sx={colhead}>Owner</TableCell>
             <TableCell sx={colhead}>Name</TableCell>
             <TableCell sx={colhead}>IBAN</TableCell>
@@ -66,19 +87,26 @@ export default function AccountList(props: Props) {
           { props.accounts && props.accounts
             .sort((a, b) => a.name < b.name ? -1 : 1 )
             .map(account =>
-              <AccountRow account={account} onSelect={() => handleSelectAccount(account.id)}>
+              <AccountRow key={account.id} account={account} onSelect={() => handleSelectAccount(account.id)}>
                 <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
                   <Box sx={{ margin: 1 }}>
-                    <TransactionSummaryList accountId={account.id} showTransactions={isSelected(account.id)}/>
+                    <TransactionSummaryList accountId={account.id}/>
                   </Box>
                 </Collapse>
               </AccountRow>
             )
           }
           <TableRow>
-            <TableCell colSpan={6} align="right" sx={colhead}>Total</TableCell>
-            <TableCell colSpan={1} align="right">{CurrencyService.format(32.2, 'EUR')}</TableCell>
+            <TableCell colSpan={5} sx={balanceRow}></TableCell>
+            <TableCell colSpan={2} align="center" sx={colhead}>Totals</TableCell>
           </TableRow>
+          { balanceTotals.length > 1 && balanceTotals.map( balance =>
+            <TableRow key={balance.id}>
+              <TableCell colSpan={5} sx={balanceRow}></TableCell>
+              <TableCell>{balance.type}</TableCell>
+              <TableCell>{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </TableContainer>

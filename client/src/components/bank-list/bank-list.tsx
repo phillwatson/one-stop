@@ -21,8 +21,8 @@ export default function BankList(props: Props) {
       { props.institutions && props.institutions
         .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
         .map((institution, index: number) =>
-          <div className="bank-item">
-            <BankCard key={ index } institution={ institution } consent={ getConsent(institution) } onLinkSelect= { props.onLinkSelect }/>
+          <div className="bank-item" key={ index }>
+            <BankCard institution={ institution } consent={ getConsent(institution) } onLinkSelect= { props.onLinkSelect }/>
           </div>
         )
       }

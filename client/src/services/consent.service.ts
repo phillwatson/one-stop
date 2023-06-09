@@ -16,8 +16,10 @@ class UserConsentService {
   registerConsent(institutionId: string): Promise<Location> {
     console.log(`Registering institution [id: ${institutionId}]`);
     
-    var callbackUri = window.location.origin + "/accounts";
-    return http.post('/rails/consents', { params: { institutionId: institutionId, callbackUri: callbackUri }})
+    const body = {
+      callbackUri: window.location.origin + "/accounts"
+    }
+    return http.post(`/rails/consents/${institutionId}`, body)
       .then(response => response.data);
   }
 

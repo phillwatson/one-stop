@@ -8,8 +8,11 @@ import InstitutionService from '../services/institution.service';
 import BankList from '../components/bank-list/bank-list'
 import UserConsentService from '../services/consent.service';
 import UserConsent from "../model/user-consent.model";
+import { useNotificationDispatch } from '../contexts/notification-context';
+import ServiceError from "../model/service-error";
 
 export default function Institutions() {
+  const showNotification = useNotificationDispatch();
   const [userConsents, setUserConsents] = React.useState<Array<UserConsent> | undefined>(undefined);
 
   const [countries, setCountries] = React.useState<Array<Country> | undefined>(undefined);
@@ -56,7 +59,8 @@ export default function Institutions() {
 
         console.log(`Redirecting to ${registerUri}`);
         window.location = registerUri;
-      });
+      })
+      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }))
     }
   }
 
