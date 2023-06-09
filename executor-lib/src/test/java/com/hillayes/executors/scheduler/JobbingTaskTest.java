@@ -4,6 +4,7 @@ import com.hillayes.executors.scheduler.helpers.NamedTaskConfigImpl;
 import com.hillayes.executors.scheduler.helpers.RetryConfigImpl;
 import com.hillayes.executors.scheduler.helpers.SchedulerConfigImpl;
 import com.hillayes.executors.scheduler.helpers.TestBase;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import lombok.extern.slf4j.Slf4j;
@@ -483,24 +484,13 @@ public class JobbingTaskTest extends TestBase {
         fixture.stop();
     }
 
-    private static abstract class TestJobbingTask implements NamedJobbingTask<String> {
-        private final String name;
-
+    private static abstract class TestJobbingTask extends AbstractNamedJobbingTask<String> {
         TestJobbingTask() {
             this("test-jobs");
         }
 
         TestJobbingTask(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String queueJob(String payload) {
-            return null;
+            super(name);
         }
     }
 }
