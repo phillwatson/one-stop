@@ -11,16 +11,18 @@ export default function CountrySelector(props: Props) {
   return (
     <select className="country-list">
       <option className="country-list-item"
-        onClick={() => { props.onSelectCountry(undefined); } }
         key={""}
+        onClick={() => { props.onSelectCountry(undefined); } }
+        selected={props.activeCountryId===undefined}
       >
       </option>
       { props.countries && props.countries
         .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
         .map((country: Country) =>
           <option className="country-list-item"
-            onClick={() => { props.onSelectCountry(country); } }
             key={country.id}
+            onClick={() => { props.onSelectCountry(country); } }
+            selected={props.activeCountryId===country.id}
           >
             { country.name }
           </option>

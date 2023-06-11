@@ -19,18 +19,18 @@ export default function AccountList(props: Props) {
   return(
     <>
       <TableRow key={props.account.id}>
-        <TableCell rowSpan={props.account.balance.length}><img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="60px" height="60px"/></TableCell>
-        <TableCell rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
-        <TableCell rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
-        <TableCell rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
-        <TableCell rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.iban}</TableCell>
-        <TableCell >{props.account.balance[0].type}</TableCell>
-        <TableCell >{CurrencyService.format(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
+        <TableCell size="small" rowSpan={props.account.balance.length}><img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="60px" height="60px"/></TableCell>
+        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
+        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
+        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
+        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.iban}</TableCell>
+        <TableCell size="small">{props.account.balance[0].type}</TableCell>
+        <TableCell size="small" >{CurrencyService.format(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
       </TableRow>
       { props.account.balance.length > 1 && props.account.balance.slice(1).map( balance =>
         <TableRow key={balance.id}>
-          <TableCell>{balance.type}</TableCell>
-          <TableCell>{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
+          <TableCell size="small">{balance.type}</TableCell>
+          <TableCell size="small">{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
         </TableRow>
       )}
         <TableRow>

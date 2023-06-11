@@ -6,7 +6,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Collapse from '@mui/material/Collapse';
-import Box from '@mui/material/Box';
 import { SxProps } from '@mui/material/styles';
 
 import './account-list.css';
@@ -49,7 +48,7 @@ export default function AccountList(props: Props) {
     const result = Array<AccountBalance>();
     props.accounts.forEach(account => {
       account.balance.forEach(balance => {
-        if (result.length == 0) {
+        if (result.length === 0) {
           result.push({...balance});
         } else {
           const type = result.find(i => i.type === balance.type)
@@ -89,9 +88,7 @@ export default function AccountList(props: Props) {
             .map(account =>
               <AccountRow key={account.id} account={account} onSelect={() => handleSelectAccount(account.id)}>
                 <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
-                  <Box sx={{ margin: 1 }}>
-                    <TransactionSummaryList accountId={account.id}/>
-                  </Box>
+                  <TransactionSummaryList accountId={account.id}/>
                 </Collapse>
               </AccountRow>
             )

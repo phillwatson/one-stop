@@ -4,7 +4,6 @@ import {
 } from "react-router-dom";
 
 import MainPage from './pages/main';
-import Institutions from "./pages/institutions";
 import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
 import NotificationProvider from "./contexts/notification-context";
@@ -22,10 +21,6 @@ const router = createBrowserRouter([
       {
         path: "accounts",
         element: <Accounts />
-      },
-      {
-        path: "institutions",
-        element: <Institutions />
       },
       {
         path: "profile",

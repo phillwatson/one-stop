@@ -1,12 +1,9 @@
 import React, { useMemo } from "react";
-import {
-  Outlet
-} from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Logout from '@mui/icons-material/Logout';
-import AccountBalance from '@mui/icons-material/AccountBalance';
 import Person from '@mui/icons-material/Person';
 import Savings from '@mui/icons-material/Savings';
 
@@ -60,7 +57,6 @@ export default function MainPage() {
 
     return [
       { label: 'Accounts', route: 'accounts', icon: <Savings/> },
-      { label: 'Institutions', route: 'institutions', icon: <AccountBalance/> },
       { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
     ];

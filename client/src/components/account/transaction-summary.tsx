@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { Paper } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -34,7 +35,7 @@ export default function TransactionSummaryList(props: Props) {
   }, [props.accountId, transactions, showNotification]);
 
   return(
-    <>
+    <Paper sx={{ margin: 1 }} elevation={3}>
       <Table size="small" aria-label="transactions">
         <caption><i>most recent 15 transactions</i></caption>
         <TableHead>
@@ -56,6 +57,6 @@ export default function TransactionSummaryList(props: Props) {
           ))}
         </TableBody>
       </Table>
-    </>
+    </Paper>
   );
 };
