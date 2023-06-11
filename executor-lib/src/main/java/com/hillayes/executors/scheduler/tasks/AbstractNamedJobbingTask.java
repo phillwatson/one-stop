@@ -7,6 +7,9 @@ import java.io.Serializable;
 @Slf4j
 public abstract class AbstractNamedJobbingTask<T extends Serializable>
     extends AbstractNamedTask implements NamedJobbingTask<T> {
+    public AbstractNamedJobbingTask() {
+        this("");
+    }
 
     public AbstractNamedJobbingTask(String name) {
         super(name);

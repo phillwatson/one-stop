@@ -5,65 +5,46 @@ networks:
 
 volumes:
   db-data:
-  zookeeper-data:
-  zookeeper-log:
-  zookeeper-secrets:
-  kafka-data:
-  kafka-secrets:
-  client-data:
+  broker-data:
 
 services:
-  zookeeper:
+  broker:
     restart: unless-stopped
-    image: confluentinc/cp-zookeeper:7.3.1
+    image: redpandadata/redpanda:v23.1.11
+    container_name: redpanda-0
     networks:
       - onestop-event-network
+    hostname: redpanda
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      # Address the broker advertises to clients that connect to the Kafka API.
+      # Use the internal addresses to connect to the Redpanda brokers' from inside the same Docker network.
+      # Use the external addresses to connect to the Redpanda brokers' from outside the Docker network.
+      - --advertise-kafka-addr internal://redpanda-0:9092,external://localhost:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      # Address the broker advertises to clients that connect to the HTTP Proxy.
+      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      # Redpanda brokers use the RPC API to communicate with each other internally.
+      - --rpc-addr redpanda-0:33145
+      - --advertise-rpc-addr redpanda-0:33145
+      # Tells Seastar (the framework Redpanda uses under the hood) to use 1 core on the system.
+      - --smp 1
+      # The amount of memory to make available to Redpanda.
+      - --memory 1G
+      # Mode dev-container uses well-known configuration properties for development in containers.
+      - --mode dev-container
+      # enable logs for debugging.
+      - --default-log-level=debug
     ports:
-      - "2181:2181"
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
     volumes:
-      - type: volume
-        source: zookeeper-data
-        target: /var/lib/zookeeper/data
-      - type: volume
-        source: zookeeper-log
-        target: /var/lib/zookeeper/log
-      - type: volume
-        source: zookeeper-secrets
-        target: /etc/zookeeper/secrets
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
-  kafka:
-    # view topics: kafka-console-consumer --bootstrap-server kafka:9092 --topic user_created --from-beginning
-    restart: unless-stopped
-    image: confluentinc/cp-kafka:7.3.1
-    depends_on:
-      - zookeeper
-    networks:
-      - onestop-event-network
-    hostname: kafka
-    ports:
-      - "9092:9092"
-    volumes:
-      - type: volume
-        source: kafka-data
-        target: /var/lib/kafka/data
-      - type: volume
-        source: kafka-secrets
-        target: /etc/kafka/secrets
-    environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      - broker-data:/var/lib/redpanda/data
     logging:
       driver: "json-file"
       options:
@@ -96,7 +77,7 @@ services:
     image: one-stop/user-service:1.0.0
     depends_on:
       - db
-      - kafka
+      - broker
       - audit-service
       - email-service
       - rail-service
@@ -104,7 +85,7 @@ services:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
     networks:
       - onestop-db-network
       - onestop-event-network
@@ -120,13 +101,13 @@ services:
     image: one-stop/rail-service:1.0.0
     depends_on:
       - db
-      - kafka
+      - broker
       - audit-service
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
       ONE_STOP_RAIL_CALLBACK_URL: https://hillayes.com/api/v1/rails/consents/response
     networks:
       - onestop-db-network
@@ -143,12 +124,12 @@ services:
     image: one-stop/audit-service:1.0.0
     depends_on:
       - db
-      - kafka
+      - broker
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
     networks:
       - onestop-db-network
       - onestop-event-network
@@ -164,13 +145,13 @@ services:
     image: one-stop/email-service:1.0.0
     depends_on:
       - db
-      - kafka
+      - broker
       - audit-service
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
     networks:
       - onestop-db-network
       - onestop-event-network
