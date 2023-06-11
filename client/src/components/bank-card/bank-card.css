@@ -1,0 +1,16 @@
+.card {
+  width: 310px;
+  height: 81px;
+  margin: 3px;
+}
+
+.enabled {
+}
+
+.enabled:hover {
+  transform: scale(1.02);
+}
+
+.disabled {
+  background-color: #eeeeee;
+}
