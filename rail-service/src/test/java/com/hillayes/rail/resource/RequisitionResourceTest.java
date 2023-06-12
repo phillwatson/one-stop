@@ -21,7 +21,7 @@ public class RequisitionResourceTest extends TestResourceBase {
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testFlow() {
         List<?> institutions = given()
-            .queryParam("country", "GB")
+            .queryParam("country-logos", "GB")
             .when().get("/api/v1/rails/banks")
             .then()
             .statusCode(200)

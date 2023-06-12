@@ -18,7 +18,7 @@ public class InstitutionResourceTest extends TestResourceBase {
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testListBanks() {
         List<Map<String,Object>> response = given()
-                .queryParam("country", "GB")
+                .queryParam("country-logos", "GB")
                 .when().get("/api/v1/rails/banks")
                 .then()
                 .statusCode(200)

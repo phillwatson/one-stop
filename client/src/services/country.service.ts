@@ -1,10 +1,11 @@
 import http from './http-common';
 import Country from '../model/country.model';
+import PaginatedList from '../model/paginated-list.model';
 
 class CountryService {
-  getAll(): Promise<Array<Country>> {
+  getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<Country>> {
     console.log("Retrieving country list")
-    return http.get<Array<Country>>('/rails/countries')
+    return http.get<PaginatedList<Country>>('/rails/countries', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
   }
 

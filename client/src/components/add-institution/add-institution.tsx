@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide, SxProps } from "@mui/material";
 
 import Country from '../../model/country.model';
 import CountryService from '../../services/country.service';
@@ -18,7 +18,12 @@ interface Props {
   onClose: () => void;
 }
 
-const dialogPaper = {
+const dialogTitle: SxProps = {
+  backgroundColor: '#1565c0',
+  color: 'white',
+};
+
+const dialogPaper: SxProps = {
   minHeight: '60vh',
   maxHeight: '60vh',
 };
@@ -39,15 +44,15 @@ export default function Institutions(props: Props) {
     props.onClose();
   };
 
-  const [userConsents, setUserConsents] = React.useState<Array<UserConsent> | undefined>(undefined);
-  const [countries, setCountries] = React.useState<Array<Country> | undefined>(undefined);
+  const [userConsents, setUserConsents] = React.useState<Array<UserConsent>>([]);
+  const [countries, setCountries] = React.useState<Array<Country>>([]);
   const [activeCountry, setActiveCountry] = React.useState<Country | undefined>(undefined);
-  const [institutions, setInstitutions] = React.useState<Array<Institution> | undefined>(undefined);
+  const [institutions, setInstitutions] = React.useState<Array<Institution>>([]);
 
   React.useEffect(() => {
     if (props.open) {
       CountryService.getAll().then(data => {
-        setCountries(data);
+        setCountries(data.items);
       });
 
       // get user's consents that have not been cancelled or denied
@@ -59,14 +64,14 @@ export default function Institutions(props: Props) {
 
   React.useEffect(() => {
     if (activeCountry === undefined) {
-      setInstitutions(undefined);
+      setInstitutions([]);
     } else {
       InstitutionService.getAll(activeCountry.id, 0, 3000).then(data => {
-          setInstitutions(data.items);
-        });
+        setInstitutions(data.items);
+      });
     }
   }, [ activeCountry, userConsents ]);
-  
+
   function handleLinkSelect(institution: Institution) {
     UserConsentService.registerConsent(institution.id).then(registerUri => {
       console.log(`Redirecting to ${registerUri}`);
@@ -79,14 +84,15 @@ export default function Institutions(props: Props) {
     <Dialog open={props.open} onClose={handleClose} scroll="paper" fullWidth={true} maxWidth="lg"
       TransitionComponent={Transition} 
         aria-labelledby="scroll-dialog-title">
-      <DialogTitle id="scroll-dialog-title">Add Institution</DialogTitle>
+      <DialogTitle id="scroll-dialog-title" sx={dialogTitle}>Add Institution</DialogTitle>
       <DialogContent dividers={true}>
-        Select Country: <CountrySelector countries={ countries }
-            activeCountryId={ (activeCountry === undefined) ? undefined : activeCountry.id }
-            onSelectCountry={ setActiveCountry }/>
+        <CountrySelector
+          countries={ countries }
+          activeCountry={activeCountry}
+          onSelectCountry={ setActiveCountry }/>
       </DialogContent>
       <DialogContent>
-        <DialogContentText style={dialogPaper}>
+        <DialogContentText sx={dialogPaper}>
           <BankList institutions={ institutions } userConsents={ userConsents } onLinkSelect={ handleLinkSelect }/>
         </DialogContentText>
 

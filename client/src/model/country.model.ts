@@ -1,6 +1,5 @@
 export default interface Country {
-  id?: any | null,
-  code: string,
+  id: string,
   name: string,
-  flag: string
+  flagUrl: string
 }
