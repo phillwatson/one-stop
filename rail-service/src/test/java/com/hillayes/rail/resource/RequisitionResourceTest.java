@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.rail.model.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -20,17 +21,19 @@ public class RequisitionResourceTest extends TestResourceBase {
     @Test
     @TestSecurity(user = adminIdStr, roles = "admin")
     public void testFlow() {
-        List<?> institutions = given()
-            .queryParam("country-logos", "GB")
-            .when().get("/api/v1/rails/banks")
+        PaginatedInstitutions institutions = given()
+            .queryParam("country", "GB")
+            .queryParam("page", 0)
+            .queryParam("page-size", 110)
+            .when().get("/api/v1/rails/institutions")
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().response().as(List.class);
-        assertEquals(107, institutions.size());
+            .extract().response().as(PaginatedInstitutions.class);
+        assertEquals(107, institutions.getItems().size());
 
         InstitutionDetail institution = given()
-            .when().get("/api/v1/rails/banks/SANDBOXFINANCE_SFIN0000")
+            .when().get("/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000")
             .then()
             .statusCode(200)
             .contentType(JSON)

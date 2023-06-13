@@ -1,15 +1,24 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.repository.CountryRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Optional;
 
 @ApplicationScoped
+@Transactional
 @Slf4j
 public class CountryService {
     @Inject
@@ -28,5 +37,16 @@ public class CountryService {
         Optional<Country> result = countryRepository.getCountry(id);
         log.info("Get country [id: {}, found: {}]", id, result.isPresent());
         return result;
+    }
+
+    public Optional<InputStream> getLogo(String id) {
+        log.info("Get country logo [id: {}]", id);
+        Country country = get(id).orElseThrow(() -> new NotFoundException("country", id));
+        if (country.getFlagUri() == null) {
+            return Optional.empty();
+        }
+
+        InputStream resource = getClass().getResourceAsStream(country.getFlagUri());
+        return Optional.ofNullable(resource);
     }
 }

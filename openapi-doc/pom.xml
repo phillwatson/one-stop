@@ -50,6 +50,10 @@
                                 <openApiNullable>false</openApiNullable>
                                 <dateLibrary>java8</dateLibrary>
                                 <library>resttemplate</library>
+                                <additionalModelTypeAnnotations>
+                                    <!-- https://openapi-generator.tech/docs/generators/spring/ -->
+                                    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+                                </additionalModelTypeAnnotations>
                             </configOptions>
                             <inputSpec>${project.basedir}/src/main/spec/one-stop-openapi.yaml</inputSpec>
 

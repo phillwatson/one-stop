@@ -66,7 +66,7 @@ public class AuthResource {
 
         URI redirect = uriBuilder.build();
         log.debug("OAuth login success [redirect: {}]", redirect);
-        return authTokens.authResponse( Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
+        return authTokens.authResponse(Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 
     @GET

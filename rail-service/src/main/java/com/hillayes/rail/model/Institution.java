@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

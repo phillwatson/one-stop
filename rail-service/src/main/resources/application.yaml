@@ -60,16 +60,16 @@ one-stop:
     countries:
       - id: GB
         name: Great Britain
-        flag-url: country-logos/gb.png
+        flag-uri: /country-logos/gb.png
       - id: DE
         name: Germany
-        flag-url: country-logos/de.png
+        flag-uri: country-logos/de.png
       - id: FR
         name: France
-        flag-url: country-logos/fr.png
+        flag-uri: country-logos/fr.png
       - id: IT
         name: Italy
-        flag-url: country-logos/it.png
+        flag-uri: country-logos/it.png
 
     caches: # the duration of various caches - specified as Duration string
       institutions: PT6H

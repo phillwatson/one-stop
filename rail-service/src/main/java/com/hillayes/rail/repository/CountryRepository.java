@@ -23,7 +23,7 @@ public class CountryRepository {
             .map(entry -> Country.builder()
                 .id(entry.id())
                 .name(entry.name())
-                .flagUrl(entry.flagUrl().orElse(null))
+                .flagUri(entry.flagUri().orElse(null))
                 .build())
             .collect(Collectors.toSet());
 
@@ -41,7 +41,7 @@ public class CountryRepository {
             .map(c -> Country.builder()
                 .id(c.id())
                 .name(c.name())
-                .flagUrl(c.flagUrl().orElse(null))
+                .flagUri(c.flagUri().orElse(null))
                 .build()
             );
 

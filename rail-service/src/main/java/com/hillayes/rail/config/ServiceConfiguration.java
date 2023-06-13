@@ -45,7 +45,7 @@ public interface ServiceConfiguration {
     interface Country {
         String id();
         String name();
-        Optional<String> flagUrl();
+        Optional<String> flagUri();
     }
 
     interface Caches {

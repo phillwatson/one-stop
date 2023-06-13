@@ -8,6 +8,11 @@ quarkus:
     nordigen-api:
       url: http://localhost:8089
 
+  log:
+    category:
+      "org.apache.http.wire":
+        level: DEBUG
+
 one-stop:
   auth:
     xsrf:

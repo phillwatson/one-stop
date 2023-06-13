@@ -29,7 +29,7 @@ public class InstitutionResource {
     public Response getAll(@Context UriInfo uriInfo,
                            @QueryParam("page") @DefaultValue("0") int page,
                            @QueryParam("page-size") @DefaultValue("20") int pageSize,
-                           @QueryParam("country-logos") String countryCode) {
+                           @QueryParam("country") String countryCode) {
         log.info("List institutions [country: {}, page: {}, pageSize: {}]", countryCode, page, pageSize);
         Set<Institution> allBanks = new HashSet<>(institutionService.list(countryCode, true));
         allBanks.addAll(institutionService.list(countryCode, false));
@@ -53,7 +53,7 @@ public class InstitutionResource {
             .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages,
                 uriBuilder -> {
                     if (countryCode != null) {
-                        uriBuilder.queryParam("country-logos", countryCode);
+                        uriBuilder.queryParam("country", countryCode);
                     }
                     return uriBuilder;
                 })

@@ -18,7 +18,7 @@ import java.util.List;
 @ApplicationScoped
 public interface InstitutionRepository {
     @GET
-    public List<Institution> list(@QueryParam("country-logos") String countryCode,
+    public List<Institution> list(@QueryParam("country") String countryCode,
                                   @QueryParam("payments_enabled") Boolean paymentsEnabled);
     @GET
     @Path("{id}/")
