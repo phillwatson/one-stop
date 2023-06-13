@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.*;
 import java.time.Duration;
 import java.util.Collection;
@@ -79,7 +79,7 @@ public class CountryResource {
         StreamingOutput content = output -> {
             try (output) {
                 try (InputStream resource = countryService.getLogo(id)
-                    .orElseThrow(javax.ws.rs.NotFoundException::new)) {
+                    .orElseThrow(jakarta.ws.rs.NotFoundException::new)) {
                     IOUtils.copy(resource, output);
                 }
                 output.flush();

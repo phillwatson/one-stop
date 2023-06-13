@@ -4,9 +4,9 @@ import com.hillayes.rail.model.ObtainJwtResponse;
 import com.hillayes.rail.model.RefreshJwtResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 @ApplicationScoped
 @RegisterRestClient(configKey = "nordigen-api")

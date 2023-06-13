@@ -1,7 +1,7 @@
 package com.hillayes.rail.model;
 
-import javax.ws.rs.ext.ParamConverter;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.Provider;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 

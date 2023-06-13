@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Provides the OpenIdAuth implementation for the Google auth-provider. The

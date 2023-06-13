@@ -5,8 +5,8 @@ import com.hillayes.rail.model.RefreshJwtResponse;
 import com.hillayes.rail.repository.AuthRepository;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AuthService {

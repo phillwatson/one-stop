@@ -1,11 +1,11 @@
 package com.hillayes.openid.rest;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * A REST client to call the OpenID auth-provider's token-endpoint, the URI of which

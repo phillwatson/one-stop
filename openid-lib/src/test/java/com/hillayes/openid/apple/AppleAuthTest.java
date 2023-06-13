@@ -14,9 +14,9 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.security.*;
 import java.time.Duration;
 import java.util.UUID;

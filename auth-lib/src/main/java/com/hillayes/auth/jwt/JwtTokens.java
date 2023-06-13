@@ -5,9 +5,9 @@ import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.core.Cookie;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Cookie;
 import java.util.Map;
 import java.util.Optional;
 

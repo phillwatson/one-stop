@@ -9,9 +9,9 @@ import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

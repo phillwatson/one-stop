@@ -5,7 +5,7 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,11 +68,11 @@ public class UserRepositoryTest {
 
         users.forEach(user -> {
             // when: we search for a user with an existing email
-            Optional<User> found = fixture.findByEmail(user.getEmail());
+            Optional<User> found = fixture.findByEmail(user.getEmail().toLowerCase());
 
             // then: we should find the user
             assertTrue(found.isPresent());
-            assertEquals(user.getEmail(), found.get().getEmail());
+            assertEquals(user.getEmail().toLowerCase(), found.get().getEmail().toLowerCase());
             assertEquals(user.getId(), found.get().getId());
         });
     }

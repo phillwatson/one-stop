@@ -8,9 +8,9 @@ import com.hillayes.rail.service.RailAccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;

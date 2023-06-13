@@ -3,7 +3,7 @@ package com.hillayes.user.domain;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;

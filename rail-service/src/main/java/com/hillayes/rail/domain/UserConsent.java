@@ -3,7 +3,7 @@ package com.hillayes.rail.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 

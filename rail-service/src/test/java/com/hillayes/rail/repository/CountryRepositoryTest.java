@@ -5,7 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Optional;
 

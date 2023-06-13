@@ -9,11 +9,11 @@ import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.ws.rs.NotAuthorizedException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotAuthorizedException;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -59,7 +59,8 @@ public class OpenIdAuthentication {
 
             String issuer = idToken.getIssuer();
             String subject = idToken.getSubject();
-            String email = idToken.getClaimValueAsString("email");
+            String val = idToken.getClaimValueAsString("email");
+            String email = Strings.isBlank(val) ? val : val.toLowerCase();
 
             // lookup user by Auth Provider's Identity
             User user = userRepository.findByIssuerAndSubject(issuer, subject)

@@ -7,9 +7,9 @@ import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.repository.AgreementRepository;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.Map;
 import java.util.Optional;
 

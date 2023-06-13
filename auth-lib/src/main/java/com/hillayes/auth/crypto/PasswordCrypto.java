@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;

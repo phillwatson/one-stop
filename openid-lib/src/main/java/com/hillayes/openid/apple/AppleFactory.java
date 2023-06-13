@@ -6,8 +6,8 @@ import com.hillayes.openid.rest.OpenIdTokenApi;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 
 /**

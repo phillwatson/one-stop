@@ -17,10 +17,6 @@
             <artifactId>resteasy-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.json</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-jwt-build</artifactId>
         </dependency>

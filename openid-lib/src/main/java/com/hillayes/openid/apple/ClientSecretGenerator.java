@@ -5,7 +5,7 @@ import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtSignatureException;
 import io.smallrye.jwt.util.KeyUtils;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;

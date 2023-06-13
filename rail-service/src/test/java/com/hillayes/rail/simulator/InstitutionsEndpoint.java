@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;

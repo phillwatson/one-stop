@@ -4,7 +4,7 @@ import com.hillayes.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 import java.util.UUID;
 

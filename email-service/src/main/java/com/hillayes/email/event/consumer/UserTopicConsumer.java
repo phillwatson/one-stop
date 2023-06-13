@@ -16,8 +16,8 @@ import com.hillayes.events.events.user.UserUpdated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

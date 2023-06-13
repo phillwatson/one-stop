@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;

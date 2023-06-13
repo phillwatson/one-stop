@@ -10,10 +10,10 @@ import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.transaction.Transactional;
-import javax.ws.rs.NotAuthorizedException;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotAuthorizedException;
 import java.util.UUID;
 
 /**

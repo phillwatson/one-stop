@@ -5,7 +5,7 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.executors.correlation.Correlation;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 

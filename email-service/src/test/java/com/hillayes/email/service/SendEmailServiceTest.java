@@ -4,9 +4,8 @@ import com.hillayes.email.config.EmailConfiguration;
 import com.hillayes.email.config.TemplateName;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
-import sendinblue.ApiException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 public class SendEmailServiceTest {

@@ -8,7 +8,7 @@ import com.hillayes.events.events.auth.LoginFailure;
 import com.hillayes.events.events.auth.UserLogin;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @TopicConsumer(Topic.USER_AUTH)

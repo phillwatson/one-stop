@@ -5,9 +5,9 @@ import com.hillayes.executors.scheduler.tasks.NamedTask;
 import com.hillayes.rail.config.ServiceConfiguration;
 import io.quarkus.runtime.Startup;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
 import javax.sql.DataSource;
 
 public class RailsScheduler {

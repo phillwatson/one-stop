@@ -11,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.net.URI;
 
 @Path("/api/v1/auth")

@@ -2,8 +2,8 @@ package com.hillayes.outbox.repository;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.persistence.LockModeType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.UUID;
 

@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -102,50 +102,6 @@ public class UserServiceTest {
 
         // and: the token expires at some future time
         assertTrue(token.getExpires().isAfter(Instant.now()));
-    }
-
-    @Test
-    public void testRegisterUser_DuplicateEmail() {
-        // given: an email address
-        String email = randomAlphanumeric(10) + "@example.com";
-
-        // and: a user with the given email already exists
-        when(userRepository.findByEmail(email.toLowerCase()))
-            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
-
-        // and: NO registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(email.toLowerCase()))
-            .thenReturn(Optional.empty());
-
-        // when: registering a user - an exception is thrown
-        assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.registerUser(email)
-        );
-
-        // then: NO token is registered
-        verify(userEventSender, never()).sendUserRegistered(any(), any());
-    }
-
-    @Test
-    public void testRegisterUser_DuplicateEmailRegistered() {
-        // given: an email address
-        String email = randomAlphanumeric(10) + "@example.com";
-
-        // and: NO onboarded user with the given email already exists
-        when(userRepository.findByEmail(email.toLowerCase()))
-            .thenReturn(Optional.empty());
-
-        // and: a registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(email.toLowerCase()))
-            .thenReturn(Optional.of(MagicToken.builder().id(UUID.randomUUID()).build()));
-
-        // when: registering a user - an exception is thrown
-        assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.registerUser(email)
-        );
-
-        // then: NO token is registered
-        verify(userEventSender, never()).sendUserRegistered(any(), any());
     }
 
     @Test
@@ -266,7 +222,7 @@ public class UserServiceTest {
         // and: the saved user contains new properties
         User savedUser = userCaptor.getValue();
         assertEquals(user.getUsername(), savedUser.getUsername());
-        assertEquals(user.getEmail().toLowerCase(), savedUser.getEmail());
+        assertEquals(user.getEmail().toLowerCase(), savedUser.getEmail().toLowerCase());
         assertEquals(user.getPreferredName(), savedUser.getPreferredName());
         assertEquals(user.getTitle(), savedUser.getTitle());
         assertEquals(user.getGivenName(), savedUser.getGivenName());

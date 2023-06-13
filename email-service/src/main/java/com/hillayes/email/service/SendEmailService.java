@@ -12,7 +12,7 @@ import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

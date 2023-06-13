@@ -11,7 +11,7 @@ import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;

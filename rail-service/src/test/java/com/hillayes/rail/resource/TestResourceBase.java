@@ -3,7 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.rail.simulator.NordigenSimulator;
 import org.junit.jupiter.api.BeforeEach;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class TestResourceBase extends TestBase {
     @Inject

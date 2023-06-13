@@ -50,6 +50,7 @@
                                 <openApiNullable>false</openApiNullable>
                                 <dateLibrary>java8</dateLibrary>
                                 <library>resttemplate</library>
+                                <useJakartaEe>true</useJakartaEe>
                                 <additionalModelTypeAnnotations>
                                     <!-- https://openapi-generator.tech/docs/generators/spring/ -->
                                     @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)

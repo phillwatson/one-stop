@@ -7,7 +7,7 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Consumes user events to maintain a local DB of user email addresses.

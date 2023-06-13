@@ -5,9 +5,9 @@ import com.hillayes.rail.model.InstitutionDetail;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @RegisterRestClient(configKey = "nordigen-api")

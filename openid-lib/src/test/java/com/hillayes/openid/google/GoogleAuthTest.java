@@ -11,7 +11,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.UUID;

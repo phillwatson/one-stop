@@ -3,9 +3,9 @@ package com.hillayes.exception;
 import com.hillayes.executors.correlation.Correlation;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;

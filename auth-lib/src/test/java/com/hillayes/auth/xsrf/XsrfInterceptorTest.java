@@ -6,10 +6,10 @@ import org.jboss.resteasy.core.ResourceMethodInvoker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.MultivaluedHashMap;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;

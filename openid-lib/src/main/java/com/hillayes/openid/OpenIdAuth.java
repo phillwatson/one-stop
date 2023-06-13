@@ -25,7 +25,7 @@ public interface OpenIdAuth {
      * this method to identify the appropriate instance. For example;
      * <pre>
      *     \@Inject \@Any
-     *     javax.enterprise.inject.Instance<OpenIdAuth> openIdAuths;
+     *     jakarta.enterprise.inject.Instance<OpenIdAuth> openIdAuths;
      * </pre>
      * See OpenIdAuthTest for more examples.
      *

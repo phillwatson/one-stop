@@ -3,9 +3,9 @@ package com.hillayes.user.resource;
 import com.hillayes.onestop.api.PageLinks;
 import org.springframework.data.domain.Page;
 
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.UUID;
 import java.util.function.Function;
 

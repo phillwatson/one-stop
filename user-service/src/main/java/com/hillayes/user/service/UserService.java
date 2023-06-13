@@ -21,9 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;

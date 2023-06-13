@@ -12,8 +12,8 @@ import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.model.RequisitionStatus;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;

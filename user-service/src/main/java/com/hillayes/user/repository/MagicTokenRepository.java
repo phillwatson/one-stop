@@ -3,7 +3,7 @@ package com.hillayes.user.repository;
 import com.hillayes.user.domain.MagicToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;

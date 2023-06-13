@@ -9,11 +9,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import java.util.Collections;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.List;
 import java.util.Optional;
 

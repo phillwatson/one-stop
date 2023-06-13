@@ -7,10 +7,10 @@ import com.hillayes.rail.model.ObtainJwtResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;

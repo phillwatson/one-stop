@@ -4,7 +4,7 @@ import com.hillayes.openid.rest.OpenIdTokenApi;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.*;
 
