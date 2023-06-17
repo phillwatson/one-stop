@@ -37,7 +37,7 @@ one-stop:
     templates:
       user-registered:
         subject: "Please complete your registration"
-        template-id: "1"
+        template: "user-registered.html"
 
       user-created:
         subject: "Welcome to One Stop"

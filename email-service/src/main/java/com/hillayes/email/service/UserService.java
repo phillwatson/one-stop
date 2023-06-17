@@ -1,12 +1,13 @@
 package com.hillayes.email.service;
 
+import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.repository.UserRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -15,15 +16,14 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final SendEmailService sendEmailService;
 
-    public User createUser(User user) {
+    public void createUser(User user) {
         log.info("Created user [id: {}, username: {}]", user.getId(), user.getUsername());
-        User result = userRepository.save(user);
+        user = userRepository.save(user);
 
         // send email to notify user of creation
-        log.debug("Sending email to notify user creation [email: {}]", user.getEmail());
-
-        return result;
+        sendEmailService.sendEmail(TemplateName.USER_CREATED, new SendEmailService.Recipient(user));
     }
 
     public void onboardUser(UUID userId) {
@@ -40,7 +40,7 @@ public class UserService {
             userRepository.delete(user);
 
             // send email to notify user of deletion
-            log.debug("Sending email to notify user deletion [email: {}]", user.getEmail());
+            sendEmailService.sendEmail(TemplateName.USER_DELETED, new SendEmailService.Recipient(user));
         });
     }
 
@@ -61,6 +61,10 @@ public class UserService {
 
         // send email to notify user of change
         log.debug("Sending email to notify user update [oldEmail: {}, newEmail: {}]", oldEmail, user.getEmail());
+
+        // send email to notify user of update to their account
+        sendEmailService.sendEmail(TemplateName.USER_UPDATED, new SendEmailService.Recipient(oldEmail, user.getPreferredName()));
+        sendEmailService.sendEmail(TemplateName.USER_UPDATED, new SendEmailService.Recipient(user));
 
         return update;
     }

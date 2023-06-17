@@ -13,11 +13,11 @@ import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -35,7 +35,7 @@ public class UserTopicConsumer implements EventConsumer {
     private final SendEmailService sendEmailService;
 
     @Transactional
-    public void consume(EventPacket eventPacket) throws Exception {
+    public void consume(EventPacket eventPacket) {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received user event [payloadClass: {}]", payloadClass);
 
@@ -50,7 +50,7 @@ public class UserTopicConsumer implements EventConsumer {
         }
     }
 
-    private void processUserRegistered(UserRegistered event) throws Exception {
+    private void processUserRegistered(UserRegistered event) {
         Recipient recipient = new Recipient(event.getEmail(), event.getEmail());
         Map<String, Object> params = Map.of(
             "acknowledge-uri", event.getAcknowledgerUri(),
@@ -59,7 +59,7 @@ public class UserTopicConsumer implements EventConsumer {
         sendEmailService.sendEmail(TemplateName.USER_REGISTERED, recipient, params);
     }
 
-    private void processUserCreated(UserCreated event) throws Exception {
+    private void processUserCreated(UserCreated event) {
         User user = User.builder()
             .id(event.getUserId())
             .username(event.getUsername())
@@ -69,9 +69,7 @@ public class UserTopicConsumer implements EventConsumer {
             .familyName(event.getFamilyName())
             .preferredName(event.getPreferredName())
             .build();
-        user = userService.createUser(user);
-
-        sendEmailService.sendEmail(TemplateName.USER_CREATED, new Recipient(user));
+        userService.createUser(user);
     }
 
     private void processUserDeleted(UserDeleted event) {

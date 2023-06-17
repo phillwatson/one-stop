@@ -4,6 +4,9 @@ import com.hillayes.executors.concurrent.ExecutorConfiguration;
 import com.hillayes.executors.concurrent.ExecutorFactory;
 import com.hillayes.executors.concurrent.ExecutorType;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jose4j.jwk.JsonWebKeySet;
@@ -11,9 +14,6 @@ import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.lang.JoseException;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
 import javax.security.auth.DestroyFailedException;
 import java.security.PrivateKey;
 import java.time.Duration;
@@ -40,11 +40,6 @@ public class RotatedJwkSet {
      * The lifo stack of key-pairs.
      */
     private final Deque<RsaJsonWebKey> stack = new LinkedList<>();
-
-    /**
-     * The ID assigned to the most recently generated key.
-     */
-    private long currentKid = 0;
 
     private ScheduledExecutorService executor;
 
@@ -80,8 +75,8 @@ public class RotatedJwkSet {
         log.debug("Rotating JWK-Set");
         synchronized (stack) {
             try {
-                currentKid = System.currentTimeMillis();
-                stack.addLast(newJWK(String.valueOf(currentKid)));
+                String kid = String.valueOf(System.currentTimeMillis());
+                stack.addLast(newJWK(kid));
                 while (stack.size() > jwkSetSize) {
                     disposeOf(stack.pop());
                 }
@@ -91,10 +86,14 @@ public class RotatedJwkSet {
         }
     }
 
-    public PrivateKey getCurrentPrivateKey() {
+    private RsaJsonWebKey getCurrentWebKey() {
         synchronized (stack) {
-            return stack.getLast().getRsaPrivateKey();
+            return stack.getLast();
         }
+    }
+
+    public PrivateKey getCurrentPrivateKey() {
+        return getCurrentWebKey().getRsaPrivateKey();
     }
 
     public String toJson() {
@@ -127,13 +126,10 @@ public class RotatedJwkSet {
      * @return the signed JWT token.
      */
     public String signClaims(JwtClaimsBuilder jwtClaimsBuilder) {
-        synchronized (stack) {
-            PrivateKey privateKey = getCurrentPrivateKey();
-
-            return jwtClaimsBuilder
-                .jws()
-                .keyId(String.valueOf(currentKid))
-                .sign(privateKey);
-        }
+        RsaJsonWebKey webKey = getCurrentWebKey();
+        return jwtClaimsBuilder
+            .jws()
+            .keyId(webKey.getKeyId())
+            .sign(webKey.getPrivateKey());
     }
 }

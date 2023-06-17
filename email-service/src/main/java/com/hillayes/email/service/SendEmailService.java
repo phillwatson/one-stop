@@ -1,8 +1,10 @@
 package com.hillayes.email.service;
 
+import com.hillayes.commons.net.Network;
 import com.hillayes.email.config.EmailConfiguration;
 import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
+import com.hillayes.email.errors.SendEmailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sendinblue.ApiException;
@@ -13,9 +15,11 @@ import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -26,13 +30,13 @@ public class SendEmailService {
     private final EmailConfiguration configuration;
 
     public void sendEmail(TemplateName templateName,
-                          EmailConfiguration.Corresponder recipient) throws IOException, ApiException {
+                          EmailConfiguration.Corresponder recipient) throws SendEmailException {
         sendEmail(templateName, recipient, null);
     }
 
     public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient,
-                          Map<String, Object> params) throws ApiException, IOException {
+                          Map<String, Object> params) throws SendEmailException {
         log.debug("Sending email [template: {}]", templateName);
         if (configuration.disabled()) {
             log.debug("Email sending is disabled");
@@ -45,41 +49,49 @@ public class SendEmailService {
             return;
         }
 
-        if ((recipient == null) && (templateConfig.receiver().isEmpty())) {
+        if (recipient == null) {
+            recipient = templateConfig.receiver().orElse(null);
+        }
+        if (recipient == null) {
             log.error("No recipient found [templateName: {}]", templateName);
             return;
         }
 
-        SendSmtpEmail email = new SendSmtpEmail()
-            .sender(new SendSmtpEmailSender()
-                .name(templateConfig.sender().orElse(configuration.defaultSender()).name())
-                .email(templateConfig.sender().orElse(configuration.defaultSender()).email()))
-            .addToItem(templateConfig.receiver()
-                .map(config -> new SendSmtpEmailTo()
-                    .name(config.name())
-                    .email(config.email()))
-                .orElse(new SendSmtpEmailTo()
+        if (params == null) {
+            params = new HashMap<>();
+        }
+
+        try {
+            // add common context parameters
+            params.put("host-ip", Network.getMyIpAddress());
+
+            SendSmtpEmail email = new SendSmtpEmail()
+                .sender(new SendSmtpEmailSender()
+                    .name(templateConfig.sender().orElse(configuration.defaultSender()).name())
+                    .email(templateConfig.sender().orElse(configuration.defaultSender()).email()))
+                .addToItem(new SendSmtpEmailTo()
                     .name(recipient.name())
-                    .email(recipient.email())))
-            .subject(templateConfig.subject());
+                    .email(recipient.email()))
+                .subject(templateConfig.subject())
+                .params(params);
 
-        if (params != null) {
-            email.params(params);
+            if (templateConfig.template().isPresent()) {
+                email.htmlContent(readHtml(templateConfig.template().get()));
+            } else if (templateConfig.templateId().isPresent()) {
+                email.templateId(Long.valueOf(templateConfig.templateId().get()));
+            } else {
+                log.error("Missing template content [templateName: {}]", templateName);
+                return;
+            }
+
+            TransactionalEmailsApi emailApi = new TransactionalEmailsApi();
+            emailApi.getApiClient().setApiKey(configuration.apiKey());
+
+            CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
+            log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
+        } catch (IOException | ApiException e) {
+            throw new SendEmailException(templateName, recipient, e);
         }
-
-        if (templateConfig.template().isPresent()) {
-            email.htmlContent(readHtml(templateConfig.template().get()));
-        } else if (templateConfig.templateId().isPresent()) {
-            email.templateId(Long.valueOf(templateConfig.templateId().get()));
-        } else {
-            email.htmlContent("<html><body><p>Hi {{contact.name}},</p><p>How are you?</p></body></html>");
-        }
-
-        TransactionalEmailsApi emailApi = new TransactionalEmailsApi();
-        emailApi.getApiClient().setApiKey(configuration.apiKey());
-
-        CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
-        log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
     }
 
     private String readHtml(String path) throws IOException {

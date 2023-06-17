@@ -100,7 +100,7 @@ one-stop:
       audiences: com.hillayes
     refresh-token:
       cookie: 'refresh_token'
-      duration-secs: 1800
+      expires-in: "PT30M"
     xsrf:
       cookie-name: 'XSRF-TOKEN'
       header-name: 'X-XSRF-TOKEN'
