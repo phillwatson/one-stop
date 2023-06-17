@@ -63,15 +63,3 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.deleted_user (
     version integer NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_deluseremail ON ${flyway:defaultSchema}.deleted_user (email);
-
-
--- used to store magic tokens during user onboarding
-CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.magic_token (
-    id uuid PRIMARY KEY,
-    token varchar(256) NOT NULL,
-    email varchar(256) NOT NULL,
-    expires timestamp NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_magictoken ON ${flyway:defaultSchema}.magic_token (token);
-CREATE INDEX IF NOT EXISTS idx_tokenemail ON ${flyway:defaultSchema}.magic_token (email);
-CREATE INDEX IF NOT EXISTS idx_tokenexpires ON ${flyway:defaultSchema}.magic_token (expires);

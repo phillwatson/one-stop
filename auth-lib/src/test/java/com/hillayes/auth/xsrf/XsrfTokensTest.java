@@ -2,6 +2,7 @@ package com.hillayes.auth.xsrf;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,28 +14,28 @@ public class XsrfTokensTest {
     @Test
     public void testValidation() {
         String token = fixture.generateToken();
-        assertTrue(fixture.validateTokens(token, token, 2000));
+        assertTrue(fixture.validateTokens(token, token, Duration.ofSeconds(2000)));
     }
 
     @Test
     public void testValidation_differentHander_sameSecret() {
         String token = new XsrfTokens("this is a secret").generateToken();
-        assertTrue(new XsrfTokens("this is a secret").validateTokens(token, token, 2000));
+        assertTrue(new XsrfTokens("this is a secret").validateTokens(token, token, Duration.ofSeconds(2000)));
     }
 
     @Test
     public void testMissingTokens() {
         String token = fixture.generateToken();
-        assertFalse(fixture.validateTokens(token, null, 2000));
-        assertFalse(fixture.validateTokens(token, "", 2000));
+        assertFalse(fixture.validateTokens(token, null, Duration.ofSeconds(2000)));
+        assertFalse(fixture.validateTokens(token, "", Duration.ofSeconds(2000)));
 
-        assertFalse(fixture.validateTokens(null, token, 2000));
-        assertFalse(fixture.validateTokens("", token, 2000));
+        assertFalse(fixture.validateTokens(null, token, Duration.ofSeconds(2000)));
+        assertFalse(fixture.validateTokens("", token, Duration.ofSeconds(2000)));
 
-        assertFalse(fixture.validateTokens(null, null, 2000));
-        assertFalse(fixture.validateTokens("", "", 2000));
+        assertFalse(fixture.validateTokens(null, null, Duration.ofSeconds(2000)));
+        assertFalse(fixture.validateTokens("", "", Duration.ofSeconds(2000)));
 
-        assertFalse(fixture.validateTokens(null, "", 2000));
-        assertFalse(fixture.validateTokens("", null, 2000));
+        assertFalse(fixture.validateTokens(null, "", Duration.ofSeconds(2000)));
+        assertFalse(fixture.validateTokens("", null, Duration.ofSeconds(2000)));
     }
 }

@@ -16,6 +16,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import javax.security.auth.DestroyFailedException;
 import java.security.PrivateKey;
+import java.time.Duration;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RotatedJwkSet {
     @ConfigProperty(name = "one-stop.auth.jwk.rotation-interval")
-    long rotationInterval;
+    Duration rotationInterval;
 
     @ConfigProperty(name = "one-stop.auth.jwk.set-size", defaultValue = "2")
     int jwkSetSize;
@@ -62,7 +63,7 @@ public class RotatedJwkSet {
                 .build());
 
         executor.scheduleAtFixedRate(this::rotateKeys,
-            rotationInterval, rotationInterval, TimeUnit.SECONDS);
+            rotationInterval.toSeconds(), rotationInterval.toSeconds(), TimeUnit.SECONDS);
     }
 
     @PreDestroy

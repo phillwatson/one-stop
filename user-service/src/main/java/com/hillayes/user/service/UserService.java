@@ -1,33 +1,33 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.commons.Strings;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
-import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
-import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
 import com.hillayes.user.resource.UserOnboardResource;
-import lombok.RequiredArgsConstructor;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,16 +35,32 @@ import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
-@RequiredArgsConstructor
 @Slf4j
 public class UserService {
-    private final UserRepository userRepository;
-    private final DeletedUserRepository deletedUserRepository;
-    private final MagicTokenRepository magicTokenRepository;
-    private final PasswordCrypto passwordCrypto;
-    private final UserEventSender userEventSender;
-    private final Gateway gateway;
+    @Inject
+    UserRepository userRepository;
+    @Inject
+    DeletedUserRepository deletedUserRepository;
+    @Inject
+    PasswordCrypto passwordCrypto;
+    @Inject
+    UserEventSender userEventSender;
+    @Inject
+    Gateway gateway;
+    @Inject
+    AuthTokens authTokens;
+    @ConfigProperty(name = "one-stop.auth.onboarding.token-expires-in")
+    Duration tokenDuration;
 
+
+    /**
+     * Sends an email to a client that wishes to register as a user. The email
+     * will contain a time-limited token (in the form of a URL link). That will
+     * direct the user to the App page to enter their user details before calling
+     * the completeOnboarding() below.
+     *
+     * @param email the email of the client wishing to register.
+     */
     public void registerUser(String email) {
         log.info("Registering user [email: {}]", email);
 
@@ -58,21 +74,17 @@ public class UserService {
             return;
         }
 
-        MagicToken token = magicTokenRepository.save(MagicToken.builder()
-            .email(email.toLowerCase())
-            .token(UUID.randomUUID().toString())
-            .expires(Instant.now().plus(5, ChronoUnit.MINUTES))
-            .build());
-
         try {
+            String token = authTokens.generateToken(email.toLowerCase(), tokenDuration);
+
             URI acknowledgerUri = UriBuilder
                 .fromResource(UserOnboardResource.class)
-                .path(UserOnboardResource.class, "acknowledgeUser")
+                .path(UserOnboardResource.class, "onboardUser")
                 .scheme(gateway.getScheme())
                 .host(gateway.getHost())
                 .port(gateway.getPort())
-                .buildFromMap(Map.of("token", token.getToken()));
-            userEventSender.sendUserRegistered(token, acknowledgerUri);
+                .buildFromMap(Map.of("token", token));
+            userEventSender.sendUserRegistered(token, tokenDuration, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
         } catch (IllegalArgumentException e) {
@@ -84,66 +96,46 @@ public class UserService {
         }
     }
 
-    public Optional<User> acknowledgeToken(String token) {
-        log.info("User has acknowledged onboarding token [token: {}]", token);
-
-        return magicTokenRepository.findByToken(token)
-            .filter(t -> t.getExpires().isAfter(Instant.now()))
-            .map(t -> {
-                // create a user record - but not yet onboarded
-                User newUser = User.builder()
-                    .username(t.getEmail())
-                    .email(t.getEmail())
-                    .givenName(t.getEmail())
-                    .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                    .roles(Set.of("onboarding")) // allow user to complete onboarding but nothing else
-                    .build();
-
-                newUser = userRepository.save(newUser);
-                magicTokenRepository.delete(t);
-
-                userEventSender.sendUserAcknowledged(newUser);
-                log.debug("Created user [username: {}, id: {}]", newUser.getUsername(), newUser.getId());
-                return newUser;
-            });
-    }
-
-    public Optional<User> completeOnboarding(UUID id, User modifiedUser, char[] password) {
-        log.info("User has completed onboarding [userId: {}]", id);
+    /**
+     * Called when a client wishing to register has completed the required user
+     * profile information. It will check that the profile information is valid
+     * before creating a new user.
+     *
+     * @param userProfile the profile data for the new user.
+     * @param password the password selected by the new user.
+     * @return the onboarded user.
+     */
+    public User completeOnboarding(User userProfile, char[] password) {
+        log.info("User has completed onboarding [username: {}]", userProfile.getUsername());
 
         // ensure mandatory fields are present
-        validateUserContent(modifiedUser);
+        validateUserContent(userProfile);
 
         // ensure username is unique
-        userRepository.findByUsername(modifiedUser.getUsername())
-            .filter(existing -> !existing.getId().equals(id))
+        userRepository.findByUsername(userProfile.getUsername())
             .ifPresent(existing -> {
                 throw new DuplicateUsernameException(existing.getUsername());
             });
 
         // ensure email is unique
-        validateUniqueEmail(id, modifiedUser.getEmail());
+        validateUniqueEmail(null, userProfile.getEmail());
 
-        return userRepository.findById(id)
-            .map(user -> {
-                // update and onboard user
-                user = userRepository.save(user.toBuilder()
-                    .username(modifiedUser.getUsername())
-                    .email(modifiedUser.getEmail())
-                    .title(modifiedUser.getTitle())
-                    .givenName(modifiedUser.getGivenName())
-                    .familyName(modifiedUser.getFamilyName())
-                    .preferredName(modifiedUser.getPreferredName())
-                    .phoneNumber(modifiedUser.getPhoneNumber())
+        userProfile = userRepository.save(userProfile.toBuilder()
+                    .username(userProfile.getUsername())
+                    .email(userProfile.getEmail())
+                    .title(userProfile.getTitle())
+                    .givenName(userProfile.getGivenName())
+                    .familyName(userProfile.getFamilyName())
+                    .preferredName(userProfile.getPreferredName())
+                    .phoneNumber(userProfile.getPhoneNumber())
                     .passwordHash(passwordCrypto.getHash(password))
                     .dateOnboarded(Instant.now())
                     .roles(Set.of("user"))
                     .build());
 
-                userEventSender.sendUserCreated(user);
-                log.debug("User has completed onboarding [id: {}, username: {}]", user.getId(), user.getUsername());
-                return user;
-            });
+        userEventSender.sendUserCreated(userProfile);
+        log.debug("User has completed onboarding [id: {}, username: {}]", userProfile.getId(), userProfile.getUsername());
+        return userProfile;
     }
 
     public Optional<User> getUser(UUID id) {
@@ -265,18 +257,9 @@ public class UserService {
      * @param email the email address to check
      */
     private void validateUniqueEmail(UUID userId, String email) {
-        // delete all expired onboarding tokens
-        magicTokenRepository.deleteByExpiresBefore(Instant.now());
-
-        // ensure no onboarding user has the same email
-        magicTokenRepository.findByEmail(email.toLowerCase())
-            .ifPresent(existing -> {
-                throw new DuplicateEmailAddressException(email);
-            });
-
         // ensure no onboarded user has the same email
         findUserByEmail(email.toLowerCase())
-            .filter(existing -> (userId == null) || (!existing.getId().equals(userId)))
+            .filter(existing -> !existing.getId().equals(userId))
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
             });

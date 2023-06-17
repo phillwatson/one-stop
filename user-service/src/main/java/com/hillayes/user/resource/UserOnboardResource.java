@@ -1,21 +1,18 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.auth.jwt.AuthTokens;
-import com.hillayes.exception.MensaException;
-import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
+import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
-import java.net.URI;
-import java.util.UUID;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/api/v1/users/onboard")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -37,42 +34,26 @@ public class UserOnboardResource {
         return Response.accepted().build();
     }
 
-    @GET
-    @Path("/acknowledge/{token}")
-    @PermitAll
-    public Response acknowledgeUser(@Context UriInfo uriInfo,
-                                    @PathParam("token") String token) {
-        log.info("Acknowledging user [token: {}]", token);
-
-        return userService.acknowledgeToken(token)
-            .map(user -> {
-                // redirect to the onboard page - with auth tokens in cookies
-                URI redirect = uriInfo.getBaseUri().resolve("/onboard");
-                return authTokens.authResponse(Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
-            })
-            .orElseThrow(() -> new NotAuthorizedException("token"));
-    }
-
     @POST
     @Path("/complete")
-    @RolesAllowed("onboarding")
+    @PermitAll
     public Response onboardUser(@Context SecurityContext ctx,
                                 UserCompleteRequest request) {
-        UUID id = ResourceUtils.getUserId(ctx);
-        log.info("Completing user registration [userId: {}, username: {}]", id, request.getUsername());
+        log.info("Completing user registration [token: {}]", request.getToken());
 
-        User userUpdate = User.builder()
-            .username(request.getUsername())
-            .preferredName(request.getPreferredName())
-            .title(request.getTitle())
-            .givenName(request.getGivenName())
-            .familyName(request.getFamilyName())
-            .email(request.getEmail())
-            .phoneNumber(request.getPhone())
-            .build();
+        try {
+            JsonWebToken jwt = authTokens.getToken(request.getToken());
+            User newUser = User.builder()
+                .username(request.getUsername())
+                .givenName(request.getGivenName())
+                .email(jwt.getName())
+                .build();
 
-        return userService.completeOnboarding(id, userUpdate, request.getPassword().toCharArray())
-            .map(user -> authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles()))
-            .orElseThrow(() -> new NotFoundException("user", id));
+            newUser = userService.completeOnboarding(newUser, request.getPassword().toCharArray());
+            return authTokens.authResponse(Response.noContent(), newUser.getId(), newUser.getRoles());
+        } catch (ParseException e) {
+            log.error("Onboarding JWT is invalid [token: {}]", request.getToken());
+            throw new NotAuthorizedException("token");
+        }
     }
 }

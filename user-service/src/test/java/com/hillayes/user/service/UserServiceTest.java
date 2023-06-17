@@ -1,14 +1,14 @@
 package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
+import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
-import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
-import com.hillayes.user.repository.MagicTokenRepository;
 import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,10 +41,10 @@ public class UserServiceTest {
     DeletedUserRepository deletedUserRepository;
 
     @InjectMock
-    MagicTokenRepository magicTokenRepository;
+    PasswordCrypto passwordCrypto;
 
     @InjectMock
-    PasswordCrypto passwordCrypto;
+    AuthTokens authTokens;
 
     @InjectMock
     UserEventSender userEventSender;
@@ -68,17 +67,6 @@ public class UserServiceTest {
             }
             return user;
         });
-
-        // simulate the token repository returns the token with an ID
-        when(magicTokenRepository.save(any())).thenAnswer(invocation -> {
-            MagicToken token = invocation.getArgument(0);
-            if (token.getId() == null) {
-                token = token.toBuilder()
-                    .id(UUID.randomUUID())
-                    .build();
-            }
-            return token;
-        });
     }
 
     @Test
@@ -86,113 +74,39 @@ public class UserServiceTest {
         // given: an email address
         String email = randomAlphanumeric(10) + "@example.com";
 
+        // and: a token is generated
+        String token = randomAlphanumeric(30);
+        when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
+
         // when: we register a user
         fixture.registerUser(email);
 
-        // then: a token is registered
-        ArgumentCaptor<MagicToken> tokenCaptor = ArgumentCaptor.forClass(MagicToken.class);
-        verify(userEventSender).sendUserRegistered(tokenCaptor.capture(), any());
+        // then: a token is generated
+        verify(authTokens).generateToken(eq(email.toLowerCase()), any());
 
-        // and: the token records the email
-        MagicToken token = tokenCaptor.getValue();
-        assertEquals(email.toLowerCase(), token.getEmail());
-
-        // and: the token contains a random code
-        assertNotNull(token.getToken());
-
-        // and: the token expires at some future time
-        assertTrue(token.getExpires().isAfter(Instant.now()));
+        // and: a registration is recorded
+        ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
+        verify(userEventSender).sendUserRegistered(tokenCaptor.capture(), any(), any());
     }
 
     @Test
-    public void testAcknowledgeToken() {
-        // given: a token
-        String token = randomAlphanumeric(30);
+    public void testRegisterUser_DuplicateEmail() throws IOException {
+        // given: an email address
+        String email = randomAlphanumeric(10) + "@example.com";
 
-        // and: the token repository contains the token
-        MagicToken entry = MagicToken.builder()
-            .email(randomAlphanumeric(10) + "@example.com")
-            .token(token)
-            .expires(Instant.now().plusSeconds(60))
-            .build();
-        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.of(entry));
+        // and: an existing user holds the same email
+        User existingUser = mockUser(UUID.randomUUID());
+        when(userRepository.findByEmail(email.toLowerCase()))
+            .thenReturn(Optional.of(existingUser));
 
-        // when: acknowledging the token
-        Optional<User> user = fixture.acknowledgeToken(token);
+        // when: we register a user
+        fixture.registerUser(email);
 
-        // then: a new user is returned
-        assertTrue(user.isPresent());
+        // then: No registration is recorded
+        verify(userEventSender, never()).sendUserRegistered(any(), any(), any());
 
-        // and: the user is not yet onboarded
-        assertFalse(user.get().isOnboarded());
-
-        // and: the user is persisted
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-
-        // and: the persisted user has a role
-        User createdUser = userCaptor.getValue();
-        assertEquals(1, createdUser.getRoles().size());
-        assertTrue(createdUser.getRoles().contains("onboarding"));
-
-        // and: the token is deleted
-        verify(magicTokenRepository).delete(entry);
-
-        // and: the user acknowledgement is issued
-        verify(userEventSender).sendUserAcknowledged(user.get());
-    }
-
-    @Test
-    public void testAcknowledgeToken_TokenNotFound() {
-        // given: a token
-        String token = randomAlphanumeric(30);
-
-        // and: the token repository DOES NOT contain the token
-        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.empty());
-
-        // when: acknowledging the token
-        Optional<User> user = fixture.acknowledgeToken(token);
-
-        // then: NO new user is returned
-        assertFalse(user.isPresent());
-
-        // and: NO user is created
-        verify(userRepository, never()).save(any());
-
-        // and: NO token is deleted
-        verify(magicTokenRepository, never()).delete(any());
-
-        // and: NO user acknowledgement is issued
-        verify(userEventSender, never()).sendUserAcknowledged(any());
-    }
-
-    @Test
-    public void testAcknowledgeToken_TokenIsExpired() {
-        // given: a token
-        String token = randomAlphanumeric(30);
-
-        // and: the token repository contains the expired token
-        MagicToken entry = MagicToken.builder()
-            .email(randomAlphanumeric(10) + "@example.com")
-            .token(token)
-            .expires(Instant.now().minusSeconds(60))
-            .build();
-        when(magicTokenRepository.findByToken(token)).thenReturn(Optional.of(entry));
-
-        // when: acknowledging the token
-        Optional<User> user = fixture.acknowledgeToken(token);
-
-        // then: NO new user is returned
-        assertFalse(user.isPresent());
-
-        // and: NO user is created
-        verify(userRepository, never()).save(any());
-
-        // and: NO token is deleted
-        verify(magicTokenRepository, never()).delete(any());
-
-        // and: NO user acknowledgement is issued
-        verify(userEventSender, never()).sendUserAcknowledged(any());
+        // and: a warning email is sent to the existing user with the same email
+        verify(userEventSender).sendAccountActivity(existingUser, SuspiciousActivity.EMAIL_REGISTRATION);
     }
 
     @Test
@@ -207,13 +121,13 @@ public class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
 
         // when: completing the onboarding
-        Optional<User> onboardedUser = fixture.completeOnboarding(userId, user, password);
+        User onboardedUser = fixture.completeOnboarding(user, password);
 
         // then: the user is returned
-        assertTrue(onboardedUser.isPresent());
+        assertNotNull(onboardedUser);
 
         // and: the user is onboarded
-        assertTrue(onboardedUser.get().isOnboarded());
+        assertTrue(onboardedUser.isOnboarded());
 
         // and: the user was updated
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -233,29 +147,20 @@ public class UserServiceTest {
         assertTrue(user.getRoles().contains("user"));
 
         // and: a notification is issued
-        verify(userEventSender).sendUserCreated(onboardedUser.get());
+        verify(userEventSender).sendUserCreated(onboardedUser);
     }
 
     @Test
     public void testCompleteOnboarding_MissingUsername() {
         // given: a completed user request
-        UUID userId = UUID.randomUUID();
         char[] password = randomAlphanumeric(20).toCharArray();
         User user = mockUser().toBuilder()
             .username(null)
             .build();
 
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
-
-        // and: an existing user holds the same username
-        when(userRepository.findByUsername(user.getUsername()))
-            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
-
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
+            fixture.completeOnboarding(user, password)
         );
 
         // then: the username is the missing parameter
@@ -271,23 +176,14 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_MissingEmail() {
         // given: a completed user request
-        UUID userId = UUID.randomUUID();
         char[] password = randomAlphanumeric(20).toCharArray();
         User user = mockUser().toBuilder()
             .email(null)
             .build();
 
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
-
-        // and: an existing user holds the same username
-        when(userRepository.findByUsername(user.getUsername()))
-            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
-
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
+            fixture.completeOnboarding(user, password)
         );
 
         // and: the email is the missing parameter
@@ -303,23 +199,14 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_MissingGivenName() {
         // given: a completed user request
-        UUID userId = UUID.randomUUID();
         char[] password = randomAlphanumeric(20).toCharArray();
         User user = mockUser().toBuilder()
             .givenName(null)
             .build();
 
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
-
-        // and: an existing user holds the same username
-        when(userRepository.findByUsername(user.getUsername()))
-            .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
-
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
+            fixture.completeOnboarding(user, password)
         );
 
         // and: the givenName is the missing parameter
@@ -335,13 +222,8 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_DuplicateUsername() {
         // given: a completed user request
-        UUID userId = UUID.randomUUID();
         char[] password = randomAlphanumeric(20).toCharArray();
         User user = mockUser();
-
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
 
         // and: an existing user holds the same username
         when(userRepository.findByUsername(user.getUsername()))
@@ -349,7 +231,7 @@ public class UserServiceTest {
 
         // when: completing the onboarding
         assertThrows(DuplicateUsernameException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
+            fixture.completeOnboarding(user, password)
         );
 
         // and: NO user is updated
@@ -362,56 +244,16 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_DuplicateEmail() {
         // given: a completed user request
-        UUID userId = UUID.randomUUID();
         char[] password = randomAlphanumeric(20).toCharArray();
         User user = mockUser();
-
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
 
         // and: an existing user holds the same email
         when(userRepository.findByEmail(user.getEmail().toLowerCase()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
-        // and: NO registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.empty());
-
         // when: completing the onboarding
         assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
-        );
-
-        // and: NO user is updated
-        verify(userRepository, never()).save(any());
-
-        // and: NO notification is issued
-        verify(userEventSender, never()).sendUserCreated(any());
-    }
-
-    @Test
-    public void testCompleteOnboarding_DuplicateEmailRegistered() {
-        // given: a completed user request
-        UUID userId = UUID.randomUUID();
-        char[] password = randomAlphanumeric(20).toCharArray();
-        User user = mockUser();
-
-        // and: the user was previously registered and acknowledged
-        User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
-
-        // and: NO onboarded user with the given email already exists
-        when(userRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.empty());
-
-        // and: a registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.of(MagicToken.builder().id(UUID.randomUUID()).build()));
-
-        // when: completing the onboarding
-        assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.completeOnboarding(userId, user, password)
+            fixture.completeOnboarding(user, password)
         );
 
         // and: NO user is updated
@@ -559,10 +401,6 @@ public class UserServiceTest {
         // and: no other user with the given email exists
         when(userRepository.findByEmail(user.getEmail().toLowerCase()))
             .thenReturn(Optional.of(user));
-
-        // and: NO onboarding user with the given email exists
-        when(magicTokenRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.empty());
 
         // when: the service is called
         Optional<User> result = fixture.updateUser(user.getId(), modifiedUser);
@@ -742,42 +580,6 @@ public class UserServiceTest {
         // and: a user with the given email already exists
         when(userRepository.findByEmail(user.getEmail().toLowerCase()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
-
-        // and: NO registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.empty());
-
-        // when: updating a user - an exception is thrown
-        assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
-        );
-
-        // then: the user is NOT updated
-        verify(userRepository, never()).save(any());
-
-        // and: an event is NOT sent
-        verify(userEventSender, never()).sendUserUpdated(any());
-    }
-
-    @Test
-    public void testUpdateUser_DuplicateEmail_Registered() {
-        // given: a user
-        User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
-        // and: NO onboarded user with the given email already exists
-        when(userRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.empty());
-
-        // and: a registered user with the given email already exists
-        when(magicTokenRepository.findByEmail(user.getEmail().toLowerCase()))
-            .thenReturn(Optional.of(MagicToken.builder().id(UUID.randomUUID()).build()));
 
         // when: updating a user - an exception is thrown
         assertThrows(DuplicateEmailAddressException.class, () ->

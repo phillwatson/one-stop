@@ -16,6 +16,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
+import java.time.Duration;
 import java.util.List;
 
 import static com.hillayes.commons.Strings.isBlank;
@@ -40,8 +41,8 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     @ConfigProperty(name = "one-stop.auth.xsrf.header-name", defaultValue = "X-XSRF-TOKEN")
     String xsrfHeaderName;
 
-    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
-    int refreshDuration;
+    @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
+    Duration refreshDuration;
 
     @Inject
     XsrfTokens xsrfTokens;

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Random;
 
@@ -62,7 +63,7 @@ public class XsrfTokens {
      *                    should be at least equal to the time-to-live duration of the refresh-token.
      * @return true if the two tokens are valid and match.
      */
-    public boolean validateTokens(String token1, String token2, int timeoutSecs) {
+    public boolean validateTokens(String token1, String token2, Duration timeout) {
         log.trace("Validating XSRF token");
 
         if ((isBlank(token1)) || (isBlank(token2))) {
@@ -82,8 +83,7 @@ public class XsrfTokens {
             return false;
         }
 
-        long timeoutMillis = timeoutSecs * 1000L;
-        if (System.currentTimeMillis() > timestamp + timeoutMillis) {
+        if (System.currentTimeMillis() > timestamp + timeout.toMillis()) {
             log.warn("XSRF token validation failed - token expired");
             return false;
         }

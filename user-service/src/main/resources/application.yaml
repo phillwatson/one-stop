@@ -67,17 +67,19 @@ one-stop:
       cookie: 'access_token'
       issuer: https://hillayes.com/one-stop
       audiences: com.hillayes
-      duration-secs: 300
+      expires-in: "PT5M"
     refresh-token:
       cookie: 'refresh_token'
-      duration-secs: 1800
+      expires-in: "PT30M"
     jwk:
       set-size: 2
-      rotation-interval: ${one-stop.auth.refresh-token.duration-secs}
+      rotation-interval: ${one-stop.auth.refresh-token.expires-in}
     xsrf:
       cookie-name: 'XSRF-TOKEN'
       header-name: 'X-XSRF-TOKEN'
       # secret: 'this will be passed in via docker env'
+    onboarding:
+      token-expires-in: "PT15M"
 
     openid:
       GOOGLE:

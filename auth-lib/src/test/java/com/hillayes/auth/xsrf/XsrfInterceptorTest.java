@@ -11,6 +11,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import java.lang.annotation.Annotation;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class XsrfInterceptorTest {
         fixture.jwtTokens = jwtTokens;
         fixture.xsrfTokens = xsrfGenerator;
         fixture.xsrfHeaderName = XSRF_HEADER;
-        fixture.refreshDuration = 60;
+        fixture.refreshDuration = Duration.ofSeconds(60);
     }
 
     @Test
@@ -95,7 +96,7 @@ public class XsrfInterceptorTest {
 
         ContainerRequestContext requestContext = mock();
         mockXsrfCookie(requestContext, token);
-        mockXsrfHeader(requestContext, null);
+        mockXsrfHeader(requestContext, (String)null);
         mockMethod(requestContext, mockRolesAllowed());
 
         fixture.filter(requestContext);
@@ -117,7 +118,7 @@ public class XsrfInterceptorTest {
         mockXsrfHeader(requestContext, token);
         mockMethod(requestContext, mockRolesAllowed());
 
-        fixture.refreshDuration = 1;
+        fixture.refreshDuration = Duration.ofSeconds(1);
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
@@ -171,7 +172,7 @@ public class XsrfInterceptorTest {
     private void mockXsrfCookie(ContainerRequestContext requestContext, String xsrfToken) {
         Map<String, Cookie> cookies = (xsrfToken == null)
             ? Map.of()
-            : Map.of(ACCESS_TOKEN, new Cookie(ACCESS_TOKEN, xsrfToken));
+            : Map.of(ACCESS_TOKEN, new Cookie.Builder(ACCESS_TOKEN).value(xsrfToken).build());
         when(requestContext.getCookies()).thenReturn(cookies);
     }
 

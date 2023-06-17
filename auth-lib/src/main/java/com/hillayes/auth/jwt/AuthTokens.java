@@ -13,6 +13,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,14 +28,14 @@ public class AuthTokens {
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;
 
-    @ConfigProperty(name = "one-stop.auth.access-token.duration-secs")
-    int accessDuration;
+    @ConfigProperty(name = "one-stop.auth.access-token.expires-in")
+    Duration accessDuration;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
     String refreshCookieName;
 
-    @ConfigProperty(name = "one-stop.auth.refresh-token.duration-secs")
-    int refreshDuration;
+    @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
+    Duration refreshDuration;
 
     @ConfigProperty(name = "one-stop.auth.access-token.issuer")
     String issuer;
@@ -66,6 +68,24 @@ public class AuthTokens {
             .collect(Collectors.toSet());
     }
 
+    public String generateToken(String principalName, Duration expiresIn) {
+        return jwkSet.signClaims(Jwt
+            .issuer(issuer)
+            .audience(audiences)
+            .upn(principalName)
+            .expiresIn(expiresIn.toSeconds()));
+    }
+
+    /**
+     * Constructs the auth cookies for the identified user, with the given groups (user roles).
+     * The cookies include a signed access-token, signed refresh-token and a cross-site
+     * request forgery (XSRF) token.
+     *
+     * @param userPrincipalName the identity of the authenticated user, by which all services
+     * can identify the user (typically the user record primary key).
+     * @param groups the user groups (roles) to which authenticated user belongs.
+     * @return the array of cookies containing auth tokens.
+     */
     private NewCookie[] buildCookies(UUID userPrincipalName, Set<String> groups) {
         log.info("Building auth tokens [issuer: {}, userId: {}]", issuer, userPrincipalName);
 
@@ -88,17 +108,17 @@ public class AuthTokens {
 
         NewCookie accessTokenCookie = new NewCookie(accessCookieName, accessToken,
             "/api", null, NewCookie.DEFAULT_VERSION, null,
-            accessDuration, Date.from(Instant.now().plusSeconds(accessDuration)),
+            (int)accessDuration.toSeconds(), Date.from(Instant.now().plus(accessDuration)),
             false, true);
 
         NewCookie refreshTokenCookie = new NewCookie(refreshCookieName, refreshToken,
             "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,
-            refreshDuration, Date.from(Instant.now().plusSeconds(refreshDuration)),
+            (int)refreshDuration.toSeconds(), Date.from(Instant.now().plus(refreshDuration)),
             false, true);
 
         NewCookie xsrfTokenCookie = new NewCookie(xsrfCookieName, xsrfToken,
             "/", null, NewCookie.DEFAULT_VERSION, null,
-            refreshDuration, Date.from(Instant.now().plusSeconds(refreshDuration)),
+            (int)refreshDuration.toSeconds(), Date.from(Instant.now().plus(refreshDuration)),
             false, false);
 
         return new NewCookie[]{accessTokenCookie, refreshTokenCookie, xsrfTokenCookie};
@@ -121,10 +141,35 @@ public class AuthTokens {
         return responseBuilder.build();
     }
 
+    /**
+     * Reads any refresh cookie from the given collection and returns its parsed
+     * and validated JWT content.
+     *
+     * @param cookies the collection of cookies in which the refresh cookie is found.
+     * @return the parsed and verified content of the refresh token. Empty if not found.
+     * @throws ParseException if the token is not valid.
+     */
     public Optional<JsonWebToken> getRefreshToken(Map<String, Cookie> cookies) throws ParseException {
         return jwtTokens.getToken(refreshCookieName, cookies);
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     * @throws ParseException
+     */
+    public JsonWebToken getToken(String token) throws ParseException {
+        return jwtTokens.parseAndVerify(token);
+    }
+
+    /**
+     * Deletes the auth cookies by overwriting any existing cookies with new cookies
+     * of the same name but with their expiry date-time to now.
+     *
+     * @param responseBuilder   the response builder to which the cookies are to be added.
+     * @return the given response builder with the cookies added.
+     */
     public Response deleteCookies(Response.ResponseBuilder responseBuilder) {
         NewCookie accessToken = new NewCookie(accessCookieName, null,
             "/api", null, NewCookie.DEFAULT_VERSION, null,

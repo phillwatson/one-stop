@@ -59,6 +59,7 @@ client<--user-service:http 409
 else valid
 user-service->user-service:createUser\n(\n username: "jane",\n password: "My-New-Account-20", - hashed\n email: "jane@work.com", - from magic-token\n created: now(),\n role: "user"\n)
 user-service->broker:user-created(user)
+user-service->broker:user-login(user)
 client<--user-service:http 204\n(with new JWT)
 end
 deactivateafter user-service

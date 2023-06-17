@@ -19,7 +19,6 @@ import java.time.Instant;
 @AllArgsConstructor
 public class UserRegistered {
     private String email;
-    private String token;
     private Instant expires;
     private URI acknowledgerUri;
 }

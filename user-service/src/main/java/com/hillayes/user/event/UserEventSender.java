@@ -8,13 +8,13 @@ import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.events.events.user.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
-import com.hillayes.user.domain.MagicToken;
 import com.hillayes.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 
 @ApplicationScoped
@@ -23,12 +23,11 @@ import java.time.Instant;
 public class UserEventSender {
     private final EventSender eventSender;
 
-    public void sendUserRegistered(MagicToken token, URI acknowledgerUri) {
-        log.debug("Sending UserRegistered event [email: {}]", token.getEmail());
+    public void sendUserRegistered(String email, Duration expires, URI acknowledgerUri) {
+        log.debug("Sending UserRegistered event [email: {}]", email);
         eventSender.send(Topic.USER, UserRegistered.builder()
-            .email(token.getEmail())
-            .token(token.getToken())
-            .expires(token.getExpires())
+            .email(email)
+            .expires(Instant.now().plus(expires))
             .acknowledgerUri(acknowledgerUri)
             .build());
     }

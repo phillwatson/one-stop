@@ -3,6 +3,7 @@ package com.hillayes.auth.jwt;
 import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,7 +12,7 @@ public class RotatedJwkSetTest {
     public synchronized void testRotation() throws InterruptedException {
         RotatedJwkSet fixture = new RotatedJwkSet();
         fixture.jwkSetSize = 2;
-        fixture.rotationInterval = 5;
+        fixture.rotationInterval = Duration.ofSeconds(5);
         fixture.init();
 
         try {
