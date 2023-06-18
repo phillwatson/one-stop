@@ -19,8 +19,8 @@ interface Props {
 }
 
 const dialogTitle: SxProps = {
-  backgroundColor: '#1565c0',
-  color: 'white',
+  backgroundColor: 'primary.main',
+  color: 'common.white',
 };
 
 const dialogPaper: SxProps = {
@@ -66,9 +66,7 @@ export default function Institutions(props: Props) {
     if (activeCountry === undefined) {
       setInstitutions([]);
     } else {
-      InstitutionService.getAll(activeCountry.id, 0, 3000).then(data => {
-        setInstitutions(data.items);
-      });
+      InstitutionService.getAll(activeCountry.id, 0, 3000).then(data => setInstitutions(data.items));
     }
   }, [ activeCountry, userConsents ]);
 

@@ -5,8 +5,9 @@ import axios, {
   AxiosError
 } from "axios";
 
-class HttpService {
+const NOOP: Promise<any> = Promise.resolve();
 
+class HttpService {
   private http: AxiosInstance;
   private refreshInflight?: Promise<any> = undefined;
 
@@ -24,19 +25,19 @@ class HttpService {
   }
 
   get<T = any, R = AxiosResponse<T>, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<R> {
-    return this.http.get(url, config);
+    return (this.refreshInflight || NOOP).then(() => this.http.get(url, config));
   }
 
   delete<T = any, R = AxiosResponse<T>, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<R> {
-    return this.http.delete(url, config);
+    return (this.refreshInflight || NOOP).then(() => this.http.delete(url, config));
   }
 
   post<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R> {
-    return this.http.post(url, data, config);
+    return (this.refreshInflight || NOOP).then(() => this.http.post(url, data, config));
   }
 
   put<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R> {
-    return this.http.put(url, data, config);
+    return (this.refreshInflight || NOOP).then(() => this.http.put(url, data, config));
   }
 
   /**
@@ -53,35 +54,34 @@ class HttpService {
     if ((error.response!.status === 401) &&
         (!requestUrl.includes("/auth/login")) &&
         (!requestUrl.includes("/auth/logout"))) {
+
       // if a refresh has already been started
       if (this.refreshInflight) {
-        // wait for the refresh to complete
-        return this.refreshInflight.then(() => new Promise((resolve) => {
-          // retry the original request
-          return resolve(this.http.request(error.config!));
-        } ));
+        // wait for the refresh to complete - retry the original request
+        return this.refreshInflight.then(() => this.http.request(error.config!));
       }
       
       else {
         // attempt to refresh the tokens
         this.refreshInflight = this.http.get("/auth/refresh")
-          .then(() => {
-            // if the refresh was successful - retry the original request
-            return new Promise((resolve) => resolve(this.http.request(error.config!)));
-          })
+          // if the refresh was successful - retry the original request
+          .then(() => this.http.request(error.config!))
+
+          // if refresh failed - return the original error
           .catch(() => {
-            // if refresh failed - return the original error
             console.log(error);
-            return new Promise((resolve) => resolve(error) );
+
+            // will cause a refresh of profile context - leading to login page
+            window.location.reload();
+            return new Promise((resolve) => resolve(error));
           })
+
+          // always delete refresh promise
           .finally(() => this.refreshInflight = undefined );
 
         return this.refreshInflight;
       }
     }
-
-    // will cause a refresh of profile context - leading to login page
-    window.location.reload();
 
     // non-401 error OR a login failure
     return Promise.reject(error);

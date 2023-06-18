@@ -27,7 +27,7 @@ export default function BankCard(props: Props) {
 
   return (
     <Card className={css} elevation={enabled ? 7 : 1}>
-      <CardHeader
+      <CardHeader 
         avatar={ <Avatar aria-label={ props.institution.name } src={ props.institution.logo } /> }
         title={ props.institution.name } subheader={ label }
         onClickCapture={ () => { if (enabled) { handleConnectToBank(props.institution) }} }
