@@ -11,8 +11,7 @@ participant nordigen
 broker->email-service:CONSENT_ACCEPTED
 activate email-service
 email-service->database:User.get(userId)
-email-service->email-service:send email
-rbox over email-service,database#bee7ff: We have received your consent....
+email-service->email-service:send email\n"consent received ..."
 deactivateafter email-service
 
 

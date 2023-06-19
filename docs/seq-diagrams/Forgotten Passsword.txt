@@ -2,8 +2,6 @@ title Forgotten Password
 
 participant client
 participant user-service
-participant magic-token-repo
-participant user-repo
 participant broker
 participant email-service
 
@@ -12,58 +10,57 @@ activate client
 activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
 
-user-service->user-repo:findByEmail()
+user-service->user-service:findByEmail()
 alt#lightblue user not found
+
+user-service->broker:suspicious-activity(email)
 client<--user-service:http 202
 rbox over client,user-service#lightblue:sending 404 risks hackers using\nthe endpoint to search for users
 
 else
 user-service->user-service:generate magic-token
-rbox over user-service,magic-token-repo#lightblue:magic token is a random secret\n with expiry of 5 minutes.\na nightly task will delete expired\n token records.
-user-service->magic-token-repo:save(email,token)
+rbox over user-service#lightblue:Magic-token is a signed JWT with configured\n expiry time. Its claims contain the user-id.
 user-service->broker:user-password(user,magic-token)
 client<--user-service:http 202
 end
 deactivateafter user-service
 deactivateafter client
 
+broker->email-service:suspicious-activity(email)
+activate email-service
+email-service->email-service:audit the suspicious activity
+deactivateafter email-service
 
 broker->email-service:user-password(user,magic-token)
 activate email-service
-email-service->email-service:send link to\nGET /api/v1/users/passwords/reset/{magic-token}
+email-service->email-service:send link to\nGET /password-reset?token={magic-token}
 deactivateafter email-service
 
 
+rbox right of client#lightblue:User receives email with magic-token\nand navigates to client app to enter\na new password.\n\nGET /password-reset?token={magic-token}
+space
 
-rbox right of client#lightblue:User receives email with magic-token
-client->user-service:GET /api/v1/users/passwords/reset/{magic-token}
 activate client
+client->client:enter password
+client->user-service:PUT /api/v1/users/password/reset\n{\n  "password": "My-New-Account-29",\n  "token "{magic-token}"\n}
 activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
-user-service->magic-token-repo:find(token)
-alt#lightblue token not-found
+user-service->user-service:parseAndValidate(token)
+alt#lightblue token invalid
 client<--user-service:http 401
 else token expired
 client<--user-service:http 401
+else password not acceptable
+client<--user-service:http 400
 else valid
-user-service->magic-token-repo:delete(token)
-user-service->user-repo:save(email, role: "pending")
-rbox over user-service,user-repo#lightblue:role of "pending" assigned to restrict what the\nuser can access.
-client<--user-service:http 307: password-reset\n(with new JWT)
-end
-deactivateafter user-service
-
-space
-client->user-service:PUT /api/v1/users/password/reset\n{\n "password": "xxxx"\n}
-activate user-service
-rbox over client,user-service#lightblue:end-point authorisation requires role "pending"
-user-service->user-repo:save(password, role: "user")
-user-service->broker:user-password-reset(user)
+user-service->user-service:save(password, role: "user")
+user-service->broker:user-password-change(user)
 client<--user-service:http 204\n(with new JWT)
+end
 deactivateafter user-service
 deactivateafter client
 
-broker->email-service:user-password-reset(user)
+broker->email-service:user-password-change(user)
 activate email-service
 email-service->email-service:send ack email
 deactivateafter email-service

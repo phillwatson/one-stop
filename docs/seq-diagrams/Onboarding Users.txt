@@ -10,12 +10,15 @@ client->user-service:POST /api/v1/users/onboard/register\n{\n  "email": "jane@wo
 activate client
 activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
+
+user-service->user-service:findByEmail()
+
 alt#lightblue email already exists
-client<--user-service:http 202
-rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint for phishing
 
 rbox left of broker#lightblue:user-active event to records\nunusual activity of user account
 user-service->broker:user-activity(user)
+client<--user-service:http 202
+rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint for phishing
 else
 user-service->user-service:generate magic-token
 rbox over user-service#lightblue:Magic-token is a signed JWT with configured\n expiry time. Its claims contain the email address.
@@ -31,11 +34,11 @@ deactivateafter email-service
 
 broker->email-service:user-registered(email,magic-token)
 activate email-service
-email-service->email-service:send email with link to client app\nGET /onboarding/{magic-token}
+email-service->email-service:send email with link to client app\nGET /onboarding?token={magic-token}
 deactivateafter email-service
 
 
-rbox right of client#lightblue:User receives email with magic-token\nand navigates to client app to enter\na username and password.\n\nGET /onboarding/{magic-token}
+rbox right of client#lightblue:User receives email with magic-token\nand navigates to client app to enter\na username and password.\n\nGET /onboarding?token={magic-token}
 space
 
 activate client
@@ -44,12 +47,12 @@ client->user-service:POST /api/v1/users/onboard/complete\n{\n  "username": "jane
 activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
 user-service->user-service:parseAndValidate(token)
-alt#lightblue token not valid
+alt#lightblue token invalid
 client<--user-service:http 401
 else token expired
 client<--user-service:http 401
 else password not acceptable
-client<--user-service:http 409
+client<--user-service:http 400
 else username already taken
 
 client<--user-service:http 409
