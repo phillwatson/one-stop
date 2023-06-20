@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class ConsentTopicConsumer implements EventConsumer {
      *
      * @param event the ConsentGiven event identifying the consent record.
      */
-    private void processConsentGiven(ConsentGiven event) {
+    private boolean processConsentGiven(ConsentGiven event) {
         log.info("Processing consent given [userId: {}, consentId: {}]", event.getUserId(), event.getConsentId());
 
         // read the consent record to ensure it's still active
@@ -61,16 +62,16 @@ public class ConsentTopicConsumer implements EventConsumer {
         if (userConsent == null) {
             log.debug("User Consent record no longer exists [userId: {}, consentId: {}]",
                 event.getUserId(), event.getConsentId());
-            return;
+            return true;
         }
 
         if (userConsent.getStatus() != ConsentStatus.GIVEN) {
             log.debug("User Consent record no longer active [userId: {}, consentId: {}, status: {}]",
                 event.getUserId(), event.getConsentId(), userConsent.getStatus());
-            return;
+            return true;
         }
 
-        requisitionService.get(userConsent.getRequisitionId()).ifPresent(requisition ->
+        return requisitionService.get(userConsent.getRequisitionId()).map(requisition -> {
             requisition.accounts.forEach(railAccountId -> {
                 // locate account by rail-account-id - or create a new one
                 final Account account = accountRepository.findByRailAccountId(railAccountId)
@@ -82,13 +83,12 @@ public class ConsentTopicConsumer implements EventConsumer {
                         .build());
 
                 // retrieve rail-account summary
-                railAccountService.get(railAccountId)
-                    .ifPresent(summary -> {
-                        account.setOwnerName(summary.ownerName);
-                        account.setIban(summary.iban);
+                railAccountService.get(railAccountId).map(summary -> {
+                    account.setOwnerName(summary.ownerName);
+                    account.setIban(summary.iban);
 
-                        // retrieve rail-account details
-                        Map<String, Object> details = railAccountService.details(railAccountId);
+                    // retrieve rail-account details
+                    railAccountService.details(railAccountId).ifPresent(details -> {
                         Map<String, Object> accountProperties = (Map) details.get("account");
                         if (accountProperties != null) {
                             account.setAccountName((String) accountProperties.get("name"));
@@ -97,12 +97,21 @@ public class ConsentTopicConsumer implements EventConsumer {
                         }
                     });
 
-                // save updated account
-                UUID accountId = accountRepository.save(account).getId();
+                    // save updated account
+                    UUID id = accountRepository.save(account).getId();
 
-                // schedule the polling of account transactions
-                pollAccountJobbingTask.queueJob(accountId);
-            })
-        );
+                    // schedule the polling of account transactions
+                    pollAccountJobbingTask.queueJob(id);
+                    return id;
+                }).orElseGet(() -> {
+                    log.warn("Failed to retrieve account [accountId: {}]", railAccountId);
+                    return null;
+                });
+            });
+            return true;
+        }).orElseGet(() -> {
+            log.warn("Failed to retrieve requisition [requisition: {}]", userConsent.getRequisitionId());
+            return false;
+        });
     }
 }

@@ -11,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -72,15 +73,17 @@ public class RailAccountService extends AbstractRailService {
         }
     }
 
-    public Map<String, Object> details(String accountId) {
+    public Optional<Map<String, Object>> details(String accountId) {
         log.debug("Retrieving account detail [id: {}]", accountId);
         try {
-            return accountDetailCache.getValueOrCall(accountId, () ->
+            Map<String, Object> detail = accountDetailCache.getValueOrCall(accountId, () ->
                 railAccountRepository.details(accountId)
             );
+            return Optional.of(detail);
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
-                return Map.of();
+                // indicate account-not-found
+                return Optional.empty();
             }
             throw e;
         }
@@ -96,8 +99,8 @@ public class RailAccountService extends AbstractRailService {
      * @return the optional list of booked and pending transactions.
      */
     public Optional<TransactionList> transactions(String accountId,
-                                        LocalDate dateFrom,
-                                        LocalDate dateTo) {
+                                                  LocalDate dateFrom,
+                                                  LocalDate dateTo) {
         log.debug("Retrieving account transactions [id: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
         try {
             // call the rail service endpoint
@@ -105,7 +108,7 @@ public class RailAccountService extends AbstractRailService {
 
             // if the result is null
             if ((response == null) || (response.transactions == null)) {
-                // return an non-empty result - empty would indicate account-not-found
+                // return a non-empty result - empty would indicate account-not-found
                 return Optional.of(TransactionList.NULL_LIST);
             }
             return Optional.of(response.transactions);

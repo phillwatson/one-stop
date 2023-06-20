@@ -44,7 +44,8 @@ public class RailAccountResource {
     @Path("/{id}/details")
     public Map<String, Object> details(@PathParam("id") String id) {
         log.info("Get account details [id: {}]", id);
-        return railAccountService.details(id);
+        return railAccountService.details(id)
+            .orElseThrow(() -> new NotFoundException("RailAccount", id));
     }
 
     @GET
