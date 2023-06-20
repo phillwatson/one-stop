@@ -1,0 +1,20 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: normal;
+  align-items: center;
+  align-content: stretch;
+  padding-bottom: 21px;
+}
+
+.field {
+  padding: 5px;
+}
+
+.error-panel {
+  margin-top: 40px;
+  padding: 21px 5px;
+  border: 1px solid;
+  color: red;
+}
