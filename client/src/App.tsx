@@ -1,5 +1,5 @@
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider,
 } from "react-router-dom";
 
@@ -8,8 +8,13 @@ import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
 import NotificationProvider from "./contexts/notification-context";
 import UserProfileProvider from "./contexts/user-context";
+import OnboardUser from "./pages/onboard-user";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
+  {
+    path: "onboard-user",
+    element: <OnboardUser />
+  },
   {
     path: "/",
     element: <MainPage />,
@@ -32,12 +37,10 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <div>
-      <NotificationProvider>
-        <UserProfileProvider>
-          <RouterProvider router={router} />
-        </UserProfileProvider>
-      </NotificationProvider>
-    </div>
+    <NotificationProvider>
+      <UserProfileProvider>
+        <RouterProvider router={router} />
+      </UserProfileProvider>
+    </NotificationProvider>
   );
 }

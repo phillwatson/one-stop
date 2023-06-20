@@ -37,7 +37,7 @@ export default function TransactionSummaryList(props: Props) {
   return(
     <Paper sx={{ margin: 1 }} elevation={3}>
       <Table size="small" aria-label="transactions">
-        <caption><i>most recent 15 transactions</i></caption>
+        <caption><i>most recent {transactions.length} transactions</i></caption>
         <TableHead>
           <TableRow>
             <TableCell sx={colhead}>Date</TableCell>
@@ -49,7 +49,7 @@ export default function TransactionSummaryList(props: Props) {
         <TableBody>
           { transactions.map(transaction => (
             <TableRow key={transaction.id}>
-              <TableCell>{new Date(transaction.date).toLocaleString("en-GB")}</TableCell>
+              <TableCell>{new Date(transaction.date).toLocaleDateString("en-GB")}</TableCell>
               <TableCell>{transaction.description}</TableCell>
               <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
               <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>

@@ -44,6 +44,18 @@ public class AuthResource {
         return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
     }
 
+    /**
+     * The call-back URI for open-id authentication.
+     *
+     * @param uriInfo the platform URI context from which redirections can be constructed.
+     * @param authProvider the identity of the OpenID auth provider implementation.
+     * @param code the OpenID provider's auth code to be exchanged for their access tokens.
+     * @param state the state information passed in the initial request to the auth provider.
+     * @param scope the scope of access to the authenticated user's data.
+     * @param error if auth failed, this is the error code for that failure.
+     * @param errorUri if auth failed, this is the URI for more info about that failure.
+     * @return the redirection response.
+     */
     @GET
     @Path("validate/{auth-provider}")
     public Response oauthLogin(@Context UriInfo uriInfo,

@@ -26,9 +26,10 @@ public class UserOnboardResource {
     @POST
     @Path("/register")
     @PermitAll
-    public Response registerUser(UserRegisterRequest request) {
+    public Response registerUser(@Context UriInfo uriInfo,
+                                 UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
-        userService.registerUser(request.getEmail());
+        userService.registerUser(request.getEmail(), uriInfo.getBaseUriBuilder());
 
         // don't give away whether the email is registered or not
         return Response.accepted().build();

@@ -12,6 +12,9 @@ import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.UriBuilder;
+import org.jboss.resteasy.specimpl.ResteasyUriInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -19,8 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import jakarta.inject.Inject;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,15 +81,23 @@ public class UserServiceTest {
         String token = randomAlphanumeric(30);
         when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
 
+        // and: a URI builder to construct the token link
+        UriBuilder uriBuilder = new ResteasyUriInfo(URI.create("http://localhost"))
+            .getBaseUriBuilder();
+
         // when: we register a user
-        fixture.registerUser(email);
+        fixture.registerUser(email, uriBuilder);
 
         // then: a token is generated
         verify(authTokens).generateToken(eq(email.toLowerCase()), any());
 
         // and: a registration is recorded
-        ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
-        verify(userEventSender).sendUserRegistered(tokenCaptor.capture(), any(), any());
+        ArgumentCaptor<URI> tokenCaptor = ArgumentCaptor.forClass(URI.class);
+        verify(userEventSender).sendUserRegistered(any(), any(), tokenCaptor.capture());
+
+        // and: the magic-token link contains the token
+        URI tokenLink = tokenCaptor.getValue();
+        assertTrue(tokenLink.getQuery().contains("token=" + token));
     }
 
     @Test
@@ -99,8 +110,12 @@ public class UserServiceTest {
         when(userRepository.findByEmail(email.toLowerCase()))
             .thenReturn(Optional.of(existingUser));
 
+        // and: a URI builder to construct the token link
+        UriBuilder uriBuilder = new ResteasyUriInfo(URI.create("http://localhost"))
+            .getBaseUriBuilder();
+
         // when: we register a user
-        fixture.registerUser(email);
+        fixture.registerUser(email, uriBuilder);
 
         // then: No registration is recorded
         verify(userEventSender, never()).sendUserRegistered(any(), any(), any());

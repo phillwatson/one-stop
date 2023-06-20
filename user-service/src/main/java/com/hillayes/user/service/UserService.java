@@ -61,7 +61,7 @@ public class UserService {
      *
      * @param email the email of the client wishing to register.
      */
-    public void registerUser(String email) {
+    public void registerUser(String email, UriBuilder uriBuilder) {
         log.info("Registering user [email: {}]", email);
 
         try {
@@ -77,13 +77,13 @@ public class UserService {
         try {
             String token = authTokens.generateToken(email.toLowerCase(), tokenDuration);
 
-            URI acknowledgerUri = UriBuilder
-                .fromResource(UserOnboardResource.class)
-                .path(UserOnboardResource.class, "onboardUser")
+            URI acknowledgerUri = uriBuilder
                 .scheme(gateway.getScheme())
                 .host(gateway.getHost())
                 .port(gateway.getPort())
-                .buildFromMap(Map.of("token", token));
+                .path("/#/onboard-user")
+                .queryParam("token", token)
+                .build();
             userEventSender.sendUserRegistered(token, tokenDuration, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);

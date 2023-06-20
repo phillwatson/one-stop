@@ -56,11 +56,11 @@ public class XsrfTokens {
     /**
      * Tests that the given XSRF tokens are valid and equal.
      *
-     * @param token1      one of the token pairs to be compared.
-     * @param token2      the other of the token pairs to be compared.
-     * @param timeoutSecs The duration after which the generated XSRF token is deemed invalid - in seconds.
-     *                    As the XSRF token is generated whenever a refresh-token is created, this
-     *                    should be at least equal to the time-to-live duration of the refresh-token.
+     * @param token1 one of the token pairs to be compared.
+     * @param token2 the other of the token pairs to be compared.
+     * @param timeout The duration after which the generated XSRF token is deemed invalid - in seconds.
+     *     As the XSRF token is generated whenever a refresh-token is created, this
+     *     should be at least equal to the time-to-live duration of the refresh-token.
      * @return true if the two tokens are valid and match.
      */
     public boolean validateTokens(String token1, String token2, Duration timeout) {

@@ -150,7 +150,7 @@ public class UserConsentService {
         userConsent.setCallbackUri(null);
         userConsent = userConsentRepository.save(userConsent);
 
-        // send consent-given event notification
+        // send consent-given event notification - this will poll account for data
         consentEventSender.sendConsentGiven(userConsent);
 
         return redirectUrl;
