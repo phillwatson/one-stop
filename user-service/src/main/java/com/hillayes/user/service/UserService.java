@@ -76,8 +76,7 @@ public class UserService {
 
             URI acknowledgerUri = uriBuilder
                 .port(gateway.getPort())
-                .path("/")
-                .fragment("/onboard-user")
+                .path("/onboard-user")
                 .queryParam("token", token)
                 .build();
             userEventSender.sendUserRegistered(email, tokenDuration, acknowledgerUri);

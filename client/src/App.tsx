@@ -1,4 +1,5 @@
 import {
+  createBrowserRouter,
   createHashRouter,
   redirect,
   RouterProvider,
@@ -11,7 +12,7 @@ import NotificationProvider from "./contexts/notification-context";
 import UserProfileProvider from "./contexts/user-context";
 import OnboardUser from "./pages/onboard-user";
 
-const router = createHashRouter([
+const router = createBrowserRouter([
   {
     path: "onboard-user",
     element: <OnboardUser />,
