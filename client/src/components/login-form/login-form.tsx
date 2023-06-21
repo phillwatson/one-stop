@@ -36,22 +36,30 @@ export default function LoginForm() {
   }
 
   return (
-    <div>
-      <div className="panel">
-        <form onSubmit={ handleSubmit }>
-          <div className="field">
-            <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
-              value={credentials.username} onChange={(e) => setCredentials({ ...credentials, username: e.target.value})} />
-          </div>
-          <div className="field">
-            <TextField className="field" id="password" label="Password" type="password" required variant="outlined" fullWidth margin="normal"
-              value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value})} />
-          </div>
-          <div className="panel">
-            <Button type="submit" variant="outlined" disabled={!validateForm()}>Login</Button>
-          </div>
-        </form>
+    <div className="panel">
+      <form onSubmit={ handleSubmit }>
+        <div className="field">
+          <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
+            value={credentials.username} onChange={(e) => setCredentials({ ...credentials, username: e.target.value})} />
+        </div>
+        <div className="field">
+          <TextField className="field" id="password" label="Password" type="password" required variant="outlined" fullWidth margin="normal"
+            value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value})} />
+        </div>
+        <div className="panel">
+          <Button type="submit" variant="outlined" disabled={!validateForm()}>Login</Button>
+        </div>
+      </form>
 
+      <div className="panel">
+        <Button variant="outlined">I don't have an account</Button>
+      </div>
+
+      <div className="panel">
+        Or, to make it easy ...
+      </div>
+
+      <div className="panel">
         <GoogleSignInButton
           clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
           redirectUri={'http://localhost/api/v1/auth/validate/google'}/>

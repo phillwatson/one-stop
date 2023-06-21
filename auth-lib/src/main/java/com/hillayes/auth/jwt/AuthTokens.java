@@ -73,7 +73,7 @@ public class AuthTokens {
             .issuer(issuer)
             .audience(audiences)
             .upn(principalName)
-            .expiresIn(expiresIn.toSeconds()));
+            .expiresIn(expiresIn));
     }
 
     /**

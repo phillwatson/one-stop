@@ -19,7 +19,7 @@ export default function RegistrationForm(props: Props) {
       <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
         value={profile.username} onChange={e => setProfile({...profile, username: e.target.value})}/>
 
-      <TextField className="field" id="password" label="Password" type="password" variant="outlined" fullWidth margin="normal"
+      <TextField className="field" id="password" label="Password" required type="password" variant="outlined" fullWidth margin="normal"
         value={profile.password} onChange={e => setProfile({...profile, password: e.target.value})}/>
     </div>
   );

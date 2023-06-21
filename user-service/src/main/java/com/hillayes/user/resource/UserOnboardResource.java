@@ -38,8 +38,7 @@ public class UserOnboardResource {
     @POST
     @Path("/complete")
     @PermitAll
-    public Response onboardUser(@Context SecurityContext ctx,
-                                UserCompleteRequest request) {
+    public Response onboardUser(UserCompleteRequest request) {
         log.info("Completing user registration [token: {}]", request.getToken());
 
         try {

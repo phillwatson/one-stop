@@ -13,7 +13,6 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
-import com.hillayes.user.resource.UserOnboardResource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -24,11 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -78,20 +75,16 @@ public class UserService {
             String token = authTokens.generateToken(email.toLowerCase(), tokenDuration);
 
             URI acknowledgerUri = uriBuilder
-                .scheme(gateway.getScheme())
-                .host(gateway.getHost())
                 .port(gateway.getPort())
-                .path("/#/onboard-user")
+                .path("/")
+                .fragment("/onboard-user")
                 .queryParam("token", token)
                 .build();
-            userEventSender.sendUserRegistered(token, tokenDuration, acknowledgerUri);
+            userEventSender.sendUserRegistered(email, tokenDuration, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
         } catch (IllegalArgumentException e) {
             log.error("Failed to construct acknowledge URI [email: {}]", email, e);
-            throw new UserRegistrationException(email);
-        } catch (IOException e) {
-            log.warn("Failed to register email [email: {}]", email, e);
             throw new UserRegistrationException(email);
         }
     }

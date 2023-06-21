@@ -1,5 +1,6 @@
 import {
   createHashRouter,
+  redirect,
   RouterProvider,
 } from "react-router-dom";
 
@@ -13,7 +14,16 @@ import OnboardUser from "./pages/onboard-user";
 const router = createHashRouter([
   {
     path: "onboard-user",
-    element: <OnboardUser />
+    element: <OnboardUser />,
+    loader: async ({request}) => {
+      const url = new URL(request.url);
+      const token = url.searchParams.get("token");
+      if (!token) {
+        alert("No token provided.")
+        return redirect("/");
+      }
+      return null;
+    }
   },
   {
     path: "/",

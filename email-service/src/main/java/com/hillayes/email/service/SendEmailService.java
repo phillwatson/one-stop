@@ -57,11 +57,10 @@ public class SendEmailService {
             return;
         }
 
-        if (params == null) {
-            params = new HashMap<>();
-        }
-
         try {
+            // make a mutable map of parameters
+            params = new HashMap<>(params);
+
             // add common context parameters
             params.put("host-ip", Network.getMyIpAddress());
 
