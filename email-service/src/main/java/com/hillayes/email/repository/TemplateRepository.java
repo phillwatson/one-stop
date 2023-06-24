@@ -23,6 +23,8 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 @Slf4j
 public class TemplateRepository {
+    private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+
     private static final String BASE_PATH = "/templates/";
     private final EmailConfiguration configuration;
 
@@ -44,8 +46,10 @@ public class TemplateRepository {
                                 Optional<Locale> locale) {
         // find the subject line from the email template configuration
         EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
+        EmailConfiguration.LocaleTemplate localeConfig =
+            selectByLocale(templateConfig, locale.orElse(DEFAULT_LOCALE));
 
-        ST template = new ST(templateConfig.subject(), '$', '$');
+        ST template = new ST(localeConfig.subject(), '$', '$');
         if (params != null) {
             params.forEach(template::add);
         }
@@ -78,7 +82,10 @@ public class TemplateRepository {
         try {
             // read the template content
             EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
-            String content = readResource(BASE_PATH + templateConfig.template());
+            EmailConfiguration.LocaleTemplate localeConfig =
+                selectByLocale(templateConfig, locale.orElse(DEFAULT_LOCALE));
+
+            String content = readResource(BASE_PATH + localeConfig.template());
 
             // apply parameters to the template
             ST template = new ST(content, '$', '$');
@@ -110,5 +117,18 @@ public class TemplateRepository {
                 return result.toString();
             }
         }
+    }
+
+    private EmailConfiguration.LocaleTemplate selectByLocale(EmailConfiguration.TemplateConfig templateConfig,
+                                                             Locale locale) {
+        EmailConfiguration.LocaleTemplate result = templateConfig.templates().get(locale.toLanguageTag());
+        if (result == null) {
+            result = templateConfig.templates().get(locale.getLanguage());
+        }
+        if (result == null) {
+            result = templateConfig.templates().get(DEFAULT_LOCALE.toLanguageTag());
+        }
+
+        return result;
     }
 }

@@ -37,17 +37,24 @@ one-stop:
       locale: "en-GB"
     templates:
       user-registered:
-        subject: "Please complete your registration"
-        template: "user-registered.html"
+        "en":
+          subject: "Please complete your registration"
+          template: "user-registered/en.html"
+        "fr-FR":
+          subject: "Veuillez compléter votre inscription"
+          template: "user-registered/fr.html"
 
       user-created:
-        subject: "Welcome to One Stop"
-        template: "user-created.html"
+        "en":
+          subject: "Welcome to One Stop"
+          template: "user-created/en.html"
 
       user-updated:
-        subject: "You account has been updated"
-        template: "user-updated.html"
+        "en":
+          subject: "You account has been updated"
+          template: "user-updated/en.html"
 
       user-deleted:
-        subject: "Sorry to see you go"
-        template: "user-deleted.html"
+        "en":
+          subject: "Sorry to see you go"
+          template: "user-deleted/en.html"

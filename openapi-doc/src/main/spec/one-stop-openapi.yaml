@@ -888,7 +888,7 @@ components:
           example: 0123456789
         locale:
           type: string
-          description: An RFC-4646 language tag that identifies a user's preferred language.
+          description: An RFC-5646 language tag that identifies a user's preferred language.
           example: en-GB
 
     UserRole:
@@ -1008,7 +1008,7 @@ components:
           example: 0123456789
         locale:
           type: string
-          description: An RFC-4646 language tag that identifies a user's preferred language.
+          description: An RFC-5646 language tag that identifies a user's preferred language.
           example: en-GB
         dateCreated:
           type: string

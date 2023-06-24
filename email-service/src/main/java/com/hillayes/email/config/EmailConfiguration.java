@@ -1,7 +1,7 @@
 package com.hillayes.email.config;
 
 import io.smallrye.config.ConfigMapping;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.smallrye.config.WithParentName;
 
 import java.util.Locale;
 import java.util.Map;
@@ -34,11 +34,6 @@ public interface EmailConfiguration {
      */
     interface TemplateConfig {
         /**
-         * The subject of the email.
-         */
-        String subject();
-
-        /**
          * The sender of the email. If not provided, the defaultSender applies.
          */
         Optional<Corresponder> sender();
@@ -48,6 +43,20 @@ public interface EmailConfiguration {
          * will be identified by the context (e.g. user record).
          */
         Optional<Corresponder> receiver();
+
+        /**
+         * A collection of email templates keyed on their locale. The email sender will
+         * select the template that best suits the recipient's locale/language.
+         */
+        @WithParentName()
+        Map<String, LocaleTemplate> templates();
+    }
+
+    interface LocaleTemplate {
+        /**
+         * The subject of the email.
+         */
+        String subject();
 
         /**
          * The path to the file containing the text used to render the email body.
