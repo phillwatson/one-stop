@@ -1,7 +1,9 @@
 package com.hillayes.email.config;
 
 import io.smallrye.config.ConfigMapping;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,15 +51,10 @@ public interface EmailConfiguration {
 
         /**
          * The path to the file containing the text used to render the email body.
-         * Use either template() or templateId().
+         * During template look-up, the path may be augmented with the email recipient's
+         * locale.
          */
-        Optional<String> template();
-
-        /**
-         * The email service's ID of the template used to render the email body.
-         * Use either template() or templateId().
-         */
-        Optional<String> templateId();
+        String template();
     }
 
     interface Corresponder {
@@ -70,5 +67,7 @@ public interface EmailConfiguration {
          * The email address of the sender. Normally "info@one-stop.co.uk"
          */
         String email();
+
+        Optional<Locale> locale();
     }
 }

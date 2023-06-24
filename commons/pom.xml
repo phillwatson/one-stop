@@ -10,4 +10,12 @@
     </parent>
 
     <artifactId>commons</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

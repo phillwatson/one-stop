@@ -1,6 +1,7 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import io.quarkus.security.Authenticated;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -17,6 +18,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 
 import static com.hillayes.commons.Strings.isBlank;
@@ -31,6 +33,18 @@ import static com.hillayes.commons.Strings.isBlank;
 @Slf4j
 public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Response ACCESS_UNAUTHORIZED = Response.status(Response.Status.UNAUTHORIZED).build();
+
+    // method annotation for which no authentication is required
+    private static final Collection<Class<? extends Annotation>> NO_AUTH = List.of(PermitAll.class);
+
+    // method annotation for which no access is allows
+    private static final Collection<Class<? extends Annotation>> DENY_ACCESS = List.of(DenyAll.class);
+
+    // method and class annotations for which authentication is required
+    private static final Collection<Class<? extends Annotation>> AUTH_REQUIRED = List.of( RolesAllowed.class, Authenticated.class );
+
+    // method and class annotations for which XSRF authentication is required
+    private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
 
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;
@@ -57,26 +71,26 @@ public class XsrfInterceptor implements ContainerRequestFilter {
         Annotation[] methodAnnotations = methodInvoker.getMethodAnnotations();
         Annotation[] classAnnotations = methodInvoker.getResourceClass().getAnnotations();
 
-        if (isAnnotationPresent(methodAnnotations, PermitAll.class)) {
+        if (isAnnotationPresent(methodAnnotations, NO_AUTH)) {
             log.trace("All access permitted");
             return;
         }
 
-        if (isAnnotationPresent(methodAnnotations, DenyAll.class)) {
+        if (isAnnotationPresent(methodAnnotations, DENY_ACCESS)) {
             log.trace("All access denied");
             requestContext.abortWith(ACCESS_UNAUTHORIZED);
             return;
         }
 
-        if ((isAnnotationPresent(methodAnnotations, RolesAllowed.class)) ||
-            (isAnnotationPresent(classAnnotations, RolesAllowed.class))) {
+        if ((isAnnotationPresent(methodAnnotations, AUTH_REQUIRED)) ||
+            (isAnnotationPresent(classAnnotations, AUTH_REQUIRED))) {
             log.trace("Method requires authentication");
             // check xsrf token in access-token cookie
             if (!validateToken(requestContext, accessCookieName)) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
-        } else if ((isAnnotationPresent(methodAnnotations, XsrfRequired.class)) ||
-            (isAnnotationPresent(classAnnotations, XsrfRequired.class))) {
+        } else if ((isAnnotationPresent(methodAnnotations, XSRF_REQUIRED)) ||
+            (isAnnotationPresent(classAnnotations, XSRF_REQUIRED))) {
             log.trace("Method requires XSRF validation");
             // check xsrf token in refresh-token cookie
             if (!validateToken(requestContext, refreshCookieName)) {
@@ -85,10 +99,10 @@ public class XsrfInterceptor implements ContainerRequestFilter {
         }
     }
 
-    private boolean isAnnotationPresent(Annotation[] methodAnnotations,
-                                        Class<? extends Annotation> annotationClass) {
-        for (Annotation annotation : methodAnnotations) {
-            if (annotation.annotationType() == annotationClass) {
+    private boolean isAnnotationPresent(Annotation[] annotations,
+                                        Collection<Class<? extends Annotation>> annotationClass) {
+        for (Annotation annotation : annotations) {
+            if (annotationClass.contains(annotation.annotationType())) {
                 return true;
             }
         }

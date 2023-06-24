@@ -55,8 +55,6 @@ quarkus:
 
 one-stop:
   rail:
-    # callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
-
     countries:
       - id: GB
         name: Great Britain

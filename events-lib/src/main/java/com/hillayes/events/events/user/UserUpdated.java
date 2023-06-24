@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +30,9 @@ public class UserUpdated {
     private String preferredName;
 
     private String phoneNumber;
+
+    // the user's preferred language.
+    private Locale locale;
 
     private Instant dateUpdated;
 }

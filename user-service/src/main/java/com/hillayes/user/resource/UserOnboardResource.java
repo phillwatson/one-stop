@@ -1,5 +1,6 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
@@ -14,6 +15,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.util.List;
+import java.util.Locale;
+
 @Path("/api/v1/users/onboard")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,10 +30,9 @@ public class UserOnboardResource {
     @POST
     @Path("/register")
     @PermitAll
-    public Response registerUser(@Context UriInfo uriInfo,
-                                 UserRegisterRequest request) {
+    public Response registerUser(UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
-        userService.registerUser(request.getEmail(), uriInfo.getBaseUriBuilder());
+        userService.registerUser(request.getEmail());
 
         // don't give away whether the email is registered or not
         return Response.accepted().build();
@@ -43,10 +46,13 @@ public class UserOnboardResource {
 
         try {
             JsonWebToken jwt = authTokens.getToken(request.getToken());
+            List<Locale> languages = RequestHeaders.getAcceptableLanguages();
+
             User newUser = User.builder()
                 .username(request.getUsername())
                 .givenName(request.getGivenName())
                 .email(jwt.getName())
+                .locale(languages.isEmpty() ? null : languages.get(0))
                 .build();
 
             newUser = userService.completeOnboarding(newUser, request.getPassword().toCharArray());

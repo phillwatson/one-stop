@@ -13,8 +13,6 @@ import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.UriBuilder;
-import org.jboss.resteasy.specimpl.ResteasyUriInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -81,12 +79,8 @@ public class UserServiceTest {
         String token = randomAlphanumeric(30);
         when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
 
-        // and: a URI builder to construct the token link
-        UriBuilder uriBuilder = new ResteasyUriInfo(URI.create("http://localhost"))
-            .getBaseUriBuilder();
-
         // when: we register a user
-        fixture.registerUser(email, uriBuilder);
+        fixture.registerUser(email);
 
         // then: a token is generated
         verify(authTokens).generateToken(eq(email.toLowerCase()), any());
@@ -110,12 +104,8 @@ public class UserServiceTest {
         when(userRepository.findByEmail(email.toLowerCase()))
             .thenReturn(Optional.of(existingUser));
 
-        // and: a URI builder to construct the token link
-        UriBuilder uriBuilder = new ResteasyUriInfo(URI.create("http://localhost"))
-            .getBaseUriBuilder();
-
         // when: we register a user
-        fixture.registerUser(email, uriBuilder);
+        fixture.registerUser(email);
 
         // then: No registration is recorded
         verify(userEventSender, never()).sendUserRegistered(any(), any(), any());

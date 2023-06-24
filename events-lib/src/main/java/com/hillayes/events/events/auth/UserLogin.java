@@ -16,4 +16,7 @@ public class UserLogin {
     private UUID userId;
 
     private Instant dateLogin;
+
+    // the HTTP request header "User-Agent" from the login request
+    private String userAgent;
 }

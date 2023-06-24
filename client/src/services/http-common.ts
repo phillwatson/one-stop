@@ -17,7 +17,7 @@ class HttpService {
       xsrfCookieName: "XSRF-TOKEN",
       xsrfHeaderName: "X-XSRF-TOKEN",
       headers: {
-        "Content-type": "application/json"
+        "Content-type": "application/json",
       }
     });
 

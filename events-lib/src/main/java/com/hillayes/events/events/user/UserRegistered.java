@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Locale;
 
 /**
  * Issued to initiate the onboarding process for a user. The user
@@ -21,4 +22,5 @@ public class UserRegistered {
     private String email;
     private Instant expires;
     private URI acknowledgerUri;
+    private Locale locale;
 }

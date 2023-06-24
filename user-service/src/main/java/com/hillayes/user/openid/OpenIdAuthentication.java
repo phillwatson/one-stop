@@ -5,6 +5,7 @@ import com.hillayes.commons.Strings;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.openid.OpenIdAuth;
 import com.hillayes.user.domain.User;
+import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
@@ -15,6 +16,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +36,9 @@ public class OpenIdAuthentication {
 
     @Inject @Any
     Instance<OpenIdAuth> openIdAuths;
+
+    @Inject
+    UserEventSender userEventSender;
 
     /**
      * Locates the OpenIdAuthentication instance that can handle authentication for the
@@ -60,7 +65,7 @@ public class OpenIdAuthentication {
             String issuer = idToken.getIssuer();
             String subject = idToken.getSubject();
             String val = idToken.getClaimValueAsString("email");
-            String email = Strings.isBlank(val) ? val : val.toLowerCase();
+            String email = Strings.isBlank(val) ? null : val.toLowerCase();
 
             // lookup user by Auth Provider's Identity
             User user = userRepository.findByIssuerAndSubject(issuer, subject)
@@ -78,14 +83,15 @@ public class OpenIdAuthentication {
                         return new NotAuthorizedException("jwt");
                     });
 
-                // take opportunity to update email address
-                if (!Strings.isBlank(email)) {
+                // take opportunity to update user's email address
+                if ((email != null) && (! email.equals(user.getEmail()))) {
                     user.setEmail(email);
+                    userEventSender.sendUserUpdated(user);
                 }
             }
 
             // if no email was provided by Auth Provider
-            else if (Strings.isBlank(email)) {
+            else if (email == null) {
                 throw new NotAuthorizedException("jwt");
             }
 
@@ -108,14 +114,16 @@ public class OpenIdAuthentication {
                         String name = idToken.getClaimValueAsString("name");
                         String givenName = idToken.getClaimValueAsString("given_name");
                         String familyName = idToken.getClaimValueAsString("family_name");
+                        String locale = idToken.getClaimValueAsString("locale");
                         return User.builder()
                                 .username(email)
                                 .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
                                 .email(email)
                                 .givenName(givenName == null ? name == null ? email : name : givenName)
                                 .familyName(familyName)
-                                .preferredName(givenName == null ? name == null ? email : name : givenName)
+                                .preferredName(name == null ? givenName == null ? email : givenName : name)
                                 .dateOnboarded(Instant.now())
+                                .locale(locale == null ? null : Locale.forLanguageTag(locale))
                                 .roles(Set.of("user"))
                                 .build();
                         }

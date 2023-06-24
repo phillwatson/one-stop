@@ -5,6 +5,8 @@ import com.hillayes.email.config.EmailConfiguration;
 import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.errors.SendEmailException;
+import com.hillayes.email.repository.TemplateRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sendinblue.ApiException;
@@ -14,20 +16,19 @@ import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Optional;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class SendEmailService {
     private final EmailConfiguration configuration;
+    private final TemplateRepository templateRepository;
+    private final TransactionalEmailsApi emailApi;
 
     public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient) throws SendEmailException {
@@ -63,6 +64,8 @@ public class SendEmailService {
 
             // add common context parameters
             params.put("host-ip", Network.getMyIpAddress());
+            params.put("recipient-name", recipient.name());
+            params.put("recipient-email", recipient.email());
 
             SendSmtpEmail email = new SendSmtpEmail()
                 .sender(new SendSmtpEmailSender()
@@ -71,20 +74,9 @@ public class SendEmailService {
                 .addToItem(new SendSmtpEmailTo()
                     .name(recipient.name())
                     .email(recipient.email()))
-                .subject(templateConfig.subject())
+                .subject(templateRepository.renderSubject(templateName, params, recipient.locale()))
+                .htmlContent(templateRepository.readTemplate(templateName, params, recipient.locale()))
                 .params(params);
-
-            if (templateConfig.template().isPresent()) {
-                email.htmlContent(readHtml(templateConfig.template().get()));
-            } else if (templateConfig.templateId().isPresent()) {
-                email.templateId(Long.valueOf(templateConfig.templateId().get()));
-            } else {
-                log.error("Missing template content [templateName: {}]", templateName);
-                return;
-            }
-
-            TransactionalEmailsApi emailApi = new TransactionalEmailsApi();
-            emailApi.getApiClient().setApiKey(configuration.apiKey());
 
             CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
             log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
@@ -93,35 +85,21 @@ public class SendEmailService {
         }
     }
 
-    private String readHtml(String path) throws IOException {
-        InputStream resource = this.getClass().getResourceAsStream("/templates/" + path);
-        if (resource == null) {
-            throw new IOException("Template not found: " + path);
-        }
-
-        try (InputStream content = resource) {
-            try (Scanner scanner = new Scanner(content, StandardCharsets.UTF_8)) {
-                StringBuilder result = new StringBuilder();
-                while (scanner.hasNextLine()) {
-                    result.append(scanner.nextLine()).append('\n');
-                }
-                return result.toString();
-            }
-        }
-    }
-
     public static class Recipient implements EmailConfiguration.Corresponder {
         private final String email;
         private final String name;
+        private final Optional<Locale> locale;
 
-        public Recipient(String email, String name) {
+        public Recipient(String email, String name, Locale locale) {
             this.email = email;
             this.name = name;
+            this.locale = Optional.ofNullable(locale);
         }
 
         public Recipient(User user) {
             this.email = user.getEmail();
             this.name = user.getPreferredName();
+            this.locale = Optional.ofNullable(user.getLocale());
         }
 
         @Override
@@ -132,6 +110,11 @@ public class SendEmailService {
         @Override
         public String email() {
             return email;
+        }
+
+        @Override
+        public Optional<Locale> locale() {
+            return locale;
         }
     }
 }

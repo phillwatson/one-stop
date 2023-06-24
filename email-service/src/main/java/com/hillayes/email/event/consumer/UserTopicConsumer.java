@@ -51,9 +51,9 @@ public class UserTopicConsumer implements EventConsumer {
     }
 
     private void processUserRegistered(UserRegistered event) {
-        Recipient recipient = new Recipient(event.getEmail(), event.getEmail());
+        Recipient recipient = new Recipient(event.getEmail(), event.getEmail(), event.getLocale());
         Map<String, Object> params = Map.of(
-            "acknowledge-uri", event.getAcknowledgerUri(),
+            "acknowledge-uri", event.getAcknowledgerUri().toString(),
             "expires", format(event.getExpires())
         );
         sendEmailService.sendEmail(TemplateName.USER_REGISTERED, recipient, params);
@@ -68,6 +68,7 @@ public class UserTopicConsumer implements EventConsumer {
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
             .preferredName(event.getPreferredName())
+            .locale(event.getLocale())
             .build();
         userService.createUser(user);
     }
@@ -85,6 +86,7 @@ public class UserTopicConsumer implements EventConsumer {
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
             .preferredName(event.getPreferredName())
+            .locale(event.getLocale())
             .build();
         userService.updateUser(user);
     }

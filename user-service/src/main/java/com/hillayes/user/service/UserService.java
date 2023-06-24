@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -58,7 +59,7 @@ public class UserService {
      *
      * @param email the email of the client wishing to register.
      */
-    public void registerUser(String email, UriBuilder uriBuilder) {
+    public void registerUser(String email) {
         log.info("Registering user [email: {}]", email);
 
         try {
@@ -74,7 +75,9 @@ public class UserService {
         try {
             String token = authTokens.generateToken(email.toLowerCase(), tokenDuration);
 
-            URI acknowledgerUri = uriBuilder
+            URI acknowledgerUri = UriBuilder.newInstance()
+                .scheme(gateway.getScheme())
+                .host(gateway.getHost())
                 .port(gateway.getPort())
                 .path("/onboard-user")
                 .queryParam("token", token)
@@ -82,7 +85,7 @@ public class UserService {
             userEventSender.sendUserRegistered(email, tokenDuration, acknowledgerUri);
 
             log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IOException e) {
             log.error("Failed to construct acknowledge URI [email: {}]", email, e);
             throw new UserRegistrationException(email);
         }
@@ -113,17 +116,18 @@ public class UserService {
         validateUniqueEmail(null, userProfile.getEmail());
 
         userProfile = userRepository.save(userProfile.toBuilder()
-                    .username(userProfile.getUsername())
-                    .email(userProfile.getEmail())
-                    .title(userProfile.getTitle())
-                    .givenName(userProfile.getGivenName())
-                    .familyName(userProfile.getFamilyName())
-                    .preferredName(userProfile.getPreferredName())
-                    .phoneNumber(userProfile.getPhoneNumber())
-                    .passwordHash(passwordCrypto.getHash(password))
-                    .dateOnboarded(Instant.now())
-                    .roles(Set.of("user"))
-                    .build());
+            .username(userProfile.getUsername())
+            .email(userProfile.getEmail())
+            .title(userProfile.getTitle())
+            .givenName(userProfile.getGivenName())
+            .familyName(userProfile.getFamilyName())
+            .preferredName(userProfile.getPreferredName())
+            .phoneNumber(userProfile.getPhoneNumber())
+            .locale(userProfile.getLocale())
+            .passwordHash(passwordCrypto.getHash(password))
+            .dateOnboarded(Instant.now())
+            .roles(Set.of("user"))
+            .build());
 
         userEventSender.sendUserCreated(userProfile);
         log.debug("User has completed onboarding [id: {}, username: {}]", userProfile.getId(), userProfile.getUsername());
@@ -192,7 +196,8 @@ public class UserService {
                     .givenName(userRequest.getGivenName())
                     .familyName(userRequest.getFamilyName())
                     .preferredName(userRequest.getPreferredName())
-                    .phoneNumber(userRequest.getPhoneNumber());
+                    .phoneNumber(userRequest.getPhoneNumber())
+                    .locale(userRequest.getLocale());
 
                 if ((userRequest.getRoles() != null) && (!userRequest.getRoles().isEmpty())) {
                     userBuilder.roles(userRequest.getRoles());
@@ -224,7 +229,6 @@ public class UserService {
      * Validates the content of the given user instance for mandatory fields.
      */
     private void validateUserContent(User user) {
-
         if (Strings.isBlank(user.getUsername())) {
             throw new MissingParameterException("username");
         }

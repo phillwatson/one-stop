@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     family_name varchar(256),
     preferred_name varchar(256),
     phone_number varchar(256),
+    locales varchar(256),
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_onboarded timestamp,
     date_blocked timestamp,

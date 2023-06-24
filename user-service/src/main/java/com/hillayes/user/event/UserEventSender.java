@@ -1,5 +1,6 @@
 package com.hillayes.user.event;
 
+import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.LoginFailure;
@@ -13,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -25,10 +29,13 @@ public class UserEventSender {
 
     public void sendUserRegistered(String email, Duration expires, URI acknowledgerUri) {
         log.debug("Sending UserRegistered event [email: {}]", email);
+        List<Locale> languages = RequestHeaders.getAcceptableLanguages();
+
         eventSender.send(Topic.USER, UserRegistered.builder()
             .email(email)
             .expires(Instant.now().plus(expires))
             .acknowledgerUri(acknowledgerUri)
+            .locale(languages.isEmpty() ? null : languages.get(0))
             .build());
     }
 
@@ -51,6 +58,7 @@ public class UserEventSender {
             .familyName(user.getFamilyName())
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
+            .locale(user.getLocale())
             .dateCreated(user.getDateCreated())
             .build());
     }
@@ -67,6 +75,7 @@ public class UserEventSender {
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
             .dateUpdated(Instant.now())
+            .locale(user.getLocale())
             .build());
     }
 
@@ -83,6 +92,7 @@ public class UserEventSender {
         eventSender.send(Topic.USER_AUTH, UserLogin.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
+            .userAgent(RequestHeaders.getFirst("User-Agent"))
             .build());
     }
 
@@ -92,6 +102,7 @@ public class UserEventSender {
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)
+            .userAgent(RequestHeaders.getFirst("User-Agent"))
             .build());
     }
 

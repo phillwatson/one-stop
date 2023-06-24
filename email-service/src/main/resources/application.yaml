@@ -34,6 +34,7 @@ one-stop:
     default-sender:
       name: "One Stop"
       email: "watson.phill+onestop@gmail.com"
+      locale: "en-GB"
     templates:
       user-registered:
         subject: "Please complete your registration"

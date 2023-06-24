@@ -11,13 +11,6 @@ import java.util.Optional;
 @ConfigMapping(prefix = "one-stop.rail")
 public interface ServiceConfiguration {
     /**
-     * The URL passed to the rail service when creating a new requisition. The rail service
-     * will call the URL when the requisition is complete; whether the requisition was successful
-     * or not. The URL should go to the UserConsentResource.consentResponse() method.
-     */
-    String callbackUrl();
-
-    /**
      * The durations of various caches used to avoid unnecessary calls to the rail service.
      */
     Caches caches();

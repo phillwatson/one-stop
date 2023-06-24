@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     given_name varchar(256) NOT NULL,
     family_name varchar(256),
     preferred_name varchar(256),
+    locales varchar(256),
     version integer NOT NULL DEFAULT 0
 );

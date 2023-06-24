@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -95,6 +97,7 @@ public class UserAdminResource {
             .familyName(request.getFamilyName())
             .email(request.getEmail())
             .phoneNumber(request.getPhone())
+            .locale(request.getLocale() == null ? null : Locale.forLanguageTag(request.getLocale()) )
             .roles(roles)
             .build();
     }
@@ -109,6 +112,7 @@ public class UserAdminResource {
             .familyName(user.getFamilyName())
             .email(user.getEmail())
             .phone(user.getPhoneNumber())
+            .locale(user.getLocale() == null ? null : user.getLocale().toLanguageTag())
             .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded())
             .dateBlocked(user.getDateBlocked())

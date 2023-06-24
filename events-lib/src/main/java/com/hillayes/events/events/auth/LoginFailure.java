@@ -17,4 +17,7 @@ public class LoginFailure {
     private Instant dateLogin;
 
     private String reason;
+
+    // the HTTP request header "User-Agent" from the login request
+    private String userAgent;
 }

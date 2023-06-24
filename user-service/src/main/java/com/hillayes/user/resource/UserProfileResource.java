@@ -17,6 +17,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+
+import java.util.Locale;
 import java.util.UUID;
 
 @Path("/api/v1/profiles")
@@ -56,6 +58,7 @@ public class UserProfileResource {
             .familyName(request.getFamilyName())
             .email(request.getEmail())
             .phoneNumber(request.getPhone())
+            .locale(request.getLocale() == null ? null : Locale.forLanguageTag(request.getLocale()) )
             .build();
 
         return userService.updateUser(id, userUpdate)
@@ -98,6 +101,7 @@ public class UserProfileResource {
             .familyName(user.getFamilyName())
             .email(user.getEmail())
             .phone(user.getPhoneNumber())
+            .locale(user.getLocale() == null ? null : user.getLocale().toLanguageTag())
             .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded());
     }

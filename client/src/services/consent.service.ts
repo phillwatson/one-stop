@@ -17,7 +17,7 @@ class UserConsentService {
     console.log(`Registering institution [id: ${institutionId}]`);
     
     const body = {
-      callbackUri: window.location.origin + "/#/accounts"
+      callbackUri: window.location.origin + "/accounts"
     }
     return http.post(`/rails/consents/${institutionId}`, body)
       .then(response => response.data);

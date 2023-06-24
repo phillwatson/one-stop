@@ -2,7 +2,6 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
@@ -11,6 +10,8 @@ import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.model.*;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
+import com.hillayes.rail.resource.UserConsentResource;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,9 +30,6 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class UserConsentService {
-    @Inject
-    ServiceConfiguration config;
-
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -109,7 +107,13 @@ public class UserConsentService {
             // create requisition
             log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]", userId, institutionId, userConsent.getId());
 
-            String registrationCallbackUrl = config.callbackUrl().replace("{{host-ip}}", Network.getMyIpAddress());
+            URI registrationCallbackUrl = UriBuilder
+                .fromMethod(UserConsentResource.class, "consentResponse")
+                .scheme("http")
+                .host(Network.getMyIpAddress())
+                .port(9876)
+                .build();
+
             log.debug("Registration callback URL: {}", registrationCallbackUrl);
 
             Requisition requisition = requisitionService.create(RequisitionRequest.builder()
@@ -117,7 +121,7 @@ public class UserConsentService {
                 .agreement(agreement.id)
                 .userLanguage("EN")
                 .reference(userConsent.getId().toString())
-                .redirect(registrationCallbackUrl)
+                .redirect(registrationCallbackUrl.toString())
                 .redirectImmediate(Boolean.FALSE)
                 .build());
 

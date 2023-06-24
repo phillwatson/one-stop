@@ -1,14 +1,12 @@
 package com.hillayes.user.domain;
 
+import com.hillayes.commons.jpa.LocaleAttrConverter;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -55,6 +53,14 @@ public class User {
     @Setter
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
+
+    /**
+     * Indicates the natural language and locale that the user prefers.
+     */
+    @Setter
+    @Column(name = "locales", nullable = true)
+    @Convert(converter = LocaleAttrConverter.class)
+    private Locale locale;
 
     @Builder.Default
     @Column(name = "date_created", nullable = false)

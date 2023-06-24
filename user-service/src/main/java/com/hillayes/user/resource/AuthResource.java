@@ -37,7 +37,8 @@ public class AuthResource {
 
     @POST
     @Path("login")
-    public Response login(LoginRequest loginRequest) {
+    public Response login(LoginRequest loginRequest,
+                          @HeaderParam("user-agent") String userAgent) {
         log.info("Auth user login initiated");
         User user = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 

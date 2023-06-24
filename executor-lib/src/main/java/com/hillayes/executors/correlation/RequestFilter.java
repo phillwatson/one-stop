@@ -10,6 +10,9 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.Provider;
+
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -31,16 +34,17 @@ public class RequestFilter implements ContainerRequestFilter, ContainerResponseF
      */
     public static final String X_CORRELATION_ID = "X-Correlation-Id";
 
+
     /**
      * Called for incoming requests. It will set the request's correlation ID on
      * the thread. The correlation ID is either taken from the request headers or,
      * if not present, generated.
      *
-     * @param ctx request context.
+     * @param requestContext request context.
      */
     @Override
-    public void filter(ContainerRequestContext ctx) {
-        String correlationID = getCorrelationId(ctx.getHeaders());
+    public void filter(ContainerRequestContext requestContext) {
+        String correlationID = getCorrelationId(requestContext.getHeaders());
         Correlation.setCorrelationId(correlationID);
     }
 

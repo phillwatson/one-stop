@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +29,8 @@ public class UserCreated {
     private String preferredName;
 
     private String phoneNumber;
+
+    private Locale locale;
 
     private Instant dateCreated;
 }

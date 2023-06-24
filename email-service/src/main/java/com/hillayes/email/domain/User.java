@@ -2,9 +2,12 @@ package com.hillayes.email.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hillayes.commons.jpa.LocaleAttrConverter;
 import lombok.*;
 
 import jakarta.persistence.*;
+
+import java.util.Locale;
 import java.util.UUID;
 
 @Entity
@@ -45,6 +48,14 @@ public class User {
     @Setter
     @Column(name="preferred_name", nullable = true)
     private String preferredName;
+
+    /**
+     * Indicates the natural language and locale that the user prefers.
+     */
+    @Setter
+    @Column(name = "locales", nullable = true)
+    @Convert(converter = LocaleAttrConverter.class)
+    private Locale locale;
 
     @Version
     @JsonIgnore
