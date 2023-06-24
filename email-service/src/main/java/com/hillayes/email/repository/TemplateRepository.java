@@ -40,16 +40,16 @@ public class TemplateRepository {
      *     subject line is to be rendered. If not given, the default system locale
      *     is used.
      * @return the rendered subject line.
+     * @throws EmailTemplateNotFoundException if the template cannot be found.
      */
     public String renderSubject(TemplateName templateName,
                                 Map<String, ?> params,
-                                Optional<Locale> locale) {
+                                Optional<Locale> locale) throws EmailTemplateNotFoundException {
         // find the subject line from the email template configuration
-        EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
-        EmailConfiguration.LocaleTemplate localeConfig =
-            selectByLocale(templateConfig, locale.orElse(DEFAULT_LOCALE));
+        String subject = selectByLocale(templateName, locale.orElse(DEFAULT_LOCALE)).subject();
 
-        ST template = new ST(localeConfig.subject(), '$', '$');
+        // apply parameters to the subject line
+        ST template = new ST(subject, '$', '$');
         if (params != null) {
             params.forEach(template::add);
         }
@@ -81,11 +81,8 @@ public class TemplateRepository {
                                Optional<Locale> locale) throws EmailTemplateNotFoundException, EmailTemplateReadException {
         try {
             // read the template content
-            EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
-            EmailConfiguration.LocaleTemplate localeConfig =
-                selectByLocale(templateConfig, locale.orElse(DEFAULT_LOCALE));
-
-            String content = readResource(BASE_PATH + localeConfig.template());
+            String templatePath = selectByLocale(templateName, locale.orElse(DEFAULT_LOCALE)).template();
+            String content = readResource(BASE_PATH + templatePath);
 
             // apply parameters to the template
             ST template = new ST(content, '$', '$');
@@ -96,9 +93,9 @@ public class TemplateRepository {
             // return rendered result
             return template.render();
         } catch (FileNotFoundException e) {
-            throw new EmailTemplateNotFoundException(templateName);
+            throw new EmailTemplateNotFoundException(templateName, e);
         } catch (IOException e) {
-            throw new EmailTemplateReadException(templateName);
+            throw new EmailTemplateReadException(templateName, e);
         }
     }
 
@@ -119,16 +116,33 @@ public class TemplateRepository {
         }
     }
 
-    private EmailConfiguration.LocaleTemplate selectByLocale(EmailConfiguration.TemplateConfig templateConfig,
-                                                             Locale locale) {
-        EmailConfiguration.LocaleTemplate result = templateConfig.templates().get(locale.toLanguageTag());
-        if (result == null) {
-            result = templateConfig.templates().get(locale.getLanguage());
-        }
-        if (result == null) {
-            result = templateConfig.templates().get(DEFAULT_LOCALE.toLanguageTag());
+    /**
+     * Attempts to locate the template from the given name that best fits the
+     * given locale. If no exact match can be found, a look-up is performed
+     * using the given locale's language alone. If still no match, the default
+     * locale is used.
+     *
+     * @param templateName the template identifier.
+     * @param locale the locale for which a template is required.
+     * @return the template that best fits the given locale, or null if non exists.
+     */
+    private EmailConfiguration.LocaleTemplate selectByLocale(TemplateName templateName, Locale locale) {
+        EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
+        if (templateConfig == null) {
+            throw new EmailTemplateNotFoundException(templateName);
         }
 
+        EmailConfiguration.LocaleTemplate result = templateConfig.templates().get(locale);
+        if (result == null) {
+            result = templateConfig.templates().get(new Locale(locale.getLanguage()));
+        }
+        if (result == null) {
+            result = templateConfig.templates().get(DEFAULT_LOCALE);
+        }
+
+        if (result == null) {
+            throw new EmailTemplateNotFoundException(templateName);
+        }
         return result;
     }
 }

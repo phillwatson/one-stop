@@ -49,9 +49,12 @@ public interface EmailConfiguration {
          * select the template that best suits the recipient's locale/language.
          */
         @WithParentName()
-        Map<String, LocaleTemplate> templates();
+        Map<Locale, LocaleTemplate> templates();
     }
 
+    /**
+     * Identifies the templates for an email subject and body.
+     */
     interface LocaleTemplate {
         /**
          * The subject of the email.
@@ -60,8 +63,6 @@ public interface EmailConfiguration {
 
         /**
          * The path to the file containing the text used to render the email body.
-         * During template look-up, the path may be augmented with the email recipient's
-         * locale.
          */
         String template();
     }
