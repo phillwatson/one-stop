@@ -108,7 +108,8 @@ public class UserConsentService {
             log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]", userId, institutionId, userConsent.getId());
 
             URI registrationCallbackUrl = UriBuilder
-                .fromMethod(UserConsentResource.class, "consentResponse")
+                .fromResource(UserConsentResource.class)
+                .path(UserConsentResource.class, "consentResponse")
                 .scheme("http")
                 .host(Network.getMyIpAddress())
                 .port(9876)
@@ -119,6 +120,7 @@ public class UserConsentService {
             Requisition requisition = requisitionService.create(RequisitionRequest.builder()
                 .institutionId(agreement.institutionId)
                 .agreement(agreement.id)
+                .accountSelection(Boolean.TRUE)
                 .userLanguage("EN")
                 .reference(userConsent.getId().toString())
                 .redirect(registrationCallbackUrl.toString())
@@ -171,7 +173,6 @@ public class UserConsentService {
         // delete the requisition - and the associated agreement
         requisitionService.delete(userConsent.getRequisitionId());
 
-        URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
         userConsent.setCallbackUri(null);
@@ -182,7 +183,12 @@ public class UserConsentService {
         // send consent-denied event notification
         consentEventSender.sendConsentDenied(userConsent);
 
-        return redirectUrl;
+        URI redirectUri = UriBuilder
+            .fromPath(userConsent.getCallbackUri())
+            .queryParam("error", error)
+            .queryParam("details", details)
+            .build();
+        return redirectUri;
     }
 
     public void consentCancelled(UUID userConsentId) {
