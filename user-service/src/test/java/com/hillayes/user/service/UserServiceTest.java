@@ -4,6 +4,7 @@ import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
+import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +71,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterUser() throws IOException {
+    public void testRegisterUser() {
         // given: an email address
         String email = randomAlphanumeric(10) + "@example.com";
 
@@ -95,7 +95,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterUser_DuplicateEmail() throws IOException {
+    public void testRegisterUser_DuplicateEmail() {
         // given: an email address
         String email = randomAlphanumeric(10) + "@example.com";
 
@@ -614,7 +614,27 @@ public class UserServiceTest {
         verify(userRepository).delete(user);
 
         // and: the deleted user is saved to the deleted user repository
-        verify(deletedUserRepository).save(any());
+        ArgumentCaptor<DeletedUser> captor = ArgumentCaptor.forClass(DeletedUser.class);
+        verify(deletedUserRepository).save(captor.capture());
+
+        // and: the deleted user has the same values as the user
+        DeletedUser deletedUser = captor.getValue();
+        assertNotNull(deletedUser.getDateDeleted());
+        assertEquals(user.getId(), deletedUser.getId());
+        assertEquals(user.getUsername(), deletedUser.getUsername());
+        assertEquals(user.getPasswordHash(), deletedUser.getPasswordHash());
+        assertEquals(user.getEmail(), deletedUser.getEmail());
+        assertEquals(user.getTitle(), deletedUser.getTitle());
+        assertEquals(user.getGivenName(), deletedUser.getGivenName());
+        assertEquals(user.getFamilyName(), deletedUser.getFamilyName());
+        assertEquals(user.getPreferredName(), deletedUser.getPreferredName());
+        assertEquals(user.getPhoneNumber(), deletedUser.getPhoneNumber());
+        assertEquals(user.getLocale(), deletedUser.getLocale());
+        assertEquals(user.getDateCreated(), deletedUser.getDateCreated());
+        assertEquals(user.getDateOnboarded(), deletedUser.getDateOnboarded());
+        assertEquals(user.getDateBlocked(), deletedUser.getDateBlocked());
+        assertEquals(user.getBlockedReason(), deletedUser.getBlockedReason());
+        assertEquals(user.getVersion(), deletedUser.getVersion());
 
         // and: an event is sent
         verify(userEventSender).sendUserDeleted(any());

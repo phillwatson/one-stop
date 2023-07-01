@@ -86,6 +86,8 @@ public class AuthService {
             userEventSender.sendUserLogin(user);
             log.debug("User tokens created [userId: {}]", user.getId());
             return user;
+        } catch (NotAuthorizedException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to verify OpenId auth-code.", e);
             userEventSender.sendLoginFailed(code, "Invalid open-id auth-code.");

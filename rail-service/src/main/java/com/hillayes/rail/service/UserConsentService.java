@@ -170,8 +170,14 @@ public class UserConsentService {
         log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
         userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
-        // delete the requisition - and the associated agreement
-        requisitionService.delete(userConsent.getRequisitionId());
+        try {
+            // delete the requisition - and the associated agreement
+            requisitionService.delete(userConsent.getRequisitionId());
+        } catch (Exception e) {
+            // log and continue
+            log.info("Error whilst deleting user's requisition [userId: {}, requisitionId: {}]",
+                userConsent.getUserId(), userConsent.getRequisitionId(), e);
+        }
 
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
@@ -201,15 +207,52 @@ public class UserConsentService {
                 userConsent.setDateCancelled(Instant.now());
                 userConsent = userConsentRepository.save(userConsent);
 
-                // delete the requisition - and the associated agreement
-                requisitionService.delete(userConsent.getRequisitionId());
-
-                // delete the account records
-                accountRepository.findByUserConsentId(userConsent.getId())
-                    .forEach(accountRepository::delete);
-
-                // send consent denied event notification
-                consentEventSender.sendConsentCancelled(userConsent);
+                cancelConsent(userConsent);
             });
+    }
+
+    /**
+     * Deletes all user-consents for the identified user. It will cascade to the
+     * requisitions and end-user agreement records.
+     * This is called when the user is deleted.
+     *
+     * @param userId the user whose consents are to be deleted.
+     */
+    public void deleteAllConsents(UUID userId) {
+        log.info("Deleting all user's consent records [userId: {}]", userId);
+        userConsentRepository.findByUserId(userId).forEach( userConsent -> {
+            log.debug("Deleting user consent [id: {}, institutionId: {}]",
+                userConsent.getId(), userConsent.getInstitutionId());
+
+            cancelConsent(userConsent);
+            userConsentRepository.delete(userConsent);
+        });
+    }
+
+    private void cancelConsent(UserConsent userConsent) {
+        try {
+            // delete the requisition - and the associated agreement
+            requisitionService.delete(userConsent.getRequisitionId());
+        } catch (Exception e) {
+            // log and continue
+            log.info("Error whilst purging user's requisition [userId: {}, requisitionId: {}]",
+                userConsent.getUserId(), userConsent.getRequisitionId(), e);
+        }
+
+        try {
+            // delete any remaining agreement record - just in case
+            agreementService.delete(userConsent.getAgreementId());
+        } catch (Exception e) {
+            // log and continue
+            log.info("Error whilst purging user's agreement [userId: {}, agreementId: {}]",
+                userConsent.getUserId(), userConsent.getAgreementId(), e);
+        }
+
+        // delete the account records
+        accountRepository.findByUserConsentId(userConsent.getId())
+            .forEach(accountRepository::delete);
+
+        // send consent cancelled event notification
+        consentEventSender.sendConsentCancelled(userConsent);
     }
 }

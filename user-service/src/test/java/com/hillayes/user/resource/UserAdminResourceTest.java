@@ -27,7 +27,7 @@ public class UserAdminResourceTest extends TestBase {
     private UserService userService;
 
     @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
+    @TestSecurity(user = adminIdStr, roles = "admin")
     public void testListUsers() {
         List<User> users = mockUsers(15);
 

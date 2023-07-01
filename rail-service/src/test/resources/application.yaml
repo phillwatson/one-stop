@@ -18,9 +18,6 @@ one-stop:
     xsrf:
       secret: "this is a secret for xsrf tokens"
 
-  rail:
-    callback-url: http://{{host-ip}}:9876/api/v1/rails/consents/response
-
   tests: # properties only used for testing
     nordigen:
       port: 8089

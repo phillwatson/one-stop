@@ -58,7 +58,7 @@ public class User {
      * Indicates the natural language and locale that the user prefers.
      */
     @Setter
-    @Column(name = "locales", nullable = true)
+    @Column(name = "locale", nullable = true)
     @Convert(converter = LocaleAttrConverter.class)
     private Locale locale;
 

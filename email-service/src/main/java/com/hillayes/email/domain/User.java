@@ -7,6 +7,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -49,6 +50,10 @@ public class User {
     @Column(name="preferred_name", nullable = true)
     private String preferredName;
 
+    @Setter
+    @Column(name = "phone_number", nullable = true)
+    private String phoneNumber;
+
     /**
      * Indicates the natural language and locale that the user prefers.
      */
@@ -56,6 +61,12 @@ public class User {
     @Column(name = "locales", nullable = true)
     @Convert(converter = LocaleAttrConverter.class)
     private Locale locale;
+
+    @Column(name = "date_created", nullable = true)
+    private Instant dateCreated;
+
+    @Column(name = "date_updated", nullable = true)
+    private Instant dateUpdated;
 
     @Version
     @JsonIgnore

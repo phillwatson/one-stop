@@ -6,7 +6,6 @@ import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import com.hillayes.onestop.api.LoginRequest;
 import com.hillayes.user.service.AuthService;
-import io.smallrye.jwt.auth.principal.ParseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -24,7 +23,6 @@ import java.net.URI;
 @Slf4j
 public class AuthResource {
     private final AuthService authService;
-
     private final AuthTokens authTokens;
 
     @GET
@@ -87,21 +85,16 @@ public class AuthResource {
     @XsrfRequired
     public Response refresh(@Context HttpHeaders headers) {
         log.info("Auth user refresh initiated");
-        try {
-            JsonWebToken refreshToken = authTokens.getRefreshToken(headers.getCookies())
-                .orElse(null);
+        JsonWebToken refreshToken = authTokens.getRefreshToken(headers.getCookies())
+            .orElse(null);
 
-            if (refreshToken == null) {
-                log.info("No refresh token cookie found.");
-                return Response.status(Response.Status.UNAUTHORIZED).build();
-            }
-
-            User user = authService.refresh(refreshToken);
-            return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
-        } catch (ParseException e) {
-            log.error("Failed to verify refresh token.", e);
-            throw new InternalServerErrorException(e);
+        if (refreshToken == null) {
+            log.info("No refresh token cookie found.");
+            return Response.status(Response.Status.UNAUTHORIZED).build();
         }
+
+        User user = authService.refresh(refreshToken);
+        return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
     }
 
     @GET

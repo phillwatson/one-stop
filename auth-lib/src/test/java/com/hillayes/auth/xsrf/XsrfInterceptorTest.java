@@ -96,7 +96,7 @@ public class XsrfInterceptorTest {
 
         ContainerRequestContext requestContext = mock();
         mockXsrfCookie(requestContext, token);
-        mockXsrfHeader(requestContext, (String)null);
+        mockXsrfHeader(requestContext);
         mockMethod(requestContext, mockRolesAllowed());
 
         fixture.filter(requestContext);
@@ -178,7 +178,7 @@ public class XsrfInterceptorTest {
 
     private void mockXsrfHeader(ContainerRequestContext requestContext, String ... xsrfTokens) {
         MultivaluedHashMap<String, String> headers = new MultivaluedHashMap<>();
-        if (xsrfTokens != null) {
+        if ((xsrfTokens != null) && (xsrfTokens.length > 0)){
             headers.put(XSRF_HEADER, List.of(xsrfTokens));
         }
         when(requestContext.getHeaders()).thenReturn(headers);

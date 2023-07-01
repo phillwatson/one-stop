@@ -1,9 +1,11 @@
 package com.hillayes.user.domain;
 
+import com.hillayes.commons.jpa.LocaleAttrConverter;
 import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 
 @Entity(name = "deleted_user")
@@ -43,6 +45,13 @@ public class DeletedUser {
 
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
+
+    /**
+     * Indicates the natural language and locale that the user prefers.
+     */
+    @Column(name = "locales", nullable = true)
+    @Convert(converter = LocaleAttrConverter.class)
+    private Locale locale;
 
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated;
@@ -88,6 +97,7 @@ public class DeletedUser {
             .familyName(user.getFamilyName())
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
+            .locale(user.getLocale())
             .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded())
             .dateBlocked(user.getDateBlocked())

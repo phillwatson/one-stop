@@ -68,7 +68,9 @@ public class UserTopicConsumer implements EventConsumer {
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
             .preferredName(event.getPreferredName())
+            .phoneNumber(event.getPhoneNumber())
             .locale(event.getLocale())
+            .dateCreated(event.getDateCreated())
             .build();
         userService.createUser(user);
     }
@@ -86,12 +88,14 @@ public class UserTopicConsumer implements EventConsumer {
             .givenName(event.getGivenName())
             .familyName(event.getFamilyName())
             .preferredName(event.getPreferredName())
+            .phoneNumber(event.getPhoneNumber())
             .locale(event.getLocale())
+            .dateUpdated(event.getDateUpdated())
             .build();
         userService.updateUser(user);
     }
 
-    private String format(Instant dateTime) {
+    protected String format(Instant dateTime) {
         return DATE_TIME_FORMATTER.format(ZonedDateTime.ofInstant(dateTime, ZoneId.systemDefault()));
     }
 }

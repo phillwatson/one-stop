@@ -38,15 +38,15 @@ one-stop:
     templates:
       user-registered:
         "en":
-          subject: "Please complete your registration"
+          subject: "Hi $user.preferredName$, please complete your OneStop registration"
           template: "user-registered/en.html"
-        "fr-FR":
-          subject: "Veuillez compléter votre inscription"
+        "fr":
+          subject: "Salut $user.preferredName$, veuillez compléter votre inscription OneStop"
           template: "user-registered/fr.html"
 
       user-created:
         "en":
-          subject: "Welcome to One Stop"
+          subject: "Welcome to OneStop $user.preferredName$"
           template: "user-created/en.html"
 
       user-updated:

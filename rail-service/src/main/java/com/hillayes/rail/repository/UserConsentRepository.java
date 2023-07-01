@@ -13,5 +13,7 @@ import java.util.UUID;
 public interface UserConsentRepository extends JpaRepository<UserConsent, UUID> {
     public Page<UserConsent> findByUserId(UUID userId, Pageable pageable);
 
+    public List<UserConsent> findByUserId(UUID userId);
+
     public List<UserConsent> findByUserIdAndInstitutionId(UUID userId, String institutionId);
 }

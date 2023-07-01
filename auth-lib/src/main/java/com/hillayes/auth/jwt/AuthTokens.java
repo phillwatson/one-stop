@@ -147,9 +147,8 @@ public class AuthTokens {
      *
      * @param cookies the collection of cookies in which the refresh cookie is found.
      * @return the parsed and verified content of the refresh token. Empty if not found.
-     * @throws ParseException if the token is not valid.
      */
-    public Optional<JsonWebToken> getRefreshToken(Map<String, Cookie> cookies) throws ParseException {
+    public Optional<JsonWebToken> getRefreshToken(Map<String, Cookie> cookies) {
         return jwtTokens.getToken(refreshCookieName, cookies);
     }
 

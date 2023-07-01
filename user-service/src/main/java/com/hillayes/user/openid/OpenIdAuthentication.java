@@ -104,7 +104,7 @@ public class OpenIdAuthentication {
                     .map(u -> {
                         log.debug("Found user by OpenID email [userId: {}, email: {}]", u.getId(), email);
                         if (u.isBlocked()) {
-                            log.debug("User is blocked [userId: {}]", u.getId());
+                            log.error("User is blocked [userId: {}]", u.getId());
                             throw new NotAuthorizedException("OpenId");
                         }
                         return u;

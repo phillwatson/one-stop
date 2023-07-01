@@ -39,8 +39,10 @@ public class RequisitionService extends AbstractRailService {
     }
 
     public Requisition create(RequisitionRequest requisition) {
-        log.debug("Creating requisition [institution: {}]", requisition.getInstitutionId());
-        return requisitionRepository.create(requisition);
+        log.debug("Creating requisition [institutionId: {}]", requisition.getInstitutionId());
+        Requisition result = requisitionRepository.create(requisition);
+        log.debug("Created requisition [institutionId: {}, id: {}]", requisition.getInstitutionId(), result.id);
+        return result;
     }
 
     public Map<String, Object> delete(String id) {

@@ -50,6 +50,7 @@ public class UserEventSender {
     public void sendUserCreated(User user) {
         log.debug("Sending UserCreated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserCreated.builder()
+            .dateCreated(user.getDateCreated())
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -59,13 +60,13 @@ public class UserEventSender {
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
             .locale(user.getLocale())
-            .dateCreated(user.getDateCreated())
             .build());
     }
 
     public void sendUserUpdated(User user) {
         log.debug("Sending UserUpdated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER, UserUpdated.builder()
+            .dateUpdated(Instant.now())
             .userId(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
@@ -74,7 +75,6 @@ public class UserEventSender {
             .familyName(user.getFamilyName())
             .preferredName(user.getPreferredName())
             .phoneNumber(user.getPhoneNumber())
-            .dateUpdated(Instant.now())
             .locale(user.getLocale())
             .build());
     }
