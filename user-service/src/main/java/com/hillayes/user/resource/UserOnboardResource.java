@@ -7,12 +7,12 @@ import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import io.smallrye.jwt.auth.principal.ParseException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.Locale;
 public class UserOnboardResource {
     private final UserService userService;
     private final AuthTokens authTokens;
+    private final RequestHeaders requestHeaders;
 
     @POST
     @Path("/register")
@@ -46,7 +47,7 @@ public class UserOnboardResource {
 
         try {
             JsonWebToken jwt = authTokens.getToken(request.getToken());
-            List<Locale> languages = RequestHeaders.getAcceptableLanguages();
+            List<Locale> languages = requestHeaders.getAcceptableLanguages();
 
             User newUser = User.builder()
                 .username(request.getUsername())

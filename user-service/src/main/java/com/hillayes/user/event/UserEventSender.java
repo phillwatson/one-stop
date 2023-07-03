@@ -6,14 +6,16 @@ import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.LoginFailure;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.events.events.auth.UserLogin;
-import com.hillayes.events.events.user.*;
+import com.hillayes.events.events.user.UserCreated;
+import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.events.events.user.UserRegistered;
+import com.hillayes.events.events.user.UserUpdated;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import jakarta.enterprise.context.ApplicationScoped;
 
 import java.net.URI;
 import java.time.Duration;
@@ -26,24 +28,17 @@ import java.util.Locale;
 @Slf4j
 public class UserEventSender {
     private final EventSender eventSender;
+    private final RequestHeaders requestHeaders;
 
     public void sendUserRegistered(String email, Duration expires, URI acknowledgerUri) {
         log.debug("Sending UserRegistered event [email: {}]", email);
-        List<Locale> languages = RequestHeaders.getAcceptableLanguages();
+        List<Locale> languages = requestHeaders.getAcceptableLanguages();
 
         eventSender.send(Topic.USER, UserRegistered.builder()
             .email(email)
             .expires(Instant.now().plus(expires))
             .acknowledgerUri(acknowledgerUri)
             .locale(languages.isEmpty() ? null : languages.get(0))
-            .build());
-    }
-
-    public void sendUserAcknowledged(User user) {
-        log.debug("Sending UserAcknowledged event [userId: {}]", user.getId());
-        eventSender.send(Topic.USER, UserAcknowledged.builder()
-            .userId(user.getId())
-            .email(user.getEmail())
             .build());
     }
 
@@ -92,7 +87,7 @@ public class UserEventSender {
         eventSender.send(Topic.USER_AUTH, UserLogin.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
-            .userAgent(RequestHeaders.getFirst("User-Agent"))
+            .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }
 
@@ -102,7 +97,7 @@ public class UserEventSender {
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)
-            .userAgent(RequestHeaders.getFirst("User-Agent"))
+            .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }
 

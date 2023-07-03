@@ -8,6 +8,7 @@ import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
+import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,9 @@ public class UserServiceTest {
 
     @InjectMock
     UserEventSender userEventSender;
+    
+    @InjectMock
+    Gateway gateway;
 
     @Inject
     UserService fixture;
@@ -112,6 +117,27 @@ public class UserServiceTest {
 
         // and: a warning email is sent to the existing user with the same email
         verify(userEventSender).sendAccountActivity(existingUser, SuspiciousActivity.EMAIL_REGISTRATION);
+    }
+
+    @Test
+    public void testRegisterUser_GatewayError() throws IOException {
+        // given: an email address
+        String email = randomAlphanumeric(10) + "@example.com";
+
+        // and: a token is generated
+        String token = randomAlphanumeric(30);
+        when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
+
+        // and: a gateway error occurs
+        when(gateway.getHost()).thenThrow(new IOException());
+        
+        // when: we register a user
+        // then: an exception is raised
+        UserRegistrationException exception = 
+            assertThrows(UserRegistrationException.class, () -> fixture.registerUser(email));
+
+        // and: a registration is recorded
+        assertEquals(email, exception.getParameter("email"));
     }
 
     @Test
