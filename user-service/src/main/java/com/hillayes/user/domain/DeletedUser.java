@@ -59,21 +59,11 @@ public class DeletedUser {
     @Column(name = "date_onboarded")
     private Instant dateOnboarded;
 
-    @Transient
-    public boolean isOnboarded() {
-        return dateOnboarded != null;
-    }
-
     @Column(name = "date_deleted")
     private Instant dateDeleted;
 
     @Column(name = "date_blocked")
     private Instant dateBlocked;
-
-    @Transient
-    public boolean isBlocked() {
-        return dateBlocked != null;
-    }
 
     @Column(name = "blocked_reason")
     private Instant blockedReason;

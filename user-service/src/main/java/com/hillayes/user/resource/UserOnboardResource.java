@@ -9,12 +9,12 @@ import com.hillayes.user.service.UserService;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,7 +42,8 @@ public class UserOnboardResource {
     @POST
     @Path("/complete")
     @PermitAll
-    public Response onboardUser(UserCompleteRequest request) {
+    public Response onboardUser(@Context UriInfo uriInfo,
+                                UserCompleteRequest request) {
         log.info("Completing user registration [token: {}]", request.getToken());
 
         try {
@@ -57,7 +58,13 @@ public class UserOnboardResource {
                 .build();
 
             newUser = userService.completeOnboarding(newUser, request.getPassword().toCharArray());
-            return authTokens.authResponse(Response.noContent(), newUser.getId(), newUser.getRoles());
+
+            URI location = uriInfo.getBaseUriBuilder()
+                .path(UserProfileResource.class)
+                .path(newUser.getId().toString())
+                .build();
+            Response response = authTokens.authResponse(Response.created(location), newUser.getId(), newUser.getRoles());
+            return response;
         } catch (ParseException e) {
             log.error("Onboarding JWT is invalid [token: {}]", request.getToken());
             throw new NotAuthorizedException("token");

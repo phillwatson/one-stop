@@ -7,8 +7,7 @@ import lombok.Getter;
 public enum UserErrorCodes implements ErrorCode {
     USER_REGISTRATION_ERROR(Severity.info, "Failed to generate user registration.", INTERNAL_SERVER_ERROR_STATUS),
     USERNAME_ALREADY_EXISTS(Severity.info, "The given username is already in use.", CONFLICT_STATUS),
-    EMAIL_ALREADY_EXISTS(Severity.info, "The given email is already in use.", CONFLICT_STATUS),
-    USER_ALREADY_ONBOARDED(Severity.info, "The user has already been onboarded.", CONFLICT_STATUS);
+    EMAIL_ALREADY_EXISTS(Severity.info, "The given email is already in use.", CONFLICT_STATUS);
 
     private final Severity severity;
     private final String message;

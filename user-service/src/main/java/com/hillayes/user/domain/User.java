@@ -34,30 +34,24 @@ public class User {
     @ColumnTransformer(write = "LOWER(?)")
     private String email;
 
-    @Setter
     @Column(name="title", nullable = true)
     private String title;
 
-    @Setter
     @Column(name = "given_name", nullable = false)
     private String givenName;
 
-    @Setter
     @Column(name = "family_name", nullable = true)
     private String familyName;
 
-    @Setter
     @Column(name="preferred_name", nullable = true)
     private String preferredName;
 
-    @Setter
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
     /**
      * Indicates the natural language and locale that the user prefers.
      */
-    @Setter
     @Column(name = "locale", nullable = true)
     @Convert(converter = LocaleAttrConverter.class)
     private Locale locale;
@@ -66,7 +60,6 @@ public class User {
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 
-    @Setter
     @Column(name = "date_onboarded")
     private Instant dateOnboarded;
 
@@ -75,7 +68,6 @@ public class User {
         return dateOnboarded != null;
     }
 
-    @Setter
     @Column(name="date_blocked")
     private Instant dateBlocked;
 
@@ -84,7 +76,6 @@ public class User {
         return dateBlocked != null;
     }
 
-    @Setter
     @Column(name="blocked_reason")
     private Instant blockedReason;
 

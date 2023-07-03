@@ -3,6 +3,7 @@ package com.hillayes.user.utils;
 import com.hillayes.user.domain.User;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -27,6 +28,7 @@ public class TestData {
             .email(randomAlphanumeric(20))
             .phoneNumber(randomNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
+            .locale(Locale.ENGLISH)
             .roles(Set.of("user"))
             .build();
     }
