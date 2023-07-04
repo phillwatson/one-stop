@@ -91,14 +91,6 @@ public class User {
     @Column(name="role")
     private Set<String> roles = new HashSet<>();
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    protected void setPasswordHash(String aValue) {
-        passwordHash = aValue;
-    }
-
     @Transient
     public OidcIdentity addOidcIdentity(String issuer, String subject) {
         OidcIdentity result = OidcIdentity.builder()

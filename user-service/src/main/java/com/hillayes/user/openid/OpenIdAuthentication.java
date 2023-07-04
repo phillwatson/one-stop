@@ -75,12 +75,16 @@ public class OpenIdAuthentication {
             if (user != null) {
                 log.debug("Found user by OpenID subject [issuer: {}, subject: {}]", issuer, subject);
 
+                if (user.isBlocked()) {
+                    throw new NotAuthorizedException("OpenId");
+                }
+
                 // if Auth Provider's Identity is disabled
                 user.getOidcIdentity(issuer)
                     .filter(oidc -> !oidc.isDisabled())
                     .orElseThrow(() -> {
                         log.debug("User's OpenID is disabled");
-                        return new NotAuthorizedException("jwt");
+                        return new NotAuthorizedException("OpenId");
                     });
 
                 // take opportunity to update user's email address

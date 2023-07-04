@@ -44,5 +44,10 @@ public class OidcIdentity {
     public boolean isDisabled() {
         return dateDisabled != null;
     }
+
+    @Transient
+    public void setDisabled(boolean value) {
+        dateDisabled = (value) ? Instant.now() : null;
+    }
 }
 
