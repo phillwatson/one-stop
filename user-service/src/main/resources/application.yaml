@@ -46,7 +46,7 @@ quarkus:
     min-level: TRACE
     level: INFO
     console:
-      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+      format: '%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n'
     category:
       "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
         level: INFO
@@ -67,10 +67,10 @@ one-stop:
       cookie: 'access_token'
       issuer: https://hillayes.com/one-stop
       audiences: com.hillayes
-      expires-in: "PT5M"
+      expires-in: 'PT5M'
     refresh-token:
       cookie: 'refresh_token'
-      expires-in: "PT30M"
+      expires-in: 'PT30M'
     jwk:
       set-size: 2
       rotation-interval: ${one-stop.auth.refresh-token.expires-in}
@@ -79,7 +79,7 @@ one-stop:
       header-name: 'X-XSRF-TOKEN'
       # secret: 'this will be passed in via docker env'
     onboarding:
-      token-expires-in: "PT15M"
+      token-expires-in: 'PT15M'
 
     openid:
       GOOGLE:

@@ -29,6 +29,9 @@ public class NordigenSimulator {
     @Inject
     RequisitionsEndpoint requisitionsEndpoint;
 
+    @Inject
+    AccountsEndpoint accountsEndpoint;
+
     @ConfigProperty(name = "one-stop.tests.nordigen.port")
     int portNumber;
 
@@ -71,6 +74,7 @@ public class NordigenSimulator {
         institutionsEndpoint.register(wireMockServer);
         agreementsEndpoint.register(wireMockServer);
         requisitionsEndpoint.register(wireMockServer);
+        accountsEndpoint.register(wireMockServer);
     }
 
     /**

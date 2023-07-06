@@ -1,14 +1,22 @@
 package com.hillayes.rail.simulator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.hillayes.rail.model.CurrencyAmount;
 import com.hillayes.rail.model.PaginatedList;
+import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.hillayes.rail.utils.TestData.toJson;
 
 public abstract class AbstractResponseTransformer extends ResponseDefinitionTransformer {
     private final String name;
@@ -33,6 +41,15 @@ public abstract class AbstractResponseTransformer extends ResponseDefinitionTran
         return global;
     }
 
+    protected Optional<String> getPathElement(String path, int index) {
+        String[] elements = path.split("/");
+        if ((index < 0) || (index >= elements.length)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(elements[index]);
+    }
+
     protected String getIdFromPath(String path, int index) {
         return path.split("/")[index];
     }
@@ -46,6 +63,12 @@ public abstract class AbstractResponseTransformer extends ResponseDefinitionTran
         return getQueryString(request, paramName)
             .map(QueryParameter::firstValue)
             .map(Boolean::parseBoolean);
+    }
+
+    protected Optional<LocalDate> getQueryDate(Request request, String paramName) {
+        return getQueryString(request, paramName)
+            .map(QueryParameter::firstValue)
+            .map(LocalDate::parse);
     }
 
     /**
@@ -78,5 +101,39 @@ public abstract class AbstractResponseTransformer extends ResponseDefinitionTran
                 .toList();
 
         return response;
+    }
+
+    protected ResponseDefinition errorResponse(ErrorResponse response,
+                                               ResponseDefinition responseDefinition) {
+        return ResponseDefinitionBuilder.like(responseDefinition)
+            .withStatus(response.statusCode)
+            .withBody(toJson(response))
+            .build();
+    }
+
+    protected ResponseDefinition unsupportedMethod(Request request,
+                                                   ResponseDefinition responseDefinition) {
+        ErrorResponse error = new ErrorResponse(400, "Unsupported method",
+            "This endpoint does not support the " + request.getMethod() + " method.");
+        return errorResponse(error, responseDefinition);
+    }
+
+    protected ResponseDefinition notFound(Request request,
+                                          ResponseDefinition responseDefinition) {
+        ErrorResponse error = new ErrorResponse(404, "Not found", "Not found.");
+        return errorResponse(error, responseDefinition);
+    }
+
+    @AllArgsConstructor
+    public static class ErrorResponse {
+        @JsonProperty("status_code")
+        public int statusCode;
+
+        @JsonProperty("summary")
+        public String summary;
+
+        @JsonProperty("detail")
+        public String detail;
+
     }
 }

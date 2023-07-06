@@ -3,13 +3,13 @@ package com.hillayes.rail.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.rail.domain.Account;
+import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.*;
+import org.apache.commons.lang3.RandomUtils;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +71,19 @@ public class TestData {
             .currencyCode("GBP")
             .iban(randomAlphanumeric(20))
             .accountType("CHEK")
+            .build();
+    }
+
+    public static AccountBalance mockAccountBalance(Account account, String balanceType) {
+        return AccountBalance.builder()
+            .id(UUID.randomUUID())
+            .accountId(account.getId())
+            .balanceType(balanceType)
+            .currencyCode("GBP")
+            .lastCommittedTransaction(randomAlphanumeric(40))
+            .amount(RandomUtils.nextDouble())
+            .referenceDate(LocalDate.now().minusDays(1))
+            .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC))
             .build();
     }
 

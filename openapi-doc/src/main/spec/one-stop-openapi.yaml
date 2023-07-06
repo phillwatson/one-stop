@@ -1152,6 +1152,13 @@ components:
     AccountBalanceResponse:
       description: A snapshot of an account's balance
       type: object
+      required:
+        - id
+        - type
+        - amount
+        - currency
+        - referenceDate
+        - dateRecorded
       properties:
         id:
           type: string

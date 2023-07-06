@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.model.RequisitionStatus;
@@ -29,6 +30,9 @@ import static com.hillayes.rail.utils.TestData.toJson;
 public class RequisitionsEndpoint extends AbstractResponseTransformer {
     @Inject
     AgreementsEndpoint agreements;
+
+    @Inject
+    AccountsEndpoint accounts;
 
     private final Map<String, Requisition> requisitions = new HashMap<>();
 
@@ -112,14 +116,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             return deleteById(request, responseDefinition);
         }
 
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(400)
-            .withBody(toJson(Map.of(
-                "status_code", 400,
-                "summary", "Unsupported method",
-                "detail", "This endpoint does not support the " + method + " method."
-            )))
-            .build();
+        return unsupportedMethod(request, responseDefinition);
     }
 
     private ResponseDefinition create(Request request,
@@ -153,7 +150,10 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                     .ssn(requisitionRequest.getSsn())
                     .accountSelection(requisitionRequest.getAccountSelection())
                     .redirectImmediate(requisitionRequest.getRedirectImmediate())
-                    .accounts(List.of())
+                    .accounts(List.of(
+                        accounts.acquireAccount(requisitionRequest.getInstitutionId()),
+                        accounts.acquireAccount(requisitionRequest.getInstitutionId())
+                    ))
                     .build();
 
                 requisitions.put(response.id, response);
@@ -178,13 +178,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         String id = getIdFromPath(request.getUrl(), 4);
         Requisition entity = requisitions.get(id);
         if (entity == null) {
-            return ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(404)
-                .withBody(toJson(Map.of(
-                    "summary", "Not found",
-                    "detail", "Requisition " + id + " not found"
-                )))
-                .build();
+            return notFound(request, responseDefinition);
         }
 
         RequisitionStatus nextStatus = entity.status.nextStatus();
@@ -204,18 +198,12 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         Requisition entity = requisitions.remove(id);
 
         if (entity == null) {
-            return ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(404)
-                .withBody(toJson(Map.of(
-                    "status_code", 404,
-                    "summary", "Not found",
-                    "detail", "Requisition " + id + " not found"
-                )))
-                .build();
+            return notFound(request, responseDefinition);
         }
 
         // delete associated agreements
         agreements.removeAgreement(entity.agreement);
+        entity.accounts.forEach(accountId ->  accounts.removeAccount(accountId) );
         
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)

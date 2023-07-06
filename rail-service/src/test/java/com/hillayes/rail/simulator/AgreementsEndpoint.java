@@ -114,14 +114,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
             return deleteById(request, responseDefinition);
         }
 
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(400)
-            .withBody(toJson(Map.of(
-                "status_code", 400,
-                "summary", "Unsupported method",
-                "detail", "This endpoint does not support the " + method + " method."
-            )))
-            .build();
+        return unsupportedMethod(request, responseDefinition);
     }
 
     private ResponseDefinition create(Request request,
@@ -185,13 +178,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         String id = getIdFromPath(request.getUrl(), 5);
         EndUserAgreement entity = agreements.get(id);
         if (entity == null) {
-            return ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(404)
-                .withBody(toJson(Map.of(
-                    "summary", "Not found",
-                    "detail", "End User Agreement " + id + " not found"
-                )))
-                .build();
+            return notFound(request, responseDefinition);
         }
 
         return ResponseDefinitionBuilder.like(responseDefinition)
@@ -206,14 +193,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         EndUserAgreement entity = removeAgreement(id);
 
         if (entity == null) {
-            return ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(404)
-                .withBody(toJson(Map.of(
-                    "status_code", 404,
-                    "summary", "Not found",
-                    "detail", "End User Agreement " + id + " not found"
-                )))
-                .build();
+            return notFound(request, responseDefinition);
         }
 
         return ResponseDefinitionBuilder.like(responseDefinition)

@@ -1,9 +1,11 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.onestop.api.AccountBalanceResponse;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.domain.Account;
+import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.service.AccountService;
@@ -11,20 +13,21 @@ import com.hillayes.rail.service.InstitutionService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.security.TestSecurity;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
-import static com.hillayes.rail.utils.TestData.mockAccount;
-import static com.hillayes.rail.utils.TestData.mockInstitution;
+import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.apache.commons.lang3.RandomStringUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -231,6 +234,13 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
+        // and: the account's recent balance records
+        List<AccountBalance> balances = List.of(
+            mockAccountBalance(account, "expected"),
+            mockAccountBalance(account, "interimAvailable")
+        );
+        when(accountService.getMostRecentBalance(account)).thenReturn(balances);
+
         // and: an institution linked to that account
         InstitutionDetail institution = mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
@@ -252,11 +262,27 @@ public class AccountResourceTest extends TestBase {
         assertEquals(account.getAccountName(), accountResponse.getName());
         assertEquals(account.getIban(), accountResponse.getIban());
 
-        assertNotNull(institution);
+        // and: the institution is included
+        assertNotNull(accountResponse.getInstitution());
         assertEquals(institution.id, accountResponse.getInstitution().getId());
         assertEquals(institution.name, accountResponse.getInstitution().getName());
         assertEquals(institution.bic, accountResponse.getInstitution().getBic());
         assertEquals(institution.logo, accountResponse.getInstitution().getLogo());
+
+        // and: the recent balances are included
+        assertNotNull(accountResponse.getBalance());
+        assertEquals(balances.size(), accountResponse.getBalance().size());
+        for (AccountBalance expected : balances) {
+            AccountBalanceResponse actual = accountResponse.getBalance().stream()
+                .filter(b -> b.getId().equals(expected.getId()))
+                .findFirst().orElse(null);
+            assertNotNull(actual);
+            assertEquals(expected.getCurrencyCode(), actual.getCurrency());
+            assertEquals(expected.getAmount(), actual.getAmount());
+            assertEquals(expected.getReferenceDate(), actual.getReferenceDate());
+            assertEquals(expected.getBalanceType(), actual.getType());
+            assertEquals(expected.getDateCreated(), actual.getDateRecorded());
+        }
     }
 
     @Test

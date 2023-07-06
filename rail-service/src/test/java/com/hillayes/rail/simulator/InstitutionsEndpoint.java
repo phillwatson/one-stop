@@ -59,14 +59,7 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
             return getById(request, responseDefinition);
         }
 
-        return new ResponseDefinitionBuilder()
-            .withStatus(400)
-            .withBody(toJson(Map.of(
-                "status_code", 400,
-                "summary", "Unsupported method",
-                "detail", "This endpoint does not support the " + method + " method."
-            )))
-            .build();
+        return unsupportedMethod(request, responseDefinition);
     }
 
     private ResponseDefinition list(Request request,
