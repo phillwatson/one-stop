@@ -108,7 +108,7 @@ public class RailAccountService extends AbstractRailService {
 
             // if the result is null
             if ((response == null) || (response.transactions == null)) {
-                // return a non-empty result - empty would indicate account-not-found
+                // return a non-empty optional result - empty would indicate account-not-found
                 return Optional.of(TransactionList.NULL_LIST);
             }
             return Optional.of(response.transactions);

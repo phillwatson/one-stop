@@ -6,15 +6,17 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class RequisitionResourceTest extends TestResourceBase {
@@ -73,7 +75,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             .build();
 
         // create requisition
-        Requisition requisition = given()
+        final Requisition requisition = given()
             .request().contentType(JSON).body(requisitionRequest)
             .when().post("/api/v1/rails/requisitions")
             .then()
@@ -100,6 +102,7 @@ public class RequisitionResourceTest extends TestResourceBase {
                 "results[0].id", equalTo(requisition.id));
 
         // get requisition - until granted and linked to accounts
+        AtomicReference<List<String>> accountIds = new AtomicReference<>();
         await().untilAsserted(() -> {
             Requisition req = given()
                 .pathParam("id", requisition.id)
@@ -114,6 +117,45 @@ public class RequisitionResourceTest extends TestResourceBase {
                     "user_language", equalTo(requisition.userLanguage))
                 .extract().as(Requisition.class);
             assertEquals(RequisitionStatus.LN, req.status);
+            accountIds.set(req.accounts);
+        });
+
+        assertFalse(accountIds.get().isEmpty());
+        accountIds.get().forEach(accountId -> {
+            // retrieve the account info
+            AccountSummary account = given()
+                .pathParam("id", accountId)
+                .when().get("/api/v1/rails/rails-accounts/{id}")
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract().as(AccountSummary.class);
+            assertEquals(requisition.institutionId, account.institutionId);
+
+            // retrieve account balances
+            List<Balance> balances = Arrays.asList(given()
+                .pathParam("id", accountId)
+                .when().get("/api/v1/rails/rails-accounts/{id}/balances")
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract().as(Balance[].class));
+            assertNotNull(balances);
+            assertFalse(balances.isEmpty());
+
+            // retrieve account transactions
+            TransactionList transactionsList = given()
+                .pathParam("id", accountId)
+                .when().get("/api/v1/rails/rails-accounts/{id}/transactions")
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract().as(TransactionList.class);
+            assertNotNull(transactionsList);
+            assertNotNull(transactionsList.booked);
+            assertFalse(transactionsList.booked.isEmpty());
+            assertNotNull(transactionsList.pending);
+            assertFalse(transactionsList.pending.isEmpty());
         });
 
         // delete the requisition
@@ -138,5 +180,14 @@ public class RequisitionResourceTest extends TestResourceBase {
             .when().get("/api/v1/rails/agreements/{id}")
             .then()
             .statusCode(404);
+
+        // get accounts (should fail)
+        accountIds.get().forEach(accountId -> {
+            given()
+                .pathParam("id", accountId)
+                .when().get("/api/v1/rails/rails-accounts/{id}")
+                .then()
+                .statusCode(404);
+        });
     }
 }

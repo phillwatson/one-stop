@@ -5,9 +5,7 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import com.hillayes.rail.model.*;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +25,7 @@ import static org.apache.commons.lang3.RandomStringUtils.*;
 public class AccountsEndpoint extends AbstractResponseTransformer {
     private final Map<String, AccountSummary> accounts = new HashMap<>();
     private final Map<String, AccountBalanceList> balances = new HashMap<>();
-    private final Map<String, List<TransactionDetail>> transactions = new HashMap<>();
+    private final Map<String, TransactionList> transactions = new HashMap<>();
 
     public AccountsEndpoint() {
         super(null);
@@ -75,11 +73,6 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
                                         ResponseDefinition responseDefinition,
                                         FileSource files,
                                         Parameters parameters) {
-        RequestMethod method = request.getMethod();
-        if (!method.equals(RequestMethod.GET)) {
-            return unsupportedMethod(request, responseDefinition);
-        }
-
         String id = getIdFromPath(request.getUrl(), 4);
         AccountSummary account = accounts.get(id);
         if (account == null) {
@@ -94,7 +87,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         } else if (resourceName.equalsIgnoreCase("details")) {
             return getDetails(account, responseDefinition);
         } else if (resourceName.equalsIgnoreCase("transactions")) {
-            return getTransactions(account, responseDefinition);
+            return getTransactions(account, request, responseDefinition);
         }
 
         return notFound(request, responseDefinition);
@@ -127,6 +120,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
                         .build()
                     );
                 }
+                referenceDate = referenceDate.minusDays(1);
             }
 
             balances.put(account.id, result);
@@ -157,14 +151,23 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
     }
 
     private ResponseDefinition getTransactions(AccountSummary account,
+                                               Request request,
                                                ResponseDefinition responseDefinition) {
-        List<TransactionDetail> transactionDetails = transactions.get(account.id);
+        LocalDate dateFrom = getQueryDate(request, "date_from").orElse(null);
+        LocalDate dateTo = getQueryDate(request, "date_to").orElse(null);
+
+        TransactionList transactionDetails = transactions.get(account.id);
+        if (transactionDetails == null) {
+            transactionDetails = TransactionList.builder()
+                .booked(randomTransactions(dateFrom, dateTo))
+                .pending(randomTransactions(LocalDate.now(), 3))
+                .build();
+
+            transactions.put(account.id, transactionDetails);
+        }
 
         TransactionsResponse result = new TransactionsResponse();
-        result.transactions = TransactionList.builder()
-            .booked(randomTransactions())
-            .pending(randomTransactions(LocalDate.now(), 3))
-            .build();
+        result.transactions = transactionDetails;
 
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
@@ -172,7 +175,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
-    private List<TransactionDetail> randomTransactions() {
+    private List<TransactionDetail> randomTransactions(LocalDate from, LocalDate to) {
         List<TransactionDetail> result = new ArrayList<>();
         LocalDate date = LocalDate.now();
         for (int day = RandomUtils.nextInt(10, 30); day >= 0; --day) {

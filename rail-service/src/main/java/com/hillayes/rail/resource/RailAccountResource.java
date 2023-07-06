@@ -54,7 +54,9 @@ public class RailAccountResource {
                                         @QueryParam("date_from") String dateFrom,
                                         @QueryParam("date_to") String dateTo) {
         log.info("Get account transactions [id: {}, dateFrom: {}, dateTo: {}]", id, dateFrom, dateTo);
-        return railAccountService.transactions(id, LocalDate.parse(dateFrom), LocalDate.parse(dateTo))
+        LocalDate from = dateFrom == null ? null : LocalDate.parse(dateFrom);
+        LocalDate to = dateTo == null ? null : LocalDate.parse(dateTo);
+        return railAccountService.transactions(id, from, to)
             .orElseThrow(() -> new NotFoundException("RailAccount", id));
     }
 }

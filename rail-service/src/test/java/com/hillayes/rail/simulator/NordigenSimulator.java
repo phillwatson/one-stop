@@ -47,7 +47,8 @@ public class NordigenSimulator {
                 .extensions(
                     institutionsEndpoint,
                     agreementsEndpoint,
-                    requisitionsEndpoint
+                    requisitionsEndpoint,
+                    accountsEndpoint
                 )
         );
 

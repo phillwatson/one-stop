@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.model.RequisitionStatus;
@@ -55,7 +54,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
 
         // mock list endpoint
         wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/requisitions/"))
-            .withHeader("Content-Type", equalTo("application/json"))
+            //.withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
@@ -150,10 +149,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                     .ssn(requisitionRequest.getSsn())
                     .accountSelection(requisitionRequest.getAccountSelection())
                     .redirectImmediate(requisitionRequest.getRedirectImmediate())
-                    .accounts(List.of(
-                        accounts.acquireAccount(requisitionRequest.getInstitutionId()),
-                        accounts.acquireAccount(requisitionRequest.getInstitutionId())
-                    ))
+                    .accounts(List.of())
                     .build();
 
                 requisitions.put(response.id, response);
@@ -184,6 +180,15 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         RequisitionStatus nextStatus = entity.status.nextStatus();
         if (nextStatus != null) {
             entity.status = nextStatus;
+
+            // if accounts have been linked
+            if (entity.status == RequisitionStatus.LN) {
+                // mock the accounts
+                entity.accounts = List.of(
+                    accounts.acquireAccount(entity.institutionId),
+                    accounts.acquireAccount(entity.institutionId)
+                );
+            }
         }
 
         return ResponseDefinitionBuilder.like(responseDefinition)
