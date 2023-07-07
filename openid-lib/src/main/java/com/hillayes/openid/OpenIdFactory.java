@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.NoSuchElementException;
 
 /**
  * A collection of Producer/Factory methods to inject and configure the OpenID
@@ -66,10 +67,14 @@ public abstract class OpenIdFactory {
         return mapper.readValue(url, OpenIdConfigResponse.class);
     }
 
-    protected OpenIdTokenApi openIdRestApi(OpenIdConfigResponse openIdConfig) {
-        log.debug("Creating OpenId REST API [url: {}]", openIdConfig.tokenEndpoint);
+    protected OpenIdTokenApi openIdRestApi(OpenIdConfiguration.AuthConfig authConfig,
+                                           OpenIdConfigResponse openIdConfig) {
+        String tokenEndpoint = openIdConfig.tokenEndpoint == null
+            ? authConfig.tokenEndpoint().orElseThrow(() -> new NoSuchElementException("Missing tokenEndpoint"))
+            : openIdConfig.tokenEndpoint;
+        log.debug("Creating OpenId REST API [url: {}]", tokenEndpoint);
 
-        URI baseUri = URI.create(openIdConfig.tokenEndpoint);
+        URI baseUri = URI.create(tokenEndpoint);
         return RestClientBuilder.newBuilder()
             .baseUri(baseUri)
             .build(OpenIdTokenApi.class);

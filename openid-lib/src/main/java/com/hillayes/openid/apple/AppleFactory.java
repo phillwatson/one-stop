@@ -60,8 +60,9 @@ public class AppleFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
     @Singleton
-    public OpenIdTokenApi appleRestApi(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
-        return openIdRestApi(openIdConfig);
+    public OpenIdTokenApi appleRestApi(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig authConfig,
+                                       @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
+        return openIdRestApi(authConfig, openIdConfig);
     }
 
     /**

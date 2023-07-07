@@ -80,7 +80,7 @@ public class SendEmailService {
 
             CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
             log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
-        } catch (IOException | ApiException e) {
+        } catch (Exception e) {
             throw new SendEmailException(templateName, recipient, e);
         }
     }
