@@ -169,6 +169,10 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .build();
     }
 
+    /**
+     * Returns the identified Requisition. Repeated calls will transition the
+     * requisition's status to the next status in the requisition flow.
+     */
     private ResponseDefinition getById(Request request,
                                        ResponseDefinition responseDefinition) {
         String id = getIdFromPath(request.getUrl(), 4);
