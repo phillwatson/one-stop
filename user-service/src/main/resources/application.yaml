@@ -88,6 +88,13 @@ one-stop:
         redirect-uri: 'http://localhost/api/v1/auth/validate/google'
         # client-secret: 'this will be passed in via docker env'
 
+      GITHUB:
+        config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
+        token-endpoint: 'https://github.com/login/oauth/access_token'
+        client-id: '284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'
+        redirect-uri: 'https://github.com/login/oauth/authorize'
+        # client-secret: 'this will be passed in via docker env'
+
       APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'

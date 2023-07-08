@@ -37,6 +37,14 @@ public interface OpenIdConfiguration {
         String configUri();
 
         /**
+         * For those Auth-Providers that do not publish the token-exchange endpoint in
+         * their "well-known" configuration. This allows the URL to be specified. If
+         * provided, it will only be used if no tokenEndpoint is found in the "well-known"
+         * configuration.
+         */
+        Optional<String> tokenEndpoint();
+
+        /**
          * The unique identifier assigned to our application by the Auth-Provider.
          * Used to verify communications with that Auth-Provider.
          */

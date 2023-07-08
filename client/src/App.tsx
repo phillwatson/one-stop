@@ -1,6 +1,5 @@
 import {
   createBrowserRouter,
-  createHashRouter,
   redirect,
   RouterProvider,
 } from "react-router-dom";
@@ -10,9 +9,14 @@ import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
 import NotificationProvider from "./contexts/notification-context";
 import UserProfileProvider from "./contexts/user-context";
+import NewUser from "./pages/new-user";
 import OnboardUser from "./pages/onboard-user";
 
 const router = createBrowserRouter([
+  {
+    path: "new-user",
+    element: <NewUser />
+  },
   {
     path: "onboard-user",
     element: <OnboardUser />,

@@ -52,7 +52,7 @@ export default function MainPage() {
 
   const menuItems: MenuItem[] = useMemo(() => {
     function logout() {
-      ProfileService.logout().then(() => setUser(undefined) );
+      ProfileService.logout().finally(() => setUser(undefined) );
     };
 
     return [

@@ -33,7 +33,9 @@ class HttpService {
   }
 
   post<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R> {
-    return (this.refreshInflight || NOOP).then(() => this.http.post(url, data, config));
+    return (this.refreshInflight || NOOP).then(() => {
+      return this.http.post(url, data, config);
+    });
   }
 
   put<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R> {
@@ -50,10 +52,11 @@ class HttpService {
   private checkError(error: AxiosError) {
     var requestUrl: string = error.request.responseURL;
 
-    // if it's an auth error BUT not a request to login or logout
+    // if it's an auth error BUT NOT a request to login or logout
     if ((error.response!.status === 401) &&
         (!requestUrl.includes("/auth/login")) &&
-        (!requestUrl.includes("/auth/logout"))) {
+        (!requestUrl.includes("/auth/logout")) &&
+        (!requestUrl.includes("/auth/refresh"))) {
 
       // if a refresh has already been started
       if (this.refreshInflight) {
@@ -72,12 +75,12 @@ class HttpService {
             console.log(error);
 
             // will cause a refresh of profile context - leading to login page
-            window.location.reload();
-            return new Promise((resolve) => resolve(error));
+            //window.location.reload();
+            return Promise.reject(error);
           })
 
           // always delete refresh promise
-          .finally(() => this.refreshInflight = undefined );
+          .finally(() => this.refreshInflight = undefined);
 
         return this.refreshInflight;
       }

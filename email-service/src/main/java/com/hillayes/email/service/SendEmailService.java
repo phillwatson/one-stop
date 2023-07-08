@@ -9,14 +9,12 @@ import com.hillayes.email.repository.TemplateRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import sendinblue.ApiException;
 import sibApi.TransactionalEmailsApi;
 import sibModel.CreateSmtpEmail;
 import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -75,12 +73,11 @@ public class SendEmailService {
                     .name(recipient.name())
                     .email(recipient.email()))
                 .subject(templateRepository.renderSubject(templateName, params, recipient.locale()))
-                .htmlContent(templateRepository.readTemplate(templateName, params, recipient.locale()))
-                .params(params);
+                .htmlContent(templateRepository.readTemplate(templateName, params, recipient.locale()));
 
             CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
             log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
-        } catch (IOException | ApiException e) {
+        } catch (Exception e) {
             throw new SendEmailException(templateName, recipient, e);
         }
     }

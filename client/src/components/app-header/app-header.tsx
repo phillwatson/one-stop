@@ -32,6 +32,22 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' 
 export default function AppHeader(props: AppHeaderProps) {
   const [currentUser] = useCurrentUser();
 
+  function getName() {
+    if (!currentUser) {
+      return null;
+    }
+
+    if (currentUser.preferredName) {
+      return currentUser.preferredName;
+    }
+
+    if (currentUser.givenName) {
+      return currentUser.givenName;
+    }
+
+    return currentUser.username;
+  }
+
   return (
     <AppBar position="fixed" open={ props.open } drawerWidth={ props.drawerWidth }>
       <Toolbar>
@@ -43,7 +59,7 @@ export default function AppHeader(props: AppHeaderProps) {
           <Typography variant="h6" noWrap component="div">
             { props.title }
           </Typography>
-          <span style={{ marginLeft: "auto" }}>{currentUser?.preferredName}</span>
+          <span style={{ marginLeft: "auto" }}>{getName()}</span>
       </Toolbar>
     </AppBar>
   );
