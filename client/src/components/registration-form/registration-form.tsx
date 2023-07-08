@@ -1,18 +1,58 @@
+import { useState } from 'react';
 import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 import "./registration-form.css";
 import { RegistrationCredentials} from "../../services/user.service";
+import { useNotificationDispatch } from '../../contexts/notification-context';
 
 interface Props {
-  profile: RegistrationCredentials;
-  setter: (profile: RegistrationCredentials) => void;
+  onSubmit: (profile: RegistrationCredentials) => void;
 }
 
 export default function RegistrationForm(props: Props) {
-  const [profile, setProfile] = [ props.profile, props.setter ];
+  const showNotification = useNotificationDispatch();
+
+  const [profile, setProfile] = useState<RegistrationCredentials>({ 
+    username: "", 
+    password: "",
+    givenName: "",
+    token: ""
+  });
+
+
+  function validateForm(): Array<string> {
+    const errors = Array<string>();
+
+    const form = profile;
+    if (form.username.length === 0) {
+      errors.push("Username is required");
+    }
+
+    if (form.password.length === 0) {
+      errors.push("Password is required");
+    }
+
+    if (form.givenName.length === 0) {
+      errors.push("Given name is required");
+    }
+
+    return errors;
+  }
+
+  function handleSubmit(event: any) {
+    event.preventDefault();
+
+    const errors = validateForm();
+    if (errors.length > 0) {
+      errors.forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
+    } else {
+      props.onSubmit(profile);
+    }
+  }
 
   return (
-    <div className="panel">
+    <form onSubmit={ handleSubmit } className="panel">
       <TextField className="field" id="givenName" label="Name" required variant="outlined" fullWidth margin="normal"
         value={profile.givenName} onChange={e => setProfile({...profile, givenName: e.target.value})}/>
 
@@ -21,6 +61,9 @@ export default function RegistrationForm(props: Props) {
 
       <TextField className="field" id="password" label="Password" required type="password" variant="outlined" fullWidth margin="normal"
         value={profile.password} onChange={e => setProfile({...profile, password: e.target.value})}/>
-    </div>
+
+      <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
+    </form>
   );
 }
+

@@ -10,6 +10,7 @@ export default function NewUser() {
   const showNotification = useNotificationDispatch();
 
   const [email, setEmail] = useState<string>("");
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
   function validateForm(): Array<string> {
     const errors = Array<string>();
@@ -24,14 +25,19 @@ export default function NewUser() {
   function handleSubmit(event: any) {
     event.preventDefault();
 
-    validateForm().forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
-    UserService.registerNewUser(email)
-      .then(() => {
-        showNotification({ type: 'add', level: 'success', message: 'Please check your email.' });
-      })
-      .catch(error => {
-        showNotification({ type: 'add', level: 'error', message: error});
-      });
+    const errors = validateForm();
+    if (errors.length > 0) {
+      errors.forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
+    } else {
+      UserService.registerNewUser(email)
+        .then(() => {
+          setSubmitted(true);
+          showNotification({ type: 'add', level: 'success', message: 'Please check your email.' });
+        })
+        .catch(error => {
+          showNotification({ type: 'add', level: 'error', message: error});
+        });
+    }
   }
 
   return (
@@ -40,7 +46,7 @@ export default function NewUser() {
           <div className="panel">
             <TextField className="field" id="emailAddress" label="Email Address" required variant="outlined" fullWidth margin="normal"
               value={email} onChange={ e => setEmail(e.target.value) }/>
-            <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Send</Button>
+            <Button type="submit" variant="outlined" disabled={(!submitted) && validateForm().length > 0}>Send</Button>
           </div>
         </form>
     </StaticAppHeader>
