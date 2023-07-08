@@ -7,6 +7,7 @@ import GoogleSignInButton from "../oauth/google-id/google-signin-button";
 import { useNotificationDispatch } from "../../contexts/notification-context";
 import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
+import { useNavigate } from "react-router-dom";
 
 interface Credentials {
   username: string,
@@ -18,6 +19,8 @@ export default function LoginForm() {
 
   const showNotification = useNotificationDispatch();
   const [, setCurrentUser ] = useCurrentUser();
+
+  const navigate = useNavigate();
 
   function validateForm() {
     const c = credentials;
@@ -33,6 +36,11 @@ export default function LoginForm() {
       .catch(e => {
         showNotification({ type: 'add', level: "warning", message: e.response.statusText });
       });
+  }
+
+  function handleNewUser(event: any) {
+    event.preventDefault();
+    navigate('/new-user');
   }
 
   return (
@@ -52,7 +60,7 @@ export default function LoginForm() {
       </form>
 
       <div className="panel">
-        <Button variant="outlined">I don't have an account</Button>
+        <Button variant="outlined" onClick={ handleNewUser }>I don't have an account</Button>
       </div>
 
       <div className="panel">

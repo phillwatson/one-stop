@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "@mui/material/Button";
 
 import { useNotificationDispatch } from "../contexts/notification-context";
@@ -8,6 +8,7 @@ import UserService, { RegistrationCredentials } from '../services/user.service'
 import StaticAppHeader from "../components/app-header/static-app-header";
 
 export default function OnboardUser() {
+  const navigate = useNavigate();
   const showNotification = useNotificationDispatch();
   const [ queryParams ] = useSearchParams();
 
@@ -42,7 +43,8 @@ export default function OnboardUser() {
     validateForm().forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
     UserService.completeRegistration(credentials)
       .then(() => {
-        showNotification({ type: 'add', level: 'success', message: 'Profile updated' });
+        showNotification({ type: 'add', level: 'success', message: 'Your account has been opened.' });
+        navigate('/profile');
       })
       .catch(error => showNotification({ type: 'add', level: 'error', message: error}));
   }

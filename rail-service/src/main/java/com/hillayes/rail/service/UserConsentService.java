@@ -120,7 +120,7 @@ public class UserConsentService {
             Requisition requisition = requisitionService.create(RequisitionRequest.builder()
                 .institutionId(agreement.institutionId)
                 .agreement(agreement.id)
-                .accountSelection(Boolean.TRUE)
+                .accountSelection(Boolean.FALSE)
                 .userLanguage("EN")
                 .reference(userConsent.getId().toString())
                 .redirect(registrationCallbackUrl.toString())
