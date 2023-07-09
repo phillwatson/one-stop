@@ -8,6 +8,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ReadMoreIcon from '@mui/icons-material/ReadMore';
 
 import './account-list.css';
 import CurrencyService from '../../services/currency.service';
@@ -57,6 +58,11 @@ export default function AccountList(props: Props) {
     closeMenu();
     console.log("Export account: " + props.account.id);
   }
+
+  function showAccount() {
+    closeMenu();
+    console.log("Show account: " + props.account.id);
+  }
   
   function AccountMenu() {
     return(
@@ -66,11 +72,15 @@ export default function AccountList(props: Props) {
           anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
-          <MenuItem onClick={exportAccount} sx={{ width: 180, maxWidth: '100%' }}>
+          <MenuItem onClick={showAccount} sx={{ width: 190, maxWidth: '100%' }}>
+            <ListItemIcon><ReadMoreIcon fontSize="small"/></ListItemIcon>
+            <ListItemText>Show More...</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={exportAccount}>
             <ListItemIcon><FileDownloadIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Export...</ListItemText>
           </MenuItem>
-          <MenuItem onClick={removeAccount} sx={{ width: 180, maxWidth: '100%' }}>
+          <MenuItem onClick={removeAccount}>
             <ListItemIcon><DeleteOutlineIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Remove...</ListItemText>
           </MenuItem>
