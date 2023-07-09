@@ -69,11 +69,11 @@ export default function AccountList(props: Props) {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell align="center" colSpan={5} sx={colhead}>Details</TableCell>
+            <TableCell align="center" colSpan={6} sx={colhead}>Details</TableCell>
             <TableCell align="center" colSpan={2} sx={colhead}>Balance</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={colhead} colSpan={2} align='center'>Institution</TableCell>
+            <TableCell sx={colhead} colSpan={3} align='center'>Institution</TableCell>
             <TableCell sx={colhead}>Owner</TableCell>
             <TableCell sx={colhead}>Name</TableCell>
             <TableCell sx={colhead}>IBAN</TableCell>
@@ -94,12 +94,12 @@ export default function AccountList(props: Props) {
             )
           }
           <TableRow>
-            <TableCell colSpan={5} sx={balanceRow}></TableCell>
+            <TableCell colSpan={6} sx={balanceRow}></TableCell>
             <TableCell colSpan={2} align="center" sx={colhead}>Totals</TableCell>
           </TableRow>
           { balanceTotals.length > 1 && balanceTotals.map( balance =>
             <TableRow key={balance.id}>
-              <TableCell colSpan={5} sx={balanceRow}></TableCell>
+              <TableCell colSpan={6} sx={balanceRow}></TableCell>
               <TableCell>{balance.type}</TableCell>
               <TableCell>{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
             </TableRow>

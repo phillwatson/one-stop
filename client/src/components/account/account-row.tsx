@@ -1,20 +1,17 @@
-import { PropsWithChildren, useRef, useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import Grow from '@mui/material/Grow';
-import Popper from '@mui/material/Popper';
+import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import './account-list.css';
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
-import Paper from '@mui/material/Paper';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ListItemText from '@mui/material/ListItemText';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
@@ -22,83 +19,44 @@ interface Props extends PropsWithChildren {
 }
 
 export default function AccountList(props: Props) {
-  const [ showMenu, setShowMenu ] = useState<boolean>(false);
-  const anchorRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-  const handleToggle = () => {
-    setShowMenu((prevOpen) => !prevOpen);
+  function toggleMenu(event: React.MouseEvent<HTMLElement>) {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (event: Event | React.SyntheticEvent) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    ) {
-      return;
-    }
-
-    setShowMenu(false);
+  function closeMenu() {
+    setAnchorEl(null);
   };
 
-  function handleListKeyDown(event: React.KeyboardEvent) {
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      setShowMenu(false);
-    } else if (event.key === 'Escape') {
-      setShowMenu(false);
-    }
+  function removeAccount() {
+    closeMenu();
+    console.log("Remove account: " + props.account.id);
+  }
+
+  function exportAccount() {
+    closeMenu();
+    console.log("Export account: " + props.account.id);
   }
   
-  function Menu() {
+  function AccountMenu() {
     return(
-      <Popper
-        open={showMenu}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        placement="top"
-        transition
-        disablePortal
-        modifiers={[
-          {
-            name: 'arrow',
-            enabled: true,
-            options: {
-              element: anchorRef.current,
-            },
-          }
-        ]}
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{ transformOrigin: placement === 'bottom-start' ? 'left top' : 'left bottom', }}
-          >
-            <Paper sx={{ width: 180, maxWidth: '100%' }}>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList
-                  autoFocusItem={showMenu}
-                  id="composition-menu"
-                  aria-labelledby="composition-button"
-                  onKeyDown={handleListKeyDown}
-                >
-                  <MenuItem onClick={handleClose}>
-                    <ListItemIcon>
-                      <FileDownloadIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Export</ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={handleClose}>
-                    <ListItemIcon>
-                      <DeleteOutlineIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Remove</ListItemText>
-                  </MenuItem>
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
+        <Menu
+          id="account-menu" aria-labelledby="account-button" anchorEl={anchorEl}
+          open={open} onClose={closeMenu}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        >
+          <MenuItem onClick={exportAccount} sx={{ width: 180, maxWidth: '100%' }}>
+            <ListItemIcon><FileDownloadIcon fontSize="small"/></ListItemIcon>
+            <ListItemText>Export...</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={removeAccount} sx={{ width: 180, maxWidth: '100%' }}>
+            <ListItemIcon><DeleteOutlineIcon fontSize="small"/></ListItemIcon>
+            <ListItemText>Remove...</ListItemText>
+          </MenuItem>
+        </Menu>
     );
   }
 
@@ -110,9 +68,17 @@ export default function AccountList(props: Props) {
   return(
     <>
       <TableRow key={props.account.id}>
-        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleToggle} ref={anchorRef} id="composition-button">
-          <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="60px" height="60px"/>
-          <Menu/>
+        <TableCell size="small" padding='none' rowSpan={props.account.balance.length}
+          onClick={toggleMenu}
+          aria-haspopup="true"
+          aria-controls={open ? 'account-menu' : undefined}
+          aria-expanded={open ? 'true' : undefined}
+          id="account-button">
+          <MoreVertIcon fontSize="small"/>
+        </TableCell>
+        <AccountMenu />
+        <TableCell size="small" padding='none' rowSpan={props.account.balance.length}>
+          <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="68px" height="68px"/>
         </TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
@@ -128,7 +94,7 @@ export default function AccountList(props: Props) {
         </TableRow>
       )}
         <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           { props.children }
         </TableCell>
       </TableRow>      
