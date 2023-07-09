@@ -79,7 +79,7 @@ public class UserConsentService {
             .institutionId(institutionId)
             .accessScope(List.of("balances", "details", "transactions"))
             .maxHistoricalDays(institution.transactionTotalDays)
-            .accessValidForDays(90)
+            .accessValidForDays(2)
             .build());
 
         // calculate expiry data
@@ -179,6 +179,12 @@ public class UserConsentService {
                 userConsent.getUserId(), userConsent.getRequisitionId(), e);
         }
 
+        URI redirectUri = UriBuilder
+            .fromPath(userConsent.getCallbackUri())
+            .queryParam("error", error)
+            .queryParam("details", details)
+            .build();
+
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
         userConsent.setCallbackUri(null);
@@ -189,11 +195,6 @@ public class UserConsentService {
         // send consent-denied event notification
         consentEventSender.sendConsentDenied(userConsent);
 
-        URI redirectUri = UriBuilder
-            .fromPath(userConsent.getCallbackUri())
-            .queryParam("error", error)
-            .queryParam("details", details)
-            .build();
         return redirectUri;
     }
 
