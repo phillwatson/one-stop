@@ -16,7 +16,8 @@ import DeleteAccountDialog from './delete-account-dialog';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
-  onSelect: (accountId: string) => void;
+  onSelect: (account: AccountDetail) => void;
+  onDelete: (account: AccountDetail) => void;
 }
 
 export default function AccountList(props: Props) {
@@ -33,8 +34,14 @@ export default function AccountList(props: Props) {
     setAnchorEl(null);
   };
 
+
+  function handleSelectAccount() {
+    props.onSelect(props.account);
+  }
+
   function removeAccountConfirmed(account: AccountDetail) {
     setDeleteDialogOpen(false);
+    props.onDelete(account);
   }
 
   function removeAccountCancelled(account: AccountDetail) {
@@ -54,8 +61,8 @@ export default function AccountList(props: Props) {
   function AccountMenu() {
     return(
         <Menu
-          id="account-menu" aria-labelledby="account-button" anchorEl={anchorEl}
-          open={menuOpen} onClose={closeMenu}
+          id="account-menu" open={menuOpen} onClose={closeMenu}
+          aria-labelledby="account-button" anchorEl={anchorEl}
           anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
@@ -69,11 +76,6 @@ export default function AccountList(props: Props) {
           </MenuItem>
         </Menu>
     );
-  }
-
-
-  function handleSelectAccount() {
-    props.onSelect(props.account.id);
   }
 
   return(

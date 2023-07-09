@@ -33,14 +33,19 @@ export default function Accounts() {
     AccountService.getAll().then( response => setAccounts(response.items));
   }, []);
 
-  function handleSelectAccount(accountId: string) {
-    alert(`selected account ${accountId}`);
+  function handleSelectAccount(account: AccountDetail) {
+    alert(`selected account ${account.iban}`);
   }
+
+  function handleDeleteAccount(account: AccountDetail) {
+    alert(`deleted account ${account.iban}`);
+  }
+
   return (
     <div>
       <h2>Accounts</h2>
       <hr></hr>
-      <AccountList accounts={accounts} onSelect={handleSelectAccount}/>
+      <AccountList accounts={accounts} onSelect={handleSelectAccount} onDelete={handleDeleteAccount}/>
 
       <Fab color="primary" aria-label="add" sx={bottomFabStyle} onClick={() => setShowInstitutions(true)}><AddIcon /></Fab>
       <Institutions open={showInstitutions} onClose={() => setShowInstitutions(false)}></Institutions>

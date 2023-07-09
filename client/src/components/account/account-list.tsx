@@ -17,7 +17,8 @@ import TransactionSummaryList from './transaction-summary';
 
 interface Props {
   accounts: Array<AccountDetail>;
-  onSelect: (accountId: string) => void;
+  onSelect: (account: AccountDetail) => void;
+  onDelete: (account: AccountDetail) => void;
 }
 
 const colhead: SxProps = {
@@ -35,13 +36,17 @@ export default function AccountList(props: Props) {
     return selectedAccounts.find(id => id === accountId) !== undefined;
   }
 
-  function handleSelectAccount(accountId: string) {
-    if (isSelected(accountId)) {
-      setSelectedAccounts(selectedAccounts.filter(id => id !== accountId))
+  function handleSelectAccount(account: AccountDetail) {
+    if (isSelected(account.id)) {
+      setSelectedAccounts(selectedAccounts.filter(id => id !== account.id))
     } else {
-      setSelectedAccounts([...selectedAccounts, accountId])
+      setSelectedAccounts([...selectedAccounts, account.id])
     }
     //props.onSelect(accountId);
+  }
+
+  function handleDeleteAccount(account: AccountDetail) {
+    props.onDelete(account);
   }
 
   const balanceTotals: Array<AccountBalance> = useMemo(() => {
@@ -86,7 +91,7 @@ export default function AccountList(props: Props) {
           { props.accounts && props.accounts
             .sort((a, b) => (a.name === b.name) ? a.iban < b.iban ? -1 : 1 : a.name < b.name ? -1 : 1 )
             .map(account =>
-              <AccountRow key={account.id} account={account} onSelect={() => handleSelectAccount(account.id)}>
+              <AccountRow key={account.id} account={account} onSelect={handleSelectAccount} onDelete={handleDeleteAccount}>
                 <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
                   <TransactionSummaryList accountId={account.id}/>
                 </Collapse>
