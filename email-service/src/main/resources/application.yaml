@@ -58,3 +58,8 @@ one-stop:
         "en":
           subject: "Sorry to see you go"
           template: "user-deleted/en.html"
+
+      account-activity:
+        "en":
+          subject: "Activity on your OneStop account"
+          template: "account-activity/en.html"

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -51,6 +52,11 @@ public class UserService {
             // send email to notify user of onboarding
             log.debug("Sending email to notify user onboarding [email: {}]", user.getEmail());
         });
+    }
+
+    public Optional<User> getUser(UUID userId) {
+        log.info("Get user [id: {}]", userId);
+        return userRepository.findById(userId);
     }
 
     public User updateUser(User user) {

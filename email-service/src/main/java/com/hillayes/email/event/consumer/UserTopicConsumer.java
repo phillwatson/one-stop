@@ -9,6 +9,7 @@ import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
+import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
@@ -47,6 +48,8 @@ public class UserTopicConsumer implements EventConsumer {
             processUserUpdated(eventPacket.getPayloadContent());
         } else if (UserDeleted.class.getName().equals(payloadClass)) {
             processUserDeleted(eventPacket.getPayloadContent());
+        } else if (AccountActivity.class.getName().equalsIgnoreCase(payloadClass)) {
+            processAccountActivity(eventPacket.getPayloadContent());
         }
     }
 
@@ -93,6 +96,17 @@ public class UserTopicConsumer implements EventConsumer {
             .dateUpdated(event.getDateUpdated())
             .build();
         userService.updateUser(user);
+    }
+
+    private void processAccountActivity(AccountActivity event) {
+        userService.getUser(event.getUserId()).ifPresent(user -> {
+            Recipient recipient = new SendEmailService.Recipient(user);
+            Map<String, Object> params = Map.of(
+                "user", user,
+                "activity", event.getActivity().getMessage()
+            );
+            sendEmailService.sendEmail(TemplateName.ACCOUNT_ACTIVITY, recipient, params);
+        });
     }
 
     protected String format(Instant dateTime) {
