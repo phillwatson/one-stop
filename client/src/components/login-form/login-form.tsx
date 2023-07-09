@@ -22,7 +22,7 @@ export default function LoginForm() {
 
   const navigate = useNavigate();
 
-  function validateForm() {
+  function validateForm(): boolean {
     const c = credentials;
     return c.username.length > 0 && c.password.length > 0;
   }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide, SxProps } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Slide, SxProps } from "@mui/material";
 
 import Country from '../../model/country.model';
 import CountryService from '../../services/country.service';
@@ -90,9 +90,9 @@ export default function Institutions(props: Props) {
           onSelectCountry={ setActiveCountry }/>
       </DialogContent>
       <DialogContent>
-        <DialogContentText sx={dialogPaper}>
+        <Paper sx={dialogPaper} elevation={0}>
           <BankList institutions={ institutions } userConsents={ userConsents } onLinkSelect={ handleLinkSelect }/>
-        </DialogContentText>
+        </Paper>
 
       </DialogContent>
       <DialogActions>

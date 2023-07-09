@@ -35,7 +35,7 @@ export default function CountrySelector(props: Props) {
           { props.countries && props.countries
             .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
             .map((country: Country) =>
-              <MenuItem value={country.id} selected={props.activeCountry === country}>
+              <MenuItem key={ country.id } value={country.id} selected={props.activeCountry === country}>
                 { country.name }
               </MenuItem>
             )

@@ -12,6 +12,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import './account-list.css';
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
+import DeleteAccountDialog from './delete-account-dialog';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
@@ -20,7 +21,9 @@ interface Props extends PropsWithChildren {
 
 export default function AccountList(props: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const menuOpen = Boolean(anchorEl);
+
+  const [ deleteDialogOpen, setDeleteDialogOpen ] = useState<boolean>(false);
 
   function toggleMenu(event: React.MouseEvent<HTMLElement>) {
     setAnchorEl(event.currentTarget);
@@ -30,9 +33,17 @@ export default function AccountList(props: Props) {
     setAnchorEl(null);
   };
 
+  function removeAccountConfirmed(account: AccountDetail) {
+    setDeleteDialogOpen(false);
+  }
+
+  function removeAccountCancelled(account: AccountDetail) {
+    setDeleteDialogOpen(false);
+  }
+
   function removeAccount() {
     closeMenu();
-    console.log("Remove account: " + props.account.id);
+    setDeleteDialogOpen(true);
   }
 
   function exportAccount() {
@@ -44,8 +55,8 @@ export default function AccountList(props: Props) {
     return(
         <Menu
           id="account-menu" aria-labelledby="account-button" anchorEl={anchorEl}
-          open={open} onClose={closeMenu}
-          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+          open={menuOpen} onClose={closeMenu}
+          anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
           <MenuItem onClick={exportAccount} sx={{ width: 180, maxWidth: '100%' }}>
@@ -69,17 +80,17 @@ export default function AccountList(props: Props) {
     <>
       <TableRow key={props.account.id}>
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}
-          onClick={toggleMenu}
+          id="account-button" onClick={toggleMenu}
           aria-haspopup="true"
-          aria-controls={open ? 'account-menu' : undefined}
-          aria-expanded={open ? 'true' : undefined}
-          id="account-button">
+          aria-controls={menuOpen ? 'account-menu' : undefined}
+          aria-expanded={menuOpen ? 'true' : undefined}>
           <MoreVertIcon fontSize="small"/>
         </TableCell>
-        <AccountMenu />
+
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}>
           <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="68px" height="68px"/>
         </TableCell>
+
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
@@ -87,17 +98,24 @@ export default function AccountList(props: Props) {
         <TableCell size="small">{props.account.balance[0].type}</TableCell>
         <TableCell size="small" >{CurrencyService.format(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
       </TableRow>
+
       { props.account.balance.length > 1 && props.account.balance.slice(1).map( balance =>
         <TableRow key={balance.id}>
           <TableCell size="small">{balance.type}</TableCell>
           <TableCell size="small">{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
         </TableRow>
       )}
-        <TableRow>
+
+      <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           { props.children }
         </TableCell>
-      </TableRow>      
+      </TableRow>
+
+      <AccountMenu />
+
+      <DeleteAccountDialog account={props.account} open={deleteDialogOpen}
+         onCancel={removeAccountCancelled} onConfirm={removeAccountConfirmed}/>
     </>
   );
 };
