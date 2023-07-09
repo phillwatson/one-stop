@@ -11,6 +11,10 @@ import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
 import Paper from '@mui/material/Paper';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ListItemText from '@mui/material/ListItemText';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
@@ -51,7 +55,7 @@ export default function AccountList(props: Props) {
         open={showMenu}
         anchorEl={anchorRef.current}
         role={undefined}
-        placement="bottom"
+        placement="top"
         transition
         disablePortal
         modifiers={[
@@ -69,7 +73,7 @@ export default function AccountList(props: Props) {
             {...TransitionProps}
             style={{ transformOrigin: placement === 'bottom-start' ? 'left top' : 'left bottom', }}
           >
-            <Paper>
+            <Paper sx={{ width: 180, maxWidth: '100%' }}>
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList
                   autoFocusItem={showMenu}
@@ -77,8 +81,18 @@ export default function AccountList(props: Props) {
                   aria-labelledby="composition-button"
                   onKeyDown={handleListKeyDown}
                 >
-                  <MenuItem onClick={handleClose}>Export</MenuItem>
-                  <MenuItem onClick={handleClose}>Remove</MenuItem>
+                  <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                      <FileDownloadIcon fontSize="small"/>
+                    </ListItemIcon>
+                    <ListItemText>Export</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                      <DeleteOutlineIcon fontSize="small"/>
+                    </ListItemIcon>
+                    <ListItemText>Remove</ListItemText>
+                  </MenuItem>
                 </MenuList>
               </ClickAwayListener>
             </Paper>
