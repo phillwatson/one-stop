@@ -9,8 +9,7 @@ import java.time.format.DateTimeParseException;
 public class LocalDateConverter implements ParamConverter<LocalDate> {
     public LocalDate fromString(String value){
         try {
-            if ((value == null) || (value.isBlank())) {
-                String x = LocalDate.parse(value).toString();
+            if ((value != null) && (!value.isBlank())) {
                 return LocalDate.parse(value);
             }
         } catch (DateTimeParseException e) {

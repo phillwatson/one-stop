@@ -23,6 +23,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +31,9 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class UserConsentService {
+    // The number of days for which account access will be agreed
+    private final static int ACCESS_VALID_FOR_DAYS = 2;
+
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -79,7 +83,7 @@ public class UserConsentService {
             .institutionId(institutionId)
             .accessScope(List.of("balances", "details", "transactions"))
             .maxHistoricalDays(institution.transactionTotalDays)
-            .accessValidForDays(2)
+            .accessValidForDays(ACCESS_VALID_FOR_DAYS)
             .build());
 
         // calculate expiry data
