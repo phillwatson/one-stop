@@ -687,12 +687,58 @@ paths:
         "500":
           description: "Internal server error"
 
+  /rails/transactions/list:
+    get:
+      tags: [ "transactions" ]
+      summary: "Get all transactions for a given date range"
+      description: "Get all transactions for the authenticated user over a given date range"
+      operationId: "getTransactionsForDateRange"
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "account-id"
+          in: "query"
+          description: "ID of account to filter transactions"
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: "from-date"
+          in: "query"
+          description: "The date, inclusive, from which the transaction list should start"
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "to-date"
+          in: "query"
+          description: "The date, exclusive, to which the transaction list should end"
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+        "400":
+          description: "Invalid ID supplied"
+        "401":
+          description: "Unauthorized"
+        "404":
+          description: "Account not found"
+        "500":
+          description: "Internal server error"
+
   /rails/transactions:
     get:
       tags: [ "transactions" ]
-      summary: "Get all transactions for an account"
-      description: "Get all transactions for an account for the authenticated user"
-      operationId: "getAllTransactionsForAccount"
+      summary: "Get all transactions"
+      description: "Get all transactions for the authenticated user"
+      operationId: "getTransactions"
       security:
         - cookieAuth: [ ]
       parameters:
@@ -1435,3 +1481,12 @@ components:
               description: The list of transactions
               items:
                 $ref: "#/components/schemas/TransactionSummaryResponse"
+
+    TransactionList:
+      type: object
+      properties:
+        transactions:
+          type: array
+          description: The list of transactions
+          items:
+            $ref: "#/components/schemas/TransactionSummaryResponse"

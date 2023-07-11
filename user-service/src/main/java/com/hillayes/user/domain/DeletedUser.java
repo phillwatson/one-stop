@@ -8,7 +8,8 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
-@Entity(name = "deleted_user")
+@Entity
+@Table(name = "deleted_user")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)

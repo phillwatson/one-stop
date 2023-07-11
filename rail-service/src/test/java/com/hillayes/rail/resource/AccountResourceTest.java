@@ -27,7 +27,6 @@ import java.util.*;
 import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
