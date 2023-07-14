@@ -68,7 +68,7 @@ public class AccountTransactionResource {
     }
 
     @GET
-    @Path("/list")
+    @Path("/dates")
     public Response getTransactionsForDateRange(@Context SecurityContext ctx,
                                                 @QueryParam("account-id") UUID accountId,
                                                 @QueryParam("from-date") LocalDate fromDate,

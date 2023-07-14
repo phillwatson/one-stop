@@ -1,4 +1,4 @@
-package com.hillayes.openid.google;
+package com.hillayes.openid.gitlab;
 
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdTokenApi;
@@ -11,29 +11,31 @@ import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
 /**
- * Provides the OpenIdAuth implementation for the Google auth-provider. The
+ * Provides the OpenIdAuth implementation for the GitLab auth-provider. The
  * instance will be initialised with the Open-ID configuration and IdTokenValidator
- * appropriate for Google.
+ * appropriate for GitLab.
+ *
+ * https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
 @ApplicationScoped
-@NamedAuthProvider(AuthProvider.GOOGLE)
+@NamedAuthProvider(AuthProvider.GITLAB)
 @Slf4j
-public class GoogleAuth implements OpenIdAuth {
+public class GitLabAuth implements OpenIdAuth {
     @Inject
-    @NamedAuthProvider(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GITLAB)
     OpenIdConfiguration.AuthConfig config;
 
     @Inject
-    @NamedAuthProvider(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GITLAB)
     IdTokenValidator idTokenValidator;
 
     @Inject
-    @NamedAuthProvider(AuthProvider.GOOGLE)
+    @NamedAuthProvider(AuthProvider.GITLAB)
     OpenIdTokenApi openIdTokenApi;
 
     @Override
     public boolean isFor(AuthProvider authProvider) {
-        return authProvider == AuthProvider.GOOGLE;
+        return authProvider == AuthProvider.GITLAB;
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {

@@ -7,6 +7,7 @@ package com.hillayes.openid;
 public enum AuthProvider {
     GOOGLE,
     GITHUB,
+    GITLAB,
     APPLE;
 
     public static AuthProvider id(String name) {

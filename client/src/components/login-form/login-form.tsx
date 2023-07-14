@@ -8,6 +8,7 @@ import { useNotificationDispatch } from "../../contexts/notification-context";
 import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 import { useNavigate } from "react-router-dom";
+import GitLabSignInButton from "../oauth/gitlab-id/gitlab-signin-button";
 
 interface Credentials {
   username: string,
@@ -71,6 +72,12 @@ export default function LoginForm() {
         <GoogleSignInButton
           clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
           redirectUri={'http://localhost/api/v1/auth/validate/google'}/>
+      </div>
+
+      <div className="panel">
+        <GitLabSignInButton
+          clientId={'31673b3e2b7f9ab7992084452b178b45609b93278f77f4d312ad1cf6d246b981'}
+          redirectUri={'http://localhost/api/v1/auth/validate/gitlab'}/>
       </div>
     </div>
   );

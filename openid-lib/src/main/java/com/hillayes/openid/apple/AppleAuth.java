@@ -5,13 +5,13 @@ import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeResponse;
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Form;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Form;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.time.Duration;

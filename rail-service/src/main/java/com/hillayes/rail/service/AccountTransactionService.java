@@ -55,7 +55,7 @@ public class AccountTransactionService {
 
     /**
      * Returns the transactions for the given user, and optionally filtered by account,
-     * over the given date range.
+     * over the given date range; ordered by booking-datetime, earliest first.
      *
      * @param userId the user to whom the transaction belong.
      * @param accountId the account to which the transaction belong (optional).

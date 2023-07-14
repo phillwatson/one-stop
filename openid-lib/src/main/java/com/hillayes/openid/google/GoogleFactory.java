@@ -3,11 +3,11 @@ package com.hillayes.openid.google;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Singleton;
 import java.io.IOException;
 
 /**

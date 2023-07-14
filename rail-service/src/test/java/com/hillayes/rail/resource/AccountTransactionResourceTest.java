@@ -56,7 +56,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .queryParam("to-date", toDate.toString())
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/transactions/list")
+            .get("/api/v1/rails/transactions/dates")
             .then()
             .statusCode(200)
             .contentType(JSON)
