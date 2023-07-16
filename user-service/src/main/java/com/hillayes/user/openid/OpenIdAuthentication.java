@@ -134,7 +134,7 @@ public class OpenIdAuthentication {
                     );
 
                 // record Auth Provider Identity against user
-                user.addOidcIdentity(issuer, subject);
+                user.addOidcIdentity(authProvider, issuer, subject);
             }
 
             if (user.getId() == null) {

@@ -1,5 +1,6 @@
 package com.hillayes.user.domain;
 
+import com.hillayes.openid.AuthProvider;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -22,6 +23,11 @@ public class OidcIdentity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @EqualsAndHashCode.Include
+    @Column(name = "provider", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
 
     @EqualsAndHashCode.Include
     @Column(name = "issuer", nullable = false)

@@ -56,7 +56,7 @@ public class OpenIdAuthenticationTest {
 
         // and: the auth-provider ID identifies a user
         User user = TestData.mockUser(UUID.randomUUID());
-        user.addOidcIdentity(idToken.getIssuer(), idToken.getSubject());
+        user.addOidcIdentity(authProvider, idToken.getIssuer(), idToken.getSubject());
         when(userRepository.findByIssuerAndSubject(idToken.getIssuer(), idToken.getSubject()))
             .thenReturn(Optional.of(user));
 
@@ -89,7 +89,7 @@ public class OpenIdAuthenticationTest {
 
         // and: the auth-provider ID identifies a user - with disabled OID identity
         User user = TestData.mockUser(UUID.randomUUID());
-        user.addOidcIdentity(idToken.getIssuer(), idToken.getSubject()).setDisabled(true);
+        user.addOidcIdentity(authProvider, idToken.getIssuer(), idToken.getSubject()).setDisabled(true);
         when(userRepository.findByIssuerAndSubject(idToken.getIssuer(), idToken.getSubject()))
             .thenReturn(Optional.of(user));
 
@@ -121,7 +121,7 @@ public class OpenIdAuthenticationTest {
         User user = TestData.mockUser(UUID.randomUUID()).toBuilder()
             .dateBlocked(Instant.now().minusSeconds(200))
             .build();
-        user.addOidcIdentity(idToken.getIssuer(), idToken.getSubject());
+        user.addOidcIdentity(authProvider, idToken.getIssuer(), idToken.getSubject());
         when(userRepository.findByIssuerAndSubject(idToken.getIssuer(), idToken.getSubject()))
             .thenReturn(Optional.of(user));
 

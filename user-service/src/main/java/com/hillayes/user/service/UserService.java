@@ -6,6 +6,7 @@ import com.hillayes.commons.Strings;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
+import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -151,6 +153,16 @@ public class UserService {
             page, pageSize, result.getNumberOfElements());
 
         return result;
+    }
+
+    public Collection<OidcIdentity> getUserAuthProviders(UUID id) {
+        log.info("Retrieving user auth-providers [userId: {}]", id);
+        Optional<User> user = userRepository.findById(id);
+        Set<OidcIdentity> oidcIdentities = user.map(User::getOidcIdentities).orElse(Set.of());
+
+        // the call to size() will load the lazy collection
+        log.debug("Retrieved user auth-providers [userId: {}, size: {}]", id, oidcIdentities.size());
+        return oidcIdentities;
     }
 
     public Optional<User> updatePassword(UUID userId,

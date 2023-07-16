@@ -1,6 +1,7 @@
 
 # One-Stop
 
+---
 ## Events Library
 A shared library used by those services wishing to listen for events published
 by the message broker (i.e. outbox-lib). Those services that are only interested

@@ -1,6 +1,7 @@
 package com.hillayes.user.domain;
 
 import com.hillayes.commons.jpa.LocaleAttrConverter;
+import com.hillayes.openid.AuthProvider;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -92,9 +93,10 @@ public class User {
     private Set<String> roles = new HashSet<>();
 
     @Transient
-    public OidcIdentity addOidcIdentity(String issuer, String subject) {
+    public OidcIdentity addOidcIdentity(AuthProvider provider, String issuer, String subject) {
         OidcIdentity result = OidcIdentity.builder()
             .user(this)
+            .provider(provider)
             .issuer(issuer)
             .subject(subject)
             .build();

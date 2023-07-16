@@ -1,5 +1,6 @@
 package com.hillayes.user.repository;
 
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -24,8 +25,8 @@ public class UserRepositoryTest {
         // given: some users in the database with some oidc identities
         List<User> users = mockUsers(3).stream()
             .map(user -> {
-                user.addOidcIdentity("google", UUID.randomUUID().toString());
-                user.addOidcIdentity("apple", UUID.randomUUID().toString());
+                user.addOidcIdentity(AuthProvider.GOOGLE, "google", UUID.randomUUID().toString());
+                user.addOidcIdentity(AuthProvider.APPLE, "apple", UUID.randomUUID().toString());
                 return user;
             })
             .toList();
@@ -49,8 +50,8 @@ public class UserRepositoryTest {
         fixture.saveAll(
             mockUsers(3).stream()
                 .peek(user -> {
-                    user.addOidcIdentity("google", UUID.randomUUID().toString());
-                    user.addOidcIdentity("apple", UUID.randomUUID().toString());
+                    user.addOidcIdentity(AuthProvider.GOOGLE, "google", UUID.randomUUID().toString());
+                    user.addOidcIdentity(AuthProvider.APPLE, "apple", UUID.randomUUID().toString());
                 })
                 .toList());
 

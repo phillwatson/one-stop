@@ -91,7 +91,7 @@ one-stop:
       GITHUB:
         config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
         token-endpoint: 'https://github.com/login/oauth/access_token'
-        client-id: 'c902ae9dd2353cb552d4'
+        client-id: 'Iv1.275574754910606b'
         redirect-uri: 'http://localhost/api/v1/auth/validate/github'
         # client-secret: 'this will be passed in via docker env'
 

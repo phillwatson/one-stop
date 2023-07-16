@@ -37,6 +37,7 @@ INSERT INTO ${flyway:defaultSchema}.userrole (user_id, role) VALUES ('9abc5177-4
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.oidcidentity (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL REFERENCES ${flyway:defaultSchema}.user(id) ON DELETE CASCADE,
+    provider varchar(256) NOT NULL,
     issuer varchar(256) NOT NULL,
     subject varchar(256) NOT NULL,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

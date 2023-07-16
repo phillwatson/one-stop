@@ -83,7 +83,7 @@ export default function LoginForm() {
 
       <div className="panel">
         <GitHubSignInButton
-          clientId={'c902ae9dd2353cb552d4'}
+          clientId={'Iv1.275574754910606b'}
           redirectUri={'http://localhost/api/v1/auth/validate/github'}/>
       </div>
     </div>

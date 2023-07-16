@@ -3,9 +3,8 @@ package com.hillayes.user.resource;
 import com.hillayes.commons.Strings;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.PasswordUpdateRequest;
-import com.hillayes.onestop.api.UserProfileRequest;
-import com.hillayes.onestop.api.UserProfileResponse;
+import com.hillayes.onestop.api.*;
+import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 @Path("/api/v1/profiles")
 @RolesAllowed({"user", "admin"})
@@ -42,6 +40,20 @@ public class UserProfileResource {
             })
             .map(user -> Response.ok(user).build())
             .orElseThrow(() -> new NotFoundException("user", id));
+    }
+
+    @GET
+    @Path("/authproviders")
+    public Response getUserAuthProviders(@Context SecurityContext ctx) {
+        UUID id = ResourceUtils.getUserId(ctx);
+        log.info("Getting user auth-providers [id: {}]", id);
+
+        List<UserAuthProvider> authProviders = userService.getUserAuthProviders(id).stream()
+            .sorted(Comparator.comparing(identity -> identity.getProvider().name()))
+            .map(this::marshal)
+            .toList();
+        return Response.ok(new UserAuthProvidersResponse()
+            .authProviders(authProviders)).build();
     }
 
     @PUT
@@ -104,5 +116,12 @@ public class UserProfileResource {
             .locale(user.getLocale() == null ? null : user.getLocale().toLanguageTag())
             .dateCreated(user.getDateCreated())
             .dateOnboarded(user.getDateOnboarded());
+    }
+
+    private UserAuthProvider marshal(OidcIdentity oidcIdentity) {
+        return new UserAuthProvider()
+            .name(oidcIdentity.getProvider().getProviderName())
+            .dateCreated(oidcIdentity.getDateCreated())
+            .logo(oidcIdentity.getProvider().getLogo());
     }
 }

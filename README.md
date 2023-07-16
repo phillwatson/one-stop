@@ -1,5 +1,7 @@
 
 # One-Stop
+
+---
 A PoC for interacting with the Nordigen Open-Banking API. Attempts to
 allow users connect to their bank accountDetails and view the transactions
 from multiple accounts in an aggregation.

@@ -1,6 +1,7 @@
 
 # One-Stop
 
+---
 ## User-Service
 This micro-service provides the user account administration. It co-ordinates the
 registration, on-boarding, authentication and deletion of user accounts. All actions

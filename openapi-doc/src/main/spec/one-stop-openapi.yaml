@@ -323,6 +323,25 @@ paths:
           description: "Unauthorized"
         "500":
           description: "Internal server error"
+  /profiles/authproviders:
+    get:
+      tags: [ "profiles" ]
+      summary: "Get the caller's auth-providers"
+      description: "Get the auth-provider information for the authenticated user."
+      operationId: "getUserAuthProviders"
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAuthProvidersResponse'
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal server error"
 
   /profiles/password:
     put:
@@ -1014,6 +1033,34 @@ components:
               - include at least one non-alpha-numeric character
           example: Simple-Banking-216
 
+    UserAuthProvider:
+      type: object
+      description: |
+        The detail of an auth-provider with which a user has user for authentication
+      properties:
+        name:
+          type: string
+          description: the recognised name of the auth-provider
+        logo:
+          type: string
+          format: uri
+          description: the URI for the auth-providers logo
+          example: https://img.icons8.com/color/48/000000/google-logo.png
+        dateCreated:
+          type: string
+          format: date-time
+          description: The date and time the user first authenticated with the provider
+          example: 2019-01-01T00:00:00.000Z
+
+    UserAuthProvidersResponse:
+      type: object
+      properties:
+        authProviders:
+          type: array
+          description: The list of Open-ID Connect Providers with which the user has authenticated.
+          items:
+            type: UserAuthProvider
+
     UserProfileResponse:
       type: object
       required:
@@ -1086,7 +1133,7 @@ components:
             id:
               type: string
               format: uuid
-              description: The Creditor Id
+              description: The user Id
               example: 07061d76-74f3-4163-aa07-fb6909681f81
             roles:
               type: array
