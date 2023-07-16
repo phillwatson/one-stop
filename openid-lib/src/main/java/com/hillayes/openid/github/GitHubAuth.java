@@ -4,15 +4,12 @@ import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeRequest;
 import com.hillayes.openid.rest.TokenExchangeResponse;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
-import java.net.URI;
 import java.util.Map;
 
 import static com.hillayes.openid.AuthProvider.GITHUB;
@@ -45,15 +42,8 @@ public class GitHubAuth implements OpenIdAuth {
     @NamedAuthProvider(GITHUB)
     OpenIdTokenApi openIdTokenApi;
 
+    @Inject
     private GitHubApiClient gitHubApiClient;
-
-    @PostConstruct
-    public void init() {
-        URI baseUri = URI.create("https://api.github.com");
-        gitHubApiClient = RestClientBuilder.newBuilder()
-            .baseUri(baseUri)
-            .build(GitHubApiClient.class);
-    }
 
     @Override
     public boolean isFor(AuthProvider authProvider) {

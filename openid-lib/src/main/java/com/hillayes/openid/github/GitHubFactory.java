@@ -6,9 +6,11 @@ import com.hillayes.openid.rest.OpenIdTokenApi;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * A collection of Producer/Factory methods to inject and configure the OpenID
@@ -89,4 +91,14 @@ public class GitHubFactory extends OpenIdFactory {
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return idTokenValidator(verificationKeys, config, openIdConfig);
     }
+
+    @Produces
+    @Singleton
+    public GitHubApiClient githubApiClient() {
+        URI baseUri = URI.create("https://api.github.com");
+        return RestClientBuilder.newBuilder()
+            .baseUri(baseUri)
+            .build(GitHubApiClient.class);
+    }
+
 }
