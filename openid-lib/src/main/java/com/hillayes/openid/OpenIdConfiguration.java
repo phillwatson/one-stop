@@ -64,6 +64,12 @@ public interface OpenIdConfiguration {
          * is complete. The same URI will then be passed back to the Auth-Provider
          * when a request is made to exchange the Auth-Provider's auth-token for the
          * authenticated user's details.
+         *
+         * The URI will identify, to our application, the auth-provider used to
+         * perform the authentication. This is normally by the user of the last
+         * element in the path matching the AuthProvider enum value. For example;
+         * the Google URI would be "http://localhost/api/v1/auth/validate/google",
+         * and the "google" path element identifies the AuthProvider.
          */
         String redirectUri();
 

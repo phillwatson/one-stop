@@ -9,6 +9,7 @@ import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 import { useNavigate } from "react-router-dom";
 import GitLabSignInButton from "../oauth/gitlab-id/gitlab-signin-button";
+import GitHubSignInButton from "../oauth/github-id/github-signin-button";
 
 interface Credentials {
   username: string,
@@ -78,6 +79,12 @@ export default function LoginForm() {
         <GitLabSignInButton
           clientId={'31673b3e2b7f9ab7992084452b178b45609b93278f77f4d312ad1cf6d246b981'}
           redirectUri={'http://localhost/api/v1/auth/validate/gitlab'}/>
+      </div>
+
+      <div className="panel">
+        <GitHubSignInButton
+          clientId={'c902ae9dd2353cb552d4'}
+          redirectUri={'http://localhost/api/v1/auth/validate/github'}/>
       </div>
     </div>
   );

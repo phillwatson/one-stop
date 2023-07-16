@@ -25,4 +25,7 @@ public class TokenExchangeRequest {
 
     @JsonProperty("grant_type")
     public String grantType;
+
+    @JsonProperty("scope")
+    public String scope;
 }

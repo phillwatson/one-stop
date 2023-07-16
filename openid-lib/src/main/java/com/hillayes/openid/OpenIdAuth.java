@@ -39,6 +39,9 @@ public interface OpenIdAuth {
      * exchange the given auth-code for access-token, refresh-token and the user's
      * ID-token (a JWT containing information pertaining to the authenticated user).
      *
+     * The ID-Token is parsed and its signature verified, using the auth-provider's
+     * public keys, before being returned as a set of JWT claims.
+     *
      * @param authCode the auth-code to be verified.
      * @return the JWT claims from the authenticated user's ID-Token.
      * @throws InvalidJwtException if the obtained ID-token is not valid.

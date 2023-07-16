@@ -30,7 +30,7 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
     @Singleton
-    public OpenIdConfiguration.AuthConfig googleConfig() {
+    public OpenIdConfiguration.AuthConfig gitlabConfig() {
         log.debug("Retrieving GitLab OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITLAB);
     }
@@ -39,7 +39,7 @@ public class GitLabFactory extends OpenIdFactory {
      * Returns the open-id configuration from GitLab's "well-known" configuration URL,
      * taken from the given local configuration.
      * <p>
-     * See https://accounts.google.com/.well-known/openid-configuration
+     * See https://gitlab.com/.well-known/openid-configuration
      *
      * @param config the local configuration for GitLab auth-provider.
      * @return GitLab's own configuration properties.
@@ -48,7 +48,7 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
     @Singleton
-    public OpenIdConfigResponse googleOpenApiConfig(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config) throws IOException {
+    public OpenIdConfigResponse gitlabOpenApiConfig(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config) throws IOException {
         return openApiConfig(config);
     }
 
@@ -60,7 +60,7 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
     @Singleton
-    public OpenIdTokenApi googleRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig authConfig,
+    public OpenIdTokenApi gitlabRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
         return openIdRestApi(authConfig, openIdConfig);
     }
@@ -73,7 +73,7 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
     @Singleton
-    public VerificationKeyResolver googleKeys(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
+    public VerificationKeyResolver gitlabKeys(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
         return verificationKeys(openIdConfig);
     }
 
@@ -84,7 +84,7 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
     @Singleton
-    public IdTokenValidator googleTokenValidator(@NamedAuthProvider(AuthProvider.GITLAB) VerificationKeyResolver verificationKeys,
+    public IdTokenValidator gitlabTokenValidator(@NamedAuthProvider(AuthProvider.GITLAB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config,
                                                  @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
         return idTokenValidator(verificationKeys, config, openIdConfig);

@@ -30,7 +30,7 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
     @Singleton
-    public OpenIdConfiguration.AuthConfig googleConfig() {
+    public OpenIdConfiguration.AuthConfig githubConfig() {
         log.debug("Retrieving GitHub OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITHUB);
     }
@@ -39,7 +39,7 @@ public class GitHubFactory extends OpenIdFactory {
      * Returns the open-id configuration from GitHub's "well-known" configuration URL,
      * taken from the given local configuration.
      * <p>
-     * See https://accounts.google.com/.well-known/openid-configuration
+     * See https://token.actions.githubusercontent.com/.well-known/openid-configuration
      *
      * @param config the local configuration for GitHub auth-provider.
      * @return GitHub's own configuration properties.
@@ -48,7 +48,7 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
     @Singleton
-    public OpenIdConfigResponse googleOpenApiConfig(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config) throws IOException {
+    public OpenIdConfigResponse githubOpenApiConfig(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config) throws IOException {
         return openApiConfig(config);
     }
 
@@ -60,7 +60,7 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
     @Singleton
-    public OpenIdTokenApi googleRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig authConfig,
+    public OpenIdTokenApi githubRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return openIdRestApi(authConfig, openIdConfig);
     }
@@ -73,7 +73,7 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
     @Singleton
-    public VerificationKeyResolver googleKeys(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
+    public VerificationKeyResolver githubKeys(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return verificationKeys(openIdConfig);
     }
 
@@ -84,7 +84,7 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
     @Singleton
-    public IdTokenValidator googleTokenValidator(@NamedAuthProvider(AuthProvider.GITHUB) VerificationKeyResolver verificationKeys,
+    public IdTokenValidator githubTokenValidator(@NamedAuthProvider(AuthProvider.GITHUB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config,
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return idTokenValidator(verificationKeys, config, openIdConfig);

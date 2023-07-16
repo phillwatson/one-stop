@@ -14,6 +14,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 
+/**
+ * Supplies the Authorization header values for the Nordigen rail API.
+ * It uses the secret ID and key registered with the rail in order to obtain
+ * access and refresh tokens. The access token will be added the Auth
+ * bearer header of ongoing request.
+ *
+ * If the access token has expired, the refresh token will be used to obtain
+ * a new one.
+ */
 @ApplicationScoped
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {

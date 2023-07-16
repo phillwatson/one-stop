@@ -10,7 +10,7 @@ export default function GitHubSignInButton(props: Props) {
     var uri = 'https://github.com/login/oauth/authorize' +
                 '?response_type=code' +
                 '&client_id=' + props.clientId +
-                '&scope=openid profile email' +
+                '&scope=openid read:user user:email' +
                 '&redirect_uri=' + props.redirectUri;
 
     window.location.href = encodeURI(uri);
