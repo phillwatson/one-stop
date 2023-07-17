@@ -13,6 +13,13 @@ import java.time.Instant;
 
 import static com.hillayes.events.consumer.HeadersUtils.*;
 
+/**
+ * Called by the Consumer class to decide what action is to be taken for errors
+ * raised by an EventConsumer whilst processing an event.
+ *
+ * Two courses of action are available; queue the event for a retry or put the
+ * event on the message-hospital queue for manual intervention.
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class ConsumerErrorHandler {
@@ -21,6 +28,7 @@ public class ConsumerErrorHandler {
     public void handle(ConsumerRecord<String, EventPacket> record, Throwable error) {
         EventPacket eventPacket = record.value();
 
+        // has the event reached the max retry count
         int retryCount = eventPacket.getRetryCount();
         Topic failureTopic = (retryCount < 3)
             ? Topic.RETRY_TOPIC

@@ -78,6 +78,13 @@ public class ConsumerFactory {
         return config;
     }
 
+    /**
+     * Creates the error handler that will decide if an event is to be retried or
+     * placed on the message-hospital queue.
+     *
+     * @param producer the producer used to requeue events. See ProducerFactory.
+     * @return the configured ConsumerErrorHandler instance.
+     */
     @Produces
     @ApplicationScoped
     public ConsumerErrorHandler errorHandler(Producer<String, EventPacket> producer) {

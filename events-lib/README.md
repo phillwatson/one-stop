@@ -17,10 +17,23 @@ topic channel is taken from the lower-case form of the enum's name. Multiple
 event classes may share the same Topic. For example; the `USER` topic includes
 the event classes `UserCreated`, `UserUpdated` and `UserDelete`.
 
+### Topic Groups
+EventConsumers can also indicate the consumer group they belong to. Events will
+be sent to all consumer groups. Within a consumer group, events of the same topic
+will be distributed to those topic consumers within that group. With only one
+consumer receiving a given event instance. If an event is retried (see later), it
+may be allocated to another consumer in the group.
+
+By default, the consumer group is taken from the configuration property "kafka.group.id",
+or the application/service name if that property is not defined.
+
+By specifying an explicit consumer group, consumers across service boundaries can share
+messages from the same topic(s).
+
 ### Consumers
 To consume (listen to) events, a class implements the interface
-`com.hillayes.events.consumer.EventConsumer` and specify the topic(s) they
-want to consume using the annotation  `@TopicConsumer`. For example;
+`com.hillayes.events.consumer.EventConsumer` and specifies the topic(s) to be
+consumed using the annotation  `@TopicConsumer`. For example;
 ```
 @TopicConsumer(Topic.USER)
 public class UserEventConsumer implements EventConsumer {
@@ -51,3 +64,6 @@ If an exception is raised by the `EventConsumer` during the processing of an
 event, that event will be queued for retry by the message broker and later
 published to ALL consumers. Resulting in an `EventConsumer` receiving duplicate
 events.
+
+If, after the event has been retried a number of times, the event fails again,
+it will be placed on the message-hospital queue (HOSPITAL_TOPIC). 

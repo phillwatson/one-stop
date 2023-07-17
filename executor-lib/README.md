@@ -44,14 +44,14 @@ and are executed as and when they are requested. The method `queue()`
 queues a new task instance passing any payload it requires. The scheduler
 will execute it as soon as a thread is available.
 
-These are useful when a service needs to avoid performing a "long-running"
+These are useful when a service needs to performing a "long-running"
 action as a result of a client request. The task can be offloaded to a
 background thread to be run at some later time (preferably asap).
 
 They are also useful to share the load of a bulk operation; allowing the
 work to be shared across hosting services and their threads. For example;
 a scheduled task may run to iterate over all accounts and perform some action
-on them. Rather than perform those action synchronously, it may spawn/queue a
+on them. Rather than process each account synchronously, it may spawn/queue a
 Jobbing task for each account.
 
 These tasks can operate without any configuration, requiring only to
