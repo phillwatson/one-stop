@@ -15,6 +15,7 @@ import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -61,9 +62,24 @@ public class SendEmailService {
             params = new HashMap<>(params);
 
             // add common context parameters
-            params.put("host-ip", Network.getMyIpAddress());
-            params.put("recipient-name", recipient.name());
-            params.put("recipient-email", recipient.email());
+            params.put("host_ip", Network.getMyIpAddress());
+            params.put("recipient_name", recipient.name());
+            params.put("recipient_email", recipient.email());
+            params.put("YEAR", LocalDate.now().getYear());
+            params.put("COMPANY_COPYRIGHT_NAME", configuration.corporation().copyrightName());
+            params.put("COMPANY_LONG_NAME", configuration.corporation().name());
+            params.put("COMPANY_CONTACT_EMAIL", configuration.corporation().supportEmail());
+            params.put("COMPANY_CONTACT_LINE1", configuration.corporation().address().addressLine1());
+            params.put("COMPANY_ADDRESS_LINE2", configuration.corporation().address().addressLine2());
+            params.put("COMPANY_ADDRESS_LINE3", configuration.corporation().address().addressLine3());
+
+            String subject = templateRepository.renderSubject(templateName, params, recipient.locale());
+            params.put("SUBJECT", subject);
+
+            String content = templateRepository.renderTemplate(templateName, params, recipient.locale());
+            params.put("__TEMPLATE_CONTENT__", content);
+
+            String body = templateRepository.renderTemplate(TemplateName.HEADER, params, recipient.locale());
 
             SendSmtpEmail email = new SendSmtpEmail()
                 .sender(new SendSmtpEmailSender()
@@ -72,8 +88,8 @@ public class SendEmailService {
                 .addToItem(new SendSmtpEmailTo()
                     .name(recipient.name())
                     .email(recipient.email()))
-                .subject(templateRepository.renderSubject(templateName, params, recipient.locale()))
-                .htmlContent(templateRepository.readTemplate(templateName, params, recipient.locale()));
+                .subject(subject)
+                .htmlContent(body);
 
             CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
             log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());

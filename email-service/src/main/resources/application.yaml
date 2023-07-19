@@ -31,17 +31,32 @@ quarkus:
 one-stop:
   email:
     disabled: false
+    corporation:
+      name: Hillayes One-Stop
+      copyright-name: One-Stop
+      support-email: watson.phill+onestop@gmail.com
+      address:
+        address-line1: Hillayes
+        address-line2: Hullavington
+        address-line3: Wiltshire SN14
+
     default-sender:
-      name: "One Stop"
-      email: "watson.phill+onestop@gmail.com"
+      name: ${one-stop.email.corporation.name}
+      email: ${one-stop.email.corporation.support-email}
       locale: "en-GB"
+
     templates:
+      header:
+        "en":
+          subject: not-applicable
+          template: "header/en.html"
+
       user-registered:
         "en":
-          subject: "Hi $user.preferredName$, please complete your OneStop registration"
+          subject: "Hi $user.preferredName$, please complete your One-Stop registration"
           template: "user-registered/en.html"
         "fr":
-          subject: "Salut $user.preferredName$, veuillez compléter votre inscription OneStop"
+          subject: "Salut $user.preferredName$, veuillez compléter votre inscription One-Stop"
           template: "user-registered/fr.html"
 
       user-created:

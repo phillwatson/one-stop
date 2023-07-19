@@ -76,9 +76,9 @@ public class TemplateRepository {
      * @throws EmailTemplateReadException if an error occurs whilst reading or
      *     rendering the template content.
      */
-    public String readTemplate(TemplateName templateName,
-                               Map<String, ?> params,
-                               Optional<Locale> locale) throws EmailTemplateNotFoundException, EmailTemplateReadException {
+    public String renderTemplate(TemplateName templateName,
+                                 Map<String, ?> params,
+                                 Optional<Locale> locale) throws EmailTemplateNotFoundException, EmailTemplateReadException {
         try {
             // read the template content
             String templatePath = selectByLocale(templateName, locale.orElse(DEFAULT_LOCALE)).template();

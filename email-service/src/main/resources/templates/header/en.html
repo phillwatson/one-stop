@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>$SUBJECT$</title>
+  <style>
+     tr,td { width: 100%; }
+
+    .body {
+      border: 1px solid;
+      margin: 12px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bodyContent {
+      border: 1px solid red;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      border: 1px solid;
+    }
+
+    .templateContent {
+      border: 1px solid blue;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer {
+      border: 1px solid;
+      font-size: small;
+    }
+  </style>
+</head>
+
+<body class="body">
+  <table class="bodyContent">
+    <tr>
+      <td class="header">
+        <h1>One-Stop</h1>
+        <h3>One-Stop Accounting</h3>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="templateContent">
+        $__TEMPLATE_CONTENT__$
+      </td>
+    </tr>
+
+    <tr>
+      <td class="footer">
+        <p>
+          This message has been sent by $COMPANY_LONG_NAME$.
+        </p>
+        <p>
+          Copyright ©$YEAR$ $COMPANY_COPYRIGHT_NAME$. All rights reserved.
+        </p>
+        <p>
+          Our mailing address is:
+            <br/>$COMPANY_CONTACT_LINE1$,
+            <br/>$COMPANY_CONTACT_LINE2$,
+            <br/>$COMPANY_CONTACT_LINE3$
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
