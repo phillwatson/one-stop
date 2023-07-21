@@ -1,19 +1,9 @@
 import './google-signin-button.css'; // import stylesheet for styling
+import UserService from "../../../services/user.service";
 
-interface Props {
-  clientId: string;
-  redirectUri: string;
-}
-
-export default function GoogleSignInButton(props: Props) {
+export default function GoogleSignInButton() {
   function buttonClick() {
-    var uri = 'https://accounts.google.com/o/oauth2/v2/auth' +
-                '?response_type=code' +
-                '&client_id=' + props.clientId +
-                '&scope=openid profile email' +
-                '&redirect_uri=' + props.redirectUri;
-
-    window.location.href = encodeURI(uri);
+    UserService.login("google");
   }
 
   return (

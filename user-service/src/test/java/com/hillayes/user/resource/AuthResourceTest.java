@@ -142,7 +142,7 @@ public class AuthResourceTest extends TestBase {
         String authCode = randomAlphanumeric(30);
 
         // and: the auth-provider exchanges the auth-code for token and a user record
-        when(openIdAuth.oauthLogin(authProvider, authCode)).thenReturn(user);
+        when(openIdAuth.oauthExchange(authProvider, authCode)).thenReturn(user);
 
         // when: the auth-provider calls the callback
         Response loginResponse = given()
@@ -197,7 +197,7 @@ public class AuthResourceTest extends TestBase {
             .extract().response();
 
         // then: the auth-code is not exchanged for tokens
-        verify(openIdAuth, never()).oauthLogin(any(), anyString());
+        verify(openIdAuth, never()).oauthExchange(any(), anyString());
 
         // and: NO user is saved
         verify(userRepository, never()).save(any());

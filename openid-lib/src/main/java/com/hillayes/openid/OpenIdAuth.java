@@ -3,6 +3,7 @@ package com.hillayes.openid;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import java.net.URI;
 import java.security.GeneralSecurityException;
 
 /**
@@ -35,10 +36,22 @@ public interface OpenIdAuth {
     boolean isFor(AuthProvider authProvider);
 
     /**
+     * Constructs the redirect URI used to initiate the auth-code flow with the
+     * auth-provider. The given state value will be returned by the auth-provider
+     * on completion of the login flow. The value can be used for verification and/or
+     * to allow the client to establish its state prior to login.
+     *
+     * @param clientState the state given by the client, to be returned to the client
+     * on completion.
+     * @return the URI to which the client is to be redirected to initiate login.
+     */
+    URI initiateLogin(String clientState);
+
+    /**
      * Implements must call the auth-provider's auth-code verification endpoint to
      * exchange the given auth-code for access-token, refresh-token and the user's
      * ID-token (a JWT containing information pertaining to the authenticated user).
-     *
+     * <p>
      * The ID-Token is parsed and its signature verified, using the auth-provider's
      * public keys, before being returned as a set of JWT claims.
      *

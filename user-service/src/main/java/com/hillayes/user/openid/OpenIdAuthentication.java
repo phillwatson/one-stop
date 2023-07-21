@@ -15,6 +15,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;
+
+import java.net.URI;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Set;
@@ -53,9 +55,17 @@ public class OpenIdAuthentication {
             .orElseThrow(() -> new RuntimeException("AuthProvider not implemented:  " + authProvider));
     }
 
-    public User oauthLogin(AuthProvider authProvider, String authCode) {
+    public URI oauthLogin(AuthProvider authProvider, String state) {
+        log.info("OAuth login [authProvider: {}, state: {}]", authProvider, state);
+
+        URI redirect = getOpenIdAuth(authProvider).initiateLogin(state);
+        log.info("OAuth login [authProvider: {}, redirect: {}]", authProvider, redirect);
+        return redirect;
+    }
+
+    public User oauthExchange(AuthProvider authProvider, String authCode) {
         try {
-            log.info("OAuth login");
+            log.info("OAuth exchange [authProvider: {}, authCode: {}]", authProvider, authCode);
 
             JwtClaims idToken = getOpenIdAuth(authProvider).exchangeAuthToken(authCode);
             if (log.isTraceEnabled()) {

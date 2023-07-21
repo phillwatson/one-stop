@@ -61,7 +61,7 @@ public class OpenIdAuthenticationTest {
             .thenReturn(Optional.of(user));
 
         // when: the service is called
-        User result = fixture.oauthLogin(authProvider, authCode);
+        User result = fixture.oauthExchange(authProvider, authCode);
 
         // then: the identified user is returned
         assertEquals(user, result);
@@ -95,7 +95,7 @@ public class OpenIdAuthenticationTest {
 
         // when: the service is called
         // then: authorisation fails
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthLogin(authProvider, authCode));
+        assertThrows(NotAuthorizedException.class, () -> fixture.oauthExchange(authProvider, authCode));
 
         // and: no events are issued
         verifyNoInteractions(userEventSender);
@@ -126,7 +126,7 @@ public class OpenIdAuthenticationTest {
             .thenReturn(Optional.of(user));
 
         // when: the service is called
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthLogin(authProvider, authCode));
+        assertThrows(NotAuthorizedException.class, () -> fixture.oauthExchange(authProvider, authCode));
 
         // and: no events are issued
         verifyNoInteractions(userEventSender);
@@ -160,7 +160,7 @@ public class OpenIdAuthenticationTest {
             .thenReturn(Optional.of(user));
 
         // when: the service is called
-        User result = fixture.oauthLogin(authProvider, authCode);
+        User result = fixture.oauthExchange(authProvider, authCode);
 
         // then: the user identified by the email address is returned
         assertEquals(user, result);
@@ -205,7 +205,7 @@ public class OpenIdAuthenticationTest {
 
         // when: the service is called
         // then: authorisation fails
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthLogin(authProvider, authCode));
+        assertThrows(NotAuthorizedException.class, () -> fixture.oauthExchange(authProvider, authCode));
 
         // and: NO auth-provider's identifier is recorded against the user
         OidcIdentity oidcIdentity = user.getOidcIdentity(idToken.getIssuer()).orElse(null);
@@ -241,7 +241,7 @@ public class OpenIdAuthenticationTest {
             .thenReturn(Optional.empty());
 
         // when: the service is called
-        User result = fixture.oauthLogin(authProvider, authCode);
+        User result = fixture.oauthExchange(authProvider, authCode);
 
         // then: the identified user is returned
         assertNotNull(result);
@@ -290,7 +290,7 @@ public class OpenIdAuthenticationTest {
 
         // when: the service is called
         // then: an exception is raised
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthLogin(authProvider, authCode));
+        assertThrows(NotAuthorizedException.class, () -> fixture.oauthExchange(authProvider, authCode));
 
         // and: no events are issued
         verifyNoInteractions(userEventSender);

@@ -1,19 +1,9 @@
 import './gitlab-signin-button.css'; // import stylesheet for styling
+import UserService from "../../../services/user.service";
 
-interface Props {
-  clientId: string;
-  redirectUri: string;
-}
-
-export default function GitHubSignInButton(props: Props) {
+export default function GitHubSignInButton() {
   function buttonClick() {
-    var uri = 'https://gitlab.com/oauth/authorize' +
-                '?response_type=code' +
-                '&client_id=' + props.clientId +
-                '&scope=openid profile email' +
-                '&redirect_uri=' + props.redirectUri;
-
-    window.location.href = encodeURI(uri);
+    UserService.login("gitlab");
   }
 
   return (

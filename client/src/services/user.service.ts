@@ -10,6 +10,11 @@ export interface RegistrationCredentials {
 
 
 class UserService {
+  login(provider: string) {
+    return http.get<Location>(`auth/login/${provider}`, { params: { "state": "same-state-value" }})
+      .then(response => window.location = response.data);
+  }
+
   registerNewUser(email: string): Promise<void> {
     console.log(`Initiating user registration "${email}"`);
 

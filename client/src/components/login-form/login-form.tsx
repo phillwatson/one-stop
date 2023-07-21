@@ -70,21 +70,15 @@ export default function LoginForm() {
       </div>
 
       <div className="panel">
-        <GoogleSignInButton
-          clientId={'284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'}
-          redirectUri={'http://localhost/api/v1/auth/validate/google'}/>
+        <GoogleSignInButton/>
       </div>
 
       <div className="panel">
-        <GitLabSignInButton
-          clientId={'31673b3e2b7f9ab7992084452b178b45609b93278f77f4d312ad1cf6d246b981'}
-          redirectUri={'http://localhost/api/v1/auth/validate/gitlab'}/>
+        <GitLabSignInButton/>
       </div>
 
       <div className="panel">
-        <GitHubSignInButton
-          clientId={'Iv1.275574754910606b'}
-          redirectUri={'http://localhost/api/v1/auth/validate/github'}/>
+        <GitHubSignInButton/>
       </div>
     </div>
   );

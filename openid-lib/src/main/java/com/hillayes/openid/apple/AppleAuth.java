@@ -8,13 +8,17 @@ import io.smallrye.jwt.algorithm.SignatureAlgorithm;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.time.Duration;
+
+import static com.hillayes.openid.AuthProvider.APPLE;
 
 /**
  * Provides the OpenIdAuth implementation for the Google auth-provider. The
@@ -22,23 +26,27 @@ import java.time.Duration;
  * appropriate for Google.
  */
 @ApplicationScoped
-@NamedAuthProvider(AuthProvider.APPLE)
+@NamedAuthProvider(APPLE)
 @Slf4j
 public class AppleAuth implements OpenIdAuth {
     @Inject
-    @NamedAuthProvider(AuthProvider.APPLE)
+    @NamedAuthProvider(APPLE)
     OpenIdConfiguration.AuthConfig config;
 
     @Inject
-    @NamedAuthProvider(AuthProvider.APPLE)
+    @NamedAuthProvider(APPLE)
+    OpenIdConfigResponse openIdConfig;
+
+    @Inject
+    @NamedAuthProvider(APPLE)
     IdTokenValidator idTokenValidator;
 
     @Inject
-    @NamedAuthProvider(AuthProvider.APPLE)
+    @NamedAuthProvider(APPLE)
     OpenIdTokenApi openIdTokenApi;
 
     @Inject
-    @NamedAuthProvider(AuthProvider.APPLE)
+    @NamedAuthProvider(APPLE)
     OpenIdConfigResponse authConfig;
 
     @Inject
@@ -50,7 +58,17 @@ public class AppleAuth implements OpenIdAuth {
 
     @Override
     public boolean isFor(AuthProvider authProvider) {
-        return authProvider == AuthProvider.APPLE;
+        return authProvider == APPLE;
+    }
+
+    public URI initiateLogin(String clientState) {
+        return UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
+            .queryParam("response_type", "code")
+            .queryParam("client_id", config.clientId())
+            .queryParam("scope", "openid profile email")
+            .queryParam("redirect_uri", config.redirectUri())
+            .queryParam("state", clientState)
+            .build();
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException, GeneralSecurityException {

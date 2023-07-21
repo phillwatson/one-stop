@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotAuthorizedException;
+
+import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -67,14 +69,20 @@ public class AuthService {
         return user;
     }
 
+    public URI oauthLogin(AuthProvider authProvider,
+                          String state) {
+        log.info("OAuth login [provider: {}, state: {}]", authProvider, state);
+        return openIdAuth.oauthLogin(authProvider, state);
+    }
+
     @Transactional
-    public User oauthLogin(AuthProvider authProvider,
-                           String code,
-                           String state,
-                           String scope) {
+    public User oauthValidate(AuthProvider authProvider,
+                              String code,
+                              String state,
+                              String scope) {
         try {
-            log.info("OAuth login [provider: {}, code: {}, state: {}, scope: {}]", authProvider, code, state, scope);
-            User user = openIdAuth.oauthLogin(authProvider, code);
+            log.info("OAuth validate [provider: {}, code: {}, state: {}, scope: {}]", authProvider, code, state, scope);
+            User user = openIdAuth.oauthExchange(authProvider, code);
 
             boolean newUser = (user.getId() == null);
             user = userRepository.save(user);

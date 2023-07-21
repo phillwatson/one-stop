@@ -16,6 +16,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collection;
@@ -41,7 +42,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Collection<Class<? extends Annotation>> DENY_ACCESS = List.of(DenyAll.class);
 
     // method and class annotations for which authentication is required
-    private static final Collection<Class<? extends Annotation>> AUTH_REQUIRED = List.of( RolesAllowed.class, Authenticated.class );
+    private static final Collection<Class<? extends Annotation>> AUTH_REQUIRED = List.of(RolesAllowed.class, Authenticated.class);
 
     // method and class annotations for which XSRF authentication is required
     private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
@@ -86,14 +87,14 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             (isAnnotationPresent(classAnnotations, AUTH_REQUIRED))) {
             log.trace("Method requires authentication");
             // check xsrf token in access-token cookie
-            if (!validateToken(requestContext, accessCookieName)) {
+            if (tokenIsInvalid(requestContext, accessCookieName)) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         } else if ((isAnnotationPresent(methodAnnotations, XSRF_REQUIRED)) ||
             (isAnnotationPresent(classAnnotations, XSRF_REQUIRED))) {
             log.trace("Method requires XSRF validation");
             // check xsrf token in refresh-token cookie
-            if (!validateToken(requestContext, refreshCookieName)) {
+            if (tokenIsInvalid(requestContext, refreshCookieName)) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }
@@ -116,37 +117,38 @@ public class XsrfInterceptor implements ContainerRequestFilter {
      * @param request the http request on which the XSRF token is expected.
      * @return true if the request contains a valid XSRF token.
      */
-    public boolean validateToken(ContainerRequestContext request,
-                                 String cookieName) {
+    private boolean tokenIsInvalid(ContainerRequestContext request,
+                                   String cookieName) {
         log.trace("Validating XSRF tokens in context request");
 
         JsonWebToken accessToken = jwtTokens.getToken(cookieName, request.getCookies())
             .orElse(null);
 
         if (accessToken == null) {
-            log.warn("XSRF token cookie missing [name: {}]", cookieName);
-            return false;
+            log.warn("XSRF token cookie missing [name: {}, path: {}]", cookieName, request.getUriInfo().getPath());
+            return true;
         }
 
         String cookieValue = accessToken.getClaim("xsrf");
         if (isBlank(cookieValue)) {
-            log.warn("XSRF token cookie blank [name: {}]", cookieName);
-            return false;
+            log.warn("XSRF token cookie blank [name: {}, path: {}]", cookieName, request.getUriInfo().getPath());
+            return true;
         }
 
         List<String> headerList = request.getHeaders().get(xsrfHeaderName);
         if ((headerList == null) || (headerList.size() != 1)) {
-            log.warn("XSRF token header invalid [name: {}, size: {}]",
-                xsrfHeaderName, (headerList == null) ? 0 : headerList.size());
-            return false;
+            log.warn("XSRF token header invalid [name: {}, size: {}, path: {}]",
+                xsrfHeaderName, (headerList == null) ? 0 : headerList.size(),
+                request.getUriInfo().getPath());
+            return true;
         }
 
         String headerValue = headerList.get(0);
         if (isBlank(headerValue)) {
-            log.warn("XSRF token header blank [name: {}]", xsrfHeaderName);
-            return false;
+            log.warn("XSRF token header blank [name: {}, path: {}]", xsrfHeaderName, request.getUriInfo().getPath());
+            return true;
         }
 
-        return xsrfTokens.validateTokens(cookieValue, headerValue, refreshDuration);
+        return ! xsrfTokens.validateTokens(cookieValue, headerValue, refreshDuration);
     }
 }

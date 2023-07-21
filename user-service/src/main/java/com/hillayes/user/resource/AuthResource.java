@@ -44,6 +44,26 @@ public class AuthResource {
     }
 
     /**
+     * Initiates the auth-token OpenID Connect login flow to call the identified auth-provider.
+     * Is passes the given state parameter from the client, and that value will be returned
+     * to the client on completion.
+     *
+     * @param authProvider the identity of the OpenID auth provider implementation.
+     * @param state the state information passed from the client - for the client's purpose.
+     * @return the auth-provider redirection.
+     */
+    @GET
+    @Path("login/{auth-provider}")
+    public Response oauthLogin(@PathParam("auth-provider") String authProvider,
+                               @QueryParam("state") String state) {
+        log.info("Initiating OAuth login [authProvider: {}]", authProvider);
+
+        URI redirect = authService.oauthLogin(AuthProvider.id(authProvider), state);
+        log.debug("Redirecting to auth-provider [authProvider: {}, uri: {}]", authProvider, redirect);
+        return Response.ok(redirect).build();
+    }
+
+    /**
      * The call-back URI for open-id authentication.
      *
      * @param uriInfo the platform URI context from which redirections can be constructed.
@@ -57,14 +77,14 @@ public class AuthResource {
      */
     @GET
     @Path("validate/{auth-provider}")
-    public Response oauthLogin(@Context UriInfo uriInfo,
-                               @PathParam("auth-provider") String authProvider,
-                               @QueryParam("code") String code,
-                               @QueryParam("state") String state,
-                               @QueryParam("scope") String scope,
-                               @QueryParam("error") String error,
-                               @QueryParam("error_uri") String errorUri) {
-        log.info("OAuth login [scope: {}, state: {}, error: {}]", scope, state, error);
+    public Response oauthValidate(@Context UriInfo uriInfo,
+                                  @PathParam("auth-provider") String authProvider,
+                                  @QueryParam("code") String code,
+                                  @QueryParam("state") String state,
+                                  @QueryParam("scope") String scope,
+                                  @QueryParam("error") String error,
+                                  @QueryParam("error_uri") String errorUri) {
+        log.info("OAuth validate [scope: {}, state: {}, error: {}]", scope, state, error);
 
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         if (error != null) {
@@ -73,7 +93,7 @@ public class AuthResource {
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 
-        User user = authService.oauthLogin(AuthProvider.id(authProvider), code, state, scope);
+        User user = authService.oauthValidate(AuthProvider.id(authProvider), code, state, scope);
 
         URI redirect = uriBuilder.build();
         log.debug("OAuth login success [redirect: {}]", redirect);

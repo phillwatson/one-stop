@@ -195,10 +195,10 @@ public class AuthServiceTest {
         User user = User.builder()
             .id(UUID.randomUUID())
             .build();
-        when(openIdAuth.oauthLogin(authProvider, code)).thenReturn(user);
+        when(openIdAuth.oauthExchange(authProvider, code)).thenReturn(user);
 
         // when: the service is called
-        User response = fixture.oauthLogin(authProvider, code, state, scope);
+        User response = fixture.oauthValidate(authProvider, code, state, scope);
 
         // then: the user record is returned
         assertEquals(user, response);
@@ -223,10 +223,10 @@ public class AuthServiceTest {
         // and: a new user is authenticated
         User user = User.builder()
             .build();
-        when(openIdAuth.oauthLogin(authProvider, code)).thenReturn(user);
+        when(openIdAuth.oauthExchange(authProvider, code)).thenReturn(user);
 
         // when: the service is called
-        User response = fixture.oauthLogin(authProvider, code, state, scope);
+        User response = fixture.oauthValidate(authProvider, code, state, scope);
 
         // then: the user record is returned
         assertEquals(user, response);
@@ -254,11 +254,11 @@ public class AuthServiceTest {
         // and: a new user is authenticated
         User user = User.builder()
             .build();
-        when(openIdAuth.oauthLogin(authProvider, code)).thenThrow(new RuntimeException("some error"));
+        when(openIdAuth.oauthExchange(authProvider, code)).thenThrow(new RuntimeException("some error"));
 
         // when: the service is called
         // then: an auth-error is raised
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthLogin(authProvider, code, state, scope));
+        assertThrows(NotAuthorizedException.class, () -> fixture.oauthValidate(authProvider, code, state, scope));
 
         // and: NO user is saved
         verify(userRepository, never()).save(user);
@@ -284,12 +284,12 @@ public class AuthServiceTest {
         String scope = "openid,profile,email";
 
         // and: auth provider fails to authenticate
-        when(openIdAuth.oauthLogin(authProvider, code))
+        when(openIdAuth.oauthExchange(authProvider, code))
             .thenThrow(new NotAuthorizedException("OpenId"));
 
         // when: the service is called
         assertThrows(NotAuthorizedException.class,
-            () -> fixture.oauthLogin(authProvider, code, state, scope));
+            () -> fixture.oauthValidate(authProvider, code, state, scope));
 
         // then: NO user is saved
         verify(userRepository, never()).save(any());

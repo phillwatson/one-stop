@@ -1,15 +1,18 @@
 package com.hillayes.openid.github;
 
 import com.hillayes.openid.*;
+import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeRequest;
 import com.hillayes.openid.rest.TokenExchangeResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
+import java.net.URI;
 import java.util.Map;
 
 import static com.hillayes.openid.AuthProvider.GITHUB;
@@ -36,6 +39,10 @@ public class GitHubAuth implements OpenIdAuth {
 
     @Inject
     @NamedAuthProvider(GITHUB)
+    OpenIdConfigResponse openIdConfig;
+
+    @Inject
+    @NamedAuthProvider(GITHUB)
     IdTokenValidator idTokenValidator;
 
     @Inject
@@ -48,6 +55,16 @@ public class GitHubAuth implements OpenIdAuth {
     @Override
     public boolean isFor(AuthProvider authProvider) {
         return authProvider == GITHUB;
+    }
+
+    public URI initiateLogin(String clientState) {
+        return UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
+            .queryParam("response_type", "code")
+            .queryParam("client_id", config.clientId())
+            .queryParam("scope", "openid profile email")
+            .queryParam("redirect_uri", config.redirectUri())
+            .queryParam("state", clientState)
+            .build();
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {
