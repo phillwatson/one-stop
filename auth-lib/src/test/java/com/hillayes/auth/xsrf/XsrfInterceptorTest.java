@@ -1,6 +1,7 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +57,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token);
         mockXsrfHeader(requestContext, token);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -70,6 +72,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, null);
         mockXsrfHeader(requestContext, token);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -84,6 +87,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token);
         mockXsrfHeader(requestContext, token, "second-value");
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -98,6 +102,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token);
         mockXsrfHeader(requestContext);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -117,6 +122,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token);
         mockXsrfHeader(requestContext, token);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.refreshDuration = Duration.ofSeconds(1);
         fixture.filter(requestContext);
@@ -133,6 +139,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token1);
         mockXsrfHeader(requestContext, token2);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -148,6 +155,7 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token1);
         mockXsrfHeader(requestContext, token2);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
@@ -163,10 +171,17 @@ public class XsrfInterceptorTest {
         mockXsrfCookie(requestContext, token1);
         mockXsrfHeader(requestContext, token2);
         mockMethod(requestContext, mockRolesAllowed());
+        mockUriInfo(requestContext);
 
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+    }
+
+    private void mockUriInfo(ContainerRequestContext requestContext) {
+        UriInfo uriInfo = mock();
+        when(uriInfo.getPath()).thenReturn("/mock/uri/path");
+        when(requestContext.getUriInfo()).thenReturn(uriInfo);
     }
 
     private void mockXsrfCookie(ContainerRequestContext requestContext, String xsrfToken) {

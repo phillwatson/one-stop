@@ -51,11 +51,16 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.2.0.Final</quarkus.platform.version>
+        <quarkus.platform.version>3.2.1.Final</quarkus.platform.version>
+
+<!--        <quarkus.management.enabled>true</quarkus.management.enabled>-->
+<!--        <quarkus.management.root-path>/management</quarkus.management.root-path>-->
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
+
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
+        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-17-runtime:1.16</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
         </quarkus.jib.jvm-additional-arguments>
     </properties>

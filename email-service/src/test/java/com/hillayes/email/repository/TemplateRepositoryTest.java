@@ -31,7 +31,7 @@ public class TemplateRepositoryTest {
         String subject = fixture.renderSubject(TemplateName.USER_REGISTERED, params, Optional.of(Locale.ENGLISH));
 
         // then: the subject is rendered in English
-        assertEquals("Hi Jack, please complete your OneStop registration", subject);
+        assertEquals("Hi Jack, please complete your One-Stop registration", subject);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class TemplateRepositoryTest {
         String subject = fixture.renderSubject(TemplateName.USER_REGISTERED, params, Optional.of(Locale.FRENCH));
 
         // then: the subject is rendered in French
-        assertEquals("Salut Jack, veuillez compléter votre inscription OneStop", subject);
+        assertEquals("Salut Jack, veuillez compléter votre inscription One-Stop", subject);
     }
 
     @Test
@@ -65,6 +65,6 @@ public class TemplateRepositoryTest {
         String subject = fixture.renderSubject(TemplateName.USER_REGISTERED, params, Optional.of(Locale.CHINESE));
 
         // then: the subject is rendered in the default locale (English)
-        assertEquals("Hi Jack, please complete your OneStop registration", subject);
+        assertEquals("Hi Jack, please complete your One-Stop registration", subject);
     }
 }

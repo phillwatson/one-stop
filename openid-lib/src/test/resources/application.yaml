@@ -7,6 +7,19 @@ one-stop:
         client-secret: 'a-google-generated-secret'
         redirect-uri: 'http://hibanapay/api/v1/auth/validate/google'
 
+      GITHUB:
+        config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
+        token-endpoint: 'https://github.com/login/oauth/access_token'
+        client-id: 'my-github-registered-client-id'
+        client-secret: 'a-github-generated-secret'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/github'
+
+      GITLAB:
+        config-uri: 'https://gitlab.com/.well-known/openid-configuration'
+        client-id: 'my-gitlab-registered-client-id'
+        client-secret: 'a-gitlab-generated-secret'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
+
       APPLE:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'

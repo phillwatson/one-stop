@@ -42,7 +42,7 @@ public class SendEmailServiceTest {
             new SendEmailService.Recipient("Mr Mock", "mock@work.com", Locale.ENGLISH);
 
         Map<String, Object> params = Map.of(
-            "acknowledge-uri", "http://validate?token=274768712uefhdsuihs78eyrf08723y4r",
+            "acknowledge_uri", "http://validate?token=274768712uefhdsuihs78eyrf08723y4r",
             "expires", Instant.now().toString()
         );
         fixture.sendEmail(TemplateName.USER_REGISTERED, recipient, params);
@@ -51,7 +51,7 @@ public class SendEmailServiceTest {
         verify(emailApi).sendTransacEmail(emailCapture.capture());
 
         SendSmtpEmail email = emailCapture.getValue();
-        assertTrue(email.getHtmlContent().contains(params.get("acknowledge-uri").toString()));
+        assertTrue(email.getHtmlContent().contains(params.get("acknowledge_uri").toString()));
         assertTrue(email.getHtmlContent().contains(params.get("expires").toString()));
     }
 }

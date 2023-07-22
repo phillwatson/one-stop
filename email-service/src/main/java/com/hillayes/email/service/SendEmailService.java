@@ -69,7 +69,7 @@ public class SendEmailService {
             params.put("COMPANY_COPYRIGHT_NAME", configuration.corporation().copyrightName());
             params.put("COMPANY_LONG_NAME", configuration.corporation().name());
             params.put("COMPANY_CONTACT_EMAIL", configuration.corporation().supportEmail());
-            params.put("COMPANY_CONTACT_LINE1", configuration.corporation().address().addressLine1());
+            params.put("COMPANY_ADDRESS_LINE1", configuration.corporation().address().addressLine1());
             params.put("COMPANY_ADDRESS_LINE2", configuration.corporation().address().addressLine2());
             params.put("COMPANY_ADDRESS_LINE3", configuration.corporation().address().addressLine3());
 
