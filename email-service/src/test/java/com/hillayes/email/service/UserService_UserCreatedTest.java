@@ -5,7 +5,7 @@ import com.hillayes.email.config.TemplateName;
 import com.hillayes.email.domain.User;
 import com.hillayes.email.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

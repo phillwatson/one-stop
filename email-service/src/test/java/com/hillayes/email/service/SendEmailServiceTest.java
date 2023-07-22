@@ -2,7 +2,8 @@ package com.hillayes.email.service;
 
 import com.hillayes.email.config.TemplateName;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.mockito.MockitoConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class SendEmailServiceTest {
-    @InjectMock(convertScopes = true)
+    @InjectMock
     TransactionalEmailsApi emailApi;
 
     @Inject

@@ -5,7 +5,8 @@ import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeRequest;
 import com.hillayes.openid.rest.TokenExchangeResponse;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.mockito.MockitoConfig;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,13 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class GoogleAuthTest {
-    @InjectMock(convertScopes = true)
+    @InjectMock
+    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.GOOGLE)
     OpenIdTokenApi openIdTokenApi;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
+    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.GOOGLE)
     IdTokenValidator idTokenValidator;
 

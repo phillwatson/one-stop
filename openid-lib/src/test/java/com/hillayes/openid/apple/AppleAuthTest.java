@@ -4,10 +4,10 @@ import com.hillayes.openid.*;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
-import com.hillayes.openid.rest.TokenExchangeRequest;
 import com.hillayes.openid.rest.TokenExchangeResponse;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.mockito.MockitoConfig;
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -27,11 +27,13 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class AppleAuthTest {
-    @InjectMock(convertScopes = true)
+    @InjectMock
+    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.APPLE)
     OpenIdTokenApi openIdTokenApi;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
+    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.APPLE)
     IdTokenValidator idTokenValidator;
 

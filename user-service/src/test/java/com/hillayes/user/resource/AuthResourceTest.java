@@ -8,7 +8,8 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.mockito.MockitoConfig;
 import io.restassured.http.Cookie;
 import io.restassured.response.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -44,7 +45,8 @@ public class AuthResourceTest extends TestBase {
     @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
     Duration refreshCookieTimeout;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
+    @MockitoConfig(convertScopes = true)
     UserRepository userRepository;
     @InjectMock
     PasswordCrypto passwordCrypto;

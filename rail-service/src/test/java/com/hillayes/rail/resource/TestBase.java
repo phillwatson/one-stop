@@ -3,7 +3,7 @@ package com.hillayes.rail.resource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.auth.xsrf.XsrfInterceptor;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 
 import jakarta.inject.Inject;
 

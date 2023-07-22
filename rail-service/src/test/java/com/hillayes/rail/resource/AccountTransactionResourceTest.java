@@ -10,7 +10,7 @@ import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.InstitutionService;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;

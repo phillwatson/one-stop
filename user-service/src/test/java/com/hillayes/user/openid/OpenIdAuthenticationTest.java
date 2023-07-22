@@ -9,7 +9,7 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import com.hillayes.user.utils.TestData;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;
 import org.jose4j.jwt.JwtClaims;

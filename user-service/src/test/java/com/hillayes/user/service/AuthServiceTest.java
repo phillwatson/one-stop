@@ -11,7 +11,7 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import io.smallrye.jwt.auth.cdi.NullJsonWebToken;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;

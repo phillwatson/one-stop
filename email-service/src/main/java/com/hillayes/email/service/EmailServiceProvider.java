@@ -1,8 +1,8 @@
 package com.hillayes.email.service;
 
 import com.hillayes.email.config.EmailConfiguration;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import sibApi.TransactionalEmailsApi;
 
@@ -15,7 +15,7 @@ public class EmailServiceProvider {
      * @return an initialised instance of the Email provider's API.
      */
     @Produces
-    @Singleton
+    @ApplicationScoped
     public TransactionalEmailsApi getEmailApi(EmailConfiguration configuration) {
         log.debug("Creating Email API instance");
         TransactionalEmailsApi result = new TransactionalEmailsApi();

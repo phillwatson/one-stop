@@ -4,7 +4,7 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 

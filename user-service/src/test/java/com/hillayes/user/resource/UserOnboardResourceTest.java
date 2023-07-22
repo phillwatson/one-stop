@@ -10,7 +10,7 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import com.hillayes.user.service.UserService;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import io.restassured.response.Response;
 import io.smallrye.jwt.auth.cdi.NullJsonWebToken;
 import io.smallrye.jwt.auth.principal.ParseException;
