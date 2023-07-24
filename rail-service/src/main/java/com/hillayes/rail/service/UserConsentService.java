@@ -202,6 +202,25 @@ public class UserConsentService {
         return redirectUri;
     }
 
+    public void consentExpired(UUID userConsentId) {
+        log.info("User's consent expired [userConsentId: {}]", userConsentId);
+        userConsentRepository.findById(userConsentId)
+            .ifPresent(userConsent -> {
+                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                    userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+                userConsent.setStatus(ConsentStatus.EXPIRED);
+                userConsent = userConsentRepository.save(userConsent);
+
+                // send consent expired event notification
+                consentEventSender.sendConsentExpired(userConsent);
+            });
+    }
+
+    /**
+     * Marks the consent record as cancelled but does not delete it, or the
+     * account records associated with it.
+     * @param userConsentId the identifier of the consent to be cancelled.
+     */
     public void consentCancelled(UUID userConsentId) {
         log.info("User's consent cancelled [userConsentId: {}]", userConsentId);
         userConsentRepository.findById(userConsentId)
@@ -218,7 +237,7 @@ public class UserConsentService {
 
     /**
      * Deletes all user-consents for the identified user. It will cascade to the
-     * requisitions and end-user agreement records.
+     * requisitions, end-user agreement, accounts, balances and transactions records.
      * This is called when the user is deleted.
      *
      * @param userId the user whose consents are to be deleted.
@@ -230,6 +249,8 @@ public class UserConsentService {
                 userConsent.getId(), userConsent.getInstitutionId());
 
             cancelConsent(userConsent);
+
+            // will cascade delete accounts, balances and transactions
             userConsentRepository.delete(userConsent);
         });
     }
@@ -252,10 +273,6 @@ public class UserConsentService {
             log.info("Error whilst purging user's agreement [userId: {}, agreementId: {}]",
                 userConsent.getUserId(), userConsent.getAgreementId(), e);
         }
-
-        // delete the account records
-        accountRepository.findByUserConsentId(userConsent.getId())
-            .forEach(accountRepository::delete);
 
         // send consent cancelled event notification
         consentEventSender.sendConsentCancelled(userConsent);

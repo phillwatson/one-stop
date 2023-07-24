@@ -1,0 +1,83 @@
+title Poll Consent
+
+participant scheduler
+participant rail-service
+participant database
+participant nordigen
+participant broker
+participant email-service
+
+note over scheduler,email-service#b7d6ff :Consents are polled when initially given.\nAfter that they are polled on a daily scheduled basis.
+space
+
+activate rail-service
+scheduler->rail-service:POLL_CONSENT(consentId)
+rail-service->database:getConsent(consentId)
+activate database
+rail-service<--database:user-consent
+deactivate database
+
+rail-service->database:getInstitution
+activate database
+rail-service<--database:institution
+deactivate database
+
+
+rail-service->nordigen:GET: /api/v2/requisitions/{id}/
+activate nordigen
+rail-service<--nordigen:requisition
+deactivate nordigen
+
+alt#lightblue requisition status = LN
+
+loop#ffd4d4 for each account-id
+rail-service->scheduler:POLL_ACCOUNT(railAccountId)
+activate scheduler
+deactivateafter scheduler
+end
+
+else#lightblue requisition status = SU {SUSPENDED}
+rail-service->database:UserConsent.persist
+rbox over rail-service,database#bee7ff:status="SUSPENDED"
+rail-service->broker:CONSENT_SUSPENDED
+activate broker
+deactivateafter broker
+rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
+
+else#lightblue requisition status = EX {EXPIRED}
+rail-service->database:UserConsent.persist
+rbox over rail-service,database#bee7ff:status="EXPIRED"
+rail-service->nordigen:DELETE: /api/v2/requisitions/{id}/
+activate nordigen
+deactivateafter nordigen
+rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
+activate nordigen
+deactivateafter nordigen
+
+rail-service->broker:CONSENT_EXPIRED
+activate broker
+deactivateafter broker
+rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
+end
+deactivateafter rail-service
+
+space
+broker->email-service:CONSENT_EXPIRED
+activate email-service
+email-service->database:User.get(userId)
+activate database
+database-->email-service:user
+deactivate database
+email-service->email-service:send email\n"consent expired..."
+deactivateafter email-service
+rbox over email-service#bee7ff:email includes link to allow\nuser to renew consent
+
+space
+broker->email-service:CONSENT_SUSPENDED
+activate email-service
+email-service->database:User.get(userId)
+activate database
+database-->email-service:user
+deactivate database
+email-service->email-service:send email\n"access has been\n suspended..."
+deactivateafter email-service

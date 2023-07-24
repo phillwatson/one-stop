@@ -38,6 +38,8 @@ rbox over rail-service,database#bee7ff:id: UUID,\nrequisition-id: String\nstatus
 rail-service->broker:CONSENT_INITIATED
 rail-service-->Client: redirect to requisition link
 deactivateafter rail-service
+
+space 2
 Client->nordigen: submit consent
 activate nordigen
 
@@ -45,22 +47,26 @@ nordigen->rail-service:GET: /api/v1/rails/consents/response\nUserConsent.id, err
 activate rail-service
 alt#lightblue error or denied
 rail-service->database:UserConsent.get
-rail-service->nordigen:DELETE: /api/v2/requisitions
+rail-service->nordigen:DELETE: /api/v2/requisitions/{id}/
+activate nordigen
+deactivateafter nordigen
+
+rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
 activate nordigen
 deactivateafter nordigen
 
 rail-service->database:UserConsent.update
 rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "DENIED"\ndate-denied: Instant\nerror: String
 rail-service->broker:CONSENT_DENIED
+rail-service-->Client:redirect to accountDetails page\n(error)
 else accepted
 rail-service->database:UserConsent.get
 rail-service->database:UserConsent.update
 rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "GIVEN"\ndate-accepted: Instant
 rail-service->broker:CONSENT_ACCEPTED
+rail-service-->Client:redirect to accountDetails page
 end
 
-rail-service-->nordigen:redirect to accountDetails page
 deactivateafter rail-service
 
-Client<--nordigen:redirect
 deactivateafter nordigen

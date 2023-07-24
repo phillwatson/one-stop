@@ -72,20 +72,24 @@ public class ConsentTopicConsumer implements EventConsumer {
         }
 
         return requisitionService.get(userConsent.getRequisitionId()).map(requisition -> {
-            requisition.accounts.forEach(railAccountId -> {
-                // locate account by rail-account-id - or create a new one
-                final Account account = accountRepository.findByRailAccountId(railAccountId)
-                    .orElse(Account.builder()
-                        .userConsentId(userConsent.getId())
-                        .userId(userConsent.getUserId())
-                        .institutionId(userConsent.getInstitutionId())
-                        .railAccountId(railAccountId)
-                        .build());
+            // TODO: ensure requisition status is "LN"
 
+            // retrieve details of each account in the requisition
+            requisition.accounts.forEach(railAccountId -> {
                 // retrieve rail-account summary
                 railAccountService.get(railAccountId).map(summary -> {
-                    account.setOwnerName(summary.ownerName);
-                    account.setIban(summary.iban);
+                    // TODO: ensure account status is "READY"
+
+                    // locate account by rail-account-id - or create a new one
+                    final Account account = accountRepository.findByRailAccountId(railAccountId)
+                        .orElse(Account.builder()
+                            .userConsentId(userConsent.getId())
+                            .userId(userConsent.getUserId())
+                            .institutionId(userConsent.getInstitutionId())
+                            .railAccountId(railAccountId)
+                            .ownerName(summary.ownerName)
+                            .iban(summary.iban)
+                            .build());
 
                     // retrieve rail-account details
                     railAccountService.details(railAccountId).ifPresent(details -> {

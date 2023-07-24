@@ -1,0 +1,37 @@
+title Consent Given
+
+participant nordigen
+participant scheduler
+
+participant rail-service
+participant database
+participant email-service
+participant broker
+
+
+nordigen->rail-service:GET: /api/v1/rails/consents/response?ref=consentId
+activate rail-service
+rail-service->database:UserConsent.get(consentId)
+activate database
+rail-service<--database:userConsent
+deactivate database
+
+rail-service->rail-service:update
+rail-service->database:UserConsent.persist
+rbox over rail-service,database#bee7ff:status="GIVEN"
+
+scheduler<-rail-service:POLL_CONSENT(consentId)
+rbox over scheduler,rail-service#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n  ...\n}
+rail-service->broker:CONSENT_GIVEN
+deactivateafter rail-service
+
+space 2
+broker->email-service:CONSENT_GIVEN
+activate email-service
+email-service->database:User.get(userId)
+activate database
+database-->email-service:user
+deactivate database
+email-service->email-service:send email\n"consent received ..."
+deactivateafter email-service
+

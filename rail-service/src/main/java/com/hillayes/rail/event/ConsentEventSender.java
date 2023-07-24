@@ -1,10 +1,7 @@
 package com.hillayes.rail.event;
 
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.consent.ConsentGiven;
-import com.hillayes.events.events.consent.ConsentCancelled;
-import com.hillayes.events.events.consent.ConsentDenied;
-import com.hillayes.events.events.consent.ConsentInitiated;
+import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.domain.UserConsent;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +64,20 @@ public class ConsentEventSender {
         eventSender.send(Topic.CONSENT, ConsentCancelled.builder()
             .consentId(userConsent.getId())
             .dateCancelled(userConsent.getDateCancelled())
+            .userId(userConsent.getId())
+            .institutionId(userConsent.getInstitutionId())
+            .agreementId(userConsent.getAgreementId())
+            .agreementExpires(userConsent.getAgreementExpires())
+            .requisitionId(userConsent.getRequisitionId())
+            .build());
+    }
+
+    public void sendConsentExpired(UserConsent userConsent) {
+        log.debug("Sending ConsentExpired event [consentId: {}, userId: {}, institutionId: {}]",
+            userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
+        eventSender.send(Topic.CONSENT, ConsentExpired.builder()
+            .consentId(userConsent.getId())
+            .dateExpired(Instant.now())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
             .agreementId(userConsent.getAgreementId())

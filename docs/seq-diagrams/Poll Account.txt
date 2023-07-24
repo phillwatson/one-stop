@@ -1,0 +1,68 @@
+title Poll Account
+
+participant scheduler
+participant rail-service
+participant database
+participant nordigen
+
+scheduler->rail-service:POLL_ACCOUNT(railAccountId)
+activate rail-service
+rail-service->>nordigen:GET: /api/v2/accounts/{id}/
+activate nordigen
+rail-service<--nordigen:account
+deactivate nordigen
+
+opt#lightblue account status = READY
+rail-service->database:Account.findByRailId(id)
+activate database
+rail-service<--database:account or null
+deactivate database
+alt#lightblue account not found
+rail-service->rail-service:new Account
+rbox over rail-service,database#bee7ff:id: UUID\nuser_id: UUID\ninstitution_id: String\nrail_account-id: String\naccount_name: String\naccount_type: String\niban: String\nowner_name: String\ncurrency: String\ndate_last_polled: Instant
+
+else if already processed within configured grace
+box over rail-service,database#e5ffbe:exit
+end
+
+rail-service->nordigen:GET: /api/v2/accounts/{id}/
+activate nordigen
+rail-service<--nordigen:account summary
+deactivate nordigen
+note over rail-service,nordigen#e5ffbe:{\n  "id": "7e944232-bda9-40bc-b784-660c7ab5fe78",\n  "created": "2022-02-21T13:43:55.595903Z",\n  "last_accessed": "2023-04-01T12:00:57.475383Z",\n  "iban": "GL3343697694912188",\n  "institution_id": "SANDBOXFINANCE_SFIN0000",\n  "status": "READY",\n  "owner_name": "John Doe"\n}
+
+rail-service->nordigen:GET: /api/v2/accounts/{id}/details/
+activate nordigen
+rail-service<--nordigen:account-details
+deactivate nordigen
+note over rail-service,nordigen#e5ffbe:{\n  "account": {\n    "resourceId": "01F3NS4YV94RA29YCH8R0F6BMF",\n    "iban": "GL3343697694912188",\n    "currency": "EUR",\n    "ownerName": "John Doe",\n    "name": "Main Account",\n    "product": "Checkings",\n    "cashAccountType": "CACC"\n  }\n}
+
+
+rail-service->database:Transaction.getMostRecent(accountId)
+rbox over rail-service,nordigen#bee7ff:determine the start date for next transaction request\nusing the account's most recent transaction
+rail-service->nordigen:GET: /api/v2/accounts/{id}/transactions/?date_from={}
+activate nordigen
+rail-service<--nordigen:transaction[]
+deactivate nordigen
+note over rail-service,nordigen#e5ffbe:{\n  "booked": [\n    {\n      "transactionId": "2023033101927908-1",\n      "bookingDate": "2023-03-31",\n      "bookingDateTime": null,\n      "valueDate": "2023-03-31",\n      "valueDateTime": null,\n      "transactionAmount": {\n        "amount": -15.0,\n        "currency": "EUR"\n      },\n....\n    },\n....\n  ],\n  "pending": [\n    {\n      "transactionId": null,\n      "bookingDate": null,\n      "bookingDateTime": null,\n      "valueDate": "2023-03-30",\n      "valueDateTime": null,\n      "transactionAmount": {\n        "amount": 10.0,\n        "currency": "EUR"\n      },\n....\n    }\n....\n  ]\n}\n
+
+loop #ffd4d4 for each booked transaction
+rail-service->database:Transaction.persist
+end
+
+rail-service->nordigen:GET: /api/v2/accounts/{id}/balances/
+activate nordigen
+rail-service<--nordigen:balance[]
+deactivate nordigen
+note over rail-service,nordigen#e5ffbe:[\n  {\n    "balanceAmount": {\n      "amount": 1913.12,\n      "currency": "EUR"\n    },\n    "balanceType": "expected",\n    "referenceDate": "2023-04-01"\n  },\n  {\n    "balanceAmount": {\n      "amount": 1913.12,\n      "currency": "EUR"\n    },\n    "balanceType": "interimAvailable",\n    "referenceDate": "2023-04-01"\n  }\n]
+loop #ffd4d4 for each balance type
+rail-service->database:AccountBalance.persist
+end
+
+
+rail-service->database:Account.persist
+rbox over rail-service,database#bee7ff:dateLastPolled = now()
+end
+
+deactivateafter rail-service
+

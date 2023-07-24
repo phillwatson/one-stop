@@ -1,0 +1,24 @@
+title Poll All Consents
+
+participant scheduler
+participant rail-service
+participant database
+
+note over scheduler,database#b7d6ff :The task is scheduled to run overnight.
+space
+
+activate rail-service
+scheduler->rail-service:POLL_ALL_CONSENTS
+rail-service->database:getAllConsents()
+activate database
+rail-service<--database:user-consent[]
+deactivate database
+
+loop#ffd4d4 rail-service:for each consent
+opt#lightblue consent status = GIVEN
+
+rail-service->scheduler:POLL_CONSENT(consentId)
+activate scheduler
+deactivateafter scheduler
+end
+end
