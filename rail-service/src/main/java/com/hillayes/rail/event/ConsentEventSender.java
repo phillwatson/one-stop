@@ -4,6 +4,7 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,7 @@ import java.time.Instant;
 @Slf4j
 public class ConsentEventSender {
     private final EventSender eventSender;
+    private final InstitutionService institutionService;
 
     public void sendConsentInitiated(UserConsent userConsent) {
         log.debug("Sending ConsentInitiated event [consentId: {}, userId: {}, institutionId: {}]",
@@ -24,6 +26,7 @@ public class ConsentEventSender {
             .dateInitiated(Instant.now())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
@@ -38,6 +41,7 @@ public class ConsentEventSender {
             .dateGiven(userConsent.getDateGiven())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
@@ -52,6 +56,7 @@ public class ConsentEventSender {
             .dateDenied(userConsent.getDateDenied())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
@@ -66,6 +71,22 @@ public class ConsentEventSender {
             .dateCancelled(userConsent.getDateCancelled())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .agreementId(userConsent.getAgreementId())
+            .agreementExpires(userConsent.getAgreementExpires())
+            .requisitionId(userConsent.getRequisitionId())
+            .build());
+    }
+
+    public void sendConsentSuspended(UserConsent userConsent) {
+        log.debug("Sending ConsentSuspended event [consentId: {}, userId: {}, institutionId: {}]",
+            userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
+        eventSender.send(Topic.CONSENT, ConsentSuspended.builder()
+            .consentId(userConsent.getId())
+            .dateSuspended(Instant.now())
+            .userId(userConsent.getId())
+            .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
@@ -80,9 +101,16 @@ public class ConsentEventSender {
             .dateExpired(Instant.now())
             .userId(userConsent.getId())
             .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
             .build());
+    }
+
+    private String getInstitutionName(String institutionId) {
+        return institutionService.get(institutionId)
+            .map(detail -> detail.name)
+            .orElse("Unknown");
     }
 }

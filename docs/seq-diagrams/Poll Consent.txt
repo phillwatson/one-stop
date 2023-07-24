@@ -8,18 +8,12 @@ participant broker
 participant email-service
 
 note over scheduler,email-service#b7d6ff :Consents are polled when initially given.\nAfter that they are polled on a daily scheduled basis.
-space
 
-activate rail-service
 scheduler->rail-service:POLL_CONSENT(consentId)
+activate rail-service
 rail-service->database:getConsent(consentId)
 activate database
 rail-service<--database:user-consent
-deactivate database
-
-rail-service->database:getInstitution
-activate database
-rail-service<--database:institution
 deactivate database
 
 
@@ -31,7 +25,8 @@ deactivate nordigen
 alt#lightblue requisition status = LN
 
 loop#ffd4d4 for each account-id
-rail-service->scheduler:POLL_ACCOUNT(railAccountId)
+
+rail-service->scheduler:POLL_ACCOUNT\n(consentId,railAccountId)
 activate scheduler
 deactivateafter scheduler
 end
@@ -39,6 +34,18 @@ end
 else#lightblue requisition status = SU {SUSPENDED}
 rail-service->database:UserConsent.persist
 rbox over rail-service,database#bee7ff:status="SUSPENDED"
+rail-service->nordigen:DELETE: /api/v2/requisitions/{id}/
+activate nordigen
+deactivateafter nordigen
+rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
+activate nordigen
+deactivateafter nordigen
+
+rail-service->nordigen:getInstitution
+activate nordigen
+rail-service<--nordigen:institution
+deactivate nordigen
+
 rail-service->broker:CONSENT_SUSPENDED
 activate broker
 deactivateafter broker
@@ -53,6 +60,11 @@ deactivateafter nordigen
 rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
 activate nordigen
 deactivateafter nordigen
+
+rail-service->nordigen:getInstitution
+activate nordigen
+rail-service<--nordigen:institution
+deactivate nordigen
 
 rail-service->broker:CONSENT_EXPIRED
 activate broker

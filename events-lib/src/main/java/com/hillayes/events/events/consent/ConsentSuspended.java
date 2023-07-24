@@ -9,23 +9,22 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Notifies listeners of the user's acceptance of consent to access their bank account
- * details.
+ * Notifies listeners of the expiration of a user's consent to access their bank account details.
  */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsentGiven {
+public class ConsentSuspended {
     /**
      * The ID of the user from whom consent is being obtained.
      */
     private UUID userId;
 
     /**
-     * The date-time on which the consent was given.
+     * The date-time on which the consent was suspended.
      */
-    private Instant dateGiven;
+    private Instant dateSuspended;
 
     /**
      * The ID of the consent record held user-consent table.
@@ -33,18 +32,18 @@ public class ConsentGiven {
     private UUID consentId;
 
     /**
-     * The ID of the institution for which consent has been obtained. This record is
+     * The ID of the institution for which consent has suspended. This record is
      * held in the rail providing the open-banking service.
      */
     private String institutionId;
 
     /**
-     * The name of the institution for which consent has been obtained.
+     * The name of the institution for which consent has suspended.
      */
     private String institutionName;
 
     /**
-     * The ID of the agreement between the user for whom consent is being obtained. This
+     * The ID of the agreement between the user for whom consent was obtained. This
      * record is held in the rail providing the open-banking service.
      */
     private String agreementId;

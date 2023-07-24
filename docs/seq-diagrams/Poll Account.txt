@@ -5,18 +5,22 @@ participant rail-service
 participant database
 participant nordigen
 
-scheduler->rail-service:POLL_ACCOUNT(railAccountId)
+note over scheduler,nordigen#b7d6ff :The polling of an account is triggered when the associated\n the User Consent is polled, and the consent is still GIVEN
+
+
+scheduler->rail-service:POLL_ACCOUNT\n(consentId, railAccountId)
 activate rail-service
 rail-service->>nordigen:GET: /api/v2/accounts/{id}/
 activate nordigen
-rail-service<--nordigen:account
+rail-service<--nordigen:rail-account
 deactivate nordigen
 
-opt#lightblue account status = READY
+alt#lightblue rail-account status = READY
 rail-service->database:Account.findByRailId(id)
 activate database
 rail-service<--database:account or null
 deactivate database
+
 alt#lightblue account not found
 rail-service->rail-service:new Account
 rbox over rail-service,database#bee7ff:id: UUID\nuser_id: UUID\ninstitution_id: String\nrail_account-id: String\naccount_name: String\naccount_type: String\niban: String\nowner_name: String\ncurrency: String\ndate_last_polled: Instant
@@ -62,7 +66,55 @@ end
 
 rail-service->database:Account.persist
 rbox over rail-service,database#bee7ff:dateLastPolled = now()
+
+else#lightblue account status = SUSPENDED
+rail-service->database:UserConsent.findById(consentId)
+activate database
+rail-service<--database:user-consent
+deactivate database
+rbox over rail-service,database#bee7ff:status="SUSPENDED"
+
+rail-service->database:UserConsent.persist
+rail-service->nordigen:DELETE: /api/v2/requisitions/{id}/
+activate nordigen
+deactivateafter nordigen
+rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
+activate nordigen
+deactivateafter nordigen
+
+rail-service->nordigen:getInstitution
+activate nordigen
+rail-service<--nordigen:institution
+deactivate nordigen
+
+rail-service->broker:CONSENT_SUSPENDED
+activate broker
+deactivateafter broker
+rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
+
+else#lightblue account status = EXPIRED
+rail-service->database:UserConsent.findById(consentId)
+activate database
+rail-service<--database:user-consent
+deactivate database
+rbox over rail-service,database#bee7ff:status="EXPIRED"
+rail-service->database:UserConsent.persist
+rail-service->nordigen:DELETE: /api/v2/requisitions/{id}/
+activate nordigen
+deactivateafter nordigen
+rail-service->nordigen:DELETE: /api/v2/agreements/enduser/{id}/
+activate nordigen
+deactivateafter nordigen
+
+rail-service->nordigen:getInstitution
+activate nordigen
+rail-service<--nordigen:institution
+deactivate nordigen
+
+rail-service->broker:CONSENT_EXPIRED
+activate broker
+deactivateafter broker
+rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
 end
 
 deactivateafter rail-service
-

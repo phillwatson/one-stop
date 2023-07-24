@@ -12,8 +12,8 @@ import com.hillayes.rail.model.TransactionList;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
-import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.service.RailAccountService;
+import com.hillayes.rail.service.UserConsentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 public class PollAccountJobbingTaskTest {
     private ServiceConfiguration configuration;
-    private UserConsentRepository userConsentRepository;
+    private UserConsentService userConsentService;
     private AccountRepository accountRepository;
     private AccountBalanceRepository accountBalanceRepository;
     private AccountTransactionRepository accountTransactionRepository;
@@ -43,7 +43,7 @@ public class PollAccountJobbingTaskTest {
     @BeforeEach
     public void init() {
         configuration = mock();
-        userConsentRepository = mock();
+        userConsentService = mock();
         accountRepository = mock();
         accountBalanceRepository = mock();
         accountTransactionRepository = mock();
@@ -57,7 +57,7 @@ public class PollAccountJobbingTaskTest {
             return balance;
         });
 
-        fixture = new PollAccountJobbingTask(configuration, userConsentRepository,
+        fixture = new PollAccountJobbingTask(configuration, userConsentService,
             accountRepository, accountBalanceRepository, accountTransactionRepository, railAccountService);
     }
 
@@ -83,7 +83,7 @@ public class PollAccountJobbingTaskTest {
     public void testAccept_WithNewAccount() {
         // given: a UserConsent, associated with the account to be processed, is still active
         UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an account to be processed for the first time
         Account account = Account.builder()
@@ -117,7 +117,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountRepository).findById(account.getId());
 
         // and: the user-consent is retrieved
-        verify(userConsentRepository).findById(account.getUserConsentId());
+        verify(userConsentService).getUserConsent(account.getUserConsentId());
 
         // and: the rail account balances are retrieved
         verify(railAccountService).balances(account.getRailAccountId());
@@ -144,7 +144,7 @@ public class PollAccountJobbingTaskTest {
     public void testAccept_NoBalanceRecords() {
         // given: a UserConsent, associated with the account to be processed, is still active
         UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an account to be processed for the first time
         Account account = Account.builder()
@@ -178,7 +178,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountRepository).findById(account.getId());
 
         // and: the user-consent is retrieved
-        verify(userConsentRepository).findById(account.getUserConsentId());
+        verify(userConsentService).getUserConsent(account.getUserConsentId());
 
         // and: the rail account balances are retrieved
         verify(railAccountService).balances(account.getRailAccountId());
@@ -205,7 +205,7 @@ public class PollAccountJobbingTaskTest {
     public void testAccept_NoNewTransaction() {
         // given: a UserConsent, associated with the account to be processed, is still active
         UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an account to be processed for the first time
         Account account = Account.builder()
@@ -239,7 +239,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountRepository).findById(account.getId());
 
         // and: the user-consent is retrieved
-        verify(userConsentRepository).findById(account.getUserConsentId());
+        verify(userConsentService).getUserConsent(account.getUserConsentId());
 
         // and: the rail account balances are retrieved
         verify(railAccountService).balances(account.getRailAccountId());
@@ -269,7 +269,7 @@ public class PollAccountJobbingTaskTest {
 
         // and: a UserConsent, associated with the account to be processed, is still active
         UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an account that was last processed 30 minutes ago
         Account account = Account.builder()
@@ -289,7 +289,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountRepository).findById(account.getId());
 
         // and: the user-consent is NOT retrieved
-        verify(userConsentRepository, never()).findById(any());
+        verify(userConsentService, never()).getUserConsent(any());
 
         // and: NO rail account balances are retrieved
         verify(railAccountService, never()).balances(any());
@@ -318,7 +318,7 @@ public class PollAccountJobbingTaskTest {
 
         // and: a UserConsent, associated with the account to be processed, is still active
         UserConsent userConsent = mockUserConsent(ConsentStatus.CANCELLED);
-        when(userConsentRepository.findById(any())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an account that was last processed 2 hours ago
         Account account = Account.builder()
@@ -338,7 +338,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountRepository).findById(account.getId());
 
         // and: the user-consent is retrieved
-        verify(userConsentRepository).findById(account.getUserConsentId());
+        verify(userConsentService).getUserConsent(account.getUserConsentId());
 
         // and: NO rail account balances are retrieved
         verify(railAccountService, never()).balances(any());

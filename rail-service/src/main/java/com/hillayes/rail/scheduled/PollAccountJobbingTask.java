@@ -5,53 +5,69 @@ import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.config.ServiceConfiguration;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AccountBalance;
-import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.domain.ConsentStatus;
+import com.hillayes.rail.domain.*;
+import com.hillayes.rail.model.AccountStatus;
+import com.hillayes.rail.model.AccountSummary;
 import com.hillayes.rail.model.TransactionDetail;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
-import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.service.RailAccountService;
+import com.hillayes.rail.service.UserConsentService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import java.time.*;
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * A jobbing task to retrieve the balance and transaction data for an identified
- * Account.
+ * UserConsent and rail Account.
  */
 @ApplicationScoped
 @Slf4j
-public class PollAccountJobbingTask extends AbstractNamedJobbingTask<UUID> {
+public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccountJobbingTask.PollAccountTaskPayload> {
     private final ServiceConfiguration configuration;
-    private final UserConsentRepository userConsentRepository;
+    private final UserConsentService userConsentService;
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
     private final AccountTransactionRepository accountTransactionRepository;
     private final RailAccountService railAccountService;
 
+    @Builder
+    public static class PollAccountTaskPayload implements Serializable {
+        UUID consentId;
+        String railAccountId;
+    }
+
     public PollAccountJobbingTask(ServiceConfiguration configuration,
-                                  UserConsentRepository userConsentRepository,
+                                  UserConsentService userConsentService,
                                   AccountRepository accountRepository,
                                   AccountBalanceRepository accountBalanceRepository,
                                   AccountTransactionRepository accountTransactionRepository,
                                   RailAccountService railAccountService) {
         super("poll-account");
         this.configuration = configuration;
-        this.userConsentRepository = userConsentRepository;
+        this.userConsentService = userConsentService;
         this.accountRepository = accountRepository;
         this.accountBalanceRepository = accountBalanceRepository;
         this.accountTransactionRepository = accountTransactionRepository;
         this.railAccountService = railAccountService;
+    }
+
+    public String queueJob(UUID consentId, String railAccountId) {
+        log.info("Queuing job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
+        return scheduler.addJob(this, PollAccountTaskPayload.builder()
+            .consentId(consentId).railAccountId(railAccountId).build());
     }
 
     /**
@@ -64,46 +80,88 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<UUID> {
      */
     @Override
     @Transactional
-    public TaskConclusion apply(TaskContext<UUID> context) {
-        UUID accountId = context.getPayload();
-        log.info("Processing Poll Account job [accountId: {}]", accountId);
+    public TaskConclusion apply(TaskContext<PollAccountTaskPayload> context) {
+        UUID consentId = context.getPayload().consentId;
+        String railAccountId = context.getPayload().railAccountId;
+        log.info("Processing Poll Account job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
 
-        // if the account has been polled after this grace period, don't poll it again
-        Instant grace = Instant.now().minus(configuration.accountPollingInterval());
+        UserConsent userConsent = userConsentService.getUserConsent(consentId).orElse(null);
+        if (userConsent == null) {
+            log.info("Unable to find user-consent [consentId: {}, railAccountId: {}]", consentId, railAccountId);
+            return TaskConclusion.COMPLETE;
+        }
 
-        accountRepository.findById(accountId)
-            .filter(acc -> {
-                // only process if not polled within grace period
-                if ((acc.getDateLastPolled() == null) || (acc.getDateLastPolled().isBefore(grace))) {
-                    return true;
-                }
+        if (userConsent.getStatus() != ConsentStatus.GIVEN) {
+            log.debug("Skipping account polling [consentId: {}, railAccountId: {}, consentStatus: {}]",
+                userConsent.getId(), railAccountId, userConsent.getStatus());
+            return TaskConclusion.COMPLETE;
+        }
 
-                log.debug("Skipping account transaction update [accountId: {}, lastPolled: {}]",
-                    accountId, acc.getDateLastPolled());
-                return false;
-            })
-            .ifPresent(account -> userConsentRepository.findById(account.getUserConsentId())
-                // ensure consent is still active
-                .filter(consent -> {
-                    if (consent.getStatus() == ConsentStatus.GIVEN) {
-                        return true;
-                    }
+        AccountSummary railAccount = railAccountService.get(railAccountId).orElse(null);
+        if (railAccount == null) {
+            log.info("Unable to find rail-account [consentId: {}, railAccountId: {}]", consentId, railAccountId);
+            return TaskConclusion.COMPLETE;
+        }
 
-                    log.debug("Skipping account transaction update [accountId: {}, consentId: {}, status: {}]",
-                        accountId, consent.getId(), consent.getStatus());
-                    return false;
-                })
-                .ifPresent(consent -> {
-                    log.debug("Polling account [accountId: {}, railAccountId: {}]", accountId, account.getRailAccountId());
-                    updateBalances(account);
-                    updateTransactions(account, consent.getMaxHistory());
+        if (railAccount.status == AccountStatus.SUSPENDED) {
+            userConsentService.consentSuspended(userConsent.getId());
+        }
 
-                    account.setDateLastPolled(Instant.now());
-                    accountRepository.save(account);
-                })
-            );
+        else if (railAccount.status == AccountStatus.EXPIRED) {
+            userConsentService.consentExpired(userConsent.getId());
+        }
+
+        else if (railAccount.status == AccountStatus.READY) {
+            Account account = getOrCreateAccount(userConsent, railAccount);
+
+            // only process if not already polled within grace period
+            Instant grace = Instant.now().minus(configuration.accountPollingInterval());
+            if ((account.getDateLastPolled() != null) && (account.getDateLastPolled().isAfter(grace))) {
+                log.debug("Skipping account polling [accountId: {}, lastPolled: {}]",
+                    account.getId(), account.getDateLastPolled());
+                return TaskConclusion.COMPLETE;
+            }
+
+            log.debug("Polling account [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
+            updateBalances(account);
+            updateTransactions(account, userConsent.getMaxHistory());
+
+            account.setDateLastPolled(Instant.now());
+            accountRepository.save(account);
+        }
 
         return TaskConclusion.COMPLETE;
+    }
+
+    private Account getOrCreateAccount(UserConsent userConsent, AccountSummary railAccount) {
+        return accountRepository.findByRailAccountId(railAccount.id)
+            .map(account -> {
+                // this may be a new consent record for an expired/suspended consent
+                account.setUserConsentId(userConsent.getId());
+                return account;
+            })
+            .orElseGet(() -> {
+                Account newAccount = Account.builder()
+                    .userConsentId(userConsent.getId())
+                    .userId(userConsent.getUserId())
+                    .institutionId(userConsent.getInstitutionId())
+                    .railAccountId(railAccount.id)
+                    .ownerName(railAccount.ownerName)
+                    .iban(railAccount.iban)
+                    .build();
+
+                // retrieve rail-account details
+                railAccountService.details(railAccount.id).ifPresent(details -> {
+                    Map<String, Object> accountProperties = (Map) details.get("account");
+                    if (accountProperties != null) {
+                        newAccount.setAccountName((String) accountProperties.get("name"));
+                        newAccount.setAccountType((String) accountProperties.get("cashAccountType"));
+                        newAccount.setCurrencyCode((String) accountProperties.get("currency"));
+                    }
+                });
+
+                return newAccount;
+            });
     }
 
     private void updateBalances(Account account) {
@@ -128,6 +186,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<UUID> {
     private void updateTransactions(Account account, int maxHistory) {
         log.debug("Updating transactions [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
+        // find the date of the most recent transaction we hold locally
+        // we then use that as the start date for our rails request for transactions
         PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
         LocalDate startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
             .stream().findFirst()
@@ -135,6 +195,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<UUID> {
             .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found
         log.debug("Looking for transactions [accountId: {}, startDate: {}]", account.getId(), startDate);
 
+        // retrieve transactions from rail
         List<AccountTransaction> transactions = railAccountService.transactions(account.getRailAccountId(), startDate, LocalDate.now())
             .map(transactionList -> transactionList.booked)
             .orElse(List.of())

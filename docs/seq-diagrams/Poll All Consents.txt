@@ -5,10 +5,9 @@ participant rail-service
 participant database
 
 note over scheduler,database#b7d6ff :The task is scheduled to run overnight.
-space
 
-activate rail-service
 scheduler->rail-service:POLL_ALL_CONSENTS
+activate rail-service
 rail-service->database:getAllConsents()
 activate database
 rail-service<--database:user-consent[]

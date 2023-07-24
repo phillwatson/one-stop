@@ -6,5 +6,6 @@ public enum ConsentStatus {
     GIVEN,
     DENIED,
     EXPIRED,
+    SUSPENDED,
     CANCELLED;
 }

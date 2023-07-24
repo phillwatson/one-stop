@@ -1,7 +1,8 @@
 package com.hillayes.rail.scheduled;
 
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.repository.AccountRepository;
+import com.hillayes.rail.domain.ConsentStatus;
+import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.repository.UserConsentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,58 +13,66 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class PollAllAccountsSchedulerTaskTest {
-    private AccountRepository accountRepository;
+    private UserConsentRepository userConsentRepository;
 
-    private PollAccountJobbingTask pollAccountJobbingTask;
+    private PollConsentJobbingTask pollConsentJobbingTask;
 
-    private PollAllAccountsSchedulerTask fixture;
+    private PollAllConsentsScheduledTask fixture;
 
     @BeforeEach
     public void init() {
-        accountRepository = mock();
-        pollAccountJobbingTask = mock();
+        userConsentRepository = mock();
+        pollConsentJobbingTask = mock();
 
-        fixture = new PollAllAccountsSchedulerTask(accountRepository, pollAccountJobbingTask);
+        fixture = new PollAllConsentsScheduledTask(userConsentRepository, pollConsentJobbingTask);
     }
 
     @Test
     public void testGetName() {
-        assertEquals("poll-all-accounts", fixture.getName());
+        assertEquals("poll-all-consents", fixture.getName());
     }
 
     @Test
-    public void testRun_WithAccounts() {
+    public void testRun_WithConsents() {
         // given: a collection of accounts
-        List<Account> accounts = List.of(
-            Account.builder().id(UUID.randomUUID()).build(),
-            Account.builder().id(UUID.randomUUID()).build(),
-            Account.builder().id(UUID.randomUUID()).build()
+        List<UserConsent> consents = List.of(
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.GIVEN).build(),
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.EXPIRED).build(),
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.GIVEN).build(),
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.SUSPENDED).build(),
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.GIVEN).build(),
+            UserConsent.builder().id(UUID.randomUUID()).status(ConsentStatus.CANCELLED).build()
         );
 
-        // and: the repository returns the accounts
-        when(accountRepository.findAll()).thenReturn(accounts);
+        // and: the repository returns the consents
+        when(userConsentRepository.findAll()).thenReturn(consents);
 
         // when: the fixture is invoked
         fixture.run();
 
-        // then: a poll-account task is queued for each account
-        accounts.forEach(account ->
-            verify(pollAccountJobbingTask).queueJob(account.getId())
-        );
+        // then: a poll-consent task is queued for each GIVEN consent
+        consents.forEach(consent -> {
+            if (consent.getStatus() == ConsentStatus.GIVEN) {
+                verify(pollConsentJobbingTask).queueJob(consent.getId());
+            }
+            else {
+                verify(pollConsentJobbingTask, never()).queueJob(consent.getId());
+            }
+        });
     }
 
     @Test
-    public void testRun_WithNoAccounts() {
-        // given: an empty collection of accounts
-        List<Account> accounts = List.of();
+    public void testRun_WithNoConsents() {
+        // given: an empty collection of consents
+        List<UserConsent> consents = List.of();
 
         // and: the repository returns the empty list
-        when(accountRepository.findAll()).thenReturn(accounts);
+        when(userConsentRepository.findAll()).thenReturn(consents);
 
         // when: the fixture is invoked
         fixture.run();
 
-        // then: NO poll-account task is queued for any account
-        verify(pollAccountJobbingTask, never()).queueJob(any());
+        // then: NO poll-consent task is queued for any consent
+        verify(pollConsentJobbingTask, never()).queueJob(any());
     }
 }

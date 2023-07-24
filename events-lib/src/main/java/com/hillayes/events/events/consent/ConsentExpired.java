@@ -32,10 +32,15 @@ public class ConsentExpired {
     private UUID consentId;
 
     /**
-     * The ID of the institution for which consent is being obtained. This record is
+     * The ID of the institution for which consent has expired. This record is
      * held in the rail providing the open-banking service.
      */
     private String institutionId;
+
+    /**
+     * The name of the institution for which consent has expired.
+     */
+    private String institutionName;
 
     /**
      * The ID of the agreement between the user for whom consent is being obtained. This
