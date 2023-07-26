@@ -2,11 +2,11 @@ package com.hillayes.rail.scheduled;
 
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
+import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.config.ServiceConfiguration;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AccountBalance;
-import com.hillayes.rail.domain.ConsentStatus;
-import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.domain.*;
+import com.hillayes.rail.model.AccountStatus;
+import com.hillayes.rail.model.AccountSummary;
 import com.hillayes.rail.model.Balance;
 import com.hillayes.rail.model.TransactionList;
 import com.hillayes.rail.repository.AccountBalanceRepository;
@@ -14,20 +14,24 @@ import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.UserConsentService;
+import com.hillayes.rail.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.hillayes.rail.utils.TestData.*;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class PollAccountJobbingTaskTest {
@@ -57,6 +61,9 @@ public class PollAccountJobbingTaskTest {
             return balance;
         });
 
+        // given: a polling grace period of 1 hour
+        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
+
         fixture = new PollAccountJobbingTask(configuration, userConsentService,
             accountRepository, accountBalanceRepository, accountTransactionRepository, railAccountService);
     }
@@ -72,291 +79,567 @@ public class PollAccountJobbingTaskTest {
         fixture.taskScheduled(scheduler);
 
         // when: an account ID is queued for processing
-        UUID accountId = UUID.randomUUID();
-        fixture.queueJob(accountId);
+        UUID consentId = UUID.randomUUID();
+        String railAccountId = randomAlphanumeric(20);
+        fixture.queueJob(consentId, railAccountId);
 
         // then: the job is passed to the scheduler for queuing
-        verify(scheduler).addJob(fixture, accountId);
+        ArgumentCaptor<PollAccountJobbingTask.Payload> captor =
+            ArgumentCaptor.forClass(PollAccountJobbingTask.Payload.class);
+        verify(scheduler).addJob(eq(fixture), captor.capture());
+
+        // and: the payload is correct
+        assertEquals(consentId, captor.getValue().consentId);
+        assertEquals(railAccountId, captor.getValue().railAccountId);
     }
 
     @Test
-    public void testAccept_WithNewAccount() {
-        // given: a UserConsent, associated with the account to be processed, is still active
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
+    public void testHappyPath_ExistingAccount() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
-        // and: an account to be processed for the first time
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.READY)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // and: a local account is linked to that rail-account
         Account account = Account.builder()
             .id(UUID.randomUUID())
-            .dateLastPolled(null) // never been processed before
-            .userConsentId(userConsent.getId())
-            .userId(userConsent.getUserId())
-            .railAccountId(UUID.randomUUID().toString())
+            .railAccountId(railAccount.id)
+            .dateLastPolled(Instant.now().minus(Duration.ofHours(2)))
             .build();
-        when(accountRepository.findById(any())).thenReturn(Optional.of(account));
+        when(accountRepository.findByRailAccountId(railAccount.id)).thenReturn(Optional.of(account));
 
-        // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
+        // and: the account has existing transactions - from which transaction poll will start
+        AccountTransaction transaction = AccountTransaction.builder()
+            .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))
+            .build();
+        Page<AccountTransaction> page = new PageImpl<>(List.of(transaction));
+        when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(PageRequest.class)))
+            .thenReturn(page);
 
-        // and: the rail account balances are available
-        List<Balance> balances = List.of(mockBalance(), mockBalance());
-        when(railAccountService.balances(any())).thenReturn(Optional.of(balances));
+        // and: rail-balance records are available
+        List<Balance> balances = List.of(
+            TestData.mockBalance(),
+            TestData.mockBalance()
+        );
+        when(railAccountService.balances(railAccount.id)).thenReturn(Optional.of(balances));
 
-        // and: the rail account transaction are available
-        TransactionList railTransactions = mockTransactionList(2, 2);
-        when(railAccountService.transactions(any(), any(), any())).thenReturn(Optional.of(railTransactions));
+        // and: rail-transactions records are available
+        TransactionList transactions = TestData.mockTransactionList(10, 2);
+        when(railAccountService.transactions(eq(railAccount.id), any(), any())).thenReturn(Optional.of(transactions));
 
-        // and: a grace period of 1 hour
-        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
 
-        // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.apply(context);
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
 
-        // then: the account is retrieved
-        verify(accountRepository).findById(account.getId());
+        // and: the rail-account is retrieved
+        verify(railAccountService).get(railAccount.id);
 
-        // and: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(account.getUserConsentId());
+        // and: the local account is retrieved
+        verify(accountRepository).findByRailAccountId(railAccount.id);
 
-        // and: the rail account balances are retrieved
-        verify(railAccountService).balances(account.getRailAccountId());
+        // and: the local account is updated with the consent ID
+        assertEquals(userConsent.getId(), account.getUserConsentId());
 
-        // and: each balance record is saved
+        // and: the account balances are retrieved
+        verify(railAccountService).balances(railAccount.id);
+
+        // and: the balances are saved
         verify(accountBalanceRepository, times(balances.size())).save(any());
 
-        // and: the account's local transactions are searched - to determine date of last transaction
+        // and: the most recent transaction is queried to get start date for poll
         verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any());
 
-        // and: the rail account transaction are retrieved - using the permitted max history
-        LocalDate startDate = LocalDate.now().minusDays(userConsent.getMaxHistory());
-        verify(railAccountService).transactions(account.getRailAccountId(), startDate, LocalDate.now());
+        // and: the account transactions are retrieved
+        verify(railAccountService).transactions(eq(railAccount.id), any(), any());
 
-        // and: the retrieved transactions are saved
+        // and: the transactions are saved
         verify(accountTransactionRepository).saveAll(any());
 
-        // and: the account's last-polled date is updated and saved
-        assertNotNull(account.getDateLastPolled());
+        // and: the local account is updated
         verify(accountRepository).save(account);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
     }
 
     @Test
-    public void testAccept_NoBalanceRecords() {
-        // given: a UserConsent, associated with the account to be processed, is still active
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
+    public void testHappyPath_NewAccount() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .institutionId(randomAlphanumeric(20))
+            .status(ConsentStatus.GIVEN)
+            .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
-        // and: an account to be processed for the first time
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .dateLastPolled(null) // never been processed before
-            .userConsentId(userConsent.getId())
-            .userId(userConsent.getUserId())
-            .railAccountId(UUID.randomUUID().toString())
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.READY)
+            .ownerName(randomAlphanumeric(10))
+            .iban(randomAlphanumeric(15))
             .build();
-        when(accountRepository.findById(any())).thenReturn(Optional.of(account));
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
 
-        // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
+        // and: NO local account is linked to that rail-account
+        when(accountRepository.findByRailAccountId(railAccount.id)).thenReturn(Optional.empty());
 
-        // and: NO rail account balances are available
-        List<Balance> balances = List.of();
-        when(railAccountService.balances(any())).thenReturn(Optional.of(balances));
+        // and: the account has existing transactions - from which transaction poll will start
+        when(accountTransactionRepository.findByAccountId(any(), any(PageRequest.class)))
+            .thenReturn(Page.empty());
 
-        // and: the rail account transaction are available
-        TransactionList railTransactions = mockTransactionList(2, 2);
-        when(railAccountService.transactions(any(), any(), any())).thenReturn(Optional.of(railTransactions));
+        // and: rail-balance records are available
+        List<Balance> balances = List.of(
+            TestData.mockBalance(),
+            TestData.mockBalance()
+        );
+        when(railAccountService.balances(railAccount.id)).thenReturn(Optional.of(balances));
 
-        // and: a grace period of 1 hour
-        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
+        // and: rail-transactions records are available
+        TransactionList transactions = TestData.mockTransactionList(10, 2);
+        when(railAccountService.transactions(eq(railAccount.id), any(), any())).thenReturn(Optional.of(transactions));
 
-        // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.apply(context);
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
 
-        // then: the account is retrieved
-        verify(accountRepository).findById(account.getId());
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
 
-        // and: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(account.getUserConsentId());
+        // and: the rail-account is retrieved
+        verify(railAccountService).get(railAccount.id);
 
-        // and: the rail account balances are retrieved
-        verify(railAccountService).balances(account.getRailAccountId());
+        // and: the fixture attempts to retrieve the local account
+        verify(accountRepository).findByRailAccountId(railAccount.id);
 
-        // and: NO balance record is saved
-        verify(accountBalanceRepository, never()).save(any());
+        // and: the account balances are retrieved
+        verify(railAccountService).balances(railAccount.id);
 
-        // and: the account's local transactions are searched - to determine date of last transaction
-        verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any());
-
-        // and: the rail account transaction are retrieved - using the permitted max history
-        LocalDate startDate = LocalDate.now().minusDays(userConsent.getMaxHistory());
-        verify(railAccountService).transactions(account.getRailAccountId(), startDate, LocalDate.now());
-
-        // and: the retrieved transactions are saved
-        verify(accountTransactionRepository).saveAll(any());
-
-        // and: the account's last-polled date is updated and saved
-        assertNotNull(account.getDateLastPolled());
-        verify(accountRepository).save(account);
-    }
-
-    @Test
-    public void testAccept_NoNewTransaction() {
-        // given: a UserConsent, associated with the account to be processed, is still active
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
-
-        // and: an account to be processed for the first time
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .dateLastPolled(null) // never been processed before
-            .userConsentId(userConsent.getId())
-            .userId(userConsent.getUserId())
-            .railAccountId(UUID.randomUUID().toString())
-            .build();
-        when(accountRepository.findById(any())).thenReturn(Optional.of(account));
-
-        // and: the account has no existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any())).thenReturn(Page.empty());
-
-        // and: the rail account balances are available
-        List<Balance> balances = List.of(mockBalance(), mockBalance());
-        when(railAccountService.balances(any())).thenReturn(Optional.of(balances));
-
-        // and: the rail account transaction are available
-        TransactionList railTransactions = TransactionList.NULL_LIST;
-        when(railAccountService.transactions(any(), any(), any())).thenReturn(Optional.of(railTransactions));
-
-        // and: a grace period of 1 hour
-        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
-
-        // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.apply(context);
-
-        // then: the account is retrieved
-        verify(accountRepository).findById(account.getId());
-
-        // and: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(account.getUserConsentId());
-
-        // and: the rail account balances are retrieved
-        verify(railAccountService).balances(account.getRailAccountId());
-
-        // and: each balance record is saved
+        // and: the balances are saved
         verify(accountBalanceRepository, times(balances.size())).save(any());
 
-        // and: the account's local transactions are searched - to determine date of last transaction
-        verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any());
-
-        // and: the rail account transaction are retrieved - using the permitted max history
-        LocalDate startDate = LocalDate.now().minusDays(userConsent.getMaxHistory());
-        verify(railAccountService).transactions(account.getRailAccountId(), startDate, LocalDate.now());
-
-        // and: NO transactions are saved
-        verify(accountTransactionRepository, never()).saveAll(any());
-
-        // and: the account's last-polled date is updated and saved
-        assertNotNull(account.getDateLastPolled());
-        verify(accountRepository).save(account);
-    }
-
-    @Test
-    public void testAccept_WithinGracePeriod() {
-        // given: a grace period of 1 hour
-        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
-
-        // and: a UserConsent, associated with the account to be processed, is still active
-        UserConsent userConsent = mockUserConsent(ConsentStatus.GIVEN);
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
-
-        // and: an account that was last processed 30 minutes ago
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .dateLastPolled(Instant.now().minusSeconds(30 * 60))
-            .userConsentId(userConsent.getId())
-            .userId(userConsent.getUserId())
-            .railAccountId(UUID.randomUUID().toString())
-            .build();
-        when(accountRepository.findById(any())).thenReturn(Optional.of(account));
-
-        // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.apply(context);
-
-        // then: the account is retrieved
-        verify(accountRepository).findById(account.getId());
-
-        // and: the user-consent is NOT retrieved
-        verify(userConsentService, never()).getUserConsent(any());
-
-        // and: NO rail account balances are retrieved
-        verify(railAccountService, never()).balances(any());
-
-        // and: NO balance record is saved
-        verify(accountBalanceRepository, never()).save(any());
-
-        // and: NO account's local transactions are searched - to determine date of last transaction
+        // and: NO transactions are queried to get start date for poll
         verify(accountTransactionRepository, never()).findByAccountId(any(), any());
 
-        // and: NO rail account transaction are retrieved - using the permitted max history
+        // and: the account transactions are retrieved
+        verify(railAccountService).transactions(eq(railAccount.id), any(), any());
+
+        // and: the transactions are saved
+        verify(accountTransactionRepository).saveAll(any());
+
+        // and: the local account is inserted
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+        verify(accountRepository).save(captor.capture());
+        Account account = captor.getValue();
+
+        // and: the local account is inserted with the consent ID
+        assertEquals(userConsent.getId(), account.getUserConsentId());
+        assertEquals(userConsent.getId(), account.getUserConsentId());
+        assertEquals(userConsent.getUserId(), account.getUserId());
+        assertEquals(userConsent.getInstitutionId(), account.getInstitutionId());
+        assertEquals(railAccount.id, account.getRailAccountId());
+        assertEquals(railAccount.ownerName, account.getOwnerName());
+        assertEquals(railAccount.iban, account.getIban());
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
+    public void testHappyPath_AccountAlreadyPolled() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.READY)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // and: a local account is linked to that rail-account
+        Account account = Account.builder()
+            .id(UUID.randomUUID())
+            .railAccountId(railAccount.id)
+            .dateLastPolled(Instant.now().minus(Duration.ofMinutes(30)))
+            .build();
+        when(accountRepository.findByRailAccountId(railAccount.id)).thenReturn(Optional.of(account));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
+
+        // and: the rail-account is retrieved
+        verify(railAccountService).get(railAccount.id);
+
+        // and: the local account is retrieved
+        verify(accountRepository).findByRailAccountId(railAccount.id);
+
+        // and: NO account balances are retrieved
+        verify(railAccountService, never()).balances(any());
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO transactions are queried or saved
+        verifyNoInteractions(accountTransactionRepository);
+
+        // and: NO account transactions are retrieved
+        verify(railAccountService, never()).transactions(any(), any(), any());
+
+        // and: NO local account is updated
+        verify(accountRepository, never()).save(account);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
+    public void testUserConsentNotFound() {
+        // given: a user-consent cannot be found
+        UUID userConsentId = UUID.randomUUID();
+        when(userConsentService.getUserConsent(userConsentId)).thenReturn(Optional.empty());
+
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.READY)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsentId, railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the fixture attempts to retrieve the user-consent
+        verify(userConsentService).getUserConsent(userConsentId);
+
+        // and: NO rail-account is retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NO account balances are retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO account transactions are retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO transactions are saved
+        verifyNoInteractions(accountTransactionRepository);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "GIVEN" })
+    public void testConsentIsNotGiven(ConsentStatus consentStatus) {
+        // given: the identified user-consent is not GIVEN
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(consentStatus)
+            .build();
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.READY)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
+
+        // and: NO rail-account is retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NOaccount balances are retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO account transactions are retrieved
+        verifyNoInteractions(railAccountService);
+
+        // and: NO transactions are saved
+        verifyNoInteractions(accountTransactionRepository);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
+    public void testNoRailAccountFound() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: NO rail-account associated with that consent can be found
+        String railAccountId = randomAlphanumeric(20);
+        when(railAccountService.get(railAccountId)).thenReturn(Optional.empty());
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccountId);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
+
+        // and: the fixture attempts to retrieve the rail-account
+        verify(railAccountService).get(railAccountId);
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NO account balances are retrieved
+        verify(railAccountService, never()).balances(any());
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO account transactions are retrieved
         verify(railAccountService, never()).transactions(any(), any(), any());
 
         // and: NO transactions are saved
-        verify(accountTransactionRepository, never()).saveAll(any());
+        verifyNoInteractions(accountTransactionRepository);
 
-        // and: the account's last-polled date is NOT updated
-        assertNotNull(account.getDateLastPolled());
-        verify(accountRepository, never()).save(any());
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
     }
 
     @Test
-    public void testAccept_UserConsentNoLongerActive() {
-        // given: a grace period of 1 hour
-        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
-
-        // and: a UserConsent, associated with the account to be processed, is still active
-        UserConsent userConsent = mockUserConsent(ConsentStatus.CANCELLED);
+    public void testNoRailAccountSuspended() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
-        // and: an account that was last processed 2 hours ago
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .dateLastPolled(Instant.now().minusSeconds(120 * 60))
-            .userConsentId(userConsent.getId())
-            .userId(userConsent.getUserId())
-            .railAccountId(UUID.randomUUID().toString())
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.SUSPENDED)
             .build();
-        when(accountRepository.findById(any())).thenReturn(Optional.of(account));
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
 
-        // when: the fixture is called to process the account
-        TaskContext<UUID> context = new TaskContext<>(account.getId());
-        fixture.apply(context);
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
 
-        // then: the account is retrieved
-        verify(accountRepository).findById(account.getId());
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
 
-        // and: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(account.getUserConsentId());
+        // and: the fixture attempts to retrieve the rail-account
+        verify(railAccountService).get(railAccount.id);
 
-        // and: NO rail account balances are retrieved
+        // and: the consent service is called to process suspended requisition
+        verify(userConsentService).consentSuspended(userConsent.getId());
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NO account balances are retrieved
         verify(railAccountService, never()).balances(any());
 
-        // and: NO balance record is saved
-        verify(accountBalanceRepository, never()).save(any());
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
 
-        // and: NO account's local transactions are searched - to determine date of last transaction
-        verify(accountTransactionRepository, never()).findByAccountId(any(), any());
-
-        // and: NO rail account transaction are retrieved - using the permitted max history
+        // and: NO account transactions are retrieved
         verify(railAccountService, never()).transactions(any(), any(), any());
 
         // and: NO transactions are saved
-        verify(accountTransactionRepository, never()).saveAll(any());
+        verifyNoInteractions(accountTransactionRepository);
 
-        // and: the account's last-polled date is NOT updated
-        assertNotNull(account.getDateLastPolled());
-        verify(accountRepository, never()).save(any());
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
+    public void testNoRailAccountExpired() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(AccountStatus.EXPIRED)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
+
+        // and: the fixture attempts to retrieve the rail-account
+        verify(railAccountService).get(railAccount.id);
+
+        // and: the consent service is called to process expired requisition
+        verify(userConsentService).consentExpired(userConsent.getId());
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NO account balances are retrieved
+        verify(railAccountService, never()).balances(any());
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO account transactions are retrieved
+        verify(railAccountService, never()).transactions(any(), any(), any());
+
+        // and: NO transactions are saved
+        verifyNoInteractions(accountTransactionRepository);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "READY", "EXPIRED", "SUSPENDED" })
+    public void testNoRailAccountStatusNotCorrect(AccountStatus accountStatus) {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: a rail-account associated with that consent
+        AccountSummary railAccount = AccountSummary.builder()
+            .id(randomAlphanumeric(20))
+            .status(accountStatus)
+            .build();
+        when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).getUserConsent(userConsent.getId());
+
+        // and: the fixture attempts to retrieve the rail-account
+        verify(railAccountService).get(railAccount.id);
+
+        // and: NO local account is retrieved
+        verifyNoInteractions(accountRepository);
+
+        // and: NO account balances are retrieved
+        verify(railAccountService, never()).balances(any());
+
+        // and: NO balances are saved
+        verifyNoInteractions(accountBalanceRepository);
+
+        // and: NO account transactions are retrieved
+        verify(railAccountService, never()).transactions(any(), any(), any());
+
+        // and: NO transactions are saved
+        verifyNoInteractions(accountTransactionRepository);
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
     }
 }

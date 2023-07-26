@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class PollAllAccountsSchedulerTaskTest {
+public class PollAllConsentsScheduledTaskTest {
     private UserConsentRepository userConsentRepository;
 
     private PollConsentJobbingTask pollConsentJobbingTask;

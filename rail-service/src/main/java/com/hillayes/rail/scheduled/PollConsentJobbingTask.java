@@ -3,6 +3,7 @@ package com.hillayes.rail.scheduled;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
+import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.model.RequisitionStatus;
 import com.hillayes.rail.service.RequisitionService;
@@ -31,7 +32,6 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
     }
 
     /**
-     *
      * @param context the context containing the identifier of the UserConsent to be updated.
      */
     @Override
@@ -45,20 +45,32 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
             return TaskConclusion.COMPLETE;
         }
 
-        requisitionService.get(userConsent.getRequisitionId()).ifPresent(requisition -> {
-            if (requisition.status == RequisitionStatus.LN) {
-                requisition.accounts.forEach(accountId -> pollAccountJobbingTask.queueJob(userConsent.getId(), accountId));
-            }
+        if (userConsent.getStatus() != ConsentStatus.GIVEN) {
+            log.info("User consent is no longer GIVEN [consentId: {}, status: {}]", consentId, userConsent.getStatus());
+            return TaskConclusion.COMPLETE;
+        }
 
-            else if (requisition.status == RequisitionStatus.SU) {
-                userConsentService.consentSuspended(userConsent.getId());
-            }
+        return requisitionService.get(userConsent.getRequisitionId())
+            .map(requisition -> {
+                if (requisition.status == RequisitionStatus.LN) {
+                    requisition.accounts.forEach(accountId -> pollAccountJobbingTask.queueJob(userConsent.getId(), accountId));
+                }
 
-            else if (requisition.status == RequisitionStatus.EX) {
-                userConsentService.consentExpired(userConsent.getId());
-            }
-        });
+                else if (requisition.status == RequisitionStatus.SU) {
+                    userConsentService.consentSuspended(userConsent.getId());
+                }
 
-        return TaskConclusion.COMPLETE;
+                else if (requisition.status == RequisitionStatus.EX) {
+                    userConsentService.consentExpired(userConsent.getId());
+                }
+
+                return TaskConclusion.COMPLETE;
+            })
+
+            // try again
+            .orElseGet(() -> {
+                log.info("User consent not ready for polling [consentId: {}, status: {}]", consentId, userConsent.getStatus());
+                return TaskConclusion.INCOMPLETE;
+            });
     }
 }

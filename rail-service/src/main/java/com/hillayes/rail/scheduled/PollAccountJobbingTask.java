@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 @ApplicationScoped
 @Slf4j
-public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccountJobbingTask.PollAccountTaskPayload> {
+public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccountJobbingTask.Payload> {
     private final ServiceConfiguration configuration;
     private final UserConsentService userConsentService;
     private final AccountRepository accountRepository;
@@ -44,7 +44,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private final RailAccountService railAccountService;
 
     @Builder
-    public static class PollAccountTaskPayload implements Serializable {
+    public static class Payload implements Serializable {
         UUID consentId;
         String railAccountId;
     }
@@ -66,8 +66,12 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
     public String queueJob(UUID consentId, String railAccountId) {
         log.info("Queuing job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
-        return scheduler.addJob(this, PollAccountTaskPayload.builder()
-            .consentId(consentId).railAccountId(railAccountId).build());
+        Payload payload = Payload
+            .builder()
+            .consentId(consentId)
+            .railAccountId(railAccountId)
+            .build();
+        return scheduler.addJob(this, payload);
     }
 
     /**
@@ -80,7 +84,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
      */
     @Override
     @Transactional
-    public TaskConclusion apply(TaskContext<PollAccountTaskPayload> context) {
+    public TaskConclusion apply(TaskContext<Payload> context) {
         UUID consentId = context.getPayload().consentId;
         String railAccountId = context.getPayload().railAccountId;
         log.info("Processing Poll Account job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
@@ -186,14 +190,19 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private void updateTransactions(Account account, int maxHistory) {
         log.debug("Updating transactions [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
-        // find the date of the most recent transaction we hold locally
-        // we then use that as the start date for our rails request for transactions
-        PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
-        LocalDate startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
-            .stream().findFirst()
-            .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
-            .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found
-        log.debug("Looking for transactions [accountId: {}, startDate: {}]", account.getId(), startDate);
+        LocalDate startDate;
+        if (account.getId() != null) {
+            // find the date of the most recent transaction we hold locally
+            // we then use that as the start date for our rails request for transactions
+            PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
+            startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
+                .stream().findFirst()
+                .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
+                .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found
+            log.debug("Looking for transactions [accountId: {}, startDate: {}]", account.getId(), startDate);
+        } else {
+            startDate = LocalDate.now().minusDays(maxHistory);
+        }
 
         // retrieve transactions from rail
         List<AccountTransaction> transactions = railAccountService.transactions(account.getRailAccountId(), startDate, LocalDate.now())
