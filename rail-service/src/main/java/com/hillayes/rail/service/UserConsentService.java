@@ -8,22 +8,21 @@ import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.model.*;
-import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
+import com.hillayes.rail.scheduled.PollConsentJobbingTask;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,9 +37,6 @@ public class UserConsentService {
     UserConsentRepository userConsentRepository;
 
     @Inject
-    AccountRepository accountRepository;
-
-    @Inject
     InstitutionService institutionService;
 
     @Inject
@@ -48,6 +44,9 @@ public class UserConsentService {
 
     @Inject
     RequisitionService requisitionService;
+
+    @Inject
+    PollConsentJobbingTask pollConsentJobbingTask;
 
     @Inject
     ConsentEventSender consentEventSender;
@@ -66,6 +65,11 @@ public class UserConsentService {
             .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
             .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
             .findFirst();
+    }
+
+    public Optional<UserConsent> getUserConsent(UUID consentId) {
+        log.info("Get user's consent record [consentId: {}]", consentId);
+        return userConsentRepository.findById(consentId);
     }
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {
@@ -160,7 +164,10 @@ public class UserConsentService {
         userConsent.setCallbackUri(null);
         userConsent = userConsentRepository.save(userConsent);
 
-        // send consent-given event notification - this will poll account for data
+        // queue a job to verify the consent and poll account for data
+        pollConsentJobbingTask.queueJob(userConsent.getId());
+
+        // send consent-given event notification
         consentEventSender.sendConsentGiven(userConsent);
 
         return redirectUrl;
@@ -202,14 +209,32 @@ public class UserConsentService {
         return redirectUri;
     }
 
+    public void consentSuspended(UUID userConsentId) {
+        log.info("User's consent suspended [userConsentId: {}]", userConsentId);
+        userConsentRepository.findById(userConsentId)
+            .filter(userConsent -> userConsent.getStatus() != ConsentStatus.SUSPENDED)
+            .ifPresent(userConsent -> {
+                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                    userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+                userConsent.setStatus(ConsentStatus.SUSPENDED);
+                userConsent = userConsentRepository.save(userConsent);
+
+                // send consent suspended event notification
+                consentEventSender.sendConsentSuspended(userConsent);
+            });
+    }
+
     public void consentExpired(UUID userConsentId) {
         log.info("User's consent expired [userConsentId: {}]", userConsentId);
         userConsentRepository.findById(userConsentId)
+            .filter(userConsent -> userConsent.getStatus() != ConsentStatus.EXPIRED)
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.EXPIRED);
                 userConsent = userConsentRepository.save(userConsent);
+
+                deleteRequisition(userConsent);
 
                 // send consent expired event notification
                 consentEventSender.sendConsentExpired(userConsent);
@@ -224,6 +249,7 @@ public class UserConsentService {
     public void consentCancelled(UUID userConsentId) {
         log.info("User's consent cancelled [userConsentId: {}]", userConsentId);
         userConsentRepository.findById(userConsentId)
+            .filter(userConsent -> userConsent.getStatus() != ConsentStatus.CANCELLED)
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
@@ -231,7 +257,10 @@ public class UserConsentService {
                 userConsent.setDateCancelled(Instant.now());
                 userConsent = userConsentRepository.save(userConsent);
 
-                cancelConsent(userConsent);
+                deleteRequisition(userConsent);
+
+                // send consent cancelled event notification
+                consentEventSender.sendConsentCancelled(userConsent);
             });
     }
 
@@ -248,14 +277,17 @@ public class UserConsentService {
             log.debug("Deleting user consent [id: {}, institutionId: {}]",
                 userConsent.getId(), userConsent.getInstitutionId());
 
-            cancelConsent(userConsent);
+            deleteRequisition(userConsent);
+
+            // send consent cancelled event notification
+            consentEventSender.sendConsentCancelled(userConsent);
 
             // will cascade delete accounts, balances and transactions
             userConsentRepository.delete(userConsent);
         });
     }
 
-    private void cancelConsent(UserConsent userConsent) {
+    private void deleteRequisition(UserConsent userConsent) {
         try {
             // delete the requisition - and the associated agreement
             requisitionService.delete(userConsent.getRequisitionId());
@@ -273,8 +305,5 @@ public class UserConsentService {
             log.info("Error whilst purging user's agreement [userId: {}, agreementId: {}]",
                 userConsent.getUserId(), userConsent.getAgreementId(), e);
         }
-
-        // send consent cancelled event notification
-        consentEventSender.sendConsentCancelled(userConsent);
     }
 }

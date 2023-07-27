@@ -76,19 +76,28 @@ one-stop:
     scheduler:
       schema: rails
       tasks:
-        # nightly task to refresh all account details
-        poll-all-accounts:
+        # nightly task to check consents are still valid
+        # and refresh all account details
+        poll-all-consents:
           frequency:
             time-of-day: "02:00:00"
           on-failure:
             max-retry: 3
             retry-interval: PT1M
 
+        # jobbing tasks to check the identified consent is still valid
+        # and refresh the account details
+        poll-consent:
+          on-failure: # gives a max of 16 minutes
+            max-retry: 4
+            retry-interval: PT2M
+            retry-exponent: 1.5
+
         # jobbing tasks to refresh the identified account details
         poll-account:
-          on-failure: # gives a max of 4 hours 53 minutes
-            max-retry: 15
-            retry-interval: PT1M
+          on-failure: # gives a max of 16 minutes
+            max-retry: 4
+            retry-interval: PT2M
             retry-exponent: 1.5
 
   auth:

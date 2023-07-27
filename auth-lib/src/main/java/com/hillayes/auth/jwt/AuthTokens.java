@@ -153,13 +153,16 @@ public class AuthTokens {
     }
 
     /**
+     * Parse the given signed JWT, and verifies its signature using the public key
+     * found in the location provided by the configuration property
+     * <code>mp.jwt.verify.publickey.location</code>
      *
-     * @param token
-     * @return
-     * @throws ParseException
+     * @param signedJwt the signed JWT.
+     * @return the parsed and verified JWT.
+     * @throws ParseException if the JWT is invalid.
      */
-    public JsonWebToken getToken(String token) throws ParseException {
-        return jwtTokens.parseAndVerify(token);
+    public JsonWebToken getToken(String signedJwt) throws ParseException {
+        return jwtTokens.parseAndVerify(signedJwt);
     }
 
     /**

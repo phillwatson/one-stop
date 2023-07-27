@@ -39,6 +39,11 @@ public class ConsentInitiated {
     private String institutionId;
 
     /**
+     * The name of the institution for which consent is being obtained.
+     */
+    private String institutionName;
+
+    /**
      * The ID of the agreement between the user for whom consent is being obtained. This
      * record is held in the rail providing the open-banking service.
      */

@@ -42,7 +42,9 @@ public class JwtTokens {
     }
 
     /**
-     * Parse and verify the JWT.
+     * Parse the given signed JWT, and verifies its signature using the public key
+     * found in the location provided by the configuration property
+     * <code>mp.jwt.verify.publickey.location</code>
      *
      * @param signedJwt the signed JWT.
      * @return the parsed and verified JWT.
