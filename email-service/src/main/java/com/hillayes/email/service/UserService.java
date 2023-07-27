@@ -56,7 +56,11 @@ public class UserService {
 
     public Optional<User> getUser(UUID userId) {
         log.info("Get user [id: {}]", userId);
-        return userRepository.findById(userId);
+        Optional<User> result = userRepository.findById(userId);
+        if (result.isEmpty()) {
+            log.warn("User not found [id: {}]", userId);
+        }
+        return result;
     }
 
     public User updateUser(User user) {

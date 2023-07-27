@@ -279,11 +279,11 @@ public class UserConsentService {
 
             deleteRequisition(userConsent);
 
-            // will cascade delete accounts, balances and transactions
-            userConsentRepository.delete(userConsent);
-
             // send consent cancelled event notification
             consentEventSender.sendConsentCancelled(userConsent);
+
+            // will cascade delete accounts, balances and transactions
+            userConsentRepository.delete(userConsent);
         });
     }
 

@@ -179,17 +179,4 @@ public class RotatedJwkSet {
             .keyId(webKey.getKeyId())
             .sign(webKey.getPrivateKey());
     }
-
-    public String signAndEncryptClaims(JwtClaimsBuilder jwtClaimsBuilder) {
-        RsaJsonWebKey webKey = getCurrentWebKey();
-        return jwtClaimsBuilder
-            .jws()
-            .keyId(webKey.getKeyId())
-            .innerSign(webKey.getPrivateKey())
-            .encrypt(webKey.getPublicKey());
-    }
-
-    public void decryptAndVerify(String jwt) {
-
-    }
 }
