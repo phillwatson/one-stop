@@ -1,6 +1,7 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 public class XsrfInterceptorTest {
     private static final String ACCESS_TOKEN = "access-token";
+    private static final String REFRESH_TOKEN = "refresh-token";
     private static final String XSRF_HEADER = "XSRF-TOKEN";
 
     private final XsrfTokens xsrfGenerator = new XsrfTokens(UUID.randomUUID().toString());
@@ -45,8 +47,10 @@ public class XsrfInterceptorTest {
 
         fixture.jwtTokens = jwtTokens;
         fixture.xsrfTokens = xsrfGenerator;
-        fixture.xsrfHeaderName = XSRF_HEADER;
-        fixture.refreshDuration = Duration.ofSeconds(60);
+        fixture.accessCookieName = mockInstance(ACCESS_TOKEN);
+        fixture.refreshCookieName = mockInstance(REFRESH_TOKEN);
+        fixture.xsrfHeaderName = mockInstance(XSRF_HEADER);
+        fixture.refreshDuration = mockInstance(Duration.ofSeconds(60));
     }
 
     @Test
@@ -124,7 +128,7 @@ public class XsrfInterceptorTest {
         mockMethod(requestContext, mockRolesAllowed());
         mockUriInfo(requestContext);
 
-        fixture.refreshDuration = Duration.ofSeconds(1);
+        fixture.refreshDuration = mockInstance(Duration.ofSeconds(1));
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
@@ -220,5 +224,11 @@ public class XsrfInterceptorTest {
                 return new String[0];
             }
         };
+    }
+
+    private <T> Instance<T> mockInstance(T value) {
+        Instance<T> mock = mock(Instance.class);
+        when(mock.get()).thenReturn(value);
+        return mock;
     }
 }

@@ -106,10 +106,20 @@ public class AuthTokens {
             .expiresIn(refreshDuration)
             .claim("xsrf", xsrfToken));
 
-        NewCookie accessTokenCookie = new NewCookie(accessCookieName, accessToken,
-            "/api", null, NewCookie.DEFAULT_VERSION, null,
-            (int)accessDuration.toSeconds(), Date.from(Instant.now().plus(accessDuration)),
-            false, true);
+//        NewCookie accessTokenCookie = new NewCookie(accessCookieName, accessToken,
+//            "/api", null, NewCookie.DEFAULT_VERSION, null,
+//            (int)accessDuration.toSeconds(), Date.from(Instant.now().plus(accessDuration)),
+//            false, true);
+
+        NewCookie accessTokenCookie = new NewCookie.Builder(accessCookieName)
+            .value(accessToken)
+            .path("/api")
+            .version(NewCookie.DEFAULT_VERSION)
+            .maxAge((int)accessDuration.toSeconds())
+            .expiry(Date.from(Instant.now().plus(accessDuration)))
+            .secure(false)
+            .httpOnly(true)
+            .build();
 
         NewCookie refreshTokenCookie = new NewCookie(refreshCookieName, refreshToken,
             "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,

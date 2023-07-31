@@ -1,9 +1,16 @@
 package com.hillayes.outbox.service;
 
 import com.hillayes.events.domain.EventPacket;
+import com.hillayes.executors.concurrent.ExecutorConfiguration;
+import com.hillayes.executors.concurrent.ExecutorFactory;
+import com.hillayes.executors.concurrent.ExecutorType;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
-import io.quarkus.scheduler.Scheduled;
+import io.quarkus.runtime.ShutdownEvent;
+import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +18,11 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -25,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * It also listens for events that have failed (raised errors during their processing)
  * and re-submit them.
  */
-@ApplicationScoped
+@Dependent
 @RequiredArgsConstructor
 @Slf4j
 public class EventDeliverer {
@@ -37,11 +43,21 @@ public class EventDeliverer {
      */
     private static final AtomicBoolean MUTEX = new AtomicBoolean();
 
+    public void init(@Observes StartupEvent ev) {
+        log.info("Scheduling EventDeliverer");
+        ScheduledExecutorService executor = (ScheduledExecutorService)ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
+            .executorType(ExecutorType.SCHEDULED)
+            .name("event-deliverer")
+            .numberOfThreads(1)
+            .build());
+
+        executor.scheduleAtFixedRate(this::deliverEvents, 10, 60, TimeUnit.SECONDS);
+    }
+
     /**
      * Ensures that the producer is closed when the application is stopped.
      */
-    @PreDestroy
-    public void onStop() {
+    public void onStop(@Observes ShutdownEvent ev) {
         log.info("Shutting down EventDeliverer - started");
         if (producer != null) {
             log.info("Closing producer {}", producer);
@@ -54,10 +70,11 @@ public class EventDeliverer {
      * A scheduled service to read pending events from the event outbox table and
      * send them to the message broker.
      */
-    @Scheduled(cron = "${mensa.events.cron:0/2 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
-    public void deliverEvents() throws Exception {
+    public void deliverEvents() {
+        log.debug("Polling events to deliver");
         // if previous delivery is still in progress, skip this run
         if (MUTEX.compareAndSet(false, true)) {
+            log.trace("Event delivery passed mutex");
             try {
                 _deliverEvents();
             } catch (Exception ignored) {

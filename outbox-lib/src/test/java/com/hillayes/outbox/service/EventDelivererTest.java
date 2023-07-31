@@ -5,6 +5,7 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.UserLogin;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
+import io.quarkus.runtime.ShutdownEvent;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -37,7 +38,7 @@ public class EventDelivererTest {
     @Test
     public void testStop() {
         // when: the fixture is stopped
-        fixture.onStop();
+        fixture.onStop(new ShutdownEvent());
 
         // then: the producer is closed
         verify(producer).close();

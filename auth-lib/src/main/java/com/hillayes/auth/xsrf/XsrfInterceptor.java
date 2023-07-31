@@ -2,6 +2,7 @@ package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
 import io.quarkus.security.Authenticated;
+import jakarta.enterprise.inject.Instance;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -48,16 +49,16 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
 
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
-    String accessCookieName;
+    Instance<String> accessCookieName;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
-    String refreshCookieName;
+    Instance<String> refreshCookieName;
 
     @ConfigProperty(name = "one-stop.auth.xsrf.header-name", defaultValue = "X-XSRF-TOKEN")
-    String xsrfHeaderName;
+    Instance<String> xsrfHeaderName;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
-    Duration refreshDuration;
+    Instance<Duration> refreshDuration;
 
     @Inject
     XsrfTokens xsrfTokens;
@@ -87,14 +88,14 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             (isAnnotationPresent(classAnnotations, AUTH_REQUIRED))) {
             log.trace("Method requires authentication");
             // check xsrf token in access-token cookie
-            if (tokenIsInvalid(requestContext, accessCookieName)) {
+            if (tokenIsInvalid(requestContext, accessCookieName.get())) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         } else if ((isAnnotationPresent(methodAnnotations, XSRF_REQUIRED)) ||
             (isAnnotationPresent(classAnnotations, XSRF_REQUIRED))) {
             log.trace("Method requires XSRF validation");
             // check xsrf token in refresh-token cookie
-            if (tokenIsInvalid(requestContext, refreshCookieName)) {
+            if (tokenIsInvalid(requestContext, refreshCookieName.get())) {
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }
@@ -135,20 +136,20 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             return true;
         }
 
-        List<String> headerList = request.getHeaders().get(xsrfHeaderName);
+        List<String> headerList = request.getHeaders().get(xsrfHeaderName.get());
         if ((headerList == null) || (headerList.size() != 1)) {
             log.warn("XSRF token header invalid [name: {}, size: {}, path: {}]",
-                xsrfHeaderName, (headerList == null) ? 0 : headerList.size(),
+                xsrfHeaderName.get(), (headerList == null) ? 0 : headerList.size(),
                 request.getUriInfo().getPath());
             return true;
         }
 
         String headerValue = headerList.get(0);
         if (isBlank(headerValue)) {
-            log.warn("XSRF token header blank [name: {}, path: {}]", xsrfHeaderName, request.getUriInfo().getPath());
+            log.warn("XSRF token header blank [name: {}, path: {}]", xsrfHeaderName.get(), request.getUriInfo().getPath());
             return true;
         }
 
-        return ! xsrfTokens.validateTokens(cookieValue, headerValue, refreshDuration);
+        return ! xsrfTokens.validateTokens(cookieValue, headerValue, refreshDuration.get());
     }
 }
