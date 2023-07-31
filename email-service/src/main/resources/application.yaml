@@ -47,59 +47,59 @@ one-stop:
 
     templates:
       header:
-        "en":
+        en:
           subject: not-applicable
           template: "header/en.html"
 
       user-registered:
-        "en":
+        en:
           subject: "Hi $user.preferredName$, please complete your One-Stop registration"
           template: "user-registered/en.html"
-        "fr":
+        fr:
           subject: "Salut $user.preferredName$, veuillez compléter votre inscription One-Stop"
           template: "user-registered/fr.html"
 
       user-created:
-        "en":
+        en:
           subject: "Welcome to OneStop $user.preferredName$"
           template: "user-created/en.html"
 
       user-updated:
-        "en":
+        en:
           subject: "You account has been updated"
           template: "user-updated/en.html"
 
       user-deleted:
-        "en":
+        en:
           subject: "Sorry to see you go"
           template: "user-deleted/en.html"
 
       account-activity:
-        "en":
+        en:
           subject: "Activity on your OneStop account"
           template: "account-activity/en.html"
 
       consent-given:
-        "en":
+        en:
           subject: "Your OneStop access to $event.institutionName$"
           template: "consent-given/en.html"
 
       consent-denied:
-        "en":
+        en:
           subject: "Your OneStop access to $event.institutionName$"
           template: "consent-denied/en.html"
 
       consent-cancelled:
-        "en":
+        en:
           subject: "Your OneStop access to $event.institutionName$"
           template: "consent-cancelled/en.html"
 
       consent-suspended:
-        "en":
+        en:
           subject: "Your OneStop access to $event.institutionName$"
           template: "consent-suspended/en.html"
 
       consent-expired:
-        "en":
+        en:
           subject: "Your OneStop access to $event.institutionName$"
           template: "consent-expired/en.html"
