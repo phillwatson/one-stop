@@ -42,7 +42,7 @@ public class AccountService {
     }
 
     public Optional<Account> getAccount(UUID accountId) {
-        log.info("Get user's accounts [accountId: {}]", accountId);
+        log.info("Get user's account [accountId: {}]", accountId);
         return accountRepository.findById(accountId);
     }
 

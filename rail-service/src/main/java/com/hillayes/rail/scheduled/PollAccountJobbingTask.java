@@ -163,7 +163,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                     }
                 });
 
-                return newAccount;
+                return accountRepository.save(newAccount);
             });
     }
 

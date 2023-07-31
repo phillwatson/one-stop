@@ -3,7 +3,6 @@ package com.hillayes.openid.apple;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
@@ -29,7 +28,6 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
-    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig appleConfig() {
         log.debug("Retrieving Apple OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.APPLE);
@@ -47,7 +45,6 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
-    @ApplicationScoped
     public OpenIdConfigResponse appleOpenApiConfig(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config) throws IOException {
         return openApiConfig(config);
     }
@@ -59,7 +56,6 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
-    @ApplicationScoped
     public OpenIdTokenApi appleRestApi(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig authConfig,
                                        @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
         return openIdRestApi(authConfig, openIdConfig);
@@ -72,7 +68,6 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
-    @ApplicationScoped
     public VerificationKeyResolver appleKeys(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
         return verificationKeys(openIdConfig);
     }
@@ -84,7 +79,6 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
-    @ApplicationScoped
     public IdTokenValidator appleTokenValidator(@NamedAuthProvider(AuthProvider.APPLE) VerificationKeyResolver verificationKeys,
                                                 @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,
                                                 @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {

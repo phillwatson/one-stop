@@ -3,7 +3,6 @@ package com.hillayes.openid.github;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
@@ -31,7 +30,6 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
-    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig githubConfig() {
         log.debug("Retrieving GitHub OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITHUB);
@@ -49,7 +47,6 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
-    @ApplicationScoped
     public OpenIdConfigResponse githubOpenApiConfig(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config) throws IOException {
         return openApiConfig(config);
     }
@@ -61,7 +58,6 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
-    @ApplicationScoped
     public OpenIdTokenApi githubRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return openIdRestApi(authConfig, openIdConfig);
@@ -74,7 +70,6 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
-    @ApplicationScoped
     public VerificationKeyResolver githubKeys(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
         return verificationKeys(openIdConfig);
     }
@@ -85,7 +80,6 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
-    @ApplicationScoped
     public IdTokenValidator githubTokenValidator(@NamedAuthProvider(AuthProvider.GITHUB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config,
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
@@ -93,12 +87,10 @@ public class GitHubFactory extends OpenIdFactory {
     }
 
     @Produces
-    @ApplicationScoped
     public GitHubApiClient githubApiClient() {
         URI baseUri = URI.create("https://api.github.com");
         return RestClientBuilder.newBuilder()
             .baseUri(baseUri)
             .build(GitHubApiClient.class);
     }
-
 }

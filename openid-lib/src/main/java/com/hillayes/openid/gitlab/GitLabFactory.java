@@ -3,7 +3,6 @@ package com.hillayes.openid.gitlab;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
@@ -29,7 +28,6 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
-    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig gitlabConfig() {
         log.debug("Retrieving GitLab OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITLAB);
@@ -47,7 +45,6 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
-    @ApplicationScoped
     public OpenIdConfigResponse gitlabOpenApiConfig(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config) throws IOException {
         return openApiConfig(config);
     }
@@ -59,7 +56,6 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
-    @ApplicationScoped
     public OpenIdTokenApi gitlabRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
         return openIdRestApi(authConfig, openIdConfig);
@@ -72,7 +68,6 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
-    @ApplicationScoped
     public VerificationKeyResolver gitlabKeys(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
         return verificationKeys(openIdConfig);
     }
@@ -83,7 +78,6 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
-    @ApplicationScoped
     public IdTokenValidator gitlabTokenValidator(@NamedAuthProvider(AuthProvider.GITLAB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config,
                                                  @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
