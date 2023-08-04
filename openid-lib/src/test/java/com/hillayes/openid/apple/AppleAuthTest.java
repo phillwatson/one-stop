@@ -1,39 +1,37 @@
 package com.hillayes.openid.apple;
 
-import com.hillayes.openid.*;
 import com.hillayes.openid.AuthProvider;
+import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
 import com.hillayes.openid.rest.TokenExchangeResponse;
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.mockito.MockitoConfig;
+import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Form;
-import jakarta.ws.rs.core.MultivaluedMap;
 import java.security.*;
 import java.time.Duration;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class AppleAuthTest {
     @InjectMock
-    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.APPLE)
     OpenIdTokenApi openIdTokenApi;
 
     @InjectMock
-    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.APPLE)
     IdTokenValidator idTokenValidator;
 
@@ -51,6 +49,7 @@ public class AppleAuthTest {
     @Inject
     @NamedAuthProvider(AuthProvider.APPLE)
     OpenIdAuth fixture;
+
 
     @Test
     public void testIsFor() {

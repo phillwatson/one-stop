@@ -74,12 +74,17 @@ public class UserConsentService {
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
-        if (getUserConsent(userId, institutionId).isPresent()) {
-            throw new BankAlreadyRegisteredException(userId, institutionId);
-        }
 
         Institution institution = institutionService.get(institutionId)
             .orElseThrow(() -> new NotFoundException("Institution", institutionId));
+
+        // read any existing consent
+        UserConsent userConsent = getUserConsent(userId, institutionId).orElse(null);
+
+        // if the existing consent has not expired
+        if ((userConsent != null) && (userConsent.getStatus() != ConsentStatus.EXPIRED)) {
+            throw new BankAlreadyRegisteredException(userId, institutionId);
+        }
 
         // create agreement
         log.debug("Requesting agreement [userId: {}, institutionId: {}]", userId, institutionId);
@@ -95,25 +100,31 @@ public class UserConsentService {
             .truncatedTo(ChronoUnit.DAYS)
             .plus(agreement.accessValidForDays, ChronoUnit.DAYS);
 
-        // record agreement
-        log.debug("Recording agreement [userId: {}, institutionId: {}, expires: {}]", userId, institutionId, expires);
-        UserConsent userConsent = UserConsent.builder()
-            .dateCreated(Instant.now())
-            .userId(userId)
-            .institutionId(agreement.institutionId)
+        // record agreement in a consent record
+        log.debug("Recording agreement [userId: {}, institutionId: {}, expires: {}]",
+            userId, institutionId, expires);
+        UserConsent.UserConsentBuilder builder;
+        if (userConsent == null) {
+            builder = UserConsent.builder()
+                .dateCreated(Instant.now())
+                .userId(userId)
+                .institutionId(agreement.institutionId);
+        } else {
+            builder = userConsent.toBuilder();
+        }
+
+        userConsent = userConsentRepository.saveAndFlush(builder
             .agreementId(agreement.id)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementExpires(expires)
             .callbackUri(callbackUri.toString())
             .status(ConsentStatus.INITIATED)
-            .build();
-
-        // save to generate ID
-        userConsent = userConsentRepository.saveAndFlush(userConsent);
+            .build());
 
         try {
             // create requisition
-            log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]", userId, institutionId, userConsent.getId());
+            log.debug("Requesting requisition [userId: {}, institutionId: {}: ref: {}]",
+                userId, institutionId, userConsent.getId());
 
             URI registrationCallbackUrl = UriBuilder
                 .fromResource(UserConsentResource.class)
@@ -130,14 +141,17 @@ public class UserConsentService {
                 .agreement(agreement.id)
                 .accountSelection(Boolean.FALSE)
                 .userLanguage("EN")
-                .reference(userConsent.getId().toString())
-                .redirect(registrationCallbackUrl.toString())
                 .redirectImmediate(Boolean.FALSE)
+                .redirect(registrationCallbackUrl.toString())
+                // reference is returned in callback
+                // - allows us to identify the consent record
+                .reference(userConsent.getId().toString())
                 .build());
 
-            // record requisition
+            // record requisition in the consent record
             userConsent.setRequisitionId(requisition.id);
             userConsent.setStatus(ConsentStatus.WAITING);
+            userConsent = userConsentRepository.save(userConsent);
 
             // send consent initiated event notification
             consentEventSender.sendConsentInitiated(userConsent);

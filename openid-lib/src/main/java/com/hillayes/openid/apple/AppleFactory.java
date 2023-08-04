@@ -3,6 +3,7 @@ package com.hillayes.openid.apple;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
@@ -55,6 +56,7 @@ public class AppleFactory extends OpenIdFactory {
      * Apple's own "well-known" configuration.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.APPLE)
     public OpenIdTokenApi appleRestApi(@NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig authConfig,
                                        @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfigResponse openIdConfig) {
@@ -78,6 +80,7 @@ public class AppleFactory extends OpenIdFactory {
      * URI found in Apple's "well-known" config resource.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.APPLE)
     public IdTokenValidator appleTokenValidator(@NamedAuthProvider(AuthProvider.APPLE) VerificationKeyResolver verificationKeys,
                                                 @NamedAuthProvider(AuthProvider.APPLE) OpenIdConfiguration.AuthConfig config,

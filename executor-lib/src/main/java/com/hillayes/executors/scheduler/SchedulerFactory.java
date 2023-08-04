@@ -193,9 +193,10 @@ public class SchedulerFactory {
                 // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
                     // construct the context for the task to run in - including the job payload
-                    TaskContext<Serializable> taskContext = new TaskContext<>(inst.getData().payload)
-                        .setFailureCount(ctx.getExecution().consecutiveFailures)
-                        .setRepeatCount(inst.getData().repeatCount);
+                    TaskContext<Serializable> taskContext = new TaskContext<>(
+                        inst.getData().payload,
+                        ctx.getExecution().consecutiveFailures,
+                        inst.getData().repeatCount);
 
                     // call the task using the correlation ID used when job was queued
                     final NamedJobbingTask<Serializable> function = (NamedJobbingTask<Serializable>) task;
@@ -218,7 +219,7 @@ public class SchedulerFactory {
                     Optional<Duration> repeatInterval = calcRepeatInterval(taskConfig, inst.getData().repeatCount);
                     if (repeatInterval.isPresent()) {
                         log.debug("Task not complete, rescheduling [instance: {}, repeatCount: {}, interval: {}]",
-                            inst.getTaskAndInstance(), taskContext.getRepeatCount(), repeatInterval);
+                            inst.getTaskAndInstance(), taskContext.getRepeatCount(), repeatInterval.get());
                         return new CompletionHandler.OnCompleteReschedule<>(
                             Schedules.fixedDelay(repeatInterval.get()), inst.getData());
                     }

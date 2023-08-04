@@ -14,6 +14,8 @@ import java.util.UUID;
 
 /**
  * A packet in which events can be transported from the sender to consumers.
+ * The event is represented by the payload property of this class. Other
+ * properties are used to manage the delivery of that event to the TopicConsumers.
  */
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -35,8 +37,10 @@ public class EventPacket {
      */
     private String correlationId;
 
-    /**
-     * The number of times the delivery of this event has failed.
+     /**
+     * The number of times the event delivery has been retried, not including the initial
+     * delivery. A maximum number of retries can be applied, after which the event is
+     * placed on the message-hospital topic.
      */
     @Setter
     private int retryCount;
@@ -47,21 +51,24 @@ public class EventPacket {
     private Instant timestamp;
 
     /**
-     * The topic on which the event was sent. This will match the topic on which the consumer is listening
-     * and is only included here for information.
+     * The topic on which the event is to be delivered. The event will be delivered to
+     * all TopicConsumers listening to this topic; that are not in the same consumer
+     * group. When multiple TopicConsumers are the same consumer group, only one of
+     * those consumers will receive the event.
      */
     private Topic topic;
 
     /**
-     * The optional key of the event. Events with the same key are delivered to the same partition,
-     * ensuring they are delivered in the order submitted - unless they are re-delivered due to
-     * errors whilst processing.
+     * The optional key of the event. Events with the same key will be delivered to the
+     * same partition. This can ensure the events are delivered in the order in which
+     * they were submitted - unless they are re-delivered due to errors whilst processing.
      */
     private String key;
 
     /**
-     * The class of the payload data. Allows the payload to be deserialized. It can also be used to filter
-     * events of different types issued on the same topic.
+     * The class from which the event's payload was deserialized. This can be used to
+     * identify the specific event type within the topic; and allow the payload to be
+     * serialized.
      */
     private String payloadClass;
 
@@ -71,6 +78,10 @@ public class EventPacket {
      */
     private String payload;
 
+    /**
+     * The event payload represented in its original Java class.
+     * @see #getPayloadContent()
+     */
     @JsonIgnore
     private transient Object payloadContent;
 

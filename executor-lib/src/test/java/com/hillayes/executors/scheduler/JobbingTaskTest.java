@@ -167,7 +167,7 @@ public class JobbingTaskTest extends TestBase {
             }
         };
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask("task one") {
             // the task will fail on each run
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
@@ -265,7 +265,6 @@ public class JobbingTaskTest extends TestBase {
     @Test
     public void testNoRepeating() {
         final AtomicInteger signal = new AtomicInteger();
-        final AtomicBoolean complete = new AtomicBoolean(false);
 
         NamedJobbingTask<String> task = new TestJobbingTask() {
             public TaskConclusion apply(TaskContext<String> context) {
@@ -312,7 +311,6 @@ public class JobbingTaskTest extends TestBase {
     @Test
     public void testRepeatingMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
-        final AtomicBoolean complete = new AtomicBoolean(false);
 
         NamedJobbingTask<String> task = new TestJobbingTask() {
             public TaskConclusion apply(TaskContext<String> context) {

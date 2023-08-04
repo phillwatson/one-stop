@@ -34,6 +34,10 @@ public interface RetryConfig {
     /**
      * The maximum number of times a task will be retried. If required, a value of 5 is
      * suggested.
+     * When both on-failure and on-incomplete configures are supplied, the on-failure
+     * max-retry only apply for consecutive failures. If the task returns an "incomplete"
+     * result, the failure count will be reset. However, the on-incomplete max-retry will
+     * apply regardless of whether the retries are consecutive or not.
      */
     OptionalInt maxRetry();
 

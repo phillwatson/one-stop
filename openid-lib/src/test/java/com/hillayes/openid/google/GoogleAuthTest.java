@@ -25,12 +25,10 @@ import static org.mockito.Mockito.when;
 @QuarkusTest
 public class GoogleAuthTest {
     @InjectMock
-    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.GOOGLE)
     OpenIdTokenApi openIdTokenApi;
 
     @InjectMock
-    @MockitoConfig(convertScopes = true)
     @NamedAuthProvider(AuthProvider.GOOGLE)
     IdTokenValidator idTokenValidator;
 

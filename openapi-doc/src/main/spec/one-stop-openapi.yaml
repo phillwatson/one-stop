@@ -1235,6 +1235,12 @@ components:
              - DENIED
              - CANCELLED
           example: INITIATED
+        errorCode:
+          type: string
+          description: If the consent is denied, this is code indicates the reason
+        errorDetail:
+          type: string
+          description: If the consent is denied, this is gives a descriptive reason.
         accounts:
           description: |
             The summary list of bank accounts related to the consent.

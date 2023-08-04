@@ -9,6 +9,12 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * The persisted representation of an event, as managed by the outbox. Whilst
+ * events await their delivery they will be persisted in the event table. The
+ * outbox delivery will periodically read a batch of these records (in the
+ * order they were written) and deliver them to the TopicConsumers.
+ */
 @Entity
 @Table(name = "events")
 @Getter
@@ -74,6 +80,9 @@ public class EventEntity {
         return new EventPacket(eventId, topic, correlationId, retryCount, timestamp, key, payloadClass, payload);
     }
 
+    /**
+     * The identifier used by the event outbox persistence.
+     */
     @Id
     @GeneratedValue(generator = "uuid2")
     @EqualsAndHashCode.Include
@@ -92,12 +101,20 @@ public class EventEntity {
     @Column(name = "correlation_id")
     private String correlationId;
 
+    /**
+     * The date-time at which the event was originally posted onto the topic queue.
+     */
+    @Column(name = "timestamp")
+    private Instant timestamp;
+
+    /**
+     * The number of times the event delivery has been retried, not including the initial
+     * delivery. A maximum number of retries can be applied, after which the event is
+     * placed on the message-hospital topic.
+     */
     @Column(name = "retry_count")
     @Setter
     private int retryCount;
-
-    @Column(name = "timestamp")
-    private Instant timestamp;
 
     /**
      * The date-time on which the event is scheduled to be delivered. This is generally
@@ -109,20 +126,35 @@ public class EventEntity {
     @Column(name = "scheduled_for")
     private Instant scheduledFor;
 
+    /**
+     * The topic on which the event is to be delivered. The event will be delivered to
+     * all TopicConsumers listening to this topic; that are not in the same consumer
+     * group. When multiple TopicConsumers are the same consumer group, only one of
+     * those consumers will receive the event.
+     */
     @Enumerated(EnumType.STRING)
     private Topic topic;
 
     /**
      * The optional key of the event. Events with the same key will be delivered to the
      * same partition. This can ensure the events are delivered in the order in which
-     * they were submitted.
+     * they were submitted - unless they are re-delivered due to errors whilst processing.
      */
     @Column(name = "key", nullable = true)
     private String key;
 
+    /**
+     * The class from which the event's payload was deserialized. This can be used to
+     * identify the specific event type within the topic; and allow the payload to be
+     * serialized.
+     */
     @Column(name = "payload_class")
     private String payloadClass;
 
+    /**
+     * A representation of the event's payload as a JSON packet. The class named by
+     * the payloadClass allows this payload to be serialized.
+     */
     @Column
     private String payload;
 }

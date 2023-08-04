@@ -144,6 +144,8 @@ public class UserConsentResource {
             .agreementExpires(consent.getAgreementExpires())
             .maxHistory(consent.getMaxHistory())
             .status(consent.getStatus().name())
+            .errorCode(consent.getErrorCode())
+            .errorDetail(consent.getErrorDetail())
             .accounts(accountService.getAccountsByUserConsent(consent).stream()
                 .map(this::marshal)
                 .toList()

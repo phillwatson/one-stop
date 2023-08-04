@@ -3,6 +3,7 @@ package com.hillayes.openid.gitlab;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
@@ -55,6 +56,7 @@ public class GitLabFactory extends OpenIdFactory {
      * GitLab's own "well-known" configuration.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITLAB)
     public OpenIdTokenApi gitlabRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
@@ -77,6 +79,7 @@ public class GitLabFactory extends OpenIdFactory {
      * auth-provider.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITLAB)
     public IdTokenValidator gitlabTokenValidator(@NamedAuthProvider(AuthProvider.GITLAB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig config,

@@ -3,6 +3,7 @@ package com.hillayes.openid.github;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
@@ -57,6 +58,7 @@ public class GitHubFactory extends OpenIdFactory {
      * GitHub's own "well-known" configuration.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITHUB)
     public OpenIdTokenApi githubRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
@@ -79,6 +81,7 @@ public class GitHubFactory extends OpenIdFactory {
      * auth-provider.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITHUB)
     public IdTokenValidator githubTokenValidator(@NamedAuthProvider(AuthProvider.GITHUB) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig config,

@@ -14,9 +14,9 @@ interface Props {
 }
 
 export default function BankCard(props: Props) {
-  const enabled = props.consent === undefined;
+  const enabled = props.consent === undefined || props.consent.status === "EXPIRED";
   const css = "card " + (enabled ? "enabled" : "disabled");
-  const label = props.institution.bic + (enabled ? "" : ": " + props.consent?.status);
+  const label = props.institution.bic + (props.consent === undefined ? "" : ": " + props.consent?.status);
 
 
   function handleConnectToBank(institution: Institution) {

@@ -3,6 +3,7 @@ package com.hillayes.openid.google;
 import com.hillayes.openid.*;
 import com.hillayes.openid.rest.OpenIdConfigResponse;
 import com.hillayes.openid.rest.OpenIdTokenApi;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
@@ -55,6 +56,7 @@ public class GoogleFactory extends OpenIdFactory {
      * Google's own "well-known" configuration.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GOOGLE)
     public OpenIdTokenApi googleRestApi(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig authConfig,
                                         @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
@@ -77,6 +79,7 @@ public class GoogleFactory extends OpenIdFactory {
      * auth-provider.
      */
     @Produces
+    @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GOOGLE)
     public IdTokenValidator googleTokenValidator(@NamedAuthProvider(AuthProvider.GOOGLE) VerificationKeyResolver verificationKeys,
                                                  @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig config,

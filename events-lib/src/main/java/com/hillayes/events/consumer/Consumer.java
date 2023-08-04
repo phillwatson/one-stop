@@ -51,6 +51,12 @@ public class Consumer implements Runnable {
     private final ConsumerErrorHandler errorHandler;
 
     Map<TopicPartition, OffsetAndMetadata> currentOffsets;
+
+    /**
+     * The count of events emitted since the last partition assignment for this
+     * consumer. This is used to signal when partition offsets are committed, in
+     * order to maintain
+     */
     int count;
 
     public Consumer(KafkaConsumer<String, EventPacket> broker,
