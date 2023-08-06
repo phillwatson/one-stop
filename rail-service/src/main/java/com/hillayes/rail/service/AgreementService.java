@@ -60,7 +60,7 @@ public class AgreementService extends AbstractRailService {
     }
 
     public Map<String, Object> delete(String id) {
-        log.debug("Deleting requisition [id: {}]", id);
+        log.debug("Deleting agreement [id: {}]", id);
         try {
             return agreementRepository.delete(id);
         } catch (WebApplicationException e) {

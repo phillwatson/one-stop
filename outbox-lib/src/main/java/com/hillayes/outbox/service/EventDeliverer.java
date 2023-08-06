@@ -71,7 +71,7 @@ public class EventDeliverer {
      * send them to the message broker.
      */
     public void deliverEvents() {
-        log.debug("Polling events to deliver");
+        log.trace("Polling events to deliver");
         // if previous delivery is still in progress, skip this run
         if (MUTEX.compareAndSet(false, true)) {
             log.trace("Event delivery passed mutex");
