@@ -404,6 +404,11 @@ public class SchedulerFactory {
         }
     }
 
+    /**
+     * Augments a given FailureHandler to add the queuing of another Jobbing Task
+     * when the maximum number of retries is exceeded.
+     * @param <T>
+     */
     public class MaxRetriesWithAbortHandler<T> implements FailureHandler<T> {
         private final int maxRetries;
         private final String onMaxRetryTaskName;

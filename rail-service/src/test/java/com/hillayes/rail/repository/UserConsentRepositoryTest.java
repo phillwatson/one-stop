@@ -6,6 +6,8 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -52,6 +54,50 @@ public class UserConsentRepositoryTest {
 
             // and: each belongs to the identified user
             consents.forEach(consent -> assertEquals(userId, consent.getUserId()));
+        });
+    }
+
+    @Test
+    public void testFindByUserId_Paged() {
+        // given: a collection of user IDs
+        Collection<UUID> userIds = List.of(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        );
+
+        // and: three user-consents for each of them
+        userIds.forEach(userId -> {
+            for (int i = 0; i < 35; i++) {
+                fixture.save(UserConsent.builder()
+                    .userId(userId)
+                    .institutionId(UUID.randomUUID().toString())
+                    .agreementId(UUID.randomUUID().toString())
+                    .agreementExpires(Instant.now().plusSeconds(1000))
+                    .maxHistory(80)
+                    .status(ConsentStatus.GIVEN)
+                    .build());
+            }
+        });
+
+        userIds.forEach(userId -> {
+            // when: each user-id retrieves their consents
+            for (int page = 0; page < 4; page++) {
+                Page<UserConsent> consents = fixture.findByUserId(userId, PageRequest.of(page, 10));
+
+                // then: the page number is correct
+                assertEquals(page, consents.getNumber());
+
+                // and: the totals are correct
+                assertEquals(35, consents.getTotalElements());
+                assertEquals(4, consents.getTotalPages());
+
+                // and: the count is correct
+                assertEquals(page == 3 ? 5 : 10, consents.getNumberOfElements());
+
+                // and: each belongs to the identified user
+                consents.forEach(consent -> assertEquals(userId, consent.getUserId()));
+            }
         });
     }
 }
