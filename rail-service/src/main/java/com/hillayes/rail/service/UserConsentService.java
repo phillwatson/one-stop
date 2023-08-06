@@ -33,6 +33,11 @@ public class UserConsentService {
     // The number of days for which account access will be agreed
     private final static int ACCESS_VALID_FOR_DAYS = 2;
 
+    /**
+     * The account scopes for which all consents are granted access.
+     */
+    private final static List<String> CONSENT_SCOPES = List.of("balances", "details", "transactions");
+
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -90,7 +95,7 @@ public class UserConsentService {
         log.debug("Requesting agreement [userId: {}, institutionId: {}]", userId, institutionId);
         EndUserAgreement agreement = agreementService.create(EndUserAgreementRequest.builder()
             .institutionId(institutionId)
-            .accessScope(List.of("balances", "details", "transactions"))
+            .accessScope(CONSENT_SCOPES)
             .maxHistoricalDays(institution.transactionTotalDays)
             .accessValidForDays(ACCESS_VALID_FOR_DAYS)
             .build());
@@ -195,14 +200,7 @@ public class UserConsentService {
         log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
         userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
-        try {
-            // delete the requisition - and the associated agreement
-            requisitionService.delete(userConsent.getRequisitionId());
-        } catch (Exception e) {
-            // log and continue
-            log.info("Error whilst deleting user's requisition [userId: {}, requisitionId: {}]",
-                userConsent.getUserId(), userConsent.getRequisitionId(), e);
-        }
+        deleteRequisition(userConsent);
 
         URI redirectUri = UriBuilder
             .fromPath(userConsent.getCallbackUri())
@@ -232,6 +230,8 @@ public class UserConsentService {
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.SUSPENDED);
                 userConsent = userConsentRepository.save(userConsent);
+
+                deleteRequisition(userConsent);
 
                 // send consent suspended event notification
                 consentEventSender.sendConsentSuspended(userConsent);
@@ -287,14 +287,19 @@ public class UserConsentService {
      */
     public void deleteAllConsents(UUID userId) {
         log.info("Deleting all user's consent records [userId: {}]", userId);
-        userConsentRepository.findByUserId(userId).forEach( userConsent -> {
+        userConsentRepository.findByUserId(userId).forEach(userConsent -> {
             log.debug("Deleting user consent [id: {}, institutionId: {}]",
                 userConsent.getId(), userConsent.getInstitutionId());
 
-            deleteRequisition(userConsent);
+            if ((userConsent.getStatus() != ConsentStatus.CANCELLED) &&
+                (userConsent.getStatus() != ConsentStatus.EXPIRED) &&
+                (userConsent.getStatus() != ConsentStatus.SUSPENDED) &&
+                (userConsent.getStatus() != ConsentStatus.DENIED)) {
+                deleteRequisition(userConsent);
 
-            // send consent cancelled event notification
-            consentEventSender.sendConsentCancelled(userConsent);
+                // send consent cancelled event notification
+                consentEventSender.sendConsentCancelled(userConsent);
+            }
 
             // will cascade delete accounts, balances and transactions
             userConsentRepository.delete(userConsent);
@@ -307,7 +312,7 @@ public class UserConsentService {
             requisitionService.delete(userConsent.getRequisitionId());
         } catch (Exception e) {
             // log and continue
-            log.info("Error whilst purging user's requisition [userId: {}, requisitionId: {}]",
+            log.info("Error whilst deleting user's requisition [userId: {}, requisitionId: {}]",
                 userConsent.getUserId(), userConsent.getRequisitionId(), e);
         }
 
@@ -316,7 +321,7 @@ public class UserConsentService {
             agreementService.delete(userConsent.getAgreementId());
         } catch (Exception e) {
             // log and continue
-            log.info("Error whilst purging user's agreement [userId: {}, agreementId: {}]",
+            log.info("Error whilst deleting user's agreement [userId: {}, agreementId: {}]",
                 userConsent.getUserId(), userConsent.getAgreementId(), e);
         }
     }

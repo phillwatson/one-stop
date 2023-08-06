@@ -2,15 +2,13 @@ package com.hillayes.rail.service;
 
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
-import jakarta.ws.rs.QueryParam;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;

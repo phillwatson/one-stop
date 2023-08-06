@@ -18,8 +18,11 @@ import jakarta.ws.rs.NotAuthorizedException;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -71,6 +74,26 @@ public class AuthServiceTest {
         JsonNode node = jsonMapper.reader().readTree(json);
         assertNotNull(node);
         assertEquals("RSA", node.get("keys").get(0).get("kty").asText());
+    }
+
+    @ParameterizedTest
+    @EnumSource(AuthProvider.class)
+    public void testInitiateOpenIdLogin(AuthProvider authProvider) {
+        // given: some state to pass open-id provider
+        String state = randomAlphanumeric(20);
+
+        // and: the open-id auth-provider will give a redirect URI
+        URI redirectUri = URI.create("http://mock-uri");
+        when(openIdAuth.oauthLogin(authProvider, state)).thenReturn(redirectUri);
+
+        // when: the service is called
+        URI uri = fixture.oauthLogin(authProvider, state);
+
+        // then: the open-id login is initiated
+        verify(openIdAuth).oauthLogin(authProvider, state);
+
+        // and: the response URI is correct
+        assertEquals(redirectUri, uri);
     }
 
     @Test

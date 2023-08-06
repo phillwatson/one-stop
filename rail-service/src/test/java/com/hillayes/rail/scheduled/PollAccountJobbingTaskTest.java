@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,9 +56,18 @@ public class PollAccountJobbingTaskTest {
         scheduler = mock();
 
         // simulate save functionality
+        when(accountRepository.save(any())).then(invocation -> {
+            Account account = invocation.getArgument(0);
+            if (account.getId() == null) {
+                account.setId(UUID.randomUUID());
+            }
+            return account;
+        });
         when(accountBalanceRepository.save(any())).then(invocation -> {
             AccountBalance balance = invocation.getArgument(0);
-            balance.setId(UUID.randomUUID());
+            if (balance.getId() == null) {
+                balance.setId(UUID.randomUUID());
+            }
             return balance;
         });
 
@@ -201,10 +211,18 @@ public class PollAccountJobbingTaskTest {
             .build();
         when(railAccountService.get(railAccount.id)).thenReturn(Optional.of(railAccount));
 
+        // and: also account details are available
+        Map<String,Object> details = Map.of(
+            "name", randomAlphanumeric(20),
+            "cashAccountType", randomAlphanumeric(6),
+            "currency", "GBP"
+        );
+        when(railAccountService.details(railAccount.id)).thenReturn(Optional.of(Map.of("account", details)));
+
         // and: NO local account is linked to that rail-account
         when(accountRepository.findByRailAccountId(railAccount.id)).thenReturn(Optional.empty());
 
-        // and: the account has existing transactions - from which transaction poll will start
+        // and: NO existing transactions
         when(accountTransactionRepository.findByAccountId(any(), any(PageRequest.class)))
             .thenReturn(Page.empty());
 
@@ -230,6 +248,9 @@ public class PollAccountJobbingTaskTest {
         // and: the rail-account is retrieved
         verify(railAccountService).get(railAccount.id);
 
+        // and: the rail-account details are retrieved
+        verify(railAccountService).details(railAccount.id);
+
         // and: the fixture attempts to retrieve the local account
         verify(accountRepository).findByRailAccountId(railAccount.id);
 
@@ -239,18 +260,15 @@ public class PollAccountJobbingTaskTest {
         // and: the balances are saved
         verify(accountBalanceRepository, times(balances.size())).save(any());
 
-        // and: NO transactions are queried to get start date for poll
-        verify(accountTransactionRepository, never()).findByAccountId(any(), any());
-
         // and: the account transactions are retrieved
         verify(railAccountService).transactions(eq(railAccount.id), any(), any());
 
         // and: the transactions are saved
         verify(accountTransactionRepository).saveAll(any());
 
-        // and: the local account is inserted
+        // and: the local account is inserted AND updated
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
-        verify(accountRepository).save(captor.capture());
+        verify(accountRepository, times(2)).save(captor.capture());
         Account account = captor.getValue();
 
         // and: the local account is inserted with the consent ID
@@ -261,6 +279,9 @@ public class PollAccountJobbingTaskTest {
         assertEquals(railAccount.id, account.getRailAccountId());
         assertEquals(railAccount.ownerName, account.getOwnerName());
         assertEquals(railAccount.iban, account.getIban());
+        assertEquals(details.get("name"), account.getAccountName());
+        assertEquals(details.get("cashAccountType"), account.getAccountType());
+        assertEquals(details.get("currency"), account.getCurrencyCode());
 
         // and: the consent service is NOT called to process suspended requisition
         verify(userConsentService, never()).consentSuspended(any());

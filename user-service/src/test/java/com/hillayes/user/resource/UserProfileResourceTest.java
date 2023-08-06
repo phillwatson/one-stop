@@ -1,6 +1,8 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.onestop.api.*;
+import com.hillayes.openid.AuthProvider;
+import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import io.quarkus.test.junit.QuarkusTest;
@@ -9,10 +11,7 @@ import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -177,6 +176,59 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: the response details the error
         verifyError(response, userId);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetUserAuthProviders() {
+        // given: an identified user
+        UUID userId = UUID.fromString(userIdStr);
+        User user = User.builder()
+            .id(userId)
+            .username(randomAlphanumeric(20))
+            .preferredName(randomAlphanumeric(20))
+            .title(randomAlphanumeric(10))
+            .givenName(randomAlphanumeric(20))
+            .familyName(randomAlphanumeric(20))
+            .email(randomAlphanumeric(20))
+            .phoneNumber(randomNumeric(10))
+            .passwordHash(UUID.randomUUID().toString())
+            .locale(Locale.ENGLISH)
+            .dateCreated(Instant.now().minusSeconds(20000))
+            .dateOnboarded(Instant.now().minusSeconds(10000))
+            .roles(Set.of("user"))
+            .build();
+        when(userService.getUser(userId)).thenReturn(Optional.of(user));
+
+        // and: the user has a collection of Open-ID identifiers
+        List<OidcIdentity> oidcIdentities = Arrays.stream(AuthProvider.values()).map(authProvider ->
+            OidcIdentity.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .provider(authProvider)
+                .issuer(randomAlphanumeric(20))
+                .subject(randomAlphanumeric(15))
+                .dateCreated(Instant.now())
+                .build()
+        ).toList();
+        when(userService.getUserAuthProviders(userId)).thenReturn(oidcIdentities);
+
+        // when: the user asks for their oidc identifiers
+        UserAuthProvidersResponse response = given()
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/profiles/authproviders")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().as(UserAuthProvidersResponse.class);
+
+        // then: the response contains all user's OIDC identifiers
+        oidcIdentities.forEach(expected ->
+            assertNotNull(response.getAuthProviders().stream()
+                .filter(identifier -> identifier.getName().equals(expected.getProvider().getProviderName()))
+                .findFirst().orElse(null))
+        );
     }
 
     @Test

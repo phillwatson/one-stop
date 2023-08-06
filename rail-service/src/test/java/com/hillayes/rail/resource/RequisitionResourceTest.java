@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -131,6 +132,22 @@ public class RequisitionResourceTest extends TestResourceBase {
                 .contentType(JSON)
                 .extract().as(AccountSummary.class);
             assertEquals(requisition.institutionId, account.institutionId);
+
+            // retrieve the account detail
+            Map<?,?> detail = given()
+                .pathParam("id", accountId)
+                .when().get("/api/v1/rails/rails-accounts/{id}/details")
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract().as(Map.class);
+            assertNotNull(detail);
+            Map<String,Object> properties = (Map<String,Object>)detail.get("account");
+            assertNotNull(properties);
+            assertNotNull(properties.get("ownerName"));
+            assertNotNull(properties.get("iban"));
+            assertNotNull(properties.get("currency"));
+            assertNotNull(properties.get("id"));
 
             // retrieve account balances
             List<Balance> balances = Arrays.asList(given()

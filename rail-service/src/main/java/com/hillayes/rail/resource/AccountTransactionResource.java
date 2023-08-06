@@ -39,12 +39,7 @@ public class AccountTransactionResource {
         log.info("Listing transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
 
-        if (accountId != null) {
-            // verify that the account belongs to the user
-            accountService.getAccount(accountId)
-                .filter(account -> userId.equals(account.getUserId()) )
-                .orElseThrow(() -> new NotFoundException("Account", accountId));
-        }
+        verifyAccountHolder(userId, accountId);
 
         Page<AccountTransaction> transactionsPage =
             accountTransactionService.getTransactions(userId, accountId, page, pageSize);
@@ -77,12 +72,7 @@ public class AccountTransactionResource {
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
 
-        if (accountId != null) {
-            // verify that the account belongs to the user
-            accountService.getAccount(accountId)
-                .filter(account -> userId.equals(account.getUserId()) )
-                .orElseThrow(() -> new NotFoundException("Account", accountId));
-        }
+        verifyAccountHolder(userId, accountId);
 
         List<AccountTransaction> transactions =
             accountTransactionService.getTransactions(userId, accountId, fromDate, toDate);
@@ -114,5 +104,20 @@ public class AccountTransactionResource {
             .description(transaction.getRemittanceInformationUnstructured() == null
                 ? transaction.getDebtorName()
                 : transaction.getRemittanceInformationUnstructured());
+    }
+
+    /**
+     * Verifies that the identified user owns the identified account. If the account
+     * ID is null, no verification is performed.
+     * @param userId the user attempting to access the account.
+     * @param accountId tehe optional account identifier.
+     */
+    private void verifyAccountHolder(UUID userId, UUID accountId) {
+        if (accountId != null) {
+            // verify that the account belongs to the user
+            accountService.getAccount(accountId)
+                .filter(account -> userId.equals(account.getUserId()) )
+                .orElseThrow(() -> new NotFoundException("Account", accountId));
+        }
     }
 }

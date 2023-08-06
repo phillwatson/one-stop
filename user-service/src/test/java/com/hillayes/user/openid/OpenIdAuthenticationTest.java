@@ -15,6 +15,7 @@ import jakarta.ws.rs.NotAuthorizedException;
 import org.jose4j.jwt.JwtClaims;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +38,23 @@ public class OpenIdAuthenticationTest {
 
     @Inject
     OpenIdAuthentication fixture;
+
+    @Test
+    public void initiateLogin() {
+        // given: and auth-provider identifier
+        AuthProvider authProvider = AuthProvider.GOOGLE;
+        when(openIdAuth.isFor(authProvider)).thenReturn(true);
+
+        // and: the auth-provider
+        URI openIdUri = URI.create("http://mock-uri");
+        when(openIdAuth.initiateLogin(any())).thenReturn(openIdUri);
+
+        // when: the service is called
+        URI uri = fixture.oauthLogin(authProvider, "some-state");
+
+        // then: the redirection URI is returned
+        assertEquals(openIdUri, uri);
+    }
 
     @Test
     public void testOauthLogin_ExistingUser() throws Exception {

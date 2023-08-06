@@ -14,12 +14,12 @@ import io.restassured.http.Cookie;
 import io.restassured.response.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.net.URI;
 import java.time.Duration;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -64,6 +64,30 @@ public class AuthResourceTest extends TestBase {
             .contentType(JSON)
             .assertThat()
             .body("keys[0].kty", is("RSA"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(AuthProvider.class)
+    public void TestOauthLogin(AuthProvider authProvider) {
+        // given: the auth-provider's redirect URI
+        URI redirectUri = URI.create("http://mock-uri");
+        when(openIdAuth.oauthLogin(eq(authProvider), any())).thenReturn(redirectUri);
+
+        // when: the open-id login is initiated
+        String state = randomAlphanumeric(20);
+        URI response = given()
+            .contentType(JSON)
+            .queryParam("state", state)
+            .get("/api/v1/auth/login/{auth-provider}", Map.of("auth-provider", authProvider.getProviderName()))
+            .then()
+            .statusCode(200)
+            .extract().response().as(URI.class);
+
+        // then: the response is the open-id redirect URI
+        assertEquals(redirectUri, response);
+
+        // and: the correct AuthProvider and state were passed
+        verify(openIdAuth).oauthLogin(authProvider, state);
     }
 
     @Test

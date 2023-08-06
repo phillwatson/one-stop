@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
  * For example; Google's well-known configuration gives the token-endpoint URI of
  * https://oauth2.googleapis.com/token.
  * <p>
- * This REST client is instantiates by the OpenIdFactory.
+ * This REST client is instantiated by the OpenIdFactory.
  */
 @Produces(MediaType.APPLICATION_JSON)
 public interface OpenIdTokenApi {

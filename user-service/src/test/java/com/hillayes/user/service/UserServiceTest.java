@@ -4,7 +4,9 @@ import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.DeletedUser;
+import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.errors.DuplicateEmailAddressException;
 import com.hillayes.user.errors.DuplicateUsernameException;
@@ -24,9 +26,8 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
 import static com.hillayes.user.utils.TestData.mockUser;
 import static com.hillayes.user.utils.TestData.mockUsers;
@@ -335,6 +336,40 @@ public class UserServiceTest {
 
         // then: the users are returned
         assertEquals(users.size(), result.getNumberOfElements());
+    }
+
+    @Test
+    public void testGetUserAuthProviders() {
+        // given: a user with some Open-ID identifiers
+        User user = mockUser(UUID.randomUUID());
+        for (AuthProvider authProvider : AuthProvider.values()) {
+            user.addOidcIdentity(authProvider, randomAlphanumeric(20), randomAlphanumeric(15));
+        }
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // when: the service is called
+        Collection<OidcIdentity> result = fixture.getUserAuthProviders(user.getId());
+
+        // then: the user's oidc identifiers are returned
+        assertEquals(user.getOidcIdentities().size(), result.size());
+        user.getOidcIdentities().forEach(expected ->
+            assertNotNull(result.stream()
+                .filter(identifier -> identifier.getProvider() == expected.getProvider())
+                .findFirst().orElse(null))
+        );
+    }
+
+    @Test
+    public void testGetUserAuthProviders_UserNotFound() {
+        // given: no user with the given ID
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // when: the service is called
+        Collection<OidcIdentity> result = fixture.getUserAuthProviders(userId);
+
+        // then: the user's oidc identifiers are empty
+        assertTrue(result.isEmpty());
     }
 
     @Test
