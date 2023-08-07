@@ -17,7 +17,6 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     error_code varchar(256) NULL,
     error_detail varchar(256) NULL
 );
-CREATE INDEX idx_userconsent_user_id ON ${flyway:defaultSchema}.userconsent (user_id);
 
 CREATE TABLE ${flyway:defaultSchema}.account (
 	id uuid NOT NULL CONSTRAINT account_pkey PRIMARY KEY,

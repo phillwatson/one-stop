@@ -10,13 +10,13 @@ import java.util.List;
 
 /**
  * ISIN
- * GB00B5ZNJ896 - BlackRock Gold and General D Acc
- * GB0033874321 - FSSA Greater China Growth B GBP Acc
- * GB00BP9LKJ73 - FTF Royce US Smaller Companies W Acc
- * GB00B80QG052 - HSBC FTSE 250 Index C Acc
- * GB00B0CNGR59 - L&G European Index I Acc
- * GB00B0CNGT73 - L&G US Index I Acc
- * IE00B3NS4D25 - Lindsell Train Global Equity B GBP Inc
+ * GB00B5ZNJ896:GBP - BlackRock Gold and General D Acc
+ * GB0033874321:GBP - FSSA Greater China Growth B GBP Acc
+ * GB00BP9LKJ73:GBP - FTF Royce US Smaller Companies W Acc
+ * GB00B80QG052:GBP - HSBC FTSE 250 Index C Acc
+ * GB00B0CNGR59:GBP - L&G European Index I Acc
+ * GB00B0CNGT73:GBP - L&G US Index I Acc
+ * IE00B3NS4D25:GBP - Lindsell Train Global Equity B GBP Inc
  * AV.
  * TW.
  * NG.

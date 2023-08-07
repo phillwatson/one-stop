@@ -119,23 +119,20 @@ public class UserConsentService {
         // record agreement in a consent record
         log.debug("Recording agreement [userId: {}, institutionId: {}, expires: {}]",
             userId, institutionId, expires);
-        UserConsent.UserConsentBuilder builder;
         if (userConsent == null) {
-            builder = UserConsent.builder()
+            userConsent = UserConsent.builder()
                 .dateCreated(Instant.now())
                 .userId(userId)
-                .institutionId(agreement.institutionId);
-        } else {
-            builder = userConsent.toBuilder();
+                .institutionId(agreement.institutionId)
+                .build();
         }
+        userConsent.setAgreementId(agreement.id);
+        userConsent.setMaxHistory(agreement.maxHistoricalDays);
+        userConsent.setAgreementExpires(expires);
+        userConsent.setCallbackUri(callbackUri.toString());
+        userConsent.setStatus(ConsentStatus.INITIATED);
 
-        userConsent = userConsentRepository.saveAndFlush(builder
-            .agreementId(agreement.id)
-            .maxHistory(agreement.maxHistoricalDays)
-            .agreementExpires(expires)
-            .callbackUri(callbackUri.toString())
-            .status(ConsentStatus.INITIATED)
-            .build());
+        userConsent = userConsentRepository.saveAndFlush(userConsent);
 
         try {
             // create requisition

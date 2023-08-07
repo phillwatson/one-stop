@@ -13,6 +13,7 @@ import java.util.UUID;
  */
 @Entity
 @Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder(toBuilder = true)
@@ -30,15 +31,12 @@ public class UserConsent {
 
     @ToString.Include
     @Column(name = "date_given", nullable = true)
-    @Setter
     private Instant dateGiven;
 
     @Column(name = "date_denied", nullable = true)
-    @Setter
     private Instant dateDenied;
 
     @Column(name = "date_cancelled", nullable = true)
-    @Setter
     private Instant dateCancelled;
 
     @EqualsAndHashCode.Include
@@ -77,14 +75,12 @@ public class UserConsent {
      * The rail ID for the requisition for access to which the consent refers.
      */
     @ToString.Include
-    @Setter
     @Column(name = "requisition_id", nullable = true)
     private String requisitionId;
 
     /**
      * The URL to which the client will be redirected after consent request is completed.
      */
-    @Setter
     @Column(name = "callback_uri", nullable = true)
     private String callbackUri;
 
@@ -92,7 +88,6 @@ public class UserConsent {
      * Indicates the position in the flow to obtain consent from the user.
      */
     @ToString.Include
-    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ConsentStatus status;
@@ -100,14 +95,12 @@ public class UserConsent {
     /**
      * If consent is denied, this records the error code returned by the rail.
      */
-    @Setter
     @Column(name="error_code", nullable = true)
     private String errorCode;
 
     /**
      * If consent is denied, this records the detail of the error returned by the rail.
      */
-    @Setter
     @Column(name="error_detail", nullable = true)
     private String errorDetail;
 }
