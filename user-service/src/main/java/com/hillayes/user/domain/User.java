@@ -11,9 +11,10 @@ import java.util.*;
 
 @Entity
 @Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class User {
@@ -30,7 +31,6 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Setter
     @Column(nullable = false)
     @ColumnTransformer(write = "LOWER(?)")
     private String email;

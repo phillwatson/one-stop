@@ -56,7 +56,7 @@ public class AuthServiceTest {
         when(userRepository.save(any())).then((invocation) -> {
             User user = invocation.getArgument(0);
             if (user.getId() == null) {
-                user = user.toBuilder().id(UUID.randomUUID()).build();
+                user.setId(UUID.randomUUID());
             }
             return user;
         });

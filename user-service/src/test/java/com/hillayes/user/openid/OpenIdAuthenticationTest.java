@@ -136,9 +136,8 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
         // and: the auth-provider ID identifies a user - who is blocked
-        User user = TestData.mockUser(UUID.randomUUID()).toBuilder()
-            .dateBlocked(Instant.now().minusSeconds(200))
-            .build();
+        User user = TestData.mockUser(UUID.randomUUID());
+        user.setDateBlocked(Instant.now().minusSeconds(200));
         user.addOidcIdentity(authProvider, idToken.getIssuer(), idToken.getSubject());
         when(userRepository.findByIssuerAndSubject(idToken.getIssuer(), idToken.getSubject()))
             .thenReturn(Optional.of(user));
@@ -195,9 +194,8 @@ public class OpenIdAuthenticationTest {
     @Test
     public void testOauthLogin_ExistingUser_NewOid_UserBlocked() throws Exception {
         // given: a user exists with links to OID account
-        User user = TestData.mockUser(UUID.randomUUID()).toBuilder()
-            .dateBlocked(Instant.now().minusSeconds(3000))
-            .build();
+        User user = TestData.mockUser(UUID.randomUUID());
+        user.setDateBlocked(Instant.now().minusSeconds(3000));
 
         // and: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;

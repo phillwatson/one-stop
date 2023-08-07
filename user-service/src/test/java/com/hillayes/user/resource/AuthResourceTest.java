@@ -157,11 +157,11 @@ public class AuthResourceTest extends TestBase {
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).then(invocation ->
-            (user.getId() == null)
-                ? user.toBuilder().id(UUID.randomUUID()).build()
-                : user
-        );
+        when(userRepository.save(user)).then(invocation -> {
+            if (user.getId() == null)
+                user.setId(UUID.randomUUID());
+            return user;
+        });
 
         // and: an OpenID auth-provider and auth-code
         AuthProvider authProvider = AuthProvider.GOOGLE;

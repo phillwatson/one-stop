@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class UserConsent {

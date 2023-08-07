@@ -1,23 +1,17 @@
 package com.hillayes.user.resource;
 
-import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.auth.crypto.PasswordCrypto;
-import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.UserRepository;
 import com.hillayes.user.service.UserService;
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
-import io.smallrye.jwt.auth.cdi.NullJsonWebToken;
-import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
-import org.codehaus.plexus.util.cli.Arg;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -25,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import java.net.URI;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -63,9 +56,9 @@ public class UserOnboardResourceTest extends TestBase {
         // simulate setting of ID on save
         when(userRepository.save(any())).then(invocation -> {
             User user = invocation.getArgument(0);
-            return (user.getId() == null)
-                ? user.toBuilder().id(UUID.randomUUID()).build()
-                : user;
+            if (user.getId() == null)
+                user.setId(UUID.randomUUID());
+            return user;
         });
     }
 

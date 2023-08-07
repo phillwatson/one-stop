@@ -116,19 +116,18 @@ public class UserService {
         // ensure email is unique
         validateUniqueEmail(null, userProfile.getEmail());
 
-        userProfile = userRepository.save(userProfile.toBuilder()
-            .username(userProfile.getUsername())
-            .email(userProfile.getEmail())
-            .title(userProfile.getTitle())
-            .givenName(userProfile.getGivenName())
-            .familyName(userProfile.getFamilyName())
-            .preferredName(userProfile.getPreferredName())
-            .phoneNumber(userProfile.getPhoneNumber())
-            .locale(userProfile.getLocale())
-            .passwordHash(passwordCrypto.getHash(password))
-            .dateOnboarded(Instant.now())
-            .roles(Set.of("user"))
-            .build());
+        userProfile.setUsername(userProfile.getUsername());
+        userProfile.setEmail(userProfile.getEmail());
+        userProfile.setTitle(userProfile.getTitle());
+        userProfile.setGivenName(userProfile.getGivenName());
+        userProfile.setFamilyName(userProfile.getFamilyName());
+        userProfile.setPreferredName(userProfile.getPreferredName());
+        userProfile.setPhoneNumber(userProfile.getPhoneNumber());
+        userProfile.setLocale(userProfile.getLocale());
+        userProfile.setPasswordHash(passwordCrypto.getHash(password));
+        userProfile.setDateOnboarded(Instant.now());
+        userProfile.setRoles(Set.of("user"));
+        userProfile = userRepository.save(userProfile);
 
         userEventSender.sendUserCreated(userProfile);
         log.debug("User has completed onboarding [id: {}, username: {}]", userProfile.getId(), userProfile.getUsername());
@@ -171,9 +170,8 @@ public class UserService {
         return userRepository.findByIdOptional(userId)
             .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
             .map(user -> {
-                user = userRepository.save(user.toBuilder()
-                    .passwordHash(passwordCrypto.getHash(newPassword))
-                    .build());
+                user.setPasswordHash(passwordCrypto.getHash(newPassword));
+                user = userRepository.save(user);
 
                 userEventSender.sendUserUpdated(user);
                 log.debug("Updated password [username: {}, userId: {}]", user.getUsername(), user.getId());
@@ -199,21 +197,19 @@ public class UserService {
 
         return userRepository.findByIdOptional(id)
             .map(user -> {
-                User.UserBuilder userBuilder = user.toBuilder()
-                    .username(userRequest.getUsername())
-                    .email(userRequest.getEmail())
-                    .title(userRequest.getTitle())
-                    .givenName(userRequest.getGivenName())
-                    .familyName(userRequest.getFamilyName())
-                    .preferredName(userRequest.getPreferredName())
-                    .phoneNumber(userRequest.getPhoneNumber())
-                    .locale(userRequest.getLocale());
-
+                user.setUsername(userRequest.getUsername());
+                user.setEmail(userRequest.getEmail());
+                user.setTitle(userRequest.getTitle());
+                user.setGivenName(userRequest.getGivenName());
+                user.setFamilyName(userRequest.getFamilyName());
+                user.setPreferredName(userRequest.getPreferredName());
+                user.setPhoneNumber(userRequest.getPhoneNumber());
+                user.setLocale(userRequest.getLocale());
                 if ((userRequest.getRoles() != null) && (!userRequest.getRoles().isEmpty())) {
-                    userBuilder.roles(userRequest.getRoles());
+                    user.setRoles(userRequest.getRoles());
                 }
 
-                return userRepository.save(userBuilder.build());
+                return userRepository.save(user);
             }).map(user -> {
                 userEventSender.sendUserUpdated(user);
                 log.debug("Updated user [username: {}, userId: {}]", user.getUsername(), user.getId());

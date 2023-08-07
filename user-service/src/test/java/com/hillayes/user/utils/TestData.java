@@ -34,8 +34,8 @@ public class TestData {
     }
 
     public static User mockUser(UUID id) {
-        return mockUser().toBuilder()
-            .id(id)
-            .build();
+        User result = mockUser();
+        result.setId(id);
+        return result;
     }
 }

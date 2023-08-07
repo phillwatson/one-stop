@@ -70,9 +70,7 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             if (user.getId() == null) {
-                user = user.toBuilder()
-                    .id(UUID.randomUUID())
-                    .build();
+                user.setId(UUID.randomUUID());
             }
             return user;
         });
@@ -188,9 +186,8 @@ public class UserServiceTest {
     public void testCompleteOnboarding_MissingUsername() {
         // given: a completed user request
         char[] password = randomAlphanumeric(20).toCharArray();
-        User user = mockUser().toBuilder()
-            .username(null)
-            .build();
+        User user = mockUser();
+        user.setUsername(null);
 
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
@@ -211,9 +208,8 @@ public class UserServiceTest {
     public void testCompleteOnboarding_MissingEmail() {
         // given: a completed user request
         char[] password = randomAlphanumeric(20).toCharArray();
-        User user = mockUser().toBuilder()
-            .email(null)
-            .build();
+        User user = mockUser();
+        user.setEmail(null);
 
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
@@ -234,9 +230,8 @@ public class UserServiceTest {
     public void testCompleteOnboarding_MissingGivenName() {
         // given: a completed user request
         char[] password = randomAlphanumeric(20).toCharArray();
-        User user = mockUser().toBuilder()
-            .givenName(null)
-            .build();
+        User user = mockUser();
+        user.setGivenName(null);
 
         // when: completing the onboarding
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
@@ -377,9 +372,8 @@ public class UserServiceTest {
     @Test
     public void testUpdatePassword() {
         // given: a user
-        User user = mockUser(UUID.randomUUID()).toBuilder()
-            .passwordHash("oldhash")
-            .build();
+        User user = mockUser(UUID.randomUUID());
+        user.setPasswordHash("oldhash");
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the given old password is correct
@@ -426,9 +420,8 @@ public class UserServiceTest {
     @Test
     public void testUpdatePassword_WrongOldPassword() {
         // given: a user
-        User user = mockUser(UUID.randomUUID()).toBuilder()
-            .passwordHash("oldhash")
-            .build();
+        User user = mockUser(UUID.randomUUID());
+        user.setPasswordHash("oldhash");
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the given old password is NOT correct
@@ -456,12 +449,6 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
         // and: no other user with the given username exists
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(user));
@@ -471,15 +458,17 @@ public class UserServiceTest {
             .thenReturn(Optional.of(user));
 
         // when: the service is called
-        Optional<User> result = fixture.updateUser(user.getId(), modifiedUser);
+        user.setGivenName("New First Name");
+        user.setFamilyName("New Last Name");
+        Optional<User> result = fixture.updateUser(user.getId(), user);
 
         // then: the user is returned
         assertTrue(result.isPresent());
 
         // and: the user is updated
         assertEquals(user.getId(), result.get().getId());
-        assertEquals(modifiedUser.getGivenName(), result.get().getGivenName());
-        assertEquals(modifiedUser.getFamilyName(), result.get().getFamilyName());
+        assertEquals(user.getGivenName(), result.get().getGivenName());
+        assertEquals(user.getFamilyName(), result.get().getFamilyName());
 
         // and: the user is saved
         verify(userRepository).save(any());
@@ -516,20 +505,16 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .username(null)
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
         // and: a user with the given username already exists
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
         // when: updating a user - an exception is thrown
+        user.setUsername(null);
+        user.setGivenName("New First Name");
+        user.setFamilyName("New Last Name");
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
+            fixture.updateUser(user.getId(), user)
         );
 
         // then: the username is the missing parameter
@@ -548,20 +533,16 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .email(null)
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
         // and: a user with the given username already exists
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
         // when: updating a user - an exception is thrown
+        user.setEmail(null);
+        user.setGivenName("New First Name");
+        user.setFamilyName("New Last Name");
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
+            fixture.updateUser(user.getId(), user)
         );
 
         // then: the email is the missing parameter
@@ -580,19 +561,15 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .givenName(null)
-            .familyName("New Last Name")
-            .build();
-
         // and: a user with the given username already exists
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
         // when: updating a user - an exception is thrown
+        user.setGivenName(null);
+        user.setFamilyName("New Last Name");
         MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
+            fixture.updateUser(user.getId(), user)
         );
 
         // then: the givenName is the missing parameter
@@ -611,19 +588,15 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
         // and: a user with the given username already exists
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
         // when: updating a user - an exception is thrown
+        user.setGivenName("New First Name");
+        user.setFamilyName("New Last Name");
         assertThrows(DuplicateUsernameException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
+            fixture.updateUser(user.getId(), user)
         );
 
         // then: the user is NOT updated
@@ -639,19 +612,15 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
-        // and: an update request
-        User modifiedUser = user.toBuilder()
-            .givenName("New First Name")
-            .familyName("New Last Name")
-            .build();
-
         // and: a user with the given email already exists
         when(userRepository.findByEmail(user.getEmail().toLowerCase()))
             .thenReturn(Optional.of(mockUser(UUID.randomUUID())));
 
         // when: updating a user - an exception is thrown
+        user.setGivenName("New First Name");
+        user.setFamilyName("New Last Name");
         assertThrows(DuplicateEmailAddressException.class, () ->
-            fixture.updateUser(user.getId(), modifiedUser)
+            fixture.updateUser(user.getId(), user)
         );
 
         // then: the user is NOT updated
