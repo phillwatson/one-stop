@@ -14,20 +14,22 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
-import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.panache.common.Sort;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.hillayes.user.utils.TestData.mockUser;
 import static com.hillayes.user.utils.TestData.mockUsers;
@@ -150,7 +152,7 @@ public class UserServiceTest {
 
         // and: the user was previously registered and acknowledged
         User registeredUser = mockUser(UUID.randomUUID());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(registeredUser));
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.of(registeredUser));
 
         // when: completing the onboarding
         User onboardedUser = fixture.completeOnboarding(user, password);
@@ -299,7 +301,7 @@ public class UserServiceTest {
     public void testGetUser() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // when: the service is called
         Optional<User> result = fixture.getUser(user.getId());
@@ -313,7 +315,7 @@ public class UserServiceTest {
     public void testGetUser_NotFound() {
         // given: no user with the given ID
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // when: the service is called
         Optional<User> result = fixture.getUser(userId);
@@ -329,7 +331,7 @@ public class UserServiceTest {
 
         // and: the user repository returns the users
         Page<User> page = new PageImpl<>(users);
-        when(userRepository.findAll(any(PageRequest.class))).thenReturn(page);
+        when(userRepository.findAll(any(Sort.class), anyInt(), anyInt())).thenReturn(page);
 
         // when: the service is called
         Page<User> result = fixture.listUsers(1, 20);
@@ -345,7 +347,7 @@ public class UserServiceTest {
         for (AuthProvider authProvider : AuthProvider.values()) {
             user.addOidcIdentity(authProvider, randomAlphanumeric(20), randomAlphanumeric(15));
         }
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // when: the service is called
         Collection<OidcIdentity> result = fixture.getUserAuthProviders(user.getId());
@@ -363,7 +365,7 @@ public class UserServiceTest {
     public void testGetUserAuthProviders_UserNotFound() {
         // given: no user with the given ID
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // when: the service is called
         Collection<OidcIdentity> result = fixture.getUserAuthProviders(userId);
@@ -378,7 +380,7 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID()).toBuilder()
             .passwordHash("oldhash")
             .build();
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the given old password is correct
         when(passwordCrypto.verify("oldpassword".toCharArray(), user.getPasswordHash())).thenReturn(true);
@@ -403,7 +405,7 @@ public class UserServiceTest {
     public void testUpdatePassword_NotFound() {
         // given: a user
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // when: the service is called
         Optional<User> result = fixture.updatePassword(userId, "oldpassword".toCharArray(), "newpassword".toCharArray());
@@ -427,7 +429,7 @@ public class UserServiceTest {
         User user = mockUser(UUID.randomUUID()).toBuilder()
             .passwordHash("oldhash")
             .build();
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the given old password is NOT correct
         when(passwordCrypto.verify("oldpassword".toCharArray(), user.getPasswordHash())).thenReturn(false);
@@ -452,7 +454,7 @@ public class UserServiceTest {
     public void testUpdateUser() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -490,7 +492,7 @@ public class UserServiceTest {
     public void testUpdateUser_NotFound() {
         // given: an unknown user
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // and: an update request
         User modifiedUser = mockUser();
@@ -512,7 +514,7 @@ public class UserServiceTest {
     public void testUpdateUser_MissingUsername() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -544,7 +546,7 @@ public class UserServiceTest {
     public void testUpdateUser_MissingEmail() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -576,7 +578,7 @@ public class UserServiceTest {
     public void testUpdateUser_MissingGivenName() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -607,7 +609,7 @@ public class UserServiceTest {
     public void testUpdateUser_DuplicateUsername() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -635,7 +637,7 @@ public class UserServiceTest {
     public void testUpdateUser_DuplicateEmail() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: an update request
         User modifiedUser = user.toBuilder()
@@ -663,7 +665,7 @@ public class UserServiceTest {
     public void testDeleteUser() {
         // given: a user
         User user = mockUser(UUID.randomUUID());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // when: the service is called
         Optional<User> result = fixture.deleteUser(user.getId());
@@ -705,7 +707,7 @@ public class UserServiceTest {
     public void testDeleteUser_NotFound() {
         // given: an unknown user
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // when: the service is called
         Optional<User> result = fixture.deleteUser(userId);

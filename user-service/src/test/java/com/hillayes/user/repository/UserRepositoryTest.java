@@ -4,10 +4,9 @@ import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import jakarta.inject.Inject;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +22,7 @@ public class UserRepositoryTest {
     @Test
     public void testFindByIssuerAndSubject() {
         // given: some users in the database with some oidc identities
-        List<User> users = mockUsers(3).stream()
+        Iterable<User> users = mockUsers(3).stream()
             .map(user -> {
                 user.addOidcIdentity(AuthProvider.GOOGLE, "google", UUID.randomUUID().toString());
                 user.addOidcIdentity(AuthProvider.APPLE, "apple", UUID.randomUUID().toString());
@@ -65,7 +64,7 @@ public class UserRepositoryTest {
     @Test
     public void testFindByEmail() {
         // given: some users in the database
-        List<User> users = fixture.saveAll(mockUsers(3));
+        Iterable<User> users = fixture.saveAll(mockUsers(3));
 
         users.forEach(user -> {
             // when: we search for a user with an existing email
@@ -93,7 +92,7 @@ public class UserRepositoryTest {
     @Test
     public void testFindByUsername() {
         // given: some users in the database
-        List<User> users = fixture.saveAll(mockUsers(3));
+        Iterable<User> users = fixture.saveAll(mockUsers(3));
 
         users.forEach(user -> {
             // when: we search for a user with an existing username

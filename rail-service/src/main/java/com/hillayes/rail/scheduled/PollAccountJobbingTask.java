@@ -14,12 +14,11 @@ import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.UserConsentService;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -193,8 +192,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         if (account.getId() != null) {
             // find the date of the most recent transaction we hold locally
             // we then use that as the start date for our rails request for transactions
-            PageRequest byBookingDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
-            startDate = accountTransactionRepository.findByAccountId(account.getId(), byBookingDate)
+            Sort sort = Sort.by("bookingDateTime").descending();
+            startDate = accountTransactionRepository.findByAccountId(account.getId(), sort, 0, 1)
                 .stream().findFirst()
                 .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
                 .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found

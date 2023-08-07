@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
 import java.time.Duration;
@@ -93,18 +92,14 @@ public class UserConsentServiceTest {
             mockUserConsent(userId),
             mockUserConsent(userId)
         );
-        when(userConsentRepository.findByUserId(eq(userId), any()))
+        when(userConsentRepository.findByUserId(eq(userId), anyInt(), anyInt()))
             .thenReturn(new PageImpl<>(consents));
 
         // when: the fixture is called
         Page<UserConsent> result = fixture.listConsents(userId, 0, 20);
 
         // then: the repository is called with given parameters
-        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(userConsentRepository).findByUserId(eq(userId), captor.capture());
-        PageRequest request = captor.getValue();
-        assertEquals(0, request.getPageNumber());
-        assertEquals(20, request.getPageSize());
+        verify(userConsentRepository).findByUserId(userId, 0, 20);
 
         // and: the consent records are returned
         assertNotNull(result);
@@ -202,14 +197,14 @@ public class UserConsentServiceTest {
     public void testGetUserConsent_ById() {
         // given: a consent exists
         UserConsent consent = mockUserConsent(UUID.randomUUID());
-        when(userConsentRepository.findById(consent.getId()))
+        when(userConsentRepository.findByIdOptional(consent.getId()))
             .thenReturn(Optional.of(consent));
 
         // when: the service is called
         Optional<UserConsent> result = fixture.getUserConsent(consent.getId());
 
         // then: the repository is called with the given parameters
-        verify(userConsentRepository).findById(consent.getId());
+        verify(userConsentRepository).findByIdOptional(consent.getId());
 
         // and: the identified consent is returned
         assertTrue(result.isPresent());
@@ -220,14 +215,14 @@ public class UserConsentServiceTest {
     public void testGetUserConsent_ById_NotFound() {
         // given: NO consent exists with the given identifier
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId))
+        when(userConsentRepository.findByIdOptional(consentId))
             .thenReturn(Optional.empty());
 
         // when: the service is called
         Optional<UserConsent> result = fixture.getUserConsent(consentId);
 
         // then: the repository is called with the given parameters
-        verify(userConsentRepository).findById(consentId);
+        verify(userConsentRepository).findByIdOptional(consentId);
 
         // and: NO consent is returned
         assertTrue(result.isEmpty());
@@ -478,7 +473,7 @@ public class UserConsentServiceTest {
             .status(ConsentStatus.WAITING)
             .callbackUri(clientCallbackUri.toString())
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         URI result = fixture.consentGiven(consent.getId());
@@ -509,7 +504,7 @@ public class UserConsentServiceTest {
     public void testConsentGiven_ConsentNotFound() {
         // given: the identified consent cannot be found
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId)).thenReturn(Optional.empty());
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
@@ -539,7 +534,7 @@ public class UserConsentServiceTest {
             .status(ConsentStatus.WAITING)
             .callbackUri(clientCallbackUri.toString())
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         String errorCode = "UserCancelledSession";
@@ -581,7 +576,7 @@ public class UserConsentServiceTest {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId)).thenReturn(Optional.empty());
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
@@ -612,7 +607,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(consentStatus)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentSuspended(consent.getId());
@@ -641,7 +636,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(ConsentStatus.SUSPENDED)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentSuspended(consent.getId());
@@ -657,7 +652,7 @@ public class UserConsentServiceTest {
     public void testConsentSuspended_NotFound() {
         // given: a consent identifier
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId)).thenReturn(Optional.empty());
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
         fixture.consentSuspended(consentId);
@@ -676,7 +671,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(consentStatus)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentExpired(consent.getId());
@@ -705,7 +700,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(ConsentStatus.EXPIRED)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentExpired(consent.getId());
@@ -721,7 +716,7 @@ public class UserConsentServiceTest {
     public void testConsentExpired_NotFound() {
         // given: a consent identifier
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId)).thenReturn(Optional.empty());
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
         fixture.consentSuspended(consentId);
@@ -740,7 +735,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(consentStatus)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentCancelled(consent.getId());
@@ -770,7 +765,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(ConsentStatus.CANCELLED)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         fixture.consentCancelled(consent.getId());
@@ -786,7 +781,7 @@ public class UserConsentServiceTest {
     public void testConsentCancelled_NotFound() {
         // given: a consent identifier
         UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findById(consentId)).thenReturn(Optional.empty());
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
         fixture.consentCancelled(consentId);
@@ -857,7 +852,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // and: the rail service will throw an exception on delete requisition
         when(requisitionService.delete(any()))
@@ -890,7 +885,7 @@ public class UserConsentServiceTest {
         UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentRepository.findById(consent.getId())).thenReturn(Optional.of(consent));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // and: the rail service will throw an exception on delete requisition
         when(agreementService.delete(any()))

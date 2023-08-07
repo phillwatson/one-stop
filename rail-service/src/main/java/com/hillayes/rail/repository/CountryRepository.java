@@ -2,15 +2,15 @@ package com.hillayes.rail.repository;
 
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.Country;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Singleton
+@ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class CountryRepository {

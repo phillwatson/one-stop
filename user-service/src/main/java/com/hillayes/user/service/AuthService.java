@@ -108,7 +108,7 @@ public class AuthService {
         log.info("Auth refresh tokens initiated");
 
         UUID userId = UUID.fromString(jsonWebToken.getName());
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdOptional(userId)
             .filter(u -> !u.isBlocked())
             .orElseThrow(() -> {
                 log.info("User name failed verification [userId: {}]", userId);

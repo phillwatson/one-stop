@@ -17,7 +17,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
 import java.time.Instant;
@@ -58,7 +57,7 @@ public class UserConsentService {
 
     public Page<UserConsent> listConsents(UUID userId, int page, int pageSize) {
         log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
-        Page<UserConsent> result = userConsentRepository.findByUserId(userId, PageRequest.of(page, pageSize));
+        Page<UserConsent> result = userConsentRepository.findByUserId(userId, page, pageSize);
         log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
             userId, page, pageSize, result.getNumberOfElements());
         return result;
@@ -74,7 +73,7 @@ public class UserConsentService {
 
     public Optional<UserConsent> getUserConsent(UUID consentId) {
         log.info("Get user's consent record [consentId: {}]", consentId);
-        return userConsentRepository.findById(consentId);
+        return userConsentRepository.findByIdOptional(consentId);
     }
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {
@@ -171,7 +170,7 @@ public class UserConsentService {
 
     public URI consentGiven(UUID userConsentId) {
         log.info("User's consent received [userConsentId: {}]", userConsentId);
-        UserConsent userConsent = userConsentRepository.findById(userConsentId)
+        UserConsent userConsent = userConsentRepository.findByIdOptional(userConsentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
@@ -194,7 +193,7 @@ public class UserConsentService {
 
     public URI consentDenied(UUID userConsentId, String error, String details) {
         log.info("User's consent denied [userConsentId: {}, error: {}, details: {}]", userConsentId, error, details);
-        UserConsent userConsent = userConsentRepository.findById(userConsentId)
+        UserConsent userConsent = userConsentRepository.findByIdOptional(userConsentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", userConsentId));
 
         log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
@@ -223,7 +222,7 @@ public class UserConsentService {
 
     public void consentSuspended(UUID userConsentId) {
         log.info("User's consent suspended [userConsentId: {}]", userConsentId);
-        userConsentRepository.findById(userConsentId)
+        userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.SUSPENDED)
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
@@ -240,7 +239,7 @@ public class UserConsentService {
 
     public void consentExpired(UUID userConsentId) {
         log.info("User's consent expired [userConsentId: {}]", userConsentId);
-        userConsentRepository.findById(userConsentId)
+        userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.EXPIRED)
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
@@ -262,7 +261,7 @@ public class UserConsentService {
      */
     public void consentCancelled(UUID userConsentId) {
         log.info("User's consent cancelled [userConsentId: {}]", userConsentId);
-        userConsentRepository.findById(userConsentId)
+        userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.CANCELLED)
             .ifPresent(userConsent -> {
                 log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",

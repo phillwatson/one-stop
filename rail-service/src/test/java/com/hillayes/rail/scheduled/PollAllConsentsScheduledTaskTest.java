@@ -45,7 +45,7 @@ public class PollAllConsentsScheduledTaskTest {
         );
 
         // and: the repository returns the consents
-        when(userConsentRepository.findAll()).thenReturn(consents);
+        when(userConsentRepository.listAll()).thenReturn(consents);
 
         // when: the fixture is invoked
         fixture.run();
@@ -67,7 +67,7 @@ public class PollAllConsentsScheduledTaskTest {
         List<UserConsent> consents = List.of();
 
         // and: the repository returns the empty list
-        when(userConsentRepository.findAll()).thenReturn(consents);
+        when(userConsentRepository.listAll()).thenReturn(consents);
 
         // when: the fixture is invoked
         fixture.run();
