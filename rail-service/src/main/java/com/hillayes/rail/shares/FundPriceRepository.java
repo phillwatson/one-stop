@@ -8,6 +8,21 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
+/**
+ * ISIN
+ * GB00B5ZNJ896 - BlackRock Gold and General D Acc
+ * GB0033874321 - FSSA Greater China Growth B GBP Acc
+ * GB00BP9LKJ73 - FTF Royce US Smaller Companies W Acc
+ * GB00B80QG052 - HSBC FTSE 250 Index C Acc
+ * GB00B0CNGR59 - L&G European Index I Acc
+ * GB00B0CNGT73 - L&G US Index I Acc
+ * IE00B3NS4D25 - Lindsell Train Global Equity B GBP Inc
+ * AV.
+ * TW.
+ * NG.
+ * LGEN
+ * PSN
+ */
 public class FundPriceRepository {
     private static final String FT_URI = "https://markets.ft.com/data/funds/tearsheet";
     private static final String FUND = "GB00BF18C781:GBP";
