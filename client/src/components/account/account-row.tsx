@@ -63,7 +63,7 @@ export default function AccountList(props: Props) {
     closeMenu();
     console.log("Show account: " + props.account.id);
   }
-  
+
   function AccountMenu() {
     return(
         <Menu
