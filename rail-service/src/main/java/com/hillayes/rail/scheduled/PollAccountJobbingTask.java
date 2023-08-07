@@ -78,6 +78,11 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
      * the grace period (defined in the configuration account-polling-interval)
      * then no update is performed.
      *
+     * This will obtain a lock on the identified consent record. One consent may
+     * refer to several accounts, all of which may be being processed at the same
+     * time. If we need to suspend or expire the consent, we don't want another
+     * job to repeat that when processing another account of the same consent.
+     *
      * @param context the context containing the identifier of the Account to be updated.
      */
     @Override
@@ -87,7 +92,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         String railAccountId = context.getPayload().railAccountId;
         log.info("Processing Poll Account job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
 
-        UserConsent userConsent = userConsentService.getUserConsent(consentId).orElse(null);
+        // get a lock on the consent to ensure no other updates
+        UserConsent userConsent = userConsentService.lockUserConsent(consentId).orElse(null);
         if (userConsent == null) {
             log.info("Unable to find user-consent [consentId: {}, railAccountId: {}]", consentId, railAccountId);
             return TaskConclusion.COMPLETE;

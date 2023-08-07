@@ -6,7 +6,6 @@ import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -51,7 +50,6 @@ public class UserRepository extends RepositoryBase<User, UUID> {
                 "JOIN u.oidcIdentities oidc " +
                 "WHERE oidc.issuer = :issuer AND oidc.subject = :subject",
             Parameters.with("issuer", issuer).and("subject", subject))
-            //.project(User.class)
             .firstResultOptional();
     }
 }

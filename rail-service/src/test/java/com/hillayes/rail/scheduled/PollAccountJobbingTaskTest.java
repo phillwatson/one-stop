@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -110,7 +109,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -152,7 +151,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the rail-account is retrieved
         verify(railAccountService).get(railAccount.id);
@@ -200,7 +199,7 @@ public class PollAccountJobbingTaskTest {
             .institutionId(randomAlphanumeric(20))
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -243,7 +242,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the rail-account is retrieved
         verify(railAccountService).get(railAccount.id);
@@ -300,7 +299,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -323,7 +322,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the rail-account is retrieved
         verify(railAccountService).get(railAccount.id);
@@ -360,7 +359,7 @@ public class PollAccountJobbingTaskTest {
     public void testUserConsentNotFound() {
         // given: a user-consent cannot be found
         UUID userConsentId = UUID.randomUUID();
-        when(userConsentService.getUserConsent(userConsentId)).thenReturn(Optional.empty());
+        when(userConsentService.lockUserConsent(userConsentId)).thenReturn(Optional.empty());
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -375,7 +374,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the fixture attempts to retrieve the user-consent
-        verify(userConsentService).getUserConsent(userConsentId);
+        verify(userConsentService).lockUserConsent(userConsentId);
 
         // and: NO rail-account is retrieved
         verifyNoInteractions(railAccountService);
@@ -413,7 +412,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(consentStatus)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -428,7 +427,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: NO rail-account is retrieved
         verifyNoInteractions(railAccountService);
@@ -465,7 +464,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: NO rail-account associated with that consent can be found
         String railAccountId = randomAlphanumeric(20);
@@ -477,7 +476,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the fixture attempts to retrieve the rail-account
         verify(railAccountService).get(railAccountId);
@@ -514,7 +513,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -529,7 +528,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the fixture attempts to retrieve the rail-account
         verify(railAccountService).get(railAccount.id);
@@ -566,7 +565,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -581,7 +580,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the fixture attempts to retrieve the rail-account
         verify(railAccountService).get(railAccount.id);
@@ -619,7 +618,7 @@ public class PollAccountJobbingTaskTest {
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
             .build();
-        when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
         AccountSummary railAccount = AccountSummary.builder()
@@ -634,7 +633,7 @@ public class PollAccountJobbingTaskTest {
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
-        verify(userConsentService).getUserConsent(userConsent.getId());
+        verify(userConsentService).lockUserConsent(userConsent.getId());
 
         // and: the fixture attempts to retrieve the rail-account
         verify(railAccountService).get(railAccount.id);

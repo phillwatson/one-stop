@@ -13,6 +13,7 @@ import com.hillayes.rail.resource.UserConsentResource;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,17 @@ public class UserConsentService {
     public Optional<UserConsent> getUserConsent(UUID consentId) {
         log.info("Get user's consent record [consentId: {}]", consentId);
         return userConsentRepository.findByIdOptional(consentId);
+    }
+
+    /**
+     * Obtain a pessimistic lock on the identified UserConsent.
+     *
+     * @param consentId the user-consent identifier.
+     * @return the locked user-consent, or an empty result.
+     */
+    public Optional<UserConsent> lockUserConsent(UUID consentId) {
+        log.info("Locking user's consent record [consentId: {}]", consentId);
+        return userConsentRepository.findByIdOptional(consentId, LockModeType.PESSIMISTIC_WRITE);
     }
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {
