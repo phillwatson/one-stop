@@ -5,9 +5,10 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Test;
-
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+
 import java.time.Instant;
 import java.util.*;
 
@@ -44,6 +45,56 @@ public class AccountRepositoryTest {
             // then: the result contains those accounts for the given user-consent ID
             assertEquals(expected.size(), actual.size());
             expected.forEach(account -> assertTrue(actual.contains(account)));
+        });
+    }
+
+    @Test
+    public void testGetByUserId() {
+        // given: a user-consent
+        List<UserConsent> consents = List.of(
+            createUserConsent(),
+            createUserConsent()
+        );
+
+        // and: linked accounts
+        Map<UserConsent, List<Account>> accounts = new HashMap<>();
+        consents.forEach(consent ->
+            accounts.put(consent, createAccounts(consent, 2))
+        );
+
+        // when: the accounts are retrieved by user-consent ID
+        accounts.forEach((consent, expected) -> {
+            Page<Account> actual = fixture.findByUserId(consent.getUserId(), 0, 20);
+
+            // then: the result contains those accounts for the given user-consent ID
+            assertEquals(expected.size(), actual.getNumberOfElements());
+            expected.forEach(account -> assertTrue(actual.getContent().contains(account)));
+        });
+    }
+
+    @Test
+    public void testFindByRailAccountId() {
+        // given: a user-consent
+        List<UserConsent> consents = List.of(
+            createUserConsent(),
+            createUserConsent()
+        );
+
+        // and: linked accounts
+        Map<UserConsent, List<Account>> accounts = new HashMap<>();
+        consents.forEach(consent ->
+            accounts.put(consent, createAccounts(consent, 2))
+        );
+
+        accounts.forEach((consent, expected) -> {
+            expected.forEach(account -> {
+                // when: the accounts are retrieved by rail-account ID
+                Optional<Account> actual = fixture.findByRailAccountId(account.getRailAccountId());
+
+                // then: the result is the expected account
+                assertTrue(actual.isPresent());
+                assertEquals(account.getId(), actual.get().getId());
+            });
         });
     }
 

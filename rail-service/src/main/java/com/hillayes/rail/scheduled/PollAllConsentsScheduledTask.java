@@ -36,7 +36,7 @@ public class PollAllConsentsScheduledTask implements NamedScheduledTask {
     @Transactional
     public void run() {
         log.info("PollAllConsentsScheduledTask.run()");
-        userConsentRepository.findAll().stream()
+        userConsentRepository.listAll().stream()
             .filter(consent -> consent.getStatus() == ConsentStatus.GIVEN)
             .forEach(consent -> pollConsentJobbingTask.queueJob(consent.getId()));
     }

@@ -7,7 +7,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -83,7 +82,7 @@ public class UserConsentRepositoryTest {
         userIds.forEach(userId -> {
             // when: each user-id retrieves their consents
             for (int page = 0; page < 4; page++) {
-                Page<UserConsent> consents = fixture.findByUserId(userId, PageRequest.of(page, 10));
+                Page<UserConsent> consents = fixture.findByUserId(userId, page, 10);
 
                 // then: the page number is correct
                 assertEquals(page, consents.getNumber());

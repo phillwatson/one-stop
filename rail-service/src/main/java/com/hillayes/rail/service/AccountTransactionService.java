@@ -2,13 +2,12 @@ package com.hillayes.rail.service;
 
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -41,10 +40,10 @@ public class AccountTransactionService {
         log.info("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
 
-        PageRequest byBookingDate = PageRequest.of(page, pageSize, Sort.by("bookingDateTime").descending());
+        Sort sort = Sort.by("bookingDateTime").descending();
         Page<AccountTransaction> result = (accountId != null)
-            ? accountTransactionRepository.findByAccountId(accountId, byBookingDate)
-            : accountTransactionRepository.findByUserId(userId, byBookingDate);
+            ? accountTransactionRepository.findByAccountId(accountId, sort, page, pageSize)
+            : accountTransactionRepository.findByUserId(userId, sort, page, pageSize);
 
         log.debug("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, size: {}]",
             userId, accountId, page, pageSize, result.getNumberOfElements());
@@ -73,8 +72,8 @@ public class AccountTransactionService {
         Instant to = toDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<AccountTransaction> result = (accountId != null)
-            ? accountTransactionRepository.findByAccountAndBookingDateTimeRange(accountId, from, to)
-            : accountTransactionRepository.findByUserAndBookingDateTimeRange(userId, from, to);
+            ? accountTransactionRepository.findByAccountAndDateRange(accountId, from, to)
+            : accountTransactionRepository.findByUserAndDateRange(userId, from, to);
 
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}, size: {}]",
             userId, accountId, fromDate, toDate, result.size());
@@ -83,6 +82,6 @@ public class AccountTransactionService {
 
     public Optional<AccountTransaction> getTransaction(UUID transactionId) {
         log.info("Get transactions [transactionId: {}]", transactionId);
-        return accountTransactionRepository.findById(transactionId);
+        return accountTransactionRepository.findByIdOptional(transactionId);
     }
 }

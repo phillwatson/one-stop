@@ -14,6 +14,7 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,8 +22,6 @@ import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.net.URI;
@@ -138,7 +137,7 @@ public class UserService {
 
     public Optional<User> getUser(UUID id) {
         log.info("Retrieving user [userId: {}]", id);
-        Optional<User> result = userRepository.findById(id);
+        Optional<User> result = userRepository.findByIdOptional(id);
 
         log.debug("Retrieved user [userId: {}, found: {}]", id, result.isPresent());
         return result;
@@ -147,8 +146,7 @@ public class UserService {
     public Page<User> listUsers(int page, int pageSize) {
         log.info("Listing user [page: {}, pageSize: {}]", page, pageSize);
 
-        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("username").ascending());
-        Page<User> result = userRepository.findAll(pageRequest);
+        Page<User> result = userRepository.findAll(Sort.by("username"), page, pageSize);
         log.debug("Listing users [page: {}, pageSize: {}, size: {}]",
             page, pageSize, result.getNumberOfElements());
 
@@ -157,7 +155,7 @@ public class UserService {
 
     public Collection<OidcIdentity> getUserAuthProviders(UUID id) {
         log.info("Retrieving user auth-providers [userId: {}]", id);
-        Optional<User> user = userRepository.findById(id);
+        Optional<User> user = userRepository.findByIdOptional(id);
         Set<OidcIdentity> oidcIdentities = user.map(User::getOidcIdentities).orElse(Set.of());
 
         // the call to size() will load the lazy collection
@@ -170,7 +168,7 @@ public class UserService {
                                          char[] newPassword) {
         log.info("Updating password [userId: {}]", userId);
 
-        return userRepository.findById(userId)
+        return userRepository.findByIdOptional(userId)
             .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
             .map(user -> {
                 user = userRepository.save(user.toBuilder()
@@ -199,7 +197,7 @@ public class UserService {
         // ensure email is unique
         validateUniqueEmail(id, userRequest.getEmail());
 
-        return userRepository.findById(id)
+        return userRepository.findByIdOptional(id)
             .map(user -> {
                 User.UserBuilder userBuilder = user.toBuilder()
                     .username(userRequest.getUsername())
@@ -226,7 +224,7 @@ public class UserService {
     public Optional<User> deleteUser(UUID id) {
         log.info("Deleting user [userId: {}]", id);
 
-        return userRepository.findById(id)
+        return userRepository.findByIdOptional(id)
             .map(user -> {
                 DeletedUser deletedUser = deletedUserRepository.save(DeletedUser.fromUser(user));
                 userRepository.delete(user);

@@ -4,14 +4,12 @@ import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
+import io.quarkus.panache.common.Sort;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-
-import jakarta.inject.Inject;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -54,8 +52,8 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the most recent transaction by bookingDate is queried
-        PageRequest byBookedDate = PageRequest.of(0, 1, Sort.by("bookingDateTime").descending());
-        Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), byBookedDate);
+        Sort sort = Sort.by("bookingDateTime").descending();
+        Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), sort, 0, 1);
 
         // then: the result contains only the most recent transaction
         assertEquals(1, result.getSize());
@@ -84,7 +82,7 @@ public class AccountTransactionRepositoryTest {
         Instant dateFrom = Instant.now().minus(Duration.ofDays(21));
         Instant dateTo = Instant.now();
         List<AccountTransaction> result =
-            fixture.findByUserAndBookingDateTimeRange(consent.getUserId(), dateFrom, dateTo);
+            fixture.findByUserAndDateRange(consent.getUserId(), dateFrom, dateTo);
 
         // then: the results contain the transaction with the date range
         assertFalse(result.isEmpty());
@@ -127,7 +125,7 @@ public class AccountTransactionRepositoryTest {
         Instant dateTo = Instant.now();
         accounts.forEach(account -> {
             List<AccountTransaction> result =
-                fixture.findByAccountAndBookingDateTimeRange(account.getId(), dateFrom, dateTo);
+                fixture.findByAccountAndDateRange(account.getId(), dateFrom, dateTo);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());

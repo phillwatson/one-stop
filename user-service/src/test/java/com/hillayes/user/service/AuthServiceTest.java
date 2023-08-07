@@ -332,7 +332,7 @@ public class AuthServiceTest {
             .username(randomAlphanumeric(20))
             .passwordHash(randomAlphanumeric(20))
             .build();
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: a refresh token identifying that user
         JsonWebToken refreshToken = new NullJsonWebToken() {
@@ -352,7 +352,7 @@ public class AuthServiceTest {
     public void testRefresh_UserNotFound() {
         // given: an unknown user wishing to refresh their auth tokens
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
         // and: a refresh token identifying that user
         JsonWebToken refreshToken = new NullJsonWebToken() {
@@ -374,7 +374,7 @@ public class AuthServiceTest {
             .passwordHash(randomAlphanumeric(20))
             .dateBlocked(Instant.now())
             .build();
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: a refresh token identifying that user
         JsonWebToken refreshToken = new NullJsonWebToken() {

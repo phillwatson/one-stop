@@ -5,13 +5,12 @@ import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public class AccountService {
                                      int page,
                                      int pageSize) {
         log.info("Listing user's accounts [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
-        Page<Account> result = accountRepository.findByUserId(userId, PageRequest.of(page, pageSize));
+        Page<Account> result = accountRepository.findByUserId(userId, page, pageSize);
 
         log.debug("Listing account's transactions [accountId: {}, page: {}, pageSize: {}, size: {}]",
             userId, page, pageSize, result.getNumberOfElements());
@@ -43,7 +42,7 @@ public class AccountService {
 
     public Optional<Account> getAccount(UUID accountId) {
         log.info("Get user's account [accountId: {}]", accountId);
-        return accountRepository.findById(accountId);
+        return accountRepository.findByIdOptional(accountId);
     }
 
     /**

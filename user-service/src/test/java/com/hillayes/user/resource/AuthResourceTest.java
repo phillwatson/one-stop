@@ -156,7 +156,7 @@ public class AuthResourceTest extends TestBase {
             .email(randomAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(user)).then(invocation ->
             (user.getId() == null)
                 ? user.toBuilder().id(UUID.randomUUID()).build()
@@ -260,7 +260,7 @@ public class AuthResourceTest extends TestBase {
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the user logs in
         Response loginResponse = passwordLogin(user);
@@ -293,7 +293,7 @@ public class AuthResourceTest extends TestBase {
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the user logs in
         Response loginResponse = passwordLogin(user);
@@ -323,7 +323,7 @@ public class AuthResourceTest extends TestBase {
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the user logs in
         Response loginResponse = passwordLogin(user);
@@ -372,7 +372,7 @@ public class AuthResourceTest extends TestBase {
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
         // and: the user logs in
         Response loginResponse = passwordLogin(user);
