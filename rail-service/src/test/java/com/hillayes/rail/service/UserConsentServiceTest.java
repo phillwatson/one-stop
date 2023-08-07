@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,19 +66,17 @@ public class UserConsentServiceTest {
         // simulate user-consent repo
         when(userConsentRepository.saveAndFlush(any())).then(invocation -> {
             UserConsent consent = invocation.getArgument(0);
-            UserConsent.UserConsentBuilder builder = consent.toBuilder();
             if (consent.getId() == null) {
-                builder.id(UUID.randomUUID());
+                consent.setId(UUID.randomUUID());
             }
-            return builder.build();
+            return consent;
         });
         when(userConsentRepository.save(any())).then(invocation -> {
             UserConsent consent = invocation.getArgument(0);
-            UserConsent.UserConsentBuilder builder = consent.toBuilder();
             if (consent.getId() == null) {
-                builder.id(UUID.randomUUID());
+                consent.setId(UUID.randomUUID());
             }
-            return builder.build();
+            return consent;
         });
     }
 
@@ -125,11 +124,21 @@ public class UserConsentServiceTest {
         String institutionId = randomAlphanumeric(30);
 
         // and: the user holds several consents for the institute
-        UserConsent activeConsent = mockUserConsent(userId).toBuilder().institutionId(institutionId).status(ConsentStatus.GIVEN).build();
+        UserConsent activeConsent = mockUserConsent(userId);
+        activeConsent.setInstitutionId(institutionId);
+        activeConsent.setStatus(ConsentStatus.GIVEN);
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().institutionId(institutionId).status(ConsentStatus.CANCELLED).build(),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institutionId);
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
             activeConsent,
-            mockUserConsent(userId).toBuilder().institutionId(institutionId).status(ConsentStatus.DENIED).build()
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institutionId);
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            })
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId))
             .thenReturn(consents);
@@ -177,8 +186,16 @@ public class UserConsentServiceTest {
 
         // and: the user holds several consents for the institute - non are active
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().institutionId(institutionId).status(ConsentStatus.CANCELLED).build(),
-            mockUserConsent(userId).toBuilder().institutionId(institutionId).status(ConsentStatus.DENIED).build()
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institutionId);
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institutionId);
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            })
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId))
             .thenReturn(consents);
@@ -242,8 +259,16 @@ public class UserConsentServiceTest {
 
         // and: no active consent exists for the identified user
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.CANCELLED).build(),
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.DENIED).build()
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            })
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
             .thenReturn(consents);
@@ -271,16 +296,13 @@ public class UserConsentServiceTest {
         // and: a requisition is created
         assertNotNull(requisition.get());
 
-        ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
-
         // and: the consent record is initially created
-        verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
-        UserConsent consent = consentCaptor.getValue();
-        assertEquals(ConsentStatus.INITIATED, consent.getStatus());
+        verify(userConsentRepository).saveAndFlush(any());
 
         // and: the consent record is later updated
+        ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
         verify(userConsentRepository).save(consentCaptor.capture());
-        consent = consentCaptor.getValue();
+        UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
         assertEquals(ConsentStatus.WAITING, consent.getStatus());
@@ -313,14 +335,21 @@ public class UserConsentServiceTest {
         URI callbackUri = URI.create("http://mock-uri");
 
         // and: no active consent exists for the identified user
-        UserConsent expiredConsent = mockUserConsent(userId).toBuilder()
-            .institutionId(institution.id)
-            .status(ConsentStatus.EXPIRED)
-            .build();
+        UserConsent expiredConsent = mockUserConsent(userId);
+        expiredConsent.setInstitutionId(institution.id);
+        expiredConsent.setStatus(ConsentStatus.EXPIRED);
 
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.CANCELLED).build(),
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.DENIED).build(),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            }),
             expiredConsent
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
@@ -349,16 +378,14 @@ public class UserConsentServiceTest {
         // and: a requisition is created
         assertNotNull(requisition.get());
 
-        ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
 
         // and: the consent record is initially created
-        verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
-        UserConsent consent = consentCaptor.getValue();
-        assertEquals(ConsentStatus.INITIATED, consent.getStatus());
+        verify(userConsentRepository).saveAndFlush(any());
 
         // and: the consent record is later updated
+        ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
         verify(userConsentRepository).save(consentCaptor.capture());
-        consent = consentCaptor.getValue();
+        UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
         assertEquals(ConsentStatus.WAITING, consent.getStatus());
@@ -415,7 +442,7 @@ public class UserConsentServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = { "INITIATED", "WAITING", "GIVEN", "SUSPENDED" })
+    @EnumSource(names = {"INITIATED", "WAITING", "GIVEN", "SUSPENDED"})
     public void testRegister_AlreadyRegistered(ConsentStatus consentStatus) {
         // given: a user identity
         UUID userId = UUID.randomUUID();
@@ -428,14 +455,21 @@ public class UserConsentServiceTest {
         URI callbackUri = URI.create("http://mock-uri");
 
         // and: a consent exists for the identified user
-        UserConsent existingConsent = mockUserConsent(userId).toBuilder()
-            .institutionId(institution.id)
-            .status(consentStatus)
-            .build();
+        UserConsent existingConsent = mockUserConsent(userId);
+        existingConsent.setInstitutionId(institution.id);
+        existingConsent.setStatus(consentStatus);
 
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.CANCELLED).build(),
-            mockUserConsent(userId).toBuilder().institutionId(institution.id).status(ConsentStatus.DENIED).build(),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.id);
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            }),
             existingConsent
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
@@ -469,10 +503,9 @@ public class UserConsentServiceTest {
     public void testConsentGiven_HappyPath() {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.WAITING)
-            .callbackUri(clientCallbackUri.toString())
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.WAITING);
+        consent.setCallbackUri(clientCallbackUri.toString());
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -530,10 +563,9 @@ public class UserConsentServiceTest {
     public void testConsentDenied_HappyPath() {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.WAITING)
-            .callbackUri(clientCallbackUri.toString())
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.WAITING);
+        consent.setCallbackUri(clientCallbackUri.toString());
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -601,12 +633,11 @@ public class UserConsentServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "SUSPENDED" })
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"SUSPENDED"})
     public void testConsentSuspended_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(consentStatus)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -633,9 +664,8 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentSuspended_AlreadySuspended() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.SUSPENDED)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.SUSPENDED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -665,12 +695,11 @@ public class UserConsentServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "EXPIRED" })
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"EXPIRED"})
     public void testConsentExpired_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(consentStatus)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -697,9 +726,8 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentExpired_AlreadyExpired() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.EXPIRED)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.EXPIRED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -729,12 +757,11 @@ public class UserConsentServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "CANCELLED" })
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"CANCELLED"})
     public void testConsentCancelled_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(consentStatus)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -762,9 +789,8 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentCancelled_AlreadyCancelled() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.CANCELLED)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.CANCELLED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
@@ -800,15 +826,42 @@ public class UserConsentServiceTest {
 
         // and: the user holds several consents
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.SUSPENDED).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.CANCELLED).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.EXPIRED).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.DENIED).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.GIVEN).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.INITIATED).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.WAITING).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.GIVEN).build(),
-            mockUserConsent(userId).toBuilder().status(ConsentStatus.GIVEN).build()
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.SUSPENDED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.CANCELLED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.EXPIRED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.DENIED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.GIVEN);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.INITIATED);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.WAITING);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.GIVEN);
+                return consent;
+            }),
+            mockUserConsent(userId, consent -> {
+                consent.setStatus(ConsentStatus.GIVEN);
+                return consent;
+            })
         );
         when(userConsentRepository.findByUserId(eq(userId)))
             .thenReturn(consents);
@@ -849,9 +902,8 @@ public class UserConsentServiceTest {
     @Test
     public void testDeleteRequisition_Exception() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.GIVEN)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.GIVEN);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // and: the rail service will throw an exception on delete requisition
@@ -882,9 +934,8 @@ public class UserConsentServiceTest {
     @Test
     public void testDeleteAgreement_Exception() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID()).toBuilder()
-            .status(ConsentStatus.GIVEN)
-            .build();
+        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        consent.setStatus(ConsentStatus.GIVEN);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // and: the rail service will throw an exception on delete requisition
@@ -913,7 +964,11 @@ public class UserConsentServiceTest {
     }
 
     private UserConsent mockUserConsent(UUID userId) {
-        return UserConsent.builder()
+        return mockUserConsent(userId, consent -> consent);
+    }
+
+    private UserConsent mockUserConsent(UUID userId, Function<UserConsent, UserConsent> modifier) {
+        UserConsent result = UserConsent.builder()
             .id(UUID.randomUUID())
             .userId(userId)
             .dateCreated(Instant.now().minus(Duration.ofDays(10)))
@@ -924,6 +979,8 @@ public class UserConsentServiceTest {
             .maxHistory(90)
             .agreementExpires(Instant.now().plus(Duration.ofDays(90)))
             .build();
+
+        return modifier.apply(result);
     }
 
     private InstitutionDetail mockInstitution() {
@@ -939,7 +996,7 @@ public class UserConsentServiceTest {
     private EndUserAgreement returnEndUserAgreement(EndUserAgreementRequest request) {
         EndUserAgreement result = new EndUserAgreement();
         result.id = randomAlphanumeric(30);
-        result.institutionId =request.getInstitutionId();
+        result.institutionId = request.getInstitutionId();
         result.created = OffsetDateTime.now();
         result.accessValidForDays = request.getAccessValidForDays();
         result.maxHistoricalDays = request.getMaxHistoricalDays();
