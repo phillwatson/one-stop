@@ -1,26 +1,26 @@
-package com.hillayes.rail.resource;
+package com.hillayes.rail.resource.admin;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.PaginatedList;
 import com.hillayes.rail.model.Requisition;
 import com.hillayes.rail.model.RequisitionRequest;
 import com.hillayes.rail.service.RequisitionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 
-@Path("/api/v1/rails/requisitions")
+@Path("/api/v1/rails/admin/rail-requisitions")
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Slf4j
-public class RequisitionResource {
+public class RailRequisitionAdminResource {
     private final RequisitionService requisitionService;
 
     @GET
@@ -33,7 +33,7 @@ public class RequisitionResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("{id}")
     public Requisition get(@PathParam("id") String id) {
         log.info("Get requisition [id: {}]", id);
         return requisitionService.get(id)
@@ -43,18 +43,18 @@ public class RequisitionResource {
     @POST
     public Response create(RequisitionRequest requisition) {
         log.info("Create requisition [reference: {}, agreement: {}, institution: {}]",
-                requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId());
+            requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId());
         Requisition result = requisitionService.create(requisition);
         log.debug("Created requisition [reference: {}, agreement: {}, institution: {}, id: {}]",
-                requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId(), result.id);
+            requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId(), result.id);
         return Response
-                .status(Response.Status.CREATED)
-                .entity(result)
-                .build();
+            .status(Response.Status.CREATED)
+            .entity(result)
+            .build();
     }
 
     @DELETE
-    @Path("/{id}")
+    @Path("{id}")
     public Map<String, Object> delete(@PathParam("id") String id) {
         log.info("Delete requisition [id: {}]", id);
         return requisitionService.delete(id);

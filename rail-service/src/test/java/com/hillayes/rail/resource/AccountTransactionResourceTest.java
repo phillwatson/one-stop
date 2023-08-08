@@ -1,35 +1,21 @@
 package com.hillayes.rail.resource;
 
-import com.hillayes.onestop.api.*;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AccountBalance;
-import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.model.Institution;
-import com.hillayes.rail.model.InstitutionDetail;
+import com.hillayes.onestop.api.PaginatedTransactions;
+import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
-import com.hillayes.rail.service.InstitutionService;
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest

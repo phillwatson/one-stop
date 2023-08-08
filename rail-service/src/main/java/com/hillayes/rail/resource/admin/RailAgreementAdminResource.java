@@ -1,4 +1,4 @@
-package com.hillayes.rail.resource;
+package com.hillayes.rail.resource.admin;
 
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.model.EndUserAgreement;
@@ -15,13 +15,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
-@Path("/api/v1/rails/agreements")
+@Path("/api/v1/rails/admin/rail-agreements")
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Slf4j
-public class AgreementResource {
+public class RailAgreementAdminResource {
     private final AgreementService agreementService;
 
     @GET

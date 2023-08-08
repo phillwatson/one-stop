@@ -1248,6 +1248,19 @@ components:
           items:
             $ref: '#/components/schemas/AccountSummaryResponse'
 
+    UserConsentAdminResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserConsentResponse"
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The user-consent Id
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
+
     AccountBalanceResponse:
       description: A snapshot of an account's balance
       type: object
@@ -1512,6 +1525,17 @@ components:
               description: The list of consents
               items:
                 $ref: "#/components/schemas/UserConsentResponse"
+
+    PaginatedUserConsentsAdmin:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedItems"
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of consents
+              items:
+                $ref: "#/components/schemas/UserConsentAdminResponse"
 
     PaginatedAccounts:
       allOf:

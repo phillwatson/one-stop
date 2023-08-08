@@ -28,7 +28,7 @@ public class AgreementResourceTest extends TestResourceBase {
             .request()
             .contentType(JSON)
             .body(agreementRequest)
-            .when().post("/api/v1/rails/agreements")
+            .when().post("/api/v1/rails/admin/rail-agreements")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -43,7 +43,7 @@ public class AgreementResourceTest extends TestResourceBase {
         given()
             .queryParam("limit", 100)
             .queryParam("offset", 0)
-            .when().get("/api/v1/rails/agreements")
+            .when().get("/api/v1/rails/admin/rail-agreements")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -53,7 +53,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // get agreement
         given()
             .pathParam("id", agreementId)
-            .when().get("/api/v1/rails/agreements/{id}")
+            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -66,7 +66,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // delete agreement
         given()
             .pathParam("id", agreementId)
-            .when().delete("/api/v1/rails/agreements/{id}")
+            .when().delete("/api/v1/rails/admin/rail-agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -75,7 +75,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // get deleted agreement (should fail)
         given()
             .pathParam("id", agreementId)
-            .when().get("/api/v1/rails/agreements/{id}")
+            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
             .then()
             .statusCode(404);
     }

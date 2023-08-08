@@ -105,6 +105,19 @@ public class UserConsentResource {
         return Response.ok(consentLink).build();
     }
 
+    /**
+     * Called by the rail-service as a call-back to the requisition request. The
+     * request involves user interaction (to agree to the requisition for access).
+     * We pass a URI to this endpoint in the request parameters, and the rail service
+     * will call this endpoint with a positive or negative outcome.
+     *
+     * @param headers the request headers.
+     * @param userConsentId the user-consent identifier to which the requisition belongs.
+     * @param error an error code, provided if the consent was denied.
+     * @param details an error message, provided if the consent was denied.
+     * @return a redirect to the callback-uri provided by the client when the request
+     * was initiated.
+     */
     @GET
     @Path("/response")
     @PermitAll

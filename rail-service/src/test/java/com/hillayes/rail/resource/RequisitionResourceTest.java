@@ -53,7 +53,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // create agreement
         EndUserAgreement agreement = given()
             .request().contentType(JSON).body(agreementRequest)
-            .when().post("/api/v1/rails/agreements")
+            .when().post("/api/v1/rails/admin/rail-agreements")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -62,7 +62,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // get agreement
         given()
             .pathParam("id", agreement.id)
-            .when().get("/api/v1/rails/agreements/{id}")
+            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON);
@@ -78,7 +78,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // create requisition
         final Requisition requisition = given()
             .request().contentType(JSON).body(requisitionRequest)
-            .when().post("/api/v1/rails/requisitions")
+            .when().post("/api/v1/rails/admin/rail-requisitions")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -95,7 +95,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         given()
             .queryParam("limit", 100)
             .queryParam("offset", 0)
-            .when().get("/api/v1/rails/requisitions")
+            .when().get("/api/v1/rails/admin/rail-requisitions")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -107,7 +107,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         await().untilAsserted(() -> {
             Requisition req = given()
                 .pathParam("id", requisition.id)
-                .when().get("/api/v1/rails/requisitions/{id}")
+                .when().get("/api/v1/rails/admin/rail-requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -126,7 +126,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve the account info
             AccountSummary account = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/rails-accounts/{id}")
+                .when().get("/api/v1/rails/admin/rail-accounts/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -136,7 +136,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve the account detail
             Map<?,?> detail = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/rails-accounts/{id}/details")
+                .when().get("/api/v1/rails/admin/rail-accounts/{id}/details")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -152,7 +152,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve account balances
             List<Balance> balances = Arrays.asList(given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/rails-accounts/{id}/balances")
+                .when().get("/api/v1/rails/admin/rail-accounts/{id}/balances")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -163,7 +163,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve account transactions
             TransactionList transactionsList = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/rails-accounts/{id}/transactions")
+                .when().get("/api/v1/rails/admin/rail-accounts/{id}/transactions")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -178,7 +178,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // delete the requisition
         given()
             .pathParam("id", requisition.id)
-            .when().delete("/api/v1/rails/requisitions/{id}")
+            .when().delete("/api/v1/rails/admin/rail-requisitions/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -187,14 +187,14 @@ public class RequisitionResourceTest extends TestResourceBase {
         // get requisition again (should fail)
         given()
             .pathParam("id", requisition.id)
-            .when().get("/api/v1/rails/requisitions/{id}")
+            .when().get("/api/v1/rails/admin/rail-requisitions/{id}")
             .then()
             .statusCode(404);
 
         // get agreement (should fail)
         given()
             .pathParam("id", requisition.agreement)
-            .when().get("/api/v1/rails/agreements/{id}")
+            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
             .then()
             .statusCode(404);
 
@@ -202,7 +202,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         accountIds.get().forEach(accountId -> {
             given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/rails-accounts/{id}")
+                .when().get("/api/v1/rails/admin/rail-accounts/{id}")
                 .then()
                 .statusCode(404);
         });
