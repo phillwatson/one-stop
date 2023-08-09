@@ -26,9 +26,9 @@ import jakarta.ws.rs.core.MultivaluedMap;
 @ApplicationScoped
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {
-    @ConfigProperty(name = "rails.secret.id")
+    @ConfigProperty(name = "one-stop.rails.secret.id")
     String SECRET_ID;
-    @ConfigProperty(name = "rails.secret.key")
+    @ConfigProperty(name = "one-stop.rails.secret.key")
     String SECRET_KEY;
 
     @Inject

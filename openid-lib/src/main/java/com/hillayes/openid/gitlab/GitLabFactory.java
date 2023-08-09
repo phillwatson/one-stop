@@ -58,9 +58,8 @@ public class GitLabFactory extends OpenIdFactory {
     @Produces
     @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITLAB)
-    public OpenIdTokenApi gitlabRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfiguration.AuthConfig authConfig,
-                                        @NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
-        return openIdRestApi(authConfig, openIdConfig);
+    public OpenIdTokenApi gitlabRestApi(@NamedAuthProvider(AuthProvider.GITLAB) OpenIdConfigResponse openIdConfig) {
+        return openIdRestApi(openIdConfig);
     }
 
     /**

@@ -3,7 +3,6 @@ package com.hillayes.rail.config;
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
-import jakarta.enterprise.context.ApplicationScoped;
 
 import java.time.Duration;
 import java.util.List;

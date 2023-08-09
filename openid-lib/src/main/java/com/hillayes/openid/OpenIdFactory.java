@@ -64,17 +64,25 @@ public abstract class OpenIdFactory {
         log.debug("Retrieving OpenId Config [url: {}]", config.configUri());
 
         URL url = new URL(config.configUri());
-        return mapper.readValue(url, OpenIdConfigResponse.class);
+        OpenIdConfigResponse result = mapper.readValue(url, OpenIdConfigResponse.class);
+
+        // fill in any blank from the app config
+        if (result.authorizationEndpoint == null) {
+            result.authorizationEndpoint = config.authorizationEndpoint()
+                .orElseThrow(() -> new NoSuchElementException("Missing authorizationEndpoint"));
+        }
+        if (result.tokenEndpoint == null) {
+            result.tokenEndpoint = config.tokenEndpoint()
+                .orElseThrow(() -> new NoSuchElementException("Missing tokenEndpoint"));
+        }
+
+        return result;
     }
 
-    protected OpenIdTokenApi openIdRestApi(OpenIdConfiguration.AuthConfig authConfig,
-                                           OpenIdConfigResponse openIdConfig) {
-        String tokenEndpoint = openIdConfig.tokenEndpoint == null
-            ? authConfig.tokenEndpoint().orElseThrow(() -> new NoSuchElementException("Missing tokenEndpoint"))
-            : openIdConfig.tokenEndpoint;
-        log.debug("Creating OpenId REST API [url: {}]", tokenEndpoint);
+    protected OpenIdTokenApi openIdRestApi(OpenIdConfigResponse openIdConfig) {
+        log.debug("Creating OpenId REST API [url: {}]", openIdConfig.tokenEndpoint);
 
-        URI baseUri = URI.create(tokenEndpoint);
+        URI baseUri = URI.create(openIdConfig.tokenEndpoint);
         return RestClientBuilder.newBuilder()
             .baseUri(baseUri)
             .build(OpenIdTokenApi.class);

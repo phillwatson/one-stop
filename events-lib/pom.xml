@@ -11,6 +11,21 @@
 
     <artifactId>events-lib</artifactId>
 
+    <profiles>
+        <profile>
+            <id>native-init</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- re-initialise class due to its static Random declaration -->
+                <quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator</quarkus.native.additional-build-args>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>jakarta.ws.rs</groupId>

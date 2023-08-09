@@ -90,6 +90,7 @@ one-stop:
 
       GITHUB:
         config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
+        authorization-endpoint: 'https://github.com/login/oauth/authorize'
         token-endpoint: 'https://github.com/login/oauth/access_token'
         client-id: 'Iv1.275574754910606b'
         redirect-uri: 'http://localhost/api/v1/auth/validate/github'

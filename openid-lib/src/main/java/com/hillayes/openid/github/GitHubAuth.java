@@ -10,7 +10,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import java.net.URI;
 import java.util.Map;
@@ -26,6 +25,16 @@ import static com.hillayes.openid.AuthProvider.GITHUB;
  * not return an ID-Token with user profile data. Instead, it returns just an
  * access-token. With that we can call the GitHub REST API to retrieve the user's
  * profile data.
+ *
+ * IMPORTANT:
+ * For authentication to work we need access to the user's email address registered
+ * with the open-id provider. For GitHub that requires explicit action on the user's
+ * part to allow access to their email address.
+ * In their GitHub email settings (https://github.com/settings/emails), uncheck the
+ * "Keep my email address private".
+ * Then, in their GitHub profile (https://github.com/settings/profile), select the
+ * email address in the "Public email" drop-down.
+ * Having authenticated once, they can make their email address private again.
  *
  * https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
@@ -61,13 +70,13 @@ public class GitHubAuth implements OpenIdAuth {
         return UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
             .queryParam("response_type", "code")
             .queryParam("client_id", config.clientId())
-            .queryParam("scope", "openid profile email")
+            .queryParam("scope", "openid profile email user:email")
             .queryParam("redirect_uri", config.redirectUri())
             .queryParam("state", clientState)
             .build();
     }
 
-    public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {
+    public JwtClaims exchangeAuthToken(String authCode) {
         log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
         TokenExchangeRequest request = TokenExchangeRequest.builder()
             .grantType("authorization_code")

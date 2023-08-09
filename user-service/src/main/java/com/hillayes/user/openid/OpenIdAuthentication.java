@@ -106,6 +106,7 @@ public class OpenIdAuthentication {
 
             // if no email was provided by Auth Provider
             else if (email == null) {
+                log.debug("Email address not included in open-id profile [authProvider: {}]", authProvider);
                 throw new NotAuthorizedException("jwt");
             }
 

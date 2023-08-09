@@ -17,19 +17,19 @@ import java.util.Map;
  * A proxy for EventConsumer implementations. This proxy consumer will receive the
  * events for a given collection of topics to which the EventConsumer is listening.
  * Each event will be passed to the EventConsumer (ensuring that the correlation ID
- * is set on the thread). It will handle errors any errors raised by the EventConsumer
- * by passing them to the given ConsumerErrorHandler.
+ * is set on the thread). It will handle any errors raised by the EventConsumer by
+ * passing them to the given ConsumerErrorHandler.
  *
  * It will also maintain the event queue offsets and respond to changes in the message
  * partition allocations.
  */
 @Slf4j
-public class Consumer implements Runnable {
+public class ConsumerProxy implements Runnable {
     private static final Duration POLL_TIMEOUT = Duration.ofDays(1);
     private static final int COMMIT_FREQUENCY = 100;
 
     /**
-     * The kafkaConsumer from which events will be polled. This Consumer will
+     * The kafkaConsumer from which events will be polled. This ConsumerProxy will
      * close the connection to this broker on shutdown.
      */
     private final KafkaConsumer<String, EventPacket> broker;
@@ -59,10 +59,10 @@ public class Consumer implements Runnable {
      */
     int count;
 
-    public Consumer(KafkaConsumer<String, EventPacket> broker,
-                    Collection<Topic> topics,
-                    EventConsumer eventConsumer,
-                    ConsumerErrorHandler errorHandler) {
+    public ConsumerProxy(KafkaConsumer<String, EventPacket> broker,
+                         Collection<Topic> topics,
+                         EventConsumer eventConsumer,
+                         ConsumerErrorHandler errorHandler) {
         this.broker = broker;
         this.eventConsumer = eventConsumer;
         this.topics = topics.stream().map(Topic::topicName).toList();

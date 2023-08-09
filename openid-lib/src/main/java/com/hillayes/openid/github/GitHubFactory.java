@@ -60,9 +60,8 @@ public class GitHubFactory extends OpenIdFactory {
     @Produces
     @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GITHUB)
-    public OpenIdTokenApi githubRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfiguration.AuthConfig authConfig,
-                                        @NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
-        return openIdRestApi(authConfig, openIdConfig);
+    public OpenIdTokenApi githubRestApi(@NamedAuthProvider(AuthProvider.GITHUB) OpenIdConfigResponse openIdConfig) {
+        return openIdRestApi(openIdConfig);
     }
 
     /**

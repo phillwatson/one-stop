@@ -42,7 +42,7 @@ public class PasswordCrypto {
     };
 
     // a randomizer with which to select characters from the above collections
-    private static final Random random = new Random(System.currentTimeMillis());
+    private static Random random;
 
     /**
      * The random number generator used to generate salt values for the password encryption.
@@ -179,6 +179,11 @@ public class PasswordCrypto {
      */
     public char[] randomPassword(int aLength) {
         char[] result = new char[aLength];
+
+        if (random == null) {
+            // late-initialisation to support native build
+            random = new Random(System.currentTimeMillis());
+        }
 
         for (int i = 0; i < aLength; i++) {
             // select a group of characters

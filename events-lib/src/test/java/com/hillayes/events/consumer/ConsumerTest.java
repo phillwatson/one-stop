@@ -43,7 +43,7 @@ public class ConsumerTest {
     @Test
     public void testGetTopics() {
         // given: a consumer with two topics
-        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH, Topic.USER), eventConsumer, errorHandler);
+        ConsumerProxy fixture = new ConsumerProxy(broker, List.of(Topic.USER_AUTH, Topic.USER), eventConsumer, errorHandler);
 
         // when: the consumer's topics are retrieved
         Collection<String> topics = fixture.getTopics();
@@ -57,7 +57,7 @@ public class ConsumerTest {
     @Test
     public void testRun() {
         // given: a consumer
-        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        ConsumerProxy fixture = new ConsumerProxy(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // when: the consumer is run
         new Thread(fixture).start();
@@ -72,7 +72,7 @@ public class ConsumerTest {
     @Test
     public void testStop() {
         // given: a consumer
-        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        ConsumerProxy fixture = new ConsumerProxy(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: the consumer is run
         new Thread(fixture).start();
@@ -93,7 +93,7 @@ public class ConsumerTest {
     @Test
     public void testConsumerRecords() {
         // given: a consumer
-        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        ConsumerProxy fixture = new ConsumerProxy(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: the consumer is run
         new Thread(fixture).start();
@@ -131,7 +131,7 @@ public class ConsumerTest {
     @Test
     public void testErrorHandler() throws Exception {
         // given: a consumer
-        Consumer fixture = new Consumer(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
+        ConsumerProxy fixture = new ConsumerProxy(broker, List.of(Topic.USER_AUTH), eventConsumer, errorHandler);
 
         // and: a faulty event consumer
         doThrow(new RuntimeException("test")).when(eventConsumer).consume(any(ConsumerRecord.class));

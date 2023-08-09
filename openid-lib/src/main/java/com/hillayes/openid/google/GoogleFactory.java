@@ -58,9 +58,8 @@ public class GoogleFactory extends OpenIdFactory {
     @Produces
     @ApplicationScoped
     @NamedAuthProvider(AuthProvider.GOOGLE)
-    public OpenIdTokenApi googleRestApi(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfiguration.AuthConfig authConfig,
-                                        @NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
-        return openIdRestApi(authConfig, openIdConfig);
+    public OpenIdTokenApi googleRestApi(@NamedAuthProvider(AuthProvider.GOOGLE) OpenIdConfigResponse openIdConfig) {
+        return openIdRestApi(openIdConfig);
     }
 
     /**

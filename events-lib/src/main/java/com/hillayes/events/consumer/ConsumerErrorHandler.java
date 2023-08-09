@@ -14,7 +14,7 @@ import java.time.Instant;
 import static com.hillayes.events.consumer.HeadersUtils.*;
 
 /**
- * Called by the Consumer class to decide what action is to be taken for errors
+ * Called by the ConsumerProxy class to decide what action is to be taken for errors
  * raised by an EventConsumer whilst processing an event.
  *
  * Two courses of action are available; queue the event for a retry or put the
