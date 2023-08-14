@@ -9,6 +9,7 @@ one-stop:
 
       GITHUB:
         config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
+        authorization-endpoint: 'https://github.com/login/oauth/authorize'
         token-endpoint: 'https://github.com/login/oauth/access_token'
         client-id: 'my-github-registered-client-id'
         client-secret: 'a-github-generated-secret'
