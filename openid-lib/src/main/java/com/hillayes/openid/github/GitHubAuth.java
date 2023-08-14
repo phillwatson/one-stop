@@ -59,7 +59,7 @@ public class GitHubAuth implements OpenIdAuth {
     OpenIdTokenApi openIdTokenApi;
 
     @Inject
-    private GitHubApiClient gitHubApiClient;
+    GitHubApiClient gitHubApiClient;
 
     @Override
     public boolean isFor(AuthProvider authProvider) {

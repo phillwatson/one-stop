@@ -106,11 +106,6 @@ public class AuthTokens {
             .expiresIn(refreshDuration)
             .claim("xsrf", xsrfToken));
 
-//        NewCookie accessTokenCookie = new NewCookie(accessCookieName, accessToken,
-//            "/api", null, NewCookie.DEFAULT_VERSION, null,
-//            (int)accessDuration.toSeconds(), Date.from(Instant.now().plus(accessDuration)),
-//            false, true);
-
         NewCookie accessTokenCookie = new NewCookie.Builder(accessCookieName)
             .value(accessToken)
             .path("/api")
@@ -121,15 +116,25 @@ public class AuthTokens {
             .httpOnly(true)
             .build();
 
-        NewCookie refreshTokenCookie = new NewCookie(refreshCookieName, refreshToken,
-            "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,
-            (int)refreshDuration.toSeconds(), Date.from(Instant.now().plus(refreshDuration)),
-            false, true);
+        NewCookie refreshTokenCookie = new NewCookie.Builder(refreshCookieName)
+            .value(refreshToken)
+            .path("/api/v1/auth/refresh")
+            .version(NewCookie.DEFAULT_VERSION)
+            .maxAge((int)refreshDuration.toSeconds())
+            .expiry(Date.from(Instant.now().plus(refreshDuration)))
+            .secure(false)
+            .httpOnly(true)
+            .build();
 
-        NewCookie xsrfTokenCookie = new NewCookie(xsrfCookieName, xsrfToken,
-            "/", null, NewCookie.DEFAULT_VERSION, null,
-            (int)refreshDuration.toSeconds(), Date.from(Instant.now().plus(refreshDuration)),
-            false, false);
+        NewCookie xsrfTokenCookie = new NewCookie.Builder(xsrfCookieName)
+            .value(xsrfToken)
+            .path("/")
+            .version(NewCookie.DEFAULT_VERSION)
+            .maxAge((int)refreshDuration.toSeconds())
+            .expiry(Date.from(Instant.now().plus(refreshDuration)))
+            .secure(false)
+            .httpOnly(false) // script must have access
+            .build();
 
         return new NewCookie[]{accessTokenCookie, refreshTokenCookie, xsrfTokenCookie};
     }

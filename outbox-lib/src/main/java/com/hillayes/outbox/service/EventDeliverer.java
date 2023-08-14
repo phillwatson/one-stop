@@ -41,7 +41,7 @@ public class EventDeliverer {
     /**
      * A mutex to prevent delivery of events from multiple threads.
      */
-    private static final AtomicBoolean MUTEX = new AtomicBoolean();
+    private final AtomicBoolean MUTEX = new AtomicBoolean();
 
     public void init(@Observes StartupEvent ev) {
         log.info("Scheduling EventDeliverer");

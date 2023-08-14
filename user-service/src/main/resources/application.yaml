@@ -10,14 +10,14 @@ mp:
       cookie: ${one-stop.auth.access-token.cookie}
 
 smallrye:
-  config:
-    mapping:
-      validate-unknown: false # ignore unknown config properties
-
   jwt:
     jwks:
       refresh-interval: 15
       forced-refresh-interval: 5
+
+  config:
+    mapping:
+      validate-unknown: false # ignore unknown config properties
 
 # configure production datasource
 "%prod":

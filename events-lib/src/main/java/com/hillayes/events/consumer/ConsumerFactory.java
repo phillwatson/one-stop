@@ -52,6 +52,15 @@ public class ConsumerFactory {
         return new ConsumerErrorHandler(producer);
     }
 
+    /**
+     * Creates a proxy for each EventConsumer instance located by the CDI context.
+     *
+     * @param instances the EventConsumer instances found in the CDI context.
+     * @param consumerConfig the broker consumer configuration.
+     * @param errorHandler the error handler to which event errors are passed during
+     * consumption.
+     * @return the collection of ConsumerProxies.
+     */
     @Produces
     @ApplicationScoped
     public Set<ConsumerProxy> consumers(@Any Instance<EventConsumer> instances,
