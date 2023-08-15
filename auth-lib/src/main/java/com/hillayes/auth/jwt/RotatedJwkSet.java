@@ -115,7 +115,7 @@ public class RotatedJwkSet {
      *
      * @param kid the unique identifier for the key-pair.
      * @return the generated key-pair.
-     * @throws JoseException
+     * @throws JoseException if the key cannot be created.
      */
     private RsaJsonWebKey newJWK(String kid) throws JoseException {
         RsaJsonWebKey result = RsaJwkGenerator.generateJwk(2048);

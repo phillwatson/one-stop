@@ -37,6 +37,14 @@ public class AuthService {
     @Inject
     RotatedJwkSet jwkSet;
 
+    /**
+     * Provides external access to the public keys used to verify signed auth
+     * tokens. These can be cached by the caller for a configured duration.
+     * This allows other services within the architecture to verify the auth
+     * tokens without having to rely upon the user-service.
+     *
+     * @return the public key set used to verify signed JWT auth tokens.
+     */
     public String getJwkSet() {
         return jwkSet.toJson();
     }

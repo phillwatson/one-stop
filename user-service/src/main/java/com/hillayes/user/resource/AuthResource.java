@@ -25,6 +25,14 @@ public class AuthResource {
     private final AuthService authService;
     private final AuthTokens authTokens;
 
+    /**
+     * Provides external access to the public keys used to verify signed auth
+     * tokens. These can be cached by the caller for a configured duration.
+     * This allows other services within the architecture to verify the auth
+     * tokens without having to rely upon the user-service.
+     *
+     * @return the public key set used to verify signed JWT auth tokens.
+     */
     @GET
     @Path("jwks.json")
     public Response getJwkSet() {
@@ -33,10 +41,15 @@ public class AuthResource {
         return Response.ok(jwkSet).build();
     }
 
+    /**
+     * Performs username/password authentication.
+     *
+     * @param loginRequest the user's credentials.
+     * @return the response containing the auth token cookies.
+     */
     @POST
     @Path("login")
-    public Response login(LoginRequest loginRequest,
-                          @HeaderParam("user-agent") String userAgent) {
+    public Response login(LoginRequest loginRequest) {
         log.info("Auth user login initiated");
         User user = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 
@@ -64,7 +77,9 @@ public class AuthResource {
     }
 
     /**
-     * The call-back URI for open-id authentication.
+     * The call-back URI for open-id authentication. The URI for this endpoint is passed
+     * in the initiating authentication request. It is then called by the open-id provider
+     * when user authentication has completed; whether successfully or not.
      *
      * @param uriInfo the platform URI context from which redirections can be constructed.
      * @param authProvider the identity of the OpenID auth provider implementation.
@@ -100,6 +115,14 @@ public class AuthResource {
         return authTokens.authResponse(Response.temporaryRedirect(redirect), user.getId(), user.getRoles());
     }
 
+    /**
+     * Refreshes the caller's auth tokens (access and refresh tokens). The caller
+     * passes their most recent refresh token. If that token is still valid, it
+     * will be exchanged for new auth tokens in the response.
+     *
+     * @param headers the headers containing the caller's refresh token.
+     * @return the response containing the auth token cookies.
+     */
     @GET
     @Path("refresh")
     @XsrfRequired
@@ -117,6 +140,11 @@ public class AuthResource {
         return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
     }
 
+    /**
+     * Invalidates the caller's auth tokens.
+     *
+     * @return the response containing the invalidates/deleted auth tokens.
+     */
     @GET
     @Path("logout")
     public Response logout() {
