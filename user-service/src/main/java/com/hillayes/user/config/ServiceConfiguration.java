@@ -6,7 +6,7 @@ import io.smallrye.config.ConfigMapping;
  * Configuration for the user service.
  */
 @ConfigMapping(prefix = "one-stop")
-public interface ServiceConfig {
+public interface ServiceConfiguration {
     GatewayConfig gateway();
 
     /**

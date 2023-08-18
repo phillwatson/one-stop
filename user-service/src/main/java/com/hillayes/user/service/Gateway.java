@@ -1,7 +1,7 @@
 package com.hillayes.user.service;
 
 import com.hillayes.commons.net.Network;
-import com.hillayes.user.config.ServiceConfig;
+import com.hillayes.user.config.ServiceConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class Gateway {
-    private final ServiceConfig serviceConfig;
+    private final ServiceConfiguration serviceConfig;
 
     public String getScheme() {
         return serviceConfig.gateway().scheme();

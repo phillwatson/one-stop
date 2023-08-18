@@ -114,35 +114,8 @@ public class OpenIdAuthentication {
             else {
                 log.debug("Did not find user by OpenID subject [issuer: {}, subject: {}]", issuer, subject);
 
-                // look-up user by email from Auth Provider
-                user = userRepository.findByEmail(email)
-                    .map(u -> {
-                        log.debug("Found user by OpenID email [userId: {}, email: {}]", u.getId(), email);
-                        if (u.isBlocked()) {
-                            log.error("User is blocked [userId: {}]", u.getId());
-                            throw new NotAuthorizedException("OpenId");
-                        }
-                        return u;
-                    })
-                    // if not found - create a new User
-                    .orElseGet(() -> {
-                        String name = idToken.getClaimValueAsString("name");
-                        String givenName = idToken.getClaimValueAsString("given_name");
-                        String familyName = idToken.getClaimValueAsString("family_name");
-                        String locale = idToken.getClaimValueAsString("locale");
-                        return User.builder()
-                                .username(email)
-                                .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
-                                .email(email)
-                                .givenName(givenName == null ? name == null ? email : name : givenName)
-                                .familyName(familyName)
-                                .preferredName(name == null ? givenName == null ? email : givenName : name)
-                                .dateOnboarded(Instant.now())
-                                .locale(locale == null ? null : Locale.forLanguageTag(locale))
-                                .roles(Set.of("user"))
-                                .build();
-                        }
-                    );
+                // look-up (or create) user by email from Auth Provider
+                user = findOrCreateUser(email, idToken);
 
                 // record Auth Provider Identity against user
                 user.addOidcIdentity(authProvider, issuer, subject);
@@ -158,5 +131,45 @@ public class OpenIdAuthentication {
             log.error("Failed to verify auth token.", e);
             throw new NotAuthorizedException("jwt");
         }
+    }
+
+    /**
+     * Locates the user with the given email address or, if not found, creates a new user
+     * from the properties of the given open-id profile.
+     *
+     * @param email email address from open-id profile.
+     * @param idToken the open-id ID-Token containing user profile.
+     * @return the user identified by the email address, or a new user created from ID-Token
+     */
+    private User findOrCreateUser(String email, JwtClaims idToken) {
+        // look-up user by email from Auth Provider
+        return userRepository.findByEmail(email)
+            .map(user -> {
+                log.debug("Found user by OpenID email [userId: {}, email: {}]", user.getId(), email);
+                if (user.isBlocked()) {
+                    log.error("User is blocked [userId: {}]", user.getId());
+                    throw new NotAuthorizedException("OpenId");
+                }
+                return user;
+            })
+            // if not found - create a new User
+            .orElseGet(() -> {
+                    String name = idToken.getClaimValueAsString("name");
+                    String givenName = idToken.getClaimValueAsString("given_name");
+                    String familyName = idToken.getClaimValueAsString("family_name");
+                    String locale = idToken.getClaimValueAsString("locale");
+                    return User.builder()
+                        .username(email)
+                        .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
+                        .email(email)
+                        .givenName(givenName == null ? name == null ? email : name : givenName)
+                        .familyName(familyName)
+                        .preferredName(name == null ? givenName == null ? email : givenName : name)
+                        .dateOnboarded(Instant.now())
+                        .locale(locale == null ? null : Locale.forLanguageTag(locale))
+                        .roles(Set.of("user"))
+                        .build();
+                }
+            );
     }
 }
