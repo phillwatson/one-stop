@@ -62,16 +62,10 @@ public class SendEmailService {
             params = new HashMap<>(params);
 
             // add common context parameters
+            params.putAll(configuration.commonArgs());
             params.put("host_ip", Network.getMyIpAddress());
-            params.put("recipient_name", recipient.name());
-            params.put("recipient_email", recipient.email());
+            params.put("recipient", recipient);
             params.put("YEAR", LocalDate.now().getYear());
-            params.put("COMPANY_COPYRIGHT_NAME", configuration.corporation().copyrightName());
-            params.put("COMPANY_LONG_NAME", configuration.corporation().name());
-            params.put("COMPANY_CONTACT_EMAIL", configuration.corporation().supportEmail());
-            params.put("COMPANY_ADDRESS_LINE1", configuration.corporation().address().addressLine1());
-            params.put("COMPANY_ADDRESS_LINE2", configuration.corporation().address().addressLine2());
-            params.put("COMPANY_ADDRESS_LINE3", configuration.corporation().address().addressLine3());
 
             String subject = templateRepository.renderSubject(templateName, params, recipient.locale());
             params.put("SUBJECT", subject);
@@ -110,9 +104,7 @@ public class SendEmailService {
         }
 
         public Recipient(User user) {
-            this.email = user.getEmail();
-            this.name = user.getPreferredName();
-            this.locale = Optional.ofNullable(user.getLocale());
+            this(user.getEmail(), user.getPreferredName(), user.getLocale());
         }
 
         @Override

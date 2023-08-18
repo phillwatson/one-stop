@@ -46,14 +46,6 @@ public class UserService {
         sendEmailService.sendEmail(TemplateName.USER_CREATED, new SendEmailService.Recipient(existingUser), params);
     }
 
-    public void onboardUser(UUID userId) {
-        log.info("Onboarded user [id: {}]", userId);
-        userRepository.findById(userId).ifPresent(user -> {
-            // send email to notify user of onboarding
-            log.debug("Sending email to notify user onboarding [email: {}]", user.getEmail());
-        });
-    }
-
     public Optional<User> getUser(UUID userId) {
         log.info("Get user [id: {}]", userId);
         Optional<User> result = userRepository.findById(userId);

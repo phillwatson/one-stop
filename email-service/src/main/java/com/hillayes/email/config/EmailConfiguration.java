@@ -18,9 +18,10 @@ public interface EmailConfiguration {
     boolean disabled();
 
     /**
-     * Holds the details of the company owning the company.
+     * Holds the common arguments, including details of the company owning the company.
+     * These are available to all email templates.
      */
-    Corporation corporation();
+    Map<String,String> commonArgs();
 
     Corresponder defaultSender();
 
@@ -84,24 +85,5 @@ public interface EmailConfiguration {
         String email();
 
         Optional<Locale> locale();
-    }
-
-    /**
-     * The properties of the application product owner.
-     */
-    interface Corporation {
-        String name();
-
-        String copyrightName();
-
-        String supportEmail();
-
-        Address address();
-    }
-
-    interface Address {
-        String addressLine1();
-        String addressLine2();
-        String addressLine3();
     }
 }

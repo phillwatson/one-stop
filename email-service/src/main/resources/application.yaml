@@ -31,19 +31,18 @@ quarkus:
 one-stop:
   email:
     disabled: false
-    corporation:
-      name: Hillayes One-Stop
-      copyright-name: One-Stop
-      support-email: watson.phill+onestop@gmail.com
-      address:
-        address-line1: Hillayes
-        address-line2: Hullavington
-        address-line3: Wiltshire SN14
+    common-args:
+      COMPANY_LONG_NAME: Hillayes One-Stop
+      COMPANY_COPYRIGHT_NAME: One-Stop
+      COMPANY_CONTACT_EMAIL: watson.phill+onestop@gmail.com
+      COMPANY_ADDRESS_LINE1: Hillayes
+      COMPANY_ADDRESS_LINE2: Hullavington
+      COMPANY_ADDRESS_LINE3: Wiltshire SN14
 
     default-sender:
-      name: ${one-stop.email.corporation.name}
-      email: ${one-stop.email.corporation.support-email}
-      locale: "en-GB"
+      name: ${one-stop.email.common-args.COMPANY_LONG_NAME}
+      email: ${one-stop.email.common-args.COMPANY_CONTACT_EMAIL}
+      locale: "en"
 
     templates:
       header:

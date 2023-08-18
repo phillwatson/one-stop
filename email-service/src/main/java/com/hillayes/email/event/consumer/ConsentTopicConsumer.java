@@ -38,35 +38,35 @@ public class ConsentTopicConsumer implements EventConsumer {
         else if (ConsentGiven.class.getName().equals(payloadClass)) {
             ConsentGiven event = eventPacket.getPayloadContent();
             params.put("event", event);
-            send(event.getUserId(), TemplateName.CONSENT_GIVEN, params);
+            sendEmail(event.getUserId(), TemplateName.CONSENT_GIVEN, params);
         }
 
         else if (ConsentDenied.class.getName().equals(payloadClass)) {
             ConsentDenied event = eventPacket.getPayloadContent();
             params.put("event", event);
-            send(event.getUserId(), TemplateName.CONSENT_DENIED, params);
+            sendEmail(event.getUserId(), TemplateName.CONSENT_DENIED, params);
         }
 
         else if (ConsentCancelled.class.getName().equals(payloadClass)) {
             ConsentCancelled event = eventPacket.getPayloadContent();
             params.put("event", event);
-            send(event.getUserId(), TemplateName.CONSENT_CANCELLED, params);
+            sendEmail(event.getUserId(), TemplateName.CONSENT_CANCELLED, params);
         }
 
         else if (ConsentSuspended.class.getName().equals(payloadClass)) {
             ConsentSuspended event = eventPacket.getPayloadContent();
             params.put("event", event);
-            send(event.getUserId(), TemplateName.CONSENT_SUSPENDED, params);
+            sendEmail(event.getUserId(), TemplateName.CONSENT_SUSPENDED, params);
         }
 
         else if (ConsentExpired.class.getName().equals(payloadClass)) {
             ConsentExpired event = eventPacket.getPayloadContent();
             params.put("event", event);
-            send(event.getUserId(), TemplateName.CONSENT_EXPIRED, params);
+            sendEmail(event.getUserId(), TemplateName.CONSENT_EXPIRED, params);
         }
     }
 
-    private void send(UUID userId, TemplateName templateName, Map<String, Object> params) {
+    private void sendEmail(UUID userId, TemplateName templateName, Map<String, Object> params) {
         userService.getUser(userId).ifPresent(user -> {
             SendEmailService.Recipient recipient = new SendEmailService.Recipient(user);
             params.put("user", user);
