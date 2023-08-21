@@ -93,6 +93,7 @@
                 </property>
             </activation>
             <properties>
+                <!-- see https://quarkus.io/guides/writing-native-applications-tips -->
                 <quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator</quarkus.native.additional-build-args>
             </properties>
         </profile>
