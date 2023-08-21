@@ -42,10 +42,6 @@ quarkus:
     google-api:
       url: https://oauth2.googleapis.com
 
-#  native:
-#    resources:
-#      includes: proxy-config.json
-
   log:
     min-level: TRACE
     level: INFO
