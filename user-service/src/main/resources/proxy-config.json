@@ -1,0 +1,15 @@
+[
+  {
+    "interfaces": [
+      "com.hillayes.openid.rest.OpenIdTokenApi",
+      "org.jboss.resteasy.client.jaxrs.internal.proxy.ResteasyClientProxy"
+    ]
+  },
+  {
+    "interfaces": [
+      "com.hillayes.openid.rest.OpenIdTokenApi",
+      "org.jboss.resteasy.microprofile.client.RestClientProxy",
+      "java.io.Closeable"
+    ]
+  }
+]

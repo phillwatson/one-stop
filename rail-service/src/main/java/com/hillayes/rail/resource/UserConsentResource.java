@@ -52,8 +52,8 @@ public class UserConsentResource {
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
 
-        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
-            userId, page, pageSize, response.getCount());
+        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+            userId, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 

@@ -59,8 +59,8 @@ public class InstitutionResource {
                 })
             );
 
-        log.debug("List institutions [country: {}, page: {}, pageSize: {}, count: {}]",
-            countryCode, page, pageSize, response.getCount());
+        log.debug("List institutions [country: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+            countryCode, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 

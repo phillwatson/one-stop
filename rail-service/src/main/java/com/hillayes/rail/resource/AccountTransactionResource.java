@@ -57,8 +57,8 @@ public class AccountTransactionResource {
                 return uriBuilder;
             }));
 
-        log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}]",
-            userId, accountId, page, pageSize, response.getCount());
+        log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+            userId, accountId, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 

@@ -15,9 +15,12 @@ import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.UserConsentService;
 import io.quarkus.panache.common.Sort;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -43,6 +46,9 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private final RailAccountService railAccountService;
 
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @RegisterForReflection
     public static class Payload implements Serializable {
         UUID consentId;
         String railAccountId;

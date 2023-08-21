@@ -128,11 +128,11 @@ public class ConsumerProxy implements Runnable {
             // ignore, we're closing
         } finally {
             try {
-                log.info("Closing consumer and committing offsets");
+                log.info("Closing consumer and committing offsets [topics: {}]", getTopics());
                 commitOffsets();
             } finally {
                 broker.close();
-                log.info("Closed consumer and we are done");
+                log.info("Closed consumer and we are done [topics: {}]", getTopics());
             }
         }
     }

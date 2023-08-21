@@ -1,5 +1,6 @@
 package com.hillayes.events.events.consent;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class ConsentGiven {
     /**
      * The ID of the user from whom consent is being obtained.

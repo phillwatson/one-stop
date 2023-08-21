@@ -1,5 +1,6 @@
 package com.hillayes.events.events.auth;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class LoginFailure {
     private String username;
 

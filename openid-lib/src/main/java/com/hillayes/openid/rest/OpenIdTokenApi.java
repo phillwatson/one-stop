@@ -1,5 +1,6 @@
 package com.hillayes.openid.rest;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;
@@ -17,6 +18,7 @@ import jakarta.ws.rs.core.MediaType;
  * This REST client is instantiated by the OpenIdFactory.
  */
 @Produces(MediaType.APPLICATION_JSON)
+@RegisterForReflection
 public interface OpenIdTokenApi {
     /**
      * Calls the auth-provider's token-endpoint to exchange an auth-token for the

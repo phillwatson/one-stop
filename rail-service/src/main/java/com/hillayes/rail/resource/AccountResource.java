@@ -42,8 +42,8 @@ public class AccountResource {
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, accountsPage));
 
-        log.debug("Listing accounts [userId: {}, page: {}, pageSize: {}, count: {}]",
-            userId, page, pageSize, response.getCount());
+        log.debug("Listing accounts [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+            userId, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 
