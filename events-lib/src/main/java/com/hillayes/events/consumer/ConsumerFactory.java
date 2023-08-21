@@ -4,6 +4,7 @@ import com.hillayes.events.annotation.AnnotationUtils;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.serializers.EventPacketDeserializer;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -18,6 +19,16 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.*;
 
+@RegisterForReflection(targets = {
+    // workaround: see https://github.com/quarkusio/quarkus/issues/34071
+    // https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection
+    org.apache.kafka.common.serialization.StringDeserializer.class,
+    org.apache.kafka.clients.consumer.RangeAssignor.class,
+    org.apache.kafka.clients.consumer.CooperativeStickyAssignor.class,
+    org.apache.kafka.clients.consumer.RoundRobinAssignor.class,
+    org.apache.kafka.clients.consumer.StickyAssignor.class,
+    com.hillayes.events.serializers.EventPacketDeserializer.class
+})
 @Slf4j
 public class ConsumerFactory {
     @Produces

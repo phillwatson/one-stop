@@ -1,5 +1,6 @@
 package com.hillayes.events.events.user;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class UserCreated {
     private UUID userId;
 

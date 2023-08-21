@@ -1,7 +1,9 @@
 package com.hillayes.openid.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class TokenExchangeResponse {
     @JsonProperty("access_token")
     public String accessToken;

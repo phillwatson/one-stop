@@ -1,12 +1,12 @@
 package com.hillayes.events.events.user;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -14,6 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class UserUpdated {
     private UUID userId;
 

@@ -53,8 +53,8 @@ public class CountryResource {
             .items(countryPage)
             .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages));
 
-        log.debug("List countries [page: {}, pageSize: {}, count: {}]",
-            page, pageSize, response.getCount());
+        log.debug("List countries [page: {}, pageSize: {}, count: {}, total: {}]",
+            page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 

@@ -2,6 +2,7 @@ package com.hillayes.events.sender;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.serializers.EventPacketSerializer;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.smallrye.common.annotation.Identifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,6 +15,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import java.util.Properties;
 
+@RegisterForReflection(targets = {
+    // workaround: see https://github.com/quarkusio/quarkus/issues/34071
+    // https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection
+    org.apache.kafka.common.serialization.StringSerializer.class,
+    com.hillayes.events.serializers.EventPacketSerializer.class
+})
 @Slf4j
 public class ProducerFactory {
     @Produces

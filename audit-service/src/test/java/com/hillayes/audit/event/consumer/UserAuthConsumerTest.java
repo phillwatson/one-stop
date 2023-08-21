@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @QuarkusTest
 public class UserAuthConsumerTest {
-    private ObjectMapper objectMapper = MapperFactory.defaultMapper();
+    private final ObjectMapper objectMapper = MapperFactory.defaultMapper();
 
     @Inject
     UserAuthTopicConsumer userAuthTopicConsumer;

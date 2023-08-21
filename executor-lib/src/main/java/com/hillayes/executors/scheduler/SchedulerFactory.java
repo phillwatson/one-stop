@@ -12,6 +12,8 @@ import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.config.RetryConfig;
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.tasks.*;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -393,6 +395,8 @@ public class SchedulerFactory {
      * that was active at the time the job was queued. This allows the correlation
      * ID to be re-activated when the task is processed.
      */
+    @NoArgsConstructor
+    @RegisterForReflection
     private static class JobbingTaskData implements Serializable {
         String correlationId;
         Serializable payload;

@@ -1,12 +1,14 @@
 package com.hillayes.openid.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /**
  * Represents the response from the Auth-Providers "well-known" configuration URI.
  * These properties are then used to interact with the Auth-Provider and verify the
  * tokens it tokens.
  */
+@RegisterForReflection
 public class OpenIdConfigResponse {
     /**
      * Identifies the issuer of the JSON Web Tokens used for authorisation. This will

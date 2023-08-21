@@ -54,6 +54,8 @@
                                 <additionalModelTypeAnnotations>
                                     <!-- https://openapi-generator.tech/docs/generators/spring/ -->
                                     @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+                                    <!-- https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection -->
+                                    @io.quarkus.runtime.annotations.RegisterForReflection
                                 </additionalModelTypeAnnotations>
                             </configOptions>
                             <inputSpec>${project.basedir}/src/main/spec/one-stop-openapi.yaml</inputSpec>
@@ -73,6 +75,21 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactVersion>${project.version}</artifactVersion>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <goals>
+                            <!-- phase is 'process-classes by default' -->
+                            <goal>jandex</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

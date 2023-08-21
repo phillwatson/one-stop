@@ -2,6 +2,7 @@ package com.hillayes.openid.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.*;
 
 @Builder
@@ -10,6 +11,7 @@ import lombok.*;
 @Setter(AccessLevel.PROTECTED)
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@RegisterForReflection
 public class TokenExchangeRequest {
     @JsonProperty("code")
     public String code;

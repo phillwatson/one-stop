@@ -2,11 +2,13 @@ package com.hillayes.commons.jpa;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Acts as a facade over the Panache Repository implementation to reflect a similar
@@ -15,6 +17,10 @@ import java.util.List;
  * @param <Entity> the type of entity to operate on
  * @param <Id> the type of the entity's identifier.
  */
+@RegisterForReflection(targets = {
+    // workaround: see https://github.com/quarkusio/quarkus/issues/34071
+    UUID[].class,
+})
 public class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity, Id> {
     public Entity save(Entity entity) {
         persist(entity);
