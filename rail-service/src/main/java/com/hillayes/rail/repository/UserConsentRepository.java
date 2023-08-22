@@ -1,10 +1,10 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.UserConsent;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;

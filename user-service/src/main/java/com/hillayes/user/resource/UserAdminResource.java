@@ -1,12 +1,12 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -34,10 +34,10 @@ public class UserAdminResource {
 
         Page<User> usersPage = userService.listUsers(page, pageSize);
         PaginatedUsers response = new PaginatedUsers()
-            .page(usersPage.getNumber())
-            .pageSize(usersPage.getSize())
-            .count(usersPage.getNumberOfElements())
-            .total(usersPage.getTotalElements())
+            .page(usersPage.getPageIndex())
+            .pageSize(usersPage.getPageSize())
+            .count(usersPage.getContentSize())
+            .total(usersPage.getTotalCount())
             .items(usersPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, usersPage));
 

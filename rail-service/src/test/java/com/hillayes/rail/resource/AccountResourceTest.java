@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.AccountBalanceResponse;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.PageLinks;
@@ -14,9 +15,6 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -66,16 +64,15 @@ public class AccountResourceTest extends TestBase {
         });
 
         // and: the account-service returns a paged list of the accounts
-        PageRequest pageRequest = PageRequest.of(10, 20);
-        Page<Account> pagedAccounts = new PageImpl<>(accounts, pageRequest, 310);
+        Page<Account> pagedAccounts = new Page<>(accounts, 310, 10, 20);
         when(accountService.getAccounts(any(UUID.class), anyInt(), anyInt()))
             .thenReturn(pagedAccounts);
 
         // when: client calls the endpoint
         PaginatedAccounts response = given()
             .request()
-            .queryParam("page", pageRequest.getPageNumber())
-            .queryParam("page-size", pageRequest.getPageSize())
+            .queryParam("page", pagedAccounts.getPageIndex())
+            .queryParam("page-size", pagedAccounts.getPageSize())
             .contentType(JSON)
             .when()
             .get("/api/v1/rails/accounts")
@@ -86,15 +83,15 @@ public class AccountResourceTest extends TestBase {
             .as(PaginatedAccounts.class);
 
         // then: the account-service is called with the authenticated user-id, and page parameters
-        verify(accountService).getAccounts(userId, pageRequest.getPageNumber(), pageRequest.getPageSize());
+        verify(accountService).getAccounts(userId, pagedAccounts.getPageIndex(), pagedAccounts.getPageSize());
 
         // and: the response corresponds to the paged list of accounts
         assertEquals(accounts.size(), response.getCount());
         assertNotNull(response.getItems());
         assertEquals(accounts.size(), response.getItems().size());
-        assertEquals(pagedAccounts.getTotalElements(), response.getTotal());
-        assertEquals(pageRequest.getPageNumber(), response.getPage());
-        assertEquals(pageRequest.getPageSize(), response.getPageSize());
+        assertEquals(pagedAccounts.getTotalCount(), response.getTotal());
+        assertEquals(pagedAccounts.getPageIndex(), response.getPage());
+        assertEquals(pagedAccounts.getPageSize(), response.getPageSize());
 
         // and: all page links are present
         PageLinks links = response.getLinks();
@@ -158,16 +155,15 @@ public class AccountResourceTest extends TestBase {
         });
 
         // and: the account-service returns a paged list of the accounts
-        PageRequest pageRequest = PageRequest.of(10, 20);
-        Page<Account> pagedAccounts = new PageImpl<>(accounts, pageRequest, 310);
+        Page<Account> pagedAccounts = new Page<>(accounts, 310, 10, 20);
         when(accountService.getAccounts(any(UUID.class), anyInt(), anyInt()))
             .thenReturn(pagedAccounts);
 
         // when: client calls the endpoint
         int status = given()
             .request()
-            .queryParam("page", pageRequest.getPageNumber())
-            .queryParam("page-size", pageRequest.getPageSize())
+            .queryParam("page", pagedAccounts.getPageIndex())
+            .queryParam("page-size", pagedAccounts.getPageSize())
             .contentType(JSON)
             .when()
             .get("/api/v1/rails/accounts")
@@ -203,16 +199,15 @@ public class AccountResourceTest extends TestBase {
         });
 
         // and: the account-service returns a paged list of the accounts
-        PageRequest pageRequest = PageRequest.of(10, 20);
-        Page<Account> pagedAccounts = new PageImpl<>(accounts, pageRequest, 310);
+        Page<Account> pagedAccounts = new Page<>(accounts, 310, 10, 20);
         when(accountService.getAccounts(any(UUID.class), anyInt(), anyInt()))
             .thenReturn(pagedAccounts);
 
         // when: client calls the endpoint
         int status = given()
             .request()
-            .queryParam("page", pageRequest.getPageNumber())
-            .queryParam("page-size", pageRequest.getPageSize())
+            .queryParam("page", pagedAccounts.getPageIndex())
+            .queryParam("page-size", pagedAccounts.getPageSize())
             .contentType(JSON)
             .when()
             .get("/api/v1/rails/accounts")

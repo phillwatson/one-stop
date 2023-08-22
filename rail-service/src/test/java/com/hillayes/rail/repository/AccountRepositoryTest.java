@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -7,7 +8,6 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.util.*;
@@ -67,7 +67,7 @@ public class AccountRepositoryTest {
             Page<Account> actual = fixture.findByUserId(consent.getUserId(), 0, 20);
 
             // then: the result contains those accounts for the given user-consent ID
-            assertEquals(expected.size(), actual.getNumberOfElements());
+            assertEquals(expected.size(), actual.getContentSize());
             expected.forEach(account -> assertTrue(actual.getContent().contains(account)));
         });
     }

@@ -1,5 +1,6 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
@@ -8,9 +9,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,14 +37,13 @@ public class UserAdminResourceTest extends TestBase {
     public void testListUsers() {
         List<User> users = mockUsers(15);
 
-        PageRequest pageRequest = PageRequest.of(10, 15);
-        Page<User> pagedUsers = new PageImpl<>(users, pageRequest, 310);
+        Page<User> pagedUsers = new Page<>(users, 310, 10, 20);
         when(userService.listUsers(anyInt(), anyInt())).thenReturn(pagedUsers);
 
         PaginatedUsers response = given()
             .when()
-            .queryParam("page", pageRequest.getPageNumber())
-            .queryParam("page-size", pageRequest.getPageSize())
+            .queryParam("page", pagedUsers.getPageIndex())
+            .queryParam("page-size", pagedUsers.getPageSize())
             .get("/api/v1/users")
             .then()
             .statusCode(200)
@@ -55,30 +52,30 @@ public class UserAdminResourceTest extends TestBase {
             .as(PaginatedUsers.class);
 
         // then: the user-service is called with the page parameters
-        verify(userService).listUsers(pageRequest.getPageNumber(), pageRequest.getPageSize());
+        verify(userService).listUsers(pagedUsers.getPageIndex(), pagedUsers.getPageSize());
 
         // and: the response corresponds to the paged list of accounts
         assertEquals(users.size(), response.getCount());
         assertNotNull(response.getItems());
         assertEquals(users.size(), response.getItems().size());
-        assertEquals(pagedUsers.getTotalElements(), response.getTotal());
-        assertEquals(pageRequest.getPageNumber(), response.getPage());
-        assertEquals(pageRequest.getPageSize(), response.getPageSize());
+        assertEquals(pagedUsers.getTotalCount(), response.getTotal());
+        assertEquals(pagedUsers.getPageIndex(), response.getPage());
+        assertEquals(pagedUsers.getPageSize(), response.getPageSize());
 
         // and: all page links are present
         assertEquals("/api/v1/users", response.getLinks().getFirst().getPath());
-        assertEquals("page-size=15&page=0", response.getLinks().getFirst().getQuery());
+        assertEquals("page-size=20&page=0", response.getLinks().getFirst().getQuery());
 
         assertNotNull(response.getLinks().getPrevious());
         assertEquals("/api/v1/users", response.getLinks().getPrevious().getPath());
-        assertEquals("page-size=15&page=9", response.getLinks().getPrevious().getQuery());
+        assertEquals("page-size=20&page=9", response.getLinks().getPrevious().getQuery());
 
         assertNotNull(response.getLinks().getNext());
         assertEquals("/api/v1/users", response.getLinks().getNext().getPath());
-        assertEquals("page-size=15&page=11", response.getLinks().getNext().getQuery());
+        assertEquals("page-size=20&page=11", response.getLinks().getNext().getQuery());
 
         assertEquals("/api/v1/users", response.getLinks().getLast().getPath());
-        assertEquals("page-size=15&page=20", response.getLinks().getLast().getQuery());
+        assertEquals("page-size=20&page=15", response.getLinks().getLast().getQuery());
     }
 
     @Test
@@ -86,8 +83,7 @@ public class UserAdminResourceTest extends TestBase {
     public void testListUsers_DefaultPageSize() {
         List<User> users = mockUsers(15);
 
-        PageRequest pageRequest = PageRequest.of(0, 20);
-        Page<User> pagedUsers = new PageImpl<>(users, pageRequest, 310);
+        Page<User> pagedUsers = new Page<>(users, 310, 0, 20);
         when(userService.listUsers(anyInt(), anyInt())).thenReturn(pagedUsers);
 
         PaginatedUsers response = given()
@@ -100,11 +96,11 @@ public class UserAdminResourceTest extends TestBase {
             .as(PaginatedUsers.class);
 
         // then: the user-service is called with the page parameters
-        verify(userService).listUsers(pageRequest.getPageNumber(), pageRequest.getPageSize());
+        verify(userService).listUsers(pagedUsers.getPageIndex(), pagedUsers.getPageSize());
 
         // and: the response shows the default page size
-        assertEquals(pageRequest.getPageNumber(), response.getPage());
-        assertEquals(pageRequest.getPageSize(), response.getPageSize());
+        assertEquals(pagedUsers.getPageIndex(), response.getPage());
+        assertEquals(pagedUsers.getPageSize(), response.getPageSize());
     }
 
     @Test
@@ -112,14 +108,13 @@ public class UserAdminResourceTest extends TestBase {
     public void testListUsers_NotAuthorised() {
         List<User> users = mockUsers(15);
 
-        PageRequest pageRequest = PageRequest.of(10, 15);
-        Page<User> pagedUsers = new PageImpl<>(users, pageRequest, 310);
+        Page<User> pagedUsers = new Page<>(users,310, 10, 15);
         when(userService.listUsers(anyInt(), anyInt())).thenReturn(pagedUsers);
 
         given()
             .when()
-            .queryParam("page", pageRequest.getPageNumber())
-            .queryParam("page-size", pageRequest.getPageSize())
+            .queryParam("page", pagedUsers.getPageIndex())
+            .queryParam("page-size", pagedUsers.getPageSize())
             .get("/api/v1/users")
             .then()
             .statusCode(403);

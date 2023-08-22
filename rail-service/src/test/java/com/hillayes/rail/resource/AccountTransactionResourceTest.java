@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.rail.service.AccountService;
@@ -8,10 +9,8 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -67,13 +66,13 @@ public class AccountTransactionResourceTest extends TestBase {
 
         // and: a list of transactions
         when(accountTransactionService.getTransactions(userId, null, page, pageSize))
-            .thenReturn(new PageImpl<>(List.of()));
+            .thenReturn(Page.empty());
 
         // when: client calls the endpoint
         PaginatedTransactions response = given()
             .request()
-            .queryParam("page", 1)
-            .queryParam("page-size", 12)
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
             .contentType(JSON)
             .when()
             .get("/api/v1/rails/transactions")

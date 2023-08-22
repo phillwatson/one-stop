@@ -1,12 +1,12 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -85,14 +85,14 @@ public class UserConsentRepositoryTest {
                 Page<UserConsent> consents = fixture.findByUserId(userId, page, 10);
 
                 // then: the page number is correct
-                assertEquals(page, consents.getNumber());
+                assertEquals(page, consents.getPageIndex());
 
                 // and: the totals are correct
-                assertEquals(35, consents.getTotalElements());
+                assertEquals(35, consents.getTotalCount());
                 assertEquals(4, consents.getTotalPages());
 
                 // and: the count is correct
-                assertEquals(page == 3 ? 5 : 10, consents.getNumberOfElements());
+                assertEquals(page == 3 ? 5 : 10, consents.getContentSize());
 
                 // and: each belongs to the identified user
                 consents.forEach(consent -> assertEquals(userId, consent.getUserId()));

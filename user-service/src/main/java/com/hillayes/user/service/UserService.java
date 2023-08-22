@@ -3,6 +3,7 @@ package com.hillayes.user.service;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.commons.Strings;
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.user.domain.DeletedUser;
@@ -21,7 +22,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.net.URI;
@@ -147,7 +147,7 @@ public class UserService {
 
         Page<User> result = userRepository.findAll(Sort.by("username"), page, pageSize);
         log.debug("Listing users [page: {}, pageSize: {}, size: {}]",
-            page, pageSize, result.getNumberOfElements());
+            page, pageSize, result.getContentSize());
 
         return result;
     }

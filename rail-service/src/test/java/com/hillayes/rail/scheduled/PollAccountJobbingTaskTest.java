@@ -1,5 +1,6 @@
 package com.hillayes.rail.scheduled;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
@@ -20,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -130,7 +129,7 @@ public class PollAccountJobbingTaskTest {
         AccountTransaction transaction = AccountTransaction.builder()
             .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))
             .build();
-        Page<AccountTransaction> page = new PageImpl<>(List.of(transaction));
+        Page<AccountTransaction> page = Page.of(List.of(transaction));
         when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(), anyInt(), anyInt()))
             .thenReturn(page);
 

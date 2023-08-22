@@ -1,5 +1,6 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -17,7 +18,6 @@ import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import java.net.URI;
 import java.time.Instant;
@@ -59,8 +59,8 @@ public class UserConsentService {
     public Page<UserConsent> listConsents(UUID userId, int page, int pageSize) {
         log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         Page<UserConsent> result = userConsentRepository.findByUserId(userId, page, pageSize);
-        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
-            userId, page, pageSize, result.getNumberOfElements());
+        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+            userId, page, pageSize, result.getContentSize(), result.getTotalCount());
         return result;
     }
 

@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionList;
@@ -9,7 +10,6 @@ import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -45,10 +45,10 @@ public class AccountTransactionResource {
             accountTransactionService.getTransactions(userId, accountId, page, pageSize);
 
         PaginatedTransactions response = new PaginatedTransactions()
-            .page(transactionsPage.getNumber())
-            .pageSize(transactionsPage.getSize())
-            .count(transactionsPage.getNumberOfElements())
-            .total(transactionsPage.getTotalElements())
+            .page(transactionsPage.getPageIndex())
+            .pageSize(transactionsPage.getPageSize())
+            .count(transactionsPage.getContentSize())
+            .total(transactionsPage.getTotalCount())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
                 if (accountId != null) {

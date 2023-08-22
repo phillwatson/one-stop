@@ -1,5 +1,6 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -18,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.net.URI;
 import java.time.Duration;
@@ -92,7 +91,7 @@ public class UserConsentServiceTest {
             mockUserConsent(userId)
         );
         when(userConsentRepository.findByUserId(eq(userId), anyInt(), anyInt()))
-            .thenReturn(new PageImpl<>(consents));
+            .thenReturn(Page.of(consents));
 
         // when: the fixture is called
         Page<UserConsent> result = fixture.listConsents(userId, 0, 20);
@@ -102,10 +101,10 @@ public class UserConsentServiceTest {
 
         // and: the consent records are returned
         assertNotNull(result);
-        assertEquals(consents.size(), result.getNumberOfElements());
-        assertEquals(consents.size(), result.getTotalElements());
+        assertEquals(consents.size(), result.getContentSize());
+        assertEquals(consents.size(), result.getTotalCount());
         assertEquals(1, result.getTotalPages());
-        assertEquals(0, result.getNumber());
+        assertEquals(0, result.getPageIndex());
 
         // and: the records are as expected
         consents.forEach(expected ->
@@ -606,7 +605,6 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentDenied_NotFound() {
         // given: a consent that has is waiting to be accepted
-        URI clientCallbackUri = URI.create("http://mock-uri");
         UUID consentId = UUID.randomUUID();
         when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 

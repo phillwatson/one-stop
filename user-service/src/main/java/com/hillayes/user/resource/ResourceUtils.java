@@ -1,7 +1,7 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.PageLinks;
-import org.springframework.data.domain.Page;
 
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
@@ -40,12 +40,12 @@ public class ResourceUtils {
      */
     public static PageLinks buildPageLinks(UriInfo uriInfo, Page<?> page,
                                            Function<UriBuilder, UriBuilder> uriDecorator) {
-        int pageNo = page.getNumber();
+        int pageNo = page.getPageIndex();
         int pageCount = page.getTotalPages();
 
         // construct UriBuilder and pass it to the decorator for any additional query params
         UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder())
-            .queryParam("page-size", page.getSize());
+            .queryParam("page-size", page.getPageSize());
 
         PageLinks result = new PageLinks()
             .first(uriBuilder.replaceQueryParam("page", 0).build())

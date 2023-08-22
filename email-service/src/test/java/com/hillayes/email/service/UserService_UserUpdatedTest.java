@@ -55,7 +55,7 @@ public class UserService_UserUpdatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
         // take snapshot as this user will be updated
         SendEmailService.Recipient originalRecipient = new SendEmailService.Recipient(existingUser);
 
@@ -127,7 +127,7 @@ public class UserService_UserUpdatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
         // take snapshot as this user will be updated
         SendEmailService.Recipient originalRecipient = new SendEmailService.Recipient(existingUser);
 
@@ -198,7 +198,7 @@ public class UserService_UserUpdatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
 
         // and: a UserUpdated event to update that user
         User user = User.builder()
@@ -237,7 +237,7 @@ public class UserService_UserUpdatedTest {
     @Test
     public void testUserUpdated_UserNotFound() {
         // given: the user does not exist
-        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(any())).thenReturn(Optional.empty());
 
         // and: a UserUpdated event to update that user
         User user = User.builder()
@@ -283,7 +283,7 @@ public class UserService_UserUpdatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
 
         // and: a UserUpdated event to update that user - with older update date
         User user = User.builder()

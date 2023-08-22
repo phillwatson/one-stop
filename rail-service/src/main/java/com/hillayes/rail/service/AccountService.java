@@ -1,5 +1,6 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.UserConsent;
@@ -9,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,8 +30,8 @@ public class AccountService {
         log.info("Listing user's accounts [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         Page<Account> result = accountRepository.findByUserId(userId, page, pageSize);
 
-        log.debug("Listing account's transactions [accountId: {}, page: {}, pageSize: {}, size: {}]",
-            userId, page, pageSize, result.getNumberOfElements());
+        log.debug("Listing account's transactions [accountId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+            userId, page, pageSize, result.getContentSize(), result.getTotalCount());
         return result;
     }
 

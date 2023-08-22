@@ -1,6 +1,5 @@
 package com.hillayes.rail.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import jakarta.persistence.*;

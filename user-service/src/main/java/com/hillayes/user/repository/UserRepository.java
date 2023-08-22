@@ -1,11 +1,11 @@
 package com.hillayes.user.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.user.domain.User;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.springframework.data.domain.Page;
 
 import java.util.Optional;
 import java.util.UUID;

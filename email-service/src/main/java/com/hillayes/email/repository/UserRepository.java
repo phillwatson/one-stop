@@ -1,11 +1,11 @@
 package com.hillayes.email.repository;
 
+import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.email.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 
-import jakarta.inject.Singleton;
 import java.util.UUID;
 
-@Singleton
-public interface UserRepository extends JpaRepository<User, UUID> {
+@ApplicationScoped
+public class UserRepository extends RepositoryBase<User, UUID> {
 }

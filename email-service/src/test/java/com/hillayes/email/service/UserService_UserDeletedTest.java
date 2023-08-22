@@ -42,7 +42,7 @@ public class UserService_UserDeletedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
 
         // when: the service is called
         fixture.deleteUser(existingUser.getId());
@@ -67,7 +67,7 @@ public class UserService_UserDeletedTest {
     @Test
     public void testUserDeleted_UserNotFound() {
         // given: NO existing user record
-        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(any())).thenReturn(Optional.empty());
 
         // when: the service is called
         fixture.deleteUser(UUID.randomUUID());

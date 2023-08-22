@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.AccountSummaryResponse;
 import com.hillayes.onestop.api.PaginatedUserConsents;
@@ -13,7 +14,6 @@ import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.UserConsentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -45,10 +45,10 @@ public class UserConsentResource {
         Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
 
         PaginatedUserConsents response = new PaginatedUserConsents()
-            .page(consentsPage.getNumber())
-            .pageSize(consentsPage.getSize())
-            .count(consentsPage.getNumberOfElements())
-            .total(consentsPage.getTotalElements())
+            .page(consentsPage.getPageIndex())
+            .pageSize(consentsPage.getPageSize())
+            .count(consentsPage.getContentSize())
+            .total(consentsPage.getTotalCount())
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
 

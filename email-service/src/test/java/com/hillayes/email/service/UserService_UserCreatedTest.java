@@ -87,7 +87,7 @@ public class UserService_UserCreatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
 
         // and: a UserCreated event
         User user = User.builder()
@@ -124,7 +124,7 @@ public class UserService_UserCreatedTest {
             .preferredName(randomAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
-        when(userRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
 
         // and: a UserCreated event
         User user = User.builder()

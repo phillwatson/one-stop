@@ -1,7 +1,7 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.PageLinks;
-import org.springframework.data.domain.Page;
 
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
@@ -53,7 +53,7 @@ public final class ResourceUtils {
      */
     public static PageLinks buildPageLinks(UriInfo uriInfo, Page<?> page,
                                            Function<UriBuilder, UriBuilder> uriDecorator) {
-        return buildPageLinks(uriInfo, page.getNumber(), page.getSize(), page.getTotalPages(), uriDecorator);
+        return buildPageLinks(uriInfo, page.getPageIndex(), page.getPageSize(), page.getTotalPages(), uriDecorator);
     }
 
     /**

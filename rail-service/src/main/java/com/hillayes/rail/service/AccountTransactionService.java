@@ -1,5 +1,6 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import io.quarkus.panache.common.Sort;
@@ -7,7 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,7 +46,7 @@ public class AccountTransactionService {
             : accountTransactionRepository.findByUserId(userId, sort, page, pageSize);
 
         log.debug("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, size: {}]",
-            userId, accountId, page, pageSize, result.getNumberOfElements());
+            userId, accountId, page, pageSize, result.getContentSize());
         return result;
     }
 

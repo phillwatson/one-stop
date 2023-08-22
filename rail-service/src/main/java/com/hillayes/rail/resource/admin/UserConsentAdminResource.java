@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource.admin;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Account;
@@ -14,7 +15,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import java.util.UUID;
 
@@ -39,10 +39,10 @@ public class UserConsentAdminResource {
         Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
 
         PaginatedUserConsentsAdmin response = new PaginatedUserConsentsAdmin()
-            .page(consentsPage.getNumber())
-            .pageSize(consentsPage.getSize())
-            .count(consentsPage.getNumberOfElements())
-            .total(consentsPage.getTotalElements())
+            .page(consentsPage.getPageIndex())
+            .pageSize(consentsPage.getPageSize())
+            .count(consentsPage.getContentSize())
+            .total(consentsPage.getTotalCount())
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
 

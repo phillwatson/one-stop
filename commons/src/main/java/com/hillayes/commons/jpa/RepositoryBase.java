@@ -3,9 +3,6 @@ package com.hillayes.commons.jpa;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +54,6 @@ public class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity,
             ? ((long)pageSize * pageNumber) + list.size()
             : query.count();
 
-        return new PageImpl<>(list, PageRequest.of(pageNumber, pageSize), count);
+        return new Page<>(list, count, pageNumber, pageSize);
     }
 }

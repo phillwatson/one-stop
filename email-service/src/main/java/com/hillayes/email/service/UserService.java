@@ -22,7 +22,7 @@ public class UserService {
 
     public void createUser(User user) {
         log.info("Created user [id: {}, username: {}]", user.getId(), user.getUsername());
-        User existingUser = userRepository.findById(user.getId())
+        User existingUser = userRepository.findByIdOptional(user.getId())
             .orElse(null);
 
         // if user already exists
@@ -48,7 +48,7 @@ public class UserService {
 
     public Optional<User> getUser(UUID userId) {
         log.info("Get user [id: {}]", userId);
-        Optional<User> result = userRepository.findById(userId);
+        Optional<User> result = userRepository.findByIdOptional(userId);
         if (result.isEmpty()) {
             log.warn("User not found [id: {}]", userId);
         }
@@ -57,7 +57,7 @@ public class UserService {
 
     public User updateUser(User user) {
         log.info("Updated user [id: {}, username: {}]", user.getId(), user.getUsername());
-        User existingUser = userRepository.findById(user.getId())
+        User existingUser = userRepository.findByIdOptional(user.getId())
             .orElse(null);
 
         if (existingUser != null) {
@@ -106,7 +106,7 @@ public class UserService {
 
     public void deleteUser(UUID userId) {
         log.info("Deleted user [id: {}]", userId);
-        userRepository.findById(userId).ifPresent(user -> {
+        userRepository.findByIdOptional(userId).ifPresent(user -> {
             userRepository.delete(user);
 
             // send email to notify user of deletion

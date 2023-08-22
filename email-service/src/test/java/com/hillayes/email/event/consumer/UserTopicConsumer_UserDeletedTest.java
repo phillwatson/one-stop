@@ -63,7 +63,7 @@ public class UserTopicConsumer_UserDeletedTest {
     @Test
     public void testUserDeleted_UserNotFound() {
         // given: NO existing user record
-        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        when(userRepository.findByIdOptional(any())).thenReturn(Optional.empty());
 
         // and: a UserDeleted event to update that user
         UserDeleted event = UserDeleted.builder()

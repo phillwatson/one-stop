@@ -8,11 +8,12 @@ import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import com.hillayes.commons.jpa.Page;
+
 import java.util.UUID;
 
 @Path("/api/v1/rails/accounts")
@@ -35,10 +36,10 @@ public class AccountResource {
         Page<Account> accountsPage = accountService.getAccounts(userId, page, pageSize);
 
         PaginatedAccounts response = new PaginatedAccounts()
-            .page(accountsPage.getNumber())
-            .pageSize(accountsPage.getSize())
-            .count(accountsPage.getNumberOfElements())
-            .total(accountsPage.getTotalElements())
+            .page(accountsPage.getPageIndex())
+            .pageSize(accountsPage.getPageSize())
+            .count(accountsPage.getContentSize())
+            .total(accountsPage.getTotalCount())
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, accountsPage));
 

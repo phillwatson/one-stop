@@ -2,6 +2,7 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.openid.AuthProvider;
@@ -21,8 +22,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.io.IOException;
 import java.net.URI;
@@ -325,14 +324,14 @@ public class UserServiceTest {
         List<User> users = mockUsers(20);
 
         // and: the user repository returns the users
-        Page<User> page = new PageImpl<>(users);
+        Page<User> page = Page.of(users);
         when(userRepository.findAll(any(Sort.class), anyInt(), anyInt())).thenReturn(page);
 
         // when: the service is called
         Page<User> result = fixture.listUsers(1, 20);
 
         // then: the users are returned
-        assertEquals(users.size(), result.getNumberOfElements());
+        assertEquals(users.size(), result.getContentSize());
     }
 
     @Test

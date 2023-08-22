@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -9,7 +10,6 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -56,7 +56,7 @@ public class AccountTransactionRepositoryTest {
         Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), sort, 0, 1);
 
         // then: the result contains only the most recent transaction
-        assertEquals(1, result.getSize());
+        assertEquals(1, result.getContentSize());
         assertEquals(transactions.get(transactions.size() - 1), result.getContent().get(0));
     }
 
