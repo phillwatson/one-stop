@@ -10,6 +10,6 @@ public interface NamedTask {
         return this.getClass().getSimpleName();
     }
 
-    default public void taskScheduled(SchedulerFactory scheduler) {
+    default public void taskInitialised(SchedulerFactory scheduler) {
     }
 }

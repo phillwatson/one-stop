@@ -19,8 +19,8 @@ public abstract class AbstractNamedTask implements NamedTask {
         return name;
     }
 
-    public void taskScheduled(SchedulerFactory scheduler) {
-        log.info("{} taskScheduled()", getName());
+    public void taskInitialised(SchedulerFactory scheduler) {
+        log.info("{} taskInitialised()", getName());
         this.scheduler = scheduler;
     }
 }

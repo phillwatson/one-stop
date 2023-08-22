@@ -67,7 +67,7 @@ public class SchedulerFactory {
         scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
         if (scheduler != null) {
             // inform all tasks that they have been started
-            namedTasks.forEach(task -> task.taskScheduled(this));
+            namedTasks.forEach(task -> task.taskInitialised(this));
         }
     }
 

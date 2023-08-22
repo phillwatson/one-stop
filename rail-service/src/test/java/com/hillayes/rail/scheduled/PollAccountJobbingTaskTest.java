@@ -85,7 +85,7 @@ public class PollAccountJobbingTaskTest {
     @Test
     public void testQueueJob() {
         // given: the jobbing task has been configured
-        fixture.taskScheduled(scheduler);
+        fixture.taskInitialised(scheduler);
 
         // when: an account ID is queued for processing
         UUID consentId = UUID.randomUUID();

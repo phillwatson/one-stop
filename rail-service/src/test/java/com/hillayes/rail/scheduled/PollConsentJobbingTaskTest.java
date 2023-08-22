@@ -53,7 +53,7 @@ public class PollConsentJobbingTaskTest {
     @Test
     public void testQueueJob() {
         // given: the jobbing task has been configured
-        fixture.taskScheduled(scheduler);
+        fixture.taskInitialised(scheduler);
 
         // when: a user-consent ID is queued for processing
         UUID consentId = UUID.randomUUID();

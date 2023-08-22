@@ -20,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +49,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @Getter
     @RegisterForReflection
     public static class Payload {
         UUID consentId;

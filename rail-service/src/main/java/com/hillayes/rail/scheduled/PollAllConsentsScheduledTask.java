@@ -28,7 +28,7 @@ public class PollAllConsentsScheduledTask implements NamedScheduledTask {
     }
 
     @Override
-    public void taskScheduled(SchedulerFactory scheduler) {
+    public void taskInitialised(SchedulerFactory scheduler) {
         log.info("PollAllConsentsScheduledTask.taskScheduled()");
     }
 
