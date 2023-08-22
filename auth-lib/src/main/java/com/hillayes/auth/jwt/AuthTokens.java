@@ -86,7 +86,7 @@ public class AuthTokens {
      * @param groups the user groups (roles) to which authenticated user belongs.
      * @return the array of cookies containing auth tokens.
      */
-    private NewCookie[] buildCookies(UUID userPrincipalName, Set<String> groups) {
+    private NewCookie[] buildCookies(Object userPrincipalName, Set<String> groups) {
         log.info("Building auth tokens [issuer: {}, userId: {}]", issuer, userPrincipalName);
 
         String xsrfToken = xsrfTokens.generateToken();
@@ -149,7 +149,7 @@ public class AuthTokens {
      * @return the given response builder with the cookies added.
      */
     public Response authResponse(Response.ResponseBuilder responseBuilder,
-                                 UUID userPrincipalName, Set<String> groups) {
+                                 Object userPrincipalName, Set<String> groups) {
         for (NewCookie cookie : buildCookies(userPrincipalName, groups)) {
             responseBuilder.header("Set-Cookie", cookie + ";SameSite=Strict");
         }
