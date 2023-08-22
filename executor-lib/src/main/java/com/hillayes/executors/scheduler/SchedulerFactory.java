@@ -11,13 +11,13 @@ import com.hillayes.executors.scheduler.config.FrequencyConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.config.RetryConfig;
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
-import com.hillayes.executors.scheduler.tasks.*;
-import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.NoArgsConstructor;
+import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
+import com.hillayes.executors.scheduler.tasks.NamedTask;
+import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -88,7 +88,7 @@ public class SchedulerFactory {
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(String jobbingTaskName, Serializable payload) {
+    public String addJob(String jobbingTaskName, Object payload) {
         Task<JobbingTaskData> task = jobbingTasks.get(jobbingTaskName);
         if (task == null) {
             throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTaskName + "\"");
@@ -111,7 +111,7 @@ public class SchedulerFactory {
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(NamedJobbingTask<?> jobbingTask, Serializable payload) {
+    public String addJob(NamedJobbingTask<?> jobbingTask, Object payload) {
         return addJob(jobbingTask.getName(), payload);
     }
 
@@ -195,13 +195,13 @@ public class SchedulerFactory {
                 // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
                     // construct the context for the task to run in - including the job payload
-                    TaskContext<Serializable> taskContext = new TaskContext<>(
-                        inst.getData().payload,
+                    TaskContext<Object> taskContext = new TaskContext<>(
+                        inst.getData().getPayloadContent(),
                         ctx.getExecution().consecutiveFailures,
                         inst.getData().repeatCount);
 
                     // call the task using the correlation ID used when job was queued
-                    final NamedJobbingTask<Serializable> function = (NamedJobbingTask<Serializable>) task;
+                    final NamedJobbingTask<Object> function = (NamedJobbingTask<Object>) task;
                     TaskConclusion conclusion = Correlation.call(inst.getData().correlationId, function, taskContext);
 
                     // if task has completed
@@ -238,7 +238,7 @@ public class SchedulerFactory {
                             try {
                                 log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                                 Correlation.run(inst.getData().correlationId, () ->
-                                    addJob(onMaxRetryTaskName, inst.getData().payload)
+                                    addJob(onMaxRetryTaskName, inst.getData().getPayloadContent())
                                 );
                             } catch (Exception e) {
                                 log.error("Failed to queue on-max-retry task", e);
@@ -280,6 +280,7 @@ public class SchedulerFactory {
 
         Scheduler result = Scheduler.create(dataSource, new ArrayList<>(jobbingTasks))
             .tableName(tableName)
+            .serializer(new TaskDataSerializer())
             .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
             .pollingInterval(configuration.pollingInterval().orElse(SchedulerConfig.DEFAULT_POLLING_INTERVAL))
             .heartbeatInterval(configuration.heartbeatInterval().orElse(SchedulerConfig.DEFAULT_HEARTBEAT_INTERVAL))
@@ -390,25 +391,6 @@ public class SchedulerFactory {
     }
 
     /**
-     * A data-class that is persisted with to NamedJobbingTask's queue. It records
-     * the payload to be processed by the NamedJobbingTask, and the correlation ID
-     * that was active at the time the job was queued. This allows the correlation
-     * ID to be re-activated when the task is processed.
-     */
-    @NoArgsConstructor
-    @RegisterForReflection
-    private static class JobbingTaskData implements Serializable {
-        String correlationId;
-        Serializable payload;
-        int repeatCount;
-
-        JobbingTaskData(String correlationId, Serializable payload) {
-            this.correlationId = correlationId;
-            this.payload = payload;
-        }
-    }
-
-    /**
      * Augments a given FailureHandler to add the queuing of another Jobbing Task
      * when the maximum number of retries is exceeded.
      * @param <T>
@@ -439,7 +421,7 @@ public class SchedulerFactory {
                         log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                         JobbingTaskData taskData = (JobbingTaskData) executionComplete.getExecution().taskInstance.getData();
                         Correlation.run(taskData.correlationId, () ->
-                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.payload)
+                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.getPayloadContent())
                         );
                     } catch (Exception e) {
                         log.error("Failed to queue on-max-retry task", e);

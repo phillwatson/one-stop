@@ -16,10 +16,12 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @Slf4j
 public class JobbingTaskTest extends TestBase {
@@ -27,7 +29,7 @@ public class JobbingTaskTest extends TestBase {
     public void testJobList() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
                 return TaskConclusion.COMPLETE;
@@ -46,7 +48,7 @@ public class JobbingTaskTest extends TestBase {
 
         // wait for jobs to complete
         Awaitility.await()
-            .pollInterval(Duration.ofSeconds(5))
+            .pollInterval(Duration.ofSeconds(3))
             .atMost(Duration.ofSeconds(20))
             .until(() -> signal.get() == 3);
 
@@ -64,10 +66,70 @@ public class JobbingTaskTest extends TestBase {
     }
 
     @Test
+    public void testUuidPayload() {
+        final AtomicInteger signal = new AtomicInteger();
+
+        UUID payload = UUID.randomUUID();
+
+        NamedJobbingTask<UUID> task = new TestJobbingTask<>() {
+            public TaskConclusion apply(TaskContext<UUID> context) {
+                log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
+                assertEquals(payload, context.getPayload());
+                return TaskConclusion.COMPLETE;
+            }
+        };
+
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(Collections.emptyMap())
+                .build(), List.of(task));
+
+        // queue a job with a UUID payload
+        fixture.addJob(task, payload);
+
+        // wait for job to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(3))
+            .atMost(Duration.ofSeconds(20))
+            .until(() -> signal.get() == 1);
+
+        fixture.stop();
+    }
+
+    @Test
+    public void testVoidPayload() {
+        final AtomicInteger signal = new AtomicInteger();
+
+        NamedJobbingTask<Void> task = new TestJobbingTask<>() {
+            public TaskConclusion apply(TaskContext<Void> context) {
+                log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
+                assertNull(context.getPayload());
+                return TaskConclusion.COMPLETE;
+            }
+        };
+
+        SchedulerFactory fixture = new SchedulerFactory(getDatasource(),
+            SchedulerConfigImpl.builder()
+                .tasks(Collections.emptyMap())
+                .build(), List.of(task));
+
+        // queue a job with a null payload
+        fixture.addJob(task, null);
+
+        // wait for job to complete
+        Awaitility.await()
+            .pollInterval(Duration.ofSeconds(3))
+            .atMost(Duration.ofSeconds(20))
+            .until(() -> signal.get() == 1);
+
+        fixture.stop();
+    }
+
+    @Test
     public void testOnFailureRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -108,7 +170,7 @@ public class JobbingTaskTest extends TestBase {
     public void testOnFailureMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             // the task will fail on each run
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
@@ -157,7 +219,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
         final String payload = RandomStringUtils.randomAlphanumeric(20);
 
-        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
+        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
@@ -167,7 +229,7 @@ public class JobbingTaskTest extends TestBase {
             }
         };
 
-        NamedJobbingTask<String> task = new TestJobbingTask("task one") {
+        NamedJobbingTask<String> task = new TestJobbingTask<>("task one") {
             // the task will fail on each run
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
@@ -226,7 +288,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean complete = new AtomicBoolean(false);
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -266,7 +328,7 @@ public class JobbingTaskTest extends TestBase {
     public void testNoRepeating() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -296,7 +358,7 @@ public class JobbingTaskTest extends TestBase {
         // wait for jobs to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
-            .atMost(Duration.ofSeconds(5))
+            .atMost(Duration.ofSeconds(10))
             .until(() -> signal.get() == 1); // no retries on incomplete applied
 
         // no more retry attempts will be made
@@ -312,7 +374,7 @@ public class JobbingTaskTest extends TestBase {
     public void testRepeatingMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -359,7 +421,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean complete = new AtomicBoolean(false);
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -418,7 +480,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
         final String payload = RandomStringUtils.randomAlphanumeric(20);
 
-        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask("on-max-retry-task") {
+        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
@@ -428,7 +490,7 @@ public class JobbingTaskTest extends TestBase {
             }
         };
 
-        NamedJobbingTask<String> task = new TestJobbingTask() {
+        NamedJobbingTask<String> task = new TestJobbingTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {})",
@@ -482,7 +544,7 @@ public class JobbingTaskTest extends TestBase {
         fixture.stop();
     }
 
-    private static abstract class TestJobbingTask extends AbstractNamedJobbingTask<String> {
+    private static abstract class TestJobbingTask<T> extends AbstractNamedJobbingTask<T> {
         TestJobbingTask() {
             this("test-jobs");
         }

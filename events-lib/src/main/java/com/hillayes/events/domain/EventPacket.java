@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
-import com.hillayes.events.serializers.MapperFactory;
 import lombok.*;
 
 import java.time.Instant;
@@ -37,7 +37,7 @@ public class EventPacket {
      */
     private String correlationId;
 
-     /**
+    /**
      * The number of times the event delivery has been retried, not including the initial
      * delivery. A maximum number of retries can be applied, after which the event is
      * placed on the message-hospital topic.

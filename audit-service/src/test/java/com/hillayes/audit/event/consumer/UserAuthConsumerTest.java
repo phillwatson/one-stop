@@ -1,12 +1,10 @@
 package com.hillayes.audit.event.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.events.consumer.ConsumerFactory;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.UserLogin;
-import com.hillayes.events.serializers.MapperFactory;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 

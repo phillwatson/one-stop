@@ -2,10 +2,9 @@ package com.hillayes.executors.scheduler.tasks;
 
 import com.hillayes.executors.scheduler.TaskContext;
 
-import java.io.Serializable;
 import java.util.function.Function;
 
-public interface NamedJobbingTask<T extends Serializable>
+public interface NamedJobbingTask<T>
     extends Function<TaskContext<T>, TaskConclusion>, NamedTask {
 
     /**

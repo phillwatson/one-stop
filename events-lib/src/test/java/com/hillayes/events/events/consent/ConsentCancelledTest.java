@@ -1,7 +1,7 @@
 package com.hillayes.events.events.consent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.events.serializers.MapperFactory;
+import com.hillayes.commons.json.MapperFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

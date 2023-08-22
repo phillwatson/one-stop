@@ -49,7 +49,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     @NoArgsConstructor
     @AllArgsConstructor
     @RegisterForReflection
-    public static class Payload implements Serializable {
+    public static class Payload {
         UUID consentId;
         String railAccountId;
     }

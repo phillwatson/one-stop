@@ -1,6 +1,7 @@
 package com.hillayes.events.serializers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.domain.EventPacket;
 import org.apache.kafka.common.serialization.Serializer;
 
@@ -8,10 +9,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class EventPacketSerializer implements Serializer<EventPacket> {
-    private final ObjectMapper objectMapper;
+    private final ObjectWriter objectWriter;
 
     public EventPacketSerializer() {
-        this.objectMapper = MapperFactory.defaultMapper();
+        this.objectWriter = MapperFactory.writerFor(EventPacket.class);
     }
 
     @Override
@@ -21,7 +22,7 @@ public class EventPacketSerializer implements Serializer<EventPacket> {
         }
 
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            objectMapper.writeValue(output, data);
+            objectWriter.writeValue(output, data);
             return output.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);

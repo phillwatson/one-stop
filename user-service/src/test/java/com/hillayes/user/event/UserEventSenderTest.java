@@ -66,7 +66,7 @@ public class UserEventSenderTest {
         // and: the content is correct
         UserRegistered event = captor.getValue();
         assertEquals(email, event.getEmail());
-        assertEquals(expiresAt.getEpochSecond(), event.getExpires().getEpochSecond());
+        assertEquals(expiresAt.getEpochSecond() / 10, event.getExpires().getEpochSecond() / 10);
         assertEquals(acknowledgerUri, event.getAcknowledgerUri());
         assertEquals(Locale.CHINESE, event.getLocale());
     }

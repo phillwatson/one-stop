@@ -2,6 +2,7 @@ package com.hillayes.rail.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -23,8 +24,7 @@ public class TestData {
     /**
      * A shared object mapper for when a test needs to serialize/deserialize objects.
      */
-    private final static ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    private final static ObjectMapper objectMapper = MapperFactory.defaultMapper();
 
     public static String toJson(Object object) {
         try {
