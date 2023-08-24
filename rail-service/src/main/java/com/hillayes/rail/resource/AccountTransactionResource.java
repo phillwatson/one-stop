@@ -6,7 +6,6 @@ import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,6 @@ import java.util.UUID;
 @Slf4j
 public class AccountTransactionResource {
     private final AccountTransactionService accountTransactionService;
-    private final AccountService accountService;
 
     @GET
     public Response getTransactions(@Context SecurityContext ctx,
@@ -38,8 +36,6 @@ public class AccountTransactionResource {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Listing transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
-
-        verifyAccountHolder(userId, accountId);
 
         Page<AccountTransaction> transactionsPage =
             accountTransactionService.getTransactions(userId, accountId, page, pageSize);
@@ -72,8 +68,6 @@ public class AccountTransactionResource {
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
 
-        verifyAccountHolder(userId, accountId);
-
         List<AccountTransaction> transactions =
             accountTransactionService.getTransactions(userId, accountId, fromDate, toDate);
 
@@ -104,20 +98,5 @@ public class AccountTransactionResource {
             .description(transaction.getRemittanceInformationUnstructured() == null
                 ? transaction.getDebtorName()
                 : transaction.getRemittanceInformationUnstructured());
-    }
-
-    /**
-     * Verifies that the identified user owns the identified account. If the account
-     * ID is null, no verification is performed.
-     * @param userId the user attempting to access the account.
-     * @param accountId tehe optional account identifier.
-     */
-    private void verifyAccountHolder(UUID userId, UUID accountId) {
-        if (accountId != null) {
-            // verify that the account belongs to the user
-            accountService.getAccount(accountId)
-                .filter(account -> userId.equals(account.getUserId()) )
-                .orElseThrow(() -> new NotFoundException("Account", accountId));
-        }
     }
 }

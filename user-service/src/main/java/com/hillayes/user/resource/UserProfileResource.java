@@ -89,16 +89,12 @@ public class UserProfileResource {
         UUID id = ResourceUtils.getUserId(ctx);
         log.info("Update user password [id: {}]", id);
 
-        if (Strings.isBlank(request.getOldPassword())) {
-            throw new MissingParameterException("oldPassword");
-        }
+        char[] currentPassword = Strings.isBlank(request.getOldPassword())
+            ? null : request.getOldPassword().toCharArray();
 
-        if (Strings.isBlank(request.getNewPassword())) {
-            throw new MissingParameterException("newPassword");
-        }
+        char[] newPassword = Strings.isBlank(request.getNewPassword())
+            ? null : request.getNewPassword().toCharArray();
 
-        char[] currentPassword = request.getOldPassword().toCharArray();
-        char[] newPassword = request.getNewPassword().toCharArray();
         return userService.updatePassword(id, currentPassword, newPassword)
             .map(user -> Response.noContent().build())
             .orElseThrow(() -> new NotAuthorizedException("username/password"));

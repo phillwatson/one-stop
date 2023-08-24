@@ -1,6 +1,7 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import io.quarkus.panache.common.Sort;
@@ -21,6 +22,9 @@ import java.util.UUID;
 @Slf4j
 public class AccountTransactionService {
     @Inject
+    AccountService accountService;
+
+    @Inject
     AccountTransactionRepository accountTransactionRepository;
 
     /**
@@ -39,6 +43,8 @@ public class AccountTransactionService {
                                                     int pageSize) {
         log.info("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
+
+        verifyAccountHolder(userId, accountId);
 
         Sort sort = Sort.by("bookingDateTime").descending();
         Page<AccountTransaction> result = (accountId != null)
@@ -67,6 +73,8 @@ public class AccountTransactionService {
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
 
+        verifyAccountHolder(userId, accountId);
+
         // convert dates to instant
         Instant from = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         Instant to = toDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
@@ -83,5 +91,20 @@ public class AccountTransactionService {
     public Optional<AccountTransaction> getTransaction(UUID transactionId) {
         log.info("Get transactions [transactionId: {}]", transactionId);
         return accountTransactionRepository.findByIdOptional(transactionId);
+    }
+
+    /**
+     * Verifies that the identified user owns the identified account. If the account
+     * ID is null, no verification is performed.
+     * @param userId the user attempting to access the account.
+     * @param accountId the optional account identifier.
+     */
+    private void verifyAccountHolder(UUID userId, UUID accountId) {
+        if (accountId != null) {
+            // verify that the account belongs to the user
+            accountService.getAccount(accountId)
+                .filter(account -> userId.equals(account.getUserId()) )
+                .orElseThrow(() -> new NotFoundException("Account", accountId));
+        }
     }
 }

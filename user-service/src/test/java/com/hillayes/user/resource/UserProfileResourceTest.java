@@ -318,6 +318,10 @@ public class UserProfileResourceTest extends TestBase {
         PasswordUpdateRequest request = new PasswordUpdateRequest()
             .newPassword(randomAlphanumeric(20));
 
+        // and: the request will be passed to the service
+        when(userService.updatePassword(userId, null, request.getNewPassword().toCharArray()))
+            .thenCallRealMethod();
+
         given()
             .contentType(JSON)
             .body(request)
@@ -326,8 +330,8 @@ public class UserProfileResourceTest extends TestBase {
             .then()
             .statusCode(400);
 
-        // and: no update is performed
-        verify(userService, never()).updatePassword(any(), any(), any());
+        // and: the service is called to update password
+        verify(userService).updatePassword(userId, null, request.getNewPassword().toCharArray());
     }
 
     @Test
@@ -340,6 +344,10 @@ public class UserProfileResourceTest extends TestBase {
         PasswordUpdateRequest request = new PasswordUpdateRequest()
             .oldPassword(randomAlphanumeric(20));
 
+        // and: the request will be passed to the service
+        when(userService.updatePassword(userId, request.getOldPassword().toCharArray(), null))
+            .thenCallRealMethod();
+
         given()
             .contentType(JSON)
             .body(request)
@@ -348,8 +356,8 @@ public class UserProfileResourceTest extends TestBase {
             .then()
             .statusCode(400);
 
-        // and: no update is performed
-        verify(userService, never()).updatePassword(any(), any(), any());
+        // and: the service is called to update password
+        verify(userService).updatePassword(userId, request.getOldPassword().toCharArray(), null);
     }
 
     private void verifyError(ServiceError response, UUID userId) {

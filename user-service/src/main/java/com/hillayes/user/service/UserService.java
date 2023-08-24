@@ -167,6 +167,14 @@ public class UserService {
                                          char[] newPassword) {
         log.info("Updating password [userId: {}]", userId);
 
+        if ((oldPassword == null) || (oldPassword.length == 0)) {
+            throw new MissingParameterException("oldPassword");
+        }
+
+        if ((newPassword == null) || (newPassword.length == 0)) {
+            throw new MissingParameterException("newPassword");
+        }
+
         return userRepository.findByIdOptional(userId)
             .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
             .map(user -> {

@@ -131,11 +131,6 @@ public class AuthResource {
         JsonWebToken refreshToken = authTokens.getRefreshToken(headers.getCookies())
             .orElse(null);
 
-        if (refreshToken == null) {
-            log.info("No refresh token cookie found.");
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-
         User user = authService.refresh(refreshToken);
         return authTokens.authResponse(Response.noContent(), user.getId(), user.getRoles());
     }

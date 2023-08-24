@@ -443,6 +443,62 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testUpdatePassword_MissingOldPassword() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        user.setPasswordHash("oldhash");
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
+
+        // and: a new password
+        char[] newPassword = "password".toCharArray();
+
+        // when: the service is called without an old password
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.updatePassword(user.getId(), null, newPassword)
+        );
+
+        // then: the user is NOT returned
+        assertEquals("oldPassword", exception.getParameter("parameter-name"));
+
+        // and: the password is NOT hashed
+        verify(passwordCrypto, never()).getHash(any());
+
+        // and: the user is NOT saved
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
+    public void testUpdatePassword_MissingNewPassword() {
+        // given: a user
+        User user = mockUser(UUID.randomUUID());
+        user.setPasswordHash("oldhash");
+        when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
+
+        // and: an old password
+        char[] oldPassword = "password".toCharArray();
+
+        // when: the service is called without a new password
+        MissingParameterException exception = assertThrows(MissingParameterException.class, () ->
+            fixture.updatePassword(user.getId(), oldPassword, null)
+        );
+
+        // then: the user is NOT returned
+        assertEquals("newPassword", exception.getParameter("parameter-name"));
+
+        // and: the password is NOT hashed
+        verify(passwordCrypto, never()).getHash(any());
+
+        // and: the user is NOT saved
+        verify(userRepository, never()).save(any());
+
+        // and: an event is NOT sent
+        verify(userEventSender, never()).sendUserUpdated(any());
+    }
+
+    @Test
     public void testUpdateUser() {
         // given: a user
         User user = mockUser(UUID.randomUUID());

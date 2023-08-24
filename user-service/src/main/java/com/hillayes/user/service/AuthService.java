@@ -7,6 +7,7 @@ import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -115,13 +116,18 @@ public class AuthService {
     public User refresh(JsonWebToken jsonWebToken) {
         log.info("Auth refresh tokens initiated");
 
+        if (jsonWebToken == null) {
+            log.info("No refresh token cookie found.");
+            throw new NotAuthorizedException("JWT");
+        }
+
         UUID userId = UUID.fromString(jsonWebToken.getName());
         User user = userRepository.findByIdOptional(userId)
             .filter(u -> !u.isBlocked())
             .orElseThrow(() -> {
                 log.info("User name failed verification [userId: {}]", userId);
                 userEventSender.sendLoginFailed(userId.toString(), "User not found.");
-                return new NotAuthorizedException("username/password");
+                return new NotAuthorizedException("JWT");
             });
 
         log.debug("User tokens refreshed [userId: {}]", user.getId());
