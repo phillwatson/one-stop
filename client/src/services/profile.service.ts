@@ -1,11 +1,17 @@
 import http from './http-common';
-import UserProfile from '../model/user-profile.model';
+import UserProfile, { UserAuthProvider, UserAuthProvidersResponse } from '../model/user-profile.model';
 
 class ProfileService {
   get(): Promise<UserProfile> {
     console.log('Retrieving user-profile');
     return http.get<UserProfile>('/profiles')
       .then(response => response.data);
+  }
+
+  getAuthProviders(): Promise<Array<UserAuthProvider>> {
+    console.log('Retrieving user auth-providers');
+    return http.get<UserAuthProvidersResponse>('/profiles/authproviders')
+      .then(response => response.data.authProviders);
   }
 
   update(profile: UserProfile): Promise<UserProfile> {
