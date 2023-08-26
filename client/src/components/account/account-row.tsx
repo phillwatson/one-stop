@@ -1,4 +1,6 @@
 import { PropsWithChildren, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Menu from '@mui/material/Menu';
@@ -22,6 +24,8 @@ interface Props extends PropsWithChildren {
 }
 
 export default function AccountList(props: Props) {
+  const navigation = useNavigate();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -59,12 +63,13 @@ export default function AccountList(props: Props) {
     console.log("Export account: " + props.account.id);
   }
 
-  function showAccount() {
+  function showAccount(accountId: string) {
     closeMenu();
-    console.log("Show account: " + props.account.id);
+    console.log("Show account: " + accountId);
+    navigation(`/accounts/${accountId}/transactions`);
   }
 
-  function AccountMenu() {
+  function AccountMenu(props: { accountId: string }) {
     return(
         <Menu
           id="account-menu" open={menuOpen} onClose={closeMenu}
@@ -72,7 +77,7 @@ export default function AccountList(props: Props) {
           anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
-          <MenuItem onClick={showAccount} sx={{ width: 190, maxWidth: '100%' }}>
+          <MenuItem onClick={() => showAccount(props.accountId)} sx={{ width: 190, maxWidth: '100%' }}>
             <ListItemIcon><ReadMoreIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Show More...</ListItemText>
           </MenuItem>
@@ -124,7 +129,7 @@ export default function AccountList(props: Props) {
         </TableCell>
       </TableRow>
 
-      <AccountMenu />
+      <AccountMenu accountId={props.account.id}/>
 
       <DeleteAccountDialog account={props.account} open={deleteDialogOpen}
          onCancel={removeAccountCancelled} onConfirm={removeAccountConfirmed}/>

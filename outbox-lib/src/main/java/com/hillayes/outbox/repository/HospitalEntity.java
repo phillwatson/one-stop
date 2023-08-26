@@ -79,9 +79,9 @@ public class HospitalEntity {
     @Column(name = "key", nullable = true)
     private String key;
 
-    @Column(name="payload_class")
+    @Column(name="payload_class", nullable = true)
     private String payloadClass;
 
-    @Column
+    @Column(nullable = true)
     private String payload;
 }

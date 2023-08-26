@@ -42,7 +42,7 @@ public class EventEntity {
             .scheduledFor(now)
             .topic(topic)
             .key(key == null ? null : key.toString())
-            .payloadClass(payloadObject.getClass().getName())
+            .payloadClass(payloadObject == null ? null : payloadObject.getClass().getName())
             .payload(EventPacket.serialize(payloadObject))
             .build();
     }
@@ -148,13 +148,13 @@ public class EventEntity {
      * identify the specific event type within the topic; and allow the payload to be
      * serialized.
      */
-    @Column(name = "payload_class")
+    @Column(name = "payload_class", nullable = true)
     private String payloadClass;
 
     /**
      * A representation of the event's payload as a JSON packet. The class named by
      * the payloadClass allows this payload to be serialized.
      */
-    @Column
+    @Column(nullable = true)
     private String payload;
 }

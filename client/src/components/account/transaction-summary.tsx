@@ -28,7 +28,7 @@ export default function TransactionSummaryList(props: Props) {
 
   useEffect(() => {
     if (transactions.length === 0) {
-      AccountService.getTransactions(props.accountId, 0, 15)
+      AccountService.getTransactions(props.accountId, 0, 10)
         .then(response => setTransactions(response.items))
         .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }))
     }

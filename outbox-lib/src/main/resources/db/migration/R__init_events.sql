@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.events (
   scheduled_for timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   topic varchar(256) NOT NULL,
   key varchar(256) NULL,
-  payload_class text NOT NULL,
-  payload text NOT NULL
+  payload_class text NULL,
+  payload text NULL
 );
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.message_hospital (
@@ -23,6 +23,6 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.message_hospital (
   cause text NOT NULL,
   topic varchar(256) NOT NULL,
   key varchar(256) NULL,
-  payload_class text NOT NULL,
-  payload text NOT NULL
+  payload_class text NULL,
+  payload text NULL
 );

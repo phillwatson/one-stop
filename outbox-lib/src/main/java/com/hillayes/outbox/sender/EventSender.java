@@ -30,7 +30,7 @@ public class EventSender {
      * @param event the event payload.
      * @param <T> the type of the event payload.
      */
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public <T> void send(Topic topic, T event) {
         send(topic, null, event);
     }
@@ -49,9 +49,9 @@ public class EventSender {
      * @param event the event payload.
      * @param <T> the type of the event payload.
      */
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public <K, T> void send(Topic topic, K key, T event) {
-        log.debug("Sending event [payload: {}]", event.getClass().getName());
+        log.debug("Sending event [topic: {}, payload: {}]", topic, event.getClass().getName());
         eventRepository.persist(EventEntity.forInitialDelivery(topic, key, event));
     }
 }

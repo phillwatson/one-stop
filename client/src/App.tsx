@@ -11,6 +11,7 @@ import NotificationProvider from "./contexts/notification-context";
 import UserProfileProvider from "./contexts/user-context";
 import NewUser from "./pages/new-user";
 import OnboardUser from "./pages/onboard-user";
+import Transactions from "./pages/transactions";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "accounts",
         element: <Accounts />
+      },
+      {
+        path: "accounts/:accountId/transactions",
+        element: <Transactions />
       },
       {
         path: "profile",
