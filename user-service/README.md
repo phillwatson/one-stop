@@ -76,7 +76,7 @@ and verify that its signature is correct. It then compares the value with that i
 the access token claims. When refreshing the tokens, the value is compared with that
 in the refresh token claims.
 
-The name of the XSRF cookie and header are, by default, ""XSRF-TOKEN"" and "X-XSRF-TOKEN",
+The name of the XSRF cookie and header are, by default, `"XSRF-TOKEN"` and `"X-XSRF-TOKEN"`,
 respectively. These names can be overridden using the config properties;
 `"one-stop.auth.xsrf.cookie"` and `"one-stop.auth.xsrf.header"`.
 
