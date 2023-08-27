@@ -32,6 +32,8 @@
         <module>email-service</module>
         <module>rail-service</module>
         <module>user-service</module>
+
+        <module>integration-tests</module>
     </modules>
 
     <properties>
