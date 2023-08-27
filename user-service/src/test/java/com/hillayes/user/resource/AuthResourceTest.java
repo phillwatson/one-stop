@@ -104,7 +104,7 @@ public class AuthResourceTest extends TestBase {
         Response loginResponse = passwordLogin(user);
 
         // then: the login event is issued
-        verify(userEventSender).sendUserLogin(user);
+        verify(userEventSender).sendUserAuthenticated(user);
 
         // and: the auth-cookies are valid
         validateCookies(loginResponse);
@@ -139,7 +139,7 @@ public class AuthResourceTest extends TestBase {
             .extract().response();
 
         // then: NO login event is issued
-        verify(userEventSender, never()).sendUserLogin(user);
+        verify(userEventSender, never()).sendUserAuthenticated(user);
 
         // and: the auth-cookies are NOT returned
         assertNull(response.cookie(xsrfCookieName));
@@ -189,7 +189,7 @@ public class AuthResourceTest extends TestBase {
         verify(userEventSender).sendUserCreated(user);
 
         // and: a user-login event is issued
-        verify(userEventSender).sendUserLogin(user);
+        verify(userEventSender).sendUserAuthenticated(user);
 
         // and: the auth-cookies are valid
         validateCookies(loginResponse);
@@ -232,7 +232,7 @@ public class AuthResourceTest extends TestBase {
         verify(userEventSender,never()).sendUserCreated(any());
 
         // and: NO user-login event is issued
-        verify(userEventSender, never()).sendUserLogin(any());
+        verify(userEventSender, never()).sendUserAuthenticated(any());
 
         // and: the xsrf-cookie is removed
         assertNull(loginResponse.cookie(xsrfCookieName));

@@ -1,6 +1,6 @@
 package com.hillayes.events.domain;
 
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -12,7 +12,7 @@ public class EventPacketTest {
     @Test
     public void testConstructor() throws Exception {
         // given: an event payload
-        UserLogin payload = UserLogin.builder()
+        UserAuthenticated payload = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -49,7 +49,7 @@ public class EventPacketTest {
     @Test
     public void testGetPayloadContent() throws Exception {
         // given: an event payload
-        UserLogin payload = UserLogin.builder()
+        UserAuthenticated payload = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -73,7 +73,7 @@ public class EventPacketTest {
         );
 
         // when: the payload content is retrieved
-        UserLogin payloadContent = eventPacket.getPayloadContent();
+        UserAuthenticated payloadContent = eventPacket.getPayloadContent();
 
         // then: the event packet contains the correct properties
         assertEquals(payload.getUserId(), payloadContent.getUserId());

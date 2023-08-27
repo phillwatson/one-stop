@@ -117,7 +117,7 @@ public class AuthServiceTest {
         fixture.login(username, password);
 
         // then: the login is recorded
-        verify(userEventSender).sendUserLogin(user);
+        verify(userEventSender).sendUserAuthenticated(user);
     }
 
     @Test
@@ -133,11 +133,11 @@ public class AuthServiceTest {
         assertThrows(NotAuthorizedException.class, () -> fixture.login(username, password));
 
         // then: the no login is recorded
-        verify(userEventSender, never()).sendUserLogin(any());
+        verify(userEventSender, never()).sendUserAuthenticated(any());
 
         // and: the login failure is recorded
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(userEventSender).sendLoginFailed(eq(username), captor.capture());
+        verify(userEventSender).sendAuthenticationFailed(eq(username), captor.capture());
 
         // and: the failure reason is recorded
         assertEquals("User not found.", captor.getValue());
@@ -163,11 +163,11 @@ public class AuthServiceTest {
         assertThrows(NotAuthorizedException.class, () -> fixture.login(username, password));
 
         // then: the no login is recorded
-        verify(userEventSender, never()).sendUserLogin(any());
+        verify(userEventSender, never()).sendUserAuthenticated(any());
 
         // and: the login failure is recorded
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(userEventSender).sendLoginFailed(eq(username), captor.capture());
+        verify(userEventSender).sendAuthenticationFailed(eq(username), captor.capture());
 
         // and: the failure reason is recorded
         assertEquals("Invalid password.", captor.getValue());
@@ -194,11 +194,11 @@ public class AuthServiceTest {
         assertThrows(NotAuthorizedException.class, () -> fixture.login(username, password));
 
         // then: the no login is recorded
-        verify(userEventSender, never()).sendUserLogin(any());
+        verify(userEventSender, never()).sendUserAuthenticated(any());
 
         // and: the login failure is recorded
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(userEventSender).sendLoginFailed(eq(username), captor.capture());
+        verify(userEventSender).sendAuthenticationFailed(eq(username), captor.capture());
 
         // and: the failure reason is recorded
         assertEquals("User blocked or deleted.", captor.getValue());
@@ -230,7 +230,7 @@ public class AuthServiceTest {
         verify(userEventSender, never()).sendUserCreated(any());
 
         // and: the login is recorded
-        verify(userEventSender).sendUserLogin(user);
+        verify(userEventSender).sendUserAuthenticated(user);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class AuthServiceTest {
         verify(userEventSender).sendUserCreated(user);
 
         // and: the login is recorded
-        verify(userEventSender).sendUserLogin(user);
+        verify(userEventSender).sendUserAuthenticated(user);
     }
 
     @Test
@@ -290,10 +290,10 @@ public class AuthServiceTest {
         verify(userEventSender, never()).sendUserCreated(user);
 
         // and: NO login is recorded
-        verify(userEventSender, never()).sendUserLogin(user);
+        verify(userEventSender, never()).sendUserAuthenticated(user);
 
         // and: a login-failure is recorded
-        verify(userEventSender).sendLoginFailed(eq(code), any());
+        verify(userEventSender).sendAuthenticationFailed(eq(code), any());
     }
 
     @Test
@@ -321,7 +321,7 @@ public class AuthServiceTest {
         verify(userEventSender, never()).sendUserCreated(any());
 
         // and: NO login is recorded
-        verify(userEventSender, never()).sendUserLogin(any());
+        verify(userEventSender, never()).sendUserAuthenticated(any());
     }
 
     @Test

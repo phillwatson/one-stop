@@ -7,7 +7,6 @@ import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
-import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -57,23 +56,23 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> {
                 log.info("User name failed verification");
-                userEventSender.sendLoginFailed(username, "User not found.");
+                userEventSender.sendAuthenticationFailed(username, "User not found.");
                 return new NotAuthorizedException("username/password");
             });
 
         if (user.isBlocked()) {
             log.info("User login failed [id: {}, blocked: {}]", user.getId(), user.isBlocked());
-            userEventSender.sendLoginFailed(username, "User blocked or deleted.");
+            userEventSender.sendAuthenticationFailed(username, "User blocked or deleted.");
             throw new NotAuthorizedException("username/password");
         }
 
         if (!passwordCrypto.verify(password, user.getPasswordHash())) {
             log.info("User password failed verification");
-            userEventSender.sendLoginFailed(username, "Invalid password.");
+            userEventSender.sendAuthenticationFailed(username, "Invalid password.");
             throw new NotAuthorizedException("username/password");
         }
 
-        userEventSender.sendUserLogin(user);
+        userEventSender.sendUserAuthenticated(user);
         log.debug("User logged in [userId: {}]", user.getId());
         return user;
     }
@@ -100,14 +99,14 @@ public class AuthService {
                 userEventSender.sendUserCreated(user);
             }
 
-            userEventSender.sendUserLogin(user);
+            userEventSender.sendUserAuthenticated(user);
             log.debug("User tokens created [userId: {}]", user.getId());
             return user;
         } catch (NotAuthorizedException e) {
             throw e;
         } catch (Exception e) {
             log.error("Failed to verify OpenId auth-code.", e);
-            userEventSender.sendLoginFailed(code, "Invalid open-id auth-code.");
+            userEventSender.sendAuthenticationFailed(code, "Invalid open-id auth-code.");
             throw new NotAuthorizedException("jwt");
         }
     }
@@ -126,7 +125,7 @@ public class AuthService {
             .filter(u -> !u.isBlocked())
             .orElseThrow(() -> {
                 log.info("User name failed verification [userId: {}]", userId);
-                userEventSender.sendLoginFailed(userId.toString(), "User not found.");
+                userEventSender.sendAuthenticationFailed(userId.toString(), "User not found.");
                 return new NotAuthorizedException("JWT");
             });
 

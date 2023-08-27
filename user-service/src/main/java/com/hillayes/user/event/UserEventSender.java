@@ -3,9 +3,9 @@ package com.hillayes.user.event;
 import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
-import com.hillayes.events.events.auth.LoginFailure;
+import com.hillayes.events.events.auth.AuthenticationFailed;
 import com.hillayes.events.events.auth.SuspiciousActivity;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
@@ -82,18 +82,18 @@ public class UserEventSender {
             .build());
     }
 
-    public void sendUserLogin(User user) {
-        log.debug("Sending UserLogin event [userId: {}]", user.getId());
-        eventSender.send(Topic.USER_AUTH, UserLogin.builder()
+    public void sendUserAuthenticated(User user) {
+        log.debug("Sending UserAuthenticated event [userId: {}]", user.getId());
+        eventSender.send(Topic.USER_AUTH, UserAuthenticated.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
             .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }
 
-    public void sendLoginFailed(String username, String reason) {
-        log.debug("Sending LoginFailed event [username: {}, reason: {}]", username, reason);
-        eventSender.send(Topic.USER_AUTH, LoginFailure.builder()
+    public void sendAuthenticationFailed(String username, String reason) {
+        log.debug("Sending AuthenticationFailed event [username: {}, reason: {}]", username, reason);
+        eventSender.send(Topic.USER_AUTH, AuthenticationFailed.builder()
             .username(username)
             .dateLogin(Instant.now())
             .reason(reason)

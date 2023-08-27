@@ -4,8 +4,8 @@ import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.LoginFailure;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.AuthenticationFailed;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,21 +18,21 @@ public class UserAuthTopicConsumer implements EventConsumer {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received user_auth event [payloadClass: {}]", payloadClass);
 
-        if (LoginFailure.class.getName().equals(payloadClass)) {
-            processLoginFailure(eventPacket.getPayloadContent());
+        if (AuthenticationFailed.class.getName().equals(payloadClass)) {
+            processAuthenticationFailed(eventPacket.getPayloadContent());
         }
 
-        else if (UserLogin.class.getName().equals(payloadClass)) {
-            processUserLogin(eventPacket.getPayloadContent());
+        else if (UserAuthenticated.class.getName().equals(payloadClass)) {
+            processUserAuthenticated(eventPacket.getPayloadContent());
         }
     }
 
-    private void processLoginFailure(LoginFailure event) {
+    private void processAuthenticationFailed(AuthenticationFailed event) {
         log.info("Login failure [username: {}]", event.getUsername());
         throw new RuntimeException("Test event retry");
     }
 
-    private void processUserLogin(UserLogin event) {
+    private void processUserAuthenticated(UserAuthenticated event) {
         log.info("User login [userId: {}]", event.getUserId());
     }
 }

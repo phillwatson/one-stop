@@ -1,7 +1,7 @@
 package com.hillayes.outbox.sender;
 
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class EventSenderTest {
     @Test
     public void testSend() {
         // given: an event
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -40,7 +40,7 @@ public class EventSenderTest {
         assertNotNull(eventEntity.getEventId());
         assertNotNull(eventEntity.getCorrelationId());
         assertEquals(Topic.USER, eventEntity.getTopic());
-        assertEquals(UserLogin.class.getName(), eventEntity.getPayloadClass());
+        assertEquals(UserAuthenticated.class.getName(), eventEntity.getPayloadClass());
         assertNotNull(eventEntity.getPayload());
         assertEquals(0, eventEntity.getRetryCount());
         assertNotNull(eventEntity.getScheduledFor());
@@ -53,7 +53,7 @@ public class EventSenderTest {
     @Test
     public void testSendWithKey() {
         // given: an event
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -71,7 +71,7 @@ public class EventSenderTest {
         assertNotNull(eventEntity.getEventId());
         assertNotNull(eventEntity.getCorrelationId());
         assertEquals(Topic.USER, eventEntity.getTopic());
-        assertEquals(UserLogin.class.getName(), eventEntity.getPayloadClass());
+        assertEquals(UserAuthenticated.class.getName(), eventEntity.getPayloadClass());
         assertNotNull(eventEntity.getPayload());
         assertEquals(0, eventEntity.getRetryCount());
         assertNotNull(eventEntity.getScheduledFor());

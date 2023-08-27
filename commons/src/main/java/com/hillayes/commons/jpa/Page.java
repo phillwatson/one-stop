@@ -4,6 +4,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+/**
+ * Encapsulates a subset of data within a collection. When the collection is
+ * considered to be divided into ordered subsets of equal size, each Page is
+ * an indexed subset of the collection; a window over the collection.
+ *
+ * The content of each page is the ordered subset of entries that fall within
+ * the boundary of that page's index when the collection is divided into
+ * subsets of the given page size.
+ *
+ * @param <T> the type of element contained within the Page.
+ */
 public class Page<T> {
     private final List<T> content;
     private final long totalCount;
@@ -39,27 +50,31 @@ public class Page<T> {
         return pageSize;
     }
 
+    /**
+     * The number of elements within this page. For the last page. this may be
+     * smaller than the page size.
+     */
     public int getContentSize() {
         return content.size();
     }
 
+    /**
+     * Determines whether the page contains any elements.
+     */
     public boolean isEmpty() {
         return content.isEmpty();
     }
 
     /**
-     * Returns the total amount of elements.
-     *
-     * @return the total amount of elements
+     * Returns the number of elements in the collection as a whole.
      */
     public long getTotalCount() {
         return totalCount;
     }
 
     /**
-     * Returns the number of total pages.
-     *
-     * @return the number of total pages
+     * Returns the total number of pages within the collection when the page
+     * size is as given in this Page.
      */
     public int getTotalPages() {
         return (pageSize > 0) ? (int) Math.ceil((double) totalCount / (double) pageSize) : 1;

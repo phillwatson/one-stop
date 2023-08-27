@@ -13,7 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @RegisterForReflection
-public class LoginFailure {
+public class AuthenticationFailed {
     private String username;
 
     private Instant dateLogin;

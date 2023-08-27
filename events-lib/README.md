@@ -4,12 +4,75 @@
 ---
 ## Events Library
 A shared library used by those services wishing to listen for events published
-by the message broker (i.e. outbox-lib). Those services that are only interested
+by the message broker (i.e. `outbox-lib`). Those services that are only interested
 in listening for events, and not interested in publishing them, only need
 include this library in their dependencies.
 
 Those services wishing to publish events must also include a dependency on the
 library `outbox-lib`.
+
+#### Events vs Actions
+Events notify listeners that some action has occurred. The action is often the change
+in an entity's state. For example; a new user may have been created, or a user may
+have given consent to access their bank account.
+
+By that definition, events are normally named as past participles of the actions or
+state change that caused them. To follow the previous examples, the event classes
+might be UserCreated and ConsentGiven.
+
+Actions are what cause events to occur. For example; "create new user", "get user's
+consent". Actions *can* be triggered as a result of an event, but the sender of the
+event need not (and, ideally, should not) be aware of those actions. These actions
+should not be an explicit part of the use-case that changes an entity's state. Instead,
+they should be performed as implicit use-cases that are triggered whenever a particular
+change to the entity's state occurs.
+
+For example; the use-case for "get user's consent" may be:
+- Given: a user provides consent to access their bank account
+- When: the consent is posted to the consent service
+- Then: record the user's consent in the database
+- And: raise a ConsentGiven event
+
+The use-cases for the ConsentGiven event may be:
+- Given: a ConsentGiven event has been raised
+- When: that event is received by the email service
+- Then: the user is sent a confirmation email
+
+and:
+- Given: a ConsentGiven event has been raised
+- When: that event is received by the account service
+- Then: the transactions are retrieved from the user's bank account
+
+The first use-case need have no mention of the others and the other use-case need have
+no knowledge of what action raised the event. This allows services to communicate
+state changes across boundaries without tightly coupling those services. It also allows
+future requirements to extend what actions are to be performed on a given state change
+without requiring code changes to the existing actions.
+
+Events should not be used to trigger explicit, or imperative, actions. If, for example,
+we rewrote the above use-case.
+
+- Given: a user provides consent to access their bank account
+- When: the consent is posted to the consent service
+- Then: record the user's consent in the database
+- And: raise an event to send a confirmation email
+- And: raise an event to retrieve the user's bank account transactions
+
+We now have a coupling between the services. The consent service knows that the email
+service and account service need to perform explicit actions when a user's consent is
+given. Also, any new actions would require changes to the consent service.
+
+These explicit events can often be recognised by the fact that their name is not a
+past participle. For example; SendEmail or RetrieveTransactions. They are often used
+when a service needs to perform: 
+- long-running actions that may cause the client to wait an unacceptable length of time
+for a response
+- actions that have a dependency on remote third-party services, and need to be
+repeated should communication fail
+
+A better solution for such explicit actions would be to use some form of background
+task scheduler; allowing tasks to be queued for execution, and repeated on failure.
+See the `executor-lib`.
 
 ### Topics
 Event topics are defined in the enum `com.hillayes.events.domain.Topic`; the
@@ -18,17 +81,19 @@ event classes may share the same Topic. For example; the `USER` topic includes
 the event classes `UserCreated`, `UserUpdated` and `UserDelete`.
 
 ### Topic Groups
-EventConsumers can also indicate the consumer group they belong to. Events will
-be sent to all consumer groups. Within a consumer group, events of the same topic
-will be distributed to those topic consumers within that group. With only one
-consumer receiving a given event instance. If an event is retried (see later), it
-may be allocated to another consumer in the group.
+EventConsumers can also indicate the consumer group they belong to using the
+annotation `@ConsumerGroup`.
+
+Events will be sent to all consumer groups. Within a consumer group, events of
+the same topic will be distributed to those topic consumers within that group.
+With only one consumer receiving a given event instance. If an event is retried
+(see later), it may be allocated to another consumer in the group.
 
 By default, the consumer group is taken from the configuration property "kafka.group.id",
 or the application/service name if that property is not defined.
 
-By specifying an explicit consumer group, consumers across service boundaries can share
-messages from the same topic(s).
+By specifying an explicit consumer group, events from the same topic can be
+distributed across consumers within different application/service boundaries.
 
 ### Consumers
 To consume (listen to) events, a class implements the interface

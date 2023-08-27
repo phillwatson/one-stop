@@ -3,9 +3,9 @@ package com.hillayes.user.event;
 import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
-import com.hillayes.events.events.auth.LoginFailure;
+import com.hillayes.events.events.auth.AuthenticationFailed;
 import com.hillayes.events.events.auth.SuspiciousActivity;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
@@ -193,7 +193,7 @@ public class UserEventSenderTest {
     }
 
     @Test
-    public void testSendUserLogin() {
+    public void testSendUserAuthenticated() {
         // given: a user has logged in
         User user = User.builder()
             .id(UUID.randomUUID())
@@ -218,21 +218,21 @@ public class UserEventSenderTest {
         when(requestHeaders.getFirst("User-Agent")).thenReturn("ssssss");
 
         // when: the fixure is called
-        fixture.sendUserLogin(user);
+        fixture.sendUserAuthenticated(user);
 
         // then: the correct event is emitted
-        ArgumentCaptor<UserLogin> captor = ArgumentCaptor.forClass(UserLogin.class);
+        ArgumentCaptor<UserAuthenticated> captor = ArgumentCaptor.forClass(UserAuthenticated.class);
         verify(eventSender).send(eq(Topic.USER_AUTH), captor.capture());
 
         // and: the content is correct
-        UserLogin event = captor.getValue();
+        UserAuthenticated event = captor.getValue();
         assertEquals(user.getId(), event.getUserId());
         assertNotNull(event.getDateLogin());
         assertEquals(requestHeaders.getFirst("User-Agent"), event.getUserAgent());
     }
 
     @Test
-    public void testSendLoginFailed() {
+    public void testSendAuthenticationFailed() {
         // given: a user has failed to authenticate - and a reason
         String username = randomAlphanumeric(20);
         String reason = randomAlphanumeric(10);
@@ -241,14 +241,14 @@ public class UserEventSenderTest {
         when(requestHeaders.getFirst("User-Agent")).thenReturn("ssssss");
 
         // when: the fixure is called
-        fixture.sendLoginFailed(username, reason);
+        fixture.sendAuthenticationFailed(username, reason);
 
         // then: the correct event is emitted
-        ArgumentCaptor<LoginFailure> captor = ArgumentCaptor.forClass(LoginFailure.class);
+        ArgumentCaptor<AuthenticationFailed> captor = ArgumentCaptor.forClass(AuthenticationFailed.class);
         verify(eventSender).send(eq(Topic.USER_AUTH), captor.capture());
 
         // and: the content is correct
-        LoginFailure event = captor.getValue();
+        AuthenticationFailed event = captor.getValue();
         assertEquals(username, event.getUsername());
         assertEquals(reason, event.getReason());
         assertNotNull(event.getDateLogin());

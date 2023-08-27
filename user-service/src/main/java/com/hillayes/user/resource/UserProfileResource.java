@@ -1,7 +1,6 @@
 package com.hillayes.user.resource;
 
 import com.hillayes.commons.Strings;
-import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.OidcIdentity;

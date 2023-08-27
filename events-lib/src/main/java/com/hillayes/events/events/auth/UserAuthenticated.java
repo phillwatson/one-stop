@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @RegisterForReflection
-public class UserLogin {
+public class UserAuthenticated {
     private UUID userId;
 
     private Instant dateLogin;

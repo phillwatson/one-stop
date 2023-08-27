@@ -2,7 +2,7 @@ package com.hillayes.outbox.service;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import io.quarkus.runtime.ShutdownEvent;
@@ -81,7 +81,7 @@ public class EventDelivererTest {
 
     private EventEntity createEventEntity() {
         // given: an event payload
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();

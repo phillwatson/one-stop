@@ -2,7 +2,7 @@ package com.hillayes.outbox.repository;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -14,7 +14,7 @@ public class HospitalEntityTest {
     @Test
     public void testFromEventPacket() {
         // given: an event payload
-        UserLogin payload = UserLogin.builder()
+        UserAuthenticated payload = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();

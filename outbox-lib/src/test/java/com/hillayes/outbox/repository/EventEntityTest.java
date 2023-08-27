@@ -2,7 +2,7 @@ package com.hillayes.outbox.repository;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -14,7 +14,7 @@ public class EventEntityTest {
     @Test
     public void testInitialDelivery() {
         // given: an event payload
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -28,7 +28,7 @@ public class EventEntityTest {
         assertNotNull(eventEntity.getCorrelationId());
         assertEquals(Topic.USER_AUTH, eventEntity.getTopic());
         assertEquals("test-key", eventEntity.getKey());
-        assertEquals(UserLogin.class.getName(), eventEntity.getPayloadClass());
+        assertEquals(UserAuthenticated.class.getName(), eventEntity.getPayloadClass());
         assertNotNull(eventEntity.getPayload());
         assertEquals(0, eventEntity.getRetryCount());
         assertNotNull(eventEntity.getScheduledFor());
@@ -38,7 +38,7 @@ public class EventEntityTest {
     @Test
     public void testRedelivery() {
         // given: an event payload
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
@@ -71,7 +71,7 @@ public class EventEntityTest {
     @Test
     public void testToEventPacket() {
         // given: an event payload
-        UserLogin event = UserLogin.builder()
+        UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();

@@ -2,7 +2,7 @@ package com.hillayes.outbox.service;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.UserLogin;
+import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -103,7 +103,7 @@ public class RetryConsumerTest {
     }
 
     private EventPacket createEventPacket() {
-        UserLogin payload = UserLogin.builder()
+        UserAuthenticated payload = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
             .dateLogin(Instant.now())
             .build();
