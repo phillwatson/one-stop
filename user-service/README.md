@@ -15,14 +15,14 @@ user records - remembering to delete them when a user-deleted event is issued.
 ## Authentication
 ### Access and Refresh Tokens
 Upon successful authentication, each response to the client will contain an access
-and refresh token; passed cookies. The client is not able to read these cookies,
+and refresh token; passed as cookies. The client is not able to read these cookies,
 but they will be returned on each request.
 
 The refresh token will only be returned to the token refresh endpoint.
 
 #### Token Security
 In addition to marking the cookies as `Same-Site=Strict`, `Secure=true` and
-`Http-Only=true`, the tokens with the cookies are signed using "rotating" Private
+`Http-Only=true`, the tokens within the cookies are signed using "rotating" Private
 Keys; and carry the Private Key ID in the header claim "kid".
 
 The number of Private Keys and the frequency at which they are renewed are
@@ -31,7 +31,7 @@ determined by the configuration properties; `"one-stop.auth.jwk.set-size"` and
 
 These properties also determine the period for which any signed data is valid. For
 example; a number of 3 and interval of 30 seconds would mean any data signed by a
-private key is valid for, at least, 60 seconds and, at most 90 seconds.
+Private Key is valid for, at least, 60 seconds and, at most, 90 seconds.
 
 It is important that the refresh tokens have a lifespan that divides equally into
 the minimum validity period of the Private Keys.
@@ -61,15 +61,15 @@ authorise the user's access to a service's endpoints.
 The tokens (and cookies) have expiry times defined by the configuration properties;
 `"one-stop.auth.access-token.expires-in"` and `"one-stop.auth.refresh-token.expires-in"`.
 
-The access token expiry determine the frequency at which the user must refresh the
+The access token expiry determines the frequency at which the user must refresh the
 tokens, and the refresh token expiry determines the maximum duration of client
 inactivity before the session is invalidated.
 
 ### Cross-Site Resource Forgery (XSRF)
 Each authenticated response from the server will carry an XSRF cookie containing a
-cryptographically signed random value. The same value is also contained in the claims
-of the access and refresh cookies. The client must return this value in the headers
-of its requests. 
+cryptographically signed random value. The same value is contained in the claims of
+the access and refresh cookies. The client must return this value in the headers of
+its requests. 
 
 For authenticated endpoints, the server will ensure the presence of the XSRF header,
 and verify that its signature is correct. It then compares the value with that in

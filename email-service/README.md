@@ -16,7 +16,7 @@ The email subject and templates are configured within the `application.yaml`,
 and map to the enum `com.hillayes.email.config.TemplateName`.
 The following is an example of the template configuration for
 `TemplateName.USER_REGISTERED`.
-```
+```yaml
 user-registered:
   en:
     subject: "Hi $user.preferredName$, please complete your One-Stop registration"
@@ -43,7 +43,7 @@ Based on the Antlr ST4 template library, the email subject and body templates
 may reference any property in a given Map of key/values. Templates may also
 reference properties of the value in the Map. For example; if the Map contains
 a reference the interface (or class), with the key `"account"`:
-```
+```Java
   public interface Account {
     public String getName();
     public String getBic();

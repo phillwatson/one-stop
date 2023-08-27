@@ -28,7 +28,7 @@ scheduler.
 #### Scheduled Tasks
 Scheduled tasks are classes that implement the interface `NamedScheduledTask`
 and run on a timer based frequency, declared in the configuration properties:
-```
+```yaml
     scheduler:
       tasks:
         poll-all-payments:
@@ -65,46 +65,46 @@ Allowing a client request to be tracked to its final conclusion.
 #### On-Failure Retry
 All tasks (scheduled or Jobbing) can be configured to repeat if an exception
 is raised during its execution.
-```
-        poll-payment:
-          on-failure:
-            max-retry: 15
-            retry-interval: PT1M
-            retry-exponent: 1.5
+```yaml
+    poll-payment:
+      on-failure:
+        max-retry: 15
+        retry-interval: PT1M
+        retry-exponent: 1.5
 ```
 ##### On-Max-Retry - Chaining
 It is possible to name another Jobbing task that will be queued should a
 task (schedules or Jobbing) exceed the maximum number of failure retries. That
 "chained" task will receive the same payload as the failed task, and can have
 its own configuration.
-```
-        poll-payment:
-          on-failure:
-            max-retry: 15
-            retry-interval: PT1M
-            retry-exponent: 1.5
-            on-max-retry: cancel-payment
-        
-        cancel-payment:
-          on-failure:
-            max-retry: 2
-            retry-interval: PT1M
-            retry-exponent: 1
+```yaml
+    poll-payment:
+      on-failure:
+        max-retry: 15
+        retry-interval: PT1M
+        retry-exponent: 1.5
+        on-max-retry: cancel-payment
+    
+    cancel-payment:
+      on-failure:
+        max-retry: 2
+        retry-interval: PT1M
+        retry-exponent: 1
 ```
 
 #### On-Incomplete Retry
 Jobbing tasks support an additional configuration used when the task does not fail
 (throw an exception) but is unable to complete.
-```
-        poll-payment:
-          on-failure:
-            max-retry: 5
-            retry-interval: PT1M
-            retry-exponent: 2
-          on-incomplete:
-            max-retry: 15
-            retry-interval: PT1M
-            retry-exponent: 1.5
+```yaml
+    poll-payment:
+      on-failure:
+        max-retry: 5
+        retry-interval: PT1M
+        retry-exponent: 2
+      on-incomplete:
+        max-retry: 15
+        retry-interval: PT1M
+        retry-exponent: 1.5
 ```
 This is useful when the Jobbing task should poll for information but that information
 is not available when the task is run.
@@ -122,19 +122,19 @@ The `on-incomplete` configuration also accepts the name of another task to be qu
 when the initial Jobbing task exceeds the maximum number of incomplete retries. That
 "chained" task will receive the same payload as the failed task, and can have its own
 configuration.
-```
-        poll-payment:
-          on-incomplete:
-            max-retry: 15
-            retry-interval: PT1M
-            retry-exponent: 1.5
-            on-max-retry: cancel-payment
-        
-        cancel-payment:
-          on-failure:
-            max-retry: 2
-            retry-interval: PT1M
-            retry-exponent: 1
+```yaml
+    poll-payment:
+      on-incomplete:
+        max-retry: 15
+        retry-interval: PT1M
+        retry-exponent: 1.5
+        on-max-retry: cancel-payment
+    
+    cancel-payment:
+      on-failure:
+        max-retry: 2
+        retry-interval: PT1M
+        retry-exponent: 1
 ```
 
 #### Database Schema
@@ -142,7 +142,7 @@ The scheduler stores the definitions for all tasks in a database table.
 By default, the table is in the default schema of the database connection.
 To select another schema, the schema can be declared in the configuration
 property:
-```
+```yaml
     scheduler:
       schema: rails
 ```

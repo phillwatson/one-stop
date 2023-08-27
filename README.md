@@ -15,34 +15,56 @@ adopted; with each module adopting the same version as the parent.
 ## Docker Configuration
 The following must be added to `environment:` section of the docker-compose.yaml
 services. This can be also be achieved by creating a docker-compose-override.yaml.
-### User and Rail Services
-```
-// the secret used to generate and verify the XSRF token
+
+### User Services
+```yaml
+# the http schema to use (http or https)
+ONE_STOP_GATEWAY_SCHEME: http
+
+# the port exposed on the router to the outside world
+# used by callback from 3rd party services
+ONE_STOP_GATEWAY_OPEN_PORT: 9876
+
+# the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars>
 
-// the secret used to authenticate with Google Open-ID Connect
+# the secret used to authenticate with Google Open-ID Connect
 ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: <the secret issued by Google>
+
+# the secret used to authenticate with GitHub Open-ID Connect
+ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_SECRET: "<the secret issued by GitHub>"
+
+# the secret used to authenticate with GitLab Open-ID Connect
+ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_SECRET: "<the secret issued by GitLab>"
+
+# the App Key-ID used to authenticate with Apple Open-ID Connect
+ONE_STOP_AUTH_OPENID_APPLE_KEY_ID: "<App key id issued by Apple>"
+
+# the Private Key PEM used to sign data sent to Apple Open-ID Connect
+ONE_STOP_AUTH_OPENID_APPLE_PRIVATE_KEY: "<the private key in PEM form>"
 ```
+
 ### Rail Service
-```
-// the Nordigen authentication keys
+```yaml
+# the secret used to generate and verify the XSRF token
+ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars - must be same as user service>
+
+# the Nordigen authentication keys
 RAILS_SECRET_ID: <the secret ID issued by Nordigen>
 RAILS_SECRET_KEY: <the secret issue by Nordigen>
-
-// the callback URL after user consent (or denial)
-ONE_STOP_RAIL_CALLBACK_URL: https://hillayes.com/api/v1/consents/response
 ```
+
 ### Email Service
-```
-// the Brevo (SendInBlue) Email-Service key
-ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo>
+```yaml
+# the Brevo (SendInBlue) Email-Service key
+ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previosly Send-With-Blue)>
 
-// to disable the sending of emails - default false
+# to disable the sending of emails - default false
 ONE_STOP_EMAIL_DISABLED: true
 ```
 
 ## To Build and Start Docker Images
-```
+```shell
 mvn clean package
 docker compose up -d
 ```
@@ -50,7 +72,7 @@ docker compose up -d
 The client docker image is not built by the maven POM. To build the client create
 a docker-compose-override.yaml and include the following - any existing docker
 image should be deleted first:
-```
+```yaml
 services:
   client:
     image: one-stop/client:1.0.0-SNAPSHOT
@@ -61,16 +83,29 @@ services:
 ### Build Parameters
 By default, the build does not run unit-tests. To run the unit-tests, add
 the following parameter to the build command:
-```
+```shell
 mvn clean package -Punit
 ```
 By default, the client is not built. To build the client, add the following
 parameter to the build command:
-```
+```shell
 mvn clean package -Pclient
 ```
 
+By default, the docker images use JVM base images. To build native docker
+images, add the following parameter to the build command:
+```shell
+mvn clean package -Dnative
+```
+
 ## Debugging Docker Images
-All docker images are built with remote JVM debugging enabled. In order to
-connect to the images the debug port 5005 must be exposed. Each container 
-should expose a unique port - to avoid clashes.
+All non-native docker images are built with remote JVM debugging enabled. In
+order to connect to the images the debug port 5005 must be exposed. Each
+container should expose a unique port - to avoid clashes.
+```yaml
+  user-service:
+    image: one-stop/user-service:1.0.0-SNAPSHOT
+    ports:
+      - "8081:8080"
+      - "5001:5005"
+```

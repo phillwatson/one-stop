@@ -99,7 +99,7 @@ With only one consumer receiving a given event instance. If an event is retried
 To consume (listen to) events, a class implements the interface
 `com.hillayes.events.consumer.EventConsumer` and specifies the topic(s) to be
 consumed using the annotation  `@TopicConsumer`. For example;
-```
+```Java
 @TopicConsumer(Topic.USER)
 public class UserEventConsumer implements EventConsumer {
     @Transactional
