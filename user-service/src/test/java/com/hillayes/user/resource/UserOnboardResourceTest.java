@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class UserOnboardResourceTest extends TestBase {
-    @ConfigProperty(name = "one-stop.auth.xsrf.cookie-name")
+    @ConfigProperty(name = "one-stop.auth.xsrf.cookie")
     String xsrfCookieName;
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;

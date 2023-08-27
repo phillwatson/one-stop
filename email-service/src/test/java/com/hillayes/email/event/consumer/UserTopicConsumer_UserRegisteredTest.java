@@ -71,9 +71,9 @@ public class UserTopicConsumer_UserRegisteredTest {
         verify(sendEmailService).sendEmail(eq(TemplateName.USER_REGISTERED), recipientCaptor.capture(), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
-        assertEquals(event.getEmail(), recipientCaptor.getValue().name());
-        assertEquals(event.getEmail(), recipientCaptor.getValue().email());
-        assertEquals(event.getLocale(), recipientCaptor.getValue().locale().get());
+        assertEquals(event.getEmail(), recipientCaptor.getValue().getName());
+        assertEquals(event.getEmail(), recipientCaptor.getValue().getEmail());
+        assertEquals(event.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters are taken from the event payload
         assertEquals(event.getAcknowledgerUri().toString(), paramsCaptor.getValue().get("acknowledge-uri"));

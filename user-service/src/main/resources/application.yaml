@@ -75,8 +75,8 @@ one-stop:
       set-size: 2
       rotation-interval: ${one-stop.auth.refresh-token.expires-in}
     xsrf:
-      cookie-name: 'XSRF-TOKEN'
-      header-name: 'X-XSRF-TOKEN'
+      cookie: 'XSRF-TOKEN'
+      header: 'X-XSRF-TOKEN'
       # secret: 'this will be passed in via docker env'
     onboarding:
       token-expires-in: 'PT15M'

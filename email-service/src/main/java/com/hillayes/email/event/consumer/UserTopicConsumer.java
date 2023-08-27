@@ -56,7 +56,7 @@ public class UserTopicConsumer implements EventConsumer {
     private void processUserRegistered(UserRegistered event) {
         Recipient recipient = new Recipient(event.getEmail(), event.getEmail(), event.getLocale());
         Map<String, Object> params = Map.of(
-            "acknowledge-uri", event.getAcknowledgerUri().toString(),
+            "acknowledge_uri", event.getAcknowledgerUri().toString(),
             "expires", format(event.getExpires())
         );
         sendEmailService.sendEmail(TemplateName.USER_REGISTERED, recipient, params);

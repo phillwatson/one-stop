@@ -54,7 +54,7 @@ export default function UserProfileForm(props: Props) {
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
 
       <Table size="small" aria-label="authproviders">
-        <caption><i>Your registered with the above auth providers</i></caption>
+        <caption><i>You're registered with the above auth providers</i></caption>
         <TableHead>
           <TableRow>
             <TableCell sx={colhead}></TableCell>

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 @Slf4j
 public class AuthTokens {
-    @ConfigProperty(name = "one-stop.auth.xsrf.cookie-name", defaultValue = "XSRF-TOKEN")
+    @ConfigProperty(name = "one-stop.auth.xsrf.cookie", defaultValue = "XSRF-TOKEN")
     String xsrfCookieName;
 
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")

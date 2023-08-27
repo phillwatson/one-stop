@@ -56,9 +56,9 @@ public class UserService_UserDeletedTest {
         verify(sendEmailService).sendEmail(eq(TemplateName.USER_DELETED), recipientCaptor.capture(), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
-        assertEquals(existingUser.getPreferredName(), recipientCaptor.getValue().name());
-        assertEquals(existingUser.getEmail(), recipientCaptor.getValue().email());
-        assertEquals(existingUser.getLocale(), recipientCaptor.getValue().locale().get());
+        assertEquals(existingUser.getPreferredName(), recipientCaptor.getValue().getName());
+        assertEquals(existingUser.getEmail(), recipientCaptor.getValue().getEmail());
+        assertEquals(existingUser.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters include the user record
         assertSame(existingUser, paramsCaptor.getValue().get("user"));

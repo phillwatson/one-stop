@@ -1,5 +1,15 @@
 package com.hillayes.exception;
 
+/**
+ * An interface that provides information as to how particular exceptions are to
+ * be conveyed to the user; their severity, identifier, message and http status.
+ * The ExceptionMapper will that call upon that information to generate a response
+ * from the exception.
+ * <p>
+ * This interface is normally implemented by an enum, and the enum value is carried
+ * by the exception. See {@link com.hillayes.exception.common.CommonErrorCodes} for
+ * an example.
+ */
 public interface ErrorCode {
     // some commonly used http status codes
     int BAD_REQUEST_STATUS = 400;

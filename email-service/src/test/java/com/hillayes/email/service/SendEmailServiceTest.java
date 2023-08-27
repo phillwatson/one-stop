@@ -40,7 +40,7 @@ public class SendEmailServiceTest {
     @Test
     public void testSendEmail() throws Exception {
         SendEmailService.Recipient recipient =
-            new SendEmailService.Recipient("Mr Mock", "mock@work.com", Locale.ENGLISH);
+            new SendEmailService.Recipient("mock@work.com", "Mr Mock", Locale.ENGLISH);
 
         Map<String, Object> params = Map.of(
             "acknowledge_uri", "http://validate?token=274768712uefhdsuihs78eyrf08723y4r",
@@ -52,6 +52,7 @@ public class SendEmailServiceTest {
         verify(emailApi).sendTransacEmail(emailCapture.capture());
 
         SendSmtpEmail email = emailCapture.getValue();
+        assertTrue(email.getHtmlContent().contains(params.get(recipient.getEmail()).toString()));
         assertTrue(email.getHtmlContent().contains(params.get("acknowledge_uri").toString()));
         assertTrue(email.getHtmlContent().contains(params.get("expires").toString()));
     }

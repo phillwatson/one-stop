@@ -67,21 +67,21 @@ public class SendEmailService {
             params.put("recipient", recipient);
             params.put("YEAR", LocalDate.now().getYear());
 
-            String subject = templateRepository.renderSubject(templateName, params, recipient.locale());
+            String subject = templateRepository.renderSubject(templateName, params, recipient.getLocale());
             params.put("SUBJECT", subject);
 
-            String content = templateRepository.renderTemplate(templateName, params, recipient.locale());
+            String content = templateRepository.renderTemplate(templateName, params, recipient.getLocale());
             params.put("__TEMPLATE_CONTENT__", content);
 
-            String body = templateRepository.renderTemplate(TemplateName.HEADER, params, recipient.locale());
+            String body = templateRepository.renderTemplate(TemplateName.HEADER, params, recipient.getLocale());
 
             SendSmtpEmail email = new SendSmtpEmail()
                 .sender(new SendSmtpEmailSender()
-                    .name(templateConfig.sender().orElse(configuration.defaultSender()).name())
-                    .email(templateConfig.sender().orElse(configuration.defaultSender()).email()))
+                    .name(templateConfig.sender().orElse(configuration.defaultSender()).getName())
+                    .email(templateConfig.sender().orElse(configuration.defaultSender()).getEmail()))
                 .addToItem(new SendSmtpEmailTo()
-                    .name(recipient.name())
-                    .email(recipient.email()))
+                    .name(recipient.getName())
+                    .email(recipient.getEmail()))
                 .subject(subject)
                 .htmlContent(body);
 
@@ -108,17 +108,17 @@ public class SendEmailService {
         }
 
         @Override
-        public String name() {
+        public String getName() {
             return name;
         }
 
         @Override
-        public String email() {
+        public String getEmail() {
             return email;
         }
 
         @Override
-        public Optional<Locale> locale() {
+        public Optional<Locale> getLocale() {
             return locale;
         }
     }

@@ -10,6 +10,6 @@ public class SendEmailException extends MensaException {
                               Throwable aCause) {
         super(EmailErrorCodes.FAILED_TO_SEND_EMAIL, aCause);
         addParameter("templateName", templateName);
-        addParameter("email", recipient.email());
+        addParameter("email", recipient.getEmail());
     }
 }

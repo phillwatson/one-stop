@@ -12,14 +12,8 @@ each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 
-In a production environment it would be more appropriate to separate each
-module (library or service) into its own project, and have each project
-follow its own versioning history. Dependant modules would then adopt the
-version of the project on which they depend - updating their dependencies
-as and when necessary.
-
 ## Docker Configuration
-The following must be added to ```environment:``` section of the docker-compose.yaml
+The following must be added to `environment:` section of the docker-compose.yaml
 services. This can be also be achieved by creating a docker-compose-override.yaml.
 ### User and Rail Services
 ```

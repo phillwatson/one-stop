@@ -4,6 +4,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The base for all service exceptions that are to be mapped to a client
+ * response by the ExceptionMapper.
+ */
 public class MensaException extends RuntimeException {
     private final ErrorCode errorCode;
     private Map<String,Object> context;
@@ -76,6 +80,12 @@ public class MensaException extends RuntimeException {
         return this;
     }
 
+    /**
+     * Called by the ExceptionMapper to retrieve the map of attribute name/value
+     * pairs that describe the context in which the exception occurred.
+     *
+     * @return the attribute name/value pairs.
+     */
     protected Map<String, Object> getContext() {
         return context == null ? Collections.emptyMap() : context;
     }

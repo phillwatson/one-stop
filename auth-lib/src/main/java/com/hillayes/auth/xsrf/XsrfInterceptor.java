@@ -54,7 +54,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
     Instance<String> refreshCookieName;
 
-    @ConfigProperty(name = "one-stop.auth.xsrf.header-name", defaultValue = "X-XSRF-TOKEN")
+    @ConfigProperty(name = "one-stop.auth.xsrf.header", defaultValue = "X-XSRF-TOKEN")
     Instance<String> xsrfHeaderName;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")

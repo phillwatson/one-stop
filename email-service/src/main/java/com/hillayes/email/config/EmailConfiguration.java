@@ -1,6 +1,7 @@
 package com.hillayes.email.config;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
 import java.util.Locale;
@@ -77,13 +78,16 @@ public interface EmailConfiguration {
         /**
          * The name of the sender; normally "one-stop info".
          */
-        String name();
+        @WithName("name")
+        String getName();
 
         /**
          * The email address of the sender. Normally "info@one-stop.co.uk"
          */
-        String email();
+        @WithName("email")
+        String getEmail();
 
-        Optional<Locale> locale();
+        @WithName("locale")
+        Optional<Locale> getLocale();
     }
 }

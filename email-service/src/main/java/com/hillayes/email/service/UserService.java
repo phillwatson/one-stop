@@ -91,12 +91,12 @@ public class UserService {
 
         // send email to notify user of change
         log.debug("Sending email to notify user update [oldEmail: {}, newEmail: {}]",
-            oldRecipient.email(), user.getEmail());
+            oldRecipient.getEmail(), user.getEmail());
 
         Map<String, Object> params = Map.of("user", existingUser);
 
         // send email to notify user of update to their account
-        if (! oldRecipient.email().equalsIgnoreCase(existingUser.getEmail())) {
+        if (! oldRecipient.getEmail().equalsIgnoreCase(existingUser.getEmail())) {
             sendEmailService.sendEmail(TemplateName.USER_UPDATED, oldRecipient, params);
         }
         sendEmailService.sendEmail(TemplateName.USER_UPDATED, new SendEmailService.Recipient(user), params);

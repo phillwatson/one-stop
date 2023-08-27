@@ -86,26 +86,26 @@ public class UserService_UserUpdatedTest {
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
-            .filter(recipient -> recipient.email().equals(user.getEmail()))
+            .filter(recipient -> recipient.getEmail().equals(user.getEmail()))
             .findFirst()
             .ifPresentOrElse(
                 recipient -> {
-                    assertEquals(user.getPreferredName(), recipient.name());
-                    assertEquals(user.getEmail(), recipient.email());
-                    assertEquals(user.getLocale(), recipient.locale().get());
+                    assertEquals(user.getPreferredName(), recipient.getName());
+                    assertEquals(user.getEmail(), recipient.getEmail());
+                    assertEquals(user.getLocale(), recipient.getLocale().get());
                 },
                 () -> fail("Missing recipient for updated user")
             );
 
         // and: the other is sent to the old email address
         recipientCaptor.getAllValues().stream()
-            .filter(recipient -> recipient.email().equals(originalRecipient.email()))
+            .filter(recipient -> recipient.getEmail().equals(originalRecipient.getEmail()))
             .findFirst()
             .ifPresentOrElse(
                 recipient -> {
-                    assertEquals(originalRecipient.name(), recipient.name());
-                    assertEquals(originalRecipient.email(), recipient.email());
-                    assertEquals(originalRecipient.locale().get(), recipient.locale().get());
+                    assertEquals(originalRecipient.getName(), recipient.getName());
+                    assertEquals(originalRecipient.getEmail(), recipient.getEmail());
+                    assertEquals(originalRecipient.getLocale().get(), recipient.getLocale().get());
                 },
                 () -> fail("Missing recipient for original user")
             );
@@ -158,26 +158,26 @@ public class UserService_UserUpdatedTest {
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
-            .filter(recipient -> recipient.email().equals(user.getEmail()))
+            .filter(recipient -> recipient.getEmail().equals(user.getEmail()))
             .findFirst()
             .ifPresentOrElse(
                 recipient -> {
-                    assertEquals(user.getPreferredName(), recipient.name());
-                    assertEquals(user.getEmail(), recipient.email());
-                    assertEquals(user.getLocale(), recipient.locale().get());
+                    assertEquals(user.getPreferredName(), recipient.getName());
+                    assertEquals(user.getEmail(), recipient.getEmail());
+                    assertEquals(user.getLocale(), recipient.getLocale().get());
                 },
                 () -> fail("Missing recipient for updated user")
             );
 
         // and: the other is sent to the old email address
         recipientCaptor.getAllValues().stream()
-            .filter(recipient -> recipient.email().equals(originalRecipient.email()))
+            .filter(recipient -> recipient.getEmail().equals(originalRecipient.getEmail()))
             .findFirst()
             .ifPresentOrElse(
                 recipient -> {
-                    assertEquals(originalRecipient.name(), recipient.name());
-                    assertEquals(originalRecipient.email(), recipient.email());
-                    assertEquals(originalRecipient.locale().get(), recipient.locale().get());
+                    assertEquals(originalRecipient.getName(), recipient.getName());
+                    assertEquals(originalRecipient.getEmail(), recipient.getEmail());
+                    assertEquals(originalRecipient.getLocale().get(), recipient.getLocale().get());
                 },
                 () -> fail("Missing recipient for original user")
             );
@@ -226,9 +226,9 @@ public class UserService_UserUpdatedTest {
         verify(sendEmailService, times(1)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
-        assertEquals(user.getPreferredName(), recipientCaptor.getValue().name());
-        assertEquals(user.getEmail(), recipientCaptor.getValue().email());
-        assertEquals(user.getLocale(), recipientCaptor.getValue().locale().get());
+        assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
+        assertEquals(user.getEmail(), recipientCaptor.getValue().getEmail());
+        assertEquals(user.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters include the updated user record
         assertEquals(existingUser, paramsCaptor.getValue().get("user"));
@@ -265,9 +265,9 @@ public class UserService_UserUpdatedTest {
         verify(sendEmailService, times(1)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
-        assertEquals(user.getPreferredName(), recipientCaptor.getValue().name());
-        assertEquals(user.getEmail(), recipientCaptor.getValue().email());
-        assertEquals(user.getLocale(), recipientCaptor.getValue().locale().get());
+        assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
+        assertEquals(user.getEmail(), recipientCaptor.getValue().getEmail());
+        assertEquals(user.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters include the updated user record
         assertEquals(user, paramsCaptor.getValue().get("user"));

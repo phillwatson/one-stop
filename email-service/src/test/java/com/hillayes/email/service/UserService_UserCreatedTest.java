@@ -69,9 +69,9 @@ public class UserService_UserCreatedTest {
         verify(sendEmailService).sendEmail(eq(TemplateName.USER_CREATED), recipientCaptor.capture(), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
-        assertEquals(user.getPreferredName(), recipientCaptor.getValue().name());
-        assertEquals(user.getEmail(), recipientCaptor.getValue().email());
-        assertEquals(user.getLocale(), recipientCaptor.getValue().locale().get());
+        assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
+        assertEquals(user.getEmail(), recipientCaptor.getValue().getEmail());
+        assertEquals(user.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters include the user record
         assertSame(user, paramsCaptor.getValue().get("user"));
