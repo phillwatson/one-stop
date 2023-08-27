@@ -45,6 +45,9 @@ ONE_STOP_AUTH_OPENID_APPLE_PRIVATE_KEY: "<the private key in PEM form>"
 ```
 
 ### Rail Service
+The application relies upon the bank data provided by the Nordigen service
+(now owned by GoCardless). Sign-up and access is free:
+https://gocardless.com/bank-account-data/ 
 ```yaml
 # the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars - must be same as user service>
@@ -55,6 +58,9 @@ RAILS_SECRET_KEY: <the secret issue by Nordigen>
 ```
 
 ### Email Service
+In order to use the email service, you will need to obtain an API key from
+Brevo (previously known as Send-With-Blue). Sign-up and access is free:
+https://www.brevo.com/
 ```yaml
 # the Brevo (SendInBlue) Email-Service key
 ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previosly Send-With-Blue)>
