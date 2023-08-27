@@ -84,16 +84,16 @@ the event classes `UserCreated`, `UserUpdated` and `UserDelete`.
 EventConsumers can also indicate the consumer group they belong to using the
 annotation `@ConsumerGroup`.
 
-Events will be sent to all consumer groups. Within a consumer group, events of
-the same topic will be distributed to those topic consumers within that group.
-With only one consumer receiving a given event instance. If an event is retried
-(see later), it may be allocated to another consumer in the group.
-
 By default, the consumer group is taken from the configuration property "kafka.group.id",
 or the application/service name if that property is not defined.
 
 By specifying an explicit consumer group, events from the same topic can be
 distributed across consumers within different application/service boundaries.
+
+Events will be sent to all consumer groups. Within a consumer group, events of
+the same topic will be distributed to those topic consumers within that group.
+With only one consumer receiving a given event instance. If an event is retried
+(see later), it may be allocated to another consumer in the group.
 
 ### Consumers
 To consume (listen to) events, a class implements the interface
