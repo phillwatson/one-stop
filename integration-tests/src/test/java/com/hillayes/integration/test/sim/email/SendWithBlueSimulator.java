@@ -2,23 +2,24 @@ package com.hillayes.integration.test.sim.email;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.matching.ContentPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.core.ConditionFactory;
 import sibModel.CreateSmtpEmail;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
 public class SendWithBlueSimulator {
-    private static final String BASE_URI = "/api.sendinblue.com/v3";
+    public static final String BASE_URI = "/api.sendinblue.com/v3";
     private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";
-    
-    public static final String WIREMOCK_EMAIL_URL = "http://wiremock:8080" + BASE_URI;
 
     private final WireMock wireMockClient;
 
@@ -34,6 +35,7 @@ public class SendWithBlueSimulator {
     }
 
     public void stop() {
+        wireMockClient.resetRequests();
         wireMockClient.removeMappings();
     }
 

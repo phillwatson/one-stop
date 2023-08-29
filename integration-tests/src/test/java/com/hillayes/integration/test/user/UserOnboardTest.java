@@ -41,13 +41,13 @@ public class UserOnboardTest extends ApiTestBase {
 
         // given: a request to register a user
         UserRegisterRequest registerRequest = new UserRegisterRequest()
-            .email("watson.phill@gmail.com");
+            .email(randomAlphanumeric(30));
 
         // when: the request is sent to the service
         userOnboardApi.registerUser(registerRequest);
 
         // then: an email is sent to the user
-        List<LoggedRequest> emailRequests = emailSim.verifyEmailSent("watson.phill@gmail.com",
+        List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(registerRequest.getEmail(),
             await().atMost(Duration.ofSeconds(30)));
         assertNotNull(emailRequests);
         assertEquals(1, emailRequests.size());

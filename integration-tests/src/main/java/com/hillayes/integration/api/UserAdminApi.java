@@ -35,7 +35,7 @@ public class UserAdminApi extends ApiBase {
     }
 
     public UserResponse updateUser(UUID userId,
-                                          UserUpdateRequest request) {
+                                   UserUpdateRequest request) {
         return givenAuth()
             .contentType(JSON)
             .body(request)
