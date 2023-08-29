@@ -39,7 +39,7 @@ public class NordigenSimulator {
 
     @PostConstruct
     public void init() {
-        log.debug("Starting Nordigen NordigenSimulator");
+        log.debug("Starting Nordigen Simulator");
         wireMockServer = new WireMockServer(
             options()
                 .port(portNumber)

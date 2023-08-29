@@ -9,7 +9,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
 public class AuthApi {
-    public static Map<String, String> login(String username, String password) {
+    public Map<String, String> login(String username, String password) {
         LoginRequest request = new LoginRequest()
             .username(username)
             .password(password);
@@ -25,9 +25,9 @@ public class AuthApi {
         return response.cookies();
     }
 
-    public static Map<String, String> logout(String refreshCookie) {
+    public Map<String, String> logout(Map<String,String> cookies) {
         Response response = given()
-            .cookie("refresh_token", refreshCookie)
+            .cookies(cookies)
             .get("/api/v1/auth/refresh")
             .then()
             .statusCode(204)
@@ -36,7 +36,7 @@ public class AuthApi {
         return response.cookies();
     }
 
-    public static Map<String, String> logout() {
+    public Map<String, String> logout() {
         Response response = given()
             .get("/api/v1/auth/logout")
             .then()
@@ -46,7 +46,7 @@ public class AuthApi {
         return response.cookies();
     }
 
-    public static String getJwkSet() {
+    public String getJwkSet() {
         Response response = given()
             .get("/api/v1/auth/jwks.json")
             .then()

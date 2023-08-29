@@ -27,9 +27,14 @@ public interface EmailConfiguration {
     Corresponder defaultSender();
 
     /**
-     * The API key used to authenticate with the email service provider.
+     * The API key used to authenticate with the 3rd-party email service provider.
      */
     String apiKey();
+
+    /**
+     * The URL on which the 3rd-party email service provider is located.
+     */
+    Optional<String> serviceUrl();
 
     /**
      * The configuration for each email template configuration, keyed by their name.

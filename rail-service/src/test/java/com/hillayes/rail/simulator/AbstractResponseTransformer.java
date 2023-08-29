@@ -6,14 +6,12 @@ import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.CurrencyAmount;
 import com.hillayes.rail.model.PaginatedList;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.hillayes.rail.utils.TestData.toJson;

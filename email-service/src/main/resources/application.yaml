@@ -31,6 +31,7 @@ quarkus:
 one-stop:
   email:
     disabled: false
+
     common-args:
       COMPANY_LONG_NAME: Hillayes One-Stop
       COMPANY_COPYRIGHT_NAME: One-Stop

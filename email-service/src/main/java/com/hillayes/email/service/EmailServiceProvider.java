@@ -19,7 +19,12 @@ public class EmailServiceProvider {
     public TransactionalEmailsApi getEmailApi(EmailConfiguration configuration) {
         log.debug("Creating Email API instance");
         TransactionalEmailsApi result = new TransactionalEmailsApi();
+
         result.getApiClient().setApiKey(configuration.apiKey());
+        configuration.serviceUrl().ifPresent( url -> {
+            log.info("Email service is on {}", url);
+            result.getApiClient().setBasePath(url);
+        });
 
         return result;
     }

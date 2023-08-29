@@ -5,13 +5,17 @@ import com.hillayes.onestop.api.UserAuthProvidersResponse;
 import com.hillayes.onestop.api.UserProfileRequest;
 import com.hillayes.onestop.api.UserProfileResponse;
 
-import static io.restassured.RestAssured.given;
+import java.util.Map;
+
 import static io.restassured.http.ContentType.JSON;
 
-public class UserProfileApi {
-    public static UserProfileResponse getProfile(String accessCookie) {
-        return given()
-            .cookie("access_token", accessCookie)
+public class UserProfileApi extends ApiBase {
+    public UserProfileApi(Map<String, String> authCookies) {
+        super(authCookies);
+    }
+
+    public UserProfileResponse getProfile() {
+        return givenAuth()
             .get("/api/v1/profiles")
             .then()
             .statusCode(200)
@@ -19,9 +23,8 @@ public class UserProfileApi {
             .extract().as(UserProfileResponse.class);
     }
 
-    public static UserAuthProvidersResponse getAuthProviders(String accessCookie) {
-        return given()
-            .cookie("access_token", accessCookie)
+    public UserAuthProvidersResponse getAuthProviders() {
+        return givenAuth()
             .get("/api/v1/profiles/authproviders")
             .then()
             .statusCode(200)
@@ -29,10 +32,8 @@ public class UserProfileApi {
             .extract().as(UserAuthProvidersResponse.class);
     }
 
-    public static UserProfileResponse updateProfile(String accessCookie,
-                                                    UserProfileRequest request) {
-        return given()
-            .cookie("access_token", accessCookie)
+    public UserProfileResponse updateProfile(UserProfileRequest request) {
+        return givenAuth()
             .contentType(JSON)
             .body(request)
             .put("/api/v1/profiles")
@@ -42,10 +43,8 @@ public class UserProfileApi {
             .extract().as(UserProfileResponse.class);
     }
 
-    public static void changePassword(String accessCookie,
-                                      PasswordUpdateRequest request) {
-        given()
-            .cookie("access_token", accessCookie)
+    public void changePassword(PasswordUpdateRequest request) {
+        givenAuth()
             .contentType(JSON)
             .body(request)
             .put("/api/v1/profiles/password")

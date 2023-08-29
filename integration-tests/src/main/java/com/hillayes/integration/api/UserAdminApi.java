@@ -4,15 +4,20 @@ import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserUpdateRequest;
 
+import java.util.Map;
 import java.util.UUID;
 
-import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
-public class UserAdminApi {
-    public static PaginatedUsers listUsers(String accessCookie) {
-        return given()
-            .cookie("access_token", accessCookie)
+public class UserAdminApi extends ApiBase {
+    public UserAdminApi(Map<String, String> authCookies) {
+        super(authCookies);
+    }
+
+    public PaginatedUsers listUsers(int pageIndex, int pageSize) {
+        return givenAuth()
+            .queryParam("page", pageIndex)
+            .queryParam("page-size", pageSize)
             .get("/api/v1/users")
             .then()
             .statusCode(200)
@@ -20,10 +25,8 @@ public class UserAdminApi {
             .extract().as(PaginatedUsers.class);
     }
 
-    public static UserResponse getUser(String accessCookie,
-                                       UUID userId) {
-        return given()
-            .cookie("access_token", accessCookie)
+    public UserResponse getUser(UUID userId) {
+        return givenAuth()
             .get("/api/v1/users/{userId}", userId)
             .then()
             .statusCode(200)
@@ -31,11 +34,9 @@ public class UserAdminApi {
             .extract().as(UserResponse.class);
     }
 
-    public static UserResponse updateUser(String accessCookie,
-                                          UUID userId,
+    public UserResponse updateUser(UUID userId,
                                           UserUpdateRequest request) {
-        return given()
-            .cookie("access_token", accessCookie)
+        return givenAuth()
             .contentType(JSON)
             .body(request)
             .put("/api/v1/users/{userId}", userId)
@@ -45,10 +46,8 @@ public class UserAdminApi {
             .extract().as(UserResponse.class);
     }
 
-    public static void deleteUser(String accessCookie,
-                                  UUID userId) {
-        given()
-            .cookie("access_token", accessCookie)
+    public void deleteUser(UUID userId) {
+        givenAuth()
             .delete("/api/v1/users/{userId}", userId)
             .then()
             .statusCode(204);

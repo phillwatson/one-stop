@@ -1,0 +1,10 @@
+services:
+  wiremock:
+    image: wiremock/wiremock:3x
+    networks:
+      - onestop-http-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"

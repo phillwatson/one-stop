@@ -59,26 +59,26 @@ public class CountryResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/{countryId}")
     public Response getById(@Context UriInfo uriInfo,
-                            @PathParam("id") String id) {
-        log.info("Get country [id: {}]", id);
-        Country country = countryService.get(id).orElseThrow(() -> new NotFoundException("country", id));
+                            @PathParam("countryId") String countryId) {
+        log.info("Get country [countryId: {}]", countryId);
+        Country country = countryService.get(countryId).orElseThrow(() -> new NotFoundException("country", countryId));
 
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
         return Response.ok(marshal(country, uriBuilder)).build();
     }
 
     @GET
-    @Path("/{id}/logos")
+    @Path("/{countryId}/logos")
     @Produces("image/png")
     public Response getCountryLogo(@Context UriInfo uriInfo,
-                                   @PathParam("id") String id) {
-        log.info("Get country logo [id: {}]", id);
+                                   @PathParam("countryId") String countryId) {
+        log.info("Get country logo [countryId: {}]", countryId);
 
         StreamingOutput content = output -> {
             try (output) {
-                try (InputStream resource = countryService.getLogo(id)
+                try (InputStream resource = countryService.getLogo(countryId)
                     .orElseThrow(jakarta.ws.rs.NotFoundException::new)) {
                     IOUtils.copy(resource, output);
                 }
@@ -93,7 +93,7 @@ public class CountryResource {
 
         return Response.ok(content)
             .cacheControl(cacheControl)
-            .header("Content-Disposition", "attachment; filename=\"" + id + ".png\"")
+            .header("Content-Disposition", "attachment; filename=\"" + countryId + ".png\"")
             .build();
     }
 
