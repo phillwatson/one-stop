@@ -15,15 +15,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
 public class SendWithBlueSimulator {
-    private static final String SENDWITHBLUE_URL = "/api.sendinblue.com/v3/smtp/email";
+    private static final String BASE_URI = "/api.sendinblue.com/v3";
+    private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";
+    
+    public static final String WIREMOCK_EMAIL_URL = "http://wiremock:8080" + BASE_URI;
+
     private final WireMock wireMockClient;
 
     public SendWithBlueSimulator(int wiremockPort) {
-        log.debug("Starting SendWithBlue Simulator");
+        log.debug("Starting SendWithBlue Simulator [port: {}]", wiremockPort);
         wireMockClient = new WireMock(wiremockPort);
 
         wireMockClient.register(
-            post(SENDWITHBLUE_URL)
+            post(TRANSACTIONAL_EMAIL_URI)
                 .willReturn(ResponseDefinitionBuilder.okForJson(
                     new CreateSmtpEmail().messageId("<201798300811.5787683@relay.domain.com>")))
         );
@@ -42,7 +46,7 @@ public class SendWithBlueSimulator {
 
     public <T> List<LoggedRequest> verifyEmailSent(ContentPattern<T> body,
                                                    ConditionFactory awaiting) {
-        RequestPatternBuilder request = postRequestedFor(urlEqualTo(SENDWITHBLUE_URL))
+        RequestPatternBuilder request = postRequestedFor(urlEqualTo(TRANSACTIONAL_EMAIL_URI))
             .withRequestBody(body);
 
         if (awaiting != null) {

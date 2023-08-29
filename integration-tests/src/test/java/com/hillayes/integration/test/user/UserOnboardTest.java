@@ -20,7 +20,7 @@ public class UserOnboardTest extends ApiTestBase {
 
     @BeforeEach
     public void startEmailSim() {
-        emailSim = new SendWithBlueSimulator(environment.getServicePort("wiremock_1", 8080));
+        emailSim = new SendWithBlueSimulator(getWiremockPort());
     }
 
     @AfterEach
