@@ -8,3 +8,27 @@ services:
       options:
         max-size: "500k"
         max-file: "1"
+
+  user-service:
+    image: one-stop/user-service:1.0.0-SNAPSHOT
+    environment:
+      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
+
+  rail-service:
+    image: one-stop/rail-service:1.0.0-SNAPSHOT
+    environment:
+      ONE_STOP_RAILS_SECRET_ID: "abcdef"
+      ONE_STOP_RAILS_SECRET_KEY: "abcdef"
+      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
+
+  audit-service:
+    image: one-stop/audit-service:1.0.0-SNAPSHOT
+
+  email-service:
+    image: one-stop/email-service:1.0.0-SNAPSHOT
+    environment:
+      ONE_STOP_EMAIL_API_KEY: "abcdef"
+      ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+
+  client:
+    image: one-stop/client:1.0.0-SNAPSHOT

@@ -32,18 +32,21 @@ public class ApiTestBase {
     }
 
     private static DockerComposeContainer<?> initContainers() {
-        URL testDockerCompose = ApiTestBase.class.getResource("/docker-compose.test.yaml");
-        if (testDockerCompose == null) {
-            throw new RuntimeException("Unable to locate docker-compose.test.yaml.\nIt should be in the test resources folder.");
-        }
-
         return new DockerComposeContainer<>(
-            new File("/data/src/one-stop/docker-compose.yaml"),
-            new File("/data/src/one-stop/docker-compose.override.yaml"),
-            new File(testDockerCompose.getFile()))
+            new File("../../one-stop/docker-compose.yaml"),
+            resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client_1", 80)
             .withExposedService("wiremock_1", 8080)
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", "http://wiremock:8080/api.sendinblue.com/v3")
             .waitingFor("client_1", new HttpWaitStrategy().forPort(80).forPath("/api/v1/auth/jwks.json"));
+    }
+
+    private static File resourceFile(String filename) {
+        URL resource = ApiTestBase.class.getResource(filename);
+        if (resource == null) {
+            throw new RuntimeException("Unable to locate " + filename + ".\nIt should be in the test resources folder.");
+        }
+
+        return new File(resource.getFile());
     }
 }
