@@ -1,23 +1,26 @@
 package com.hillayes.integration.test.sim.email;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.matching.ContentPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.core.ConditionFactory;
 import sibModel.CreateSmtpEmail;
 
-import java.util.ArrayList;
+import java.io.Closeable;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
-public class SendWithBlueSimulator {
+public class SendWithBlueSimulator implements Closeable {
+    private static final ObjectReader jsonReader = new ObjectMapper().readerFor(EmailMessage.class);
+
     public static final String BASE_URI = "/api.sendinblue.com/v3";
     private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";
 
@@ -34,15 +37,39 @@ public class SendWithBlueSimulator {
         );
     }
 
-    public void stop() {
+    public void close() {
         wireMockClient.resetRequests();
         wireMockClient.removeMappings();
     }
 
-    public List<LoggedRequest> verifyEmailSent(String emailAddress,
+    /**
+     * Returns the email content of the given wiremock request.
+     * @param request the request returned from wiremock email server interception
+     * @return the content of the email extracted from the given request.
+     */
+    public EmailMessage parse(LoggedRequest request) {
+        try {
+            return jsonReader.readValue(request.getBodyAsString());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<LoggedRequest> verifyEmailSent(String toEmailAddress,
                                                ConditionFactory awaiting) {
+        log.info("Verifying email sent [address: {}]", toEmailAddress);
         return verifyEmailSent(
-            matchingJsonPath("$.to[0].email", equalToIgnoreCase(emailAddress)),
+            matchingJsonPath("$.to[0].email", equalToIgnoreCase(toEmailAddress)),
+            awaiting);
+    }
+
+    public List<LoggedRequest> verifyEmailSent(String toEmailAddress,
+                                               String subject,
+                                               ConditionFactory awaiting) {
+        log.info("Verifying email sent [address: {}, subject: {}]", toEmailAddress, subject);
+        return verifyEmailSent(
+            matchingJsonPath("$.to[0].email", equalToIgnoreCase(toEmailAddress))
+                .and(matchingJsonPath("$.subject", containing(subject))),
             awaiting);
     }
 

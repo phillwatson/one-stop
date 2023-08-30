@@ -18,6 +18,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -35,8 +36,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 @Slf4j
 public class EventDeliverer {
-    private final Producer<String, EventPacket> producer;
+    // the delay before messages polling begins
+    private final static Duration INIT_DELAY = Duration.ofSeconds(10);
+
+    // the frequency at which messages are polled from the database
+    private final static Duration POLL_FREQUENCY = Duration.ofSeconds(5);
+
+    // the maximum number of messages retrieved on each poll
+    private final static int POLL_BATCH_SIZE = 25;
+
+    // the repository to poll messages from the database
     private final EventRepository eventRepository;
+
+    // the broker interface to send messages polled from the database
+    private final Producer<String, EventPacket> producer;
 
     /**
      * A mutex to prevent delivery of events from multiple threads.
@@ -51,7 +64,8 @@ public class EventDeliverer {
             .numberOfThreads(1)
             .build());
 
-        executor.scheduleAtFixedRate(this::deliverEvents, 10, 60, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(this::deliverEvents,
+            INIT_DELAY.toSeconds(), POLL_FREQUENCY.toSeconds(), TimeUnit.SECONDS);
     }
 
     /**
@@ -89,7 +103,7 @@ public class EventDeliverer {
      */
     @Transactional(rollbackOn = Exception.class)
     protected void _deliverEvents() throws Exception {
-        List<EventEntity> events = eventRepository.listUndelivered(25);
+        List<EventEntity> events = eventRepository.listUndelivered(POLL_BATCH_SIZE);
         log.trace("Found events for delivery [size: {}]", events.size());
 
         if (events.isEmpty()) {
@@ -123,7 +137,6 @@ public class EventDeliverer {
         }
         log.trace("Event delivery complete");
     }
-
 
     @AllArgsConstructor
     private static class EventTuple {

@@ -1,16 +1,14 @@
 package com.hillayes.integration.test.user;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.integration.api.UserOnboardApi;
 import com.hillayes.integration.api.UserProfileApi;
 import com.hillayes.integration.test.ApiTestBase;
+import com.hillayes.integration.test.sim.email.EmailMessage;
 import com.hillayes.integration.test.sim.email.SendWithBlueSimulator;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserProfileResponse;
 import com.hillayes.onestop.api.UserRegisterRequest;
-import static org.apache.commons.lang3.RandomStringUtils.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +17,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +31,7 @@ public class UserOnboardTest extends ApiTestBase {
 
     @AfterEach
     public void stopEmailSim() {
-        emailSim.stop();
+        emailSim.close();
     }
 
     @Test
@@ -53,9 +52,8 @@ public class UserOnboardTest extends ApiTestBase {
         assertEquals(1, emailRequests.size());
 
         // and: the email contains HTMl body content
-        JsonNode json = new ObjectMapper().readTree(emailRequests.get(0).getBodyAsString());
-        assertNotNull(json);
-        String htmlContent = json.path("htmlContent").asText();
+        EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
+        String htmlContent = emailMessage.getHtmlContent();
         assertNotNull(htmlContent);
 
         // and: the HTML contains the magic-link token
@@ -70,7 +68,7 @@ public class UserOnboardTest extends ApiTestBase {
             .username(randomAlphanumeric(12))
             .givenName(randomAlphanumeric(10))
             .password(randomAlphanumeric(15));
-        Map<String, String> authTokens = userOnboardApi.onboardUser(completeRequest);
+        Map<String, String> authTokens = userOnboardApi.onboardUser(completeRequest).getRight();
 
         // then: auth tokens are returned
         assertEquals(3, authTokens.size());
@@ -85,5 +83,6 @@ public class UserOnboardTest extends ApiTestBase {
         // and: the profile matches given user information
         assertEquals(completeRequest.getUsername(), profile.getUsername());
         assertEquals(completeRequest.getGivenName(), profile.getGivenName());
+        assertEquals(registerRequest.getEmail().toLowerCase(), profile.getEmail().toLowerCase());
     }
 }

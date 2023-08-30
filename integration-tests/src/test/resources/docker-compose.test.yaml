@@ -1,6 +1,6 @@
 services:
   wiremock:
-    image: wiremock/wiremock:3x
+    image: wiremock/wiremock:2.35.0-1
     networks:
       - onestop-http-network
     logging:
