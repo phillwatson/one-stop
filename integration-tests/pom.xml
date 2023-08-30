@@ -13,6 +13,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>openapi-doc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>rail-service</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
@@ -20,21 +29,16 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sendinblue</groupId>
-            <artifactId>sib-api-v3-sdk</artifactId>
-            <version>6.0.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>openapi-doc</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sendinblue</groupId>
+            <artifactId>sib-api-v3-sdk</artifactId>
+            <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

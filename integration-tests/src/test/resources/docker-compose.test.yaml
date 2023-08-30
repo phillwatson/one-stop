@@ -20,6 +20,7 @@ services:
       ONE_STOP_RAILS_SECRET_ID: "abcdef"
       ONE_STOP_RAILS_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
+      QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${NORDIGEN_API_URL}
 
   audit-service:
     image: one-stop/audit-service:1.0.0-SNAPSHOT

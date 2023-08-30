@@ -12,7 +12,7 @@ public class InstitutionApi extends ApiBase {
         super(authCookies);
     }
 
-    public PaginatedInstitutions getInsititutions(int pageIndex, int pageSize, String countryCode) {
+    public PaginatedInstitutions getInstitutions(int pageIndex, int pageSize, String countryCode) {
         return givenAuth()
             .queryParam("page", pageIndex)
             .queryParam("page-size", pageSize)
@@ -24,7 +24,7 @@ public class InstitutionApi extends ApiBase {
             .extract().as(PaginatedInstitutions.class);
     }
 
-    public InstitutionResponse getInsititution(String institutionId) {
+    public InstitutionResponse getInstitution(String institutionId) {
         return givenAuth()
             .get("/api/v1/rails/institutions/{institutionId}", institutionId)
             .then()

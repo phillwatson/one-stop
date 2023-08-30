@@ -35,7 +35,7 @@ public class UserOnboardTest extends ApiTestBase {
     }
 
     @Test
-    public void testRegisterAndOnboardNewUser() throws Exception {
+    public void testRegisterAndOnboardNewUser() {
         UserOnboardApi userOnboardApi = new UserOnboardApi();
 
         // given: a request to register a user

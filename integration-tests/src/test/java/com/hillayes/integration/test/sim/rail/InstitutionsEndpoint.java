@@ -1,7 +1,7 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.integration.test.sim.rail;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -9,21 +9,15 @@ import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.inject.Singleton;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-@Singleton
 @Slf4j
 public class InstitutionsEndpoint extends AbstractResponseTransformer {
-    public InstitutionsEndpoint() {
-        super(null);
-    }
-
-    public void register(WireMockServer wireMockServer) {
+    public void register(WireMock wireMockClient) {
         // mock list endpoint
-        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/institutions/"))
+        wireMockClient.register(get(urlPathEqualTo(NordigenSimulator.BASE_URI + "/api/v2/institutions/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -34,7 +28,7 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock get endpoint
-        wireMockServer.stubFor(get(urlPathMatching("/api/v2/institutions/(.*)/"))
+        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/institutions/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()

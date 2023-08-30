@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.hillayes.rail.utils.TestData.fromJson;
-import static com.hillayes.rail.utils.TestData.toJson;
 
 @Singleton
 @Slf4j
@@ -48,7 +46,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                    .withTransformers(getName())
             )
         );
 
@@ -58,7 +56,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                    .withTransformers(getName())
                     .withTransformerParameter("list", true)
             )
         );
@@ -69,7 +67,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                    .withTransformers(getName())
             )
         );
 
@@ -79,7 +77,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                    .withTransformers(getName())
             )
         );
 
@@ -89,7 +87,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withTransformers(RequisitionsEndpoint.class.getSimpleName())
+                    .withTransformers(getName())
             )
         );
     }

@@ -23,10 +23,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class EventDelivererTest {
-    private Producer<String, EventPacket> producer = mock(Producer.class);
-    private EventRepository eventRepository = mock(EventRepository.class);
+    private final Producer<String, EventPacket> producer = mock(Producer.class);
+    private final EventRepository eventRepository = mock(EventRepository.class);
 
-    private EventDeliverer fixture = new EventDeliverer(producer, eventRepository);
+    private final EventDeliverer fixture = new EventDeliverer(eventRepository, producer);
 
     @BeforeEach
     public void beforeEach() {

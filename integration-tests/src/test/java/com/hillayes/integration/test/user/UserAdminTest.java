@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class UserAdminTest extends ApiTestBase {
     @Test
-    public void testListUsers() throws Exception {
+    public void testListUsers() {
         // given: several users exist
         List<UserEntity> expectedUsers = mockUsers();
 
@@ -60,7 +60,7 @@ public class UserAdminTest extends ApiTestBase {
     }
 
     @Test
-    public void testGetUser() throws Exception {
+    public void testGetUser() {
         // given: several users exist
         List<UserEntity> expectedUsers = mockUsers();
 
@@ -88,7 +88,7 @@ public class UserAdminTest extends ApiTestBase {
     }
 
     @Test
-    public void testUpdateUser() throws Exception {
+    public void testUpdateUser() {
         // given: several users exist
         List<UserEntity> expectedUsers = mockUsers();
 
@@ -144,7 +144,7 @@ public class UserAdminTest extends ApiTestBase {
     }
 
     @Test
-    public void testDeleteUser() throws Exception {
+    public void testDeleteUser() {
         // given: the admin user signs in
         AuthApi authApi = new AuthApi();
         Map<String, String> authTokens = authApi.login("admin", "password");
@@ -179,7 +179,7 @@ public class UserAdminTest extends ApiTestBase {
         assertEquals(initialUserCount, adminApi.listUsers(0, 30).getTotal());
     }
 
-    private List<UserEntity> mockUsers() throws Exception {
+    private List<UserEntity> mockUsers() {
         return UserUtils.createUsers(getWiremockPort(),
             List.of(
                 UserEntity.builder()

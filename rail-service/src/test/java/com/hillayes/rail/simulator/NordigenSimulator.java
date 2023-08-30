@@ -15,7 +15,6 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static com.hillayes.rail.utils.TestData.toJson;
 
 @Singleton
 @Slf4j
@@ -92,7 +91,7 @@ public class NordigenSimulator {
         wireMockServer.stubFor(post(urlEqualTo("/api/v2/token/new/"))
             .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody(toJson(response)))
+                .withBody(AbstractResponseTransformer.toJson(response)))
         );
     }
 

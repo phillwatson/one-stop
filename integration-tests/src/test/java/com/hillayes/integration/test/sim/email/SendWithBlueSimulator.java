@@ -27,7 +27,7 @@ public class SendWithBlueSimulator implements Closeable {
     private final WireMock wireMockClient;
 
     public SendWithBlueSimulator(int wiremockPort) {
-        log.debug("Starting SendWithBlue Simulator [port: {}]", wiremockPort);
+        log.info("Starting SendWithBlue Simulator [port: {}]", wiremockPort);
         wireMockClient = new WireMock(wiremockPort);
 
         wireMockClient.register(

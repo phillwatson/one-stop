@@ -1,6 +1,7 @@
 package com.hillayes.integration.test;
 
 import com.hillayes.integration.test.sim.email.SendWithBlueSimulator;
+import com.hillayes.integration.test.sim.rail.NordigenSimulator;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -39,6 +40,7 @@ public class ApiTestBase {
             .withExposedService("client_1", 80)
             .withExposedService("wiremock_1", 8080)
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", "http://wiremock:8080" + SendWithBlueSimulator.BASE_URI)
+            .withEnv("NORDIGEN_API_URL", "http://wiremock:8080" + NordigenSimulator.BASE_URI)
             .waitingFor("client_1", new HttpWaitStrategy().forPort(80).forPath("/api/v1/auth/jwks.json"));
     }
 

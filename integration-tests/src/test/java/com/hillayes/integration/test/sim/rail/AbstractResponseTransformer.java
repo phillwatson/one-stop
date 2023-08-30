@@ -1,9 +1,11 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.integration.test.sim.rail;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -19,26 +21,16 @@ import java.util.Optional;
 public abstract class AbstractResponseTransformer extends ResponseDefinitionTransformer {
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    private final String name;
-    private final boolean global;
-
-    AbstractResponseTransformer(String name) {
-        this(name, false);
-    }
-
-    AbstractResponseTransformer(String name, boolean global) {
-        this.name = name;
-        this.global = global;
-    }
+    abstract public void register(WireMock wireMockClient);
 
     @Override
     public String getName() {
-        return name == null ? this.getClass().getSimpleName() : name;
+        return this.getClass().getSimpleName();
     }
 
     @Override
     public boolean applyGlobally() {
-        return global;
+        return false;
     }
 
     protected static String toJson(Object object) {

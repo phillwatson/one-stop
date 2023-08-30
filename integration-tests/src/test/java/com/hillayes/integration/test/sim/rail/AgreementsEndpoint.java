@@ -1,7 +1,7 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.integration.test.sim.rail;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -11,7 +11,6 @@ import com.hillayes.rail.model.EndUserAgreement;
 import com.hillayes.rail.model.EndUserAgreementRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,24 +18,19 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-@Singleton
 @Slf4j
 public class AgreementsEndpoint extends AbstractResponseTransformer {
     private final Map<String, EndUserAgreement> agreements = new HashMap<>();
-
-    public AgreementsEndpoint() {
-        super(null);
-    }
 
     EndUserAgreement removeAgreement(String id) {
         return agreements.remove(id);
     }
 
-    public void register(WireMockServer wireMockServer) {
+    public void register(WireMock wireMockClient) {
         agreements.clear();
 
         // mock create endpoint
-        wireMockServer.stubFor(post(urlEqualTo("/api/v2/agreements/enduser/"))
+        wireMockClient.register(post(urlEqualTo(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -46,7 +40,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock list endpoint
-        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/agreements/enduser/"))
+        wireMockClient.register(get(urlPathEqualTo(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -57,7 +51,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock get endpoint
-        wireMockServer.stubFor(get(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
+        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -67,7 +61,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock accept endpoint
-        wireMockServer.stubFor(put(urlPathMatching("/api/v2/agreements/enduser/(.*)/accept/"))
+        wireMockClient.register(put(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/accept/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -77,7 +71,7 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock delete endpoint
-        wireMockServer.stubFor(delete(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
+        wireMockClient.register(delete(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()

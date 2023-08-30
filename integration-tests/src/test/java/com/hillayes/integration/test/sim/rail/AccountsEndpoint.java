@@ -1,13 +1,13 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.integration.test.sim.rail;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.rail.model.*;
-import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -17,18 +17,13 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.apache.commons.lang3.RandomStringUtils.*;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-@Singleton
 @Slf4j
 public class AccountsEndpoint extends AbstractResponseTransformer {
     private final Map<String, AccountSummary> accounts = new HashMap<>();
     private final Map<String, AccountBalanceList> balances = new HashMap<>();
     private final Map<String, TransactionList> transactions = new HashMap<>();
-
-    public AccountsEndpoint() {
-        super(null);
-    }
 
     public void removeAccount(String accountId) {
         accounts.remove(accountId);
@@ -51,13 +46,13 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         return account.id;
     }
 
-    public void register(WireMockServer wireMockServer) {
+    public void register(WireMock wireMockClient) {
         accounts.clear();
         balances.clear();
         transactions.clear();
 
         // mock get account endpoint
-        wireMockServer.stubFor(get(urlPathMatching("/api/v2/accounts/([^/]+)/([^/]+/)?$"))
+        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/accounts/([^/]+)/([^/]+/)?$"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()

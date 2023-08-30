@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 public class UserUtils {
     public static List<UserEntity> createUsers(int wiremockPort,
-                                               List<UserEntity> users) throws Exception {
+                                               List<UserEntity> users) {
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(wiremockPort)) {
             return users.stream()
                 .map(user -> __createUser(emailSim, user))
@@ -30,14 +30,14 @@ public class UserUtils {
     }
 
     private static UserEntity createUser(int wiremockPort,
-                                         UserEntity user) throws RuntimeException {
+                                         UserEntity user) {
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(wiremockPort)) {
             return __createUser(emailSim, user);
         }
     }
 
     private static UserEntity __createUser(SendWithBlueSimulator emailSim,
-                                           UserEntity user) throws RuntimeException {
+                                           UserEntity user) {
         log.info("Creating user [username: {}]", user.getUsername());
         UserOnboardApi userOnboardApi = new UserOnboardApi();
 
