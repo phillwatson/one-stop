@@ -1,6 +1,5 @@
-package com.hillayes.integration.test.sim.rail;
+package com.hillayes.sim.nordigen;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.FileSource;

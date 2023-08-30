@@ -52,7 +52,7 @@ public class SendEmailServiceTest {
         verify(emailApi).sendTransacEmail(emailCapture.capture());
 
         SendSmtpEmail email = emailCapture.getValue();
-        assertTrue(email.getHtmlContent().contains(params.get(recipient.getEmail()).toString()));
+        assertTrue(email.getHtmlContent().contains(recipient.getEmail()));
         assertTrue(email.getHtmlContent().contains(params.get("acknowledge_uri").toString()));
         assertTrue(email.getHtmlContent().contains(params.get("expires").toString()));
     }

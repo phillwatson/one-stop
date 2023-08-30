@@ -1,13 +1,13 @@
-package com.hillayes.integration.test.sim.email;
+package com.hillayes.sim.email;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContentPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.hillayes.commons.json.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.core.ConditionFactory;
 import sibModel.CreateSmtpEmail;
@@ -19,7 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
 public class SendWithBlueSimulator implements Closeable {
-    private static final ObjectReader jsonReader = new ObjectMapper().readerFor(EmailMessage.class);
+    private static final ObjectReader jsonReader = MapperFactory.readerFor(EmailMessage.class);
 
     public static final String BASE_URI = "/api.sendinblue.com/v3";
     private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";

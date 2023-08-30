@@ -1,7 +1,7 @@
 package com.hillayes.integration.test;
 
-import com.hillayes.integration.test.sim.email.SendWithBlueSimulator;
-import com.hillayes.integration.test.sim.rail.NordigenSimulator;
+import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.nordigen.NordigenSimulator;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;

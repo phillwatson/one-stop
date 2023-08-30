@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
     <description>Hillayes One-Stop</description>
     <url>http://www.hillayes.co.uk/hillayes/one-stop</url>
-    <inceptionYear>2023</inceptionYear>
+    <inceptionYear>2022</inceptionYear>
     <organization>
         <name>Hillayes UK</name>
         <url>http://www.hillayes.co.uk</url>
@@ -33,6 +33,7 @@
         <module>rail-service</module>
         <module>user-service</module>
 
+        <module>sim-lib</module>
         <module>integration-tests</module>
     </modules>
 
@@ -97,9 +98,34 @@
             </dependency>
 
             <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.28</version>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>4.2.0</version>
+            </dependency>
+            <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
                 <version>5.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8-standalone</artifactId>
+                <version>2.35.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sendinblue</groupId>
+                <artifactId>sib-api-v3-sdk</artifactId>
+                <version>6.0.0</version>
             </dependency>
 
             <dependency>
@@ -162,6 +188,16 @@
                 <artifactId>user-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>sim-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>integration-tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -169,7 +205,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
             <scope>provided</scope>
         </dependency>
 
@@ -221,19 +256,16 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.7.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>2.35.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

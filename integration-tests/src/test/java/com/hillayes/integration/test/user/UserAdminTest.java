@@ -4,13 +4,13 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.integration.api.AuthApi;
 import com.hillayes.integration.api.UserAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
-import com.hillayes.integration.test.sim.email.SendWithBlueSimulator;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
 import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserRole;
 import com.hillayes.onestop.api.UserUpdateRequest;
+import com.hillayes.sim.email.SendWithBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

@@ -1,4 +1,4 @@
-package com.hillayes.integration.test.sim.email;
+package com.hillayes.sim.email;
 
 import lombok.Getter;
 import lombok.Setter;

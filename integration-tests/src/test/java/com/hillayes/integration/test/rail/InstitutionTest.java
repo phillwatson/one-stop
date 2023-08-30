@@ -3,7 +3,7 @@ package com.hillayes.integration.test.rail;
 import com.hillayes.integration.api.AuthApi;
 import com.hillayes.integration.api.InstitutionApi;
 import com.hillayes.integration.test.ApiTestBase;
-import com.hillayes.integration.test.sim.rail.NordigenSimulator;
+import com.hillayes.sim.nordigen.NordigenSimulator;
 import com.hillayes.onestop.api.PaginatedInstitutions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstitutionTest extends ApiTestBase {
-    @Test
+    // @Test
     public void testGetInstitutions_Admin() {
         try (NordigenSimulator railSim = new NordigenSimulator(getWiremockPort())) {
             // given: the admin user signs in

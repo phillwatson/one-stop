@@ -1,15 +1,15 @@
-package com.hillayes.integration.test.sim.rail;
+package com.hillayes.sim.nordigen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.rail.model.PaginatedList;
 import lombok.AllArgsConstructor;
 
@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 public abstract class AbstractResponseTransformer extends ResponseDefinitionTransformer {
-    protected static final ObjectMapper jsonMapper = new ObjectMapper();
+    protected static final ObjectMapper jsonMapper = MapperFactory.defaultMapper();
 
     abstract public void register(WireMock wireMockClient);
 

@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer;
 import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.rail.model.PaginatedList;
 import lombok.AllArgsConstructor;
 
@@ -17,7 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 public abstract class AbstractResponseTransformer extends ResponseDefinitionTransformer {
-    protected static final ObjectMapper jsonMapper = new ObjectMapper();
+    protected static final ObjectMapper jsonMapper = MapperFactory.defaultMapper();
 
     private final String name;
     private final boolean global;

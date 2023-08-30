@@ -76,7 +76,7 @@ public class UserTopicConsumer_UserRegisteredTest {
         assertEquals(event.getLocale(), recipientCaptor.getValue().getLocale().get());
 
         // and: the email template parameters are taken from the event payload
-        assertEquals(event.getAcknowledgerUri().toString(), paramsCaptor.getValue().get("acknowledge-uri"));
+        assertEquals(event.getAcknowledgerUri().toString(), paramsCaptor.getValue().get("acknowledge_uri"));
         assertEquals(fixture.format(event.getExpires()), paramsCaptor.getValue().get("expires"));
     }
 
