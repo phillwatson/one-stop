@@ -7,8 +7,8 @@ import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserProfileResponse;
 import com.hillayes.onestop.api.UserRegisterRequest;
-import com.hillayes.sim.email.EmailMessage;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.integration.sim.email.EmailMessage;
+import com.hillayes.integration.sim.email.SendWithBlueSimulator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class UserOnboardTest extends ApiTestBase {
     public void testRegisterAndOnboardNewUser() {
         UserOnboardApi userOnboardApi = new UserOnboardApi();
 
-        // given: a request to register a user
+        // given: a request to register a user by email
         UserRegisterRequest registerRequest = new UserRegisterRequest()
             .email(randomAlphanumeric(30));
 
@@ -76,13 +76,13 @@ public class UserOnboardTest extends ApiTestBase {
         assertTrue(authTokens.containsKey("refresh_token"));
         assertTrue(authTokens.containsKey("XSRF-TOKEN"));
 
-        // and: the new user can ue these tokens to retrieve their profile
+        // and: the new user can use these tokens to retrieve their profile
         UserProfileResponse profile = new UserProfileApi(authTokens).getProfile();
         assertNotNull(profile);
 
         // and: the profile matches given user information
         assertEquals(completeRequest.getUsername(), profile.getUsername());
         assertEquals(completeRequest.getGivenName(), profile.getGivenName());
-        assertEquals(registerRequest.getEmail().toLowerCase(), profile.getEmail().toLowerCase());
+        assertEquals(registerRequest.getEmail().toLowerCase(), profile.getEmail());
     }
 }

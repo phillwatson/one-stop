@@ -17,9 +17,13 @@
             <artifactId>openapi-doc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>sim-lib</artifactId>
+            <groupId>com.sendinblue</groupId>
+            <artifactId>sib-api-v3-sdk</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.hillayes</groupId>-->
+<!--            <artifactId>sim-lib</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>

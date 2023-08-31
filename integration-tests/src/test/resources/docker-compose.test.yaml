@@ -1,16 +1,16 @@
 services:
-  sim:
-    image: one-stop/sim-lib:1.0.0-SNAPSHOT
+#  sim:
+#    image: one-stop/sim-lib:1.0.0-SNAPSHOT
 
   wiremock:
     image: wiremock/wiremock:2.35.0-1
-    command: [
-      "-extensions",
-      "com.hillayes.sim.nordigen.InstitutionsEndpoint,com.hillayes.sim.nordigen.AgreementsEndpoint,com.hillayes.sim.nordigen.AccountsEndpoint,com.hillayes.sim.nordigen.RequisitionsEndpoint" ]
     networks:
       - onestop-http-network
-    volumes_from:
-      - sim:ro
+#    command: [
+#      "-extensions",
+#      "com.hillayes.sim.nordigen.InstitutionsEndpoint,com.hillayes.sim.nordigen.AgreementsEndpoint,com.hillayes.sim.nordigen.AccountsEndpoint,com.hillayes.sim.nordigen.RequisitionsEndpoint" ]
+#    volumes_from:
+#      - sim:ro
     logging:
       driver: "json-file"
       options:
