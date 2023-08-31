@@ -1,8 +1,16 @@
 services:
+  sim:
+    image: one-stop/sim-lib:1.0.0-SNAPSHOT
+
   wiremock:
     image: wiremock/wiremock:2.35.0-1
+    command: [
+      "-extensions",
+      "com.hillayes.sim.nordigen.InstitutionsEndpoint,com.hillayes.sim.nordigen.AgreementsEndpoint,com.hillayes.sim.nordigen.AccountsEndpoint,com.hillayes.sim.nordigen.RequisitionsEndpoint" ]
     networks:
       - onestop-http-network
+    volumes_from:
+      - sim:ro
     logging:
       driver: "json-file"
       options:
@@ -22,14 +30,14 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${NORDIGEN_API_URL}
 
-  audit-service:
-    image: one-stop/audit-service:1.0.0-SNAPSHOT
-
   email-service:
     image: one-stop/email-service:1.0.0-SNAPSHOT
     environment:
       ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+
+  audit-service:
+    image: one-stop/audit-service:1.0.0-SNAPSHOT
 
   client:
     image: one-stop/client:1.0.0-SNAPSHOT
