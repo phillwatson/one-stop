@@ -11,8 +11,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.Provider;
 
-import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 /**

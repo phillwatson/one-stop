@@ -5,8 +5,6 @@ import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.model.Institution;
 import com.hillayes.rail.model.InstitutionDetail;
 import com.hillayes.rail.repository.InstitutionRepository;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import jakarta.annotation.PostConstruct;
@@ -59,10 +57,6 @@ public class InstitutionService extends AbstractRailService {
         }
     }
 
-    @RequiredArgsConstructor
-    @EqualsAndHashCode
-    private static class CacheKey {
-        private final String countryCode;
-        private final Boolean paymentsEnabled;
+    private record CacheKey(String countryCode, Boolean paymentsEnabled) {
     }
 }

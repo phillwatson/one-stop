@@ -21,8 +21,8 @@
             <artifactId>smallrye-jwt-build</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-jwt</artifactId>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-jwt</artifactId>
         </dependency>
 
         <dependency>

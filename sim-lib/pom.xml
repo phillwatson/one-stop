@@ -38,41 +38,4 @@
             <artifactId>rail-service</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.43.4</version>
-                <configuration>
-                    <images>
-                        <image>
-                            <!-- creates a data container to export the jar file -->
-                            <name>${project.parent.artifactId}/${project.artifactId}:${project.version}</name>
-                            <build>
-                                <from>busybox:1.36.1-musl</from>
-                                <volumes>
-                                    <volume>/var/wiremock/extensions</volume>
-                                </volumes>
-                                <assembly>
-                                    <mode>dir</mode>
-                                    <targetDir>/var/wiremock/extensions</targetDir>
-                                    <descriptorRef>artifact</descriptorRef>
-                                </assembly>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
