@@ -136,7 +136,7 @@ public class JobbingTaskTest extends TestBase {
                     context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
 
                 if (count < 3) {
-                    throw new RuntimeException("test task failure");
+                    throw new RuntimeException("Mock failure");
                 }
                 return TaskConclusion.COMPLETE;
             }
@@ -178,7 +178,7 @@ public class JobbingTaskTest extends TestBase {
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
                     context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count);
 
-                throw new RuntimeException("test task failure");
+                throw new RuntimeException("Mock failure");
             }
         };
 
@@ -238,7 +238,7 @@ public class JobbingTaskTest extends TestBase {
                     context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count, context.getPayload());
 
                 assertEquals(payload, context.getPayload());
-                throw new RuntimeException("test task failure");
+                throw new RuntimeException("Mock failure");
             }
         };
 

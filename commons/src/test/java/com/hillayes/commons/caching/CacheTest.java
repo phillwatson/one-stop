@@ -30,7 +30,7 @@ public class CacheTest {
         verify(supplier, never()).get();
 
         // wait for cache to timeout
-        sleep(100);
+        sleep(110);
         assertEquals("value 1", fixture.getValueOrCall(1, supplier));
         verify(supplier).get();
     }

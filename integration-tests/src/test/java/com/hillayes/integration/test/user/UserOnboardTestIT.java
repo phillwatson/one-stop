@@ -21,7 +21,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserOnboardTest extends ApiTestBase {
+public class UserOnboardTestIT extends ApiTestBase {
     private SendWithBlueSimulator emailSim;
 
     @BeforeEach
