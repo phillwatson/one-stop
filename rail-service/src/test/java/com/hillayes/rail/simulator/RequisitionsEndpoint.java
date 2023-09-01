@@ -7,9 +7,9 @@ import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
-import com.hillayes.rail.model.RequisitionStatus;
+import com.hillayes.nordigen.model.Requisition;
+import com.hillayes.nordigen.model.RequisitionRequest;
+import com.hillayes.nordigen.model.RequisitionStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.inject.Inject;

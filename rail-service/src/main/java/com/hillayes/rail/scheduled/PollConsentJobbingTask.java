@@ -5,7 +5,7 @@ import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.RequisitionStatus;
+import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.rail.service.RequisitionService;
 import com.hillayes.rail.service.UserConsentService;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -7,7 +7,7 @@ import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.time.*;

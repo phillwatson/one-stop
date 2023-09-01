@@ -1,9 +1,9 @@
 package com.hillayes.rail.resource.admin;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.rail.model.AccountSummary;
-import com.hillayes.rail.model.Balance;
-import com.hillayes.rail.model.TransactionList;
+import com.hillayes.nordigen.model.AccountSummary;
+import com.hillayes.nordigen.model.Balance;
+import com.hillayes.nordigen.model.TransactionList;
 import com.hillayes.rail.service.RailAccountService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;

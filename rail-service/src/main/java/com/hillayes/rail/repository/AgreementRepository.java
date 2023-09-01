@@ -1,9 +1,9 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.EndUserAgreement;
-import com.hillayes.rail.model.EndUserAgreementAccepted;
-import com.hillayes.rail.model.EndUserAgreementRequest;
-import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.nordigen.model.EndUserAgreement;
+import com.hillayes.nordigen.model.EndUserAgreementAccepted;
+import com.hillayes.nordigen.model.EndUserAgreementRequest;
+import com.hillayes.nordigen.model.PaginatedList;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

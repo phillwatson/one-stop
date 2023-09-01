@@ -1,9 +1,9 @@
 package com.hillayes.rail.resource.admin;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.rail.model.PaginatedList;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
+import com.hillayes.nordigen.model.PaginatedList;
+import com.hillayes.nordigen.model.Requisition;
+import com.hillayes.nordigen.model.RequisitionRequest;
 import com.hillayes.rail.service.RequisitionService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;

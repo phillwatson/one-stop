@@ -5,7 +5,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.Institution;
+import com.hillayes.nordigen.model.Institution;
 import com.hillayes.rail.resource.ResourceUtils;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;

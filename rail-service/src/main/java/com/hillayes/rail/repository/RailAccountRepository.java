@@ -1,8 +1,8 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.AccountSummary;
-import com.hillayes.rail.model.AccountBalanceList;
-import com.hillayes.rail.model.TransactionsResponse;
+import com.hillayes.nordigen.model.AccountSummary;
+import com.hillayes.nordigen.model.AccountBalanceList;
+import com.hillayes.nordigen.model.TransactionsResponse;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

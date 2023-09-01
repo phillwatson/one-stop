@@ -1,16 +1,15 @@
 services:
-#  sim:
-#    image: one-stop/sim-lib:1.0.0-SNAPSHOT
+  sim:
+    image: one-stop/sim-lib:1.0.0-SNAPSHOT
+    ports:
+      - "9090:8080"
+    networks:
+      - onestop-http-network
 
   wiremock:
     image: wiremock/wiremock:2.35.0-1
     networks:
       - onestop-http-network
-#    command: [
-#      "-extensions",
-#      "com.hillayes.sim.nordigen.InstitutionsEndpoint,com.hillayes.sim.nordigen.AgreementsEndpoint,com.hillayes.sim.nordigen.AccountsEndpoint,com.hillayes.sim.nordigen.RequisitionsEndpoint" ]
-#    volumes_from:
-#      - sim:ro
     logging:
       driver: "json-file"
       options:
@@ -19,11 +18,17 @@ services:
 
   user-service:
     image: one-stop/user-service:1.0.0-SNAPSHOT
+    ports:
+      - "8081:8080"
+      - "5001:5005"
     environment:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
 
   rail-service:
     image: one-stop/rail-service:1.0.0-SNAPSHOT
+    ports:
+      - "8082:8080"
+      - "5002:5005"
     environment:
       ONE_STOP_RAILS_SECRET_ID: "abcdef"
       ONE_STOP_RAILS_SECRET_KEY: "abcdef"
@@ -32,12 +37,18 @@ services:
 
   email-service:
     image: one-stop/email-service:1.0.0-SNAPSHOT
+    ports:
+      - "8084:8080"
+      - "5004:5005"
     environment:
       ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
 
   audit-service:
     image: one-stop/audit-service:1.0.0-SNAPSHOT
+    ports:
+      - "8083:8080"
+      - "5003:5005"
 
   client:
     image: one-stop/client:1.0.0-SNAPSHOT

@@ -8,7 +8,7 @@ import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.Institution;
+import com.hillayes.nordigen.model.Institution;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.UserConsentService;

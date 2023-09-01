@@ -10,7 +10,7 @@ import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserRole;
 import com.hillayes.onestop.api.UserUpdateRequest;
-import com.hillayes.integration.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendWithBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

@@ -1,8 +1,8 @@
 package com.hillayes.rail.service;
 
-import com.hillayes.rail.model.PaginatedList;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
+import com.hillayes.nordigen.model.PaginatedList;
+import com.hillayes.nordigen.model.Requisition;
+import com.hillayes.nordigen.model.RequisitionRequest;
 import com.hillayes.rail.repository.RequisitionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

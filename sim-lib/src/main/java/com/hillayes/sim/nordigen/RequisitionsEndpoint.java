@@ -1,15 +1,12 @@
 package com.hillayes.sim.nordigen;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
-import com.hillayes.rail.model.RequisitionStatus;
+import com.hillayes.nordigen.model.Requisition;
+import com.hillayes.nordigen.model.RequisitionRequest;
+import com.hillayes.nordigen.model.RequisitionStatus;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
@@ -18,10 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
+@ApplicationScoped
+@Path(NordigenSimulator.BASE_URI + "/api/v2/requisitions/")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class RequisitionsEndpoint extends AbstractResponseTransformer {
+public class RequisitionsEndpoint extends AbstractEndpoint {
     private final AgreementsEndpoint agreements;
 
     private final AccountsEndpoint accounts;
@@ -34,146 +33,28 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         this.accounts = accounts;
     }
 
-    public void register(WireMock wireMockClient) {
+    public void reset() {
         requisitions.clear();
-
-        // mock create endpoint
-        wireMockClient.register(post(urlEqualTo(NordigenSimulator.BASE_URI + "/api/v2/requisitions/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock list endpoint
-        wireMockClient.register(get(urlPathEqualTo(NordigenSimulator.BASE_URI + "/api/v2/requisitions/"))
-            //.withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-                    .withTransformerParameter("list", true)
-            )
-        );
-
-        // mock get endpoint
-        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/requisitions/(.*)/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock accept endpoint
-        wireMockClient.register(put(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/requisitions/(.*)/accept/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock delete endpoint
-        wireMockClient.register(delete(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/requisitions/(.*)/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
     }
 
-    @Override
-    public ResponseDefinition transform(Request request,
-                                        ResponseDefinition responseDefinition,
-                                        FileSource files,
-                                        Parameters parameters) {
-        RequestMethod method = request.getMethod();
-        if (method.equals(RequestMethod.POST)) {
-            return create(request, responseDefinition);
-        }
-
-        if (method.equals(RequestMethod.GET)) {
-            if (parameters.getBoolean("list", false)) {
-                return list(request, responseDefinition);
-            }
-            return getById(request, responseDefinition);
-        }
-
-        if (method.equals(RequestMethod.DELETE)) {
-            return deleteById(request, responseDefinition);
-        }
-
-        return unsupportedMethod(request, responseDefinition);
-    }
-
-    private ResponseDefinition create(Request request,
-                                      ResponseDefinition responseDefinition) {
-        RequisitionRequest requisitionRequest = fromJson(request.getBodyAsString(), RequisitionRequest.class);
-
-        return requisitions.values().stream()
-            .filter(agreement -> agreement.institutionId.equals(requisitionRequest.getInstitutionId()))
-            .map(agreement -> ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(409)
-                .withBody(toJson(Map.of(
-                    "summary", "Conflict",
-                    "detail", "An requisition with this Institution already exists.",
-                    "status_code", 409
-                )))
-                .build()
-            )
-            .findFirst()
-            .orElseGet(() -> {
-                String id = UUID.randomUUID().toString();
-                Requisition response = Requisition.builder()
-                    .id(id)
-                    .created(OffsetDateTime.now())
-                    .status(RequisitionStatus.CR)
-                    .link("https://ob.nordigen.com/psd2/start/" + id + "/" + requisitionRequest.getInstitutionId())
-                    .redirect(requisitionRequest.getRedirect())
-                    .institutionId(requisitionRequest.getInstitutionId())
-                    .agreement(requisitionRequest.getAgreement())
-                    .reference(requisitionRequest.getReference())
-                    .userLanguage(requisitionRequest.getUserLanguage())
-                    .ssn(requisitionRequest.getSsn())
-                    .accountSelection(requisitionRequest.getAccountSelection())
-                    .redirectImmediate(requisitionRequest.getRedirectImmediate())
-                    .accounts(List.of())
-                    .build();
-
-                requisitions.put(response.id, response);
-                return ResponseDefinitionBuilder.like(responseDefinition)
-                        .withStatus(201)
-                        .withBody(toJson(response))
-                        .build();
-                }
-            );
-    }
-
-    private ResponseDefinition list(Request request,
-                                    ResponseDefinition responseDefinition) {
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(sublist(request, requisitions.values())))
-            .build();
+    @GET
+    public Response list(@QueryParam("offset") int offset,
+                         @QueryParam("limit") int limit) {
+        log.info("list requisitions [offset: {}, limit: {}]", offset, limit);
+        return Response.ok(sublist(offset, limit, requisitions.values())).build();
     }
 
     /**
      * Returns the identified Requisition. Repeated calls will transition the
      * requisition's status to the next status in the requisition flow.
      */
-    private ResponseDefinition getById(Request request,
-                                       ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 4);
+    @GET
+    @Path("{id}/")
+    public Response get(@PathParam("id") String id) {
+        log.info("get requisitions [id: {}]", id);
         Requisition entity = requisitions.get(id);
         if (entity == null) {
-            return notFound(request, responseDefinition);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         RequisitionStatus nextStatus = entity.status.nextStatus();
@@ -189,33 +70,66 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
                 );
             }
         }
-
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(entity))
-            .build();
+        return Response.ok(entity).build();
     }
 
-    private ResponseDefinition deleteById(Request request,
-                                          ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 4);
+    @POST
+    public Response create(RequisitionRequest requisitionRequest) {
+        log.info("create requisitions [institution: {}]", requisitionRequest.getInstitutionId());
+        return requisitions.values().stream()
+            .filter(agreement -> agreement.institutionId.equals(requisitionRequest.getInstitutionId()))
+            .findFirst()
+            .map(agreement -> Response.status(Response.Status.CONFLICT)
+                .entity(Map.of(
+                    "summary", "Conflict",
+                    "detail", "An requisition with this Institution already exists.",
+                    "status_code", 409
+                ))
+                .build()
+            )
+            .orElseGet(() -> {
+                    String id = UUID.randomUUID().toString();
+                    Requisition response = Requisition.builder()
+                        .id(id)
+                        .created(OffsetDateTime.now())
+                        .status(RequisitionStatus.CR)
+                        .link("https://ob.nordigen.com/psd2/start/" + id + "/" + requisitionRequest.getInstitutionId())
+                        .redirect(requisitionRequest.getRedirect())
+                        .institutionId(requisitionRequest.getInstitutionId())
+                        .agreement(requisitionRequest.getAgreement())
+                        .reference(requisitionRequest.getReference())
+                        .userLanguage(requisitionRequest.getUserLanguage())
+                        .ssn(requisitionRequest.getSsn())
+                        .accountSelection(requisitionRequest.getAccountSelection())
+                        .redirectImmediate(requisitionRequest.getRedirectImmediate())
+                        .accounts(List.of())
+                        .build();
+
+                    requisitions.put(response.id, response);
+                    return Response.status(Response.Status.CREATED).entity(response).build();
+                }
+            );
+    }
+
+    @DELETE
+    @Path("{id}/")
+    public Response delete(@PathParam("id") String id) {
+        log.info("delete requisitions [id: {}]", id);
         Requisition entity = requisitions.remove(id);
 
         if (entity == null) {
-            return notFound(request, responseDefinition);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         // delete associated agreements
         agreements.removeAgreement(entity.agreement);
         entity.accounts.forEach(accounts::removeAccount);
-        
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(Map.of(
+
+        return Response.ok(Map.of(
                 "status_code", 200,
                 "summary", "Requisition deleted",
                 "detail", "Requisition " + id + " deleted"
-            )))
+            ))
             .build();
     }
 }

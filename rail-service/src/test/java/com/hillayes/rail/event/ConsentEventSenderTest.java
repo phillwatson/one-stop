@@ -5,7 +5,7 @@ import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.model.InstitutionDetail;
+import com.hillayes.nordigen.model.InstitutionDetail;
 import com.hillayes.rail.service.InstitutionService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;

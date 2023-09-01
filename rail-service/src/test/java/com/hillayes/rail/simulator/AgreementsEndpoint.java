@@ -7,8 +7,8 @@ import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.EndUserAgreement;
-import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.nordigen.model.EndUserAgreement;
+import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.inject.Singleton;

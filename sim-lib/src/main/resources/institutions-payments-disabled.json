@@ -1,0 +1,463 @@
+[
+  {
+    "id": "NEWDAY_AMAZON_NEWDUK00X01",
+    "name": "Amazon card (Newday)",
+    "bic": "NEWDUK00X01",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_AMAZON_NEWDUK00X01.png"
+  },
+  {
+    "id": "AMERICAN_EXPRESS_AESUGB21",
+    "name": "American Express",
+    "bic": "AESUGB21",
+    "transaction_total_days": "90",
+    "countries": [
+      "GB",
+      "FR",
+      "FI",
+      "SE",
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/AMERICAN_EXPRESS_AESUGB21.png"
+  },
+  {
+    "id": "NEWDAY_AQUA_NEWDUK00X02",
+    "name": "Aqua card (Newday)",
+    "bic": "NEWDUK00X02",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_AQUA_NEWDUK00X02.png"
+  },
+  {
+    "id": "NEWDAY_ARGOS_NEWDUK00X04",
+    "name": "Argos card (Newday)",
+    "bic": "NEWDUK00X04",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_ARGOS_NEWDUK00X04.png"
+  },
+  {
+    "id": "NEWDAY_BIP_NEWDUK00X05",
+    "name": "BIP card (Newday)",
+    "bic": "NEWDUK00X05",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_BIP_NEWDUK00X05.png"
+  },
+  {
+    "id": "NEWDAY_BURTON_NEWDUK00X06",
+    "name": "Burton card (Newday)",
+    "bic": "NEWDUK00X06",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_BURTON_NEWDUK00X06.png"
+  },
+  {
+    "id": "CAPITALONE_NFBKUSF1XXX",
+    "name": "Capital One",
+    "bic": "NFBKUSF1XXX",
+    "transaction_total_days": "180",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/CAPITALONE_NFBKUSF1XXX.png"
+  },
+  {
+    "id": "NEWDAY_DEBENHAMS_NEWDUK00X07",
+    "name": "Debenhams card (Newday)",
+    "bic": "NEWDUK00X07",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_DEBENHAMS_NEWDUK00X07.png"
+  },
+  {
+    "id": "NEWDAY_DOROTHYPERKINS_NEWDUK00X08",
+    "name": "Dorothy Perkins card (Newday)",
+    "bic": "NEWDUK00X08",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_DOROTHYPERKINS_NEWDUK00X08.png"
+  },
+  {
+    "id": "NEWDAY_EVANS_NEWDUK00X09",
+    "name": "Evans card (Newday)",
+    "bic": "NEWDUK00X09",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_EVANS_NEWDUK00X09.png"
+  },
+  {
+    "id": "NEWDAY_FLUID_NEWDUK00X10",
+    "name": "Fluid card (Newday)",
+    "bic": "NEWDUK00X10",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_FLUID_NEWDUK00X10.png"
+  },
+  {
+    "id": "GOLDMAN_SACHS_GSILGB2X",
+    "name": "Goldman Sachs",
+    "bic": "GSILGB2X",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB",
+      "LU"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/GOLDMAN_SACHS_GSILGB2X.png"
+  },
+  {
+    "id": "HARGREAVES_LANSDOWN_HLSVGB22",
+    "name": "Hargreaves Lansdown Saving Limited",
+    "bic": "HLSVGB22",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/HARGREAVES_LANSDOWN_HLSVGB22.png"
+  },
+  {
+    "id": "NEWDAY_HOUSEOFFRASER_NEWDUK00X11",
+    "name": "House of Fraser card (Newday)",
+    "bic": "NEWDUK00X11",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_HOUSEOFFRASER_NEWDUK00X11.png"
+  },
+  {
+    "id": "LOMBARD_ODIER_GB_LOCYGB2L",
+    "name": "Lombard Odier",
+    "bic": "LOCYGB2L",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/LOMBARD_ODIER_LOCYLULL.png"
+  },
+  {
+    "id": "NEWDAY_MARBLES_NEWDUK00X13",
+    "name": "Marbles card (Newday)",
+    "bic": "NEWDUK00X13",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_MARBLES_NEWDUK00X13.png"
+  },
+  {
+    "id": "MNS_MSFEGB21",
+    "name": "Marks & Spencer",
+    "bic": "MSFEGB21",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/MNS_MSFEGB21.png"
+  },
+  {
+    "id": "MBNA_MBNAGB22",
+    "name": "MBNA Personal",
+    "bic": "MBNAGB22",
+    "transaction_total_days": "90",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/MBNA_MBNAGB22.png"
+  },
+  {
+    "id": "NATWEST_CS_NWBKGB2L",
+    "name": "Natwest ClearSpend",
+    "bic": "NWBKGB2L",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NATWEST_NWBKGB2L.png"
+  },
+  {
+    "id": "PAYSAFE_NETEGB21",
+    "name": "Neteller",
+    "bic": "NETEGB21",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB",
+      "NO",
+      "SE",
+      "FI",
+      "DK",
+      "EE",
+      "LV",
+      "LT",
+      "NL",
+      "CZ",
+      "ES",
+      "PL",
+      "BE",
+      "DE",
+      "AT",
+      "BG",
+      "HR",
+      "CY",
+      "FR",
+      "GR",
+      "HU",
+      "IS",
+      "IE",
+      "IT",
+      "LI",
+      "LU",
+      "MT",
+      "PT",
+      "RO",
+      "SK",
+      "SI"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/PAYSAFE_NETEGB21.png"
+  },
+  {
+    "id": "NEWDAY_NEWPAY_NEWDUK00X15",
+    "name": "Newpay card (Newday)",
+    "bic": "NEWDUK00X15",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_NEWPAY_NEWDUK00X15.png"
+  },
+  {
+    "id": "ONEPAY_1PAYGB00",
+    "name": "Onepay",
+    "bic": "1PAYGB00",
+    "transaction_total_days": "90",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/ONEPAY_1PAYGB00.png"
+  },
+  {
+    "id": "NEWDAY_OPUS_NEWDUK00X16",
+    "name": "Opus card (Newday)",
+    "bic": "NEWDUK00X16",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_OPUS_NEWDUK00X16.png"
+  },
+  {
+    "id": "PAYPAL_PPLXLULL",
+    "name": "PayPal",
+    "bic": "PPLXLULL",
+    "transaction_total_days": "90",
+    "countries": [
+      "GB",
+      "NO",
+      "SE",
+      "FI",
+      "DK",
+      "EE",
+      "LV",
+      "LT",
+      "NL",
+      "CZ",
+      "ES",
+      "PL",
+      "BE",
+      "DE",
+      "AT",
+      "BG",
+      "HR",
+      "CY",
+      "FR",
+      "GR",
+      "HU",
+      "IS",
+      "IE",
+      "IT",
+      "LI",
+      "LU",
+      "MT",
+      "PT",
+      "RO",
+      "SK",
+      "SI"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/PAYPAL_PPLXLULL.png"
+  },
+  {
+    "id": "PLEO_PLEODK00",
+    "name": "Pleo",
+    "bic": "PLEODK00",
+    "transaction_total_days": "90",
+    "countries": [
+      "DK",
+      "GB",
+      "DE",
+      "SE",
+      "ES",
+      "IE",
+      "DK"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/PLEO_PLEODK00.png"
+  },
+  {
+    "id": "NEWDAY_PULSE_NEWDUK00X17",
+    "name": "Pulse card (Newday)",
+    "bic": "NEWDUK00X17",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_PULSE_NEWDUK00X17.png"
+  },
+  {
+    "id": "RBS_GB_CS_RBSSGBKC",
+    "name": "Royal Bank of Scotland ClearSpend",
+    "bic": "RBSSGBKC",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/RBS_GB_RBSSGBKC.png"
+  },
+  {
+    "id": "SAINSBURYS_SANBGB21",
+    "name": "Sainsbury's Bank",
+    "bic": "SANBGB21",
+    "transaction_total_days": "180",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/SAINSBURYS_SANBGB21.png"
+  },
+  {
+    "id": "PAYSAFE_SKRLGB2L",
+    "name": "Skrill",
+    "bic": "SKRLGB2L",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB",
+      "NO",
+      "SE",
+      "FI",
+      "DK",
+      "EE",
+      "LV",
+      "LT",
+      "NL",
+      "CZ",
+      "ES",
+      "PL",
+      "BE",
+      "DE",
+      "AT",
+      "BG",
+      "HR",
+      "CY",
+      "FR",
+      "GR",
+      "HU",
+      "IS",
+      "IE",
+      "IT",
+      "LI",
+      "LU",
+      "MT",
+      "PT",
+      "RO",
+      "SK",
+      "SI"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/PAYSAFE_SKRLGB2L.png"
+  },
+  {
+    "id": "STRIPE_STPUIE21",
+    "name": "Stripe",
+    "bic": "STPUIE21",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB",
+      "NO",
+      "SE",
+      "FI",
+      "DK",
+      "EE",
+      "LV",
+      "LT",
+      "NL",
+      "CZ",
+      "ES",
+      "PL",
+      "BE",
+      "DE",
+      "AT",
+      "BG",
+      "HR",
+      "CY",
+      "FR",
+      "GR",
+      "HU",
+      "IS",
+      "IE",
+      "IT",
+      "LI",
+      "LU",
+      "MT",
+      "PT",
+      "RO",
+      "SK",
+      "SI"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/STRIPE_STPUIE21.png"
+  },
+  {
+    "id": "NEWDAY_TUI_NEWDUK00X20",
+    "name": "TUI card (Newday)",
+    "bic": "NEWDUK00X20",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_TUI_NEWDUK00X20.png"
+  },
+  {
+    "id": "UNION_UBPGGB2X",
+    "name": "Union Bancaire Privée London",
+    "bic": "UBPGGB2X",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/UNION_DBSALULLFND.png"
+  },
+  {
+    "id": "NEWDAY_WALLIS_NEWDUK00X21",
+    "name": "Wallis card (Newday)",
+    "bic": "NEWDUK00X21",
+    "transaction_total_days": "730",
+    "countries": [
+      "GB"
+    ],
+    "logo": "https://cdn.nordigen.com/ais/NEWDAY_WALLIS_NEWDUK00X21.png"
+  }
+]

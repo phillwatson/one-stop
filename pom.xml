@@ -28,6 +28,7 @@
         <module>outbox-lib</module>
         <module>auth-lib</module>
         <module>openid-lib</module>
+        <module>nordigen-lib</module>
 
         <module>audit-service</module>
         <module>email-service</module>
@@ -172,6 +173,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>outbox-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>nordigen-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

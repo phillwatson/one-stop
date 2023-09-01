@@ -4,8 +4,8 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.integration.api.UserOnboardApi;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
-import com.hillayes.integration.sim.email.EmailMessage;
-import com.hillayes.integration.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.EmailMessage;
+import com.hillayes.sim.email.SendWithBlueSimulator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 

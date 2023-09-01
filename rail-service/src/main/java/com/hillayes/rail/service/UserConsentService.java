@@ -8,7 +8,7 @@ import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
 import com.hillayes.rail.event.ConsentEventSender;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;

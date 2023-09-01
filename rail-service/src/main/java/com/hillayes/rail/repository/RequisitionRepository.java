@@ -1,8 +1,8 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.PaginatedList;
-import com.hillayes.rail.model.Requisition;
-import com.hillayes.rail.model.RequisitionRequest;
+import com.hillayes.nordigen.model.PaginatedList;
+import com.hillayes.nordigen.model.Requisition;
+import com.hillayes.nordigen.model.RequisitionRequest;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

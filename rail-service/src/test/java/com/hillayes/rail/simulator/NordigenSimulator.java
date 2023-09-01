@@ -3,7 +3,7 @@ package com.hillayes.rail.simulator;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
-import com.hillayes.rail.model.ObtainJwtResponse;
+import com.hillayes.nordigen.model.ObtainJwtResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

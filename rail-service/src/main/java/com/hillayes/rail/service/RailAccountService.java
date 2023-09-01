@@ -2,7 +2,7 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.config.ServiceConfiguration;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
 import com.hillayes.rail.repository.RailAccountRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

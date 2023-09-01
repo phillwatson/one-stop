@@ -1,7 +1,7 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.Institution;
-import com.hillayes.rail.model.InstitutionDetail;
+import com.hillayes.nordigen.model.Institution;
+import com.hillayes.nordigen.model.InstitutionDetail;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.commons.json.MapperFactory;
-import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.nordigen.model.PaginatedList;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;

@@ -1,91 +1,63 @@
 package com.hillayes.sim.nordigen;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.json.MapperFactory;
+import com.hillayes.nordigen.model.Institution;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
+@ApplicationScoped
+@Path(NordigenSimulator.BASE_URI + "/api/v2/institutions/")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class InstitutionsEndpoint extends AbstractResponseTransformer {
-    public void register(WireMock wireMockClient) {
-        // mock list endpoint
-        wireMockClient.register(get(urlPathEqualTo(NordigenSimulator.BASE_URI + "/api/v2/institutions/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-                    .withTransformerParameter("list", true)
-            )
-        );
+public class InstitutionsEndpoint extends AbstractEndpoint {
+    private static final TypeReference<List<Institution>> INSTITUTION_LIST = new TypeReference<>() {};
 
-        // mock get endpoint
-        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/institutions/(.*)/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
+    ObjectMapper objectMapper = MapperFactory.defaultMapper();
+
+    @GET
+    public Response list(@QueryParam("country") String countryCode,
+                         @QueryParam("payments_enabled") Boolean paymentsEnabled) throws IOException {
+        log.info("listing institutions [country: {}, payment_enabled: {}]", countryCode, paymentsEnabled);
+        String filename = paymentsEnabled == Boolean.TRUE
+            ? "/institutions-payments-enabled.json"
+            : "/institutions-payments-disabled.json";
+        URL resource = this.getClass().getResource(filename);
+
+        List<Institution> institutions = objectMapper.readValue(resource, INSTITUTION_LIST);
+        return Response.ok(institutions).build();
     }
 
-    @Override
-    public ResponseDefinition transform(Request request,
-                                        ResponseDefinition responseDefinition,
-                                        FileSource files,
-                                        Parameters parameters) {
-        RequestMethod method = request.getMethod();
-
-        if (method.equals(RequestMethod.GET)) {
-            if (parameters.getBoolean("list", false)) {
-                return list(request, responseDefinition);
-            }
-            return getById(request, responseDefinition);
-        }
-
-        return unsupportedMethod(request, responseDefinition);
-    }
-
-    private ResponseDefinition list(Request request,
-                                    ResponseDefinition responseDefinition) {
-        String filename = getQueryBoolean(request, "payments_enabled")
-            .filter(b -> b)
-            .map(b -> "institutions-payments-enabled.json")
-            .orElse("institutions-payments-disabled.json");
-
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBodyFile(filename)
-            .build();
-    }
-
-    private ResponseDefinition getById(Request request,
-                                       ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 4);
+    @GET
+    @Path("{id}/")
+    public Response get(@PathParam("id") String id) {
+        log.info("get institution [id: {}]", id);
         String entity = DEFINITIONS.get(id);
         if (entity == null) {
-            return ResponseDefinitionBuilder.like(responseDefinition)
-                .withBody(toJson(Map.of(
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(Map.of(
                     "summary", "Not found",
                     "detail", "End User Agreement " + id + " not found"
-                )))
+                ))
                 .build();
         }
 
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(entity)
-            .build();
+        return Response.ok(entity).build();
     }
+
+    public void reset() {
+    }
+
     public final static Map<String,String> DEFINITIONS = Map.of(
         "SANDBOXFINANCE_SFIN0000", """
         {

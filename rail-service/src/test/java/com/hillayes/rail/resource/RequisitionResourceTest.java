@@ -1,7 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.onestop.api.PaginatedInstitutions;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;

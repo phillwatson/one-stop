@@ -1,6 +1,8 @@
 package com.hillayes.integration.test;
 
-import com.hillayes.integration.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.nordigen.NordigenSimClient;
+import com.hillayes.sim.nordigen.NordigenSimulator;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -11,6 +13,12 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ApiTestBase {
+    // the URI on which the nordigen simulator is running. This is INTERNAL to docker network.
+    public static final String RAIL_HOST = "http://sim:8080" + NordigenSimulator.BASE_URI;
+
+    // the URI on which the email simulator is running. This is INTERNAL to docker work.
+    public static final String EMAIL_HOST = "http://wiremock:8080" + SendWithBlueSimulator.BASE_URI;
+
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     private static DockerComposeContainer<?> dockerContainers;
@@ -38,9 +46,13 @@ public class ApiTestBase {
             resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client_1", 80)
             .withExposedService("wiremock_1", 8080)
-            .withEnv("ONE_STOP_EMAIL_SERVICE_URL", "http://wiremock:8080" + SendWithBlueSimulator.BASE_URI)
-            .withEnv("NORDIGEN_API_URL", "http://wiremock:8080") // + NordigenSimulator.BASE_URI)
+            .withEnv("ONE_STOP_EMAIL_SERVICE_URL", EMAIL_HOST)
+            .withEnv("NORDIGEN_API_URL", RAIL_HOST)
             .waitingFor("client_1", new HttpWaitStrategy().forPort(80).forPath("/api/v1/auth/jwks.json"));
+    }
+
+    protected static NordigenSimClient newRailClient() {
+        return NordigenSimulator.client("http://localhost:9090");
     }
 
     private static File resourceFile(String filename) {

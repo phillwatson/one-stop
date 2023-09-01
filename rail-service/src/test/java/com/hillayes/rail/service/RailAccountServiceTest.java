@@ -1,7 +1,7 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.rail.config.ServiceConfiguration;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
 import com.hillayes.rail.repository.RailAccountRepository;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;

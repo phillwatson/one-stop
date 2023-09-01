@@ -1,12 +1,10 @@
 package com.hillayes.sim.nordigen;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.*;
+import com.hillayes.nordigen.model.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -15,11 +13,14 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
+@ApplicationScoped
+@Path(NordigenSimulator.BASE_URI + "/api/v2/accounts/")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class AccountsEndpoint extends AbstractResponseTransformer {
+public class AccountsEndpoint extends AbstractEndpoint {
     private final Map<String, AccountSummary> accounts = new HashMap<>();
     private final Map<String, AccountBalanceList> balances = new HashMap<>();
     private final Map<String, TransactionList> transactions = new HashMap<>();
@@ -45,57 +46,54 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         return account.id;
     }
 
-    public void register(WireMock wireMockClient) {
+    public void reset() {
         accounts.clear();
         balances.clear();
         transactions.clear();
-
-        // mock get account endpoint
-        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/accounts/([^/]+)/([^/]+/)?$"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
     }
 
-    @Override
-    public ResponseDefinition transform(Request request,
-                                        ResponseDefinition responseDefinition,
-                                        FileSource files,
-                                        Parameters parameters) {
-        String id = getIdFromPath(request.getUrl(), 4);
-        AccountSummary account = accounts.get(id);
+    @GET
+    @Path("{id}/")
+    public Response getAccount(@PathParam("id") String accountId) {
+        log.info("get account [id: {}]", accountId);
+        AccountSummary account = accounts.get(accountId);
         if (account == null) {
-            return notFound(request, responseDefinition);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        String resourceName = getPathElement(request.getUrl(), 5).orElse(null);
-        if (resourceName == null) {
-            return getAccount(account, responseDefinition);
-        } else if (resourceName.equalsIgnoreCase("balances")) {
-            return getBalances(account, responseDefinition);
-        } else if (resourceName.equalsIgnoreCase("details")) {
-            return getDetails(account, responseDefinition);
-        } else if (resourceName.equalsIgnoreCase("transactions")) {
-            return getTransactions(account, request, responseDefinition);
+        return Response.ok(account).build();
+    }
+
+    @GET
+    @Path("{id}/details/")
+    public Response getDetails(@PathParam("id") String accountId) {
+        log.info("get account detail [id: {}]", accountId);
+        AccountSummary account = accounts.get(accountId);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return notFound(request, responseDefinition);
+        // just some example properties of the account detail
+        Map<String, Object> detail = new HashMap<>();
+        detail.put("id", account.id);
+        detail.put("iban", account.iban);
+        detail.put("ownerName", account.ownerName);
+        detail.put("currency", "GBP");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("account", detail);
+        return Response.ok(result).build();
     }
 
-    private ResponseDefinition getAccount(AccountSummary account,
-                                          ResponseDefinition responseDefinition) {
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(account))
-            .build();
-    }
+    @GET
+    @Path("{id}/balances/")
+    public Response getBalances(@PathParam("id") String accountId) {
+        log.info("get balances [id: {}]", accountId);
+        AccountSummary account = accounts.get(accountId);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
-    private ResponseDefinition getBalances(AccountSummary account,
-                                           ResponseDefinition responseDefinition) {
         String[] balanceTypes = {"expected", "interimAvailable"};
 
         AccountBalanceList result = balances.get(account.id);
@@ -118,36 +116,22 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
 
             balances.put(account.id, result);
         }
-
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(result))
-            .build();
+        return Response.ok(result).build();
     }
 
-    private ResponseDefinition getDetails(AccountSummary account,
-                                          ResponseDefinition responseDefinition) {
-        // just some example properties of the account detail
-        Map<String, Object> detail = new HashMap<>();
-        detail.put("id", account.id);
-        detail.put("iban", account.iban);
-        detail.put("ownerName", account.ownerName);
-        detail.put("currency", "GBP");
+    @GET
+    @Path("{id}/transactions/")
+    public Response getTransactions(@PathParam("id") String accountId,
+                                    @QueryParam("date_from") String dateFromStr,
+                                    @QueryParam("date_to") String dateToStr) {
+        log.info("get transactions [id: {}, from: {}, to: {}]", accountId, dateFromStr, dateToStr);
+        AccountSummary account = accounts.get(accountId);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("account", detail);
-
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(result))
-            .build();
-    }
-
-    private ResponseDefinition getTransactions(AccountSummary account,
-                                               Request request,
-                                               ResponseDefinition responseDefinition) {
-        LocalDate dateFrom = getQueryDate(request, "date_from").orElse(null);
-        LocalDate dateTo = getQueryDate(request, "date_to").orElse(null);
+        LocalDate dateFrom = localDateFromString(dateFromStr);
+        LocalDate dateTo = localDateFromString(dateToStr);
 
         TransactionList transactionDetails = transactions.get(account.id);
         if (transactionDetails == null) {
@@ -162,10 +146,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         TransactionsResponse result = new TransactionsResponse();
         result.transactions = transactionDetails;
 
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(result))
-            .build();
+        return Response.ok(result).build();
     }
 
     private List<TransactionDetail> randomTransactions(LocalDate from, LocalDate to) {

@@ -1,10 +1,10 @@
 package com.hillayes.rail.resource.admin;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.rail.model.EndUserAgreement;
-import com.hillayes.rail.model.EndUserAgreementAccepted;
-import com.hillayes.rail.model.EndUserAgreementRequest;
-import com.hillayes.rail.model.PaginatedList;
+import com.hillayes.nordigen.model.EndUserAgreement;
+import com.hillayes.nordigen.model.EndUserAgreementAccepted;
+import com.hillayes.nordigen.model.EndUserAgreementRequest;
+import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.rail.service.AgreementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

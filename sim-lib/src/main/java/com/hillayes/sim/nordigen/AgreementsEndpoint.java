@@ -1,14 +1,12 @@
 package com.hillayes.sim.nordigen;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.rail.model.EndUserAgreement;
-import com.hillayes.rail.model.EndUserAgreementRequest;
+import com.hillayes.nordigen.model.EndUserAgreement;
+import com.hillayes.nordigen.model.EndUserAgreementAccepted;
+import com.hillayes.nordigen.model.EndUserAgreementRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
@@ -16,115 +14,43 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
+@ApplicationScoped
+@Path(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class AgreementsEndpoint extends AbstractResponseTransformer {
+public class AgreementsEndpoint extends AbstractEndpoint {
     private final Map<String, EndUserAgreement> agreements = new HashMap<>();
 
     EndUserAgreement removeAgreement(String id) {
         return agreements.remove(id);
     }
 
-    public void register(WireMock wireMockClient) {
+    public void reset() {
         agreements.clear();
-
-        // mock create endpoint
-        wireMockClient.register(post(urlEqualTo(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock list endpoint
-        wireMockClient.register(get(urlPathEqualTo(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-                    .withTransformerParameter("list", true)
-            )
-        );
-
-        // mock get endpoint
-        wireMockClient.register(get(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock accept endpoint
-        wireMockClient.register(put(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/accept/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
-
-        // mock delete endpoint
-        wireMockClient.register(delete(urlPathMatching(NordigenSimulator.BASE_URI + "/api/v2/agreements/enduser/(.*)/"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withTransformers(getName())
-            )
-        );
     }
 
-    @Override
-    public ResponseDefinition transform(Request request,
-                                        ResponseDefinition responseDefinition,
-                                        FileSource files,
-                                        Parameters parameters) {
-        RequestMethod method = request.getMethod();
-        if (method.equals(RequestMethod.POST)) {
-            return create(request, responseDefinition);
-        }
-
-        if (method.equals(RequestMethod.PUT)) {
-            return accept(request, responseDefinition);
-        }
-
-        if (method.equals(RequestMethod.GET)) {
-            if (parameters.getBoolean("list", false)) {
-                return list(request, responseDefinition);
-            }
-            return getById(request, responseDefinition);
-        }
-
-        if (method.equals(RequestMethod.DELETE)) {
-            return deleteById(request, responseDefinition);
-        }
-
-        return unsupportedMethod(request, responseDefinition);
+    @GET
+    public Response list(@QueryParam("offset") int offset,
+                         @QueryParam("limit") int limit) {
+        log.info("listing agreements [offset: {}, limit: {}]", offset, limit);
+        return Response.ok(sublist(offset, limit, agreements.values())).build();
     }
 
-    private ResponseDefinition create(Request request,
-                                      ResponseDefinition responseDefinition) {
-        EndUserAgreementRequest agreementRequest = fromJson(request.getBodyAsString(), EndUserAgreementRequest.class);
-
+    @POST
+    public Response create(EndUserAgreementRequest agreementRequest) {
+        log.info("create agreement [institution: {}]", agreementRequest.getInstitutionId());
         return agreements.values().stream()
             .filter(agreement -> agreement.institutionId.equals(agreementRequest.getInstitutionId()))
-            .map(agreement -> ResponseDefinitionBuilder.like(responseDefinition)
-                .withStatus(409)
-                .withBody(toJson(Map.of(
+            .findFirst()
+            .map(agreement -> Response
+                .status(Response.Status.CONFLICT)
+                .entity(Map.of(
                     "summary", "Conflict",
                     "detail", "An agreement with this Institution already exists.",
                     "status_code", 409
-                )))
-                .build()
+                )).build()
             )
-            .findFirst()
             .orElseGet(() ->
                 {
                     EndUserAgreement response = new EndUserAgreement();
@@ -137,64 +63,48 @@ public class AgreementsEndpoint extends AbstractResponseTransformer {
                     response.accepted = null;
 
                     agreements.put(response.id, response);
-                    return ResponseDefinitionBuilder.like(responseDefinition)
-                        .withStatus(201)
-                        .withBody(toJson(response))
-                        .build();
+                    return Response.status(Response.Status.CREATED).entity(response).build();
                 }
             );
     }
 
-    private ResponseDefinition accept(Request request,
-                                      ResponseDefinition responseDefinition) {
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(Map.of(
-                "summary", "Insufficient permissions",
-                "detail", "Your company doesn't have permission to accept EUA. You'll have to use our default form for this action.",
-                "status_code", 403
-            )))
-            .build();
+    @PUT
+    @Path("{id}/")
+    public Response accept(@PathParam("id") String id,
+                           EndUserAgreementAccepted acceptance) {
+        log.info("accept agreement [id: {}]", id);
+        return Response.status(Response.Status.FORBIDDEN).entity(Map.of(
+            "summary", "Insufficient permissions",
+            "detail", "Your company doesn't have permission to accept EUA. You'll have to use our default form for this action.",
+            "status_code", 403
+        )).build();
     }
 
-    private ResponseDefinition list(Request request,
-                                    ResponseDefinition responseDefinition) {
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(sublist(request, agreements.values())))
-            .build();
-    }
-
-    private ResponseDefinition getById(Request request,
-                                       ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 5);
+    @GET
+    @Path("{id}/")
+    public Response get(@PathParam("id") String id) {
+        log.info("get agreement [id: {}]", id);
         EndUserAgreement entity = agreements.get(id);
         if (entity == null) {
-            return notFound(request, responseDefinition);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(entity))
-            .build();
+        return Response.ok(entity).build();
     }
 
-    private ResponseDefinition deleteById(Request request,
-                                          ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 5);
+    @DELETE
+    @Path("{id}/")
+    public Response delete(@PathParam("id") String id) {
+        log.info("delete agreement [id: {}]", id);
         EndUserAgreement entity = removeAgreement(id);
 
         if (entity == null) {
-            return notFound(request, responseDefinition);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return ResponseDefinitionBuilder.like(responseDefinition)
-            .withStatus(200)
-            .withBody(toJson(Map.of(
+        return Response.ok(Map.of(
                 "status_code", 200,
                 "summary", "End User Agreement deleted",
                 "detail", "End User Agreement " + id + " deleted"
-            )))
-            .build();
+            )).build();
     }
 }

@@ -1,7 +1,7 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.ObtainJwtResponse;
-import com.hillayes.rail.model.RefreshJwtResponse;
+import com.hillayes.nordigen.model.ObtainJwtResponse;
+import com.hillayes.nordigen.model.RefreshJwtResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.ext.ClientHeadersFactory;
@@ -54,6 +54,7 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
             ObtainJwtResponse response = authService.newToken(SECRET_ID, SECRET_KEY);
             accessToken = new Token(response.getAccess(), response.getAccessExpires());
             refreshToken = new Token(response.getRefresh(), response.getRefreshExpires());
+            log.debug("Access and refresh token retrieved [secretId: {}]", SECRET_ID);
         }
 
         else if (accessToken.hasExpired()) {

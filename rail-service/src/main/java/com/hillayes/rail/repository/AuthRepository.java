@@ -1,7 +1,7 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.rail.model.ObtainJwtResponse;
-import com.hillayes.rail.model.RefreshJwtResponse;
+import com.hillayes.nordigen.model.ObtainJwtResponse;
+import com.hillayes.nordigen.model.RefreshJwtResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import jakarta.enterprise.context.ApplicationScoped;
