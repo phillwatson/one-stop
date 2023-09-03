@@ -57,19 +57,22 @@ public class RequisitionsEndpoint extends AbstractEndpoint {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        RequisitionStatus nextStatus = entity.status.nextStatus();
-        if (nextStatus != null) {
-            entity.status = nextStatus;
+        if (entity.status != RequisitionStatus.LN) {
+            RequisitionStatus nextStatus = entity.status.nextStatus();
+            if (nextStatus != null) {
+                entity.status = nextStatus;
 
-            // if accounts have been linked
-            if (entity.status == RequisitionStatus.LN) {
-                // mock the accounts
-                entity.accounts = List.of(
-                    accounts.acquireAccount(entity.institutionId),
-                    accounts.acquireAccount(entity.institutionId)
-                );
+                // if accounts have been linked
+                if (entity.status == RequisitionStatus.LN) {
+                    // mock the accounts
+                    entity.accounts = List.of(
+                        accounts.acquireAccount(entity.institutionId),
+                        accounts.acquireAccount(entity.institutionId)
+                    );
+                }
             }
         }
+
         return Response.ok(entity).build();
     }
 

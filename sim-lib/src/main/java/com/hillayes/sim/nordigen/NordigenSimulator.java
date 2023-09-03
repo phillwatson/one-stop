@@ -59,6 +59,7 @@ public class NordigenSimulator {
      */
     @POST
     @Path("/api/v2/token/new/")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response login() {
         ObtainJwtResponse response = ObtainJwtResponse.builder()
             .access(UUID.randomUUID().toString())

@@ -9,7 +9,7 @@ import static io.restassured.RestAssured.given;
 public abstract class ApiBase {
     private Map<String,String> authCookies;
 
-    ApiBase(Map<String,String> authCookies) {
+    protected ApiBase(Map<String,String> authCookies) {
         this.authCookies = authCookies;
     }
 

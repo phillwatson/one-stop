@@ -180,8 +180,12 @@ public class AccountsEndpoint extends AbstractEndpoint {
     }
 
     private CurrencyAmount randomAmount() {
+        float amount = RandomUtils.nextFloat(10f, 100000f);
+        if (RandomUtils.nextBoolean())
+            amount = -amount;
+
         return CurrencyAmount.builder()
-            .amount(RandomUtils.nextFloat())
+            .amount(amount)
             .currency("GBP")
             .build();
     }

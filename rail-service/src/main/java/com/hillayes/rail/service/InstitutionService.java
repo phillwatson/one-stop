@@ -5,7 +5,6 @@ import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.nordigen.model.Institution;
 import com.hillayes.nordigen.model.InstitutionDetail;
 import com.hillayes.rail.repository.InstitutionRepository;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import jakarta.annotation.PostConstruct;
@@ -24,9 +23,6 @@ public class InstitutionService extends AbstractRailService {
     @Inject
     ServiceConfiguration config;
 
-    @ConfigProperty(name ="quarkus.rest-client.nordigen-api.url")
-    String url;
-
     private Cache<CacheKey, List<Institution>> cacheByCountry;
     private Cache<String, InstitutionDetail> cacheById;
 
@@ -38,7 +34,6 @@ public class InstitutionService extends AbstractRailService {
 
     public List<Institution> list(String countryCode,
                                   Boolean paymentsEnabled) {
-        System.out.println(url);
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
         return cacheByCountry.getValueOrCall(key, () -> {
             List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);

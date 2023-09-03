@@ -29,7 +29,7 @@ public class UserUtils {
         }
     }
 
-    private static UserEntity createUser(int wiremockPort,
+    public static UserEntity createUser(int wiremockPort,
                                          UserEntity user) {
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(wiremockPort)) {
             return __createUser(emailSim, user);
@@ -77,6 +77,11 @@ public class UserUtils {
         user.setAuthTokens(authTokens);
 
         log.info("Created user [username: {}]", user.getUsername());
+
+        // wait for welcome email
+        emailSim.verifyEmailSent(user.getEmail(), "Welcome to OneStop",
+            await().atMost(Duration.ofSeconds(60)));
+
         return user;
     }
 }

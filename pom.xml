@@ -70,7 +70,7 @@
     <profiles>
         <profile>
             <!-- enabled the execution of unit-tests -->
-            <id>unit</id>
+            <id>test</id>
             <properties>
                 <maven.test.skip>false</maven.test.skip>
                 <skipITs>false</skipITs>

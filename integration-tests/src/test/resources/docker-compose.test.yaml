@@ -1,4 +1,5 @@
 services:
+  # Simulator container. This host the rail simulator.
   sim:
     image: one-stop/sim-lib:1.0.0-SNAPSHOT
     ports:
@@ -6,6 +7,7 @@ services:
     networks:
       - onestop-http-network
 
+  # Wiremock container. This host the email simulator.
   wiremock:
     image: wiremock/wiremock:2.35.0-1
     networks:
@@ -33,7 +35,7 @@ services:
       ONE_STOP_RAILS_SECRET_ID: "abcdef"
       ONE_STOP_RAILS_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
-      QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${NORDIGEN_API_URL}
+      QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
 
   email-service:
     image: one-stop/email-service:1.0.0-SNAPSHOT

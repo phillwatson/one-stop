@@ -31,12 +31,12 @@ public class UserAdminTestIT extends ApiTestBase {
 
         // and: the admin user signs in
         AuthApi authApi = new AuthApi();
-        Map<String, String> cookies = authApi.login("admin", "password");
-        assertNotNull(cookies);
-        assertEquals(3, cookies.size());
+        Map<String, String> authTokens = authApi.login("admin", "password");
+        assertNotNull(authTokens);
+        assertEquals(3, authTokens.size());
 
         // when: the admin lists the users
-        UserAdminApi userAdminApi = new UserAdminApi(cookies);
+        UserAdminApi userAdminApi = new UserAdminApi(authTokens);
         PaginatedUsers users = userAdminApi.listUsers(0, 30);
         assertNotNull(users);
 

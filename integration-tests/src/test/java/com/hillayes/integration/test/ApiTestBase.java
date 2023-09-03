@@ -13,10 +13,18 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ApiTestBase {
-    // the URI on which the nordigen simulator is running. This is INTERNAL to docker network.
+    /**
+     * The URI on which the nordigen simulator is running. This is INTERNAL to docker network.
+     * This is passed to the Rail Service container (via the config properties) to allow it
+     * to connect to the simulator.
+     */
     public static final String RAIL_HOST = "http://sim:8080" + NordigenSimulator.BASE_URI;
 
-    // the URI on which the email simulator is running. This is INTERNAL to docker work.
+    /**
+     * The URI on which the email simulator is running. This is INTERNAL to docker work.
+     * This is passed to the Email Service container (via the config properties) to allow it
+     * to connect to the simulator.
+     */
     public static final String EMAIL_HOST = "http://wiremock:8080" + SendWithBlueSimulator.BASE_URI;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
@@ -47,10 +55,14 @@ public class ApiTestBase {
             .withExposedService("client_1", 80)
             .withExposedService("wiremock_1", 8080)
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", EMAIL_HOST)
-            .withEnv("NORDIGEN_API_URL", RAIL_HOST)
+            .withEnv("REST_CLIENT_NORDIGEN_API_URL", RAIL_HOST)
             .waitingFor("client_1", new HttpWaitStrategy().forPort(80).forPath("/api/v1/auth/jwks.json"));
     }
 
+    /**
+     * Creates a new client connected to the Rail Simulator which is running in a docker
+     * container. The instance can be reused by calling its reset() method.
+     */
     protected static NordigenSimClient newRailClient() {
         return NordigenSimulator.client("http://localhost:9090");
     }

@@ -90,7 +90,7 @@ services:
 By default, the build does not run unit-tests. To run the unit-tests, add
 the following parameter to the build command:
 ```shell
-mvn clean package -Punit
+mvn clean package -Ptest
 ```
 By default, the client is not built. To build the client, add the following
 parameter to the build command:
