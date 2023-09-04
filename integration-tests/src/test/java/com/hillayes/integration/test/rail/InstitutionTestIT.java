@@ -15,7 +15,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class InstitutionTest extends ApiTestBase {
+public class InstitutionTestIT extends ApiTestBase {
     private static NordigenSimClient railClient;
 
     @BeforeAll

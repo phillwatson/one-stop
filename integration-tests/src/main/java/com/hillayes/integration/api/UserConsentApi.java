@@ -41,10 +41,7 @@ public class UserConsentApi extends ApiBase {
     }
 
     public void deleteConsent(String institutionId) {
-        givenAuth()
-            .delete("/api/v1/rails/consents/{institutionId}", institutionId)
-            .then()
-            .statusCode(204);
+        deleteConsent(institutionId, 204);
     }
 
     public Response deleteConsent(String institutionId, int expectedStatus) {
@@ -52,7 +49,6 @@ public class UserConsentApi extends ApiBase {
             .delete("/api/v1/rails/consents/{institutionId}", institutionId)
             .then()
             .statusCode(expectedStatus)
-            .contentType(JSON)
             .extract().response();
     }
 

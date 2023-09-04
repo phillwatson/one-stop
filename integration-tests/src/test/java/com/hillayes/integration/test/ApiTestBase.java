@@ -1,9 +1,11 @@
 package com.hillayes.integration.test;
 
+import com.hillayes.onestop.api.ServiceError;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.nordigen.NordigenSimulator;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
@@ -11,6 +13,7 @@ import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 import java.io.File;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class ApiTestBase {
     /**
@@ -74,5 +77,9 @@ public class ApiTestBase {
         }
 
         return new File(resource.getFile());
+    }
+
+    protected void withServiceError(Response response, Consumer<ServiceError> consumer) {
+        consumer.accept(response.as(ServiceError.class));
     }
 }

@@ -4,6 +4,7 @@ import com.hillayes.onestop.api.PasswordUpdateRequest;
 import com.hillayes.onestop.api.UserAuthProvidersResponse;
 import com.hillayes.onestop.api.UserProfileRequest;
 import com.hillayes.onestop.api.UserProfileResponse;
+import io.restassured.response.Response;
 
 import java.util.Map;
 
@@ -44,11 +45,16 @@ public class UserProfileApi extends ApiBase {
     }
 
     public void changePassword(PasswordUpdateRequest request) {
-        givenAuth()
+        changePassword(request, 204);
+    }
+
+    public Response changePassword(PasswordUpdateRequest request, int expectedStatus) {
+        return givenAuth()
             .contentType(JSON)
             .body(request)
             .put("/api/v1/profiles/password")
             .then()
-            .statusCode(204);
+            .statusCode(expectedStatus)
+            .extract().response();
     }
 }

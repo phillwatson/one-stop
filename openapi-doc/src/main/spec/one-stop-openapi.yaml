@@ -1067,6 +1067,7 @@ components:
         - username
         - givenName
         - email
+        - roles
       properties:
         username:
           type: string
@@ -1118,6 +1119,12 @@ components:
           format: date-time
           description: The date the user account was blocked
           example: 2019-01-01T00:00:00.000Z
+        roles:
+          type: array
+          items:
+            type: string
+            description: The authorisation roles that the user holds
+            example: admin
 
     UserResponse:
       allOf:
@@ -1135,12 +1142,6 @@ components:
               format: uuid
               description: The user Id
               example: 07061d76-74f3-4163-aa07-fb6909681f81
-            roles:
-              type: array
-              items:
-                type: string
-                description: The authorisation roles that the user holds
-                example: admin
 
     CountryResponse:
       type: object

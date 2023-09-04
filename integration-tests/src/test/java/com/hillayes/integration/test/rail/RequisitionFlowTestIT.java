@@ -1,9 +1,6 @@
 package com.hillayes.integration.test.rail;
 
-import com.hillayes.integration.api.AccountApi;
-import com.hillayes.integration.api.AuthApi;
-import com.hillayes.integration.api.InstitutionApi;
-import com.hillayes.integration.api.UserConsentApi;
+import com.hillayes.integration.api.*;
 import com.hillayes.integration.api.admin.RailAgreementAdminApi;
 import com.hillayes.integration.api.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
@@ -13,9 +10,7 @@ import com.hillayes.nordigen.model.EndUserAgreement;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
-import com.hillayes.onestop.api.InstitutionResponse;
-import com.hillayes.onestop.api.UserConsentRequest;
-import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.onestop.api.*;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import io.restassured.response.Response;
@@ -31,7 +26,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RequisitionFlowTest extends ApiTestBase {
+public class RequisitionFlowTestIT extends ApiTestBase {
     private static NordigenSimClient railClient;
 
     private static Map<String, String> adminAuthTokens;
@@ -54,7 +49,7 @@ public class RequisitionFlowTest extends ApiTestBase {
     }
 
     @Test
-    public void testUserConsentFlow() {
+    public void testUserConsentEndToEnd() {
         // given: a user
         UserEntity user = UserEntity.builder()
             .username(randomAlphanumeric(20))
@@ -64,13 +59,17 @@ public class RequisitionFlowTest extends ApiTestBase {
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
-        // and: the user can identify the institution
+        // establish authenticated APIs
         InstitutionApi institutionApi = new InstitutionApi(user.getAuthTokens());
+        UserConsentApi userConsentApi = new UserConsentApi(user.getAuthTokens());
+        AccountApi accountApi = new AccountApi(user.getAuthTokens());
+        AccountTransactionsApi transactionsApi = new AccountTransactionsApi(user.getAuthTokens());
+
+        // and: the user can identify the institution
         InstitutionResponse institution = institutionApi.getInstitution("SANDBOXFINANCE_SFIN0000");
         assertNotNull(institution);
 
         // when: the user initiates a consent request for the institution
-        UserConsentApi userConsentApi = new UserConsentApi(user.getAuthTokens());
         UserConsentRequest consentRequest = new UserConsentRequest()
             .callbackUri(URI.create("http://mock/callback/uri"));
         URI redirectUri = userConsentApi.register(institution.getId(), consentRequest);
@@ -139,7 +138,7 @@ public class RequisitionFlowTest extends ApiTestBase {
             assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(),"Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
 
             // and: the user can retrieve their consent record
@@ -153,8 +152,7 @@ public class RequisitionFlowTest extends ApiTestBase {
             assertNull(consentForInstitution.getErrorCode());
         }
 
-        // when: the user's accounts have been polled
-        AccountApi accountApi = new AccountApi(user.getAuthTokens());
+        // when: the user's accounts have been polled by the service
         int accountCount = requisition.accounts.size();
         await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
             .untilAsserted(() ->
@@ -168,9 +166,94 @@ public class RequisitionFlowTest extends ApiTestBase {
         assertNotNull(consentForInstitution.getAccounts());
 
         // when: the user retrieves their accounts
-        consentForInstitution.getAccounts().forEach(accountSummary ->
+        consentForInstitution.getAccounts().forEach(accountSummary -> {
             // then: they all reference the selected institution
-            assertEquals(institution.getId(), accountSummary.getInstitutionId())
-        );
+            assertEquals(institution.getId(), accountSummary.getInstitutionId());
+
+            // when: the user retrieves their account transactions
+            int pageSize = 5;
+            PaginatedTransactions transactions =
+                transactionsApi.getTransactions(0, pageSize, accountSummary.getId());
+
+            // then: transactions are returned
+            assertNotNull(transactions);
+            assertEquals(0, transactions.getPage());
+            assertEquals(pageSize, transactions.getPageSize());
+
+            // and: the transactions reference the account
+            assertNotNull(transactions.getItems());
+            assertEquals(transactions.getCount(), transactions.getItems().size());
+            transactions.getItems().forEach(transaction ->
+                assertEquals(accountSummary.getId(), transaction.getAccountId())
+            );
+
+            int page = 0;
+            long expectedTotalCount = transactions.getTotal();
+            long totalCount = transactions.getCount();
+            while (transactions.getLinks().getNext() != null) {
+                // when: the next page is retrieved
+                transactions = transactionsApi.get(transactions.getLinks().getNext(), PaginatedTransactions.class);
+
+                // then: the next page is returned
+                assertNotNull(transactions);
+                assertEquals(++page, transactions.getPage());
+                assertEquals(pageSize, transactions.getPageSize());
+                assertEquals(expectedTotalCount, transactions.getTotal());
+
+                // and: the transactions reference the account
+                assertNotNull(transactions.getItems());
+                assertEquals(transactions.getCount(), transactions.getItems().size());
+                transactions.getItems().forEach(transaction ->
+                    assertEquals(accountSummary.getId(), transaction.getAccountId())
+                );
+
+                totalCount += transactions.getCount();
+            }
+
+            // and: the total number of transactions is correct
+            assertEquals(expectedTotalCount, totalCount);
+        });
+
+        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+            // when: the user deletes the consent
+            userConsentApi.deleteConsent(institution.getId());
+
+            // then: an email is sent to the user for confirmation
+            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+                await().atMost(Duration.ofSeconds(60)));
+        }
+
+        // when: the user attempts to retrieve the institution consent
+        withServiceError(userConsentApi.getConsentForInstitution(institution.getId(), 404), error -> {
+            // then: a not-found error is returned
+            assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
+            assertNotNull(error.getContextAttributes());
+            assertNotNull(error.getContextAttributes().stream()
+                .filter(attr -> attr.getName().equals("entity-type"))
+                .filter(attr -> attr.getValue().equals("UserConsent"))
+                .findFirst().orElse(null));
+        });
+
+        // when: the user attempts to retrieve any account from the institution
+        consentForInstitution.getAccounts().forEach(accountSummary -> {
+            // then: a not-found error is returned
+            withServiceError(accountApi.getAccount(accountSummary.getId(), 404), error -> {
+                // then: a not-found error is returned
+                assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
+                assertNotNull(error.getContextAttributes());
+                assertNotNull(error.getContextAttributes().stream()
+                    .filter(attr -> attr.getName().equals("entity-type"))
+                    .filter(attr -> attr.getValue().equals("Account"))
+                    .findFirst().orElse(null));
+            });
+        });
+
+        // when: the user agreement is retrieved
+        // then: a not-found error is returned
+        agreementAdminApi.get(agreement.id, 404);
+
+        // when: the requisition is retrieved
+        // then: a not-found error is returned
+        requisitionAdminApi.get(requisition.id, 404);
     }
 }

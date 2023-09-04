@@ -23,6 +23,8 @@ public class AccountService {
     AccountRepository accountRepository;
     @Inject
     AccountBalanceRepository accountBalanceRepository;
+    @Inject
+    UserConsentService userConsentService;
 
     public Page<Account> getAccounts(UUID userId,
                                      int page,
@@ -42,7 +44,12 @@ public class AccountService {
 
     public Optional<Account> getAccount(UUID accountId) {
         log.info("Get user's account [accountId: {}]", accountId);
-        return accountRepository.findByIdOptional(accountId);
+        return accountRepository.findByIdOptional(accountId)
+            .filter(account ->
+                // this will return empty if consent is cancelled or denied
+                userConsentService.getUserConsent(account.getUserId(), account.getInstitutionId())
+                    .isPresent()
+            );
     }
 
     /**

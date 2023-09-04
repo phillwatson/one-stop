@@ -110,7 +110,8 @@ public class UserProfileResource {
             .phone(user.getPhoneNumber())
             .locale(user.getLocale() == null ? null : user.getLocale().toLanguageTag())
             .dateCreated(user.getDateCreated())
-            .dateOnboarded(user.getDateOnboarded());
+            .dateOnboarded(user.getDateOnboarded())
+            .roles(user.getRoles().stream().toList());
     }
 
     private UserAuthProvider marshal(OidcIdentity oidcIdentity) {

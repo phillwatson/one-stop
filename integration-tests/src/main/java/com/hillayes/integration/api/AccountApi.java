@@ -2,6 +2,7 @@ package com.hillayes.integration.api;
 
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.PaginatedAccounts;
+import io.restassured.response.Response;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,12 +26,17 @@ public class AccountApi extends ApiBase {
     }
 
     public AccountResponse getAccount(UUID accountId) {
+        return getAccount(accountId, 200)
+            .as(AccountResponse.class);
+    }
+
+    public Response getAccount(UUID accountId, int expectedStatus) {
         return givenAuth()
             .contentType(JSON)
             .get("/api/v1/rails/accounts/{accountId}", accountId)
             .then()
-            .statusCode(200)
+            .statusCode(expectedStatus)
             .contentType(JSON)
-            .extract().as(AccountResponse.class);
+            .extract().response();
     }
 }
