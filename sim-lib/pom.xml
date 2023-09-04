@@ -11,6 +11,12 @@
 
     <artifactId>sim-lib</artifactId>
 
+    <properties>
+        <!-- to enable compilation use -Ptest -->
+        <skip.compile>true</skip.compile>
+        <quarkus.container-image.build>false</quarkus.container-image.build>
+    </properties>
+
     <dependencies>
         <dependency>
             <!-- causes build of docker images on package -->
@@ -33,10 +39,6 @@
         <dependency>
             <groupId>org.eclipse.microprofile.rest.client</groupId>
             <artifactId>microprofile-rest-client-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -80,21 +82,10 @@
 
     <profiles>
         <profile>
-            <id>default</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
-            <properties>
-                <!-- skip compilation and docker image by default -->
-                <skip.compile>true</skip.compile>
-                <skip.jib>true</skip.jib>
-                <quarkus.container-image.build>false</quarkus.container-image.build>
-            </properties>
-        </profile>
-        <profile>
             <id>test</id>
             <properties>
                 <!-- enable compilation and docker image -->
                 <skip.compile>false</skip.compile>
-                <skip.jib>false</skip.jib>
                 <quarkus.container-image.build>true</quarkus.container-image.build>
             </properties>
         </profile>
