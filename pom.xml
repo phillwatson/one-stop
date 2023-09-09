@@ -32,13 +32,11 @@
 
         <module>audit-service</module>
         <module>notification-service</module>
-        <module>email-service</module>
         <module>rail-service</module>
         <module>user-service</module>
 
         <module>sim-lib</module>
         <module>integration-tests</module>
-        <module>notification-service</module>
     </modules>
 
     <properties>
@@ -190,11 +188,6 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>notification-service</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.hillayes</groupId>
-                <artifactId>email-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

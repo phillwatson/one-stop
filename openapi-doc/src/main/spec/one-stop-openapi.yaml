@@ -1568,3 +1568,45 @@ components:
           description: The list of transactions
           items:
             $ref: "#/components/schemas/TransactionSummaryResponse"
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The notification Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        timestamp:
+          type: string
+          format: date-time
+          description: The notification date and time
+          example: 2019-01-01T00:00:00.000Z
+        topic:
+          type: string
+          description: The topic in which the notification is categorised.
+        correlationId:
+          description: The identifier to relate this notification to server log entries.
+          type: string
+          format: uuid
+        severity:
+          description: An indication of the severity of the notification.
+          type: string
+          enum: [info, warn, error]
+        messageId:
+          description: The unique identifier for the message - provides index to locale strings.
+          type: string
+        message:
+          description: |
+            A summary of the notification. This is not intended to be displayed to the user.
+            Instead, a locale message, identified by the messageId, should be displayed.
+            The locale message may be a template string containing attribute place-holders
+            to be replaced with the named contextAttributes values.
+          type: string
+        contextAttributes:
+          description: |
+            An array of named values that capture the context in which the notification occurred.
+            This can be used to replace place-holders within a template string for locale translation.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextAttribute'
