@@ -19,15 +19,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.notification (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL,
     date_created timestamp NOT NULL,
-    topic varchar(256) NOT NULL,
-    message_id varchar(256) NOT NULl
+    message_id varchar(256) NOT NULl,
+    attributes text NULL
 );
-CREATE INDEX idx_notification_user_id ON ${flyway:defaultSchema}.notification (user_id,date_created);
-
-CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.notification_attribute (
-    id uuid PRIMARY KEY,
-    notification_id uuid NOT NULL,
-    attr_name varchar(256) NOT NULL,
-    attr_value varchar(256) NOT NULL
-);
-CREATE INDEX idx_notiattr_notification_id ON ${flyway:defaultSchema}.notification_attribute (notification_id);
+CREATE INDEX idx_notification_user_id ON ${flyway:defaultSchema}.notification (user_id, date_created);

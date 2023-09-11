@@ -1,10 +1,5 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.notification.config.TemplateName;
-import com.hillayes.notification.domain.User;
-import com.hillayes.notification.service.SendEmailService;
-import com.hillayes.notification.service.SendEmailService.Recipient;
-import com.hillayes.notification.service.UserService;
 import com.hillayes.events.annotation.TopicConsumer;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
@@ -14,6 +9,11 @@ import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
+import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.domain.User;
+import com.hillayes.notification.service.SendEmailService.Recipient;
+import com.hillayes.notification.service.UserService;
+import com.hillayes.notification.task.QueueEmailTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class UserTopicConsumer implements EventConsumer {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss, dd MMM yyyy vvvv");
 
     private final UserService userService;
-    private final SendEmailService sendEmailService;
+    private final QueueEmailTask queueEmailTask;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -59,7 +59,7 @@ public class UserTopicConsumer implements EventConsumer {
             "acknowledge_uri", event.getAcknowledgerUri().toString(),
             "expires", format(event.getExpires())
         );
-        sendEmailService.sendEmail(TemplateName.USER_REGISTERED, recipient, params);
+        queueEmailTask.queueJob(recipient, TemplateName.USER_REGISTERED, params);
     }
 
     private void processUserCreated(UserCreated event) {
@@ -99,14 +99,10 @@ public class UserTopicConsumer implements EventConsumer {
     }
 
     private void processAccountActivity(AccountActivity event) {
-        userService.getUser(event.getUserId()).ifPresent(user -> {
-            Recipient recipient = new SendEmailService.Recipient(user);
-            Map<String, Object> params = Map.of(
-                "user", user,
-                "activity", event.getActivity().getMessage()
-            );
-            sendEmailService.sendEmail(TemplateName.ACCOUNT_ACTIVITY, recipient, params);
-        });
+        Map<String, Object> params = Map.of(
+            "activity", event.getActivity().getMessage()
+        );
+        queueEmailTask.queueJob(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
     }
 
     protected String format(Instant dateTime) {

@@ -30,13 +30,13 @@ smallrye:
         url: jdbc:postgresql://db:5432/one-stop
 
 quarkus:
-  flyway:
-    migrate-at-start: true
-    schemas: users
-
   hibernate-orm:
     database:
       default-schema: users
+
+  flyway:
+    migrate-at-start: true
+    schemas: ${quarkus.hibernate-orm.database.default-schema}
 
   rest-client:
     google-api:

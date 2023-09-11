@@ -1,16 +1,13 @@
 package com.hillayes.notification.domain;
 
-import com.hillayes.commons.Strings;
-import com.hillayes.events.domain.Topic;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Table(name = "notification")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
@@ -33,34 +30,10 @@ public class Notification {
     private Instant dateCreated;
 
     @ToString.Include
-    @Column(nullable = false)
+    @Column(name = "message_id", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Topic topic;
+    private NotificationId messageId;
 
-    @ToString.Include
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private NotificationMessageId messageId;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "notification_id")
-    @Builder.Default
-    private Set<NotificationAttribute> attributes = new HashSet<>();
-
-    public boolean addAttr(String name, String value) {
-        if (Strings.isBlank(name)) {
-            return false;
-        }
-
-        NotificationAttribute attr = NotificationAttribute.builder()
-            .notification(this)
-            .name(name.toLowerCase())
-            .value(value)
-            .build();
-
-        if (Strings.isBlank(value)) {
-            return getAttributes().remove(attr);
-        }
-        return getAttributes().add(attr);
-    }
+    @Column(nullable = true)
+    private String attributes;
 }

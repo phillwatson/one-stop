@@ -10,7 +10,7 @@ public class EmailTemplateNotFoundException extends MensaException {
 
     public EmailTemplateNotFoundException(TemplateName templateName,
                                           Throwable cause) {
-        super(EmailErrorCodes.FAILED_TO_SEND_EMAIL, cause);
+        super(ErrorCodes.EMAIL_TEMPLATE_NOT_FOUND, cause);
         addParameter("templateName", templateName);
     }
 }

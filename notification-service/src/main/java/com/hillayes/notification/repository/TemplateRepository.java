@@ -29,8 +29,8 @@ public class TemplateRepository {
     private final EmailConfiguration configuration;
 
     /**
-     * Retries the email subject line from the identified template configuration
-     * and renders it with the given parameter/attribute values and, finally, returns
+     * Reads the email subject line from the identified template configuration and
+     * renders it with the given parameter/attribute values and, finally, returns
      * the result.
      *
      * @param templateName the template identifier.
@@ -124,7 +124,8 @@ public class TemplateRepository {
      *
      * @param templateName the template identifier.
      * @param locale the locale for which a template is required.
-     * @return the template that best fits the given locale, or null if non exists.
+     * @return the template that best fits the given locale.
+     * @throws EmailTemplateNotFoundException if not template can be found.
      */
     private EmailConfiguration.LocaleTemplate selectByLocale(TemplateName templateName, Locale locale) {
         EmailConfiguration.TemplateConfig templateConfig = configuration.templates().get(templateName);
@@ -136,8 +137,13 @@ public class TemplateRepository {
         if (result == null) {
             result = templateConfig.templates().get(new Locale(locale.getLanguage()));
         }
+
         if (result == null) {
             result = templateConfig.templates().get(DEFAULT_LOCALE);
+        }
+
+        if (result == null) {
+            result = templateConfig.templates().get(new Locale(DEFAULT_LOCALE.getLanguage()));
         }
 
         if (result == null) {

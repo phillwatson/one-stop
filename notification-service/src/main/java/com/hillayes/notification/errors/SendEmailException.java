@@ -8,7 +8,7 @@ public class SendEmailException extends MensaException {
     public SendEmailException(TemplateName templateName,
                               EmailConfiguration.Corresponder recipient,
                               Throwable aCause) {
-        super(EmailErrorCodes.FAILED_TO_SEND_EMAIL, aCause);
+        super(ErrorCodes.FAILED_TO_SEND_EMAIL, aCause);
         addParameter("templateName", templateName);
         addParameter("email", recipient.getEmail());
     }

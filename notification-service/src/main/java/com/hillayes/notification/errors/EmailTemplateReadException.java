@@ -6,7 +6,7 @@ import com.hillayes.exception.MensaException;
 public class EmailTemplateReadException extends MensaException {
     public EmailTemplateReadException(TemplateName templateName,
                                       Throwable cause) {
-        super(EmailErrorCodes.EMAIL_TEMPLATE_READ, cause);
+        super(ErrorCodes.EMAIL_TEMPLATE_READ, cause);
         addParameter("templateName", templateName);
     }
 }

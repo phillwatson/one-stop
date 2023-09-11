@@ -1,6 +1,8 @@
 package com.hillayes.notification.event.consumer;
 
 import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.domain.NotificationId;
+import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.service.SendEmailService;
 import com.hillayes.notification.service.UserService;
 import com.hillayes.events.annotation.TopicConsumer;
@@ -8,6 +10,7 @@ import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
+import com.hillayes.notification.task.QueueEmailTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +25,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class ConsentTopicConsumer implements EventConsumer {
-    private final UserService userService;
-    private final SendEmailService sendEmailService;
+    private final QueueEmailTask queueEmailTask;
+    private final NotificationService notificationService;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -57,20 +60,20 @@ public class ConsentTopicConsumer implements EventConsumer {
             ConsentSuspended event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmail(event.getUserId(), TemplateName.CONSENT_SUSPENDED, params);
+
+            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_SUSPENDED, params);
         }
 
         else if (ConsentExpired.class.getName().equals(payloadClass)) {
             ConsentExpired event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmail(event.getUserId(), TemplateName.CONSENT_EXPIRED, params);
+
+            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_EXPIRED, params);
         }
     }
 
     private void sendEmail(UUID userId, TemplateName templateName, Map<String, Object> params) {
-        userService.getUser(userId).ifPresent(user -> {
-            SendEmailService.Recipient recipient = new SendEmailService.Recipient(user);
-            params.put("user", user);
-            sendEmailService.sendEmail(templateName, recipient, params);
-        });
+        queueEmailTask.queueJob(userId, templateName, params);
     }
 }

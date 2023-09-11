@@ -1,5 +1,7 @@
 package com.hillayes.executors.scheduler.config;
 
+import io.smallrye.config.ConfigMapping;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +12,7 @@ import java.util.Optional;
  * See the db-scheduler lib documentation for more information:
  * https://github.com/kagkarlsson/db-scheduler#configuration
  */
+@ConfigMapping(prefix = "one-stop.scheduler")
 public interface SchedulerConfig {
     final static Integer DEFAULT_THREAD_COUNT = 10;
     final static Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(5);

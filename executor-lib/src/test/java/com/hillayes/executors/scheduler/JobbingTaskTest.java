@@ -65,6 +65,9 @@ public class JobbingTaskTest extends TestBase {
         fixture.stop();
     }
 
+    /**
+     * Ensures that simple object data types can be passed to tasks as JSON payloads.
+     */
     @Test
     public void testUuidPayload() {
         final AtomicInteger signal = new AtomicInteger();

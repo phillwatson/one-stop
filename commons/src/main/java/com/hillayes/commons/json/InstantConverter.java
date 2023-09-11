@@ -1,0 +1,24 @@
+package com.hillayes.commons.json;
+
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.Provider;
+
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+
+@Provider
+public class InstantConverter implements ParamConverter<Instant> {
+    public Instant fromString(String value){
+        try {
+            if ((value != null) && (!value.isBlank())) {
+                return Instant.parse(value);
+            }
+        } catch (DateTimeParseException e) {
+        }
+        return null;
+    }
+
+    public String toString(Instant value){
+        return (value == null) ? null : value.toString();
+    }
+}

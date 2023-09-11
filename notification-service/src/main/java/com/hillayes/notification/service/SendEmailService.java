@@ -95,12 +95,12 @@ public class SendEmailService {
     public static class Recipient implements EmailConfiguration.Corresponder {
         private final String email;
         private final String name;
-        private final Optional<Locale> locale;
+        private final Locale locale;
 
         public Recipient(String email, String name, Locale locale) {
             this.email = email;
             this.name = name;
-            this.locale = Optional.ofNullable(locale);
+            this.locale = locale;
         }
 
         public Recipient(User user) {
@@ -119,7 +119,7 @@ public class SendEmailService {
 
         @Override
         public Optional<Locale> getLocale() {
-            return locale;
+            return Optional.ofNullable(locale);
         }
     }
 }

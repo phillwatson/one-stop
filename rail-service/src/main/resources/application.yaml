@@ -73,32 +73,32 @@ one-stop:
       institutions: PT6H
       account-details: PT5H
 
-    scheduler:
-      schema: rails
-      tasks:
-        # nightly task to check consents are still valid
-        # and refresh all account details
-        poll-all-consents:
-          frequency:
-            time-of-day: "02:00:00"
-          on-failure:
-            max-retry: 3
-            retry-interval: PT1M
+  scheduler:
+    schema: ${quarkus.hibernate-orm.database.default-schema}
+    tasks:
+      # nightly task to check consents are still valid
+      # and refresh all account details
+      poll-all-consents:
+        frequency:
+          time-of-day: "02:00:00"
+        on-failure:
+          max-retry: 3
+          retry-interval: PT1M
 
-        # jobbing tasks to check the identified consent is still valid
-        # and refresh the account details
-        poll-consent:
-          on-failure: # gives a max of 16 minutes
-            max-retry: 4
-            retry-interval: PT2M
-            retry-exponent: 1.5
+      # jobbing tasks to check the identified consent is still valid
+      # and refresh the account details
+      poll-consent:
+        on-failure: # gives a max of 16 minutes
+          max-retry: 4
+          retry-interval: PT2M
+          retry-exponent: 1.5
 
-        # jobbing tasks to refresh the identified account details
-        poll-account:
-          on-failure: # gives a max of 16 minutes
-            max-retry: 4
-            retry-interval: PT2M
-            retry-exponent: 1.5
+      # jobbing tasks to refresh the identified account details
+      poll-account:
+        on-failure: # gives a max of 16 minutes
+          max-retry: 4
+          retry-interval: PT2M
+          retry-exponent: 1.5
 
   auth:
     access-token:

@@ -6,6 +6,7 @@ import jakarta.ws.rs.ext.Provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Provider
@@ -15,6 +16,11 @@ public class ParamConverters implements ParamConverterProvider {
         if (aClass.isAssignableFrom(LocalDate.class)) {
             return (ParamConverter<T>) new LocalDateConverter();
         }
+
+        else if (aClass.isAssignableFrom(Instant.class)) {
+            return (ParamConverter<T>) new InstantConverter();
+        }
+
         return null;
     }
 }

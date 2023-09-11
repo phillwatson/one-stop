@@ -4,6 +4,7 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public interface EmailConfiguration {
         String template();
     }
 
-    interface Corresponder {
+    interface Corresponder extends Serializable {
         /**
          * The name of the sender; normally "one-stop info".
          */
