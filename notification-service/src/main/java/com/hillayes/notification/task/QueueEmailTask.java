@@ -21,6 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Queues a task to send email to the identified recipient.
+ * This allows events processing to offload the sending of emails to a background
+ * thread whilst still supporting retries should the send fail.
+ */
 @ApplicationScoped
 @Slf4j
 public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payload> {
@@ -68,12 +73,16 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
         SendEmailService.Recipient recipient = payload.recipient;
         if (payload.userId != null) {
             User user = userService.getUser(payload.userId).orElse(null);
-            if (user != null) {
+            if (user == null) {
+                if (recipient == null) {
+                    log.info("Failed to identify email recipient [userId: {}]", payload.userId);
+                    return TaskConclusion.COMPLETE;
+                }
+            } else {
                 params.put("user", user);
-            }
-
-            if (payload.recipient == null) {
-                recipient = new SendEmailService.Recipient(user);
+                if (payload.recipient == null) {
+                    recipient = new SendEmailService.Recipient(user);
+                }
             }
         }
 
