@@ -4,6 +4,7 @@ import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
@@ -32,7 +33,7 @@ public class UserService_UserCreatedTest {
     UserRepository userRepository;
 
     @InjectMock
-    SendEmailService sendEmailService;
+    SendEmailTask sendEmailTask;
 
     @Inject
     UserService fixture;
@@ -66,7 +67,7 @@ public class UserService_UserCreatedTest {
         // and: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService).sendEmail(eq(TemplateName.USER_CREATED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_CREATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
@@ -110,7 +111,7 @@ public class UserService_UserCreatedTest {
         verify(userRepository, never()).save(existingUser);
 
         // and: NO email is sent to the user
-        verifyNoInteractions(sendEmailService);
+        verifyNoInteractions(sendEmailTask);
     }
 
     @Test
@@ -147,6 +148,6 @@ public class UserService_UserCreatedTest {
         verify(userRepository).save(existingUser);
 
         // and: an email is sent to the user
-        verify(sendEmailService).sendEmail(eq(TemplateName.USER_CREATED), any(), any());
+        verify(sendEmailTask).queueJob(any(EmailConfiguration.Corresponder.class), eq(TemplateName.USER_CREATED), any());
     }
 }

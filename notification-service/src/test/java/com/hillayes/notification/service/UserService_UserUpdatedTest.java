@@ -4,6 +4,7 @@ import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
@@ -32,7 +33,7 @@ public class UserService_UserUpdatedTest {
     UserRepository userRepository;
 
     @InjectMock
-    SendEmailService sendEmailService;
+    SendEmailTask sendEmailTask;
 
     @Inject
     UserService fixture;
@@ -82,7 +83,7 @@ public class UserService_UserUpdatedTest {
         // and: two emails are sent
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService, times(2)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask, times(2)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
@@ -154,7 +155,7 @@ public class UserService_UserUpdatedTest {
         // and: two emails are sent
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService, times(2)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask, times(2)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
@@ -223,7 +224,7 @@ public class UserService_UserUpdatedTest {
         // and: an email is sent to the new email address
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService, times(1)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask, times(1)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
@@ -262,7 +263,7 @@ public class UserService_UserUpdatedTest {
         // and: an email is sent to the new email address
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService, times(1)).sendEmail(eq(TemplateName.USER_UPDATED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask, times(1)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
@@ -306,6 +307,6 @@ public class UserService_UserUpdatedTest {
         verify(userRepository, never()).save(any());
 
         // and: NO emails are sent
-        verifyNoInteractions(sendEmailService);
+        verifyNoInteractions(sendEmailTask);
     }
 }

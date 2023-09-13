@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.notification (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL,
+    correlation_id varchar(256) NULL,
     date_created timestamp NOT NULL,
     message_id varchar(256) NOT NULl,
     attributes text NULL

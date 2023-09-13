@@ -1,0 +1,314 @@
+package com.hillayes.notification.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.events.events.consent.ConsentExpired;
+import com.hillayes.events.events.consent.ConsentSuspended;
+import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.notification.domain.Notification;
+import com.hillayes.notification.domain.NotificationId;
+import com.hillayes.notification.domain.User;
+import com.hillayes.notification.repository.NotificationRepository;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@QuarkusTest
+public class NotificationServiceTest {
+    @Inject
+    ObjectMapper objectMapper;
+
+    @InjectMock
+    NotificationRepository notificationRepository;
+
+    @InjectMock
+    UserService userService;
+
+    @Inject
+    NotificationService fixture;
+
+    @BeforeEach
+    public void beforeEach() {
+        when(notificationRepository.save(any())).then(invocation -> {
+            Notification notification = invocation.getArgument(0);
+            if (notification.getId() == null) {
+                notification = notification.toBuilder().id(UUID.randomUUID()).build();
+            }
+            return notification;
+        });
+    }
+
+    @Test
+    public void testCreateNotification() throws JsonProcessingException {
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: a notification ID
+        NotificationId notificationId = NotificationId.CONSENT_EXPIRED;
+
+        // and: a parameter map containing an event payload
+        ConsentExpired event = mockConsentExpired();
+
+        // when: the service is called
+        Notification notification = fixture.createNotification(userId, notificationId, Map.of("event", event));
+
+        // then: the notification is saved
+        verify(notificationRepository).save(any());
+
+        // and: a notification is created
+        assertNotNull(notification);
+
+        // and: the notification reflects given IDs
+        assertEquals(userId, notification.getUserId());
+        assertEquals(notificationId, notification.getMessageId());
+
+        // and: the parameters are mapped to JSON
+        assertNotNull(notification.getAttributes());
+
+        // when: the parameters are deserialized
+        HashMap<String, Object> params = objectMapper.readValue(notification.getAttributes(), HashMap.class);
+
+        // then: the event payload is returned
+        Map<String, Object> eventMap = (Map<String, Object>) params.get("event");
+        assertNotNull(eventMap);
+
+        // and: the event payload matches the input data
+        assertEquals(event.getUserId().toString(), eventMap.get("userId"));
+        assertEquals(event.getConsentId().toString(), eventMap.get("consentId"));
+        assertEquals(event.getInstitutionId(), eventMap.get("institutionId"));
+        assertEquals(event.getInstitutionName(), eventMap.get("institutionName"));
+        assertEquals(event.getRequisitionId(), eventMap.get("requisitionId"));
+        assertEquals(event.getAgreementId(), eventMap.get("agreementId"));
+        assertEquals(event.getAgreementExpires(), Instant.parse((String) eventMap.get("agreementExpires")));
+        assertEquals(event.getDateExpired(), Instant.parse((String) eventMap.get("dateExpired")));
+    }
+
+    @Test
+    public void testListNotifications_HappyPath() throws JsonProcessingException {
+        // given: a user
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .givenName(randomAlphanumeric(30))
+            .email(randomAlphanumeric(30))
+            .build();
+        when(userService.getUser(user.getId()))
+            .thenReturn(Optional.of(user));
+
+        // and: an available list of notifications for consent events
+        ConsentSuspended consentSuspended = mockConsentSuspended();
+        ConsentExpired consentExpired = mockConsentExpired();
+        List<Notification> notifications = List.of(
+            mockNotification(NotificationId.CONSENT_SUSPENDED, Map.of("event", consentSuspended)),
+            mockNotification(NotificationId.CONSENT_EXPIRED, Map.of("event", consentExpired))
+        );
+        when(notificationRepository.listByUserAndTime(eq(user.getId()), any()))
+            .thenReturn(notifications);
+
+        // and: a date-time from which to start
+        Instant after = Instant.now();
+
+        // and: a NotificationMapper implementation - to assert results and return rendered messages
+        NotificationService.NotificationMapper<String> mapper = mockNotificationMapper(notifications);
+
+        // when: the service is called
+        List<String> messages = fixture.listNotifications(user.getId(), after, mapper);
+
+        // then: the user is read from repository
+        verify(userService).getUser(user.getId());
+
+        // and: the notifications are read from repository
+        verify(notificationRepository).listByUserAndTime(user.getId(), after);
+
+        // and: the messages are rendered
+        assertNotNull(messages);
+        assertEquals(notifications.size(), messages.size());
+
+        // and: the messages passed through the
+        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.get(0));
+        assertEquals("Access to " + consentExpired.getInstitutionName() + " has expired.\nYou need to renew your consent.", messages.get(1));
+    }
+
+    @Test
+    public void testListNotifications_UserNotFound() throws JsonProcessingException {
+        // given: a user cannot be found by ID
+        UUID userId = UUID.randomUUID();
+        when(userService.getUser(userId))
+            .thenReturn(Optional.empty());
+
+        // and: an available list of notifications for consent events
+        ConsentSuspended consentSuspended = mockConsentSuspended();
+        ConsentExpired consentExpired = mockConsentExpired();
+        List<Notification> notifications = List.of(
+            mockNotification(NotificationId.CONSENT_SUSPENDED, Map.of("event", consentSuspended)),
+            mockNotification(NotificationId.CONSENT_EXPIRED, Map.of("event", consentExpired))
+        );
+        when(notificationRepository.listByUserAndTime(eq(userId), any()))
+            .thenReturn(notifications);
+
+        // and: a date-time from which to start
+        Instant after = Instant.now();
+
+        // and: a NotificationMapper implementation - to assert results and return rendered messages
+        NotificationService.NotificationMapper<String> mapper = mockNotificationMapper(notifications);
+
+        // when: the service is called
+        List<String> messages = fixture.listNotifications(userId, after, mapper);
+
+        // then: the user is read from repository
+        verify(userService).getUser(userId);
+
+        // and: the notifications are NOT read from repository
+        verifyNoInteractions(notificationRepository);
+
+        // and: NO messages are rendered
+        assertNotNull(messages);
+        assertTrue(messages.isEmpty());
+    }
+
+    @Test
+    public void testDeleteNotification_HappyPath() throws JsonProcessingException {
+        // given: a user
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .givenName(randomAlphanumeric(30))
+            .email(randomAlphanumeric(30))
+            .build();
+
+        // and: a notification to be deleted
+        Notification notification = mockNotification(user.getId(), NotificationId.CONSENT_SUSPENDED, Map.of());
+        when(notificationRepository.findById(notification.getId()))
+            .thenReturn(notification);
+
+        fixture.deleteNotification(user.getId(), notification.getId());
+
+        // then: the notifications are read from repository
+        verify(notificationRepository).findById(notification.getId());
+
+        // and: the notification is deleted
+        verify(notificationRepository).delete(notification);
+    }
+
+    @Test
+    public void testDeleteNotification_WrongUserId() throws JsonProcessingException {
+        // given: a user
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .givenName(randomAlphanumeric(30))
+            .email(randomAlphanumeric(30))
+            .build();
+
+        // and: a notification, for that user, to be deleted
+        Notification notification = mockNotification(user.getId(), NotificationId.CONSENT_SUSPENDED, Map.of());
+        when(notificationRepository.findById(notification.getId()))
+            .thenReturn(notification);
+
+        // when: the service is called
+        // then: a NotFound exception is raised
+        assertThrows(NotFoundException.class, () ->
+            fixture.deleteNotification(UUID.randomUUID(), notification.getId())
+        );
+
+        // and: the notifications are read from repository
+        verify(notificationRepository).findById(notification.getId());
+
+        // and: NO notification is deleted
+        verify(notificationRepository, never()).delete(any());
+    }
+
+    @Test
+    public void testDeleteNotification_NotFound() throws JsonProcessingException {
+        // given: a user
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .givenName(randomAlphanumeric(30))
+            .email(randomAlphanumeric(30))
+            .build();
+
+        // and: a notification ID
+        UUID notificationId = UUID.randomUUID();
+
+        // and: the notification cannot be found
+        when(notificationRepository.findById(notificationId))
+            .thenReturn(null);
+
+        // when: the service is called
+        fixture.deleteNotification(user.getId(), notificationId);
+
+        // and: the notifications are read from repository
+        verify(notificationRepository).findById(notificationId);
+
+        // and: NO notification is deleted
+        verify(notificationRepository, never()).delete(any());
+    }
+
+    /**
+     * An implementation of NotificationService.NotificationMapper that verifies the results
+     * returned from the service are as expected, and returns the rendered messages.
+     */
+    private NotificationService.NotificationMapper mockNotificationMapper(List<Notification> expectedNotifications) {
+        final AtomicInteger messageCount = new AtomicInteger();
+        return (notification, message) -> {
+            int index = messageCount.getAndIncrement();
+            Notification expected = expectedNotifications.get(index);
+            assertEquals(expected.getId(), notification.getId());
+            assertEquals(expected.getUserId(), notification.getUserId());
+            assertEquals(expected.getMessageId(), notification.getMessageId());
+            return message;
+        };
+    }
+
+    private Notification mockNotification(NotificationId notificationId,
+                                          Map<String, Object> attributes) throws JsonProcessingException {
+        return mockNotification(UUID.randomUUID(), notificationId, attributes);
+    }
+
+    private Notification mockNotification(UUID userId, NotificationId notificationId,
+                                          Map<String, Object> attributes) throws JsonProcessingException {
+        return Notification.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .dateCreated(Instant.now())
+            .messageId(notificationId)
+            .attributes(objectMapper.writeValueAsString(attributes))
+            .build();
+    }
+
+    private ConsentExpired mockConsentExpired() {
+        return ConsentExpired.builder()
+            .userId(UUID.randomUUID())
+            .consentId(UUID.randomUUID())
+            .institutionId(randomAlphanumeric(30))
+            .institutionName(randomAlphanumeric(30))
+            .dateExpired(Instant.now())
+            .agreementId(randomAlphanumeric(30))
+            .requisitionId(randomAlphanumeric(30))
+            .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
+            .build();
+    }
+
+    private ConsentSuspended mockConsentSuspended() {
+        return ConsentSuspended.builder()
+            .userId(UUID.randomUUID())
+            .consentId(UUID.randomUUID())
+            .institutionId(randomAlphanumeric(30))
+            .institutionName(randomAlphanumeric(30))
+            .dateSuspended(Instant.now())
+            .agreementId(randomAlphanumeric(30))
+            .requisitionId(randomAlphanumeric(30))
+            .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
+            .build();
+    }
+}

@@ -3,6 +3,7 @@ package com.hillayes.notification.service;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.task.SendEmailTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
-    private final SendEmailService sendEmailService;
+    private final SendEmailTask sendEmailTask;
 
     public void createUser(User user) {
         log.info("Created user [id: {}, username: {}]", user.getId(), user.getUsername());
@@ -43,7 +44,7 @@ public class UserService {
 
         // send email to notify user of creation
         Map<String, Object> params = Map.of("user", existingUser);
-        sendEmailService.sendEmail(TemplateName.USER_CREATED, new SendEmailService.Recipient(existingUser), params);
+        sendEmailTask.queueJob(new SendEmailService.Recipient(existingUser), TemplateName.USER_CREATED, params);
     }
 
     public Optional<User> getUser(UUID userId) {
@@ -97,9 +98,9 @@ public class UserService {
 
         // send email to notify user of update to their account
         if (! oldRecipient.getEmail().equalsIgnoreCase(existingUser.getEmail())) {
-            sendEmailService.sendEmail(TemplateName.USER_UPDATED, oldRecipient, params);
+            sendEmailTask.queueJob(oldRecipient, TemplateName.USER_UPDATED, params);
         }
-        sendEmailService.sendEmail(TemplateName.USER_UPDATED, new SendEmailService.Recipient(user), params);
+        sendEmailTask.queueJob(new SendEmailService.Recipient(user), TemplateName.USER_UPDATED, params);
 
         return existingUser;
     }
@@ -111,7 +112,7 @@ public class UserService {
 
             // send email to notify user of deletion
             Map<String, Object> params = Map.of("user", user);
-            sendEmailService.sendEmail(TemplateName.USER_DELETED, new SendEmailService.Recipient(user), params);
+            sendEmailTask.queueJob(new SendEmailService.Recipient(user), TemplateName.USER_DELETED, params);
         });
     }
 }

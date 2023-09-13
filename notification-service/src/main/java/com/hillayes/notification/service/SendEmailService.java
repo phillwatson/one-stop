@@ -50,7 +50,7 @@ public class SendEmailService {
         }
 
         if (recipient == null) {
-            recipient = templateConfig.receiver().orElse(null);
+            recipient = templateConfig.recipient().orElse(null);
         }
         if (recipient == null) {
             log.error("No recipient found [templateName: {}]", templateName);
@@ -97,14 +97,16 @@ public class SendEmailService {
         private final String name;
         private final Locale locale;
 
+        public Recipient(User user) {
+            this(user.getEmail(),
+                user.getPreferredName() != null ? user.getPreferredName() : user.getGivenName(),
+                user.getLocale());
+        }
+
         public Recipient(String email, String name, Locale locale) {
             this.email = email;
             this.name = name;
             this.locale = locale;
-        }
-
-        public Recipient(User user) {
-            this(user.getEmail(), user.getPreferredName(), user.getLocale());
         }
 
         @Override

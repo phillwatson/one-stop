@@ -16,7 +16,7 @@ import java.util.UUID;
 @Slf4j
 public class NotificationRepository extends RepositoryBase<Notification, UUID> {
     public List<Notification> listByUserAndTime(UUID userId, Instant after) {
-        return find("accountId = :userID AND dateCreated > :after",
+        return find("userId = :userId AND dateCreated > :after",
             Parameters
                 .with("userId", userId)
                 .and("after", after))

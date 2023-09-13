@@ -4,7 +4,6 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -52,10 +51,10 @@ public interface EmailConfiguration {
         Optional<Corresponder> sender();
 
         /**
-         * The optional receiver of the email. If not present, it is assumed the receiver
+         * The optional recipient of the email. If not present, it is assumed the recipient
          * will be identified by the context (e.g. user record).
          */
-        Optional<Corresponder> receiver();
+        Optional<Corresponder> recipient();
 
         /**
          * A collection of email templates keyed on their locale. The email sender will
@@ -80,7 +79,7 @@ public interface EmailConfiguration {
         String template();
     }
 
-    interface Corresponder extends Serializable {
+    interface Corresponder {
         /**
          * The name of the sender; normally "one-stop info".
          */

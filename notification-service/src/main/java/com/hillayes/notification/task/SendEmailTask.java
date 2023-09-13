@@ -17,9 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Queues a task to send email to the identified recipient.
@@ -28,12 +26,12 @@ import java.util.UUID;
  */
 @ApplicationScoped
 @Slf4j
-public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payload> {
+public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payload> {
     private final UserService userService;
     private final SendEmailService sendEmailService;
 
-    public QueueEmailTask(UserService userService,
-                          SendEmailService sendEmailService) {
+    public SendEmailTask(UserService userService,
+                         SendEmailService sendEmailService) {
         super("queue-email");
         this.userService = userService;
         this.sendEmailService = sendEmailService;
@@ -51,12 +49,12 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
         return scheduler.addJob(this, payload);
     }
 
-    public String queueJob(SendEmailService.Recipient recipient,
+    public String queueJob(EmailConfiguration.Corresponder recipient,
                            TemplateName templateName,
                            Map<String, Object> params) {
         log.info("Queuing email job [template: {}]", templateName);
         Payload payload = Payload.builder()
-            .recipient(recipient)
+            .recipient(new EmailRecipient(recipient))
             .templateName(templateName)
             .params(params)
             .build();
@@ -70,7 +68,7 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
 
         Map<String, Object> params = new HashMap<>();
 
-        SendEmailService.Recipient recipient = payload.recipient;
+        EmailRecipient recipient = payload.recipient;
         if (payload.userId != null) {
             User user = userService.getUser(payload.userId).orElse(null);
             if (user == null) {
@@ -81,7 +79,7 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
             } else {
                 params.put("user", user);
                 if (payload.recipient == null) {
-                    recipient = new SendEmailService.Recipient(user);
+                    recipient = new EmailRecipient(user);
                 }
             }
         }
@@ -90,7 +88,7 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
             params.putAll(payload.params);
         }
 
-        sendEmailService.sendEmail(payload.templateName, recipient, params);
+        sendEmailService.sendEmail(payload.templateName, recipient.toCorresponder(), params);
         return TaskConclusion.COMPLETE;
     }
 
@@ -101,8 +99,32 @@ public class QueueEmailTask extends AbstractNamedJobbingTask<QueueEmailTask.Payl
     @RegisterForReflection
     public static class Payload {
         UUID userId;
-        SendEmailService.Recipient recipient;
+        EmailRecipient recipient;
         TemplateName templateName;
         Map<String, Object> params;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @RegisterForReflection
+    public static class EmailRecipient {
+        String email;
+        String name;
+        Locale locale;
+
+        EmailRecipient(User user) {
+            this(user.getEmail(),
+                user.getPreferredName() != null ? user.getPreferredName() : user.getGivenName(),
+                user.getLocale());
+        }
+
+        EmailRecipient(EmailConfiguration.Corresponder corresponder) {
+            this(corresponder.getEmail(), corresponder.getName(), corresponder.getLocale().orElse(null));
+        }
+
+        public EmailConfiguration.Corresponder toCorresponder() {
+            return new SendEmailService.Recipient(email, name, locale);
+        }
     }
 }

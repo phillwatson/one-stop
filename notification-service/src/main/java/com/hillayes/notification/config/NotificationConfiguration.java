@@ -21,7 +21,7 @@ public interface NotificationConfiguration {
     /**
      * The configuration for each notification message configuration, keyed by their ID.
      */
-    Map<NotificationId, MessageConfig> messages();
+    Map<NotificationId, MessageConfig> templates();
 
     /**
      * The configuration for a single notification message.

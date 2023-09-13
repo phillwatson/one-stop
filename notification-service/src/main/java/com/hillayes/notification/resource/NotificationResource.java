@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationResource {
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     @GET
     public Response getNotifications(@Context SecurityContext ctx,

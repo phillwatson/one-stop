@@ -3,6 +3,7 @@ package com.hillayes.notification.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.notification.config.NotificationConfiguration;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
@@ -31,18 +32,19 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserService userService;
 
-    public void createNotification(UUID userId,
-                                   NotificationId notificationId,
-                                   Map<String, Object> params) throws ParameterSerialisationException {
+    public Notification createNotification(UUID userId,
+                                           NotificationId notificationId,
+                                           Map<String, Object> params) throws ParameterSerialisationException {
         try {
             Notification notification = Notification.builder()
                 .userId(userId)
+                .correlationId(Correlation.getCorrelationId().orElse(null))
                 .dateCreated(Instant.now())
                 .messageId(notificationId)
                 .attributes(params == null ? null : mapper.writeValueAsString(params))
                 .build();
 
-            notificationRepository.save(notification);
+            return notificationRepository.save(notification);
         } catch (JsonProcessingException e) {
             throw new ParameterSerialisationException(notificationId, e);
         }
@@ -132,7 +134,7 @@ public class NotificationService {
      * @throws NotificationIdNotFoundException if no message can be found.
      */
     private String selectByLocale(NotificationId notificationId, Locale locale) {
-        NotificationConfiguration.MessageConfig messageConfig = configuration.messages().get(notificationId);
+        NotificationConfiguration.MessageConfig messageConfig = configuration.templates().get(notificationId);
         if (messageConfig == null) {
             throw new NotificationIdNotFoundException(notificationId);
         }

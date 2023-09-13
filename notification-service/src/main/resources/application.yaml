@@ -139,10 +139,11 @@ one-stop:
       COMPANY_LONG_NAME: Hillayes One-Stop
       COMPANY_COPYRIGHT_NAME: One-Stop
 
-    consent-suspended:
-      en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
-    consent-expired:
-      en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
+    templates:
+      consent-suspended:
+        en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
+      consent-expired:
+        en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
 
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}

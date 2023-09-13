@@ -13,7 +13,7 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.service.SendEmailService.Recipient;
 import com.hillayes.notification.service.UserService;
-import com.hillayes.notification.task.QueueEmailTask;
+import com.hillayes.notification.task.SendEmailTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class UserTopicConsumer implements EventConsumer {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss, dd MMM yyyy vvvv");
 
     private final UserService userService;
-    private final QueueEmailTask queueEmailTask;
+    private final SendEmailTask sendEmailTask;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -59,7 +59,7 @@ public class UserTopicConsumer implements EventConsumer {
             "acknowledge_uri", event.getAcknowledgerUri().toString(),
             "expires", format(event.getExpires())
         );
-        queueEmailTask.queueJob(recipient, TemplateName.USER_REGISTERED, params);
+        sendEmailTask.queueJob(recipient, TemplateName.USER_REGISTERED, params);
     }
 
     private void processUserCreated(UserCreated event) {
@@ -102,7 +102,7 @@ public class UserTopicConsumer implements EventConsumer {
         Map<String, Object> params = Map.of(
             "activity", event.getActivity().getMessage()
         );
-        queueEmailTask.queueJob(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
+        sendEmailTask.queueJob(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
     }
 
     protected String format(Instant dateTime) {

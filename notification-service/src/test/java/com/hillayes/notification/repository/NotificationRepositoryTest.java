@@ -8,7 +8,10 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,60 +24,51 @@ public class NotificationRepositoryTest {
     NotificationRepository fixture;
 
     @Test
-    public void testSave() {
-        // given: a notification record
-        Notification notification = Notification.builder()
-            .userId(UUID.randomUUID())
-            .dateCreated(Instant.now())
-            .messageId(NotificationId.CONSENT_EXPIRED)
-            .build();
+    public void testListByUserAndTime() {
+        // given: a collection of notifications for an identified user
+        UUID userId = UUID.randomUUID();
+        Instant start = Instant.now().minus(Duration.ofHours(10));
+        mockNotifications(userId, start);
 
-        // when: the notification is saved
-        Notification saved = fixture.saveAndFlush(notification);
+        // and: a collection of notifications for other users
+        mockNotifications(UUID.randomUUID(), start);
+        mockNotifications(UUID.randomUUID(), start);
 
-        // then: the notification is assigned an ID
-        assertNotNull(saved.getId());
+        // and: a required start date-time
+        Instant after = start.plus(Duration.ofHours(5));
 
-        // clear orm cache
-        fixture.getEntityManager().clear();
+        // when: the fixture is called
+        List<Notification> results = fixture.listByUserAndTime(userId, after);
 
-        // when: the notification is read
-        Notification reloaded = fixture.findById(saved.getId());
+        // then: the result is not empty
+        assertFalse(results.isEmpty());
 
-        // then: the ID are the same
-        assertEquals(saved.getId(), reloaded.getId());
+        // and: the result contains only those for the identified user
+        results.forEach(notification -> assertEquals(userId, notification.getUserId()));
+
+        // and: only those after the given date-time are returned
+        results.forEach(notification -> assertTrue(notification.getDateCreated().isAfter(after)));
     }
 
-    @Test
-    public void testDeleteNotification() {
-        // given: a notification record
+    private List<Notification> mockNotifications(UUID userId, Instant startDateTime) {
         Notification notification = Notification.builder()
-            .userId(UUID.randomUUID())
-            .dateCreated(Instant.now())
+            .userId(userId)
+            .dateCreated(startDateTime)
             .messageId(NotificationId.CONSENT_EXPIRED)
             .build();
 
-        // and: the notification is saved
-        Notification saved = fixture.saveAndFlush(notification);
+        Instant now = Instant.now();
+        List<Notification> notifications = new ArrayList<>();
+        while (notification.getDateCreated().isBefore(now)) {
+            notifications.add(notification);
+            notification = notification.toBuilder()
+                .dateCreated(notification.getDateCreated().plus(Duration.ofHours(1)))
+                .build();
+        }
 
-        // clear orm cache
-        fixture.getEntityManager().clear();
-
-        // when: the notification is deleted
-        fixture.deleteById(saved.getId());
-
-        // and: the cache is flushed
+        fixture.saveAll(notifications);
         fixture.flush();
 
-        // then: the notification can no longer be read
-        assertNull(fixture.findById(saved.getId()));
-
-        // and: no attributes can be found in the database
-        Long count = fixture.getEntityManager()
-            .createQuery("select count(*) from NotificationAttribute where notification.id = :id",
-                Long.class)
-            .setParameter("id", saved.getId())
-            .getSingleResult();
-        assertEquals(0, count);
+        return notifications;
     }
 }

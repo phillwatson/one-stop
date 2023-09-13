@@ -26,6 +26,10 @@ public class Notification {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    @ToString.Include
+    @Column(name = "correlation_id", nullable = true)
+    private String correlationId;
+
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated;
 

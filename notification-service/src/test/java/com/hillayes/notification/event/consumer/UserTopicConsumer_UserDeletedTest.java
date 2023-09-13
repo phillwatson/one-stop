@@ -1,13 +1,13 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.notification.repository.UserRepository;
-import com.hillayes.notification.service.SendEmailService;
-import com.hillayes.notification.service.UserService;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
-import io.quarkus.test.junit.QuarkusTest;
+import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.service.UserService;
+import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,6 @@ public class UserTopicConsumer_UserDeletedTest {
 
     @InjectMock
     UserRepository userRepository;
-
-    @InjectMock
-    SendEmailService sendEmailService;
 
     @Inject
     UserTopicConsumer fixture;
@@ -80,9 +77,6 @@ public class UserTopicConsumer_UserDeletedTest {
 
         // and: NO user record is deleted
         verify(userRepository, never()).delete(any());
-
-        // and: NO email is sent to the user
-        verifyNoInteractions(sendEmailService);
     }
 
     private EventPacket mockEventPacket(Object payload) {

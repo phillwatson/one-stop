@@ -243,7 +243,8 @@ public class AccountResourceTest extends TestBase {
             .request()
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/accounts/" + account.getId())
+            .pathParam("accountId", account.getId())
+            .get("/api/v1/rails/accounts/{accountId}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -294,7 +295,8 @@ public class AccountResourceTest extends TestBase {
             .request()
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/accounts/" + account.getId())
+            .pathParam("accountId", account.getId())
+            .get("/api/v1/rails/accounts/{accountId}")
             .then()
             .extract().statusCode();
 
@@ -318,7 +320,8 @@ public class AccountResourceTest extends TestBase {
             .request()
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/accounts/" + account.getId())
+            .pathParam("accountId", account.getId())
+            .get("/api/v1/rails/accounts/{accountId}")
             .then()
             .extract().statusCode();
 
@@ -337,7 +340,8 @@ public class AccountResourceTest extends TestBase {
             .request()
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/accounts/" + accountId)
+            .pathParam("accountId", accountId)
+            .get("/api/v1/rails/accounts/{accountId}")
             .then()
             .extract().statusCode();
 
@@ -363,7 +367,8 @@ public class AccountResourceTest extends TestBase {
             .request()
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/accounts/" + account.getId())
+            .pathParam("accountId", account.getId())
+            .get("/api/v1/rails/accounts/{accountId}")
             .then()
             .extract().statusCode();
 

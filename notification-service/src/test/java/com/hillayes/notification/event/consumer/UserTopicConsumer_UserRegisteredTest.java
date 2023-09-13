@@ -1,12 +1,12 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.repository.UserRepository;
 import com.hillayes.notification.service.SendEmailService;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserRegistered;
+import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
@@ -35,7 +35,7 @@ public class UserTopicConsumer_UserRegisteredTest {
     UserRepository userRepository;
 
     @InjectMock
-    SendEmailService sendEmailService;
+    SendEmailTask sendEmailTask;
 
     @Inject
     UserTopicConsumer fixture;
@@ -67,8 +67,8 @@ public class UserTopicConsumer_UserRegisteredTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService).sendEmail(eq(TemplateName.USER_REGISTERED), recipientCaptor.capture(), paramsCaptor.capture());
+        ArgumentCaptor<SendEmailService.Recipient> recipientCaptor = ArgumentCaptor.forClass(SendEmailService.Recipient.class);
+        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_REGISTERED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(event.getEmail(), recipientCaptor.getValue().getName());

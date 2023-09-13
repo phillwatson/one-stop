@@ -4,6 +4,7 @@ import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 import jakarta.inject.Inject;
@@ -28,7 +29,7 @@ public class UserService_UserDeletedTest {
     UserRepository userRepository;
 
     @InjectMock
-    SendEmailService sendEmailService;
+    SendEmailTask sendEmailTask;
 
     @Inject
     UserService fixture;
@@ -53,7 +54,7 @@ public class UserService_UserDeletedTest {
         // and: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailService).sendEmail(eq(TemplateName.USER_DELETED), recipientCaptor.capture(), paramsCaptor.capture());
+        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_DELETED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(existingUser.getPreferredName(), recipientCaptor.getValue().getName());
@@ -76,6 +77,6 @@ public class UserService_UserDeletedTest {
         verify(userRepository, never()).delete(any());
 
         // and: NO email is sent to the user
-        verifyNoInteractions(sendEmailService);
+        verifyNoInteractions(sendEmailTask);
     }
 }
