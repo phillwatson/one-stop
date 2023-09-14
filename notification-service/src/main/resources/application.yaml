@@ -45,6 +45,10 @@ quarkus:
       "com.hillayes":
         level: DEBUG
 
+  native:
+    resources:
+      includes: "templates/**"
+
 one-stop:
   auth:
     access-token:

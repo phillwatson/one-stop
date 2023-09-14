@@ -53,6 +53,10 @@ quarkus:
       "com.hillayes":
         level: DEBUG
 
+  native:
+    resources:
+      includes: "country-logos/**"
+
 one-stop:
   rail:
     countries:

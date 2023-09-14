@@ -85,8 +85,12 @@ public class SendEmailService {
                 .subject(subject)
                 .htmlContent(body);
 
+            log.trace("Sending email [template: {}, {}]", templateName, email);
             CreateSmtpEmail createSmtpEmail = emailApi.sendTransacEmail(email);
             log.debug("Sent email [template: {}, id: {}]", templateName, createSmtpEmail.getMessageId());
+        } catch (sendinblue.ApiException e) {
+            log.error("Failed to send email: {}", e.getResponseBody());
+            throw new SendEmailException(templateName, recipient, e);
         } catch (Exception e) {
             throw new SendEmailException(templateName, recipient, e);
         }
