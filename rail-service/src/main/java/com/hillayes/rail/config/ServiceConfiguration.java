@@ -28,11 +28,6 @@ public interface ServiceConfiguration {
     Duration accountPollingInterval();
 
     /**
-     * The configurations for the scheduler and its tasks.
-     */
-    SchedulerConfig scheduler();
-
-    /**
      * The detail that describes a country supported by the rail service.
      */
     interface Country {

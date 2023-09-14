@@ -1,5 +1,6 @@
 package com.hillayes.commons.json;
 
+import com.hillayes.commons.Strings;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.Provider;
 
@@ -10,7 +11,7 @@ import java.time.format.DateTimeParseException;
 public class LocalDateConverter implements ParamConverter<LocalDate> {
     public LocalDate fromString(String value){
         try {
-            if ((value != null) && (!value.isBlank())) {
+            if (!Strings.isBlank(value)) {
                 return LocalDate.parse(value);
             }
         } catch (DateTimeParseException e) {

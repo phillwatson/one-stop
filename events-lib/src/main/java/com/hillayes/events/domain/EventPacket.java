@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.*;
 
 import java.time.Instant;
@@ -19,8 +20,8 @@ import java.util.UUID;
  */
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@RegisterForReflection
 public class EventPacket {
     private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
 
@@ -84,6 +85,11 @@ public class EventPacket {
      */
     @JsonIgnore
     private transient Object payloadContent;
+
+    /**
+     * A no-args constructor for JSON deserialization.
+     */
+    protected EventPacket() {}
 
     public EventPacket(UUID id, Topic topic, String correlationId,
                        int retryCount, Instant timestamp,

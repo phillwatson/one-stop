@@ -36,13 +36,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 @Slf4j
 public class EventDeliverer {
-    // the delay before messages polling begins
+    /**
+     * The delay before messages polling begins.
+     * TODO: move to a configurable property
+     */
     private final static Duration INIT_DELAY = Duration.ofSeconds(10);
 
-    // the frequency at which messages are polled from the database
-    private final static Duration POLL_FREQUENCY = Duration.ofSeconds(5);
+    /**
+     * The frequency at which messages are polled from the database.
+     * TODO: move to a configurable property
+     */
+    private final static Duration POLL_FREQUENCY = Duration.ofSeconds(2);
 
-    // the maximum number of messages retrieved on each poll
+    /**
+     * The maximum number of messages retrieved on each poll.
+     * TODO: move to a configurable property
+     */
     private final static int POLL_BATCH_SIZE = 25;
 
     // the repository to poll messages from the database

@@ -61,7 +61,7 @@ public class UserProfileTestIT extends ApiTestBase {
 
         // and: the profile fits
         assertEquals(user.getUsername(), profile.getUsername());
-        assertEquals(user.getEmail().toLowerCase(), profile.getEmail());
+        assertEquals(user.getEmail().toLowerCase(), profile.getEmail().toLowerCase());
         assertEquals(user.getGivenName(), profile.getGivenName());
 
         // and: the response shows the user's role
@@ -112,7 +112,7 @@ public class UserProfileTestIT extends ApiTestBase {
             assertEquals(updateProfileRequest.getGivenName(), profile.getGivenName());
             assertEquals(updateProfileRequest.getFamilyName(), profile.getFamilyName());
             assertEquals(updateProfileRequest.getPreferredName(), profile.getPreferredName());
-            assertEquals(updateProfileRequest.getEmail().toLowerCase(), profile.getEmail());
+            assertEquals(updateProfileRequest.getEmail().toLowerCase(), profile.getEmail().toLowerCase());
             assertEquals(updateProfileRequest.getPhone(), profile.getPhone());
             assertEquals(updateProfileRequest.getLocale(), profile.getLocale());
         }

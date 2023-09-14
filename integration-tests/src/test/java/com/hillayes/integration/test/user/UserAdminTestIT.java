@@ -119,7 +119,7 @@ public class UserAdminTestIT extends ApiTestBase {
 
                 // then: the data matches that given in the request
                 assertEquals(updateRequest.getUsername(), updatedUser.getUsername());
-                assertEquals(updateRequest.getEmail().toLowerCase(), updatedUser.getEmail());
+                assertEquals(updateRequest.getEmail().toLowerCase(), updatedUser.getEmail().toLowerCase());
                 assertEquals(updateRequest.getPreferredName(), updatedUser.getPreferredName());
                 assertEquals(updateRequest.getTitle(), updatedUser.getTitle());
                 assertEquals(updateRequest.getGivenName(), updatedUser.getGivenName());

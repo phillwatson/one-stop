@@ -1,0 +1,160 @@
+mp:
+  jwt:
+    verify:
+      audiences: ${one-stop.auth.access-token.audiences}
+      issuer: ${one-stop.auth.access-token.issuer}
+      publickey:
+        location: http://user-service:8080/api/v1/auth/jwks.json
+    token:
+      header: Cookie
+      cookie: ${one-stop.auth.access-token.cookie}
+
+smallrye:
+  jwt:
+    jwks:
+      refresh-interval: 15
+      forced-refresh-interval: 5
+
+# configure production datasource
+"%prod":
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      #username: one-stop
+      #password: password
+      jdbc:
+        url: jdbc:postgresql://db:5432/one-stop
+
+quarkus:
+  hibernate-orm:
+    database:
+      default-schema: notifications
+
+  flyway:
+    migrate-at-start: true
+    schemas: ${quarkus.hibernate-orm.database.default-schema}
+
+  log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "org.apache.kafka":
+        level: WARN
+      "com.hillayes":
+        level: DEBUG
+
+  native:
+    resources:
+      includes: "templates/**"
+
+one-stop:
+  auth:
+    access-token:
+      cookie: 'access_token'
+      issuer: https://hillayes.com/one-stop
+      audiences: com.hillayes
+    refresh-token:
+      cookie: 'refresh_token'
+      expires-in: "PT30M"
+    xsrf:
+      cookie-name: 'XSRF-TOKEN'
+      header-name: 'X-XSRF-TOKEN'
+      # secret: 'this will be passed in via docker env'
+
+  email:
+    disabled: false
+
+    common-args:
+      COMPANY_LONG_NAME: Hillayes One-Stop
+      COMPANY_COPYRIGHT_NAME: One-Stop
+      COMPANY_CONTACT_EMAIL: watson.phill+onestop@gmail.com
+      COMPANY_ADDRESS_LINE1: Hillayes
+      COMPANY_ADDRESS_LINE2: Hullavington
+      COMPANY_ADDRESS_LINE3: Wiltshire SN14
+
+    default-sender:
+      name: ${one-stop.email.common-args.COMPANY_LONG_NAME}
+      email: ${one-stop.email.common-args.COMPANY_CONTACT_EMAIL}
+      locale: "en"
+
+    templates:
+      header:
+        en:
+          subject: not-applicable
+          template: "header/en.html"
+
+      user-registered:
+        en:
+          subject: "Hi $user.preferredName$, please complete your One-Stop registration"
+          template: "user-registered/en.html"
+        fr:
+          subject: "Salut $user.preferredName$, veuillez compléter votre inscription One-Stop"
+          template: "user-registered/fr.html"
+
+      user-created:
+        en:
+          subject: "Welcome to OneStop $user.preferredName$"
+          template: "user-created/en.html"
+
+      user-updated:
+        en:
+          subject: "Your account has been updated"
+          template: "user-updated/en.html"
+
+      user-deleted:
+        en:
+          subject: "Sorry to see you go"
+          template: "user-deleted/en.html"
+
+      account-activity:
+        en:
+          subject: "Activity on your OneStop account"
+          template: "account-activity/en.html"
+
+      consent-given:
+        en:
+          subject: "Your OneStop access to $event.institutionName$"
+          template: "consent-given/en.html"
+
+      consent-denied:
+        en:
+          subject: "Your OneStop access to $event.institutionName$"
+          template: "consent-denied/en.html"
+
+      consent-cancelled:
+        en:
+          subject: "Your OneStop access to $event.institutionName$"
+          template: "consent-cancelled/en.html"
+
+      consent-suspended:
+        en:
+          subject: "Your OneStop access to $event.institutionName$"
+          template: "consent-suspended/en.html"
+
+      consent-expired:
+        en:
+          subject: "Your OneStop access to $event.institutionName$"
+          template: "consent-expired/en.html"
+
+  notification:
+    common-args:
+      COMPANY_LONG_NAME: Hillayes One-Stop
+      COMPANY_COPYRIGHT_NAME: One-Stop
+
+    templates:
+      consent-suspended:
+        en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
+      consent-expired:
+        en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
+
+  scheduler:
+    schema: ${quarkus.hibernate-orm.database.default-schema}
+    tasks:
+      # jobbing tasks to queue emails for sending
+      queue-email:
+        on-failure: # gives a max of 16 minutes
+          max-retry: 4
+          retry-interval: PT2M
+          retry-exponent: 1.5

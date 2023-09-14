@@ -37,14 +37,15 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
 
-  email-service:
-    image: one-stop/email-service:1.0.0-SNAPSHOT
+  notification-service:
+    image: one-stop/notification-service:1.0.0-SNAPSHOT
     ports:
       - "8084:8080"
       - "5004:5005"
     environment:
       ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
 
   audit-service:
     image: one-stop/audit-service:1.0.0-SNAPSHOT

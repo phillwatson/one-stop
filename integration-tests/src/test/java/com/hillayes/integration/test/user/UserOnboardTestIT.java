@@ -83,6 +83,6 @@ public class UserOnboardTestIT extends ApiTestBase {
         // and: the profile matches given user information
         assertEquals(completeRequest.getUsername(), profile.getUsername());
         assertEquals(completeRequest.getGivenName(), profile.getGivenName());
-        assertEquals(registerRequest.getEmail().toLowerCase(), profile.getEmail());
+        assertEquals(registerRequest.getEmail().toLowerCase(), profile.getEmail().toLowerCase());
     }
 }

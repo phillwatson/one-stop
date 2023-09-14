@@ -31,7 +31,7 @@
         <module>nordigen-lib</module>
 
         <module>audit-service</module>
-        <module>email-service</module>
+        <module>notification-service</module>
         <module>rail-service</module>
         <module>user-service</module>
 
@@ -187,7 +187,7 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
-                <artifactId>email-service</artifactId>
+                <artifactId>notification-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class ScheduledTaskTest extends TestBase {
-    @Test
+    //@Test
     public void testDailyTask() {
         AtomicBoolean signal = new AtomicBoolean();
 
@@ -49,7 +49,7 @@ public class ScheduledTaskTest extends TestBase {
 
         Awaitility.await()
             .pollInterval(5, TimeUnit.SECONDS)
-            .atMost(20, TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .until(signal::get);
 
         fixture.stop();

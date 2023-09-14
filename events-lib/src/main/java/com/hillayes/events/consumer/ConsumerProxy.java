@@ -126,6 +126,8 @@ public class ConsumerProxy implements Runnable {
             }
         } catch (WakeupException e) {
             // ignore, we're closing
+        } catch (Exception e) {
+            log.error("Unexpected exception", e);
         } finally {
             try {
                 log.info("Closing consumer and committing offsets [topics: {}]", getTopics());
