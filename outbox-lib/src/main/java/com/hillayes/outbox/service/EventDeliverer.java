@@ -46,7 +46,7 @@ public class EventDeliverer {
      * The frequency at which messages are polled from the database.
      * TODO: move to a configurable property
      */
-    private final static Duration POLL_FREQUENCY = Duration.ofSeconds(5);
+    private final static Duration POLL_FREQUENCY = Duration.ofSeconds(2);
 
     /**
      * The maximum number of messages retrieved on each poll.
