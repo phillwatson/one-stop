@@ -31,7 +31,7 @@ import java.util.UUID;
 @Slf4j
 public class UserConsentService {
     // The number of days for which account access will be agreed
-    private final static int ACCESS_VALID_FOR_DAYS = 2;
+    private final static int ACCESS_VALID_FOR_DAYS = 90;
 
     /**
      * The account scopes for which all consents are granted access.
