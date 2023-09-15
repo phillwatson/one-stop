@@ -15,7 +15,7 @@ import java.util.Optional;
 @ConfigMapping(prefix = "one-stop.scheduler")
 public interface SchedulerConfig {
     final static Integer DEFAULT_THREAD_COUNT = 10;
-    final static Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(5);
+    final static Duration DEFAULT_POLLING_INTERVAL = Duration.ofSeconds(2);
     final static Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofMinutes(5);
     final static Duration DEFAULT_SHUTDOWN_MAX_WAIT = Duration.ofMinutes(30);
     final static Duration DEFAULT_UNRESOLVED_TIMEOUT = Duration.ofDays(14);
