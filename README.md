@@ -103,6 +103,7 @@ images, add the following parameter to the build command:
 ```shell
 mvn clean package -Dnative
 ```
+Combinations of these can be used.
 
 ## Debugging Docker Images
 All non-native docker images are built with remote JVM debugging enabled. In
