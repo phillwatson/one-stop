@@ -40,7 +40,6 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         adminAuthTokens = authApi.login("admin", "password");
         assertNotNull(adminAuthTokens);
         assertEquals(3, adminAuthTokens.size());
-
     }
 
     @BeforeEach

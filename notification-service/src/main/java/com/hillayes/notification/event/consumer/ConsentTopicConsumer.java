@@ -45,6 +45,7 @@ public class ConsentTopicConsumer implements EventConsumer {
             ConsentDenied event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_DENIED, params);
+            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_DENIED, params);
         }
 
         else if (ConsentCancelled.class.getName().equals(payloadClass)) {

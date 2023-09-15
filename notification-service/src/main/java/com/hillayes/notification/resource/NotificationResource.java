@@ -1,6 +1,5 @@
 package com.hillayes.notification.resource;
 
-import com.hillayes.executors.correlation.Correlation;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.onestop.api.NotificationResponse;
@@ -24,6 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationResource {
+    private static final NotificationService.NotificationMapper<NotificationResponse> MAPPER = new Mapper();
+
     private final NotificationService notificationService;
 
     @GET
@@ -32,7 +33,7 @@ public class NotificationResource {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Getting user notifications [userId: {}, after: {}]", userId, after);
 
-        List<NotificationResponse> notifications = notificationService.listNotifications(userId, after, new Mapper());
+        List<NotificationResponse> notifications = notificationService.listNotifications(userId, after, MAPPER);
 
         log.debug("Get user notifications [userId: {}, after: {}, count: {}]", userId, after, notifications.size());
         return Response.ok(notifications).build();
@@ -50,11 +51,16 @@ public class NotificationResource {
         return Response.noContent().build();
     }
 
+    /**
+     * An implementation of NotificationService.NotificationMapper to be passed to the service
+     * when retrieving notifications. It allows the service to return both the notification
+     * record and its rendered message.
+     */
     private static class Mapper implements NotificationService.NotificationMapper<NotificationResponse> {
         public NotificationResponse map(Notification notification, String message) {
             return new NotificationResponse()
                 .id(notification.getId())
-                .correlationId(Correlation.getCorrelationId().orElse(null))
+                .correlationId(notification.getCorrelationId())
                 .timestamp(notification.getDateCreated())
                 .topic(notification.getMessageId().getTopic().name())
                 .severity(NotificationResponse.SeverityEnum.fromValue(notification.getMessageId().getSeverity().name()))

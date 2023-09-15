@@ -60,4 +60,14 @@ public class ConsentDenied {
      * record is held in the rail providing the open-banking service.
      */
     private String requisitionId;
+
+    /**
+     * Records the error code returned by the rail.
+     */
+    private String errorCode;
+
+    /**
+     * Records the detail of the error returned by the rail.
+     */
+    private String errorDetail;
 }

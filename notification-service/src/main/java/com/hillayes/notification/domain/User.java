@@ -1,25 +1,20 @@
 package com.hillayes.notification.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hillayes.commons.jpa.LocaleAttrConverter;
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
     @Id
     @ToString.Include
@@ -69,6 +64,5 @@ public class User {
     private Instant dateUpdated;
 
     @Version
-    @JsonIgnore
     private Integer version;
 }

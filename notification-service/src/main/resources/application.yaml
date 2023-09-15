@@ -144,6 +144,8 @@ one-stop:
       COMPANY_COPYRIGHT_NAME: One-Stop
 
     templates:
+      consent-denied:
+        en: "Access to $event.institutionName$ has been denied.\nReason given '$event.errorDetail$'."
       consent-suspended:
         en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
       consent-expired:

@@ -60,6 +60,8 @@ public class ConsentEventSender {
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .requisitionId(userConsent.getRequisitionId())
+            .errorCode(userConsent.getErrorCode())
+            .errorDetail(userConsent.getErrorDetail())
             .build());
     }
 

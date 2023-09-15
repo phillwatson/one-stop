@@ -1,6 +1,7 @@
 package com.hillayes.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.executors.correlation.Correlation;
@@ -27,7 +28,9 @@ import java.util.*;
 public class NotificationService {
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
-    private final ObjectMapper mapper;
+    private static final TypeReference<HashMap<String, Object>> PARAMS_MAP = new TypeReference<>() {};
+
+    private final ObjectMapper jsonMapper;
     private final NotificationConfiguration configuration;
     private final NotificationRepository notificationRepository;
     private final UserService userService;
@@ -41,7 +44,7 @@ public class NotificationService {
                 .correlationId(Correlation.getCorrelationId().orElse(null))
                 .dateCreated(Instant.now())
                 .messageId(notificationId)
-                .attributes(params == null ? null : mapper.writeValueAsString(params))
+                .attributes(params == null ? null : jsonMapper.writeValueAsString(params))
                 .build();
 
             return notificationRepository.save(notification);
@@ -111,7 +114,7 @@ public class NotificationService {
         // apply notification's own parameters to the message template
         if (notification.getAttributes() != null) {
             try {
-                HashMap<String, Object> params = mapper.readValue(notification.getAttributes(), HashMap.class);
+                HashMap<String, Object> params = jsonMapper.readValue(notification.getAttributes(), PARAMS_MAP);
                 params.forEach(engine::add);
             } catch (JsonProcessingException e) {
                 throw new ParameterDeserialisationException(notification.getMessageId(), e);

@@ -37,6 +37,24 @@ public class RequisitionsEndpoint extends AbstractEndpoint {
         requisitions.clear();
     }
 
+    /**
+     * A utility method to allow tests to set the status of the identified Requisition.
+     * This supports the use-cases where a requisition has expired or has been suspended.
+     */
+    @PUT
+    @Path("{id}/")
+    public Response updateRequisitionStatus(@PathParam("id") String id,
+                                            @QueryParam("status") RequisitionStatus status) {
+        log.info("update requisition status [id: {}]", id);
+        Requisition entity = requisitions.get(id);
+        if (entity == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        entity.status = status;
+        return Response.noContent().build();
+    }
+
     @GET
     public Response list(@QueryParam("offset") int offset,
                          @QueryParam("limit") int limit) {

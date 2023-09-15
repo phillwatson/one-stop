@@ -1,9 +1,7 @@
 package com.hillayes.sim.nordigen;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import com.hillayes.nordigen.model.RequisitionStatus;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -13,4 +11,9 @@ public interface NordigenSimClient {
     @PUT
     @Path("/reset")
     public Response reset();
+
+    @PUT
+    @Path("/api/v2/requisitions/{id}/")
+    public Response updateRequisitionStatus(@PathParam("id") String id,
+                                            @QueryParam("status") RequisitionStatus status);
 }

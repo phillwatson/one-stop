@@ -57,8 +57,8 @@ RAILS_SECRET_ID: <the secret ID issued by Nordigen>
 RAILS_SECRET_KEY: <the secret issue by Nordigen>
 ```
 
-### Email Service
-In order to use the email service, you will need to obtain an API key from
+### Notification Service
+In order to use the notification service, you will need to obtain an API key from
 Brevo (previously known as Send-With-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
