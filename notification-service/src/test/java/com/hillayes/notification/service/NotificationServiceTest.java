@@ -63,7 +63,8 @@ public class NotificationServiceTest {
         ConsentExpired event = mockConsentExpired();
 
         // when: the service is called
-        Notification notification = fixture.createNotification(userId, notificationId, Map.of("event", event));
+        Notification notification = fixture.createNotification(userId, Instant.now(),
+            notificationId, Map.of("event", event));
 
         // then: the notification is saved
         verify(notificationRepository).save(any());

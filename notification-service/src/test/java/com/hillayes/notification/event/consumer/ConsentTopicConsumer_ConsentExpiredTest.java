@@ -22,6 +22,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -65,7 +66,8 @@ public class ConsentTopicConsumer_ConsentExpiredTest {
         assertEquals(event.getConsentId(), param.getConsentId());
 
         // and: a notification is issued
-        verify(notificationService).createNotification(eq(event.getUserId()), eq(NotificationId.CONSENT_EXPIRED), paramsCaptor.capture());
+        verify(notificationService).createNotification(eq(event.getUserId()), any(),
+            eq(NotificationId.CONSENT_EXPIRED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         param = (ConsentExpired)paramsCaptor.getValue().get("event");

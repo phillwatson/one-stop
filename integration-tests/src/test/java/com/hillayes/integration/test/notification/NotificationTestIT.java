@@ -82,24 +82,30 @@ public class NotificationTestIT extends ApiTestBase {
             requisition = requisitionAdminApi.get(requisition.id);
         }
 
+        String errorDetails = randomAlphanumeric(30);
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
             // when: an error response is returned from the rails service
-            String errorDetails = randomAlphanumeric(30);
             userConsentApi.consentResponse(requisition.reference, "mock-error-code", errorDetails);
 
             // then: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
-
-            // and: a notification is issued to the user
-            List<NotificationResponse> notifications = notificationApi.getNotifications(testStarted);
-            assertNotNull(notifications);
-            assertEquals(1, notifications.size());
-
-            // and: the notification shows the reason for denial
-            NotificationResponse notification = notifications.get(0);
-            assertEquals("CONSENT", notification.getTopic());
-            assertTrue(notification.getMessage().contains("Reason given '" + errorDetails + "'"));
         }
+
+        // and: a notification is issued to the user
+        List<NotificationResponse> notifications = notificationApi.getNotifications(testStarted);
+        assertNotNull(notifications);
+        assertEquals(1, notifications.size());
+
+        // and: the notification shows the reason for denial
+        NotificationResponse notification = notifications.get(0);
+        assertEquals("CONSENT", notification.getTopic());
+        assertTrue(notification.getMessage().contains("Reason given '" + errorDetails + "'"));
+
+        // when: the notification is deleted
+        notificationApi.deleteNotification(notification.getId());
+
+        // then: the notifications are empty
+        assertTrue(notificationApi.getNotifications(testStarted).isEmpty());
    }
 }

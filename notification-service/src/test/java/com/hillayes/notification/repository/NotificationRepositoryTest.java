@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,6 +49,32 @@ public class NotificationRepositoryTest {
 
         // and: only those after the given date-time are returned
         results.forEach(notification -> assertTrue(notification.getDateCreated().isAfter(after)));
+    }
+
+    @Test
+    public void testFindByUserIdAndTimestamp() {
+        // given: a collection of notifications for an identified user
+        UUID userId = UUID.randomUUID();
+        Instant start = Instant.now().minus(Duration.ofHours(10));
+        List<Notification> notifications = mockNotifications(userId, start);
+
+        // and: a collection of notifications for other users
+        mockNotifications(UUID.randomUUID(), start);
+        mockNotifications(UUID.randomUUID(), start);
+
+        // when: each notification is queried
+        notifications.forEach(expected -> {
+            Optional<Notification> result = fixture.findByUserAndTimestamp(userId, expected.getDateCreated(), expected.getMessageId());
+
+            // then: the result is returned
+            assertTrue(result.isPresent());
+
+            // and: the result matches the expectation
+            Notification actual = result.get();
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(userId, actual.getUserId());
+        });
+
     }
 
     private List<Notification> mockNotifications(UUID userId, Instant startDateTime) {

@@ -45,7 +45,8 @@ public class ConsentTopicConsumer implements EventConsumer {
             ConsentDenied event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_DENIED, params);
-            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_DENIED, params);
+            notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
+                NotificationId.CONSENT_DENIED, params);
         }
 
         else if (ConsentCancelled.class.getName().equals(payloadClass)) {
@@ -58,14 +59,16 @@ public class ConsentTopicConsumer implements EventConsumer {
             ConsentSuspended event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_SUSPENDED, params);
-            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_SUSPENDED, params);
+            notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
+                NotificationId.CONSENT_SUSPENDED, params);
         }
 
         else if (ConsentExpired.class.getName().equals(payloadClass)) {
             ConsentExpired event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_EXPIRED, params);
-            notificationService.createNotification(event.getUserId(), NotificationId.CONSENT_EXPIRED, params);
+            notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
+                NotificationId.CONSENT_EXPIRED, params);
         }
     }
 }

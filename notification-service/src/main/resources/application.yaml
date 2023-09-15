@@ -140,8 +140,8 @@ one-stop:
 
   notification:
     common-args:
-      COMPANY_LONG_NAME: Hillayes One-Stop
-      COMPANY_COPYRIGHT_NAME: One-Stop
+      COMPANY_LONG_NAME: ${one-stop.email.common-args.COMPANY_LONG_NAME}
+      COMPANY_COPYRIGHT_NAME: ${one-stop.email.common-args.COMPANY_COPYRIGHT_NAME}
 
     templates:
       consent-denied:

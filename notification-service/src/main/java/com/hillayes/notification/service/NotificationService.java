@@ -28,31 +28,62 @@ import java.util.*;
 public class NotificationService {
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
-    private static final TypeReference<HashMap<String, Object>> PARAMS_MAP = new TypeReference<>() {};
+    private static final TypeReference<HashMap<String, Object>> PARAMS_MAP = new TypeReference<>() {
+    };
 
     private final ObjectMapper jsonMapper;
     private final NotificationConfiguration configuration;
     private final NotificationRepository notificationRepository;
     private final UserService userService;
 
+    /**
+     * Creates a Notification to record a message issued to the identified user.
+     * The Notification records the message context, in the form of name/value
+     * attributes, and also the correlation ID in which the notification was
+     * issued.
+     *
+     * @param userId the user to which the notification relates.
+     * @param timestamp the date-time when the notification was originally issued.
+     * @param notificationId the identifier that provides notification details.
+     * @param params the context attributes to be included in rendered message.
+     * @return the new Notification record.
+     * @throws ParameterSerialisationException
+     */
     public Notification createNotification(UUID userId,
+                                           Instant timestamp,
                                            NotificationId notificationId,
                                            Map<String, Object> params) throws ParameterSerialisationException {
-        try {
-            Notification notification = Notification.builder()
-                .userId(userId)
-                .correlationId(Correlation.getCorrelationId().orElse(null))
-                .dateCreated(Instant.now())
-                .messageId(notificationId)
-                .attributes(params == null ? null : jsonMapper.writeValueAsString(params))
-                .build();
+        // a notification may already exist
+        return notificationRepository.findByUserAndTimestamp(userId, timestamp, notificationId).or(() -> {
+            try {
+                // create a new record
+                Notification notification = Notification.builder()
+                    .userId(userId)
+                    .correlationId(Correlation.getCorrelationId().orElse(null))
+                    .dateCreated(timestamp)
+                    .messageId(notificationId)
+                    .attributes(params == null ? null : jsonMapper.writeValueAsString(params))
+                    .build();
 
-            return notificationRepository.save(notification);
-        } catch (JsonProcessingException e) {
-            throw new ParameterSerialisationException(notificationId, e);
-        }
+                return Optional.of(notificationRepository.save(notification));
+            } catch (JsonProcessingException e) {
+                throw new ParameterSerialisationException(notificationId, e);
+            }
+        }).get();
     }
 
+    /**
+     * Returns a list of Notification for the identified user issued after the
+     * given timestamp, in the order they were issued. Each entry in the result
+     * is constructed by passing the given Notification and its rendered message
+     * to the given NotificationMapper.
+     *
+     * @param userId the identifier for the user to whom the notifications belong.
+     * @param after the timestamp that all notification must proceed.
+     * @param mapper the NotificationMapper used to construct the resulting entities.
+     * @param <T> the type of the mapped notification entities.
+     * @return the collection of mapped notifications in the order they were issued.
+     */
     public <T> List<T> listNotifications(UUID userId, Instant after,
                                          NotificationMapper<T> mapper) {
         log.info("List notifications [userId: {}, after: {}]", userId, after);

@@ -3,8 +3,10 @@ package com.hillayes.notification.event.consumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.ConsentDenied;
+import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.events.events.consent.ConsentGiven;
 import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.InjectMock;
@@ -21,9 +23,9 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 @QuarkusTest
 public class ConsentTopicConsumer_ConsentDeniedTest {
@@ -64,8 +66,15 @@ public class ConsentTopicConsumer_ConsentDeniedTest {
         assertEquals(event.getUserId(), param.getUserId());
         assertEquals(event.getConsentId(), param.getConsentId());
 
-        // and: no notification is issued
-        verifyNoInteractions(notificationService);
+        // and: a notification is issued
+        verify(notificationService).createNotification(eq(event.getUserId()), any(),
+            eq(NotificationId.CONSENT_DENIED), paramsCaptor.capture());
+
+        // and: the parameters contain the event payload
+        param = (ConsentDenied)paramsCaptor.getValue().get("event");
+        assertNotNull(param);
+        assertEquals(event.getUserId(), param.getUserId());
+        assertEquals(event.getConsentId(), param.getConsentId());
     }
 
     private EventPacket mockEventPacket(Object payload) {

@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +65,8 @@ public class ConsentTopicConsumer_ConsentSuspendedTest {
         assertEquals(event.getConsentId(), param.getConsentId());
 
         // and: a notification is issued
-        verify(notificationService).createNotification(eq(event.getUserId()), eq(NotificationId.CONSENT_SUSPENDED), paramsCaptor.capture());
+        verify(notificationService).createNotification(eq(event.getUserId()), any(),
+            eq(NotificationId.CONSENT_SUSPENDED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         param = (ConsentSuspended)paramsCaptor.getValue().get("event");
