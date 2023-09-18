@@ -27,7 +27,7 @@ export default function Accounts() {
       const details = queryParams.get("details")
       showNotification({ type: 'add', level: 'error', message: details ? details : error!!});
     }
-  }, [ queryParams ]);
+  }, [ queryParams, showNotification ]);
 
   useEffect(() => {
     AccountService.getAll().then( response => setAccounts(response.items));
