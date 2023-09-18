@@ -16,9 +16,8 @@ on:
 
 jobs:
   build:
-
+    name: test and package
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 17
@@ -29,10 +28,7 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: |
-        mvn -B package -Ptest --file pom.xml \
+        mvn -B verify -Pclient -Ptest --file pom.xml \
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
-          -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR \
-          -Dquarkus.log.category.\"com.github.tomakehurst.wiremock\".level=WARN \
-          -Dquarkus.log.category.\"wiremock.org\".level=ERROR \
-          -Dquarkus.log.category.WireMock.level=WARN
+          -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
