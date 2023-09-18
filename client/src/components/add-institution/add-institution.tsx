@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Slide, SxProps } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Slide, SxProps } from "@mui/material";
 
 import Country from '../../model/country.model';
 import CountryService from '../../services/country.service';
