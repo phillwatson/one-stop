@@ -32,4 +32,4 @@ jobs:
         mvn -B package -Ptest --file pom.xml \
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
-          -DQUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP_WIRE__LEVEL=ERROR
+          -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
