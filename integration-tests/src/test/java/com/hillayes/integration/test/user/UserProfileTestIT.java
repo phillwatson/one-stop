@@ -159,10 +159,7 @@ public class UserProfileTestIT extends ApiTestBase {
         withServiceError(userProfileApi.changePassword(request, 400), error -> {
             // and: the response is a service error identifying the missing parameter
             assertEquals("PARAMETER_MISSING", error.getMessageId());
-            assertNotNull(error.getContextAttributes().stream()
-                .filter(attr -> attr.getName().equals("parameter-name"))
-                .filter(attr -> attr.getValue().equals("oldPassword"))
-                .findFirst().orElse(null));
+            assertEquals("oldPassword", error.getContextAttributes().get("parameter-name"));
         });
     }
 
@@ -187,10 +184,7 @@ public class UserProfileTestIT extends ApiTestBase {
         withServiceError(userProfileApi.changePassword(request, 400), error -> {
             // and: the response is a service error identifying the missing parameter
             assertEquals("PARAMETER_MISSING", error.getMessageId());
-            assertNotNull(error.getContextAttributes().stream()
-                .filter(attr -> attr.getName().equals("parameter-name"))
-                .filter(attr -> attr.getValue().equals("newPassword"))
-                .findFirst().orElse(null));
+            assertEquals("newPassword", error.getContextAttributes().get("parameter-name"));
         });
     }
 

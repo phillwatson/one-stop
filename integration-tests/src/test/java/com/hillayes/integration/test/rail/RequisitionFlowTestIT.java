@@ -227,10 +227,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
-            assertNotNull(error.getContextAttributes().stream()
-                .filter(attr -> attr.getName().equals("entity-type"))
-                .filter(attr -> attr.getValue().equals("UserConsent"))
-                .findFirst().orElse(null));
+            assertEquals("UserConsent", error.getContextAttributes().get("entity-type"));
         });
 
         // when: the user attempts to retrieve any account from the institution
@@ -240,10 +237,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
                 // then: a not-found error is returned
                 assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
                 assertNotNull(error.getContextAttributes());
-                assertNotNull(error.getContextAttributes().stream()
-                    .filter(attr -> attr.getName().equals("entity-type"))
-                    .filter(attr -> attr.getValue().equals("Account"))
-                    .findFirst().orElse(null));
+                assertEquals("Account", error.getContextAttributes().get("entity-type"));
             });
         });
 

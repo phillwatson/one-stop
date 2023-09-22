@@ -1,12 +1,12 @@
 package com.hillayes.exception;
 
 import com.hillayes.executors.correlation.Correlation;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,9 +42,8 @@ public class MensaExceptionMapper implements ExceptionMapper<MensaException> {
         return result;
     }
 
-    private List<ServiceError.Parameter> getContextParams(MensaException aException) {
+    private Map<String,String> getContextParams(MensaException aException) {
         return aException.getContext().entrySet().stream()
-            .map(e -> new ServiceError.Parameter(e.getKey(), String.valueOf(e.getValue())))
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toString() ));
     }
 }

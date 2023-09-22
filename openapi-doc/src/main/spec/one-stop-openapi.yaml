@@ -83,21 +83,8 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -377,21 +364,8 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -449,21 +423,8 @@ paths:
           required: true
           schema:
             type: string
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -516,21 +477,8 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -649,21 +597,8 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -770,21 +705,8 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: "page"
-          in: "query"
-          description: "Page number - zero indexed"
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: "page-size"
-          in: "query"
-          description: "Number of items per page"
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 20
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
       responses:
         200:
           description: "successful operation"
@@ -896,6 +818,31 @@ components:
       name: access-token
       description: A JWT identifying the user, the cookie (and token) have a short expiry time
 
+  parameters:
+    PageIndexParam:
+      name: page
+      in: query
+      description: The zero-based index of the page of results to return.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 25
+        minimum: 0
+      example: 10
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      description: The maximum number of results to return in a page.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 25
+        minimum: 1
+      example: 30
+
   schemas:
     LoginRequest:
       description: The authentication credentials
@@ -910,22 +857,6 @@ components:
         password:
           type: string
           description: the user's password
-
-    ContextAttribute:
-      description: |
-        An attribute the captures an element of the context in which an error occurred.
-        The attributes can be used to support locale translation of message templates; by
-        placing the attribute name in the message template.
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          description: the attribute identifier
-          type: string
-        value:
-          description: the attribute value
-          type: string
 
     ServiceError:
       type: object
@@ -955,9 +886,12 @@ components:
           description: |
             An array of named values that capture the context in which the error occurred.
             This can be used to replace place-holders within a template string for locale translation.
-          type: array
-          items:
-            $ref: '#/components/schemas/ContextAttribute'
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            min: '0'
+            max: '10'
 
     UserRegisterRequest:
       type: object

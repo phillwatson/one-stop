@@ -7,7 +7,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.ext.ClientHeadersFactory;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -23,7 +22,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
  * If the access token has expired, the refresh token will be used to obtain
  * a new one.
  */
-@ApplicationScoped
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {
     @ConfigProperty(name = "one-stop.rails.secret.id")

@@ -135,16 +135,10 @@ public class NotificationResourceTest extends TestBase {
         assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
 
         // and: the entity type is identified
-        assertNotNull(error.getContextAttributes().stream()
-            .filter(attr -> attr.getName().equals("entity-type"))
-            .filter(attr -> attr.getValue().equals("Notification"))
-            .findFirst().orElse(null));
+        assertEquals("Notification", error.getContextAttributes().get("entity-type"));
 
         // and: the notification ID is identified
-        assertNotNull(error.getContextAttributes().stream()
-            .filter(attr -> attr.getName().equals("entity-id"))
-            .filter(attr -> attr.getValue().equals(notification.getId().toString()))
-            .findFirst().orElse(null));
+        assertEquals(notification.getId().toString(), error.getContextAttributes().get("entity-id"));
 
         // and: no notification is deleted
         verify(notificationRepository, never()).deleteById(any());

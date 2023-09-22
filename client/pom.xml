@@ -15,6 +15,7 @@
         <node.version>v19.6.0</node.version>
         <yarn.version>v1.22.19</yarn.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
         <skip.clean>true</skip.clean>
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
@@ -78,6 +79,44 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <skip>${skip.install}</skip>
+                    <to>
+                        <image>${project.parent.artifactId}/${project.artifactId}:${project.version}</image>
+                    </to>
+                    <from>
+                        <image>nginx:1.17.0-alpine</image>
+                    </from>
+                    <container>
+                        <ports>80</ports>
+                        <entrypoint>nginx,-g,"daemon off"</entrypoint>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>${project.basedir}/build/</from>
+                                <into>/etc/nginx/html/</into>
+                            </path>
+                            <path>
+                                <from>${project.basedir}/nginx.conf</from>
+                                <into>/etc/nginx/html/</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

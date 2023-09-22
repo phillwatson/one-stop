@@ -368,15 +368,7 @@ public class UserProfileResourceTest extends TestBase {
         assertEquals("The identified entity cannot be found.", response.getMessage());
 
         assertNotNull(response.getContextAttributes());
-        assertEquals("user", response.getContextAttributes().stream()
-            .filter(attr -> attr.getName().equals("entity-type"))
-            .findFirst()
-            .map(ContextAttribute::getValue)
-            .orElse(null));
-        assertEquals(userId.toString(), response.getContextAttributes().stream()
-            .filter(attr -> attr.getName().equals("entity-id"))
-            .findFirst()
-            .map(ContextAttribute::getValue)
-            .orElse(null));
+        assertEquals("user", response.getContextAttributes().get("entity-type"));
+        assertEquals(userId.toString(), response.getContextAttributes().get("entity-id"));
     }
 }
