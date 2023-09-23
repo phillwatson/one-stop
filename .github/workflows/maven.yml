@@ -3,6 +3,12 @@
 
 name: Java CI with Maven
 
+# to login to the github container repo use:
+#    docker login https://ghcr.io -u phillwatson -p <personal-access-token>
+# where:
+#  <personal-access-token> is created here https://github.com/settings/tokens
+# This will create an auth entry in the ~/.docker/config.json/
+
 on:
   push:
     branches: [ "main" ]
@@ -58,5 +64,5 @@ jobs:
       with:
         context: client/
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: one-stop/client:1.0.0-SNAPSHOT
         labels: ${{ steps.meta.outputs.labels }}
