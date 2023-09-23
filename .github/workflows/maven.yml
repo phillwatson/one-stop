@@ -18,8 +18,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-#  PROJECT_NAME: one-stop
-#  PROJECT_VERSION: latest
+  QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository }}
+  QUARKUS_CONTAINER_IMAGE_PUSH: true
 
 jobs:
   build:
@@ -50,8 +50,6 @@ jobs:
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
           -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
-          -DQUARKUS_CONTAINER_IMAGE_GROUP=${{ github.repository }}
-          -DQUARKUS_CONTAINER_IMAGE_PUSH=true
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
@@ -59,8 +57,6 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-#    - name: Push to packages
-#      run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/${{ env.PROJECT_NAME }}:${{ env.PROJECT_VERSION }}
     - name: Build and push Client Docker image
       uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
       with:
