@@ -18,7 +18,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  QUARKUS_CONTAINER_IMAGE_REGISTRY: ${{ REGISTRY }}
+  QUARKUS_CONTAINER_IMAGE_REGISTRY: ${{ ghcr.io }}
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
   QUARKUS_CONTAINER_IMAGE_PUSH: true
 
