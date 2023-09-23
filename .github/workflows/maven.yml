@@ -18,6 +18,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  QUARKUS_CONTAINER_IMAGE_REGISTRY: ${{ REGISTRY }}
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
   QUARKUS_CONTAINER_IMAGE_PUSH: true
 
@@ -63,5 +64,5 @@ jobs:
       with:
         context: client/
         push: true
-        tags: ${{ github.repository }}/client:1.0.0-SNAPSHOT
+        tags: ${{ github.repository_owner }}/client:1.0.0-SNAPSHOT
         labels: ${{ steps.meta.outputs.labels }}
