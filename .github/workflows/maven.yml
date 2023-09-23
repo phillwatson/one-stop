@@ -50,6 +50,8 @@ jobs:
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
           -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
+          -DQUARKUS_CONTAINER_IMAGE_GROUP=${{ github.repository }}
+          -DQUARKUS_CONTAINER_IMAGE_PUSH=true
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
@@ -64,5 +66,5 @@ jobs:
       with:
         context: client/
         push: true
-        tags: one-stop/client:1.0.0-SNAPSHOT
+        tags: ${{ github.repository }}/client:1.0.0-SNAPSHOT
         labels: ${{ steps.meta.outputs.labels }}
