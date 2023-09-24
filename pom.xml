@@ -6,7 +6,7 @@
 
     <groupId>com.hillayes</groupId>
     <artifactId>one-stop</artifactId>
-    <version>1.0.${revision}</version>
+    <version>${revision}</version>
 
     <packaging>pom</packaging>
     <description>Hillayes One-Stop</description>
@@ -40,7 +40,7 @@
     </modules>
 
     <properties>
-        <revision>0-SNAPSHOT</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
