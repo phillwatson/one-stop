@@ -367,6 +367,7 @@
                 </plugin>
 
                 <plugin>
+                    <!-- use mvn versions:update-properties -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>2.16.1</version>
