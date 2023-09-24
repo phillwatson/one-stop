@@ -12,7 +12,7 @@
     <artifactId>openapi-doc</artifactId>
 
     <properties>
-        <openapi-generator.version>6.5.0</openapi-generator.version>
+        <openapi-generator.version>7.0.1</openapi-generator.version>
     </properties>
 
     <dependencies>
