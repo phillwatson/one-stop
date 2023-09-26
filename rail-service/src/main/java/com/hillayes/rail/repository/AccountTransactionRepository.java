@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -20,6 +21,19 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
 
     public Page<AccountTransaction> findByAccountId(UUID accountId, Sort sortBy, int pageNumber, int pageSize) {
         return findByPage(find("accountId", sortBy, accountId), pageNumber, pageSize);
+    }
+
+    /**
+     * Locates the transactions whose internal ID is in the given list. The internal
+     * transaction ID is assigned by the rail service.
+     *
+     * @param internalTransactionIds the list of internal transaction IDs.
+     * @return those transactions identified in the given list.
+     */
+    public List<AccountTransaction> findByInternalId(List<String> internalTransactionIds) {
+        return internalTransactionIds.isEmpty()
+            ? List.of()
+            : find("internalTransactionId in ?1", internalTransactionIds).list();
     }
 
     /**
