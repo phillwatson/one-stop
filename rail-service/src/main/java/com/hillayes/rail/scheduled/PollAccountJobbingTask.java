@@ -228,7 +228,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
         // map the NEW transactions to our own records
         List<AccountTransaction> transactions = details.stream()
-            .filter(detail -> existing.contains(detail.internalTransactionId))
+            .filter(detail -> !existing.contains(detail.internalTransactionId))
             .map(detail -> marshalTransaction(account, detail))
             .toList();
 
