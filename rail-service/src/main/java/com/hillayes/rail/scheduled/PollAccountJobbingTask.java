@@ -222,13 +222,15 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
         // TODO: add CREATE INDEX idx_account_intrnl_id ON ${flyway:defaultSchema}.account_transaction (internal_transaction_id);
         // identify those internal transaction IDs we've seen before
-        List<String> existing = accountTransactionRepository.findByInternalId(details.stream()
-            .map(detail -> detail.internalTransactionId).toList())
-            .stream().map(AccountTransaction::getInternalTransactionId).toList();
+        List<String> existing = (account.getId() == null)
+            ? List.of()
+            : accountTransactionRepository.findByInternalId(details.stream()
+                .map(detail -> detail.internalTransactionId).toList())
+                .stream().map(AccountTransaction::getInternalTransactionId).toList();
 
         // map the NEW transactions to our own records
         List<AccountTransaction> transactions = details.stream()
-            .filter(detail -> existing.contains(detail.internalTransactionId))
+            .filter(detail -> !existing.contains(detail.internalTransactionId))
             .map(detail -> marshalTransaction(account, detail))
             .toList();
 

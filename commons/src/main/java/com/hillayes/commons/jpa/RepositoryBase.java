@@ -18,7 +18,7 @@ import java.util.UUID;
     // workaround: see https://github.com/quarkusio/quarkus/issues/34071
     UUID[].class,
 })
-public class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity, Id> {
+public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity, Id> {
     public Entity save(Entity entity) {
         persist(entity);
         return entity;
@@ -45,7 +45,7 @@ public class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity,
      * @param pageSize the max number of elements to be returned.
      * @return the requested page of results.
      */
-    public Page<Entity> findByPage(PanacheQuery<Entity> query, int pageNumber, int pageSize) {
+    protected Page<Entity> findByPage(PanacheQuery<Entity> query, int pageNumber, int pageSize) {
         List<Entity> list = query
             .page(pageNumber, pageSize)
             .list();
