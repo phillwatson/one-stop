@@ -1,0 +1,8 @@
+node_modules
+src
+target
+public
+README.md
+.flattened-pom.xml
+yarn.lock
+package.json
