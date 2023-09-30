@@ -6,3 +6,5 @@ README.md
 .flattened-pom.xml
 yarn.lock
 package.json
+pom.xml
+tsconfig*
