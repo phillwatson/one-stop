@@ -297,6 +297,6 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         if (instant != null) {
             return instant;
         }
-        return (date == null) ? instant : date.atStartOfDay(ZoneOffset.UTC).toInstant();
+        return (date == null) ? null : date.atStartOfDay(ZoneOffset.UTC).toInstant();
     }
 }

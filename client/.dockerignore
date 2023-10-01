@@ -1,10 +1,4 @@
-node_modules
-src
-target
-public
-README.md
-.flattened-pom.xml
-yarn.lock
-package.json
-pom.xml
-tsconfig*
+*
+!Dockerfile
+!build
+!nginx.conf
