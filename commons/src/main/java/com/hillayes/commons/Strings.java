@@ -12,6 +12,14 @@ public class Strings {
     }
 
     /**
+     * Returns the given value, or null if the value is blank.
+     * @see #isBlank(String)
+     */
+    static public String toStringOrNull(String value) {
+        return isBlank(value) ? null : value;
+    }
+
+    /**
      * Returns the given value's toString() result, or null if the value is null.
      */
     static public String toStringOrNull(Object value) {

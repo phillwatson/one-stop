@@ -1,0 +1,76 @@
+title OIdC Authentication
+
+participant client
+participant user-service
+participant oidc-provider
+participant user-repository
+
+activate client
+client->user-service:/api/v1/auth/login/{authProvider}
+activate user-service
+user-service->user-service:select oidc-provider implementation
+user-service->user-service:generateAuthRequest()
+note over user-service,oidc-provider#lightblue:e.g.\nhttps://accounts.google.com/o/oauth2/v2/auth\n?response_type=code\n&client_id=<clientId>\n&scope=openid profile email\n&redirect_uri=http://one-stop/api/v1/auth/validate/google\n&state=<clientState>
+client<--user-service:307: redirect(uri)
+deactivate user-service
+
+client->oidc-provider:redirect to oidc-provider
+activate oidc-provider
+note over client,oidc-provider#f0e6bb:OIdC Provider prompts user to login.
+space
+client<--oidc-provider:307: redirectUri
+deactivate oidc-provider
+
+
+client->user-service:http://one-stop/api/v1/auth/validate/google\n?code=<auth-code>\n&state=<client-state>
+activate user-service
+
+user-service->user-service:select oidc-provider implementation
+user-service->oidc-provider:exchangeAuthToken(auth-code)
+activate oidc-provider
+note over oidc-provider#lightblue:validates auth-token and exchanges it for\naccess-token, refresh-token and id-token.
+user-service<--oidc-provider:access-token\nrefresh-token\nid-token
+deactivate oidc-provider
+
+
+user-service->user-repository:findByIssuerAndSubject("google", <google-user-id>)
+activate user-repository
+note over user-service,user-repository #lightblue:attempts to locate user by oidc-provider's identifier.
+user-service<--user-repository:user | null
+deactivate user-repository
+alt#lightblue user exists
+opt#lightblue user blocked
+note left of user-service#lightblue:user has been marked as blocked.
+client<--user-service:401: Unauthorized
+end
+else user does not exist
+alt#dba99c email NOT in id-token
+note left of user-service#lightblue:email address not provided in \noidc-provider's id-token claims.
+client<--user-service:401: Unauthorized
+else
+user-service->user-repository:findByEmail(email)
+activate user-repository
+user-service<--user-repository:user | null
+deactivate user-repository
+alt#lightblue user found
+opt#lightblue user blocked
+note left of user-service#lightblue:user has been marked as blocked.
+client<--user-service:401: Unauthorized
+end
+else user not found
+user-service->user-repository:createUser()
+activate user-repository
+user-service<--user-repository:user
+deactivate user-repository
+end
+user-service->user-repository:addOidcIdentity("google", <google-user-id>)
+activate user-repository
+deactivateafter user-repository
+end
+end
+user-service->user-service:generate token cookies
+client<--user-service:200: success
+note left of user-service#lightblue:secure, http-only, same-site cookies for\n- access-token\n- refresh-token\n- xsrf-token
+
+deactivate user-service
+deactivateafter client

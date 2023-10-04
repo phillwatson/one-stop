@@ -65,6 +65,10 @@ The access token expiry determines the frequency at which the user must refresh 
 tokens, and the refresh token expiry determines the maximum duration of client
 inactivity before the session is invalidated.
 
+#### Rovoking Tokens
+The token refresh provides an opportunity to check if the user's access has been
+revoked, returning a 401 (Unauthorized) response if so.
+
 ### Cross-Site Resource Forgery (XSRF)
 Each authenticated response from the server will carry an XSRF cookie containing a
 cryptographically signed random value. The same value is contained in the claims of
