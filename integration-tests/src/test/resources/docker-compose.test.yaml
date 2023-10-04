@@ -1,5 +1,5 @@
 services:
-  # Simulator container. This host the rail simulator.
+  # Simulator container. This hosts the rail simulator.
   sim:
     image: one-stop/sim-lib:1.0.0-SNAPSHOT
     ports:
@@ -7,7 +7,7 @@ services:
     networks:
       - onestop-http-network
 
-  # Wiremock container. This host the email simulator.
+  # Wiremock container. This hosts the email simulator.
   wiremock:
     image: wiremock/wiremock:2.35.0-1
     networks:
