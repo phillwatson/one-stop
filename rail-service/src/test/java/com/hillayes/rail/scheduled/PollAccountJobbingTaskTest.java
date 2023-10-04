@@ -144,9 +144,6 @@ public class PollAccountJobbingTaskTest {
         TransactionList transactions = TestData.mockTransactionList(10, 2);
         when(railAccountService.transactions(eq(railAccount.id), any(), any())).thenReturn(Optional.of(transactions));
 
-        // and: no existing transaction clash with those retrieved
-        when(accountTransactionRepository.findByInternalId(any())).thenReturn(List.of());
-
         // when: the fixture is called to process the user-consent and account
         PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.id);
         TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
@@ -175,9 +172,6 @@ public class PollAccountJobbingTaskTest {
 
         // and: the account transactions are retrieved
         verify(railAccountService).transactions(eq(railAccount.id), any(), any());
-
-        // and: any existing transaction are retrieved
-        verify(accountTransactionRepository).findByInternalId(any());
 
         // and: the transactions are saved
         verify(accountTransactionRepository).saveAll(any());
@@ -266,9 +260,6 @@ public class PollAccountJobbingTaskTest {
 
         // and: the account transactions are retrieved
         verify(railAccountService).transactions(eq(railAccount.id), any(), any());
-
-        // and: no existing transaction are retrieved
-        verify(accountTransactionRepository, never()).findByInternalId(any());
 
         // and: the transactions are saved
         verify(accountTransactionRepository).saveAll(any());
