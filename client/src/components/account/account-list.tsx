@@ -89,7 +89,7 @@ export default function AccountList(props: Props) {
 
         <TableBody>
           { props.accounts && props.accounts
-            .sort((a, b) => (a.name === b.name) ? a.iban < b.iban ? -1 : 1 : a.name < b.name ? -1 : 1 )
+            .sort((a, b) => (a.institution.name !== b.institution.name) ? a.institution.name < b.institution.name ? -1 : 1 : (a.iban < b.iban) ? -1 : 1 )
             .map(account =>
               <AccountRow key={account.id} account={account} onSelect={handleSelectAccount} onDelete={handleDeleteAccount}>
                 <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
