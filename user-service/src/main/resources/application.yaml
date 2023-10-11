@@ -1,20 +1,4 @@
-mp:
-  jwt:
-    verify:
-      audiences: ${one-stop.auth.access-token.audiences}
-      issuer: ${one-stop.auth.access-token.issuer}
-      publickey:
-        location: http://user-service:8080/api/v1/auth/jwks.json
-    token:
-      header: Cookie
-      cookie: ${one-stop.auth.access-token.cookie}
-
 smallrye:
-  jwt:
-    jwks:
-      refresh-interval: 15
-      forced-refresh-interval: 5
-
   config:
     mapping:
       validate-unknown: false # ignore unknown config properties
@@ -38,10 +22,6 @@ quarkus:
     migrate-at-start: true
     schemas: ${quarkus.hibernate-orm.database.default-schema}
 
-  rest-client:
-    google-api:
-      url: https://oauth2.googleapis.com
-
   log:
     min-level: TRACE
     level: INFO
@@ -58,54 +38,6 @@ quarkus:
         level: DEBUG
 
 one-stop:
-  gateway:
-    scheme: http
-    open-port: 9876
-
   auth:
-    access-token:
-      cookie: 'access_token'
-      issuer: https://hillayes.com/one-stop
-      audiences: com.hillayes
-      expires-in: 'PT5M'
-    refresh-token:
-      cookie: 'refresh_token'
-      expires-in: 'PT30M'
-    jwk:
-      set-size: 2
-      rotation-interval: ${one-stop.auth.refresh-token.expires-in}
-    xsrf:
-      cookie: 'XSRF-TOKEN'
-      header: 'X-XSRF-TOKEN'
-      # secret: 'this will be passed in via docker env'
     onboarding:
       token-expires-in: 'PT15M'
-
-    openid:
-      GOOGLE:
-        config-uri: 'https://accounts.google.com/.well-known/openid-configuration'
-        client-id: '284564870769-e3qm0g1dgim9kjd1gp3qmia610evn88a.apps.googleusercontent.com'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/google'
-        # client-secret: 'this will be passed in via docker env'
-
-      GITHUB:
-        config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
-        authorization-endpoint: 'https://github.com/login/oauth/authorize'
-        token-endpoint: 'https://github.com/login/oauth/access_token'
-        client-id: 'Iv1.275574754910606b'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/github'
-        # client-secret: 'this will be passed in via docker env'
-
-      GITLAB:
-        config-uri: 'https://gitlab.com/.well-known/openid-configuration'
-        client-id: '31673b3e2b7f9ab7992084452b178b45609b93278f77f4d312ad1cf6d246b981'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
-        # client-secret: 'this will be passed in via docker env'
-
-      APPLE:
-        config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
-        team-id: 'my-apple-team-id'
-        client-id: 'my-apple-registered-client-id'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/apple'
-        # key-id: 'this will be passed in via docker env'
-        # private-key: 'this will be passed in via docker env'

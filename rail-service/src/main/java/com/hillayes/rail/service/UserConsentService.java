@@ -1,6 +1,7 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.commons.net.Gateway;
 import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -55,6 +56,9 @@ public class UserConsentService {
 
     @Inject
     ConsentEventSender consentEventSender;
+
+    @Inject
+    Gateway gateway;
 
     public Page<UserConsent> listConsents(UUID userId, int page, int pageSize) {
         log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
@@ -141,10 +145,10 @@ public class UserConsentService {
 
             URI registrationCallbackUrl = UriBuilder
                 .fromResource(UserConsentResource.class)
+                .scheme(gateway.getScheme())
+                .host(gateway.getHost())
+                .port(gateway.getPort())
                 .path(UserConsentResource.class, "consentResponse")
-                .scheme("http")
-                .host(Network.getMyIpAddress())
-                .port(9876)
                 .build();
 
             log.debug("Registration callback URL: {}", registrationCallbackUrl);

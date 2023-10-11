@@ -1,0 +1,4 @@
+one-stop:
+  gateway:
+    scheme: http
+    open-port: 9876

@@ -1,0 +1,34 @@
+mp:
+  jwt:
+    verify:
+      audiences: ${one-stop.auth.access-token.audiences}
+      issuer: ${one-stop.auth.access-token.issuer}
+      publickey:
+        location: http://user-service:8080/api/v1/auth/jwks.json
+    token:
+      header: Cookie
+      cookie: ${one-stop.auth.access-token.cookie}
+
+smallrye:
+  jwt:
+    jwks:
+      refresh-interval: 15
+      forced-refresh-interval: 5
+
+one-stop:
+  auth:
+    access-token:
+      cookie: 'access_token'
+      issuer: https://hillayes.com/one-stop
+      audiences: com.hillayes
+      expires-in: 'PT5M'
+    refresh-token:
+      cookie: 'refresh_token'
+      expires-in: 'PT30M'
+    jwk:
+      set-size: 2
+      rotation-interval: ${one-stop.auth.refresh-token.expires-in}
+    xsrf:
+      cookie: 'XSRF-TOKEN'
+      header: 'X-XSRF-TOKEN'
+      # secret: 'this will be passed in via docker env'

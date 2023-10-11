@@ -3,6 +3,7 @@ package com.hillayes.user.service;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.commons.net.Gateway;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.openid.AuthProvider;

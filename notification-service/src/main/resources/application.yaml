@@ -1,20 +1,3 @@
-mp:
-  jwt:
-    verify:
-      audiences: ${one-stop.auth.access-token.audiences}
-      issuer: ${one-stop.auth.access-token.issuer}
-      publickey:
-        location: http://user-service:8080/api/v1/auth/jwks.json
-    token:
-      header: Cookie
-      cookie: ${one-stop.auth.access-token.cookie}
-
-smallrye:
-  jwt:
-    jwks:
-      refresh-interval: 15
-      forced-refresh-interval: 5
-
 # configure production datasource
 "%prod":
   quarkus:
@@ -50,19 +33,6 @@ quarkus:
       includes: "templates/**"
 
 one-stop:
-  auth:
-    access-token:
-      cookie: 'access_token'
-      issuer: https://hillayes.com/one-stop
-      audiences: com.hillayes
-    refresh-token:
-      cookie: 'refresh_token'
-      expires-in: "PT30M"
-    xsrf:
-      cookie-name: 'XSRF-TOKEN'
-      header-name: 'X-XSRF-TOKEN'
-      # secret: 'this will be passed in via docker env'
-
   email:
     disabled: false
 
