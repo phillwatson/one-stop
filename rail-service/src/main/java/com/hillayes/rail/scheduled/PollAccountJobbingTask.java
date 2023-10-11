@@ -220,7 +220,6 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             .map(transactionList -> transactionList.booked)
             .orElse(List.of());
 
-        // TODO: add CREATE INDEX idx_account_intrnl_id ON ${flyway:defaultSchema}.account_transaction (internal_transaction_id);
         // identify those internal transaction IDs we've seen before
         List<String> existing = (account.getId() == null)
             ? List.of()

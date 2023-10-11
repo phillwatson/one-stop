@@ -87,3 +87,4 @@ CREATE TABLE ${flyway:defaultSchema}.account_transaction (
 );
 CREATE INDEX idx_account_trans_date ON ${flyway:defaultSchema}.account_transaction (account_id, booking_datetime);
 CREATE INDEX idx_account_user_date ON ${flyway:defaultSchema}.account_transaction (user_id, booking_datetime);
+CREATE INDEX idx_account_intrnl_id ON ${flyway:defaultSchema}.account_transaction (internal_transaction_id);
