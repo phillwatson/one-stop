@@ -1,6 +1,6 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.events.annotation.TopicConsumer;
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
@@ -10,6 +10,8 @@ import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ApplicationScoped
-@TopicConsumer(Topic.CONSENT)
 @RequiredArgsConstructor
 @Slf4j
 public class ConsentTopicConsumer implements EventConsumer {
     private final SendEmailTask sendEmailTask;
     private final NotificationService notificationService;
 
-    @Transactional
-    public void consume(EventPacket eventPacket) {
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+                        @TopicObserved(Topic.CONSENT) EventPacket eventPacket) {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received consent event [payloadClass: {}]", payloadClass);
 

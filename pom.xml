@@ -37,6 +37,7 @@
 
         <module>sim-lib</module>
         <module>integration-tests</module>
+        <module>one-stop-main</module>
     </modules>
 
     <properties>
@@ -208,6 +209,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>integration-tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>one-stop-main</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

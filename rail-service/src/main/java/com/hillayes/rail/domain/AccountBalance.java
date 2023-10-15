@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "account_balance")
+@Table(schema = "rails", name = "account_balance")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

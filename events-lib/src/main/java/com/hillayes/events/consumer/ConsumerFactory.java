@@ -83,7 +83,8 @@ public class ConsumerFactory {
             Collection<Topic> topics = AnnotationUtils.getTopics(eventConsumer);
             Optional<String> consumerGroup = AnnotationUtils.getConsumerGroup(eventConsumer);
             if (!topics.isEmpty()) {
-                log.debug("Registering consumer [topics: {}, class: {}]", topics, eventConsumer.getClass().getName());
+                log.debug("Registering consumer [group: {}, topics: {}, class: {}]",
+                    consumerGroup.orElse(null), topics, eventConsumer.getClass().getName());
 
                 // Create a new config for each consumer - with defaults supplied from the global config
                 Properties config = new Properties();

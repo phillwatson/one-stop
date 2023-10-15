@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Entity
+@Table(schema = "users", name = "user")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -88,7 +89,7 @@ public class User {
     private Integer version;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="userrole", joinColumns=@JoinColumn(name="user_id"))
+    @CollectionTable(schema = "users", name="userrole", joinColumns=@JoinColumn(name="user_id"))
     @Column(name="role")
     @Builder.Default
     private Set<String> roles = new HashSet<>();

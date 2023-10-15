@@ -1,22 +1,25 @@
 package com.hillayes.audit.event.consumer;
 
-import com.hillayes.events.annotation.TopicConsumer;
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.user.*;
-import lombok.extern.slf4j.Slf4j;
-
+import com.hillayes.events.events.user.UserCreated;
+import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.events.events.user.UserUpdated;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.TransactionPhase;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Consumes user events to maintain a local DB of user email addresses.
  */
 @ApplicationScoped
-@TopicConsumer(Topic.USER)
 @Slf4j
 public class UserTopicConsumer implements EventConsumer {
-    public void consume(EventPacket eventPacket) {
+    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+                        @TopicObserved(Topic.USER) EventPacket eventPacket) {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received user event [payloadClass: {}]", payloadClass);
 

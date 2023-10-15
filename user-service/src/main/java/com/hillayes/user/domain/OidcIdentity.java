@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Table(schema = "users", name = "oidcidentity")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
