@@ -10,6 +10,24 @@ quarkus:
       sql: true
       bind-parameters: true
 
+  flyway:
+    migrate-at-start: true
+
+  log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: '%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n'
+    category:
+      "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
+        level: INFO
+      "org.jose4j.jwk":
+        level: INFO
+      "org.apache.kafka":
+        level: WARN
+      "com.hillayes":
+        level: DEBUG
+
 one-stop:
   auth:
     xsrf:

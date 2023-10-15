@@ -11,6 +11,7 @@ import java.util.UUID;
  * given bank.
  */
 @Entity
+@Table(schema = "rails", name = "userconsent")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

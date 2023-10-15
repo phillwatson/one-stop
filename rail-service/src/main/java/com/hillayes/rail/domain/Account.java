@@ -1,11 +1,8 @@
 package com.hillayes.rail.domain;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -14,6 +11,7 @@ import java.util.UUID;
  * consent.
  */
 @Entity
+@Table(schema = "rails", name = "account")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

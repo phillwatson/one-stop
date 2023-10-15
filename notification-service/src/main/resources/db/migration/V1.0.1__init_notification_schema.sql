@@ -1,6 +1,6 @@
-CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
+CREATE SCHEMA IF NOT EXISTS notifications;
 
-CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
+CREATE TABLE IF NOT EXISTS notifications.user (
     id uuid PRIMARY KEY,
     username varchar(256) NOT NULL,
     email varchar(256) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     version integer NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.notification (
+CREATE TABLE IF NOT EXISTS notifications.notification (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL,
     correlation_id varchar(256) NULL,
@@ -23,4 +23,4 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.notification (
     message_id varchar(256) NOT NULl,
     attributes text NULL
 );
-CREATE INDEX idx_notification_user_id ON ${flyway:defaultSchema}.notification (user_id, date_created);
+CREATE INDEX idx_notification_user_id ON notifications.notification (user_id, date_created);

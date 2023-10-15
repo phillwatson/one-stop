@@ -1,9 +1,13 @@
 package com.hillayes.outbox.sender;
 
+import com.hillayes.events.annotation.TopicObserved;
+import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.UserAuthenticated;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -15,9 +19,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class EventSenderTest {
-    private EventRepository eventRepository = mock(EventRepository.class);
+    private final EventRepository eventRepository = mock(EventRepository.class);
+    private final Event<EventPacket> mockEvent = mock(Event.class);
 
-    private EventSender fixture = new EventSender(eventRepository);
+    private final EventSender fixture = new EventSender(eventRepository, mockEvent, mockEvent, mockEvent);
 
     @Test
     public void testSend() {
