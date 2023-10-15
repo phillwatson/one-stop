@@ -35,37 +35,27 @@ public class ConsentTopicConsumer implements EventConsumer {
         Map<String, Object> params = new HashMap<>();
         if (ConsentInitiated.class.getName().equals(payloadClass)) {
             // no action required
-        }
-
-        else if (ConsentGiven.class.getName().equals(payloadClass)) {
+        } else if (ConsentGiven.class.getName().equals(payloadClass)) {
             ConsentGiven event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_GIVEN, params);
-        }
-
-        else if (ConsentDenied.class.getName().equals(payloadClass)) {
+        } else if (ConsentDenied.class.getName().equals(payloadClass)) {
             ConsentDenied event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_DENIED, params);
             notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
                 NotificationId.CONSENT_DENIED, params);
-        }
-
-        else if (ConsentCancelled.class.getName().equals(payloadClass)) {
+        } else if (ConsentCancelled.class.getName().equals(payloadClass)) {
             ConsentCancelled event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_CANCELLED, params);
-        }
-
-        else if (ConsentSuspended.class.getName().equals(payloadClass)) {
+        } else if (ConsentSuspended.class.getName().equals(payloadClass)) {
             ConsentSuspended event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_SUSPENDED, params);
             notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
                 NotificationId.CONSENT_SUSPENDED, params);
-        }
-
-        else if (ConsentExpired.class.getName().equals(payloadClass)) {
+        } else if (ConsentExpired.class.getName().equals(payloadClass)) {
             ConsentExpired event = eventPacket.getPayloadContent();
             params.put("event", event);
             sendEmailTask.queueJob(event.getUserId(), TemplateName.CONSENT_EXPIRED, params);
