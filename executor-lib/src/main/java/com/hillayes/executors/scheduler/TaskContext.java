@@ -1,7 +1,6 @@
 package com.hillayes.executors.scheduler;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * A context passed to the Jobbing task
