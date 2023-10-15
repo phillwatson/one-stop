@@ -7,10 +7,10 @@ allow users connect to their bank accountDetails and view the transactions
 from multiple accounts in an aggregation.
 
 ## Architecture
-One-Stop has been designed using a micro-service architecture, where
-each service has a specific area of responsibility. However, to keep the
-PoC build simple, the Maven model of parent POM and sub-modules has been
-adopted; with each module adopting the same version as the parent.
+One-Stop has been designed using a monolith service architecture, where
+each service has a specific area of responsibility. The Maven model of parent
+POM and sub-modules has been adopted; with each module adopting the same
+version as the parent.
 
 ## Docker Configuration
 The following must be added to `environment:` section of the docker-compose.yaml
@@ -110,8 +110,8 @@ All non-native docker images are built with remote JVM debugging enabled. In
 order to connect to the images the debug port 5005 must be exposed. Each
 container should expose a unique port - to avoid clashes.
 ```yaml
-  user-service:
-    image: one-stop/user-service:1.0.0-SNAPSHOT
+  one-stop-service:
+    image: one-stop/one-stop-main:1.0.0-SNAPSHOT
     ports:
       - "8081:8080"
       - "5001:5005"
