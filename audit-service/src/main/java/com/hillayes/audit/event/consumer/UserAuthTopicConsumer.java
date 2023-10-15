@@ -21,7 +21,9 @@ public class UserAuthTopicConsumer implements EventConsumer {
 
         if (AuthenticationFailed.class.getName().equals(payloadClass)) {
             processAuthenticationFailed(eventPacket.getPayloadContent());
-        } else if (UserAuthenticated.class.getName().equals(payloadClass)) {
+        }
+
+        else if (UserAuthenticated.class.getName().equals(payloadClass)) {
             processUserAuthenticated(eventPacket.getPayloadContent());
         }
     }

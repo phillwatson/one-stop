@@ -44,13 +44,21 @@ public class UserTopicConsumer implements EventConsumer {
 
         if (UserRegistered.class.getName().equals(payloadClass)) {
             processUserRegistered(eventPacket.getPayloadContent());
-        } else if (UserCreated.class.getName().equals(payloadClass)) {
+        }
+
+        else if (UserCreated.class.getName().equals(payloadClass)) {
             processUserCreated(eventPacket.getPayloadContent());
-        } else if (UserUpdated.class.getName().equals(payloadClass)) {
+        }
+
+        else if (UserUpdated.class.getName().equals(payloadClass)) {
             processUserUpdated(eventPacket.getPayloadContent());
-        } else if (UserDeleted.class.getName().equals(payloadClass)) {
+        }
+
+        else if (UserDeleted.class.getName().equals(payloadClass)) {
             processUserDeleted(eventPacket.getPayloadContent());
-        } else if (AccountActivity.class.getName().equalsIgnoreCase(payloadClass)) {
+        }
+
+        else if (AccountActivity.class.getName().equalsIgnoreCase(payloadClass)) {
             processAccountActivity(eventPacket.getPayloadContent());
         }
     }
