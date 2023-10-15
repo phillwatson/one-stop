@@ -38,6 +38,5 @@ build/
 ### Mac OS ###
 .DS_Store
 
-/docker-compose.override.yaml
-/docker-compose.override.yml
+/docker-compose.override.*
 *.p8

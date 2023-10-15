@@ -2,8 +2,6 @@ package com.hillayes.executors.scheduler.tasks;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
-
 @Slf4j
 public abstract class AbstractNamedJobbingTask<T>
     extends AbstractNamedTask implements NamedJobbingTask<T> {
