@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>event-module</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -38,6 +38,10 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>executor-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>events-common</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -5,7 +5,6 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.notification.repository.UserRepository;
 import com.hillayes.notification.service.UserService;
-import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

@@ -1,6 +1,7 @@
 package com.hillayes.events.domain;
 
 import com.hillayes.events.events.auth.UserAuthenticated;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -76,7 +77,7 @@ public class EventPacketTest {
         UserAuthenticated payloadContent = eventPacket.getPayloadContent();
 
         // then: the event packet contains the correct properties
-        assertEquals(payload.getUserId(), payloadContent.getUserId());
-        assertEquals(payload.getDateLogin(), payloadContent.getDateLogin());
+        Assertions.assertEquals(payload.getUserId(), payloadContent.getUserId());
+        Assertions.assertEquals(payload.getDateLogin(), payloadContent.getDateLogin());
     }
 }

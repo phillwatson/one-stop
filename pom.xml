@@ -24,8 +24,7 @@
         <module>commons</module>
         <module>executor-lib</module>
         <module>exception-lib</module>
-        <module>events-lib</module>
-        <module>outbox-lib</module>
+        <module>event-module</module>
         <module>auth-lib</module>
         <module>openid-lib</module>
         <module>nordigen-lib</module>
@@ -158,7 +157,17 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>events-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>events-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>outbox-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -169,11 +178,6 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>openid-lib</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.hillayes</groupId>
-                <artifactId>outbox-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
