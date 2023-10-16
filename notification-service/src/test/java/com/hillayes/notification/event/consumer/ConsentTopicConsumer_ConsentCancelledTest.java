@@ -3,7 +3,6 @@ package com.hillayes.notification.event.consumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.ConsentCancelled;
-import com.hillayes.events.events.consent.ConsentGiven;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;

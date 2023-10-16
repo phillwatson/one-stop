@@ -5,31 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>event-module</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>outbox-lib</artifactId>
+    <artifactId>events-common</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>executor-lib</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
+            <artifactId>commons</artifactId>
         </dependency>
     </dependencies>
 </project>
