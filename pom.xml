@@ -21,20 +21,14 @@
         <module>openapi-doc</module>
         <module>client</module>
 
-        <module>commons</module>
-        <module>executor-lib</module>
-        <module>exception-lib</module>
         <module>event-module</module>
-        <module>auth-lib</module>
-        <module>openid-lib</module>
-        <module>nordigen-lib</module>
+        <module>lib-module</module>
 
         <module>audit-service</module>
         <module>notification-service</module>
         <module>rail-service</module>
         <module>user-service</module>
 
-        <module>sim-lib</module>
         <module>integration-tests</module>
     </modules>
 
