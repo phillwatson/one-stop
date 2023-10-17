@@ -5,22 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>lib-module</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>executor-lib</artifactId>
+    <artifactId>commons</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.kagkarlsson</groupId>
-            <artifactId>db-scheduler</artifactId>
-            <version>12.4.0</version>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -30,10 +29,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>commons</artifactId>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
