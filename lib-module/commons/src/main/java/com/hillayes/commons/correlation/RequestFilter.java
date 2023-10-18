@@ -1,4 +1,4 @@
-package com.hillayes.executors.correlation;
+package com.hillayes.commons.correlation;
 
 import lombok.extern.slf4j.Slf4j;
 

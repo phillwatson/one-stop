@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.executors.correlation.Correlation;
+import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.notification.config.NotificationConfiguration;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;

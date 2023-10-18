@@ -6,7 +6,7 @@ import com.github.kagkarlsson.scheduler.task.helper.RecurringTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedules;
-import com.hillayes.executors.correlation.Correlation;
+import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.executors.scheduler.config.FrequencyConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.config.RetryConfig;

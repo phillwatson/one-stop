@@ -24,11 +24,6 @@
 
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>executor-lib</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
         </dependency>
     </dependencies>
