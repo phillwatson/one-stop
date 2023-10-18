@@ -1,6 +1,6 @@
 package com.hillayes.exception;
 
-import com.hillayes.executors.correlation.Correlation;
+import com.hillayes.commons.correlation.Correlation;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;

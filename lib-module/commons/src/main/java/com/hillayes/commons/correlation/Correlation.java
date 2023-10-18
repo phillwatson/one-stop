@@ -1,4 +1,4 @@
-package com.hillayes.executors.correlation;
+package com.hillayes.commons.correlation;
 
 import org.jboss.logmanager.MDC;
 

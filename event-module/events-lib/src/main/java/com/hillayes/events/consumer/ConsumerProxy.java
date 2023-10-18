@@ -2,7 +2,7 @@ package com.hillayes.events.consumer;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.executors.correlation.Correlation;
+import com.hillayes.commons.correlation.Correlation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;

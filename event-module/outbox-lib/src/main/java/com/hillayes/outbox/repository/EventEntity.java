@@ -2,7 +2,7 @@ package com.hillayes.outbox.repository;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.executors.correlation.Correlation;
+import com.hillayes.commons.correlation.Correlation;
 import lombok.*;
 
 import jakarta.persistence.*;
