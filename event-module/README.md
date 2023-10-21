@@ -3,55 +3,8 @@
 
 ---
 ## Events Library
-A shared library used by those services wishing to listen for events published
-on a message bus. Two forms of message bus are supported:
-
-### Internal Message Bus
-This uses Jakarta EE Events to all beans to communicate. The advantage is that no
-third-party dependency is required. However, it only supports communication within
-the application itself.
-
-To use this event mechanism add a dependency on `local-events-lib`.
-
-#### Event Observers
-The JEE annotation `jakarta.enterprise.event.Observes` is used to annotate those
-methods that wish to receive events, and the annotation
-`com.hillayes.events.annotation.TopicObserved' is used identify the topic of events
-to be received.
-
-This is an example of a method to receive events from the `USER` topic. As the event
-should only be processed if the originator of the event successfully commits its
-transaction, the `@Observes` annotation states the `AFTER_SUCCESS` TransactionPhase.
-The method is also marked as `@Transactional` as it may wish to perform database
-updates of its own. Note the use of `REQUIRES_NEW`. This is because the transaction
-that created the event has been closed by the time the observer method is called.
-```java
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
-                        @TopicObserved(Topic.USER) EventPacket eventPacket){
-       ...
-    }
-```
-
-In general, the bean class declaring this observer method will be annotated with
-`@ApplicationScoped`.
-
-#### Event Senders
-The class `com.hillayes.events.sender.EventSender` from `local-events-lib` provides
-methods to send events to observers on a named topic.
-
-See `com.hillayes.user.event.UserEventSender` for an example of how the `EventSender`
-is used.
-
-
-### Kafka / Redpanda
-The Kafka (or Redpanda) message broker can be used to communicate both internally
-and externally of the application.
-Those services that are only interested in listening for events, and not interested
-in publishing them, only need include library `events-lib` in their dependencies.
-
-Those services wishing to publish events to external listeners must use the "kafka"
-broker, by include a dependency on the library `outbox-lib`.
+A shared library used by those services wishing to publish and/or listen for events
+on a message bus.
 
 #### Events vs Actions
 Events notify listeners that some action has occurred. The action is often the change
@@ -106,15 +59,63 @@ given. Also, any new actions would require changes to the consent service.
 
 These explicit events can often be recognised by the fact that their name is not a
 past participle. For example; SendEmail or RetrieveTransactions. They are often used
-when a service needs to perform: 
+when a service needs to perform:
 - long-running actions that may cause the client to wait an unacceptable length of time
-for a response
+  for a response
 - actions that have a dependency on remote third-party services, and need to be
-repeated should communication fail
+  repeated should communication fail
 
 A better solution for such explicit actions would be to use some form of background
 task scheduler; allowing tasks to be queued for execution, and repeated on failure.
 See the `executor-lib`.
+
+
+### Internal Message Bus
+This uses Jakarta EE Events to all beans to communicate. The advantage is that no
+third-party dependency is required. However, it only supports communication within
+the application itself.
+
+To use this event mechanism add a dependency on `local-events-lib`.
+
+#### Event Observers
+The JEE annotation `jakarta.enterprise.event.Observes` is used to annotate those
+methods that wish to receive events, and the annotation
+`com.hillayes.events.annotation.TopicObserved' is used identify the topic of events
+to be received.
+
+This is an example of a method to receive events from the `USER` topic. As the event
+should only be processed if the originator of the event successfully commits its
+transaction, the `@Observes` annotation states the `AFTER_SUCCESS` TransactionPhase.
+The method is also marked as `@Transactional` as it may wish to perform database
+updates of its own. Note the use of `REQUIRES_NEW`. This is because the transaction
+that created the event has been closed by the time the observer method is called.
+```java
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+                        @TopicObserved(Topic.USER) EventPacket eventPacket){
+       ...
+    }
+```
+
+In general, the bean class declaring this observer method will be annotated with
+`@ApplicationScoped`.
+
+#### Event Senders
+The class `com.hillayes.events.sender.EventSender` from `local-events-lib` provides
+methods to send events to observers on a named topic.
+
+See `com.hillayes.user.event.UserEventSender` for an example of how the `EventSender`
+is used.
+
+
+### Kafka / Redpanda
+The Kafka (or Redpanda) message broker can be used to communicate both internally
+and externally of the application.
+Those services that are only interested in listening for events, and not interested
+in publishing them, only need include library `events-lib` in their dependencies.
+
+Those services wishing to publish events to external listeners must use the "kafka"
+broker, by include a dependency on the library `outbox-lib`.
 
 ### Topics
 Event topics are defined in the enum `com.hillayes.events.domain.Topic`; the
