@@ -1,7 +1,6 @@
 package com.hillayes.rail.event.consumer;
 
 import com.hillayes.events.annotation.TopicObserved;
-import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
@@ -16,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class UserTopicConsumer implements EventConsumer {
+public class UserTopicConsumer {
     private final UserConsentService userConsentService;
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)

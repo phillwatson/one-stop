@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -24,6 +27,27 @@ import java.util.UUID;
 @RegisterForReflection
 public class EventPacket {
     private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
+
+    /**
+     * A factory method to create a new event packet for its initial delivery.
+     * Called when an event is first submitted delivery.
+     *
+     * @param topic the topic on which the event is to be delivered.
+     * @param key the optional key of the event. Used to ensure that events with
+     *     the same key are delivered in order.
+     * @param payloadObject the payload to be passed in the event.
+     */
+    public static EventPacket forInitialDelivery(Topic topic, Object key, Object payloadObject) {
+        Instant now = Instant.now();
+        return new EventPacket(
+            UUID.randomUUID(),
+            topic,
+            Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()),
+            0, now,
+            key == null ? null : key.toString(),
+            payloadObject == null ? null : payloadObject.getClass().getName(),
+            EventPacket.serialize(payloadObject));
+    }
 
     /**
      * The event's unique identifier. This is suitable for testing whether the event

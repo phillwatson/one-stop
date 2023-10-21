@@ -1,7 +1,6 @@
 package com.hillayes.notification.event.consumer;
 
 import com.hillayes.events.annotation.TopicObserved;
-import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
@@ -22,7 +21,7 @@ import java.util.Map;
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class ConsentTopicConsumer implements EventConsumer {
+public class ConsentTopicConsumer {
     private final SendEmailTask sendEmailTask;
     private final NotificationService notificationService;
 

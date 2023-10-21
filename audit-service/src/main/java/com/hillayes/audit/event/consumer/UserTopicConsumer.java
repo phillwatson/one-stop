@@ -1,7 +1,6 @@
 package com.hillayes.audit.event.consumer;
 
 import com.hillayes.events.annotation.TopicObserved;
-import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserCreated;
@@ -17,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ApplicationScoped
 @Slf4j
-public class UserTopicConsumer implements EventConsumer {
+public class UserTopicConsumer {
     public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
                         @TopicObserved(Topic.USER) EventPacket eventPacket) {
         String payloadClass = eventPacket.getPayloadClass();

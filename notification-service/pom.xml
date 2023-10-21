@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
+            <artifactId>local-events-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>

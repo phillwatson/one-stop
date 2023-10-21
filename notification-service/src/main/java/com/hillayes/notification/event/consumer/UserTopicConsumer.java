@@ -1,7 +1,6 @@
 package com.hillayes.notification.event.consumer;
 
 import com.hillayes.events.annotation.TopicObserved;
-import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
@@ -30,7 +29,7 @@ import java.util.Map;
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class UserTopicConsumer implements EventConsumer {
+public class UserTopicConsumer {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss, dd MMM yyyy vvvv");
 
     private final UserService userService;

@@ -79,12 +79,7 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
-        </dependency>
-        <dependency>
-            <!-- a dependency on this will automatically start a cron job for delivery -->
-            <groupId>com.hillayes</groupId>
-            <artifactId>outbox-lib</artifactId>
+            <artifactId>local-events-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>

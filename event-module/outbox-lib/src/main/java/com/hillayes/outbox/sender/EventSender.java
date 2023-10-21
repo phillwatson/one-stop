@@ -1,14 +1,8 @@
 package com.hillayes.outbox.sender;
 
-import com.hillayes.events.annotation.TopicObserved;
-import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
-import jakarta.enterprise.event.Event;
-import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,24 +13,10 @@ import jakarta.transaction.Transactional;
  * The external point of contact for the event outbox.
  */
 @ApplicationScoped
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class EventSender {
-    @Inject
-    private EventRepository eventRepository;
-
-    @Inject
-    @TopicObserved(Topic.USER)
-    private Event<EventPacket> userEvent;
-
-    @Inject
-    @TopicObserved(Topic.USER_AUTH)
-    private Event<EventPacket> userAuthEvent;
-
-    @Inject
-    @TopicObserved(Topic.CONSENT)
-    private Event<EventPacket> consentEvent;
+    private final EventRepository eventRepository;
 
     /**
      * Records the given event for delivery at the next scheduled delivery round.
@@ -74,18 +54,5 @@ public class EventSender {
         log.debug("Sending event [topic: {}, payload: {}]", topic, event.getClass().getName());
         EventEntity entity = EventEntity.forInitialDelivery(topic, key, event);
         eventRepository.persist(entity);
-
-        EventPacket eventPacket = entity.toEventPacket();
-        switch (topic) {
-            case USER:
-                userEvent.fire(eventPacket);
-                break;
-            case USER_AUTH:
-                userAuthEvent.fire(eventPacket);
-                break;
-            case CONSENT:
-                consentEvent.fire(eventPacket);
-                break;
-        }
     }
 }
