@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.hillayes</groupId>
         <artifactId>event-module</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>local-events-lib</artifactId>
