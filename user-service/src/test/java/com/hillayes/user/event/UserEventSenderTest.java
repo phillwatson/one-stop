@@ -10,7 +10,7 @@ import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
-import com.hillayes.outbox.sender.EventSender;
+import com.hillayes.events.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import io.quarkus.test.junit.QuarkusTest;

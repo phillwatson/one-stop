@@ -7,7 +7,7 @@ import com.hillayes.sim.nordigen.NordigenSimulator;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.ComposeContainer;
+import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 
 import java.io.File;
@@ -47,7 +47,7 @@ public class ApiTestBase {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static ComposeContainer dockerContainers;
+    private static DockerComposeContainer dockerContainers;
 
     @BeforeAll
     public static void beforeAll() {
@@ -66,8 +66,8 @@ public class ApiTestBase {
         return dockerContainers.getServicePort("wiremock-1", WIREMOCK_PORT);
     }
 
-    private static ComposeContainer initContainers() {
-        return new ComposeContainer(
+    private static DockerComposeContainer initContainers() {
+        return new DockerComposeContainer(
             new File("../../one-stop/docker-compose.yaml"),
             resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client-1", CLIENT_PORT)
