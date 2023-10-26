@@ -6,7 +6,7 @@
 A shared library used by those services wishing to listen for events published
 by the message broker (i.e. `outbox-lib`). Those services that are only interested
 in listening for events, and not interested in publishing them, only need
-include this library in their dependencies.
+include the `events-lib` in their dependencies.
 
 Those services wishing to publish events must also include a dependency on the
 library `outbox-lib`.
