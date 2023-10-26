@@ -69,7 +69,7 @@ public class NotificationService {
             } catch (JsonProcessingException e) {
                 throw new ParameterSerialisationException(notificationId, e);
             }
-        }).get();
+        }).orElse(null);
     }
 
     /**
