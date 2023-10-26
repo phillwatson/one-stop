@@ -37,6 +37,22 @@ one-stop:
 ```
 See `com.hillayes.openid.OpenIdConfiguration` for more detail.
 
+### GitHub Auth Provider
+The GitHub API does not fully support the Open-ID Connect API in that, it does
+not return an ID-Token with user profile data. Instead, it returns just an
+access-token. With that we can call the GitHub REST API to retrieve the user's
+profile data.
+
+**IMPORTANT:**
+For authentication to work we need access to the user's email address registered
+with the open-id provider. For GitHub that requires explicit action on the user's
+part to allow access to their email address.
+In their GitHub email settings (https://github.com/settings/emails), uncheck the
+"Keep my email address private".
+Then, in their GitHub profile (https://github.com/settings/profile), select the
+email address in the "Public email" drop-down.
+Having authenticated once, they can make their email address private again.
+
 ## Adding a New Open-Id Connect Provider
 For most providers only two classes need to be implemented; OpenIdFactory
 and OpenIdAuth.
