@@ -12,6 +12,16 @@ each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 
+### Structure
+The project consists of a parent POM with a number of sub-modules. The sub-modules
+consist of services (that provide client functionality) and libraries (that provide
+internal functionality shared by services and other libraries).
+
+In general, and to reduce clutter, the library modules are grouped under the parent
+module `lib-module`. The exception to this is the event libraries; which are grouped
+under the parent module `event-module`.
+
+
 ## Docker Configuration
 The following must be added to `environment:` section of the docker-compose.yaml
 services. This can be also be achieved by creating a docker-compose-override.yaml.
