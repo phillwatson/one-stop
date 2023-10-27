@@ -15,8 +15,8 @@ one-stop:
     xsrf:
       secret: this is a secret for xsrf tokens
     openid:
-      GOOGLE:
+      google:
         client-secret: 'a-google-generated-secret'
-      APPLE:
+      apple:
         key-id: 'my-apple-key-id'
         client-secret: 'an-apple-generated-secret'

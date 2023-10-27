@@ -1,13 +1,13 @@
 one-stop:
   auth:
     openid:
-      GOOGLE:
+      google:
         config-uri: 'https://accounts.google.com/.well-known/openid-configuration'
         client-id: 'my-google-registered-client-id'
         client-secret: 'a-google-generated-secret'
         redirect-uri: 'http://hibanapay/api/v1/auth/validate/google'
 
-      GITHUB:
+      github:
         config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
         authorization-endpoint: 'https://github.com/login/oauth/authorize'
         token-endpoint: 'https://github.com/login/oauth/access_token'
@@ -15,13 +15,13 @@ one-stop:
         client-secret: 'a-github-generated-secret'
         redirect-uri: 'http://localhost/api/v1/auth/validate/github'
 
-      GITLAB:
+      gitlab:
         config-uri: 'https://gitlab.com/.well-known/openid-configuration'
         client-id: 'my-gitlab-registered-client-id'
         client-secret: 'a-gitlab-generated-secret'
         redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
 
-      APPLE:
+      apple:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'
         client-id: 'my-apple-registered-client-id'
