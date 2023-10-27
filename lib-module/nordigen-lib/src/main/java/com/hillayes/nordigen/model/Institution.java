@@ -6,6 +6,10 @@ import lombok.ToString;
 
 import java.util.List;
 
+/**
+ * Describes a financial institute to which a user may grant consent for transaction
+ * information to be retrieved.
+ */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 public class Institution implements Comparable<Institution> {
