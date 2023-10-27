@@ -38,8 +38,8 @@ public class Cache<K,T> {
      */
     public T getValueOrCall(K key, Supplier<T> supplier) {
         Entry<T> entry = values.get(key);
-        if ((entry == null) || (entry.isExpired(timeToLive))) {
-            entry = new Entry<>(supplier.get());
+        if ((entry == null) || (entry.isExpired())) {
+            entry = new Entry<>(supplier.get(), timeToLive);
             values.put(key, entry);
         }
         return entry.value;
@@ -51,16 +51,16 @@ public class Cache<K,T> {
     }
 
     private static class Entry<T> {
-        private final long created;
+        private final long expires;
         private final T value;
 
-        Entry(T value) {
-            created = System.currentTimeMillis();
+        Entry(T value, long timeToLive) {
+            expires = System.currentTimeMillis() + timeToLive;
             this.value = value;
         }
 
-        public boolean isExpired(long timeToLive) {
-            return (created + timeToLive < System.currentTimeMillis());
+        public boolean isExpired() {
+            return (expires <= System.currentTimeMillis());
         }
 
         public T getValue() {

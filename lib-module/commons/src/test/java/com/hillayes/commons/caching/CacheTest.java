@@ -11,7 +11,7 @@ import static org.mockito.Mockito.*;
 public class CacheTest {
     @Test
     public void testCache() {
-        Cache<Integer, String> fixture = new Cache<>(Duration.ofMinutes(10).toMillis());
+        Cache<Integer, String> fixture = new Cache<>(Duration.ofMinutes(10));
 
         String value = fixture.getValueOrCall(1, () -> "value 1");
         assertEquals("value 1", value);
@@ -19,7 +19,7 @@ public class CacheTest {
 
     @Test
     public void testCacheTimeToLive() {
-        Cache<Integer, String> fixture = new Cache<>(Duration.ofMillis(100).toMillis());
+        Cache<Integer, String> fixture = new Cache<>(Duration.ofMillis(100));
         Supplier<String> supplier = spy(mockSupplier("value 1"));
 
         assertEquals("value 1", fixture.getValueOrCall(1, supplier));
@@ -37,7 +37,7 @@ public class CacheTest {
 
     @Test
     public void testCacheRemove() {
-        Cache<Integer, String> fixture = new Cache<>(Duration.ofMillis(100).toMillis());
+        Cache<Integer, String> fixture = new Cache<>(Duration.ofMillis(100));
         Supplier<String> supplier = spy(mockSupplier("value 1"));
 
         assertEquals("value 1", fixture.getValueOrCall(1, supplier));
