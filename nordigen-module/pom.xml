@@ -3,21 +3,17 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.hillayes</groupId>
         <artifactId>one-stop</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>lib-module</artifactId>
+    <artifactId>nordigen-module</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>commons</module>
-        <module>exception-lib</module>
-        <module>executor-lib</module>
-        <module>auth-lib</module>
-        <module>openid-lib</module>
+        <module>nordigen-lib</module>
+        <module>sim-lib</module>
     </modules>
 </project>

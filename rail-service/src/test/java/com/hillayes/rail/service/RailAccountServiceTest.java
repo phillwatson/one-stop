@@ -1,8 +1,8 @@
 package com.hillayes.rail.service;
 
-import com.hillayes.rail.config.ServiceConfiguration;
+import com.hillayes.nordigen.api.AccountApi;
 import com.hillayes.nordigen.model.*;
-import com.hillayes.rail.repository.RailAccountRepository;
+import com.hillayes.rail.config.ServiceConfiguration;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomUtils;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class RailAccountServiceTest {
-    RailAccountRepository railAccountRepository;
+    AccountApi accountApi;
 
     ServiceConfiguration config;
 
@@ -31,7 +31,7 @@ public class RailAccountServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        railAccountRepository = mock();
+        accountApi = mock();
         config = mock();
         when(config.caches()).thenReturn(new ServiceConfiguration.Caches() {
             @Override
@@ -47,7 +47,7 @@ public class RailAccountServiceTest {
 
         fixture = new RailAccountService();
         fixture.config = config;
-        fixture.railAccountRepository = railAccountRepository;
+        fixture.accountApi = accountApi;
         fixture.init();
     }
 
@@ -59,7 +59,7 @@ public class RailAccountServiceTest {
             .status(AccountStatus.READY)
             .institutionId(randomAlphanumeric(20))
             .build();
-        when(railAccountRepository.get(accountSummary.id)).thenReturn(accountSummary);
+        when(accountApi.get(accountSummary.id)).thenReturn(accountSummary);
 
         // when: the service is called
         Optional<AccountSummary> result = fixture.get(accountSummary.id);
@@ -75,7 +75,7 @@ public class RailAccountServiceTest {
     public void testGet_NotFound() {
         // given: the identified rail-account does not exist
         String id = randomAlphanumeric(20);
-        when(railAccountRepository.get(id)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
+        when(accountApi.get(id)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
 
         // when: the service is called
         Optional<AccountSummary> result = fixture.get(id);
@@ -88,7 +88,7 @@ public class RailAccountServiceTest {
     public void testGet_ServerError() {
         // given: the rail-account cannot be retrieved
         String id = randomAlphanumeric(20);
-        when(railAccountRepository.get(id)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
+        when(accountApi.get(id)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
 
         // when: the service is called
         // then: the server error is passed back
@@ -116,7 +116,7 @@ public class RailAccountServiceTest {
                 .referenceDate(LocalDate.now())
                 .build()
         );
-        when(railAccountRepository.balances(accountId)).thenReturn(balanceList);
+        when(accountApi.balances(accountId)).thenReturn(balanceList);
 
         // when: the service is called
         Optional<List<Balance>> result = fixture.balances(accountId);
@@ -142,7 +142,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: the account has NO available balances
-        when(railAccountRepository.balances(accountId)).thenReturn(null);
+        when(accountApi.balances(accountId)).thenReturn(null);
 
         // when: the service is called
         Optional<List<Balance>> result = fixture.balances(accountId);
@@ -161,7 +161,7 @@ public class RailAccountServiceTest {
 
         // and: the account has NO available balances
         AccountBalanceList balanceList = new AccountBalanceList();
-        when(railAccountRepository.balances(accountId)).thenReturn(balanceList);
+        when(accountApi.balances(accountId)).thenReturn(balanceList);
 
         // when: the service is called
         Optional<List<Balance>> result = fixture.balances(accountId);
@@ -179,7 +179,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: no balances are found
-        when(railAccountRepository.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
+        when(accountApi.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
 
         // when: the service is called
         Optional<List<Balance>> result = fixture.balances(accountId);
@@ -194,7 +194,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: no balances are found
-        when(railAccountRepository.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
+        when(accountApi.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
 
         // when: the service is called
         // then: the server error is passed back
@@ -210,7 +210,7 @@ public class RailAccountServiceTest {
 
         // and: the account details are available
         Map<String, Object> details = Map.of("key", "value");
-        when(railAccountRepository.details(accountId)).thenReturn(details);
+        when(accountApi.details(accountId)).thenReturn(details);
 
         // when: the service is called
         Optional<Map<String, Object>> result = fixture.details(accountId);
@@ -229,7 +229,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: the account details are not found
-        when(railAccountRepository.details(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
+        when(accountApi.details(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
 
         // when: the service is called
         Optional<Map<String, Object>> result = fixture.details(accountId);
@@ -244,7 +244,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: the account details are available
-        when(railAccountRepository.details(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
+        when(accountApi.details(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
 
         // when: the service is called
         // then: the server error is passed back
@@ -269,7 +269,7 @@ public class RailAccountServiceTest {
         );
         TransactionsResponse t = new TransactionsResponse();
         t.transactions = TransactionList.builder().booked(booked).pending(pending).build();
-        when(railAccountRepository.transactions(eq(accountId), any(), any())).thenReturn(t);
+        when(accountApi.transactions(eq(accountId), any(), any())).thenReturn(t);
 
         // when: the service is called
         Optional<TransactionList> result = fixture
@@ -297,7 +297,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: NO transactions are available
-        when(railAccountRepository.transactions(eq(accountId), any(), any())).thenReturn(new TransactionsResponse());
+        when(accountApi.transactions(eq(accountId), any(), any())).thenReturn(new TransactionsResponse());
 
         // when: the service is called
         Optional<TransactionList> result = fixture
@@ -317,7 +317,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: NO transactions are available
-        when(railAccountRepository.transactions(eq(accountId), any(), any())).thenReturn(null);
+        when(accountApi.transactions(eq(accountId), any(), any())).thenReturn(null);
 
         // when: the service is called
         Optional<TransactionList> result = fixture
@@ -337,7 +337,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: NO transactions are not found
-        when(railAccountRepository.transactions(eq(accountId), any(), any()))
+        when(accountApi.transactions(eq(accountId), any(), any()))
             .thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
 
         // when: the service is called
@@ -354,7 +354,7 @@ public class RailAccountServiceTest {
         String accountId = randomAlphanumeric(20);
 
         // and: NO transactions are not found
-        when(railAccountRepository.transactions(eq(accountId), any(), any()))
+        when(accountApi.transactions(eq(accountId), any(), any()))
             .thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
 
         // when: the service is called

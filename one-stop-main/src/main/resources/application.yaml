@@ -16,3 +16,12 @@ smallrye:
 quarkus:
   flyway:
     migrate-at-start: true
+
+  log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG

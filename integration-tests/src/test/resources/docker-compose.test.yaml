@@ -32,8 +32,8 @@ services:
       - "8082:8080"
       - "5002:5005"
     environment:
-      ONE_STOP_RAILS_SECRET_ID: "abcdef"
-      ONE_STOP_RAILS_SECRET_KEY: "abcdef"
+      ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
+      ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
 

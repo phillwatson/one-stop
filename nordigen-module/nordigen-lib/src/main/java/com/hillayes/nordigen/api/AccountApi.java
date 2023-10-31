@@ -1,14 +1,14 @@
-package com.hillayes.rail.repository;
+package com.hillayes.nordigen.api;
 
-import com.hillayes.nordigen.model.AccountSummary;
 import com.hillayes.nordigen.model.AccountBalanceList;
+import com.hillayes.nordigen.model.AccountSummary;
 import com.hillayes.nordigen.model.TransactionsResponse;
-import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 @Path("/api/v2/accounts/")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface RailAccountRepository {
+public interface AccountApi {
     @GET
     @Path("{id}/")
     public AccountSummary get(@PathParam("id") String id);

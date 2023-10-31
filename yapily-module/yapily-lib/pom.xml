@@ -5,21 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>yapily-module</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>openapi-doc</artifactId>
-
-    <properties>
-        <openapi-generator.version>7.0.1</openapi-generator.version>
-    </properties>
+    <artifactId>yapily-lib</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy.microprofile</groupId>
+            <artifactId>microprofile-rest-client</artifactId>
         </dependency>
     </dependencies>
 
@@ -28,15 +31,17 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator.version}</version>
                 <executions>
                     <execution>
                         <id>genpojo</id>
                         <configuration>
                             <configOptions>
-                                <modelPackage>com.hillayes.onestop.api</modelPackage>
+                                <modelPackage>com.hillayes.yapily.model</modelPackage>
                             </configOptions>
-                            <inputSpec>${project.basedir}/src/main/spec/one-stop-openapi.yaml</inputSpec>
+                            <!--
+                                OpenAPI spec can be found at: https://github.com/yapily/yapily-openapi
+                            -->
+                            <inputSpec>${project.basedir}/src/main/spec/openapi.json</inputSpec>
                         </configuration>
                     </execution>
                 </executions>
