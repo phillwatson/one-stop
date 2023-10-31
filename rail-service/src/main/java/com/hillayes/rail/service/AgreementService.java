@@ -1,16 +1,16 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.nordigen.api.AgreementApi;
 import com.hillayes.nordigen.model.EndUserAgreement;
 import com.hillayes.nordigen.model.EndUserAgreementAccepted;
 import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import com.hillayes.nordigen.model.PaginatedList;
-import com.hillayes.rail.repository.AgreementRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,17 +19,17 @@ import java.util.Optional;
 public class AgreementService extends AbstractRailService {
     @Inject
     @RestClient
-    AgreementRepository agreementRepository;
+    AgreementApi agreementApi;
 
     public PaginatedList<EndUserAgreement> list(int limit,
                                                 int offset) {
         log.debug("Listing agreements [limit: {}, offset: {}]", limit, offset);
-        return agreementRepository.list(limit, offset);
+        return agreementApi.list(limit, offset);
     }
 
     public EndUserAgreement create(EndUserAgreementRequest agreement) {
         log.debug("Creating agreement [institutionId: {}]", agreement.getInstitutionId());
-        EndUserAgreement result = agreementRepository.create(agreement);
+        EndUserAgreement result = agreementApi.create(agreement);
         log.debug("Created agreement [institutionId: {}, id: {}]", agreement.getInstitutionId(), result.id);
         return result;
     }
@@ -38,7 +38,7 @@ public class AgreementService extends AbstractRailService {
                                              EndUserAgreementAccepted acceptance) {
         log.debug("Accepting agreement [id: {}]", id);
         try {
-            return Optional.ofNullable(agreementRepository.accept(id, acceptance));
+            return Optional.ofNullable(agreementApi.accept(id, acceptance));
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Optional.empty();
@@ -50,7 +50,7 @@ public class AgreementService extends AbstractRailService {
     public Optional<EndUserAgreement> get(String id) {
         log.debug("Retrieving agreement [id: {}]", id);
         try {
-            return Optional.ofNullable(agreementRepository.get(id));
+            return Optional.ofNullable(agreementApi.get(id));
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Optional.empty();
@@ -62,7 +62,7 @@ public class AgreementService extends AbstractRailService {
     public Map<String, Object> delete(String id) {
         log.debug("Deleting agreement [id: {}]", id);
         try {
-            return agreementRepository.delete(id);
+            return agreementApi.delete(id);
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Map.of();

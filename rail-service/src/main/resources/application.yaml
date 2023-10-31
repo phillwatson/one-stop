@@ -17,10 +17,6 @@ quarkus:
     database:
       default-schema: rails
 
-  rest-client:
-    nordigen-api:
-      url: https://ob.nordigen.com
-
   log:
     min-level: TRACE
     level: INFO

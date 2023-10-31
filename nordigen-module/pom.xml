@@ -9,14 +9,11 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>lib-module</artifactId>
+    <artifactId>nordigen-module</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>commons</module>
-        <module>exception-lib</module>
-        <module>executor-lib</module>
-        <module>auth-lib</module>
-        <module>openid-lib</module>
+        <module>nordigen-lib</module>
+        <module>sim-lib</module>
     </modules>
 </project>
