@@ -22,7 +22,7 @@ one-stop:
     nordigen:
       port: 8089
 
-  rails:
+  nordigen:
     secret:
       id: e9309c
       key: 8653cb

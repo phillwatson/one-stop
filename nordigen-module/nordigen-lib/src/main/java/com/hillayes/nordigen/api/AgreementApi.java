@@ -1,15 +1,15 @@
-package com.hillayes.rail.repository;
+package com.hillayes.nordigen.api;
 
 import com.hillayes.nordigen.model.EndUserAgreement;
 import com.hillayes.nordigen.model.EndUserAgreementAccepted;
 import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import com.hillayes.nordigen.model.PaginatedList;
-import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
 import java.util.Map;
 
 @RegisterRestClient(configKey = "nordigen-api")
@@ -18,7 +18,7 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public interface AgreementRepository {
+public interface AgreementApi {
     @GET
     public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,
                                                 @QueryParam("offset") int offset);

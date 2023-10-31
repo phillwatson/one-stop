@@ -1,9 +1,9 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
-import com.hillayes.rail.config.ServiceConfiguration;
+import com.hillayes.nordigen.api.AccountApi;
 import com.hillayes.nordigen.model.*;
-import com.hillayes.rail.repository.RailAccountRepository;
+import com.hillayes.rail.config.ServiceConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class RailAccountService extends AbstractRailService {
     @Inject
     @RestClient
-    RailAccountRepository railAccountRepository;
+    AccountApi accountApi;
 
     @Inject
     ServiceConfiguration config;
@@ -36,7 +36,7 @@ public class RailAccountService extends AbstractRailService {
     public Optional<AccountSummary> get(String accountId) {
         log.debug("Retrieving account summary [id: {}]", accountId);
         try {
-            return Optional.ofNullable(railAccountRepository.get(accountId));
+            return Optional.ofNullable(accountApi.get(accountId));
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 // indicate account-not-found
@@ -58,7 +58,7 @@ public class RailAccountService extends AbstractRailService {
     public Optional<List<Balance>> balances(String accountId) {
         log.debug("Retrieving account balances [id: {}]", accountId);
         try {
-            AccountBalanceList balanceList = railAccountRepository.balances(accountId);
+            AccountBalanceList balanceList = accountApi.balances(accountId);
             if ((balanceList == null) || (balanceList.balances == null)) {
                 return Optional.of(List.of());
             }
@@ -76,7 +76,7 @@ public class RailAccountService extends AbstractRailService {
         log.debug("Retrieving account detail [id: {}]", accountId);
         try {
             Map<String, Object> detail = accountDetailCache.getValueOrCall(accountId, () ->
-                railAccountRepository.details(accountId)
+                accountApi.details(accountId)
             );
             return Optional.of(detail);
         } catch (WebApplicationException e) {
@@ -103,7 +103,7 @@ public class RailAccountService extends AbstractRailService {
         log.debug("Retrieving account transactions [id: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
         try {
             // call the rail service endpoint
-            TransactionsResponse response = railAccountRepository.transactions(accountId, dateFrom, dateTo);
+            TransactionsResponse response = accountApi.transactions(accountId, dateFrom, dateTo);
 
             // if the result is null
             if ((response == null) || (response.transactions == null)) {

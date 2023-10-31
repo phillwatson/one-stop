@@ -1,0 +1,4 @@
+quarkus:
+  rest-client:
+    yapily-api:
+      url: https://api.yapily.com/

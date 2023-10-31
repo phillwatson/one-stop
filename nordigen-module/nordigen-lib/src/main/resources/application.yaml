@@ -1,0 +1,4 @@
+quarkus:
+  rest-client:
+    nordigen-api:
+      url: https://ob.nordigen.com

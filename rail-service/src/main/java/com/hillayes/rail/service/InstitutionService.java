@@ -1,16 +1,16 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
-import com.hillayes.rail.config.ServiceConfiguration;
+import com.hillayes.nordigen.api.InstitutionApi;
 import com.hillayes.nordigen.model.Institution;
 import com.hillayes.nordigen.model.InstitutionDetail;
-import com.hillayes.rail.repository.InstitutionRepository;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-
+import com.hillayes.rail.config.ServiceConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ import java.util.Optional;
 public class InstitutionService extends AbstractRailService {
     @Inject
     @RestClient
-    InstitutionRepository institutionRepository;
+    InstitutionApi institutionApi;
 
     @Inject
     ServiceConfiguration config;
@@ -36,7 +36,7 @@ public class InstitutionService extends AbstractRailService {
                                   Boolean paymentsEnabled) {
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
         return cacheByCountry.getValueOrCall(key, () -> {
-            List<Institution> list = institutionRepository.list(countryCode, paymentsEnabled);
+            List<Institution> list = institutionApi.list(countryCode, paymentsEnabled);
             get("SANDBOXFINANCE_SFIN0000")
                 .ifPresent(list::add);
 
@@ -48,7 +48,7 @@ public class InstitutionService extends AbstractRailService {
 
     public Optional<InstitutionDetail> get(String id) {
         try {
-            return Optional.ofNullable(cacheById.getValueOrCall(id, () -> institutionRepository.get(id)));
+            return Optional.ofNullable(cacheById.getValueOrCall(id, () -> institutionApi.get(id)));
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Optional.empty();
