@@ -19,17 +19,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>nordigen-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>openapi-doc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
         </dependency>
 
         <dependency>

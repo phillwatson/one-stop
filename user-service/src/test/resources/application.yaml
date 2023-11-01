@@ -20,3 +20,8 @@ one-stop:
       apple:
         key-id: 'my-apple-key-id'
         client-secret: 'an-apple-generated-secret'
+
+  nordigen:
+    secret:
+      id: e9309c
+      key: 8653cb

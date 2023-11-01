@@ -146,7 +146,7 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
-                <artifactId>commons</artifactId>
+                <artifactId>commons-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

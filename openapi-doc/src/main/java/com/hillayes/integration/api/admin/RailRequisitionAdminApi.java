@@ -1,9 +1,9 @@
 package com.hillayes.integration.api.admin;
 
-import io.restassured.common.mapper.TypeRef;
 import com.hillayes.integration.api.ApiBase;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 
 import java.util.Map;

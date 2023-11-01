@@ -6,8 +6,8 @@ import io.restassured.response.Response;
 
 import java.util.Map;
 
-import static io.restassured.http.ContentType.JSON;
 import static io.restassured.http.ContentType.BINARY;
+import static io.restassured.http.ContentType.JSON;
 
 public class CountryApi extends ApiBase {
     public CountryApi(Map<String, String> authCookies) {

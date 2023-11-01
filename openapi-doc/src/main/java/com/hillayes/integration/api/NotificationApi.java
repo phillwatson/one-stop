@@ -1,6 +1,6 @@
 package com.hillayes.integration.api;
 
-import com.hillayes.onestop.api.*;
+import com.hillayes.onestop.api.NotificationResponse;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 
