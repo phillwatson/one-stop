@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>commons</artifactId>
+            <artifactId>commons-lib</artifactId>
         </dependency>
     </dependencies>
 </project>

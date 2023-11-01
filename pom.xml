@@ -18,13 +18,14 @@
     </organization>
 
     <modules>
-        <module>openapi-doc</module>
         <module>client</module>
+
+        <module>nordigen-module</module>
+        <module>yapily-module</module>
+        <module>openapi-doc</module>
 
         <module>event-module</module>
         <module>lib-module</module>
-        <module>nordigen-module</module>
-        <module>yapily-module</module>
 
         <module>audit-service</module>
         <module>notification-service</module>
@@ -146,7 +147,7 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
-                <artifactId>commons</artifactId>
+                <artifactId>commons-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
