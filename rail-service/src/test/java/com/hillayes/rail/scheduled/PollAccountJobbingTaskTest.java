@@ -97,8 +97,8 @@ public class PollAccountJobbingTaskTest {
         verify(scheduler).addJob(eq(fixture), captor.capture());
 
         // and: the payload is correct
-        assertEquals(consentId, captor.getValue().consentId);
-        assertEquals(railAccountId, captor.getValue().railAccountId);
+        assertEquals(consentId, captor.getValue().consentId());
+        assertEquals(railAccountId, captor.getValue().railAccountId());
     }
 
     @Test
