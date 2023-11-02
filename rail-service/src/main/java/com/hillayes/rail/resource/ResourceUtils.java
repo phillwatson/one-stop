@@ -32,18 +32,30 @@ public final class ResourceUtils {
      * Builds page links for a page of the given sizes, using the given uriInfo.
      *
      * @param uriInfo the UriInfo for the request, used to obtain the base URI.
-     * @param pageNo the page number - zero-based.
+     * @param pageIndex the page number - zero-based.
      * @param pageSize the size of this page.
      * @param pageCount the total number of pages.
      * @return a PageLinks object containing the links for the given page.
      */
-    public static PageLinks buildPageLinks(UriInfo uriInfo, int pageNo, int pageSize, int pageCount) {
-        return buildPageLinks(uriInfo, pageNo, pageSize, pageCount, Function.identity());
+    public static PageLinks buildPageLinks(UriInfo uriInfo, int pageIndex, int pageSize, int pageCount) {
+        return buildPageLinks(uriInfo, pageIndex, pageSize, pageCount, Function.identity());
     }
 
     /**
      * Builds page links for the given page, using the given uriInfo and uriDecorator.
-     * The decorator is used to add any additional query parameters to the links.
+     *
+     * The decorator is used to add any additional query parameters to the links. For
+     * example; given an endpoint that accepts an account ID on which to filter its
+     * paged result. We would want to include that account ID in the link URLs. To do
+     * so, we would pass a decorator like such:
+     * <pre>
+     *     ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
+     *         if (accountId != null) {
+     *             uriBuilder.queryParam("account-id", accountId);
+     *         }
+     *         return uriBuilder;
+     *     })
+     * </pre>
      *
      * @param uriInfo the UriInfo for the request, used to obtain the base URI.
      * @param page the page of DB query results.
@@ -59,17 +71,29 @@ public final class ResourceUtils {
     /**
      * Builds page links for a page of the given sizes, using the given uriInfo and
      * uriDecorator.
-     * The decorator is used to add any additional query parameters to the links.
+     *
+     * The decorator is used to add any additional query parameters to the links. For
+     * example; given an endpoint that accepts an account ID on which to filter its
+     * paged result. We would want to include that account ID in the link URLs. To do
+     * so, we would pass a decorator like such:
+     * <pre>
+     *     ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
+     *         if (accountId != null) {
+     *             uriBuilder.queryParam("account-id", accountId);
+     *         }
+     *         return uriBuilder;
+     *     })
+     * </pre>
      *
      * @param uriInfo the UriInfo for the request, used to obtain the base URI.
-     * @param pageNo the page number - zero-based.
+     * @param pageIndex the page number - zero-based.
      * @param pageSize the size of this page.
      * @param pageCount the total number of pages.
      * @param uriDecorator a function that adds additional data to the given UriBuilder,
      *     and returns a UriBuilder (possibly the same as given).
      * @return a PageLinks object containing the links for the given page.
      */
-    public static PageLinks buildPageLinks(UriInfo uriInfo, int pageNo, int pageSize, int pageCount,
+    public static PageLinks buildPageLinks(UriInfo uriInfo, int pageIndex, int pageSize, int pageCount,
                                            Function<UriBuilder, UriBuilder> uriDecorator) {
         // construct UriBuilder and pass it to the decorator for any additional query params
         UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder())
@@ -79,11 +103,11 @@ public final class ResourceUtils {
             .first(uriBuilder.replaceQueryParam("page", 0).build())
             .last(uriBuilder.replaceQueryParam("page", pageCount - 1).build());
 
-        if (pageNo > 0) {
-            result.previous(uriBuilder.replaceQueryParam("page", pageNo - 1).build());
+        if (pageIndex > 0) {
+            result.previous(uriBuilder.replaceQueryParam("page", pageIndex - 1).build());
         }
-        if (pageNo < pageCount - 1) {
-            result.next(uriBuilder.replaceQueryParam("page", pageNo + 1).build());
+        if (pageIndex < pageCount - 1) {
+            result.next(uriBuilder.replaceQueryParam("page", pageIndex + 1).build());
         }
 
         return result;

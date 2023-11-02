@@ -1,5 +1,6 @@
 package com.hillayes.integration.test.rail;
 
+import com.hillayes.integration.api.*;
 import com.hillayes.integration.api.admin.RailAgreementAdminApi;
 import com.hillayes.integration.api.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
@@ -9,7 +10,10 @@ import com.hillayes.nordigen.model.EndUserAgreement;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
-import com.hillayes.onestop.api.*;
+import com.hillayes.onestop.api.InstitutionResponse;
+import com.hillayes.onestop.api.PaginatedTransactions;
+import com.hillayes.onestop.api.UserConsentRequest;
+import com.hillayes.onestop.api.UserConsentResponse;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import io.restassured.response.Response;
