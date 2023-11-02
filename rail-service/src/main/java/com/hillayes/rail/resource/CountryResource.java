@@ -29,7 +29,7 @@ public class CountryResource {
 
     @GET
     public Response getAll(@Context UriInfo uriInfo,
-                           @QueryParam("page") @DefaultValue("0") int page,
+                           @QueryParam("page") @DefaultValue("0") int pageIndex,
                            @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         log.info("List countries");
 
@@ -38,7 +38,7 @@ public class CountryResource {
         // reduce the overall list to the subset identified by the page parameters
         List<CountryResponse> countryPage = allCountries.stream()
             .sorted(Comparator.comparing(Country::getName))
-            .skip(((long) page) * pageSize)
+            .skip(((long) pageIndex) * pageSize)
             .limit(pageSize)
             .map(country -> marshal(country, uriInfo.getAbsolutePathBuilder().path(country.getId())))
             .toList();
@@ -46,15 +46,15 @@ public class CountryResource {
         // convert the subset to a paginated response
         int totalPages = (int) Math.ceil((double) allCountries.size() / pageSize);
         PaginatedCountries response = new PaginatedCountries()
-            .page(page)
+            .page(pageIndex)
             .pageSize(pageSize)
             .count(countryPage.size())
             .total((long) allCountries.size())
             .items(countryPage)
-            .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages));
+            .links(ResourceUtils.buildPageLinks(uriInfo, pageIndex, pageSize, totalPages));
 
         log.debug("List countries [page: {}, pageSize: {}, count: {}, total: {}]",
-            page, pageSize, response.getCount(), response.getTotal());
+            pageIndex, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 
