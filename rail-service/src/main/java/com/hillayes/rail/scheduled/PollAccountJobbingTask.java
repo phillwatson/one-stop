@@ -18,10 +18,6 @@ import io.quarkus.panache.common.Sort;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -45,15 +41,11 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private final AccountTransactionRepository accountTransactionRepository;
     private final RailAccountService railAccountService;
 
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
     @RegisterForReflection
-    public static class Payload {
-        UUID consentId;
-        String railAccountId;
-    }
+    public record Payload(
+        UUID consentId,
+        String railAccountId
+    ) {}
 
     public PollAccountJobbingTask(ServiceConfiguration configuration,
                                   UserConsentService userConsentService,
@@ -72,10 +64,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
     public String queueJob(UUID consentId, String railAccountId) {
         log.info("Queuing job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
-        Payload payload = Payload.builder()
-            .consentId(consentId)
-            .railAccountId(railAccountId)
-            .build();
+        Payload payload = new Payload(consentId, railAccountId);
         return scheduler.addJob(this, payload);
     }
 
@@ -95,8 +84,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     @Override
     @Transactional
     public TaskConclusion apply(TaskContext<Payload> context) {
-        UUID consentId = context.getPayload().consentId;
-        String railAccountId = context.getPayload().railAccountId;
+        UUID consentId = context.getPayload().consentId();
+        String railAccountId = context.getPayload().railAccountId();
         log.info("Processing Poll Account job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
 
         // get a lock on the consent to ensure no other updates
