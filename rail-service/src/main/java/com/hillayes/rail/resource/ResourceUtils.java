@@ -6,6 +6,7 @@ import com.hillayes.onestop.api.PageLinks;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -43,19 +44,7 @@ public final class ResourceUtils {
 
     /**
      * Builds page links for the given page, using the given uriInfo and uriDecorator.
-     *
-     * The decorator is used to add any additional query parameters to the links. For
-     * example; given an endpoint that accepts an account ID on which to filter its
-     * paged result. We would want to include that account ID in the link URLs. To do
-     * so, we would pass a decorator like such:
-     * <pre>
-     *     ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
-     *         if (accountId != null) {
-     *             uriBuilder.queryParam("account-id", accountId);
-     *         }
-     *         return uriBuilder;
-     *     })
-     * </pre>
+     * The decorator is used to add any additional query parameters to the links.
      *
      * @param uriInfo the UriInfo for the request, used to obtain the base URI.
      * @param page the page of DB query results.
@@ -71,19 +60,7 @@ public final class ResourceUtils {
     /**
      * Builds page links for a page of the given sizes, using the given uriInfo and
      * uriDecorator.
-     *
-     * The decorator is used to add any additional query parameters to the links. For
-     * example; given an endpoint that accepts an account ID on which to filter its
-     * paged result. We would want to include that account ID in the link URLs. To do
-     * so, we would pass a decorator like such:
-     * <pre>
-     *     ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
-     *         if (accountId != null) {
-     *             uriBuilder.queryParam("account-id", accountId);
-     *         }
-     *         return uriBuilder;
-     *     })
-     * </pre>
+     * The decorator is used to add any additional query parameters to the links.
      *
      * @param uriInfo the UriInfo for the request, used to obtain the base URI.
      * @param pageIndex the page number - zero-based.
@@ -96,8 +73,11 @@ public final class ResourceUtils {
     public static PageLinks buildPageLinks(UriInfo uriInfo, int pageIndex, int pageSize, int pageCount,
                                            Function<UriBuilder, UriBuilder> uriDecorator) {
         // construct UriBuilder and pass it to the decorator for any additional query params
-        UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder())
-            .queryParam("page-size", pageSize);
+        UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder());
+
+        // add all parameters from the original request
+        uriInfo.getQueryParameters().forEach((key, value) ->
+            uriBuilder.queryParam(key, value.toArray()));
 
         PageLinks result = new PageLinks()
             .first(uriBuilder.replaceQueryParam("page", 0).build())

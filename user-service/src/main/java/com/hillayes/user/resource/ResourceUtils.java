@@ -96,8 +96,11 @@ public final class ResourceUtils {
     public static PageLinks buildPageLinks(UriInfo uriInfo, int pageIndex, int pageSize, int pageCount,
                                            Function<UriBuilder, UriBuilder> uriDecorator) {
         // construct UriBuilder and pass it to the decorator for any additional query params
-        UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder())
-            .queryParam("page-size", pageSize);
+        UriBuilder uriBuilder = uriDecorator.apply(uriInfo.getAbsolutePathBuilder());
+
+        // add all parameters from the original request
+        uriInfo.getQueryParameters().forEach((key, value) ->
+            uriBuilder.queryParam(key, value.toArray()));
 
         PageLinks result = new PageLinks()
             .first(uriBuilder.replaceQueryParam("page", 0).build())

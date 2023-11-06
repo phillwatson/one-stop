@@ -46,12 +46,7 @@ public class AccountTransactionResource {
             .count(transactionsPage.getContentSize())
             .total(transactionsPage.getTotalCount())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage, uriBuilder -> {
-                if (accountId != null) {
-                    uriBuilder.queryParam("account-id", accountId);
-                }
-                return uriBuilder;
-            }));
+            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage));
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, accountId, page, pageSize, response.getCount(), response.getTotal());

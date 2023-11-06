@@ -22,6 +22,7 @@
 
         <module>nordigen-module</module>
         <module>yapily-module</module>
+        <module>share-price-module</module>
         <module>openapi-doc</module>
 
         <module>event-module</module>
@@ -198,6 +199,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>yapily-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>alpha-vantage-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
