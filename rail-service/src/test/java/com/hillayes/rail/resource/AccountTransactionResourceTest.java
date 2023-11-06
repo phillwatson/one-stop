@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.rail.service.AccountService;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
@@ -87,5 +89,46 @@ public class AccountTransactionResourceTest extends TestBase {
 
         // and: no account look-up is performed
         verifyNoInteractions(accountService);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetTransactions_WithUserId() {
+        UUID userId = UUID.fromString(userIdStr);
+
+        /// and: a page range
+        int page = 1;
+        int pageSize = 12;
+
+        // and: a list of transactions
+        when(accountTransactionService.getTransactions(userId, userId, page, pageSize))
+            .thenReturn(Page.empty());
+
+        // when: client calls the endpoint
+        PaginatedTransactions response = given()
+            .request()
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
+            .queryParam("account-id", userId)
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/transactions")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(PaginatedTransactions.class);
+
+        // then: the account-trans-service is called with the authenticated user-id and page
+        verify(accountTransactionService).getTransactions(userId, userId, page, pageSize);
+
+        // and: no account look-up is performed
+        verifyNoInteractions(accountService);
+
+        // and: the page links contain given parameters
+        PageLinks links = response.getLinks();
+        assertTrue(links.getFirst().getQuery().contains("account-id=" + userId));
+        assertTrue(links.getFirst().getQuery().contains("page=" + 0));
+        assertTrue(links.getFirst().getQuery().contains("page-size=" + pageSize));
     }
 }

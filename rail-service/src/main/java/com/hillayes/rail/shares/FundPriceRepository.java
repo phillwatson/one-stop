@@ -39,13 +39,12 @@ public class FundPriceRepository {
         List<List<String>> rowCols = HtmlScraper.scrape(html);
 
         return rowCols.stream().map(row ->
-            DailyPrice.builder()
-                .date(LocalDate.parse(row.get(0), DATE_FORMATTER))
-                .open(Float.parseFloat(row.get(2)))
-                .high(Float.parseFloat(row.get(3)))
-                .low(Float.parseFloat(row.get(4)))
-                .close(Float.parseFloat(row.get(5)))
-                .build()
+            new DailyPrice(
+                LocalDate.parse(row.get(0), DATE_FORMATTER),
+                Float.parseFloat(row.get(2)),
+                Float.parseFloat(row.get(3)),
+                Float.parseFloat(row.get(4)),
+                Float.parseFloat(row.get(5)))
         ).toList();
     }
 

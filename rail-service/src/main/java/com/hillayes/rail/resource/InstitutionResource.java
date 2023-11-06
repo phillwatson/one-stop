@@ -50,14 +50,7 @@ public class InstitutionResource {
             .count(bankPage.size())
             .total((long) allBanks.size())
             .items(bankPage)
-            .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages,
-                uriBuilder -> {
-                    if (countryCode != null) {
-                        uriBuilder.queryParam("country", countryCode);
-                    }
-                    return uriBuilder;
-                })
-            );
+            .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages));
 
         log.debug("List institutions [country: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             countryCode, page, pageSize, response.getCount(), response.getTotal());
