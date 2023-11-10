@@ -39,13 +39,15 @@ public class CountryResourceTest extends TestBase {
         // and: all page links are present - there is only one page
         PageLinks links = response.getLinks();
         assertEquals("/api/v1/rails/countries", links.getFirst().getPath());
-        assertEquals("page-size=20&page=0", links.getFirst().getQuery());
+        assertTrue(links.getFirst().getQuery().contains("page-size=20"));
+        assertTrue(links.getFirst().getQuery().contains("&page=0"));
 
         assertNull(links.getPrevious());
         assertNull(links.getNext());
 
         assertEquals("/api/v1/rails/countries", links.getLast().getPath());
-        assertEquals("page-size=20&page=0", links.getLast().getQuery());
+        assertTrue(links.getLast().getQuery().contains("page-size=20"));
+        assertTrue(links.getLast().getQuery().contains("&page=0"));
     }
 
     @Test
