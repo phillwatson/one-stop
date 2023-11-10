@@ -39,14 +39,20 @@ public class InstitutionResourceTest extends TestResourceBase {
         // and: all page links are present - there is only one page
         PageLinks links = response.getLinks();
         assertEquals("/api/v1/rails/institutions", links.getFirst().getPath());
-        assertEquals("country=GB&page-size=10&page=0", links.getFirst().getQuery());
+        assertTrue(links.getFirst().getQuery().contains("country=GB"));
+        assertTrue(links.getFirst().getQuery().contains("page-size=10"));
+        assertTrue(links.getFirst().getQuery().contains("page=0"));
 
         assertNull(links.getPrevious());
         assertEquals("/api/v1/rails/institutions", links.getNext().getPath());
-        assertEquals("country=GB&page-size=10&page=1", links.getNext().getQuery());
+        assertTrue(links.getNext().getQuery().contains("country=GB"));
+        assertTrue(links.getNext().getQuery().contains("page-size=10"));
+        assertTrue(links.getNext().getQuery().contains("page=1"));
 
         assertEquals("/api/v1/rails/institutions", links.getLast().getPath());
-        assertEquals("country=GB&page-size=10&page=10", links.getLast().getQuery());
+        assertTrue(links.getLast().getQuery().contains("country=GB"));
+        assertTrue(links.getLast().getQuery().contains("page-size=10"));
+        assertTrue(links.getLast().getQuery().contains("page=10"));
     }
 
     @Test

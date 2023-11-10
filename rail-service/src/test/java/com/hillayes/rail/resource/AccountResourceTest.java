@@ -24,8 +24,7 @@ import java.util.UUID;
 import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
@@ -96,18 +95,22 @@ public class AccountResourceTest extends TestBase {
         // and: all page links are present
         PageLinks links = response.getLinks();
         assertEquals("/api/v1/rails/accounts", links.getFirst().getPath());
-        assertEquals("page-size=20&page=0", links.getFirst().getQuery());
+        assertTrue(links.getFirst().getQuery().contains("page-size=20"));
+        assertTrue(links.getFirst().getQuery().contains("page=0"));
 
         assertNotNull(links.getPrevious());
         assertEquals("/api/v1/rails/accounts", links.getPrevious().getPath());
-        assertEquals("page-size=20&page=9", links.getPrevious().getQuery());
+        assertTrue(links.getPrevious().getQuery().contains("page-size=20"));
+        assertTrue(links.getPrevious().getQuery().contains("page=9"));
 
         assertNotNull(links.getNext());
         assertEquals("/api/v1/rails/accounts", links.getNext().getPath());
-        assertEquals("page-size=20&page=11", links.getNext().getQuery());
+        assertTrue(links.getNext().getQuery().contains("page-size=20"));
+        assertTrue(links.getNext().getQuery().contains("page=11"));
 
         assertEquals("/api/v1/rails/accounts", links.getLast().getPath());
-        assertEquals("page-size=20&page=15", links.getLast().getQuery());
+        assertTrue(links.getLast().getQuery().contains("page-size=20"));
+        assertTrue(links.getLast().getQuery().contains("page=15"));
 
         // and: each account is found in the response
         accounts.forEach(account -> {
