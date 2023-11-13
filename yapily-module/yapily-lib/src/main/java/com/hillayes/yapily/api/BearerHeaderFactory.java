@@ -27,7 +27,7 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
     public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,
                                                  MultivaluedMap<String, String> clientOutgoingHeaders) {
         MultivaluedMap<String, String> result = new MultivaluedHashMap<>();
-        result.add(HttpHeaders.AUTHORIZATION, "Bearer " + bearer());
+        result.add(HttpHeaders.AUTHORIZATION, "Basic " + bearer());
         result.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         return result;
     }
