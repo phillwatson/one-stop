@@ -857,21 +857,43 @@ components:
         password:
           type: string
           description: the user's password
+    ErrorSeverity:
+      description: An indication of the severity of a service error.
+      type: string
+      enum: [info, warn, error]
+      example: info
 
-    ServiceError:
+    ServiceErrorResponse:
       type: object
+      description: |
+        Conveys a service error response; showing the causes(s) of the error. A response may
+        return several causes; which will be shown in the "errors" array. The "correlationId"
+        can be used to identify the server log entries related to the error(s).
       required:
         - correlationId
         - severity
-        - message
       properties:
         correlationId:
           description: The identifier to relate this error to server log entries.
           type: string
         severity:
+          description: The highest of the severity levels within the list of errors
+          $ref: '#/components/schemas/ErrorSeverity'
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceError"
+
+    ServiceError:
+      type: object
+      description: Details the cause of a service error.
+      required:
+        - severity
+        - message
+      properties:
+        severity:
           description: An indication of the severity of the error.
-          type: string
-          enum: [info, warn, error]
+          $ref: '#/components/schemas/ErrorSeverity'
         messageId:
           description: The unique identifier for the message - provides index to locale strings.
           type: string

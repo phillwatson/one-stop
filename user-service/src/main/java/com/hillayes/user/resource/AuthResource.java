@@ -6,6 +6,7 @@ import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.User;
 import com.hillayes.onestop.api.LoginRequest;
 import com.hillayes.user.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -49,7 +50,7 @@ public class AuthResource {
      */
     @POST
     @Path("login")
-    public Response login(LoginRequest loginRequest) {
+    public Response login(@Valid LoginRequest loginRequest) {
         log.info("Auth user login initiated");
         User user = authService.login(loginRequest.getUsername(), loginRequest.getPassword().toCharArray());
 

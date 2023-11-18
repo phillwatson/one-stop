@@ -173,14 +173,14 @@ public class UserAdminResourceTest extends TestBase {
         when(userService.getUser(userId)).thenReturn(Optional.empty());
 
         // when: the admin requests the user
-        ServiceError response = given()
+        ServiceErrorResponse response = given()
             .when()
             .get("/api/v1/users/{userId}", userId)
             .then()
             .contentType(JSON)
             .statusCode(404)
             .extract()
-            .as(ServiceError.class);
+            .as(ServiceErrorResponse.class);
 
         // and: the response details the error
         verifyError(response, userId);
@@ -265,7 +265,7 @@ public class UserAdminResourceTest extends TestBase {
             .phone(randomNumeric(10));
 
         // when: the admin makes an update requests
-        ServiceError response = given()
+        ServiceErrorResponse response = given()
             .contentType(JSON)
             .body(request)
             .when()
@@ -274,7 +274,7 @@ public class UserAdminResourceTest extends TestBase {
             .contentType(JSON)
             .statusCode(404)
             .extract()
-            .as(ServiceError.class);
+            .as(ServiceErrorResponse.class);
 
         // and: the response details the error
         verifyError(response, userId);
@@ -341,14 +341,14 @@ public class UserAdminResourceTest extends TestBase {
         when(userService.deleteUser(userId)).thenReturn(Optional.empty());
 
         // when: the admin requests each user
-        ServiceError response = given()
+        ServiceErrorResponse response = given()
             .when()
             .delete("/api/v1/users/{userId}", userId)
             .then()
             .contentType(JSON)
             .statusCode(404)
             .extract()
-            .as(ServiceError.class);
+            .as(ServiceErrorResponse.class);
 
         // and: the response details the error
         verifyError(response, userId);
@@ -368,15 +368,18 @@ public class UserAdminResourceTest extends TestBase {
             .statusCode(403);
     }
 
-    private void verifyError(ServiceError response, UUID userId) {
+    private void verifyError(ServiceErrorResponse response, UUID userId) {
         assertNotNull(response);
         assertNotNull(response.getCorrelationId());
-        assertEquals(ServiceError.SeverityEnum.INFO, response.getSeverity());
-        assertEquals("ENTITY_NOT_FOUND", response.getMessageId());
-        assertEquals("The identified entity cannot be found.", response.getMessage());
+        assertNotNull(response.getErrors());
 
-        assertNotNull(response.getContextAttributes());
-        assertEquals("user", response.getContextAttributes().get("entity-type"));
-        assertEquals(userId.toString(), response.getContextAttributes().get("entity-id"));
+        ServiceError serviceError = response.getErrors().get(0);
+        assertEquals(ErrorSeverity.INFO, serviceError.getSeverity());
+        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
+        assertEquals("The identified entity cannot be found.", serviceError.getMessage());
+
+        assertNotNull(serviceError.getContextAttributes());
+        assertEquals("user", serviceError.getContextAttributes().get("entity-type"));
+        assertEquals(userId.toString(), serviceError.getContextAttributes().get("entity-id"));
     }
 }

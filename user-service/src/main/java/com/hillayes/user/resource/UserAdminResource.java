@@ -5,6 +5,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +62,7 @@ public class UserAdminResource {
     @PUT
     @Path("/{id}")
     public Response updateUser(@PathParam("id") UUID id,
-                               UserUpdateRequest request) {
+                               @Valid UserUpdateRequest request) {
         log.info("Update user [id: {}]", id);
         return userService.updateUser(id, marshal(request))
             .map(user -> {

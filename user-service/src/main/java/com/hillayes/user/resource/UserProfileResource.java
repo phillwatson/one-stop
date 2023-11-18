@@ -6,6 +6,7 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +58,7 @@ public class UserProfileResource {
 
     @PUT
     public Response updateProfile(@Context SecurityContext ctx,
-                                  UserProfileRequest request) {
+                                  @Valid UserProfileRequest request) {
         UUID id = ResourceUtils.getUserId(ctx);
         log.info("Update user profile [id: {}]", id);
 
@@ -84,7 +85,7 @@ public class UserProfileResource {
     @PUT
     @Path("/password")
     public Response changePassword(@Context SecurityContext ctx,
-                                   PasswordUpdateRequest request) {
+                                   @Valid PasswordUpdateRequest request) {
         UUID id = ResourceUtils.getUserId(ctx);
         log.info("Update user password [id: {}]", id);
 

@@ -41,3 +41,8 @@ one-stop:
     secret:
       id: e9309c
       key: 8653cb
+
+  yapily:
+    secret:
+      id: MXGurRNJ
+      key: 5467f

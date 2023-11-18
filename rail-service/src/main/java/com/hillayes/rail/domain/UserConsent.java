@@ -30,13 +30,13 @@ public class UserConsent {
     private Instant dateCreated = Instant.now();
 
     @ToString.Include
-    @Column(name = "date_given", nullable = true)
+    @Column(name = "date_given")
     private Instant dateGiven;
 
-    @Column(name = "date_denied", nullable = true)
+    @Column(name = "date_denied")
     private Instant dateDenied;
 
-    @Column(name = "date_cancelled", nullable = true)
+    @Column(name = "date_cancelled")
     private Instant dateCancelled;
 
     @EqualsAndHashCode.Include
@@ -75,13 +75,13 @@ public class UserConsent {
      * The rail ID for the requisition for access to which the consent refers.
      */
     @ToString.Include
-    @Column(name = "requisition_id", nullable = true)
+    @Column(name = "requisition_id")
     private String requisitionId;
 
     /**
      * The URL to which the client will be redirected after consent request is completed.
      */
-    @Column(name = "callback_uri", nullable = true)
+    @Column(name = "callback_uri")
     private String callbackUri;
 
     /**
@@ -95,12 +95,12 @@ public class UserConsent {
     /**
      * If consent is denied, this records the error code returned by the rail.
      */
-    @Column(name="error_code", nullable = true)
+    @Column(name="error_code")
     private String errorCode;
 
     /**
      * If consent is denied, this records the detail of the error returned by the rail.
      */
-    @Column(name="error_detail", nullable = true)
+    @Column(name="error_detail")
     private String errorDetail;
 }

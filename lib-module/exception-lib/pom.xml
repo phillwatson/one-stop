@@ -19,6 +19,10 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>openapi-doc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>executor-lib</artifactId>
             <scope>provided</scope>
         </dependency>

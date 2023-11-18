@@ -6,6 +6,7 @@ import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionRequest;
 import com.hillayes.rail.service.RequisitionService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -41,7 +42,7 @@ public class RailRequisitionAdminResource {
     }
 
     @POST
-    public Response create(RequisitionRequest requisition) {
+    public Response create(@Valid RequisitionRequest requisition) {
         log.info("Create requisition [reference: {}, agreement: {}, institution: {}]",
             requisition.getReference(), requisition.getAgreement(), requisition.getInstitutionId());
         Requisition result = requisitionService.create(requisition);

@@ -12,10 +12,10 @@ import java.util.Base64;
 
 /**
  * Supplies the Authorization header values for the Yapily rail API.
- * It uses the registered secret ID and key for the Auth bearer header of
+ * It uses the registered secret ID and key for the Auth header of
  * ongoing request.
  */
-public class BearerHeaderFactory implements ClientHeadersFactory {
+public class BasicHeaderFactory implements ClientHeadersFactory {
     @ConfigProperty(name = "one-stop.yapily.secret.id")
     String SECRET_ID;
     @ConfigProperty(name = "one-stop.yapily.secret.key")
@@ -27,12 +27,12 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
     public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,
                                                  MultivaluedMap<String, String> clientOutgoingHeaders) {
         MultivaluedMap<String, String> result = new MultivaluedHashMap<>();
-        result.add(HttpHeaders.AUTHORIZATION, "Bearer " + bearer());
+        result.add(HttpHeaders.AUTHORIZATION, "Basic " + encodedToken());
         result.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         return result;
     }
 
-    private String bearer() {
+    private String encodedToken() {
         if (CREDENTIALS == null) {
             String token = SECRET_ID + ":" + SECRET_KEY;
             byte[] encodedBytes = Base64.getEncoder().encode(token.getBytes(StandardCharsets.ISO_8859_1));

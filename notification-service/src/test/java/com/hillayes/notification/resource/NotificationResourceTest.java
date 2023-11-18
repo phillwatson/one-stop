@@ -7,6 +7,7 @@ import com.hillayes.notification.repository.NotificationRepository;
 import com.hillayes.notification.service.UserService;
 import com.hillayes.onestop.api.NotificationResponse;
 import com.hillayes.onestop.api.ServiceError;
+import com.hillayes.onestop.api.ServiceErrorResponse;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -23,8 +24,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -120,7 +120,7 @@ public class NotificationResourceTest extends TestBase {
 
         // when: the resource is called
         // then: a not-found response is returned
-        ServiceError error = given()
+        ServiceErrorResponse response = given()
             .request()
             .contentType(JSON)
             .when()
@@ -129,10 +129,18 @@ public class NotificationResourceTest extends TestBase {
             .then()
             .statusCode(404)
             .contentType(JSON)
-            .extract().as(ServiceError.class);
+            .extract().as(ServiceErrorResponse.class);
+
+        assertNotNull(response.getErrors());
+        assertFalse(response.getErrors().isEmpty());
+        ServiceError error = response.getErrors().get(0);
 
         // and: the error shows reason
         assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
+
+        // and: context attributes are present
+        assertNotNull(error.getContextAttributes());
+        assertFalse(error.getContextAttributes().isEmpty());
 
         // and: the entity type is identified
         assertEquals("Notification", error.getContextAttributes().get("entity-type"));

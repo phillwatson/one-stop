@@ -1,5 +1,6 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.exception.common.CommonErrorCodes;
 import com.hillayes.onestop.api.*;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.OidcIdentity;
@@ -17,8 +18,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -82,13 +82,13 @@ public class UserProfileResourceTest extends TestBase {
         when(userService.getUser(userId)).thenReturn(Optional.empty());
 
         // when: the user asks for their profile
-        ServiceError response = given()
+        ServiceErrorResponse response = given()
             .when()
             .get("/api/v1/profiles")
             .then()
             .statusCode(404)
             .contentType(JSON)
-            .extract().as(ServiceError.class);
+            .extract().as(ServiceErrorResponse.class);
 
         // then: the get-user service is called
         verify(userService).getUser(userId);
@@ -161,7 +161,7 @@ public class UserProfileResourceTest extends TestBase {
             .phone(randomNumeric(12));
 
         // when: the user asks for their profile
-        ServiceError response = given()
+        ServiceErrorResponse response = given()
             .contentType(JSON)
             .body(request)
             .when()
@@ -169,7 +169,7 @@ public class UserProfileResourceTest extends TestBase {
             .then()
             .statusCode(404)
             .contentType(JSON)
-            .extract().as(ServiceError.class);
+            .extract().as(ServiceErrorResponse.class);
 
         // and: the update-user service is called
         verify(userService).updateUser(eq(userId), any());
@@ -322,16 +322,27 @@ public class UserProfileResourceTest extends TestBase {
         when(userService.updatePassword(userId, null, request.getNewPassword().toCharArray()))
             .thenCallRealMethod();
 
-        given()
+        ServiceErrorResponse response = given()
             .contentType(JSON)
             .body(request)
             .when()
             .put("/api/v1/profiles/password")
             .then()
-            .statusCode(400);
+            .statusCode(400)
+            .extract().as(ServiceErrorResponse.class);
 
-        // and: the service is called to update password
-        verify(userService).updatePassword(userId, null, request.getNewPassword().toCharArray());
+        // then: the response shows the error
+        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getSeverity().getApiSeverity(), response.getSeverity());
+        assertNotNull(response.getErrors());
+        assertFalse(response.getErrors().isEmpty());
+
+        // and: the response identified the field
+        ServiceError error = response.getErrors().get(0);
+        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getId(), error.getMessageId());
+        assertEquals("oldPassword", error.getContextAttributes().get("field-name"));
+
+        // and: the service is NOT called to update password
+        verify(userService, never()).updatePassword(any(), any(), any());
     }
 
     @Test
@@ -348,27 +359,41 @@ public class UserProfileResourceTest extends TestBase {
         when(userService.updatePassword(userId, request.getOldPassword().toCharArray(), null))
             .thenCallRealMethod();
 
-        given()
+        ServiceErrorResponse response = given()
             .contentType(JSON)
             .body(request)
             .when()
             .put("/api/v1/profiles/password")
             .then()
-            .statusCode(400);
+            .statusCode(400)
+            .extract().as(ServiceErrorResponse.class);
 
-        // and: the service is called to update password
-        verify(userService).updatePassword(userId, request.getOldPassword().toCharArray(), null);
+        // then: the response shows the error
+        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getSeverity().getApiSeverity(), response.getSeverity());
+        assertNotNull(response.getErrors());
+        assertFalse(response.getErrors().isEmpty());
+
+        // and: the response identified the field
+        ServiceError error = response.getErrors().get(0);
+        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getId(), error.getMessageId());
+        assertEquals("newPassword", error.getContextAttributes().get("field-name"));
+
+        // and: the service is NOT called to update password
+        verify(userService, never()).updatePassword(any(), any(), any());
     }
 
-    private void verifyError(ServiceError response, UUID userId) {
+    private void verifyError(ServiceErrorResponse response, UUID userId) {
         assertNotNull(response);
         assertNotNull(response.getCorrelationId());
-        assertEquals(ServiceError.SeverityEnum.INFO, response.getSeverity());
-        assertEquals("ENTITY_NOT_FOUND", response.getMessageId());
-        assertEquals("The identified entity cannot be found.", response.getMessage());
+        assertNotNull(response.getErrors());
 
-        assertNotNull(response.getContextAttributes());
-        assertEquals("user", response.getContextAttributes().get("entity-type"));
-        assertEquals(userId.toString(), response.getContextAttributes().get("entity-id"));
+        ServiceError serviceError = response.getErrors().get(0);
+        assertEquals(ErrorSeverity.INFO, serviceError.getSeverity());
+        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
+        assertEquals("The identified entity cannot be found.", serviceError.getMessage());
+
+        assertNotNull(serviceError.getContextAttributes());
+        assertEquals("user", serviceError.getContextAttributes().get("entity-type"));
+        assertEquals(userId.toString(), serviceError.getContextAttributes().get("entity-id"));
     }
 }
