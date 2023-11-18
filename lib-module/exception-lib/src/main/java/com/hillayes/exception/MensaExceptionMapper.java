@@ -1,6 +1,9 @@
 package com.hillayes.exception;
 
 import com.hillayes.commons.correlation.Correlation;
+import com.hillayes.onestop.api.ErrorSeverity;
+import com.hillayes.onestop.api.ServiceError;
+import com.hillayes.onestop.api.ServiceErrorResponse;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -31,13 +34,17 @@ public class MensaExceptionMapper implements ExceptionMapper<MensaException> {
             .build();
     }
 
-    private ServiceError format(String aCorrelationId, MensaException aException) {
-        ServiceError result = new ServiceError();
+    private ServiceErrorResponse format(String aCorrelationId, MensaException aException) {
+        ServiceError error = new ServiceError();
+        error.setSeverity(aException.getErrorCode().getSeverity().getApiSeverity());
+        error.setMessageId(aException.getErrorCode().getId());
+        error.setMessage(aException.getMessage());
+        error.setContextAttributes(getContextParams(aException));
+
+        ServiceErrorResponse result = new ServiceErrorResponse();
         result.setCorrelationId(aCorrelationId);
-        result.setSeverity(aException.getErrorCode().getSeverity());
-        result.setMessageId(aException.getErrorCode().getId());
-        result.setMessage(aException.getMessage());
-        result.setContextAttributes(getContextParams(aException));
+        result.severity(error.getSeverity());
+        result.addErrorsItem(error);
 
         return result;
     }

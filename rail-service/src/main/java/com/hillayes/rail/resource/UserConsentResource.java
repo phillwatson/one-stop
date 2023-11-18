@@ -12,6 +12,7 @@ import com.hillayes.nordigen.model.Institution;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.UserConsentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,7 +96,7 @@ public class UserConsentResource {
     @RolesAllowed("user")
     public Response register(@Context SecurityContext ctx,
                              @PathParam("institutionId") String institutionId,
-                             UserConsentRequest consentRequest) {
+                             @Valid UserConsentRequest consentRequest) {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 

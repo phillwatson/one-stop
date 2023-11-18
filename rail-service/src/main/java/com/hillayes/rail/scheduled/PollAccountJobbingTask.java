@@ -213,8 +213,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         List<String> existing = (account.getId() == null)
             ? List.of()
             : accountTransactionRepository.findByInternalId(details.stream()
-                .map(detail -> detail.internalTransactionId).toList())
-                .stream().map(AccountTransaction::getInternalTransactionId).toList();
+                .map(detail -> detail.internalTransactionId).toList()).stream()
+            .map(AccountTransaction::getInternalTransactionId).toList();
 
         // map the NEW transactions to our own records
         List<AccountTransaction> transactions = details.stream()

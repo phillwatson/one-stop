@@ -8,7 +8,7 @@ import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "yapily-api")
-@RegisterClientHeaders(BearerHeaderFactory.class)
+@RegisterClientHeaders(BasicHeaderFactory.class)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -21,7 +21,7 @@ public interface PaymentsApi {
      * @return
      */
     @POST
-    @Path("payments")
+    @Path("/payments")
     public ApiResponseOfPaymentResponse createPayment(@HeaderParam("consent") String consentToken,
                                                       PaymentRequest paymentRequest);
 
@@ -34,7 +34,7 @@ public interface PaymentsApi {
      * @return
      */
     @GET
-    @Path("payments/{paymentId}/details")
+    @Path("/payments/{paymentId}/details")
     public ApiResponseOfPaymentResponses getPaymentDetails(@HeaderParam("consent") String consentToken,
                                                            @PathParam("paymentId") String paymentId);
 }

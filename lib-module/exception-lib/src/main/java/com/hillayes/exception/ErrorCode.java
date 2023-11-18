@@ -1,5 +1,7 @@
 package com.hillayes.exception;
 
+import com.hillayes.onestop.api.ErrorSeverity;
+
 /**
  * An interface that provides information as to how particular exceptions are to
  * be conveyed to the user; their severity, identifier, message and http status.
@@ -48,8 +50,18 @@ public interface ErrorCode {
      */
     enum Severity
     {
-        info,
-        warning,
-        error;
+        info(ErrorSeverity.INFO),
+        warn(ErrorSeverity.WARN),
+        error(ErrorSeverity.ERROR);
+
+        private final ErrorSeverity apiSeverity;
+
+        private Severity(ErrorSeverity apiSeverity) {
+            this.apiSeverity = apiSeverity;
+        }
+
+        public ErrorSeverity getApiSeverity() {
+            return apiSeverity;
+        }
     }
 }

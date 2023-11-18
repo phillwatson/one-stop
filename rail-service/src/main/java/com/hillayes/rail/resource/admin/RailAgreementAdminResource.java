@@ -6,6 +6,7 @@ import com.hillayes.nordigen.model.EndUserAgreementAccepted;
 import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.rail.service.AgreementService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +35,7 @@ public class RailAgreementAdminResource {
     }
 
     @POST
-    public Response create(EndUserAgreementRequest agreement) {
+    public Response create(@Valid EndUserAgreementRequest agreement) {
         log.info("Create agreement [institution: {}, scope: {}]", agreement.getInstitutionId(), agreement.getAccessScope());
         EndUserAgreement result = agreementService.create(agreement);
         log.debug("Created agreement [institution: {}, id: {}]", agreement.getInstitutionId(), result.id);
@@ -47,7 +48,7 @@ public class RailAgreementAdminResource {
     @PUT
     @Path("/{id}")
     public EndUserAgreement accept(@PathParam("id") String id,
-                                   EndUserAgreementAccepted acceptance) {
+                                   @Valid EndUserAgreementAccepted acceptance) {
         log.info("Accept agreement [id: {}]", id);
         return agreementService.accept(id, acceptance)
             .orElseThrow(() -> new NotFoundException("Agreement", id));

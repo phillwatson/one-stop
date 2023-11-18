@@ -8,6 +8,7 @@ import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.annotation.security.PermitAll;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class UserOnboardResource {
     @POST
     @Path("/register")
     @PermitAll
-    public Response registerUser(UserRegisterRequest request) {
+    public Response registerUser(@Valid UserRegisterRequest request) {
         log.info("Registering user [email: {}]", request.getEmail());
         userService.registerUser(request.getEmail());
 
@@ -43,7 +44,7 @@ public class UserOnboardResource {
     @Path("/complete")
     @PermitAll
     public Response onboardUser(@Context UriInfo uriInfo,
-                                UserCompleteRequest request) {
+                                @Valid UserCompleteRequest request) {
         log.info("Completing user registration [token: {}]", request.getToken());
 
         try {
