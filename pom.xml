@@ -46,14 +46,14 @@
 
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
-        <surefire-plugin.version>3.1.2</surefire-plugin.version>
+        <surefire-plugin.version>3.2.2</surefire-plugin.version>
 
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.5.0</quarkus.platform.version>
+        <quarkus.platform.version>3.5.2</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -63,7 +63,7 @@
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
         </quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.0.1</openapi-generator.version>
+        <openapi-generator.version>7.1.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -132,7 +132,7 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.1</version>
             </dependency>
             <dependency>
                 <groupId>com.sendinblue</groupId>
@@ -404,7 +404,7 @@
                     <!-- use mvn versions:update-properties -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.16.1</version>
+                    <version>2.16.2</version>
                 </plugin>
 
                 <plugin>
@@ -459,7 +459,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.1.5</version>
                     <executions>
                         <execution>
                             <id>make-index</id>
