@@ -7,6 +7,7 @@ import { useCurrentUser } from "../contexts/user-context";
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
 import UserProfile from "../model/user-profile.model";
+import UserConsentList from "../components/consents/user-consents";
 
 const emptyProfile: UserProfile = {
   id: undefined, 
@@ -63,6 +64,7 @@ export default function UpdateProfile() {
       <hr></hr>
       <form onSubmit={ handleSubmit }>
         <UserProfileForm profile={ profile } setter={ setProfile }/>
+        <UserConsentList />
         <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
       </form>
     </div>

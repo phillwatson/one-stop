@@ -57,8 +57,7 @@ export default function UserProfileForm(props: Props) {
         <caption><i>You're registered with the above auth providers</i></caption>
         <TableHead>
           <TableRow>
-            <TableCell sx={colhead}></TableCell>
-            <TableCell sx={colhead}>Provider</TableCell>
+            <TableCell sx={colhead} colSpan={2}>Auth Provider</TableCell>
             <TableCell sx={colhead}>Created</TableCell>
           </TableRow>
         </TableHead>
@@ -66,7 +65,7 @@ export default function UserProfileForm(props: Props) {
           { authProviders.map(authProvider => (
             <TableRow key={authProvider.name}>
               <TableCell><img src={ authProvider.logo } alt="{ authProvider.name } logo" width="32px" height="32px"/></TableCell>
-              <TableCell>{authProvider.name}</TableCell>
+              <TableCell width={"70%"}>{authProvider.name}</TableCell>
               <TableCell>{new Date(authProvider.dateCreated).toLocaleDateString("en-GB")}</TableCell>
             </TableRow>
           ))}
