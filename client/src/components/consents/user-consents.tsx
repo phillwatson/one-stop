@@ -34,9 +34,11 @@ export default function UserConsentList(props: Props) {
     ).then(result => setInstitutions(result))
   }, [ userConsents ])
 
+  function formatDateTime(dateStr?: string): string {
+    if (dateStr == null) return "";
 
-  function formatDateTime(date?: Date): string {
-    return (date == null) ? "" : new Date(date).toLocaleDateString("en-GB")
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString("en-GB") + " " + date.toLocaleDateString("en-GB");
   }
 
   function getLogo(consentInfo: UserConsent): string | undefined {
@@ -61,7 +63,7 @@ export default function UserConsentList(props: Props) {
         <TableBody>
           { userConsents.map(consent => (
             <TableRow key={consent.id}>
-              <TableCell><img src={ getLogo(consent) } alt="consent.institutionName logo" width="32px" height="32px"/></TableCell>
+              <TableCell><img src={ getLogo(consent) } alt={consent.institutionName + " logo"} width="32px" height="32px"/></TableCell>
               <TableCell width={"90%"}>{consent.institutionName}</TableCell>
               <TableCell>{formatDateTime(consent.dateGiven)}</TableCell>
               <TableCell>{formatDateTime(consent.agreementExpires)}</TableCell>

@@ -53,6 +53,7 @@ export default function UserProfileForm(props: Props) {
       <TextField className="field" id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
 
+      <p/>
       <Table size="small" aria-label="authproviders">
         <caption><i>You're registered with the above auth providers</i></caption>
         <TableHead>
@@ -64,7 +65,7 @@ export default function UserProfileForm(props: Props) {
         <TableBody>
           { authProviders.map(authProvider => (
             <TableRow key={authProvider.name}>
-              <TableCell><img src={ authProvider.logo } alt="{ authProvider.name } logo" width="32px" height="32px"/></TableCell>
+              <TableCell><img src={ authProvider.logo } alt={authProvider.name + " logo"} width="32px" height="32px"/></TableCell>
               <TableCell width={"70%"}>{authProvider.name}</TableCell>
               <TableCell>{new Date(authProvider.dateCreated).toLocaleDateString("en-GB")}</TableCell>
             </TableRow>
