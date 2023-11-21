@@ -4,7 +4,7 @@ export default interface UserConsent {
   /**
    * The date-time on which the agreements was given.
    */
-  dateGiven: Date,
+  dateGiven: string,
 
   /**
    * The rail ID for the institution to which the consent refers.
@@ -19,7 +19,7 @@ export default interface UserConsent {
   /**
    * The date-time on which the agreement expires.
    */
-  agreementExpires: Date,
+  agreementExpires: string,
 
   /**
    * The agreed number of past days for which transaction data can be obtained.
