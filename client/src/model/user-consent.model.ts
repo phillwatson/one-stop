@@ -1,10 +1,10 @@
 export default interface UserConsent {
   id: any,
-  dateCreated: Date,
-  dateAccepted?: Date,
-  dateDenied?: Date,
-  dateCancelled?: Date,
-  userId: any,
+
+  /**
+   * The date-time on which the agreements was given.
+   */
+  dateGiven: Date,
 
   /**
    * The rail ID for the institution to which the consent refers.
@@ -12,9 +12,9 @@ export default interface UserConsent {
   institutionId: string,
 
   /**
-   * The rail ID for the agreement to which the consent refers.
+   * The name of the institution to which the consent refers.
    */
-  agreementId: string,
+  institutionName: string,
 
   /**
    * The date-time on which the agreement expires.
@@ -25,11 +25,6 @@ export default interface UserConsent {
    * The agreed number of past days for which transaction data can be obtained.
    */
   maxHistory: number,
-
-  /**
-   * The rail ID for the requisition for access to which the consent refers.
-   */
-  requisitionId: string,
 
   /**
    * Indicates the position in the flow to obtain consent from the user.
