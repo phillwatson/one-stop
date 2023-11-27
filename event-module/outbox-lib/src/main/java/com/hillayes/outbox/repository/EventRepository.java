@@ -1,6 +1,6 @@
 package com.hillayes.outbox.repository;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import com.hillayes.commons.jpa.RepositoryBase;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.LockModeType;
@@ -11,7 +11,7 @@ import java.util.UUID;
  * A repository used to persist events until they are delivered.
  */
 @ApplicationScoped
-public class EventRepository implements PanacheRepositoryBase<EventEntity, UUID> {
+public class EventRepository extends RepositoryBase<EventEntity, UUID> {
     /**
      * Returns scheduled events in the order they are scheduled. The events are locked
      * to prevent allow update and prevent update conflicts.
