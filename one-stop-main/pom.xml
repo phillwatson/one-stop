@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <!-- causes build of docker images on package -->
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>audit-service</artifactId>
             <version>${project.version}</version>

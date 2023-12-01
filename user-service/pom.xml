@@ -13,11 +13,6 @@
 
     <dependencies>
         <dependency>
-            <!-- causes build of docker images on package -->
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-container-image-jib</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
