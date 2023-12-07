@@ -1,3 +1,5 @@
+name: one-stop
+
 networks:
   onestop-db-network:
   onestop-event-network:
