@@ -11,6 +11,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -68,7 +69,7 @@ public class ApiTestBase {
 
     private static DockerComposeContainer<?> initContainers() {
         return new DockerComposeContainer<>(
-            new File("../../one-stop/docker/docker-compose.yaml"),
+            new File("../docker-compose.yaml"),
             resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client_1", CLIENT_PORT)
             .withExposedService("wiremock_1", WIREMOCK_PORT)

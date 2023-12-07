@@ -1,4 +1,4 @@
-name: one-stop
+#name: one-stop
 
 networks:
   onestop-db-network:
