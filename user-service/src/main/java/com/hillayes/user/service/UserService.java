@@ -7,6 +7,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
@@ -168,24 +169,31 @@ public class UserService {
                                          char[] newPassword) {
         log.info("Updating password [userId: {}]", userId);
 
-        if ((oldPassword == null) || (oldPassword.length == 0)) {
-            throw new MissingParameterException("oldPassword");
-        }
-
         if ((newPassword == null) || (newPassword.length == 0)) {
             throw new MissingParameterException("newPassword");
         }
 
-        return userRepository.findByIdOptional(userId)
-            .filter(user -> passwordCrypto.verify(oldPassword, user.getPasswordHash()))
-            .map(user -> {
-                user.setPasswordHash(passwordCrypto.getHash(newPassword));
-                user = userRepository.save(user);
+        User user = userRepository.findByIdOptional(userId).orElse(null);
+        if (user == null) {
+            return Optional.empty();
+        }
 
-                userEventSender.sendUserUpdated(user);
-                log.debug("Updated password [username: {}, userId: {}]", user.getUsername(), user.getId());
-                return user;
-            });
+        // if the user currently has a password - the old password must be provided
+        if ((user.getPasswordHash() != null) &&
+            (oldPassword == null) || (oldPassword.length == 0)) {
+            throw new MissingParameterException("oldPassword");
+        }
+
+        if (!passwordCrypto.verify(oldPassword, user.getPasswordHash())) {
+            return Optional.empty();
+        }
+
+        user.setPasswordHash(passwordCrypto.getHash(newPassword));
+        user = userRepository.save(user);
+
+        userEventSender.sendUserUpdated(user);
+        log.debug("Updated password [username: {}, userId: {}]", user.getUsername(), user.getId());
+        return Optional.of(user);
     }
 
     public Optional<User> updateUser(UUID id, User userRequest) {
