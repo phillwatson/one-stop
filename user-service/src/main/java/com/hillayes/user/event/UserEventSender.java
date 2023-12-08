@@ -107,6 +107,7 @@ public class UserEventSender {
             .userId(user.getId())
             .activity(activity)
             .dateRecorded(Instant.now())
+            .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }
 }

@@ -21,4 +21,7 @@ public class AccountActivity {
     private UUID userId;
     private SuspiciousActivity activity;
     private Instant dateRecorded;
+
+    // the HTTP request header "User-Agent" from the login request
+    private String userAgent;
 }

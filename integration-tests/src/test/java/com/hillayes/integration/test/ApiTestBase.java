@@ -47,14 +47,14 @@ public class ApiTestBase {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static DockerComposeContainer dockerContainers;
+    private static DockerComposeContainer<?> dockerContainers;
 
     @BeforeAll
     public static void beforeAll() {
         if (! initialized.getAndSet(true)) {
             dockerContainers = initContainers();
             dockerContainers.start();
-            RestAssured.port = dockerContainers.getServicePort("client-1", CLIENT_PORT);
+            RestAssured.port = dockerContainers.getServicePort("client_1", CLIENT_PORT);
         }
     }
 
@@ -63,18 +63,18 @@ public class ApiTestBase {
      * be passed to a Wiremock client constructor, to allow it to connect.
      */
     public int getWiremockPort() {
-        return dockerContainers.getServicePort("wiremock-1", WIREMOCK_PORT);
+        return dockerContainers.getServicePort("wiremock_1", WIREMOCK_PORT);
     }
 
-    private static DockerComposeContainer initContainers() {
-        return new DockerComposeContainer(
-            new File("../../one-stop/docker-compose.yaml"),
+    private static DockerComposeContainer<?> initContainers() {
+        return new DockerComposeContainer<>(
+            new File("../docker-compose.yaml"),
             resourceFile("/docker-compose.test.yaml"))
-            .withExposedService("client-1", CLIENT_PORT)
-            .withExposedService("wiremock-1", WIREMOCK_PORT)
+            .withExposedService("client_1", CLIENT_PORT)
+            .withExposedService("wiremock_1", WIREMOCK_PORT)
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", EMAIL_HOST)
             .withEnv("REST_CLIENT_NORDIGEN_API_URL", RAIL_HOST)
-            .waitingFor("client-1", new HttpWaitStrategy().forPort(CLIENT_PORT).forPath("/api/v1/auth/jwks.json"));
+            .waitingFor("client_1", new HttpWaitStrategy().forPort(CLIENT_PORT).forPath("/api/v1/auth/jwks.json"));
     }
 
     /**

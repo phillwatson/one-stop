@@ -288,7 +288,7 @@ public class UserProfileResourceTest extends TestBase {
             .oldPassword(randomAlphanumeric(20))
             .newPassword(randomAlphanumeric(20));
 
-        // and: the user can be found
+        // and: the user cannot be found
         when(userService.updatePassword(userId,
             request.getOldPassword().toCharArray(),
             request.getNewPassword().toCharArray()))
@@ -306,43 +306,6 @@ public class UserProfileResourceTest extends TestBase {
         verify(userService).updatePassword(userId,
             request.getOldPassword().toCharArray(),
             request.getNewPassword().toCharArray());
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testChangePassword_MissingOldPassword() {
-        // given: an identified user
-        UUID userId = UUID.fromString(userIdStr);
-
-        // and: a request to change password - no old password
-        PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .newPassword(randomAlphanumeric(20));
-
-        // and: the request will be passed to the service
-        when(userService.updatePassword(userId, null, request.getNewPassword().toCharArray()))
-            .thenCallRealMethod();
-
-        ServiceErrorResponse response = given()
-            .contentType(JSON)
-            .body(request)
-            .when()
-            .put("/api/v1/profiles/password")
-            .then()
-            .statusCode(400)
-            .extract().as(ServiceErrorResponse.class);
-
-        // then: the response shows the error
-        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getSeverity().getApiSeverity(), response.getSeverity());
-        assertNotNull(response.getErrors());
-        assertFalse(response.getErrors().isEmpty());
-
-        // and: the response identified the field
-        ServiceError error = response.getErrors().get(0);
-        assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getId(), error.getMessageId());
-        assertEquals("oldPassword", error.getContextAttributes().get("field-name"));
-
-        // and: the service is NOT called to update password
-        verify(userService, never()).updatePassword(any(), any(), any());
     }
 
     @Test

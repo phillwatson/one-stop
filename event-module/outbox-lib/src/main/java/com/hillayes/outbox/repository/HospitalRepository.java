@@ -1,6 +1,6 @@
 package com.hillayes.outbox.repository;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import com.hillayes.commons.jpa.RepositoryBase;
 import io.quarkus.panache.common.Sort;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,7 +11,7 @@ import java.util.UUID;
  * A repository used to persist events until they are delivered.
  */
 @ApplicationScoped
-public class HospitalRepository implements PanacheRepositoryBase<HospitalEntity, UUID> {
+public class HospitalRepository extends RepositoryBase<HospitalEntity, UUID> {
     /**
      * Returns recorded hospital events in their descending timestamp order.
      *
