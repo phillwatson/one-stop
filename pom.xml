@@ -46,7 +46,7 @@
 
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
-        <surefire-plugin.version>3.2.2</surefire-plugin.version>
+        <surefire-plugin.version>3.2.3</surefire-plugin.version>
 
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
@@ -122,7 +122,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>5.3.2</version>
+                <version>5.4.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hsqldb</groupId>
@@ -147,12 +147,12 @@
             <dependency>
                 <groupId>com.github.kagkarlsson</groupId>
                 <artifactId>db-scheduler</artifactId>
-                <version>12.5.0</version>
+                <version>13.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
                 <artifactId>jose4j</artifactId>
-                <version>0.9.3</version>
+                <version>0.9.4</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
