@@ -60,7 +60,6 @@ public class RetryTopicConsumer implements EventConsumer {
             .map(Instant::parse)
             .orElse(Instant.now().plus(DEFAULT_RESCHEDULE_OFFSET));
 
-        EventEntity entity = EventEntity.forRedelivery(event, scheduleFor);
-        eventRepository.persist(entity);
+        eventRepository.save(EventEntity.forRedelivery(event, scheduleFor));
     }
 }

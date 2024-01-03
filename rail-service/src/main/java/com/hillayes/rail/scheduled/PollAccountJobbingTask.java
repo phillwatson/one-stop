@@ -1,6 +1,7 @@
 package com.hillayes.rail.scheduled;
 
 import com.hillayes.commons.Strings;
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
@@ -14,7 +15,6 @@ import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.service.RailAccountService;
 import com.hillayes.rail.service.UserConsentService;
-import io.quarkus.panache.common.Sort;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -194,7 +194,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         if (account.getId() != null) {
             // find the date of the most recent transaction we hold locally
             // we then use that as the start date for our rails request for transactions
-            Sort sort = Sort.by("bookingDateTime").descending();
+            OrderBy sort = OrderBy.by("bookingDateTime").descending();
             startDate = accountTransactionRepository.findByAccountId(account.getId(), sort, 0, 1)
                 .stream().findFirst()
                 .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction

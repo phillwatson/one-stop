@@ -1,26 +1,24 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AccountTransaction;
-import io.quarkus.panache.common.Parameters;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
 public class AccountTransactionRepository extends RepositoryBase<AccountTransaction, UUID> {
-    public Page<AccountTransaction> findByUserId(UUID userId, Sort sortBy, int pageNumber, int pageSize) {
-        return findByPage(find("userId", sortBy, userId),
-            pageNumber, pageSize);
+    public Page<AccountTransaction> findByUserId(UUID userId, OrderBy sortBy, int pageNumber, int pageSize) {
+        return pageAll("userId", sortBy, pageNumber, pageSize, userId);
     }
 
-    public Page<AccountTransaction> findByAccountId(UUID accountId, Sort sortBy, int pageNumber, int pageSize) {
-        return findByPage(find("accountId", sortBy, accountId), pageNumber, pageSize);
+    public Page<AccountTransaction> findByAccountId(UUID accountId, OrderBy sortBy, int pageNumber, int pageSize) {
+        return pageAll("accountId", sortBy, pageNumber, pageSize, accountId);
     }
 
     /**
@@ -33,7 +31,7 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
     public List<AccountTransaction> findByInternalId(List<String> internalTransactionIds) {
         return internalTransactionIds.isEmpty()
             ? List.of()
-            : find("internalTransactionId in ?1", internalTransactionIds).list();
+            : listAll("internalTransactionId in ?1", internalTransactionIds);
     }
 
     /**
@@ -48,13 +46,13 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
     public List<AccountTransaction> findByUserAndDateRange(UUID userId,
                                                            Instant fromDate,
                                                            Instant toDate) {
-        return find("userId = :userId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
-            Sort.by("bookingDateTime"),
-            Parameters
-                .with("userId", userId)
-                .and("fromDate", fromDate)
-                .and("toDate", toDate))
-            .list();
+        return listAll("userId = :userId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
+            OrderBy.by("bookingDateTime"),
+            Map.of(
+                "userId", userId,
+                "fromDate", fromDate,
+                "toDate", toDate
+            ));
     }
 
     /**
@@ -69,12 +67,11 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
     public List<AccountTransaction> findByAccountAndDateRange(UUID accountId,
                                                               Instant fromDate,
                                                               Instant toDate) {
-        return find("accountId = :accountId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
-            Sort.by("bookingDateTime"),
-            Parameters
-                .with("accountId", accountId)
-                .and("fromDate", fromDate)
-                .and("toDate", toDate))
-            .list();
+        return listAll("accountId = :accountId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
+            OrderBy.by("bookingDateTime"),
+            Map.of("accountId", accountId,
+                "fromDate", fromDate,
+                "toDate", toDate)
+        );
     }
 }

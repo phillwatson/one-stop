@@ -105,7 +105,9 @@ public class NotificationService {
     public void deleteNotification(UUID userId, UUID notificationId) {
         log.info("Deleting user notification [userId: {}, notificationId: {}]", userId, notificationId);
 
-        Notification notification = notificationRepository.findById(notificationId);
+        Notification notification = notificationRepository.findByIdOptional(notificationId)
+            .orElse(null);
+
         if (notification == null) {
             log.debug("Notification not found [notificationId: {}]", notificationId);
             return;

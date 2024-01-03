@@ -1,7 +1,7 @@
 package com.hillayes.outbox.repository;
 
 import com.hillayes.commons.jpa.RepositoryBase;
-import io.quarkus.panache.common.Sort;
+import com.hillayes.commons.jpa.OrderBy;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -20,8 +20,6 @@ public class HospitalRepository extends RepositoryBase<HospitalEntity, UUID> {
      * @return a stream of undelivered events.
      */
     public List<HospitalEntity> list(int page, int pageSize) {
-        return find("FROM HospitalEntity", Sort.descending("timestamp"))
-                .page(page, pageSize)
-                .list();
+        return listAll("FROM HospitalEntity", page, pageSize, OrderBy.descending("timestamp"));
     }
 }

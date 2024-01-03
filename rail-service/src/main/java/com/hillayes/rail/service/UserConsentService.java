@@ -89,7 +89,7 @@ public class UserConsentService {
      */
     public Optional<UserConsent> lockUserConsent(UUID consentId) {
         log.info("Locking user's consent record [consentId: {}]", consentId);
-        return userConsentRepository.findByIdOptional(consentId, LockModeType.PESSIMISTIC_WRITE);
+        return userConsentRepository.lock(consentId);
     }
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {

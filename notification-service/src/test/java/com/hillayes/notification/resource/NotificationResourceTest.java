@@ -92,7 +92,7 @@ public class NotificationResourceTest extends TestBase {
 
         // and: a notification to be deleted
         Notification notification = mockNotification(userId, UUID.randomUUID(), Instant.now());
-        when(notificationRepository.findById(notification.getId())).thenReturn(notification);
+        when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
 
         // when: the resource is called
         given()
@@ -105,7 +105,7 @@ public class NotificationResourceTest extends TestBase {
             .statusCode(204);
 
         // then: the repository is called to retrieve the notification
-        verify(notificationRepository).findById(notification.getId());
+        verify(notificationRepository).findByIdOptional(notification.getId());
 
         // and: the repository is called to delete the notification
         verify(notificationRepository).delete(notification);
@@ -116,7 +116,7 @@ public class NotificationResourceTest extends TestBase {
     public void testDeleteNotification_WrongUser() {
         // given: a notification to be deleted
         Notification notification = mockNotification(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
-        when(notificationRepository.findById(notification.getId())).thenReturn(notification);
+        when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
 
         // when: the resource is called
         // then: a not-found response is returned
@@ -158,7 +158,7 @@ public class NotificationResourceTest extends TestBase {
     public void testDeleteNotification_NotFound() {
         // given: the identified notification does not exist
         UUID notificationId = UUID.randomUUID();
-        when(notificationRepository.findById(notificationId)).thenReturn(null);
+        when(notificationRepository.findByIdOptional(notificationId)).thenReturn(Optional.empty());
 
         // when: the resource is called
         // then: a success response is returned
@@ -172,7 +172,7 @@ public class NotificationResourceTest extends TestBase {
             .statusCode(204);
 
         // and: a call is made to read the notification
-        verify(notificationRepository).findById(notificationId);
+        verify(notificationRepository).findByIdOptional(notificationId);
 
         // and: no notification is deleted
         verify(notificationRepository, never()).deleteById(any());
@@ -184,7 +184,7 @@ public class NotificationResourceTest extends TestBase {
     public void testDeleteNotification_WrongRole() {
         // given: a notification to be deleted
         Notification notification = mockNotification(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
-        when(notificationRepository.findById(notification.getId())).thenReturn(notification);
+        when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
 
         // when: the resource is called
         // then: a forbidden response is returned
