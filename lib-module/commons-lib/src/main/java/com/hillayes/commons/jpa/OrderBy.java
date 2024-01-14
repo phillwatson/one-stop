@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Encapsulates the order by clause of a SQL query.
+ * Encapsulates the order by clause of a SQL query. The order by clause is a list of
+ * named columns, each of which may be ordered ascending or descending.
  */
 public class OrderBy {
     private List<Column> columns = new ArrayList();
@@ -25,6 +26,15 @@ public class OrderBy {
         OrderBy result = new OrderBy();
         for (String column : columns) {
             result.and(column, OrderBy.Direction.Descending);
+        }
+
+        return result;
+    }
+
+    public static OrderBy ascending(String... columns) {
+        OrderBy result = new OrderBy();
+        for (String column : columns) {
+            result.and(column, OrderBy.Direction.Ascending);
         }
 
         return result;
