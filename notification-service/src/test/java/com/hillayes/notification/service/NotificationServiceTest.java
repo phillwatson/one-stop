@@ -190,13 +190,13 @@ public class NotificationServiceTest {
 
         // and: a notification to be deleted
         Notification notification = mockNotification(user.getId(), NotificationId.CONSENT_SUSPENDED, Map.of());
-        when(notificationRepository.findById(notification.getId()))
-            .thenReturn(notification);
+        when(notificationRepository.findByIdOptional(notification.getId()))
+            .thenReturn(Optional.of(notification));
 
         fixture.deleteNotification(user.getId(), notification.getId());
 
         // then: the notifications are read from repository
-        verify(notificationRepository).findById(notification.getId());
+        verify(notificationRepository).findByIdOptional(notification.getId());
 
         // and: the notification is deleted
         verify(notificationRepository).delete(notification);
@@ -213,8 +213,8 @@ public class NotificationServiceTest {
 
         // and: a notification, for that user, to be deleted
         Notification notification = mockNotification(user.getId(), NotificationId.CONSENT_SUSPENDED, Map.of());
-        when(notificationRepository.findById(notification.getId()))
-            .thenReturn(notification);
+        when(notificationRepository.findByIdOptional(notification.getId()))
+            .thenReturn(Optional.of(notification));
 
         // when: the service is called
         // then: a NotFound exception is raised
@@ -223,7 +223,7 @@ public class NotificationServiceTest {
         );
 
         // and: the notifications are read from repository
-        verify(notificationRepository).findById(notification.getId());
+        verify(notificationRepository).findByIdOptional(notification.getId());
 
         // and: NO notification is deleted
         verify(notificationRepository, never()).delete(any());
@@ -242,14 +242,14 @@ public class NotificationServiceTest {
         UUID notificationId = UUID.randomUUID();
 
         // and: the notification cannot be found
-        when(notificationRepository.findById(notificationId))
-            .thenReturn(null);
+        when(notificationRepository.findByIdOptional(notificationId))
+            .thenReturn(Optional.empty());
 
         // when: the service is called
         fixture.deleteNotification(user.getId(), notificationId);
 
         // and: the notifications are read from repository
-        verify(notificationRepository).findById(notificationId);
+        verify(notificationRepository).findByIdOptional(notificationId);
 
         // and: NO notification is deleted
         verify(notificationRepository, never()).delete(any());

@@ -12,16 +12,14 @@ import java.util.UUID;
 @ApplicationScoped
 public class AccountRepository extends RepositoryBase<Account, UUID> {
     public Optional<Account> findByRailAccountId(String railAccountId) {
-        return find("railAccountId", railAccountId)
-            .firstResultOptional();
+        return findFirst("railAccountId", railAccountId);
     }
 
     public Page<Account> findByUserId(UUID userId, int pageNumber, int pageSize) {
-        return findByPage(find("userId", userId), pageNumber, pageSize);
+        return pageAll("userId", pageNumber, pageSize, userId);
     }
 
     public List<Account> findByUserConsentId(UUID consentId) {
-        return find("userConsentId", consentId)
-            .list();
+        return listAll("userConsentId", consentId);
     }
 }

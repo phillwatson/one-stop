@@ -52,7 +52,6 @@ public class EventSender {
     @Transactional
     public <K, T> void send(Topic topic, K key, T event) {
         log.debug("Sending event [topic: {}, payload: {}]", topic, event.getClass().getName());
-        EventEntity entity = EventEntity.forInitialDelivery(topic, key, event);
-        eventRepository.persist(entity);
+        eventRepository.save(EventEntity.forInitialDelivery(topic, key, event));
     }
 }

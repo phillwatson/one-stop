@@ -20,9 +20,6 @@ public class EventRepository extends RepositoryBase<EventEntity, UUID> {
      * @return a stream of undelivered events.
      */
     public List<EventEntity> listUndelivered(int batchSize) {
-        return find("FROM EventEntity WHERE scheduledFor < CURRENT_TIMESTAMP ORDER BY scheduledFor")
-                .withLock(LockModeType.PESSIMISTIC_WRITE)
-                .page(0, batchSize)
-                .list();
+        return lock("FROM EventEntity WHERE scheduledFor < CURRENT_TIMESTAMP ORDER BY scheduledFor", batchSize);
     }
 }

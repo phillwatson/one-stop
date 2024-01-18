@@ -2,7 +2,6 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
-import com.hillayes.commons.net.Network;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -15,7 +14,6 @@ import com.hillayes.rail.resource.UserConsentResource;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +87,7 @@ public class UserConsentService {
      */
     public Optional<UserConsent> lockUserConsent(UUID consentId) {
         log.info("Locking user's consent record [consentId: {}]", consentId);
-        return userConsentRepository.findByIdOptional(consentId, LockModeType.PESSIMISTIC_WRITE);
+        return userConsentRepository.lock(consentId);
     }
 
     public URI register(UUID userId, String institutionId, URI callbackUri) {
