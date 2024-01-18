@@ -103,7 +103,7 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
      * @param pageSize the max number of elements to be returned.
      * @return the requested page of results.
      */
-    private Page<Entity> findByPage(PanacheQuery<Entity> query, int pageNumber, int pageSize) {
+    protected Page<Entity> findByPage(PanacheQuery<Entity> query, int pageNumber, int pageSize) {
         List<Entity> list = query
             .page(pageNumber, pageSize)
             .list();
