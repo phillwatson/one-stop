@@ -3,11 +3,11 @@ package com.hillayes.user.service;
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
 import com.hillayes.commons.Strings;
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
-import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
@@ -17,7 +17,6 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -147,7 +146,7 @@ public class UserService {
     public Page<User> listUsers(int page, int pageSize) {
         log.info("Listing user [page: {}, pageSize: {}]", page, pageSize);
 
-        Page<User> result = userRepository.findAll(Sort.by("username"), page, pageSize);
+        Page<User> result = userRepository.pageAll(OrderBy.by("username"), page, pageSize);
         log.debug("Listing users [page: {}, pageSize: {}, size: {}]",
             page, pageSize, result.getContentSize());
 

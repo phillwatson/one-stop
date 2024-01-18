@@ -1,10 +1,10 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ public class AccountTransactionService {
 
         verifyAccountHolder(userId, accountId);
 
-        Sort sort = Sort.by("bookingDateTime").descending();
+        OrderBy sort = OrderBy.by("bookingDateTime").descending();
         Page<AccountTransaction> result = (accountId != null)
             ? accountTransactionRepository.findByAccountId(accountId, sort, page, pageSize)
             : accountTransactionRepository.findByUserId(userId, sort, page, pageSize);

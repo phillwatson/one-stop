@@ -41,7 +41,7 @@ public class HospitalConsumerTest {
 
         // then: the event is persisted
         ArgumentCaptor<HospitalEntity> argument = ArgumentCaptor.forClass(HospitalEntity.class);
-        verify(hospitalRepository).persist(argument.capture());
+        verify(hospitalRepository).save(argument.capture());
 
         // and: the hospital entity is created
         HospitalEntity hospitalEntity = argument.getValue();

@@ -32,7 +32,7 @@ public class EventSenderTest {
 
         // then: the event is persisted
         ArgumentCaptor<EventEntity> argument = ArgumentCaptor.forClass(EventEntity.class);
-        verify(eventRepository).persist(argument.capture());
+        verify(eventRepository).save(argument.capture());
 
         // and: the event entity is created
         EventEntity eventEntity = argument.getValue();
@@ -63,7 +63,7 @@ public class EventSenderTest {
 
         // then: the event is persisted
         ArgumentCaptor<EventEntity> argument = ArgumentCaptor.forClass(EventEntity.class);
-        verify(eventRepository).persist(argument.capture());
+        verify(eventRepository).save(argument.capture());
 
         // and: the event entity is created
         EventEntity eventEntity = argument.getValue();

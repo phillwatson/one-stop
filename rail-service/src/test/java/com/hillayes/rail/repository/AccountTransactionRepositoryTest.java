@@ -1,11 +1,11 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import io.quarkus.panache.common.Sort;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -52,7 +52,7 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the most recent transaction by bookingDate is queried
-        Sort sort = Sort.by("bookingDateTime").descending();
+        OrderBy sort = OrderBy.by("bookingDateTime").descending();
         Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), sort, 0, 1);
 
         // then: the result contains only the most recent transaction

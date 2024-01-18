@@ -51,6 +51,6 @@ public class HospitalTopicConsumer implements EventConsumer {
             event.getId(), event.getTopic(), event.getRetryCount(), reason, cause);
 
         // write the record to the event hospital table - with reason and cause
-        hospitalRepository.persist(HospitalEntity.fromEventPacket(event, reason, cause));
+        hospitalRepository.save(HospitalEntity.fromEventPacket(event, reason, cause));
     }
 }

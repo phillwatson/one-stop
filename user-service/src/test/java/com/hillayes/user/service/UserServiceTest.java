@@ -2,6 +2,7 @@ package com.hillayes.user.service;
 
 import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.events.events.auth.SuspiciousActivity;
@@ -16,7 +17,6 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
-import io.quarkus.panache.common.Sort;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -326,7 +326,7 @@ public class UserServiceTest {
 
         // and: the user repository returns the users
         Page<User> page = Page.of(users);
-        when(userRepository.findAll(any(Sort.class), anyInt(), anyInt())).thenReturn(page);
+        when(userRepository.pageAll(any(OrderBy.class), anyInt(), anyInt())).thenReturn(page);
 
         // when: the service is called
         Page<User> result = fixture.listUsers(1, 20);
