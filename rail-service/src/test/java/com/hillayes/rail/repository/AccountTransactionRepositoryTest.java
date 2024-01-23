@@ -193,6 +193,17 @@ public class AccountTransactionRepositoryTest {
         assertEquals(8, page.getTotalCount());
         assertEquals(2, page.getPageIndex());
         assertEquals(3, page.getPageSize());
+
+        // when: the page above the last is selected
+        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 12, 3);
+
+        // then: the page above the last is selected
+        assertNotNull(page);
+        assertEquals(0, page.getContentSize());
+        assertEquals(3, page.getTotalPages());
+        assertEquals(8, page.getTotalCount());
+        assertEquals(12, page.getPageIndex());
+        assertEquals(3, page.getPageSize());
     }
 
     private UserConsent mockUserConsent() {
