@@ -25,4 +25,8 @@ public class Strings {
     static public String toStringOrNull(Object value) {
         return value == null ? null : value.toString();
     }
+
+    static public String valueOf(String value, String defaultValue) {
+        return isBlank(value) ? defaultValue : value;
+    }
 }

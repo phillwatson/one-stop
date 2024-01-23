@@ -9,10 +9,13 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>nordigen-module</artifactId>
+    <artifactId>rail-module</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>sim-lib</module>
+        <module>yapily-lib</module>
+        <module>nordigen-lib</module>
+        <module>rail-api</module>
+        <module>rail-service</module>
     </modules>
 </project>
