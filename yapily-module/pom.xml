@@ -14,5 +14,6 @@
 
     <modules>
         <module>yapily-lib</module>
+        <module>yapily-service</module>
     </modules>
 </project>

@@ -216,6 +216,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.velopayments</groupId>
+                <artifactId>yapily-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>alpha-vantage-lib</artifactId>
                 <version>${project.version}</version>
