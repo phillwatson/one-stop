@@ -142,6 +142,59 @@ public class AccountTransactionRepositoryTest {
         });
     }
 
+    @Test
+    public void testPagination() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: a linked account
+        Account account = accountRepository.save(mockAccount(consent));
+
+        // and: a list of transactions
+        List<AccountTransaction> transactions = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        LocalDate bookingDate = now.minusDays(8);
+        while (bookingDate.isBefore(now)) {
+            transactions.add(mockTransaction(account, bookingDate));
+            bookingDate = bookingDate.plusDays(1);
+        }
+        fixture.saveAll(transactions);
+        fixture.flush();
+
+        // when: the first page transactions are returned by account ID
+        Page<AccountTransaction> page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 0, 3);
+
+        // then: the first page transactions are returned by account ID
+        assertNotNull(page);
+        assertEquals(3, page.getContentSize());
+        assertEquals(3, page.getTotalPages());
+        assertEquals(8, page.getTotalCount());
+        assertEquals(0, page.getPageIndex());
+        assertEquals(3, page.getPageSize());
+
+        // when: the second page transactions are returned by account ID
+        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 1, 3);
+
+        // then: the second page transactions are returned by account ID
+        assertNotNull(page);
+        assertEquals(3, page.getContentSize());
+        assertEquals(3, page.getTotalPages());
+        assertEquals(8, page.getTotalCount());
+        assertEquals(1, page.getPageIndex());
+        assertEquals(3, page.getPageSize());
+
+        // when: the last page transactions are returned by account ID
+        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 2, 3);
+
+        // then: the last page transactions are returned by account ID
+        assertNotNull(page);
+        assertEquals(2, page.getContentSize());
+        assertEquals(3, page.getTotalPages());
+        assertEquals(8, page.getTotalCount());
+        assertEquals(2, page.getPageIndex());
+        assertEquals(3, page.getPageSize());
+    }
+
     private UserConsent mockUserConsent() {
         return UserConsent.builder()
             .userId(UUID.randomUUID())
