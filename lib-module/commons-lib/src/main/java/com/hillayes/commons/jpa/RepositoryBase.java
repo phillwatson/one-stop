@@ -108,7 +108,7 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
             .page(pageNumber, pageSize)
             .list();
 
-        long count = (pageSize > list.size())
+        long count = (! list.isEmpty()) && (pageSize > list.size())
             ? ((long)pageSize * pageNumber) + list.size()
             : query.count();
 
