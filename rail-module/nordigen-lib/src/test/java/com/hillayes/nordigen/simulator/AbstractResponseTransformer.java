@@ -1,4 +1,4 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.nordigen.simulator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;

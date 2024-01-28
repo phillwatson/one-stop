@@ -1,5 +1,6 @@
 package com.hillayes.rail.api.domain;
 
+import com.hillayes.commons.MonetaryAmount;
 import lombok.*;
 
 import java.time.Instant;

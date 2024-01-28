@@ -1,5 +1,6 @@
 package com.hillayes.rail.domain;
 
+import com.hillayes.commons.MonetaryAmount;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -67,14 +68,12 @@ public class AccountTransaction {
      * The amount of the transaction as billed to the account.
      */
     @ToString.Include
-    @Column(name = "amount", nullable = true)
-    private long amount;
-
-    /**
-     * The currency of the transaction as billed to the account.
-     */
-    @Column(name = "currency_code", nullable = true)
-    private String currencyCode;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "amount", column = @Column(name = "amount")),
+        @AttributeOverride(name = "currencyCode", column = @Column(name = "currency_code"))
+    })
+    private MonetaryAmount amount;
 
     /**
      * Might be used by the financial institution to transport additional transaction related information
@@ -91,6 +90,6 @@ public class AccountTransaction {
     /**
      * Is the identification of the transaction as used for reference given by financial institution.
      */
-    @Column(name = "entry_reference", nullable = true)
-    private String entryReference;
+    @Column(name = "reference", nullable = true)
+    private String reference;
 }

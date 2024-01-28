@@ -1,5 +1,6 @@
 package com.hillayes.nordigen;
 
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.Strings;
 import com.hillayes.nordigen.model.*;
 import com.hillayes.nordigen.service.AccountService;
@@ -136,8 +137,9 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public void deleteAgreement(String id) {
+    public boolean deleteAgreement(String id) {
         requisitionService.delete(id);
+        return true;
     }
 
     @Override
@@ -192,9 +194,9 @@ public class NordigenRailAdaptor implements RailProviderApi {
                         .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))
                         .dateValued(bestOf(transaction.valueDate, transaction.valueDateTime))
                         .amount(of(transaction.transactionAmount))
-                        .reference(transaction.entryReference)
-                        .description(transaction.additionalInformation)
-                        .creditor(transaction.creditorName)
+                        .reference(Strings.toStringOrNull(transaction.entryReference))
+                        .description(Strings.toStringOrNull(transaction.additionalInformation))
+                        .creditor(Strings.toStringOrNull(transaction.creditorName))
                         .build()
                 )
                 .toList()

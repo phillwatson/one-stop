@@ -1,7 +1,8 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.nordigen.simulator;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -9,7 +10,6 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.nordigen.model.*;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomUtils;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -18,6 +18,7 @@ import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.apache.commons.lang3.RandomStringUtils.*;
+import static org.apache.commons.lang3.RandomUtils.*;
 
 @Singleton
 @Slf4j
@@ -75,7 +76,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         String id = getIdFromPath(request.getUrl(), 4);
         AccountSummary account = accounts.get(id);
         if (account == null) {
-            return notFound(request, responseDefinition);
+            return WireMock.notFound().build();
         }
 
         String resourceName = getPathElement(request.getUrl(), 5).orElse(null);
@@ -89,7 +90,7 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
             return getTransactions(account, request, responseDefinition);
         }
 
-        return notFound(request, responseDefinition);
+        return WireMock.notFound().build();
     }
 
     private ResponseDefinition getAccount(AccountSummary account,
@@ -177,8 +178,8 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
     private List<TransactionDetail> randomTransactions(LocalDate from, LocalDate to) {
         List<TransactionDetail> result = new ArrayList<>();
         LocalDate date = LocalDate.now();
-        for (int day = RandomUtils.nextInt(10, 30); day >= 0; --day) {
-            result.addAll(randomTransactions(date, RandomUtils.nextInt(5, 10)));
+        for (int day = nextInt(10, 30); day >= 0; --day) {
+            result.addAll(randomTransactions(date, nextInt(5, 10)));
             date = date.minusDays(1);
         }
         return result;
@@ -205,8 +206,8 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
     }
 
     private CurrencyAmount randomAmount() {
-        float amount = RandomUtils.nextFloat(10f, 100000f);
-        if (RandomUtils.nextBoolean())
+        float amount = nextFloat(10f, 100000f);
+        if (nextBoolean())
             amount = -amount;
 
         return CurrencyAmount.builder()

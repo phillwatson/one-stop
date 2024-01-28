@@ -1,5 +1,6 @@
 package com.hillayes.rail.domain;
 
+import com.hillayes.commons.MonetaryAmount;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class AccountBalance {
     @Id
     @GeneratedValue(generator = "uuid2")
+    @Setter
     private UUID id;
 
     @Column(name = "account_id", nullable = false)
@@ -31,11 +33,12 @@ public class AccountBalance {
     @EqualsAndHashCode.Include
     private LocalDate referenceDate;
 
-    @Column(name = "amount", nullable = false)
-    private long amount;
-
-    @Column(name = "currency_code", nullable = false)
-    private String currencyCode;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "amount", column = @Column(name = "amount")),
+        @AttributeOverride(name = "currencyCode", column = @Column(name = "currency_code"))
+    })
+    private MonetaryAmount amount;
 
     @Column(name = "balance_type", nullable = false)
     private String balanceType;

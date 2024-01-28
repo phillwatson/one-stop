@@ -17,7 +17,7 @@ public interface RailProviderApi {
 
     public Optional<Agreement> getAgreement(String id);
 
-    public void deleteAgreement(String id);
+    public boolean deleteAgreement(String id);
 
     public Optional<Account> getAccount(String id);
 

@@ -1,12 +1,11 @@
 package com.hillayes.rail.domain;
 
+import com.hillayes.commons.jpa.CurrencyConverter;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import java.time.Instant;
+import java.util.Currency;
 import java.util.UUID;
 
 /**
@@ -23,6 +22,7 @@ import java.util.UUID;
 public class Account {
     @Id
     @GeneratedValue(generator = "uuid2")
+    @Setter
     private UUID id;
 
     @Builder.Default
@@ -36,6 +36,7 @@ public class Account {
 
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Setter
     @Column(name = "userconsent_id", nullable = false)
     private UUID userConsentId;
 
@@ -61,8 +62,9 @@ public class Account {
     @Column(name = "owner_name", nullable = true)
     private String ownerName;
 
-    @Column(name = "currency_code", nullable = true)
-    private String currencyCode;
+    @Column(name = "currency", nullable = true)
+    @Convert(converter = CurrencyConverter.class)
+    private Currency currency;
 
     /**
      * The date-time that the account details were last polled. The account details
@@ -70,6 +72,7 @@ public class Account {
      *
      * @See ServiceConfiguration.accountPollingInterval()
      */
+    @Setter
     @Column(name = "date_last_polled", nullable = true)
     private Instant dateLastPolled;
 }

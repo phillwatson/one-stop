@@ -1,18 +1,20 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.*;
+import com.hillayes.onestop.api.AccountBalanceResponse;
+import com.hillayes.onestop.api.AccountResponse;
+import com.hillayes.onestop.api.InstitutionResponse;
+import com.hillayes.onestop.api.PaginatedAccounts;
 import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
-import com.hillayes.commons.jpa.Page;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 
@@ -69,14 +71,14 @@ public class AccountResource {
             .id(account.getId())
             .name(account.getAccountName())
             .ownerName(account.getOwnerName())
-            .currency(account.getCurrencyCode())
+            .currency(account.getCurrency().getCurrencyCode())
             .iban(account.getIban())
             .institution(marshal(institution))
             .balance(accountService.getMostRecentBalance(account).stream().map(balance ->
                     new AccountBalanceResponse()
                         .id(balance.getId())
-                        .amount(balance.getAmount())
-                        .currency(balance.getCurrencyCode())
+                        .amount(balance.getAmount().toDecimal())
+                        .currency(balance.getAmount().getCurrencyCode())
                         .referenceDate(balance.getReferenceDate())
                         .dateRecorded(balance.getDateCreated())
                         .type(balance.getBalanceType())
@@ -86,9 +88,9 @@ public class AccountResource {
 
     private InstitutionResponse marshal(Institution institution) {
         return new InstitutionResponse()
-            .id(institution.id)
-            .name(institution.name)
-            .bic(institution.bic)
-            .logo(institution.logo);
+            .id(institution.getId())
+            .name(institution.getName())
+            .bic(institution.getBic())
+            .logo(institution.getLogo());
     }
 }

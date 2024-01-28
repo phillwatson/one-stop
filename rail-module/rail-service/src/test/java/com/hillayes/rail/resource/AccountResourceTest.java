@@ -5,12 +5,12 @@ import com.hillayes.onestop.api.AccountBalanceResponse;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
+import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
-import com.hillayes.nordigen.model.Institution;
-import com.hillayes.nordigen.model.InstitutionDetail;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
+import com.hillayes.rail.utils.TestApiData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -52,9 +52,9 @@ public class AccountResourceTest extends TestBase {
 
         // and: a list of institutions linked to those accounts
         Map<String, Institution> banks = Map.of(
-            accounts.get(0).getInstitutionId(), mockInstitution(),
-            accounts.get(1).getInstitutionId(), mockInstitution(),
-            accounts.get(2).getInstitutionId(), mockInstitution()
+            accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
         );
 
         when(institutionService.get(any())).then(invocation -> {
@@ -126,10 +126,11 @@ public class AccountResourceTest extends TestBase {
 
             Institution institution = banks.get(account.getInstitutionId());
             assertNotNull(institution);
-            assertEquals(institution.id, accountResponse.getInstitution().getId());
-            assertEquals(institution.name, accountResponse.getInstitution().getName());
-            assertEquals(institution.bic, accountResponse.getInstitution().getBic());
-            assertEquals(institution.logo, accountResponse.getInstitution().getLogo());
+            assertNotNull(accountResponse.getInstitution());
+            assertEquals(institution.getId(), accountResponse.getInstitution().getId());
+            assertEquals(institution.getName(), accountResponse.getInstitution().getName());
+            assertEquals(institution.getBic(), accountResponse.getInstitution().getBic());
+            assertEquals(institution.getLogo(), accountResponse.getInstitution().getLogo());
         });
     }
 
@@ -147,9 +148,9 @@ public class AccountResourceTest extends TestBase {
 
         // and: a list of institutions linked to those accounts
         Map<String, Institution> banks = Map.of(
-            accounts.get(0).getInstitutionId(), mockInstitution(),
-            accounts.get(1).getInstitutionId(), mockInstitution(),
-            accounts.get(2).getInstitutionId(), mockInstitution()
+            accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
         );
 
         when(institutionService.get(any())).then(invocation -> {
@@ -191,9 +192,9 @@ public class AccountResourceTest extends TestBase {
 
         // and: a list of institutions linked to those accounts
         Map<String, Institution> banks = Map.of(
-            accounts.get(0).getInstitutionId(), mockInstitution(),
-            accounts.get(1).getInstitutionId(), mockInstitution(),
-            accounts.get(2).getInstitutionId(), mockInstitution()
+            accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
+            accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
         );
 
         when(institutionService.get(any())).then(invocation -> {
@@ -238,7 +239,7 @@ public class AccountResourceTest extends TestBase {
         when(accountService.getMostRecentBalance(account)).thenReturn(balances);
 
         // and: an institution linked to that account
-        InstitutionDetail institution = mockInstitution();
+        Institution institution = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint
@@ -261,10 +262,10 @@ public class AccountResourceTest extends TestBase {
 
         // and: the institution is included
         assertNotNull(accountResponse.getInstitution());
-        assertEquals(institution.id, accountResponse.getInstitution().getId());
-        assertEquals(institution.name, accountResponse.getInstitution().getName());
-        assertEquals(institution.bic, accountResponse.getInstitution().getBic());
-        assertEquals(institution.logo, accountResponse.getInstitution().getLogo());
+        assertEquals(institution.getId(), accountResponse.getInstitution().getId());
+        assertEquals(institution.getName(), accountResponse.getInstitution().getName());
+        assertEquals(institution.getBic(), accountResponse.getInstitution().getBic());
+        assertEquals(institution.getLogo(), accountResponse.getInstitution().getLogo());
 
         // and: the recent balances are included
         assertNotNull(accountResponse.getBalance());
@@ -274,8 +275,7 @@ public class AccountResourceTest extends TestBase {
                 .filter(b -> b.getId().equals(expected.getId()))
                 .findFirst().orElse(null);
             assertNotNull(actual);
-            assertEquals(expected.getCurrencyCode(), actual.getCurrency());
-            assertEquals(expected.getAmount(), actual.getAmount());
+            assertEquals(expected.getAmount().toDecimal(), actual.getAmount());
             assertEquals(expected.getReferenceDate(), actual.getReferenceDate());
             assertEquals(expected.getBalanceType(), actual.getType());
             assertEquals(expected.getDateCreated(), actual.getDateRecorded());
@@ -290,7 +290,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        InstitutionDetail bank = mockInstitution();
+        Institution bank = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a non-user role
@@ -315,7 +315,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        InstitutionDetail bank = mockInstitution();
+        Institution bank = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a user with multiple roles
@@ -335,7 +335,6 @@ public class AccountResourceTest extends TestBase {
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testGetAccountById_NotFound() {
-        UUID userId = UUID.fromString(userIdStr);
         UUID accountId = UUID.randomUUID();
         when(accountService.getAccount(accountId)).thenReturn(Optional.empty());
 
@@ -355,14 +354,12 @@ public class AccountResourceTest extends TestBase {
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testGetAccountById_WrongUser() {
-        UUID userId = UUID.fromString(userIdStr);
-
         // given: an account belonging to ANOTHER user
         Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
         // and: an institution linked to that account
-        InstitutionDetail institution = mockInstitution();
+        Institution institution = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint

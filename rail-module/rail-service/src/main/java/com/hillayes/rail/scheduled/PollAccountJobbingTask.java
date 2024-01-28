@@ -1,6 +1,5 @@
 package com.hillayes.rail.scheduled;
 
-import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
@@ -151,7 +150,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                 .accountName(railAccount.getName())
                 .iban(railAccount.getIban())
                 .ownerName(railAccount.getOwnerName())
-                .currencyCode(railAccount.getCurrency().getCurrencyCode())
+                .currency(railAccount.getCurrency())
                 .accountType(railAccount.getAccountType())
                 .build()
             );
@@ -166,8 +165,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                 .accountId(account.getId())
                 .balanceType(balance.getType())
                 .referenceDate(balance.getDateTime())
-                .currencyCode(balance.getAmount().getCurrency().getCurrencyCode())
-                .amount(balance.getAmount().getAmount())
+                .amount(balance.getAmount())
                 .build()))
             .toList();
 
@@ -230,11 +228,10 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             .transactionId(detail.getOriginalTransactionId())
             .bookingDateTime(detail.getDateBooked())
             .valueDateTime(detail.getDateValued())
-            .amount(detail.getAmount().getAmount())
-            .currencyCode(detail.getAmount().getCurrency().getCurrencyCode())
-            .additionalInformation(Strings.toStringOrNull(detail.getDescription()))
+            .amount(detail.getAmount())
+            .additionalInformation(detail.getDescription())
             .creditorName(detail.getCreditor())
-            .entryReference(detail.getReference())
+            .reference(detail.getReference())
             .build();
     }
 }

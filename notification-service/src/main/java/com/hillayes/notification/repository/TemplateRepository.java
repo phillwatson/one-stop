@@ -135,7 +135,7 @@ public class TemplateRepository {
 
         EmailConfiguration.LocaleTemplate result = templateConfig.templates().get(locale);
         if (result == null) {
-            result = templateConfig.templates().get(new Locale(locale.getLanguage()));
+            result = templateConfig.templates().get(Locale.of(locale.getLanguage()));
         }
 
         if (result == null) {
@@ -143,7 +143,7 @@ public class TemplateRepository {
         }
 
         if (result == null) {
-            result = templateConfig.templates().get(new Locale(DEFAULT_LOCALE.getLanguage()));
+            result = templateConfig.templates().get(Locale.of(DEFAULT_LOCALE.getLanguage()));
         }
 
         if (result == null) {

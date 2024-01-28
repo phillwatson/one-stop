@@ -13,14 +13,14 @@ import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.UserConsentService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
 import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
@@ -154,7 +154,7 @@ public class UserConsentResource {
 
         return new UserConsentResponse()
             .institutionId(consent.getInstitutionId())
-            .institutionName(institution.name)
+            .institutionName(institution.getName())
             .dateGiven(consent.getDateGiven())
             .agreementExpires(consent.getAgreementExpires())
             .maxHistory(consent.getMaxHistory())
@@ -172,7 +172,7 @@ public class UserConsentResource {
             .id(account.getId())
             .name(account.getAccountName())
             .ownerName(account.getOwnerName())
-            .currency(account.getCurrencyCode())
+            .currency(account.getCurrency().getCurrencyCode())
             .iban(account.getIban())
             .institutionId(account.getInstitutionId());
     }

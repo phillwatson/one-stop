@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
@@ -232,8 +233,7 @@ public class AccountTransactionRepositoryTest {
             .accountId(account.getId())
             .internalTransactionId(UUID.randomUUID().toString())
             .bookingDateTime(bookingDate.atStartOfDay(ZoneOffset.UTC).toInstant())
-            .transactionAmount(123.33)
-            .transactionCurrencyCode("GBP")
+            .amount(MonetaryAmount.of("GBP", 123.33))
             .build();
     }
 }

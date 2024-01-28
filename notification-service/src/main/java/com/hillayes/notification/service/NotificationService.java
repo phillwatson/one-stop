@@ -177,7 +177,7 @@ public class NotificationService {
 
         String result = messageConfig.templates().get(locale);
         if (result == null) {
-            result = messageConfig.templates().get(new Locale(locale.getLanguage()));
+            result = messageConfig.templates().get(Locale.of(locale.getLanguage()));
         }
 
         if (result == null) {
@@ -185,7 +185,7 @@ public class NotificationService {
         }
 
         if (result == null) {
-            result = messageConfig.templates().get(new Locale(DEFAULT_LOCALE.getLanguage()));
+            result = messageConfig.templates().get(Locale.of(DEFAULT_LOCALE.getLanguage()));
         }
 
         if (result == null) {

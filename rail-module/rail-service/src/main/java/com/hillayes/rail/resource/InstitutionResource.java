@@ -5,12 +5,15 @@ import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.service.InstitutionService;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,9 +71,9 @@ public class InstitutionResource {
 
     private InstitutionResponse marshal(Institution institution) {
         return new InstitutionResponse()
-            .id(institution.id)
-            .name(institution.name)
-            .bic(institution.bic)
-            .logo(institution.logo);
+            .id(institution.getId())
+            .name(institution.getName())
+            .bic(institution.getBic())
+            .logo(institution.getLogo());
     }
 }

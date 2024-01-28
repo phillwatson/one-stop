@@ -1,4 +1,4 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.nordigen.simulator;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;

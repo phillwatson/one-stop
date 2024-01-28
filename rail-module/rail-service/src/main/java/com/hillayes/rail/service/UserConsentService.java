@@ -121,7 +121,7 @@ public class UserConsentService {
                     .dateCreated(Instant.now())
                     .userId(userId)
                     .provider(railProvider)
-                    .institutionId(institution.id)
+                    .institutionId(institution.getId())
                     .build();
             }
             userConsent.setAgreementId(agreement.getId());

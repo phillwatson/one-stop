@@ -3,19 +3,19 @@ package com.hillayes.rail.scheduled;
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
+import com.hillayes.rail.api.RailProviderApi;
+import com.hillayes.rail.api.domain.Agreement;
+import com.hillayes.rail.api.domain.AgreementStatus;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.nordigen.model.Requisition;
-import com.hillayes.nordigen.model.RequisitionStatus;
-import com.hillayes.rail.service.RequisitionService;
 import com.hillayes.rail.service.UserConsentService;
+import com.hillayes.rail.utils.TestApiData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 public class PollConsentJobbingTaskTest {
     private UserConsentService userConsentService;
-    private RequisitionService requisitionService;
+    private RailProviderApi railProviderApi;
     private PollAccountJobbingTask pollAccountJobbingTask;
     private SchedulerFactory scheduler;
 
@@ -35,13 +35,13 @@ public class PollConsentJobbingTaskTest {
     @BeforeEach
     public void init() {
         userConsentService = mock();
-        requisitionService = mock();
+        railProviderApi = mock();
         pollAccountJobbingTask = mock();
         scheduler = mock();
 
         fixture = new PollConsentJobbingTask(
             userConsentService,
-            requisitionService,
+            railProviderApi,
             pollAccountJobbingTask);
     }
 
@@ -69,20 +69,13 @@ public class PollConsentJobbingTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a "linked" requisition for that consent
-        Requisition requisition = Requisition.builder()
-            .id(userConsent.getRequisitionId())
-            .status(RequisitionStatus.LN)
-            .accounts(List.of(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20)
-            ))
-            .build();
-        when(requisitionService.get(requisition.id)).thenReturn(Optional.of(requisition));
+        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId());
+        when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
         TaskContext<UUID> context = new TaskContext<>(userConsent.getId());
@@ -92,14 +85,15 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: the requisition is retrieved
-        verify(requisitionService).get(requisition.id);
+        verify(railProviderApi).getAgreement(agreement.getId());
 
         // and: a job is queued to process each rail account in the requisition
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(pollAccountJobbingTask, times(requisition.accounts.size())).queueJob(eq(userConsent.getId()), captor.capture());
+        verify(pollAccountJobbingTask, times(agreement.getAccountIds().size()))
+            .queueJob(eq(userConsent.getId()), captor.capture());
 
         // and: the rail-account IDs are correct
-        requisition.accounts.forEach( railAccountId ->
+        agreement.getAccountIds().forEach(railAccountId ->
             assertTrue(captor.getAllValues().contains(railAccountId))
         );
 
@@ -121,7 +115,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsentId);
 
         // and: NO requisition is retrieved
-        verifyNoInteractions(requisitionService);
+        verifyNoInteractions(railProviderApi);
 
         // and: NO job is queued to process each rail accounts
         verifyNoInteractions(pollAccountJobbingTask);
@@ -137,7 +131,7 @@ public class PollConsentJobbingTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(consentStatus)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -149,7 +143,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: NO requisition is retrieved
-        verifyNoInteractions(requisitionService);
+        verifyNoInteractions(railProviderApi);
 
         // and: NO job is queued to process each rail accounts
         verifyNoInteractions(pollAccountJobbingTask);
@@ -164,20 +158,13 @@ public class PollConsentJobbingTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an "expired" requisition for that consent
-        Requisition requisition = Requisition.builder()
-            .id(userConsent.getRequisitionId())
-            .status(RequisitionStatus.EX)
-            .accounts(List.of(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20)
-            ))
-            .build();
-        when(requisitionService.get(requisition.id)).thenReturn(Optional.of(requisition));
+        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.EXPIRED);
+        when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
         TaskContext<UUID> context = new TaskContext<>(userConsent.getId());
@@ -187,7 +174,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: the requisition is retrieved
-        verify(requisitionService).get(requisition.id);
+        verify(railProviderApi).getAgreement(agreement.getId());
 
         // and: NO job is queued to process each rail account in the requisition
         verifyNoInteractions(pollAccountJobbingTask);
@@ -205,20 +192,13 @@ public class PollConsentJobbingTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a "suspended" requisition for that consent
-        Requisition requisition = Requisition.builder()
-            .id(userConsent.getRequisitionId())
-            .status(RequisitionStatus.SU)
-            .accounts(List.of(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20)
-            ))
-            .build();
-        when(requisitionService.get(requisition.id)).thenReturn(Optional.of(requisition));
+        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.SUSPENDED);
+        when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
         TaskContext<UUID> context = new TaskContext<>(userConsent.getId());
@@ -228,7 +208,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: the requisition is retrieved
-        verify(requisitionService).get(requisition.id);
+        verify(railProviderApi).getAgreement(agreement.getId());
 
         // and: NO job is queued to process each rail account in the requisition
         verifyNoInteractions(pollAccountJobbingTask);
@@ -241,26 +221,19 @@ public class PollConsentJobbingTaskTest {
     }
 
     @ParameterizedTest
-    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "LN", "EX", "SU" })
-    public void testRequisitionStatusNotCorrect(RequisitionStatus requisitionStatus) {
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "GIVEN", "EXPIRED", "SUSPENDED" })
+    public void testRequisitionStatusNotCorrect(AgreementStatus agreementStatus) {
         // given: a consent record to be processed
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a requisition for that consent
-        Requisition requisition = Requisition.builder()
-            .id(userConsent.getRequisitionId())
-            .status(requisitionStatus)
-            .accounts(List.of(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20)
-            ))
-            .build();
-        when(requisitionService.get(requisition.id)).thenReturn(Optional.of(requisition));
+        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), agreementStatus);
+        when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
         TaskContext<UUID> context = new TaskContext<>(userConsent.getId());
@@ -270,7 +243,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: the requisition is retrieved
-        verify(requisitionService).get(requisition.id);
+        verify(railProviderApi).getAgreement(agreement.getId());
 
         // and: NO job is queued to process each rail account in the requisition
         verifyNoInteractions(pollAccountJobbingTask);
@@ -288,12 +261,12 @@ public class PollConsentJobbingTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .requisitionId(randomAlphanumeric(20))
+            .agreementId(randomAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a requisition for that consent cannot be found
-        when(requisitionService.get(userConsent.getRequisitionId())).thenReturn(Optional.empty());
+        when(railProviderApi.getAgreement(userConsent.getAgreementId())).thenReturn(Optional.empty());
 
         // when: the fixture is called to process the user-consent
         TaskContext<UUID> context = new TaskContext<>(userConsent.getId());
@@ -303,7 +276,7 @@ public class PollConsentJobbingTaskTest {
         verify(userConsentService).getUserConsent(userConsent.getId());
 
         // and: an attempt to retrieve the requisition is made
-        verify(requisitionService).get(userConsent.getRequisitionId());
+        verify(railProviderApi).getAgreement(userConsent.getAgreementId());
 
         // and: NO job is queued to process each rail account in the requisition
         verifyNoInteractions(pollAccountJobbingTask);

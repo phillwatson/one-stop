@@ -1,4 +1,4 @@
-package com.hillayes.rail.simulator;
+package com.hillayes.nordigen.simulator;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
@@ -7,16 +7,13 @@ import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.hillayes.nordigen.model.Requisition;
-import com.hillayes.nordigen.model.RequisitionRequest;
-import com.hillayes.nordigen.model.RequisitionStatus;
+import com.hillayes.nordigen.model.EndUserAgreement;
+import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,24 +21,22 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Singleton
 @Slf4j
-public class RequisitionsEndpoint extends AbstractResponseTransformer {
-    @Inject
-    AgreementsEndpoint agreements;
+public class AgreementsEndpoint extends AbstractResponseTransformer {
+    private final Map<String, EndUserAgreement> agreements = new HashMap<>();
 
-    @Inject
-    AccountsEndpoint accounts;
-
-    private final Map<String, Requisition> requisitions = new HashMap<>();
-
-    public RequisitionsEndpoint() {
+    public AgreementsEndpoint() {
         super(null);
     }
 
+    EndUserAgreement removeAgreement(String id) {
+        return agreements.remove(id);
+    }
+
     public void register(WireMockServer wireMockServer) {
-        requisitions.clear();
+        agreements.clear();
 
         // mock create endpoint
-        wireMockServer.stubFor(post(urlEqualTo("/api/v2/requisitions/"))
+        wireMockServer.stubFor(post(urlEqualTo("/api/v2/agreements/enduser/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -51,8 +46,8 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock list endpoint
-        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/requisitions/"))
-            //.withHeader("Content-Type", equalTo("application/json"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v2/agreements/enduser/"))
+            .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
@@ -62,7 +57,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock get endpoint
-        wireMockServer.stubFor(get(urlPathMatching("/api/v2/requisitions/(.*)/"))
+        wireMockServer.stubFor(get(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -72,7 +67,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock accept endpoint
-        wireMockServer.stubFor(put(urlPathMatching("/api/v2/requisitions/(.*)/accept/"))
+        wireMockServer.stubFor(put(urlPathMatching("/api/v2/agreements/enduser/(.*)/accept/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -82,7 +77,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         );
 
         // mock delete endpoint
-        wireMockServer.stubFor(delete(urlPathMatching("/api/v2/requisitions/(.*)/"))
+        wireMockServer.stubFor(delete(urlPathMatching("/api/v2/agreements/enduser/(.*)/"))
             .withHeader("Content-Type", equalTo("application/json"))
             .willReturn(
                 aResponse()
@@ -102,6 +97,10 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             return create(request, responseDefinition);
         }
 
+        if (method.equals(RequestMethod.PUT)) {
+            return accept(request, responseDefinition);
+        }
+
         if (method.equals(RequestMethod.GET)) {
             if (parameters.getBoolean("list", false)) {
                 return list(request, responseDefinition);
@@ -118,40 +117,33 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
 
     private ResponseDefinition create(Request request,
                                       ResponseDefinition responseDefinition) {
-        RequisitionRequest requisitionRequest = fromJson(request.getBodyAsString(), RequisitionRequest.class);
+        EndUserAgreementRequest agreementRequest = fromJson(request.getBodyAsString(), EndUserAgreementRequest.class);
 
-        return requisitions.values().stream()
-            .filter(agreement -> agreement.institutionId.equals(requisitionRequest.getInstitutionId()))
+        return agreements.values().stream()
+            .filter(agreement -> agreement.institutionId.equals(agreementRequest.getInstitutionId()))
             .map(agreement -> ResponseDefinitionBuilder.like(responseDefinition)
                 .withStatus(409)
                 .withBody(toJson(Map.of(
                     "summary", "Conflict",
-                    "detail", "An requisition with this Institution already exists.",
+                    "detail", "An agreement with this Institution already exists.",
                     "status_code", 409
                 )))
                 .build()
             )
             .findFirst()
-            .orElseGet(() -> {
-                String id = UUID.randomUUID().toString();
-                Requisition response = Requisition.builder()
-                    .id(id)
-                    .created(OffsetDateTime.now())
-                    .status(RequisitionStatus.CR)
-                    .link("https://ob.nordigen.com/psd2/start/" + id + "/" + requisitionRequest.getInstitutionId())
-                    .redirect(requisitionRequest.getRedirect())
-                    .institutionId(requisitionRequest.getInstitutionId())
-                    .agreement(requisitionRequest.getAgreement())
-                    .reference(requisitionRequest.getReference())
-                    .userLanguage(requisitionRequest.getUserLanguage())
-                    .ssn(requisitionRequest.getSsn())
-                    .accountSelection(requisitionRequest.getAccountSelection())
-                    .redirectImmediate(requisitionRequest.getRedirectImmediate())
-                    .accounts(List.of())
-                    .build();
+            .orElseGet(() ->
+                {
+                    EndUserAgreement response = new EndUserAgreement();
+                    response.id = UUID.randomUUID().toString();
+                    response.maxHistoricalDays = agreementRequest.getMaxHistoricalDays();
+                    response.accessValidForDays = agreementRequest.getAccessValidForDays();
+                    response.accessScope = agreementRequest.getAccessScope();
+                    response.institutionId = agreementRequest.getInstitutionId();
+                    response.created = OffsetDateTime.now();
+                    response.accepted = null;
 
-                requisitions.put(response.id, response);
-                return ResponseDefinitionBuilder.like(responseDefinition)
+                    agreements.put(response.id, response);
+                    return ResponseDefinitionBuilder.like(responseDefinition)
                         .withStatus(201)
                         .withBody(toJson(response))
                         .build();
@@ -159,38 +151,32 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
             );
     }
 
+    private ResponseDefinition accept(Request request,
+                                      ResponseDefinition responseDefinition) {
+        return ResponseDefinitionBuilder.like(responseDefinition)
+            .withStatus(200)
+            .withBody(toJson(Map.of(
+                "summary", "Insufficient permissions",
+                "detail", "Your company doesn't have permission to accept EUA. You'll have to use our default form for this action.",
+                "status_code", 403
+            )))
+            .build();
+    }
+
     private ResponseDefinition list(Request request,
                                     ResponseDefinition responseDefinition) {
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
-            .withBody(toJson(sublist(request, requisitions.values())))
+            .withBody(toJson(sublist(request, agreements.values())))
             .build();
     }
 
-    /**
-     * Returns the identified Requisition. Repeated calls will transition the
-     * requisition's status to the next status in the requisition flow.
-     */
     private ResponseDefinition getById(Request request,
                                        ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 4);
-        Requisition entity = requisitions.get(id);
+        String id = getIdFromPath(request.getUrl(), 5);
+        EndUserAgreement entity = agreements.get(id);
         if (entity == null) {
             return notFound(request, responseDefinition);
-        }
-
-        RequisitionStatus nextStatus = entity.status.nextStatus();
-        if (nextStatus != null) {
-            entity.status = nextStatus;
-
-            // if accounts have been linked
-            if (entity.status == RequisitionStatus.LN) {
-                // mock the accounts
-                entity.accounts = List.of(
-                    accounts.acquireAccount(entity.institutionId),
-                    accounts.acquireAccount(entity.institutionId)
-                );
-            }
         }
 
         return ResponseDefinitionBuilder.like(responseDefinition)
@@ -201,23 +187,19 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
 
     private ResponseDefinition deleteById(Request request,
                                           ResponseDefinition responseDefinition) {
-        String id = getIdFromPath(request.getUrl(), 4);
-        Requisition entity = requisitions.remove(id);
+        String id = getIdFromPath(request.getUrl(), 5);
+        EndUserAgreement entity = removeAgreement(id);
 
         if (entity == null) {
             return notFound(request, responseDefinition);
         }
 
-        // delete associated agreements
-        agreements.removeAgreement(entity.agreement);
-        entity.accounts.forEach(accountId ->  accounts.removeAccount(accountId) );
-        
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
             .withBody(toJson(Map.of(
                 "status_code", 200,
-                "summary", "Requisition deleted",
-                "detail", "Requisition " + id + " deleted"
+                "summary", "End User Agreement deleted",
+                "detail", "End User Agreement " + id + " deleted"
             )))
             .build();
     }

@@ -1,4 +1,4 @@
-package com.hillayes.rail.resource;
+package com.hillayes.nordigen.resource;
 
 import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import io.quarkus.test.junit.QuarkusTest;
@@ -12,9 +12,9 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
-public class AgreementResourceTest extends TestResourceBase {
+public class AgreementAdminResourceTest extends TestResourceBase {
     @Test
-    @TestSecurity(user = adminIdStr, roles = "admin")
+    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testFlow() {
         EndUserAgreementRequest agreementRequest = EndUserAgreementRequest.builder()
             .institutionId("SANDBOXFINANCE_SFIN0000")
@@ -28,7 +28,7 @@ public class AgreementResourceTest extends TestResourceBase {
             .request()
             .contentType(JSON)
             .body(agreementRequest)
-            .when().post("/api/v1/rails/admin/rail-agreements")
+            .when().post("/api/v1/rails/nordigen/agreements")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -43,7 +43,7 @@ public class AgreementResourceTest extends TestResourceBase {
         given()
             .queryParam("limit", 100)
             .queryParam("offset", 0)
-            .when().get("/api/v1/rails/admin/rail-agreements")
+            .when().get("/api/v1/rails/nordigen/agreements")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -53,7 +53,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // get agreement
         given()
             .pathParam("id", agreementId)
-            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
+            .when().get("/api/v1/rails/nordigen/agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -66,7 +66,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // delete agreement
         given()
             .pathParam("id", agreementId)
-            .when().delete("/api/v1/rails/admin/rail-agreements/{id}")
+            .when().delete("/api/v1/rails/nordigen/agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -75,7 +75,7 @@ public class AgreementResourceTest extends TestResourceBase {
         // get deleted agreement (should fail)
         given()
             .pathParam("id", agreementId)
-            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
+            .when().get("/api/v1/rails/nordigen/agreements/{id}")
             .then()
             .statusCode(404);
     }

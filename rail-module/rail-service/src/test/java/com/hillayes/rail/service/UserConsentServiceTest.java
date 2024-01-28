@@ -2,18 +2,23 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.rail.api.RailProviderApi;
+import com.hillayes.rail.api.domain.Agreement;
+import com.hillayes.rail.api.domain.AgreementStatus;
+import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.event.ConsentEventSender;
-import com.hillayes.nordigen.model.*;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
+import com.hillayes.rail.utils.TestApiData;
+import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,13 +28,10 @@ import org.mockito.ArgumentCaptor;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,10 +48,7 @@ public class UserConsentServiceTest {
     InstitutionService institutionService;
 
     @InjectMock
-    AgreementService agreementService;
-
-    @InjectMock
-    RequisitionService requisitionService;
+    RailProviderApi railProviderApi;
 
     @InjectMock
     PollConsentJobbingTask pollConsentJobbingTask;
@@ -86,9 +85,9 @@ public class UserConsentServiceTest {
 
         // and: the user holds several consents
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId),
-            mockUserConsent(userId),
-            mockUserConsent(userId)
+            TestData.mockUserConsent(userId),
+            TestData.mockUserConsent(userId),
+            TestData.mockUserConsent(userId)
         );
         when(userConsentRepository.findByUserId(eq(userId), anyInt(), anyInt()))
             .thenReturn(Page.of(consents));
@@ -123,17 +122,17 @@ public class UserConsentServiceTest {
         String institutionId = randomAlphanumeric(30);
 
         // and: the user holds several consents for the institute
-        UserConsent activeConsent = mockUserConsent(userId);
+        UserConsent activeConsent = TestData.mockUserConsent(userId);
         activeConsent.setInstitutionId(institutionId);
         activeConsent.setStatus(ConsentStatus.GIVEN);
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setInstitutionId(institutionId);
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
             activeConsent,
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setInstitutionId(institutionId);
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
@@ -185,12 +184,12 @@ public class UserConsentServiceTest {
 
         // and: the user holds several consents for the institute - non are active
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setInstitutionId(institutionId);
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setInstitutionId(institutionId);
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
@@ -212,7 +211,7 @@ public class UserConsentServiceTest {
     @Test
     public void testGetUserConsent_ById() {
         // given: a consent exists
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         when(userConsentRepository.findByIdOptional(consent.getId()))
             .thenReturn(Optional.of(consent));
 
@@ -250,50 +249,43 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        InstitutionDetail institution = mockInstitution();
-        when(institutionService.get(institution.id)).thenReturn(Optional.of(institution));
+        Institution institution = TestApiData.mockInstitution();
+        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
 
         // and: no active consent exists for the identified user
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
             })
         );
-        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
+        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.getId()))
             .thenReturn(consents);
 
         // and: an agreement will be created
-        AtomicReference<EndUserAgreement> agreement = new AtomicReference<>();
-        when(agreementService.create(any())).then(invocation -> {
-            agreement.set(returnEndUserAgreement(invocation.getArgument(0)));
+        AtomicReference<Agreement> agreement = new AtomicReference<>();
+        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
+            String reference = invocation.getArgument(0);
+            Institution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
 
-        // and: a requisition will be created
-        AtomicReference<Requisition> requisition = new AtomicReference<>();
-        when(requisitionService.create(any())).then(invocation -> {
-            requisition.set(returnRequisition(invocation.getArgument(0)));
-            return requisition.get();
-        });
-
         // when: the service is called
-        URI requisitionUri = fixture.register(userId, institution.id, callbackUri);
+        URI requisitionUri = fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri);
 
         // then: an agreement is created
         assertNotNull(agreement.get());
-
-        // and: a requisition is created
-        assertNotNull(requisition.get());
 
         // and: the consent record is initially created
         verify(userConsentRepository).saveAndFlush(any());
@@ -307,18 +299,16 @@ public class UserConsentServiceTest {
         assertEquals(ConsentStatus.WAITING, consent.getStatus());
         assertEquals(userId, consent.getUserId());
         assertEquals(callbackUri.toString(), consent.getCallbackUri());
-        assertEquals(institution.id, consent.getInstitutionId());
-        assertEquals(requisition.get().id, consent.getRequisitionId());
-        assertEquals(agreement.get().id, consent.getAgreementId());
-        assertEquals(agreement.get().maxHistoricalDays, consent.getMaxHistory());
-        Instant expires = Instant.now().truncatedTo(ChronoUnit.DAYS).plus(agreement.get().accessValidForDays, ChronoUnit.DAYS);
-        assertEquals(expires, consent.getAgreementExpires());
+        assertEquals(institution.getId(), consent.getInstitutionId());
+        assertEquals(agreement.get().getId(), consent.getAgreementId());
+        assertEquals(agreement.get().getMaxHistory(), consent.getMaxHistory());
+        assertEquals(agreement.get().getDateExpires(), consent.getAgreementExpires());
 
         // and: the initiated consent event is issued
         verify(consentEventSender).sendConsentInitiated(consent);
 
         // and: the result is the requisition link URI
-        assertEquals(requisitionUri.toString(), requisition.get().link);
+        assertEquals(requisitionUri, agreement.get().getAgreementLink());
     }
 
     @Test
@@ -327,56 +317,48 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        InstitutionDetail institution = mockInstitution();
-        when(institutionService.get(institution.id)).thenReturn(Optional.of(institution));
+        Institution institution = TestApiData.mockInstitution();
+        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
 
         // and: no active consent exists for the identified user
-        UserConsent expiredConsent = mockUserConsent(userId);
-        expiredConsent.setInstitutionId(institution.id);
+        UserConsent expiredConsent = TestData.mockUserConsent(userId);
+        expiredConsent.setInstitutionId(institution.getId());
         expiredConsent.setStatus(ConsentStatus.EXPIRED);
 
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
             }),
             expiredConsent
         );
-        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
+        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.getId()))
             .thenReturn(consents);
 
         // and: an agreement will be created
-        AtomicReference<EndUserAgreement> agreement = new AtomicReference<>();
-        when(agreementService.create(any())).then(invocation -> {
-            agreement.set(returnEndUserAgreement(invocation.getArgument(0)));
+        AtomicReference<Agreement> agreement = new AtomicReference<>();
+        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
+            String reference = invocation.getArgument(0);
+            Institution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
 
-        // and: a requisition will be created
-        AtomicReference<Requisition> requisition = new AtomicReference<>();
-        when(requisitionService.create(any())).then(invocation -> {
-            requisition.set(returnRequisition(invocation.getArgument(0)));
-            return requisition.get();
-        });
-
         // when: the service is called
-        URI requisitionUri = fixture.register(userId, institution.id, callbackUri);
+        URI requisitionUri = fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri);
 
         // then: an agreement is created
         assertNotNull(agreement.get());
-
-        // and: a requisition is created
-        assertNotNull(requisition.get());
-
 
         // and: the consent record is initially created
         verify(userConsentRepository).saveAndFlush(any());
@@ -390,18 +372,16 @@ public class UserConsentServiceTest {
         assertEquals(ConsentStatus.WAITING, consent.getStatus());
         assertEquals(userId, consent.getUserId());
         assertEquals(callbackUri.toString(), consent.getCallbackUri());
-        assertEquals(institution.id, consent.getInstitutionId());
-        assertEquals(requisition.get().id, consent.getRequisitionId());
-        assertEquals(agreement.get().id, consent.getAgreementId());
-        assertEquals(agreement.get().maxHistoricalDays, consent.getMaxHistory());
-        Instant expires = Instant.now().truncatedTo(ChronoUnit.DAYS).plus(agreement.get().accessValidForDays, ChronoUnit.DAYS);
-        assertEquals(expires, consent.getAgreementExpires());
+        assertEquals(institution.getId(), consent.getInstitutionId());
+        assertEquals(agreement.get().getId(), consent.getAgreementId());
+        assertEquals(agreement.get().getMaxHistory(), consent.getMaxHistory());
+        assertEquals(agreement.get().getDateExpires(), consent.getAgreementExpires());
 
         // and: the initiated consent event is issued
         verify(consentEventSender).sendConsentInitiated(consent);
 
         // and: the result is the requisition link URI
-        assertEquals(requisitionUri.toString(), requisition.get().link);
+        assertEquals(requisitionUri, agreement.get().getAgreementLink());
     }
 
     @Test
@@ -410,8 +390,8 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        InstitutionDetail institution = mockInstitution();
-        when(institutionService.get(institution.id)).thenReturn(Optional.empty());
+        Institution institution = TestApiData.mockInstitution();
+        when(institutionService.get(institution.getId())).thenReturn(Optional.empty());
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -419,18 +399,15 @@ public class UserConsentServiceTest {
         // when: the service is called
         // then: a not-found exception is thrown
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.register(userId, institution.id, callbackUri)
+            fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri)
         );
 
         // and: the exception identifies requested institution
         assertEquals("Institution", exception.getParameter("entity-type"));
-        assertEquals(institution.id, exception.getParameter("entity-id"));
+        assertEquals(institution.getId(), exception.getParameter("entity-id"));
 
         // and: no agreements are created
-        verifyNoInteractions(agreementService);
-
-        // and: no requirements are created
-        verifyNoInteractions(requisitionService);
+        verifyNoInteractions(railProviderApi);
 
         /// and: no consent is created or updated
         verify(userConsentRepository, never()).saveAndFlush(any());
@@ -447,48 +424,45 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        InstitutionDetail institution = mockInstitution();
-        when(institutionService.get(institution.id)).thenReturn(Optional.of(institution));
+        Institution institution = TestApiData.mockInstitution();
+        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
 
         // and: a consent exists for the identified user
-        UserConsent existingConsent = mockUserConsent(userId);
-        existingConsent.setInstitutionId(institution.id);
+        UserConsent existingConsent = TestData.mockUserConsent(userId);
+        existingConsent.setInstitutionId(institution.getId());
         existingConsent.setStatus(consentStatus);
 
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
-                consent.setInstitutionId(institution.id);
+            TestData.mockUserConsent(userId, consent -> {
+                consent.setInstitutionId(institution.getId());
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
             }),
             existingConsent
         );
-        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.id))
+        when(userConsentRepository.findByUserIdAndInstitutionId(userId, institution.getId()))
             .thenReturn(consents);
 
         // when: the service is called
         // then: a BankAlreadyRegistered exception is thrown
         BankAlreadyRegisteredException exception = assertThrows(BankAlreadyRegisteredException.class, () ->
-            fixture.register(userId, institution.id, callbackUri)
+            fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri)
         );
 
         // and: the exception identifies user and requested institution
         assertEquals(userId, exception.getParameter("user-id"));
-        assertEquals(institution.id, exception.getParameter("institution-id"));
+        assertEquals(institution.getId(), exception.getParameter("institution-id"));
 
         // and: no agreements are created
-        verifyNoInteractions(agreementService);
-
-        // and: no requirements are created
-        verifyNoInteractions(requisitionService);
+        verifyNoInteractions(railProviderApi);
 
         /// and: no consent is created or updated
         verify(userConsentRepository, never()).saveAndFlush(any());
@@ -502,13 +476,13 @@ public class UserConsentServiceTest {
     public void testConsentGiven_HappyPath() {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.WAITING);
         consent.setCallbackUri(clientCallbackUri.toString());
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        URI result = fixture.consentGiven(consent.getId());
+        URI result = fixture.consentGiven(consent.getReference());
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -535,18 +509,18 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentGiven_ConsentNotFound() {
         // given: the identified consent cannot be found
-        UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
+        String consentReference = UUID.randomUUID().toString();
+        when(userConsentRepository.findByReference(consentReference)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.consentGiven(consentId)
+            fixture.consentGiven(consentReference)
         );
 
         // and: the exception identifies requested consent
         assertEquals("UserConsent", exception.getParameter("entity-type"));
-        assertEquals(consentId, exception.getParameter("entity-id"));
+        assertEquals(consentReference, exception.getParameter("entity-id"));
 
         // and: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -562,15 +536,16 @@ public class UserConsentServiceTest {
     public void testConsentDenied_HappyPath() {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.WAITING);
         consent.setCallbackUri(clientCallbackUri.toString());
-        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+        consent.setReference(UUID.randomUUID().toString());
+        when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         String errorCode = "UserCancelledSession";
         String errorDetail = "User Cancelled Session";
-        URI result = fixture.consentDenied(consent.getId(), errorCode, errorDetail);
+        URI result = fixture.consentDenied(consent.getReference(), errorCode, errorDetail);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -585,11 +560,8 @@ public class UserConsentServiceTest {
         // and: the callback uri is cleared
         assertNull(updatedConsent.getCallbackUri());
 
-        // and: the requisition is deleted
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
         // and: the agreement is deleted
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentDenied(updatedConsent);
@@ -605,26 +577,26 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentDenied_NotFound() {
         // given: a consent that has is waiting to be accepted
-        UUID consentId = UUID.randomUUID();
-        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
+        String consentReference = UUID.randomUUID().toString();
+        when(userConsentRepository.findByReference(consentReference)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
             String errorCode = "UserCancelledSession";
             String errorDetail = "User Cancelled Session";
-            fixture.consentDenied(consentId, errorCode, errorDetail);
+            fixture.consentDenied(consentReference, errorCode, errorDetail);
         });
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent", exception.getParameter("entity-type"));
-        assertEquals(consentId, exception.getParameter("entity-id"));
+        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
+        assertEquals(consentReference, exception.getParameter("entity-id"));
 
         // then: the consent is updated
         verify(userConsentRepository, never()).save(any());
 
         // and: NO requisition is deleted
-        verifyNoInteractions(requisitionService);
+        verify(railProviderApi, never()).deleteAgreement(any());
 
         // and: NO consent event is issued
         verifyNoInteractions(consentEventSender);
@@ -634,7 +606,7 @@ public class UserConsentServiceTest {
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"SUSPENDED"})
     public void testConsentSuspended_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -649,11 +621,8 @@ public class UserConsentServiceTest {
         // and: the status is set to SUSPENDED
         assertEquals(ConsentStatus.SUSPENDED, updatedConsent.getStatus());
 
-        // and: the requisition is deleted
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
         // and: the agreement is deleted
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentSuspended(updatedConsent);
@@ -662,7 +631,7 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentSuspended_AlreadySuspended() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.SUSPENDED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -696,7 +665,7 @@ public class UserConsentServiceTest {
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"EXPIRED"})
     public void testConsentExpired_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -711,11 +680,8 @@ public class UserConsentServiceTest {
         // and: the status is set to EXPIRED
         assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
 
-        // and: the requisition is deleted
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
         // and: the agreement is deleted
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentExpired(updatedConsent);
@@ -724,7 +690,7 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentExpired_AlreadyExpired() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.EXPIRED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -758,7 +724,7 @@ public class UserConsentServiceTest {
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"CANCELLED"})
     public void testConsentCancelled_HappyPath(ConsentStatus consentStatus) {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -774,11 +740,8 @@ public class UserConsentServiceTest {
         assertEquals(ConsentStatus.CANCELLED, updatedConsent.getStatus());
         assertNotNull(updatedConsent.getDateCancelled());
 
-        // and: the requisition is deleted
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
         // and: the agreement is deleted
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentCancelled(updatedConsent);
@@ -787,7 +750,7 @@ public class UserConsentServiceTest {
     @Test
     public void testConsentCancelled_AlreadyCancelled() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.CANCELLED);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
@@ -824,39 +787,39 @@ public class UserConsentServiceTest {
 
         // and: the user holds several consents
         List<UserConsent> consents = List.of(
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.SUSPENDED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.CANCELLED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.EXPIRED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.DENIED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.GIVEN);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.INITIATED);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.WAITING);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.GIVEN);
                 return consent;
             }),
-            mockUserConsent(userId, consent -> {
+            TestData.mockUserConsent(userId, consent -> {
                 consent.setStatus(ConsentStatus.GIVEN);
                 return consent;
             })
@@ -880,17 +843,13 @@ public class UserConsentServiceTest {
                 (consent.getStatus() == ConsentStatus.CANCELLED) ||
                 (consent.getStatus() == ConsentStatus.EXPIRED) ||
                 (consent.getStatus() == ConsentStatus.DENIED)) {
-                // and: NO non-active requisitions are deleted
-                verify(requisitionService, never()).delete(consent.getRequisitionId());
                 // and: NO non-active agreements are deleted
-                verify(agreementService, never()).delete(consent.getAgreementId());
+                verify(railProviderApi, never()).deleteAgreement(consent.getAgreementId());
                 // and: NO consent events are issued for non-active consent
                 verify(consentEventSender, never()).sendConsentCancelled(consent);
             } else {
-                // and: all active requisitions are deleted
-                verify(requisitionService).delete(consent.getRequisitionId());
                 // and: all active agreements are deleted
-                verify(agreementService).delete(consent.getAgreementId());
+                verify(railProviderApi).deleteAgreement(consent.getAgreementId());
                 // and: consent events are issued for each active consent
                 verify(consentEventSender).sendConsentCancelled(consent);
             }
@@ -900,12 +859,12 @@ public class UserConsentServiceTest {
     @Test
     public void testDeleteRequisition_Exception() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.GIVEN);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
-        // and: the rail service will throw an exception on delete requisition
-        when(requisitionService.delete(any()))
+        // and: the rail service will throw an exception on delete agreement
+        when(railProviderApi.deleteAgreement(any()))
             .thenThrow(new RuntimeException("some rail exception"));
 
         // when: the consent is expired
@@ -919,11 +878,8 @@ public class UserConsentServiceTest {
         // and: the status is set to EXPIRED
         assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
 
-        // and: the requisition is deleted - the exception is ignored
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
-        // and: the agreement is deleted
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        // and: the agreement is deleted - the exception is ignored
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentExpired(updatedConsent);
@@ -932,12 +888,12 @@ public class UserConsentServiceTest {
     @Test
     public void testDeleteAgreement_Exception() {
         // given: a consent identifier
-        UserConsent consent = mockUserConsent(UUID.randomUUID());
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.GIVEN);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
-        // and: the rail service will throw an exception on delete requisition
-        when(agreementService.delete(any()))
+        // and: the rail service will throw an exception on delete agreement
+        when(railProviderApi.deleteAgreement(any()))
             .thenThrow(new RuntimeException("some rail exception"));
 
         // when: the consent is expired
@@ -951,68 +907,25 @@ public class UserConsentServiceTest {
         // and: the status is set to EXPIRED
         assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
 
-        // and: the requisition is deleted
-        verify(requisitionService).delete(updatedConsent.getRequisitionId());
-
         // and: the agreement is deleted - the exception is ignored
-        verify(agreementService).delete(updatedConsent.getAgreementId());
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentExpired(updatedConsent);
     }
 
-    private UserConsent mockUserConsent(UUID userId) {
-        return mockUserConsent(userId, consent -> consent);
-    }
-
-    private UserConsent mockUserConsent(UUID userId, Function<UserConsent, UserConsent> modifier) {
-        UserConsent result = UserConsent.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .dateCreated(Instant.now().minus(Duration.ofDays(10)))
-            .status(ConsentStatus.GIVEN)
-            .institutionId(randomAlphanumeric(30))
-            .agreementId(randomAlphanumeric(30))
-            .requisitionId(randomAlphanumeric(20))
-            .maxHistory(90)
-            .agreementExpires(Instant.now().plus(Duration.ofDays(90)))
-            .build();
-
-        return modifier.apply(result);
-    }
-
-    private InstitutionDetail mockInstitution() {
-        InstitutionDetail result = new InstitutionDetail();
-        result.id = randomAlphanumeric(20);
-        result.name = randomAlphanumeric(30);
-        result.bic = randomAlphanumeric(12);
-        result.transactionTotalDays = RandomUtils.nextInt(100, 900);
-
-        return result;
-    }
-
-    private EndUserAgreement returnEndUserAgreement(EndUserAgreementRequest request) {
-        EndUserAgreement result = new EndUserAgreement();
-        result.id = randomAlphanumeric(30);
-        result.institutionId = request.getInstitutionId();
-        result.created = OffsetDateTime.now();
-        result.accessValidForDays = request.getAccessValidForDays();
-        result.maxHistoricalDays = request.getMaxHistoricalDays();
-
-        return result;
-    }
-
-    private Requisition returnRequisition(RequisitionRequest request) {
-        return Requisition.builder()
-            .id(randomAlphanumeric(30))
-            .institutionId(request.getInstitutionId())
-            .agreement(request.getAgreement())
-            .accountSelection(request.getAccountSelection())
-            .userLanguage(request.getUserLanguage())
-            .redirectImmediate(request.getRedirectImmediate())
-            .redirect(request.getRedirect())
-            .reference(request.getReference())
-            .link("http://mock-requisition-link")
+    private Agreement returnEndUserAgreement(String reference, Institution institution, URI callbackUri) {
+        return Agreement.builder()
+            .id(UUID.randomUUID().toString())
+            .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))    
+            .status(AgreementStatus.GIVEN)
+            .dateCreated(Instant.now())
+            .dateGiven(Instant.now())
+            .dateExpires(Instant.now().plus(Duration.ofDays(90)))
+            .institutionId(institution.getId())
+            .maxHistory(institution.getTransactionTotalDays())
+            .agreementLink(URI.create("http://mock-agreement-link"))
+            .redirectUrl(callbackUri)
             .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
@@ -7,12 +8,11 @@ import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.service.AccountTransactionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -87,11 +87,9 @@ public class AccountTransactionResource {
         return new TransactionSummaryResponse()
             .id(transaction.getId())
             .accountId(transaction.getAccountId())
-            .amount(transaction.getTransactionAmount())
-            .currency(transaction.getTransactionCurrencyCode())
+            .amount(transaction.getAmount().toDecimal())
+            .currency(transaction.getAmount().getCurrencyCode())
             .date(transaction.getBookingDateTime())
-            .description(transaction.getRemittanceInformationUnstructured() == null
-                ? transaction.getDebtorName()
-                : transaction.getRemittanceInformationUnstructured());
+            .description(Strings.valueOf(transaction.getReference(), transaction.getAdditionalInformation()));
     }
 }

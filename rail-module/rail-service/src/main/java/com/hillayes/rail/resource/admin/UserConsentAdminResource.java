@@ -102,7 +102,7 @@ public class UserConsentAdminResource {
             .id(account.getId())
             .name(account.getAccountName())
             .ownerName(account.getOwnerName())
-            .currency(account.getCurrencyCode())
+            .currency(account.getCurrency().getCurrencyCode())
             .iban(account.getIban())
             .institutionId(account.getInstitutionId());
     }

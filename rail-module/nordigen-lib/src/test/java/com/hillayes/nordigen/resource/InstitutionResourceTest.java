@@ -1,4 +1,4 @@
-package com.hillayes.rail.resource;
+package com.hillayes.nordigen.resource;
 
 import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedInstitutions;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @QuarkusTest
 public class InstitutionResourceTest extends TestResourceBase {
     @Test
-    @TestSecurity(user = adminIdStr, roles = "admin")
+    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testListBanks() {
         PaginatedInstitutions response = given()
             .queryParam("country", "GB")
@@ -44,6 +44,8 @@ public class InstitutionResourceTest extends TestResourceBase {
         assertTrue(links.getFirst().getQuery().contains("page=0"));
 
         assertNull(links.getPrevious());
+
+        assertNotNull(links.getNext());
         assertEquals("/api/v1/rails/institutions", links.getNext().getPath());
         assertTrue(links.getNext().getQuery().contains("country=GB"));
         assertTrue(links.getNext().getQuery().contains("page-size=10"));
@@ -56,7 +58,7 @@ public class InstitutionResourceTest extends TestResourceBase {
     }
 
     @Test
-    @TestSecurity(user = adminIdStr, roles = "admin")
+    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testGetBank() {
         given()
             .pathParam("id", "FIRST_DIRECT_MIDLGB22")

@@ -25,6 +25,7 @@ public class UserConsent {
     private UUID id;
 
     @ToString.Include
+    @Enumerated(EnumType.STRING)
     private RailProvider provider;
 
     @Builder.Default

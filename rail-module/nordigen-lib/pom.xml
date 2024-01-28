@@ -36,5 +36,11 @@
             <groupId>com.hillayes</groupId>
             <artifactId>rail-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>auth-lib</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

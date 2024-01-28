@@ -3,6 +3,7 @@ package com.hillayes.rail.event;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
+import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,6 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .build());
     }
 
@@ -44,7 +44,6 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .build());
     }
 
@@ -59,7 +58,6 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .errorCode(userConsent.getErrorCode())
             .errorDetail(userConsent.getErrorDetail())
             .build());
@@ -76,7 +74,6 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .build());
     }
 
@@ -91,7 +88,6 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .build());
     }
 
@@ -106,13 +102,12 @@ public class ConsentEventSender {
             .institutionName(getInstitutionName(userConsent.getInstitutionId()))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
-            .requisitionId(userConsent.getRequisitionId())
             .build());
     }
 
     private String getInstitutionName(String institutionId) {
         return institutionService.get(institutionId)
-            .map(detail -> detail.name)
+            .map(Institution::getName)
             .orElse("Unknown");
     }
 }

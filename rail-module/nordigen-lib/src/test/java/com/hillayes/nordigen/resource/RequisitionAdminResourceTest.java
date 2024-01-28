@@ -1,4 +1,4 @@
-package com.hillayes.rail.resource;
+package com.hillayes.nordigen.resource;
 
 import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.nordigen.model.*;
@@ -20,9 +20,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-public class RequisitionResourceTest extends TestResourceBase {
+public class RequisitionAdminResourceTest extends TestResourceBase {
     @Test
-    @TestSecurity(user = adminIdStr, roles = "admin")
+    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testFlow() {
         PaginatedInstitutions institutions = given()
             .queryParam("country", "GB")
@@ -33,6 +33,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             .statusCode(200)
             .contentType(JSON)
             .extract().response().as(PaginatedInstitutions.class);
+        assertNotNull(institutions.getItems());
         assertEquals(107, institutions.getItems().size());
 
         InstitutionDetail institution = given()
@@ -78,7 +79,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // create requisition
         final Requisition requisition = given()
             .request().contentType(JSON).body(requisitionRequest)
-            .when().post("/api/v1/rails/admin/rail-requisitions")
+            .when().post("/api/v1/rails/nordigen/requisitions")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -95,7 +96,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         given()
             .queryParam("limit", 100)
             .queryParam("offset", 0)
-            .when().get("/api/v1/rails/admin/rail-requisitions")
+            .when().get("/api/v1/rails/nordigen/requisitions")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -107,7 +108,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         await().untilAsserted(() -> {
             Requisition req = given()
                 .pathParam("id", requisition.id)
-                .when().get("/api/v1/rails/admin/rail-requisitions/{id}")
+                .when().get("/api/v1/rails/nordigen/requisitions/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -126,7 +127,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve the account info
             AccountSummary account = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/admin/rail-accounts/{id}")
+                .when().get("/api/v1/rails/nordigen/accounts/{id}")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -136,7 +137,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve the account detail
             Map<?,?> detail = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/admin/rail-accounts/{id}/details")
+                .when().get("/api/v1/rails/nordigen/accounts/{id}/details")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -152,7 +153,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve account balances
             List<Balance> balances = Arrays.asList(given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/admin/rail-accounts/{id}/balances")
+                .when().get("/api/v1/rails/nordigen/accounts/{id}/balances")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -163,7 +164,7 @@ public class RequisitionResourceTest extends TestResourceBase {
             // retrieve account transactions
             TransactionList transactionsList = given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/admin/rail-accounts/{id}/transactions")
+                .when().get("/api/v1/rails/nordigen/accounts/{id}/transactions")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -178,7 +179,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // delete the requisition
         given()
             .pathParam("id", requisition.id)
-            .when().delete("/api/v1/rails/admin/rail-requisitions/{id}")
+            .when().delete("/api/v1/rails/nordigen/requisitions/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -187,7 +188,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         // get requisition again (should fail)
         given()
             .pathParam("id", requisition.id)
-            .when().get("/api/v1/rails/admin/rail-requisitions/{id}")
+            .when().get("/api/v1/rails/nordigen/requisitions/{id}")
             .then()
             .statusCode(404);
 
@@ -202,7 +203,7 @@ public class RequisitionResourceTest extends TestResourceBase {
         accountIds.get().forEach(accountId -> {
             given()
                 .pathParam("id", accountId)
-                .when().get("/api/v1/rails/admin/rail-accounts/{id}")
+                .when().get("/api/v1/rails/nordigen/accounts/{id}")
                 .then()
                 .statusCode(404);
         });

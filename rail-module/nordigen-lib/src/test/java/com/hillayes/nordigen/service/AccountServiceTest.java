@@ -1,54 +1,36 @@
-package com.hillayes.rail.service;
+package com.hillayes.nordigen.service;
 
 import com.hillayes.nordigen.api.AccountApi;
 import com.hillayes.nordigen.model.*;
-import com.hillayes.rail.config.ServiceConfiguration;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomUtils.nextFloat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RailAccountServiceTest {
+public class AccountServiceTest {
     AccountApi accountApi;
 
-    ServiceConfiguration config;
-
-    RailAccountService fixture;
+    AccountService fixture;
 
     @BeforeEach
     public void beforeEach() {
         accountApi = mock();
-        config = mock();
-        when(config.caches()).thenReturn(new ServiceConfiguration.Caches() {
-            @Override
-            public Duration institutions() {
-                return Duration.ofSeconds(0); // disable cache
-            }
 
-            @Override
-            public Duration accountDetails() {
-                return Duration.ofSeconds(0); // disable cache
-            }
-        });
-
-        fixture = new RailAccountService();
-        fixture.config = config;
+        fixture = new AccountService();
         fixture.accountApi = accountApi;
-        fixture.init();
     }
 
     @Test
@@ -107,12 +89,12 @@ public class RailAccountServiceTest {
         balanceList.balances = List.of(
             Balance.builder()
                 .balanceType("expected")
-                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(RandomUtils.nextFloat()).build())
+                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(nextFloat()).build())
                 .referenceDate(LocalDate.now())
                 .build(),
             Balance.builder()
                 .balanceType("resolved")
-                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(RandomUtils.nextFloat()).build())
+                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(nextFloat()).build())
                 .referenceDate(LocalDate.now())
                 .build()
         );
