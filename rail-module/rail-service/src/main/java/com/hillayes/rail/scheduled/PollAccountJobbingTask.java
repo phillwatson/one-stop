@@ -142,7 +142,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                 account.setUserConsentId(userConsent.getId());
                 return account;
             })
-            .orElseGet(() -> Account.builder()
+            .orElseGet(() -> accountRepository.save(Account.builder()
                 .userConsentId(userConsent.getId())
                 .userId(userConsent.getUserId())
                 .railAccountId(railAccount.getId())
@@ -152,7 +152,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                 .ownerName(railAccount.getOwnerName())
                 .currency(railAccount.getCurrency())
                 .accountType(railAccount.getAccountType())
-                .build()
+                .build())
             );
     }
 

@@ -3,6 +3,7 @@ package com.hillayes.rail.repository;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -209,6 +210,7 @@ public class AccountTransactionRepositoryTest {
 
     private UserConsent mockUserConsent() {
         return UserConsent.builder()
+            .provider(RailProvider.NORDIGEN)
             .userId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())

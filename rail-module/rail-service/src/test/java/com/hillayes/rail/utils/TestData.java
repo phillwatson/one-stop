@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.json.MapperFactory;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -46,6 +47,7 @@ public class TestData {
     public static UserConsent mockUserConsent(UUID userId, Function<UserConsent, UserConsent> modifier) {
         UserConsent result = UserConsent.builder()
             .id(UUID.randomUUID())
+            .provider(RailProvider.NORDIGEN)
             .userId(userId)
             .status(ConsentStatus.GIVEN)
             .reference(UUID.randomUUID().toString())

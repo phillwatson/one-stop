@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextDouble;
@@ -75,6 +77,23 @@ public class TestApiData {
     }
 
     public static List<Transaction> mockTransactionList(int count) {
-        return List.of();
+        return (count <= 0)
+            ? List.of()
+            : Stream.generate(TestApiData::mockTransaction)
+                .limit(count)
+                .toList();
+    }
+
+    public static Transaction mockTransaction() {
+        return Transaction.builder()
+            .id(randomAlphanumeric(20))
+            .originalTransactionId(randomAlphanumeric(20))
+            .amount(MonetaryAmount.of("GBP", nextDouble()))
+            .dateBooked(Instant.now().minus(Duration.ofDays(nextInt())))
+            .dateValued(Instant.now().minus(Duration.ofDays(nextInt())))
+            .description(randomAlphanumeric(20))
+            .reference(randomAlphanumeric(15))
+            .creditor(randomAlphanumeric(20))
+            .build();
     }
 }

@@ -292,7 +292,7 @@ public class UserConsentServiceTest {
 
         // and: the consent record is later updated
         ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
-        verify(userConsentRepository).save(consentCaptor.capture());
+        verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
         UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
@@ -365,7 +365,7 @@ public class UserConsentServiceTest {
 
         // and: the consent record is later updated
         ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
-        verify(userConsentRepository).save(consentCaptor.capture());
+        verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
         UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
@@ -479,7 +479,8 @@ public class UserConsentServiceTest {
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.WAITING);
         consent.setCallbackUri(clientCallbackUri.toString());
-        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+        consent.setReference(UUID.randomUUID().toString());
+        when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
         URI result = fixture.consentGiven(consent.getReference());
@@ -519,7 +520,7 @@ public class UserConsentServiceTest {
         );
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent", exception.getParameter("entity-type"));
+        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
         assertEquals(consentReference, exception.getParameter("entity-id"));
 
         // and: NO consent is updated
@@ -540,6 +541,7 @@ public class UserConsentServiceTest {
         consent.setStatus(ConsentStatus.WAITING);
         consent.setCallbackUri(clientCallbackUri.toString());
         consent.setReference(UUID.randomUUID().toString());
+        consent.setDateGiven(null);
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called

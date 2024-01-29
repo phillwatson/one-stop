@@ -1,6 +1,7 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import io.quarkus.test.TestTransaction;
@@ -34,6 +35,7 @@ public class UserConsentRepositoryTest {
         userIds.forEach(userId -> {
             for (int i = 0; i < 3; i++) {
                 fixture.save(UserConsent.builder()
+                    .provider(RailProvider.NORDIGEN)
                     .userId(userId)
                     .institutionId(UUID.randomUUID().toString())
                     .agreementId(UUID.randomUUID().toString())
@@ -69,6 +71,7 @@ public class UserConsentRepositoryTest {
         userIds.forEach(userId -> {
             for (int i = 0; i < 35; i++) {
                 fixture.save(UserConsent.builder()
+                    .provider(RailProvider.NORDIGEN)
                     .userId(userId)
                     .institutionId(UUID.randomUUID().toString())
                     .agreementId(UUID.randomUUID().toString())

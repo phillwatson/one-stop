@@ -62,7 +62,7 @@ public class Account {
     @Column(name = "owner_name", nullable = true)
     private String ownerName;
 
-    @Column(name = "currency", nullable = true)
+    @Column(name = "currency_code", nullable = true)
     @Convert(converter = CurrencyConverter.class)
     private Currency currency;
 

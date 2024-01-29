@@ -43,6 +43,9 @@ public class UserConsentService {
     UserConsentRepository userConsentRepository;
 
     @Inject
+    InstitutionService institutionService;
+
+    @Inject
     RailProviderApi railProviderApi;
 
     @Inject
@@ -89,7 +92,7 @@ public class UserConsentService {
     public URI register(UUID userId, RailProvider railProvider, String institutionId, URI callbackUri) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 
-        Institution institution = railProviderApi.getInstitution(institutionId)
+        Institution institution = institutionService.get(institutionId)
             .orElseThrow(() -> new NotFoundException("Institution", institutionId));
 
         // read any existing consent

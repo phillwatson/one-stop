@@ -1,6 +1,7 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -114,6 +115,7 @@ public class AccountBalanceRepositoryTest {
 
     private UserConsent createUserConsent() {
         return userConsentRepository.save(UserConsent.builder()
+            .provider(RailProvider.NORDIGEN)
             .userId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())

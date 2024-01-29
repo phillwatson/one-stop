@@ -71,7 +71,7 @@ public class AccountTransaction {
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "amount", column = @Column(name = "amount")),
-        @AttributeOverride(name = "currencyCode", column = @Column(name = "currency_code"))
+        @AttributeOverride(name = "currency", column = @Column(name = "currency_code"))
     })
     private MonetaryAmount amount;
 
