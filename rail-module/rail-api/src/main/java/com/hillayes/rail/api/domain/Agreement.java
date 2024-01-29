@@ -59,14 +59,10 @@ public class Agreement {
     private AgreementStatus status;
 
     /**
-     * The URL to which the user is redirected in order to obtain agreement.
+     * The URL to which the user is redirected in order to obtain their authorisation
+     * to access their account details.
      */
     private URI agreementLink;
-
-    /**
-     * The redirect URL to which the user should be sent to obtain agreement.
-     */
-    private URI redirectUrl;
 
     /**
      * If agreement is denied, this records the error code returned by the rail.

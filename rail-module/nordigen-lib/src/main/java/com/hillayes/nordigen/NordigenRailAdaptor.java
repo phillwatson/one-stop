@@ -77,7 +77,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Agreement register(String reference, Institution institution, URI callbackUri) {
+    public Agreement register(Institution institution, URI callbackUri, String reference) {
         log.debug("Requesting agreement [reference: {}, institutionId: {}]", reference, institution.getId());
         EndUserAgreement agreement = agreementService.create(EndUserAgreementRequest.builder()
             .institutionId(institution.getId())
@@ -115,7 +115,6 @@ public class NordigenRailAdaptor implements RailProviderApi {
             .institutionId(agreement.institutionId)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementLink(URI.create(requisition.link))
-            .redirectUrl(callbackUri)
             .build();
     }
 

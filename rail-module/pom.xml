@@ -13,9 +13,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>rail-api</module>
         <module>yapily-lib</module>
         <module>nordigen-lib</module>
-        <module>rail-api</module>
         <module>rail-service</module>
     </modules>
 </project>

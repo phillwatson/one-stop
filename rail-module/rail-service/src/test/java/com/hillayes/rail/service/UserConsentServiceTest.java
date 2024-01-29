@@ -122,9 +122,11 @@ public class UserConsentServiceTest {
         String institutionId = randomAlphanumeric(30);
 
         // and: the user holds several consents for the institute
-        UserConsent activeConsent = TestData.mockUserConsent(userId);
-        activeConsent.setInstitutionId(institutionId);
-        activeConsent.setStatus(ConsentStatus.GIVEN);
+        UserConsent activeConsent = TestData.mockUserConsent(userId, consent -> {
+            consent.setInstitutionId(institutionId);
+            consent.setStatus(ConsentStatus.GIVEN);
+            return consent;
+        });
         List<UserConsent> consents = List.of(
             TestData.mockUserConsent(userId, consent -> {
                 consent.setInstitutionId(institutionId);
@@ -274,9 +276,9 @@ public class UserConsentServiceTest {
         // and: an agreement will be created
         AtomicReference<Agreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            String reference = invocation.getArgument(0);
-            Institution i = invocation.getArgument(1);
-            URI uri = invocation.getArgument(2);
+            Institution i = invocation.getArgument(0);
+            URI uri = invocation.getArgument(1);
+            String reference = invocation.getArgument(2);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -287,10 +289,7 @@ public class UserConsentServiceTest {
         // then: an agreement is created
         assertNotNull(agreement.get());
 
-        // and: the consent record is initially created
-        verify(userConsentRepository).saveAndFlush(any());
-
-        // and: the consent record is later updated
+        // and: the consent record is created
         ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
         verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
         UserConsent consent = consentCaptor.getValue();
@@ -347,9 +346,9 @@ public class UserConsentServiceTest {
         // and: an agreement will be created
         AtomicReference<Agreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            String reference = invocation.getArgument(0);
-            Institution i = invocation.getArgument(1);
-            URI uri = invocation.getArgument(2);
+            Institution i = invocation.getArgument(0);
+            URI uri = invocation.getArgument(1);
+            String reference = invocation.getArgument(2);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -360,10 +359,7 @@ public class UserConsentServiceTest {
         // then: an agreement is created
         assertNotNull(agreement.get());
 
-        // and: the consent record is initially created
-        verify(userConsentRepository).saveAndFlush(any());
-
-        // and: the consent record is later updated
+        // and: the consent record is created
         ArgumentCaptor<UserConsent> consentCaptor = ArgumentCaptor.forClass(UserConsent.class);
         verify(userConsentRepository).saveAndFlush(consentCaptor.capture());
         UserConsent consent = consentCaptor.getValue();
@@ -859,35 +855,6 @@ public class UserConsentServiceTest {
     }
 
     @Test
-    public void testDeleteRequisition_Exception() {
-        // given: a consent identifier
-        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
-        consent.setStatus(ConsentStatus.GIVEN);
-        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
-
-        // and: the rail service will throw an exception on delete agreement
-        when(railProviderApi.deleteAgreement(any()))
-            .thenThrow(new RuntimeException("some rail exception"));
-
-        // when: the consent is expired
-        fixture.consentExpired(consent.getId());
-
-        // then: the consent is updated
-        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
-        verify(userConsentRepository).save(captor.capture());
-        UserConsent updatedConsent = captor.getValue();
-
-        // and: the status is set to EXPIRED
-        assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
-
-        // and: the agreement is deleted - the exception is ignored
-        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
-
-        // and: a consent event is issued
-        verify(consentEventSender).sendConsentExpired(updatedConsent);
-    }
-
-    @Test
     public void testDeleteAgreement_Exception() {
         // given: a consent identifier
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
@@ -920,14 +887,13 @@ public class UserConsentServiceTest {
         return Agreement.builder()
             .id(UUID.randomUUID().toString())
             .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))    
-            .status(AgreementStatus.GIVEN)
+            .status(AgreementStatus.INITIATED)
             .dateCreated(Instant.now())
             .dateGiven(Instant.now())
             .dateExpires(Instant.now().plus(Duration.ofDays(90)))
             .institutionId(institution.getId())
             .maxHistory(institution.getTransactionTotalDays())
             .agreementLink(URI.create("http://mock-agreement-link"))
-            .redirectUrl(callbackUri)
             .build();
     }
 }

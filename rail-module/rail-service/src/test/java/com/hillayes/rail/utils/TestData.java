@@ -1,9 +1,6 @@
 package com.hillayes.rail.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.MonetaryAmount;
-import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
@@ -19,27 +16,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextDouble;
 
 public class TestData {
-    /**
-     * A shared object mapper for when a test needs to serialize/deserialize objects.
-     */
-    private final static ObjectMapper objectMapper = MapperFactory.defaultMapper();
-
-    public static String toJson(Object object) {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T fromJson(String json, Class<T> clazz) {
-        try {
-            return objectMapper.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static UserConsent mockUserConsent(UUID userId) {
         return mockUserConsent(userId, consent -> consent);
     }

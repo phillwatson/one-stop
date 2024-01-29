@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,14 +30,6 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class UserConsentService {
-    // The number of days for which account access will be agreed
-    private final static int ACCESS_VALID_FOR_DAYS = 90;
-
-    /**
-     * The account scopes for which all consents are granted access.
-     */
-    private final static List<String> CONSENT_SCOPES = List.of("balances", "details", "transactions");
-
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -115,10 +106,10 @@ public class UserConsentService {
 
             // generate a random reference and register the agreement with the rail
             String reference = UUID.randomUUID().toString();
-            Agreement agreement = railProviderApi.register(reference, institution, registrationCallbackUrl);
+            Agreement agreement = railProviderApi.register(institution, registrationCallbackUrl, reference);
 
             // record agreement in a consent record - with the reference
-            log.debug("Recording agreement [userId: {}, institutionId: {}]", userId, institutionId);
+            log.debug("Recording agreement [userId: {}, institutionId: {}, reference: {}]", userId, institutionId, reference);
             if (userConsent == null) {
                 userConsent = UserConsent.builder()
                     .dateCreated(Instant.now())
@@ -148,12 +139,12 @@ public class UserConsentService {
     }
 
     public URI consentGiven(String consentReference) {
-        log.info("User's consent received [userConsentId: {}]", consentReference);
+        log.info("User's consent received [reference: {}]", consentReference);
         UserConsent userConsent = userConsentRepository.findByReference(consentReference)
             .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
-            userConsent.getUserId(), consentReference, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+            userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
         URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.GIVEN);
@@ -171,12 +162,12 @@ public class UserConsentService {
     }
 
     public URI consentDenied(String consentReference, String error, String details) {
-        log.info("User's consent denied [userConsentId: {}, error: {}, details: {}]", consentReference, error, details);
+        log.info("User's consent denied [reference: {}, error: {}, details: {}]", consentReference, error, details);
         UserConsent userConsent = userConsentRepository.findByReference(consentReference)
             .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
 
-        log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
-        userConsent.getUserId(), consentReference, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
+        log.debug("Updating consent [userId: {}, consentId: {}, institutionId: {}, expires: {}]",
+        userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
         deleteAgreement(userConsent);
 
