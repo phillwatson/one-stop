@@ -69,7 +69,7 @@ public class UserConsent {
     /**
      * The date-time on which the agreement expires.
      */
-    @Column(name = "agreement_expires", nullable = false)
+    @Column(name = "agreement_expires")
     private Instant agreementExpires;
 
     /**

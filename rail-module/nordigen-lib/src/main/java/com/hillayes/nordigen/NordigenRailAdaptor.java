@@ -46,6 +46,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
     @Override
     public Optional<Institution> getInstitution(String id) {
+        log.debug("Getting institution [id: {}]", id);
         return institutionService.get(id)
             .map(institution -> Institution.builder()
                 .id(institution.id)
@@ -61,6 +62,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
     @Override
     public List<Institution> listInstitutions(String countryCode) {
+        log.debug("Listing institutions [countryCode: {}]", countryCode);
         return institutionService.list(countryCode, false)
             .stream()
             .map(institution -> Institution.builder()
@@ -110,8 +112,8 @@ public class NordigenRailAdaptor implements RailProviderApi {
             .accountIds(requisition.accounts)
             .status(of(requisition.status))
             .dateCreated(requisition.created.toInstant())
-            .dateGiven(agreement.accepted.toInstant())
-            .dateExpires(agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
+            .dateGiven(agreement.accepted == null ? null : agreement.accepted.toInstant())
+            .dateExpires(agreement.accepted == null ? null : agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
             .institutionId(agreement.institutionId)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementLink(URI.create(requisition.link))
@@ -120,6 +122,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
     @Override
     public Optional<Agreement> getAgreement(String id) {
+        log.debug("Getting agreement [id: {}]", id);
         return requisitionService.get(id)
             .flatMap(requisition -> agreementService.get(requisition.agreement)
                 .map(agreement -> Agreement.builder()
@@ -127,8 +130,8 @@ public class NordigenRailAdaptor implements RailProviderApi {
                     .accountIds(requisition.accounts)
                     .status(of(requisition.status))
                     .dateCreated(requisition.created.toInstant())
-                    .dateGiven(agreement.accepted.toInstant())
-                    .dateExpires(agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
+                    .dateGiven(agreement.accepted == null ? null : agreement.accepted.toInstant())
+                    .dateExpires(agreement.accepted == null ? null : agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
                     .institutionId(agreement.institutionId)
                     .maxHistory(agreement.maxHistoricalDays)
                     .build()
@@ -137,12 +140,14 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
     @Override
     public boolean deleteAgreement(String id) {
+        log.debug("Deleting agreement [id: {}]", id);
         requisitionService.delete(id);
         return true;
     }
 
     @Override
     public Optional<Account> getAccount(String id) {
+        log.debug("Getting account [id: {}]", id);
         return accountService.get(id)
             .map(account -> Account.builder()
                 .id(account.id)
@@ -167,6 +172,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
     @Override
     public List<Balance> listBalances(String accountId, LocalDate dateFrom) {
+        log.debug("Listing balances [accountId: {}, from: {}]", accountId, dateFrom);
         return accountService.balances(accountId)
             .map(balances -> balances.stream()
                 .filter(balance -> balance.referenceDate.isAfter(dateFrom))
@@ -183,17 +189,18 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public List<Transaction> listTransactions(String id, LocalDate dateFrom, LocalDate dateTo) {
-        return accountService.transactions(id, dateFrom, dateTo)
+    public List<Transaction> listTransactions(String accountId, LocalDate dateFrom, LocalDate dateTo) {
+        log.debug("Listing transactions [accountId: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
+        return accountService.transactions(accountId, dateFrom, dateTo)
             .map(transactions -> transactions.booked.stream()
                 .map(transaction ->
                     Transaction.builder()
-                        .id(transaction.internalTransactionId)
+                        .id(Strings.valueOf(transaction.internalTransactionId, transaction.transactionId))
                         .originalTransactionId(Strings.valueOf(transaction.transactionId, transaction.entryReference))
                         .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))
                         .dateValued(bestOf(transaction.valueDate, transaction.valueDateTime))
                         .amount(of(transaction.transactionAmount))
-                        .reference(Strings.toStringOrNull(transaction.entryReference))
+                        .reference(Strings.valueOf(transaction.entryReference, transaction.remittanceInformationUnstructured))
                         .description(Strings.toStringOrNull(transaction.additionalInformation))
                         .creditor(Strings.toStringOrNull(transaction.creditorName))
                         .build()
@@ -232,16 +239,15 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     private MonetaryAmount of(com.hillayes.nordigen.model.CurrencyAmount amount) {
-        if (amount == null) {
-            return MonetaryAmount.ZERO;
-        }
-        return MonetaryAmount.of(amount.currency, amount.amount);
+        return (amount == null)
+            ? MonetaryAmount.ZERO
+            : MonetaryAmount.of(amount.currency, amount.amount);
     }
 
     private Currency currency(String currencyCode) {
         return Strings.isBlank(currencyCode)
             ? Currency.getInstance("GBP")
-            :Currency.getInstance(currencyCode);
+            : Currency.getInstance(currencyCode);
     }
 
     /**
@@ -253,9 +259,8 @@ public class NordigenRailAdaptor implements RailProviderApi {
      * @return the best of the given date and instant.
      */
     private Instant bestOf(LocalDate date, Instant instant) {
-        if (instant != null) {
-            return instant;
-        }
-        return (date == null) ? null : date.atStartOfDay(ZoneOffset.UTC).toInstant();
+        return (instant != null)
+            ? instant
+            : (date == null) ? null : date.atStartOfDay(ZoneOffset.UTC).toInstant();
     }
 }

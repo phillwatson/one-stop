@@ -11,7 +11,7 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     institution_id varchar(256) NOT NULL,
     agreement_id varchar(256) NOT NULL,
     reference varchar(256) NULL,
-    agreement_expires timestamp NOT NUlL,
+    agreement_expires timestamp NUlL,
     max_history int NOT NULL,
     callback_uri varchar(256) NULL,
     status varchar(256) NOT NULL,
