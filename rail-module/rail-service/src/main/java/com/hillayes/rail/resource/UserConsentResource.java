@@ -6,12 +6,12 @@ import com.hillayes.onestop.api.AccountSummaryResponse;
 import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
-import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.AccountService;
+import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.UserConsentService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -32,7 +32,7 @@ import java.util.UUID;
 @Slf4j
 public class UserConsentResource {
     private final UserConsentService userConsentService;
-    private final RailProviderApi railProviderApi;
+    private final InstitutionService institutionService;
     private final AccountService accountService;
 
     @GET
@@ -149,7 +149,7 @@ public class UserConsentResource {
     }
 
     private UserConsentResponse marshal(UserConsent consent) {
-        Institution institution = railProviderApi.getInstitution(consent.getInstitutionId())
+        Institution institution = institutionService.get(consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentResponse()

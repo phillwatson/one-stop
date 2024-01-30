@@ -90,6 +90,6 @@ public class AccountTransactionResource {
             .amount(transaction.getAmount().toDecimal())
             .currency(transaction.getAmount().getCurrencyCode())
             .date(transaction.getBookingDateTime())
-            .description(Strings.valueOf(transaction.getReference(), transaction.getAdditionalInformation()));
+            .description(Strings.getOrDefault(transaction.getReference(), transaction.getAdditionalInformation()));
     }
 }

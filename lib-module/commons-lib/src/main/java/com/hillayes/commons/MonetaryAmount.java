@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
@@ -29,17 +28,11 @@ public class MonetaryAmount {
             .movePointRight(currency.getDefaultFractionDigits())
             .longValue();
 
-        return MonetaryAmount.builder()
-            .amount(value)
-            .currency(currency)
-            .build();
+        return new MonetaryAmount(value, currency);
     }
 
     public static MonetaryAmount of(String currencyStr, long amount) {
-        return MonetaryAmount.builder()
-            .amount(amount)
-            .currency(Currency.getInstance(currencyStr))
-            .build();
+        return new MonetaryAmount(amount, Currency.getInstance(currencyStr));
     }
 
     public Double toDecimal() {

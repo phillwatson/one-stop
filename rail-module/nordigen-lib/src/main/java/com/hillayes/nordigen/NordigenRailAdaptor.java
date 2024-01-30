@@ -45,6 +45,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
     InstitutionService institutionService;
 
     @Override
+    public boolean isFor(RailProvider railProvider) {
+        return railProvider == RailProvider.NORDIGEN;
+    }
+
+    @Override
     public Optional<Institution> getInstitution(String id) {
         log.debug("Getting institution [id: {}]", id);
         return institutionService.get(id)
@@ -194,12 +199,12 @@ public class NordigenRailAdaptor implements RailProviderApi {
         return accountService.transactions(accountId, dateFrom, dateTo)
             .map(transactions -> transactions.booked.stream()
                 .map(transaction -> Transaction.builder()
-                    .id(Strings.valueOf(transaction.internalTransactionId, transaction.transactionId))
-                    .originalTransactionId(Strings.valueOf(transaction.transactionId, transaction.entryReference))
+                    .id(Strings.getOrDefault(transaction.internalTransactionId, transaction.transactionId))
+                    .originalTransactionId(Strings.getOrDefault(transaction.transactionId, transaction.entryReference))
                     .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))
                     .dateValued(bestOf(transaction.valueDate, transaction.valueDateTime))
                     .amount(of(transaction.transactionAmount))
-                    .reference(Strings.valueOf(transaction.entryReference, transaction.remittanceInformationUnstructured))
+                    .reference(Strings.getOrDefault(transaction.entryReference, transaction.remittanceInformationUnstructured))
                     .description(Strings.toStringOrNull(transaction.additionalInformation))
                     .creditor(Strings.toStringOrNull(transaction.creditorName))
                     .build()

@@ -26,7 +26,7 @@ public class Strings {
         return value == null ? null : value.toString();
     }
 
-    static public String valueOf(String value, String defaultValue) {
+    static public String getOrDefault(String value, String defaultValue) {
         return isBlank(value) ? defaultValue : value;
     }
 }

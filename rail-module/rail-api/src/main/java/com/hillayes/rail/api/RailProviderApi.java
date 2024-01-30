@@ -15,6 +15,22 @@ import java.util.Optional;
  */
 public interface RailProviderApi {
     /**
+     * Used when we have a collection of RailProviderApi implementations, and we
+     * want to select the correct instance based on a given RailProvider value.
+     * <p>
+     * We inject all instances using the class Instance<RailProviderApi>, and use
+     * this method to identify the appropriate instance. For example;
+     * <pre>
+     *     \@Inject \@Any
+     *     jakarta.enterprise.inject.Instance<RailProviderApi> railProviderApis;
+     * </pre>
+     *
+     * @param railProvider the RailProvider value that identifies the implementation.
+     * @return true if this instance supports the given RailProvider.
+     */
+    boolean isFor(RailProvider railProvider);
+
+    /**
      * Returns the identified Institution, or empty if not found.
      * @param id the institution id.
      * @return the institution, or empty if not found.
