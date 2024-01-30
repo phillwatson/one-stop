@@ -61,9 +61,10 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public List<Institution> listInstitutions(String countryCode) {
+    public List<Institution> listInstitutions(String countryCode,
+                                              boolean paymentsEnabled) {
         log.debug("Listing institutions [countryCode: {}]", countryCode);
-        return institutionService.list(countryCode, false)
+        return institutionService.list(countryCode, paymentsEnabled)
             .stream()
             .map(institution -> Institution.builder()
                 .id(institution.id)
@@ -72,7 +73,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
                 .logo(institution.logo)
                 .countries(institution.countries)
                 .transactionTotalDays(institution.transactionTotalDays)
-                .paymentsEnabled(false)
+                .paymentsEnabled(paymentsEnabled)
                 .build()
             )
             .toList();
@@ -159,7 +160,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
                 .build()
             )
             .map(account -> accountService.details(id)
-                .map(details -> (Map<String,String>)details.get("account"))
+                .map(details -> (Map<String, String>) details.get("account"))
                 .map(accountProperties -> {
                     account.setName(accountProperties.get("name"));
                     account.setAccountType(accountProperties.get("cashAccountType"));
@@ -176,12 +177,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
         return accountService.balances(accountId)
             .map(balances -> balances.stream()
                 .filter(balance -> balance.referenceDate.isAfter(dateFrom))
-                .map(balance ->
-                    Balance.builder()
-                        .type(balance.balanceType)
-                        .dateTime(balance.referenceDate)
-                        .amount(of(balance.balanceAmount))
-                        .build()
+                .map(balance -> Balance.builder()
+                    .type(balance.balanceType)
+                    .dateTime(balance.referenceDate)
+                    .amount(of(balance.balanceAmount))
+                    .build()
                 )
                 .toList()
             )
@@ -193,17 +193,16 @@ public class NordigenRailAdaptor implements RailProviderApi {
         log.debug("Listing transactions [accountId: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
         return accountService.transactions(accountId, dateFrom, dateTo)
             .map(transactions -> transactions.booked.stream()
-                .map(transaction ->
-                    Transaction.builder()
-                        .id(Strings.valueOf(transaction.internalTransactionId, transaction.transactionId))
-                        .originalTransactionId(Strings.valueOf(transaction.transactionId, transaction.entryReference))
-                        .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))
-                        .dateValued(bestOf(transaction.valueDate, transaction.valueDateTime))
-                        .amount(of(transaction.transactionAmount))
-                        .reference(Strings.valueOf(transaction.entryReference, transaction.remittanceInformationUnstructured))
-                        .description(Strings.toStringOrNull(transaction.additionalInformation))
-                        .creditor(Strings.toStringOrNull(transaction.creditorName))
-                        .build()
+                .map(transaction -> Transaction.builder()
+                    .id(Strings.valueOf(transaction.internalTransactionId, transaction.transactionId))
+                    .originalTransactionId(Strings.valueOf(transaction.transactionId, transaction.entryReference))
+                    .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))
+                    .dateValued(bestOf(transaction.valueDate, transaction.valueDateTime))
+                    .amount(of(transaction.transactionAmount))
+                    .reference(Strings.valueOf(transaction.entryReference, transaction.remittanceInformationUnstructured))
+                    .description(Strings.toStringOrNull(transaction.additionalInformation))
+                    .creditor(Strings.toStringOrNull(transaction.creditorName))
+                    .build()
                 )
                 .toList()
             )
@@ -211,31 +210,19 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     private AgreementStatus of(RequisitionStatus status) {
-        switch (status) {
-            case CR:
-                return AgreementStatus.INITIATED; // CREATED Requisition has been successfully created
-            case GC:
-                return AgreementStatus.WAITING; // GIVING_CONSENT End-user is giving consent at GoCardless's consent screen
-            case UA:
-                return AgreementStatus.WAITING; // UNDERGOING_AUTHENTICATION End-user is redirected to the financial institution for authentication
-            case RJ:
-                return AgreementStatus.DENIED; // REJECTED Either SSN verification has failed or end-user has entered incorrect credentials
-            case SA:
-                return AgreementStatus.WAITING; // SELECTING_ACCOUNTS End-user is selecting accounts
-            case GA:
-                return AgreementStatus.WAITING; // GRANTING_ACCESS End-user is granting access to their account information
-            case LN:
-                return AgreementStatus.GIVEN; // LINKED Account has been successfully linked to requisition
-            case SU:
-                return AgreementStatus.SUSPENDED; // SUSPENDED Requisition is suspended due to numerous consecutive errors that happened while accessing its accounts
-            case EX:
-                return AgreementStatus.EXPIRED; // EXPIRED Access to accounts has expired as set in End User Agreement
-            case ID:
-                return AgreementStatus.WAITING;
-            case ER:
-                return AgreementStatus.WAITING;
-        }
-        return AgreementStatus.CANCELLED;
+        return switch (status) {
+            case CR -> AgreementStatus.INITIATED; // CREATED Requisition has been successfully created
+            case GC -> AgreementStatus.WAITING; // GIVING_CONSENT End-user is giving consent at GoCardless's consent screen
+            case UA -> AgreementStatus.WAITING; // UNDERGOING_AUTHENTICATION End-user is redirected to the financial institution for authentication
+            case RJ -> AgreementStatus.DENIED; // REJECTED Either SSN verification has failed or end-user has entered incorrect credentials
+            case SA -> AgreementStatus.WAITING; // SELECTING_ACCOUNTS End-user is selecting accounts
+            case GA -> AgreementStatus.WAITING; // GRANTING_ACCESS End-user is granting access to their account information
+            case LN -> AgreementStatus.GIVEN; // LINKED Account has been successfully linked to requisition
+            case SU -> AgreementStatus.SUSPENDED; // SUSPENDED Requisition is suspended due to numerous consecutive errors that happened while accessing its accounts
+            case EX -> AgreementStatus.EXPIRED; // EXPIRED Access to accounts has expired as set in End User Agreement
+            case ID -> AgreementStatus.WAITING;
+            case ER -> AgreementStatus.WAITING;
+        };
     }
 
     private MonetaryAmount of(com.hillayes.nordigen.model.CurrencyAmount amount) {

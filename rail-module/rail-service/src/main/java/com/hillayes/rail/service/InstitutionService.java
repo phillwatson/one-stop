@@ -31,7 +31,8 @@ public class InstitutionService {
     public List<Institution> list(String countryCode,
                                   Boolean paymentsEnabled) {
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
-        return cacheByCountry.getValueOrCall(key, () -> railProviderApi.listInstitutions(countryCode));
+        return cacheByCountry.getValueOrCall(key, () ->
+            railProviderApi.listInstitutions(countryCode, paymentsEnabled));
     }
 
     public Optional<Institution> get(String id) {
