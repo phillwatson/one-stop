@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -20,6 +19,7 @@ public class TestApiData {
     public static Institution mockInstitution() {
         return Institution.builder()
             .id(UUID.randomUUID().toString())
+            .provider(RailProvider.NORDIGEN)
             .name(randomAlphanumeric(20))
             .countries(List.of("GB"))
             .logo("https://example.com/logo.png")

@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,8 +41,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentInitiated() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()
@@ -78,8 +78,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentGiven() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()
@@ -117,8 +116,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentDenied() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()
@@ -157,8 +155,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentCancelled() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()
@@ -197,8 +194,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentSuspended() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()
@@ -237,8 +233,7 @@ public class ConsentEventSenderTest {
     public void testSendConsentExpired() {
         // given: a known institution
         Institution institution = TestApiData.mockInstitution();
-        institution.setName("mock institution");
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
         UserConsent userConsent = UserConsent.builder()

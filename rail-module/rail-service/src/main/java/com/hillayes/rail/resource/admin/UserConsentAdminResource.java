@@ -78,7 +78,7 @@ public class UserConsentAdminResource {
     }
 
     private UserConsentAdminResponse marshal(UserConsent consent) {
-        Institution institution = institutionService.get(consent.getInstitutionId())
+        Institution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentAdminResponse()

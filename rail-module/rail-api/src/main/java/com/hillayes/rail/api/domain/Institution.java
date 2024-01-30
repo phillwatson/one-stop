@@ -5,7 +5,6 @@ import lombok.*;
 import java.util.List;
 
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
@@ -14,6 +13,9 @@ import java.util.List;
 public class Institution implements Comparable<Institution> {
     @EqualsAndHashCode.Include
     private String id;
+
+    @ToString.Include
+    private RailProvider provider;
 
     @ToString.Include
     private String name;

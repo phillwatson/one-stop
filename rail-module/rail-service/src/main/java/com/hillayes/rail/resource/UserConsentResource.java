@@ -101,8 +101,7 @@ public class UserConsentResource {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 
-        URI consentLink = userConsentService.register(userId, RailProvider.NORDIGEN, institutionId,
-            consentRequest.getCallbackUri());
+        URI consentLink = userConsentService.register(userId, institutionId, consentRequest.getCallbackUri());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
         return Response.ok(consentLink).build();

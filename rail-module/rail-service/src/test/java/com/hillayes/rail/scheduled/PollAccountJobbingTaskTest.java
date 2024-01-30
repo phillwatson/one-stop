@@ -8,6 +8,7 @@ import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
 import com.hillayes.rail.api.domain.Balance;
 import com.hillayes.rail.api.domain.Transaction;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
 import com.hillayes.rail.repository.AccountBalanceRepository;
@@ -69,8 +70,10 @@ public class PollAccountJobbingTaskTest {
         ServiceConfiguration configuration = mock();
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
+        RailProviderFactory railProviderFactory = mock();
+        when(railProviderFactory.get(any())).thenReturn(railProviderApi);
         fixture = new PollAccountJobbingTask(configuration, userConsentService,
-            accountRepository, accountBalanceRepository, accountTransactionRepository, railProviderApi);
+            accountRepository, accountBalanceRepository, accountTransactionRepository, railProviderFactory);
     }
 
     @Test

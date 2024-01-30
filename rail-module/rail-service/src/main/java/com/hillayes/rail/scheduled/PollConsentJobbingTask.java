@@ -5,6 +5,7 @@ import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AgreementStatus;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.UserConsentService;
@@ -23,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
     private final UserConsentService userConsentService;
-    private final RailProviderApi railProviderApi;
+    private final RailProviderFactory railProviderFactory;
     private final PollAccountJobbingTask pollAccountJobbingTask;
 
     @Override
@@ -50,6 +51,7 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
             return TaskConclusion.COMPLETE;
         }
 
+        RailProviderApi railProviderApi = railProviderFactory.get(userConsent.getProvider());
         return railProviderApi.getAgreement(userConsent.getAgreementId())
             .map(agreement -> {
                 if (agreement.getStatus() == AgreementStatus.GIVEN) {

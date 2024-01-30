@@ -7,6 +7,7 @@ import com.hillayes.rail.api.domain.Agreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
 import com.hillayes.rail.api.domain.Institution;
 import com.hillayes.rail.api.domain.RailProvider;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
@@ -48,7 +49,7 @@ public class UserConsentServiceTest {
     InstitutionService institutionService;
 
     @InjectMock
-    RailProviderApi railProviderApi;
+    RailProviderFactory railProviderFactory;
 
     @InjectMock
     PollConsentJobbingTask pollConsentJobbingTask;
@@ -58,6 +59,8 @@ public class UserConsentServiceTest {
 
     @Inject
     UserConsentService fixture;
+
+    private RailProviderApi railProviderApi;
 
     @BeforeEach
     public void beforeEach() {
@@ -76,6 +79,9 @@ public class UserConsentServiceTest {
             }
             return consent;
         });
+
+        railProviderApi = mock();
+        when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
 
     @Test
@@ -252,7 +258,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -284,7 +290,7 @@ public class UserConsentServiceTest {
         });
 
         // when: the service is called
-        URI requisitionUri = fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri);
+        URI requisitionUri = fixture.register(userId, institution.getId(), callbackUri);
 
         // then: an agreement is created
         assertNotNull(agreement.get());
@@ -317,7 +323,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -354,7 +360,7 @@ public class UserConsentServiceTest {
         });
 
         // when: the service is called
-        URI requisitionUri = fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri);
+        URI requisitionUri = fixture.register(userId, institution.getId(), callbackUri);
 
         // then: an agreement is created
         assertNotNull(agreement.get());
@@ -387,7 +393,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(institution.getId())).thenReturn(Optional.empty());
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.empty());
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -395,7 +401,7 @@ public class UserConsentServiceTest {
         // when: the service is called
         // then: a not-found exception is thrown
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri)
+            fixture.register(userId, institution.getId(), callbackUri)
         );
 
         // and: the exception identifies requested institution
@@ -421,7 +427,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(institution.getId())).thenReturn(Optional.of(institution));
+        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -450,7 +456,7 @@ public class UserConsentServiceTest {
         // when: the service is called
         // then: a BankAlreadyRegistered exception is thrown
         BankAlreadyRegisteredException exception = assertThrows(BankAlreadyRegisteredException.class, () ->
-            fixture.register(userId, RailProvider.NORDIGEN, institution.getId(), callbackUri)
+            fixture.register(userId, institution.getId(), callbackUri)
         );
 
         // and: the exception identifies user and requested institution

@@ -72,6 +72,7 @@ public class InstitutionResource {
     private InstitutionResponse marshal(Institution institution) {
         return new InstitutionResponse()
             .id(institution.getId())
+            .provider(institution.getProvider().name())
             .name(institution.getName())
             .bic(institution.getBic())
             .logo(institution.getLogo());

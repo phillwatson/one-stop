@@ -27,7 +27,7 @@ public class ConsentEventSender {
             .dateInitiated(Instant.now())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .build());
@@ -41,7 +41,7 @@ public class ConsentEventSender {
             .dateGiven(userConsent.getDateGiven())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .build());
@@ -55,7 +55,7 @@ public class ConsentEventSender {
             .dateDenied(userConsent.getDateDenied())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .errorCode(userConsent.getErrorCode())
@@ -71,7 +71,7 @@ public class ConsentEventSender {
             .dateCancelled(userConsent.getDateCancelled())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .build());
@@ -85,7 +85,7 @@ public class ConsentEventSender {
             .dateSuspended(Instant.now())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .build());
@@ -99,14 +99,14 @@ public class ConsentEventSender {
             .dateExpired(Instant.now())
             .userId(userConsent.getUserId())
             .institutionId(userConsent.getInstitutionId())
-            .institutionName(getInstitutionName(userConsent.getInstitutionId()))
+            .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
             .agreementExpires(userConsent.getAgreementExpires())
             .build());
     }
 
-    private String getInstitutionName(String institutionId) {
-        return institutionService.get(institutionId)
+    private String getInstitutionName(UserConsent userConsent) {
+        return institutionService.get(userConsent.getProvider(), userConsent.getInstitutionId())
             .map(Institution::getName)
             .orElse("Unknown");
     }

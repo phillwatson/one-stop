@@ -6,6 +6,7 @@ import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.Agreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.UserConsentService;
@@ -39,9 +40,12 @@ public class PollConsentJobbingTaskTest {
         pollAccountJobbingTask = mock();
         scheduler = mock();
 
+        RailProviderFactory railProviderFactory = mock();
+        when(railProviderFactory.get(any())).thenReturn(railProviderApi);
+
         fixture = new PollConsentJobbingTask(
             userConsentService,
-            railProviderApi,
+            railProviderFactory,
             pollAccountJobbingTask);
     }
 

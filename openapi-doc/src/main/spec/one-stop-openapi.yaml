@@ -1183,6 +1183,10 @@ components:
           type: string
           description: The institution Id
           example: 07061d7674f3
+        provider:
+          type: string
+          description: The Rail Provider from which the institution is sourced
+          example: NORDIGEN
         name:
           type: string
           description: The institution's name

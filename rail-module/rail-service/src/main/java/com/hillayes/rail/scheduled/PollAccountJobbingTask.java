@@ -7,6 +7,7 @@ import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
 import com.hillayes.rail.api.domain.Transaction;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
 import com.hillayes.rail.repository.AccountBalanceRepository;
@@ -36,7 +37,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
     private final AccountTransactionRepository accountTransactionRepository;
-    private final RailProviderApi railProviderApi;
+    private final RailProviderFactory railProviderFactory;
 
     @RegisterForReflection
     public record Payload(
@@ -49,14 +50,14 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                                   AccountRepository accountRepository,
                                   AccountBalanceRepository accountBalanceRepository,
                                   AccountTransactionRepository accountTransactionRepository,
-                                  RailProviderApi railProviderApi) {
+                                  RailProviderFactory railProviderFactory) {
         super("poll-account");
         this.configuration = configuration;
         this.userConsentService = userConsentService;
         this.accountRepository = accountRepository;
         this.accountBalanceRepository = accountBalanceRepository;
         this.accountTransactionRepository = accountTransactionRepository;
-        this.railProviderApi = railProviderApi;
+        this.railProviderFactory = railProviderFactory;
     }
 
     public String queueJob(UUID consentId, String railAccountId) {
@@ -98,6 +99,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             return TaskConclusion.COMPLETE;
         }
 
+        RailProviderApi railProviderApi = railProviderFactory.get(userConsent.getProvider());
         com.hillayes.rail.api.domain.Account railAccount = railProviderApi.getAccount(railAccountId).orElse(null);
         if (railAccount == null) {
             log.info("Unable to find rail-account [consentId: {}, railAccountId: {}]", consentId, railAccountId);
@@ -124,8 +126,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             }
 
             log.debug("Polling account [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
-            updateBalances(account);
-            updateTransactions(account, userConsent.getMaxHistory());
+            updateBalances(railProviderApi, account);
+            updateTransactions(railProviderApi, account, userConsent.getMaxHistory());
 
             account.setDateLastPolled(Instant.now());
             accountRepository.save(account);
@@ -156,7 +158,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             );
     }
 
-    private void updateBalances(Account account) {
+    private void updateBalances(RailProviderApi railProviderApi, Account account) {
         log.debug("Updating balances [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
         List<AccountBalance> balances = railProviderApi.listBalances(account.getRailAccountId(), LocalDate.now().minusDays(90))
@@ -172,7 +174,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         log.debug("Updated balances [size: {}]", balances.size());
     }
 
-    private void updateTransactions(Account account, int maxHistory) {
+    private void updateTransactions(RailProviderApi railProviderApi, Account account, int maxHistory) {
         log.debug("Updating transactions [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
         LocalDate startDate;
