@@ -6,7 +6,6 @@ import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.Agreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
 import com.hillayes.rail.api.domain.Institution;
-import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -258,7 +257,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
+        when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -323,7 +322,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
+        when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -393,7 +392,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.empty());
+        when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.empty());
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
@@ -427,7 +426,7 @@ public class UserConsentServiceTest {
 
         // and: an identified institution
         Institution institution = TestApiData.mockInstitution();
-        when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
+        when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
         URI callbackUri = URI.create("http://mock-uri");
