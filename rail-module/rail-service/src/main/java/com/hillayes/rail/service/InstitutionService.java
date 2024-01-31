@@ -2,7 +2,7 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
@@ -21,8 +21,8 @@ public class InstitutionService {
     @Inject
     ServiceConfiguration config;
 
-    private Cache<CacheKey, List<Institution>> cacheByCountry;
-    private Cache<String, Optional<Institution>> cacheById;
+    private Cache<CacheKey, List<RailInstitution>> cacheByCountry;
+    private Cache<String, Optional<RailInstitution>> cacheById;
 
     @PostConstruct
     public void init() {
@@ -30,20 +30,30 @@ public class InstitutionService {
         cacheById = new Cache<>(config.caches().institutions());
     }
 
-    public List<Institution> list(String countryCode,
-                                  Boolean paymentsEnabled) {
+    public List<RailInstitution> list(RailProvider railProvider,
+                                      String countryCode,
+                                      Boolean paymentsEnabled) {
         CacheKey key = new CacheKey(countryCode, paymentsEnabled);
-        RailProviderApi railProviderApi = railProviderFactory.get(RailProvider.NORDIGEN);
+        if (railProvider == null) {
+            // return all institutions from all providers
+            return cacheByCountry.getValueOrCall(key, () ->
+                railProviderFactory.getAll()
+                    .flatMap(api -> api.listInstitutions(countryCode, paymentsEnabled).stream())
+                    .toList());
+        }
+
+        // return institutions from the specified provider
+        RailProviderApi railProviderApi = railProviderFactory.get(railProvider);
         return cacheByCountry.getValueOrCall(key, () ->
             railProviderApi.listInstitutions(countryCode, paymentsEnabled));
     }
 
-    public Optional<Institution> get(RailProvider railProvider, String id) {
+    public Optional<RailInstitution> get(RailProvider railProvider, String id) {
         return cacheById.getValueOrCall(id, () ->
             railProviderFactory.get(railProvider).getInstitution(id));
     }
 
-    public Optional<Institution> get(String id) {
+    public Optional<RailInstitution> get(String id) {
         return cacheById.getValueOrCall(id, () -> railProviderFactory.getAll()
             .map(api -> api.getInstitution(id))
             .filter(Optional::isPresent)

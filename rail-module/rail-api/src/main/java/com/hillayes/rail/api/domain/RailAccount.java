@@ -5,19 +5,22 @@ import lombok.*;
 import java.util.Currency;
 
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class Account {
+public class RailAccount {
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private String id;
 
     private AccountStatus status;
 
+    @ToString.Include
     private String name;
 
+    @ToString.Include
     private String institutionId;
 
     private String iban;

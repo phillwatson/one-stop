@@ -423,6 +423,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: "rail"
+          in: "query"
+          description: "The rail provider to filter the institutions"
+          schema:
+            type: string
         - $ref: "#/components/parameters/PageIndexParam"
         - $ref: "#/components/parameters/PageSizeParam"
       responses:

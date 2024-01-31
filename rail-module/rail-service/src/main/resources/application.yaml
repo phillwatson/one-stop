@@ -51,6 +51,9 @@ one-stop:
       - id: IT
         name: Italy
         flag-uri: country-logos/it.png
+      - id: PT
+        name: Portugal
+        flag-uri: country-logos/pt.png
 
     caches: # the duration of various caches - specified as Duration string
       institutions: PT6H

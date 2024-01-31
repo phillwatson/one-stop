@@ -100,6 +100,10 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>yapily-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>rail-api</artifactId>
         </dependency>
     </dependencies>

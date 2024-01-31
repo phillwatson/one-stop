@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class Institution implements Comparable<Institution> {
+public class RailInstitution implements Comparable<RailInstitution> {
     @EqualsAndHashCode.Include
     private String id;
 
@@ -32,7 +32,7 @@ public class Institution implements Comparable<Institution> {
     private boolean paymentsEnabled;
 
     @Override
-    public int compareTo(Institution other) {
+    public int compareTo(RailInstitution other) {
         if (other == this) {
             return 0;
         }

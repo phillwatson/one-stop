@@ -6,13 +6,12 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class Balance {
+public class RailBalance {
     private LocalDate dateTime;
     private MonetaryAmount amount;
     private String type;

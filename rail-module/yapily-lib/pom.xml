@@ -24,6 +24,11 @@
             <groupId>org.jboss.resteasy.microprofile</groupId>
             <artifactId>microprofile-rest-client</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>rail-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

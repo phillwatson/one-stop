@@ -16,8 +16,8 @@ import static org.apache.commons.lang3.RandomUtils.nextDouble;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
 
 public class TestApiData {
-    public static Institution mockInstitution() {
-        return Institution.builder()
+    public static RailInstitution mockInstitution() {
+        return RailInstitution.builder()
             .id(UUID.randomUUID().toString())
             .provider(RailProvider.NORDIGEN)
             .name(randomAlphanumeric(20))
@@ -28,16 +28,16 @@ public class TestApiData {
             .build();
     }
 
-    public static Agreement mockAgreement() {
+    public static RailAgreement mockAgreement() {
         return mockAgreement(randomAlphanumeric(20));
     }
 
-    public static Agreement mockAgreement(String id) {
+    public static RailAgreement mockAgreement(String id) {
         return mockAgreement(id, AgreementStatus.GIVEN);
     }
 
-    public static Agreement mockAgreement(String id, AgreementStatus status) {
-        return Agreement.builder()
+    public static RailAgreement mockAgreement(String id, AgreementStatus status) {
+        return RailAgreement.builder()
             .id(id)
             .status(status)
             .dateExpires(Instant.now().plus(Duration.ofDays(nextInt())))
@@ -52,12 +52,12 @@ public class TestApiData {
             .build();
     }
 
-    public static Account mockAccount() {
+    public static RailAccount mockAccount() {
         return mockAccount(AccountStatus.READY);
     }
 
-    public static Account mockAccount(AccountStatus status) {
-        return Account.builder()
+    public static RailAccount mockAccount(AccountStatus status) {
+        return RailAccount.builder()
             .id(randomAlphanumeric(20))
             .status(status)
             .ownerName(randomAlphanumeric(10))
@@ -68,15 +68,15 @@ public class TestApiData {
             .build();
 
     }
-    public static Balance mockBalance() {
-        return Balance.builder()
+    public static RailBalance mockBalance() {
+        return RailBalance.builder()
             .amount(MonetaryAmount.of("GBP", nextDouble()))
             .dateTime(LocalDate.now().minusDays(nextInt()))
             .type(randomAlphanumeric(5))
             .build();
     }
 
-    public static List<Transaction> mockTransactionList(int count) {
+    public static List<RailTransaction> mockTransactionList(int count) {
         return (count <= 0)
             ? List.of()
             : Stream.generate(TestApiData::mockTransaction)
@@ -84,8 +84,8 @@ public class TestApiData {
                 .toList();
     }
 
-    public static Transaction mockTransaction() {
-        return Transaction.builder()
+    public static RailTransaction mockTransaction() {
+        return RailTransaction.builder()
             .id(randomAlphanumeric(20))
             .originalTransactionId(randomAlphanumeric(20))
             .amount(MonetaryAmount.of("GBP", nextDouble()))

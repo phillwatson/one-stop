@@ -6,7 +6,7 @@ import com.hillayes.onestop.api.AccountBalanceResponse;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedAccounts;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
@@ -64,7 +64,7 @@ public class AccountResource {
     }
 
     private AccountResponse marshal(Account account) {
-        Institution institution = institutionService.get(account.getInstitutionId())
+        RailInstitution institution = institutionService.get(account.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", account.getInstitutionId()));
 
         return new AccountResponse()
@@ -86,7 +86,7 @@ public class AccountResource {
             );
     }
 
-    private InstitutionResponse marshal(Institution institution) {
+    private InstitutionResponse marshal(RailInstitution institution) {
         return new InstitutionResponse()
             .id(institution.getId())
             .name(institution.getName())

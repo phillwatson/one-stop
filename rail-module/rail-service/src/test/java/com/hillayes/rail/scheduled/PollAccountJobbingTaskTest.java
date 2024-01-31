@@ -6,8 +6,9 @@ import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
-import com.hillayes.rail.api.domain.Balance;
-import com.hillayes.rail.api.domain.Transaction;
+import com.hillayes.rail.api.domain.RailBalance;
+import com.hillayes.rail.api.domain.RailAccount;
+import com.hillayes.rail.api.domain.RailTransaction;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
@@ -111,7 +112,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount();
+        RailAccount railAccount = TestApiData.mockAccount();
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // and: a local account is linked to that rail-account
@@ -131,14 +132,14 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(page);
 
         // and: rail-balance records are available
-        List<Balance> balances = List.of(
+        List<RailBalance> balances = List.of(
             TestApiData.mockBalance(),
             TestApiData.mockBalance()
         );
         when(railProviderApi.listBalances(eq(railAccount.getId()), any())).thenReturn(balances);
 
         // and: rail-transactions records are available
-        List<Transaction> transactions = TestApiData.mockTransactionList(10);
+        List<RailTransaction> transactions = TestApiData.mockTransactionList(10);
         when(railProviderApi.listTransactions(eq(railAccount.getId()), any(), any())).thenReturn(transactions);
 
         // when: the fixture is called to process the user-consent and account
@@ -198,7 +199,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount();
+        RailAccount railAccount = TestApiData.mockAccount();
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // and: NO local account is linked to that rail-account
@@ -209,14 +210,14 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Page.empty());
 
         // and: rail-balance records are available
-        List<Balance> balances = List.of(
+        List<RailBalance> balances = List.of(
             TestApiData.mockBalance(),
             TestApiData.mockBalance()
         );
         when(railProviderApi.listBalances(eq(railAccount.getId()), any())).thenReturn(balances);
 
         // and: rail-transactions records are available
-        List<Transaction> transactions = TestApiData.mockTransactionList(10);
+        List<RailTransaction> transactions = TestApiData.mockTransactionList(10);
         when(railProviderApi.listTransactions(eq(railAccount.getId()), any(), any())).thenReturn(transactions);
 
         // when: the fixture is called to process the user-consent and account
@@ -282,7 +283,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount();
+        RailAccount railAccount = TestApiData.mockAccount();
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // and: a local account is linked to that rail-account
@@ -339,7 +340,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsentId)).thenReturn(Optional.empty());
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount();
+        RailAccount railAccount = TestApiData.mockAccount();
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
@@ -389,7 +390,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount();
+        RailAccount railAccount = TestApiData.mockAccount();
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
@@ -487,7 +488,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount(AccountStatus.SUSPENDED);
+        RailAccount railAccount = TestApiData.mockAccount(AccountStatus.SUSPENDED);
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
@@ -536,7 +537,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount(AccountStatus.EXPIRED);
+        RailAccount railAccount = TestApiData.mockAccount(AccountStatus.EXPIRED);
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
@@ -586,7 +587,7 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a rail-account associated with that consent
-        com.hillayes.rail.api.domain.Account railAccount = TestApiData.mockAccount(accountStatus);
+        RailAccount railAccount = TestApiData.mockAccount(accountStatus);
         when(railProviderApi.getAccount(railAccount.getId())).thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account

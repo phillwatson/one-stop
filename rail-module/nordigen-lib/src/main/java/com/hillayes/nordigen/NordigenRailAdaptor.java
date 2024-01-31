@@ -9,8 +9,8 @@ import com.hillayes.nordigen.service.InstitutionService;
 import com.hillayes.nordigen.service.RequisitionService;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
-import com.hillayes.rail.api.domain.Balance;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailBalance;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -50,10 +50,10 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Optional<Institution> getInstitution(String id) {
+    public Optional<RailInstitution> getInstitution(String id) {
         log.debug("Getting institution [id: {}]", id);
         return institutionService.get(id)
-            .map(institution -> Institution.builder()
+            .map(institution -> RailInstitution.builder()
                 .id(institution.id)
                 .provider(RailProvider.NORDIGEN)
                 .name(institution.name)
@@ -67,12 +67,12 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public List<Institution> listInstitutions(String countryCode,
-                                              boolean paymentsEnabled) {
-        log.debug("Listing institutions [countryCode: {}]", countryCode);
+    public List<RailInstitution> listInstitutions(String countryCode,
+                                                  boolean paymentsEnabled) {
+        log.debug("Listing institutions [countryCode: {}, paymentsEnabled: {}]", countryCode, paymentsEnabled);
         return institutionService.list(countryCode, paymentsEnabled)
             .stream()
-            .map(institution -> Institution.builder()
+            .map(institution -> RailInstitution.builder()
                 .id(institution.id)
                 .provider(RailProvider.NORDIGEN)
                 .name(institution.name)
@@ -87,7 +87,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Agreement register(Institution institution, URI callbackUri, String reference) {
+    public RailAgreement register(RailInstitution institution, URI callbackUri, String reference) {
         log.debug("Requesting agreement [reference: {}, institutionId: {}]", reference, institution.getId());
         EndUserAgreement agreement = agreementService.create(EndUserAgreementRequest.builder()
             .institutionId(institution.getId())
@@ -115,7 +115,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
         log.debug("Requisition created [reference: {}, institutionId: {}: agreementId: {}, requisitionId: {}]",
             reference, institution.getId(), agreement.id, requisition.id);
 
-        return Agreement.builder()
+        return RailAgreement.builder()
             .id(requisition.id)
             .accountIds(requisition.accounts)
             .status(of(requisition.status))
@@ -129,11 +129,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Optional<Agreement> getAgreement(String id) {
+    public Optional<RailAgreement> getAgreement(String id) {
         log.debug("Getting agreement [id: {}]", id);
         return requisitionService.get(id)
             .flatMap(requisition -> agreementService.get(requisition.agreement)
-                .map(agreement -> Agreement.builder()
+                .map(agreement -> RailAgreement.builder()
                     .id(requisition.id)
                     .accountIds(requisition.accounts)
                     .status(of(requisition.status))
@@ -154,10 +154,10 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Optional<Account> getAccount(String id) {
+    public Optional<RailAccount> getAccount(String id) {
         log.debug("Getting account [id: {}]", id);
         return accountService.get(id)
-            .map(account -> Account.builder()
+            .map(account -> RailAccount.builder()
                 .id(account.id)
                 .iban(account.iban)
                 .institutionId(account.institutionId)
@@ -168,23 +168,23 @@ public class NordigenRailAdaptor implements RailProviderApi {
             )
             .map(account -> accountService.details(id)
                 .map(details -> (Map<String, String>) details.get("account"))
-                .map(accountProperties -> {
-                    account.setName(accountProperties.get("name"));
-                    account.setAccountType(accountProperties.get("cashAccountType"));
-                    account.setCurrency(currency(accountProperties.get("currency")));
-                    return account;
-                })
+                .map(accountProperties -> account.toBuilder()
+                    .name(accountProperties.getOrDefault("name", account.getName()))
+                    .accountType(accountProperties.get("cashAccountType"))
+                    .currency(currency(accountProperties.get("currency")))
+                    .build()
+                )
                 .orElse(account)
             );
     }
 
     @Override
-    public List<Balance> listBalances(String accountId, LocalDate dateFrom) {
+    public List<RailBalance> listBalances(String accountId, LocalDate dateFrom) {
         log.debug("Listing balances [accountId: {}, from: {}]", accountId, dateFrom);
         return accountService.balances(accountId)
             .map(balances -> balances.stream()
                 .filter(balance -> balance.referenceDate.isAfter(dateFrom))
-                .map(balance -> Balance.builder()
+                .map(balance -> RailBalance.builder()
                     .type(balance.balanceType)
                     .dateTime(balance.referenceDate)
                     .amount(of(balance.balanceAmount))
@@ -196,11 +196,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public List<Transaction> listTransactions(String accountId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<RailTransaction> listTransactions(String accountId, LocalDate dateFrom, LocalDate dateTo) {
         log.debug("Listing transactions [accountId: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
         return accountService.transactions(accountId, dateFrom, dateTo)
             .map(transactions -> transactions.booked.stream()
-                .map(transaction -> Transaction.builder()
+                .map(transaction -> RailTransaction.builder()
                     .id(Strings.getOrDefault(transaction.internalTransactionId, transaction.transactionId))
                     .originalTransactionId(Strings.getOrDefault(transaction.transactionId, transaction.entryReference))
                     .dateBooked(bestOf(transaction.bookingDate, transaction.bookingDateTime))

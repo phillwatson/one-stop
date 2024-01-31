@@ -4,7 +4,7 @@ import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.Agreement;
+import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
@@ -78,7 +78,7 @@ public class PollConsentJobbingTaskTest {
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a "linked" requisition for that consent
-        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId());
+        RailAgreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId());
         when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
@@ -167,7 +167,7 @@ public class PollConsentJobbingTaskTest {
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: an "expired" requisition for that consent
-        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.EXPIRED);
+        RailAgreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.EXPIRED);
         when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
@@ -201,7 +201,7 @@ public class PollConsentJobbingTaskTest {
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a "suspended" requisition for that consent
-        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.SUSPENDED);
+        RailAgreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), AgreementStatus.SUSPENDED);
         when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent
@@ -236,7 +236,7 @@ public class PollConsentJobbingTaskTest {
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // and: a requisition for that consent
-        Agreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), agreementStatus);
+        RailAgreement agreement = TestApiData.mockAgreement(userConsent.getAgreementId(), agreementStatus);
         when(railProviderApi.getAgreement(agreement.getId())).thenReturn(Optional.of(agreement));
 
         // when: the fixture is called to process the user-consent

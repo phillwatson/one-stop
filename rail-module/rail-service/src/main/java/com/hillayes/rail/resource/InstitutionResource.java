@@ -3,7 +3,8 @@ package com.hillayes.rail.resource;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedInstitutions;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.service.InstitutionService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -31,10 +32,11 @@ public class InstitutionResource {
     public Response getAll(@Context UriInfo uriInfo,
                            @QueryParam("page") @DefaultValue("0") int page,
                            @QueryParam("page-size") @DefaultValue("20") int pageSize,
+                           @QueryParam("rail") RailProvider railProvider,
                            @QueryParam("country") String countryCode) {
         log.info("List institutions [country: {}, page: {}, pageSize: {}]", countryCode, page, pageSize);
-        Set<Institution> allBanks = new HashSet<>(institutionService.list(countryCode, true));
-        allBanks.addAll(institutionService.list(countryCode, false));
+        Set<RailInstitution> allBanks = new HashSet<>(institutionService.list(railProvider, countryCode, true));
+        allBanks.addAll(institutionService.list(railProvider, countryCode, false));
 
         // reduce the overall list to the subset identified by the page parameters
         List<InstitutionResponse> bankPage = allBanks.stream()
@@ -63,13 +65,13 @@ public class InstitutionResource {
     @Path("/{id}")
     public Response getById(@PathParam("id") String id) {
         log.info("Get institution [id: {}]", id);
-        Institution institution = institutionService.get(id)
+        RailInstitution institution = institutionService.get(id)
             .orElseThrow(() -> new NotFoundException("Institution", id));
 
         return Response.ok(marshal(institution)).build();
     }
 
-    private InstitutionResponse marshal(Institution institution) {
+    private InstitutionResponse marshal(RailInstitution institution) {
         return new InstitutionResponse()
             .id(institution.getId())
             .provider(institution.getProvider().name())

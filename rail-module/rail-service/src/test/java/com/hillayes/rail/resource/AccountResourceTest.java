@@ -5,7 +5,7 @@ import com.hillayes.onestop.api.AccountBalanceResponse;
 import com.hillayes.onestop.api.AccountResponse;
 import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedAccounts;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
 import com.hillayes.rail.service.AccountService;
@@ -51,7 +51,7 @@ public class AccountResourceTest extends TestBase {
         );
 
         // and: a list of institutions linked to those accounts
-        Map<String, Institution> banks = Map.of(
+        Map<String, RailInstitution> banks = Map.of(
             accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
@@ -124,7 +124,7 @@ public class AccountResourceTest extends TestBase {
             assertEquals(account.getAccountName(), accountResponse.getName());
             assertEquals(account.getIban(), accountResponse.getIban());
 
-            Institution institution = banks.get(account.getInstitutionId());
+            RailInstitution institution = banks.get(account.getInstitutionId());
             assertNotNull(institution);
             assertNotNull(accountResponse.getInstitution());
             assertEquals(institution.getId(), accountResponse.getInstitution().getId());
@@ -147,7 +147,7 @@ public class AccountResourceTest extends TestBase {
         );
 
         // and: a list of institutions linked to those accounts
-        Map<String, Institution> banks = Map.of(
+        Map<String, RailInstitution> banks = Map.of(
             accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
@@ -191,7 +191,7 @@ public class AccountResourceTest extends TestBase {
         );
 
         // and: a list of institutions linked to those accounts
-        Map<String, Institution> banks = Map.of(
+        Map<String, RailInstitution> banks = Map.of(
             accounts.get(0).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(1).getInstitutionId(), TestApiData.mockInstitution(),
             accounts.get(2).getInstitutionId(), TestApiData.mockInstitution()
@@ -239,7 +239,7 @@ public class AccountResourceTest extends TestBase {
         when(accountService.getMostRecentBalance(account)).thenReturn(balances);
 
         // and: an institution linked to that account
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint
@@ -290,7 +290,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        Institution bank = TestApiData.mockInstitution();
+        RailInstitution bank = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a non-user role
@@ -315,7 +315,7 @@ public class AccountResourceTest extends TestBase {
         Account account = mockAccount(userId, UUID.randomUUID());
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
-        Institution bank = TestApiData.mockInstitution();
+        RailInstitution bank = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(bank));
 
         // when: the endpoint is called by a user with multiple roles
@@ -359,7 +359,7 @@ public class AccountResourceTest extends TestBase {
         when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
 
         // and: an institution linked to that account
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(account.getInstitutionId())).thenReturn(Optional.of(institution));
 
         // when: client calls the endpoint

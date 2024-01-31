@@ -7,13 +7,12 @@ import java.time.Instant;
 import java.util.List;
 
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class Agreement {
+public class RailAgreement {
     /**
      * The rail ID for the agreement.
      */

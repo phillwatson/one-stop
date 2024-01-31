@@ -6,8 +6,7 @@ import com.hillayes.onestop.api.AccountSummaryResponse;
 import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
-import com.hillayes.rail.api.domain.Institution;
-import com.hillayes.rail.api.domain.RailProvider;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.AccountService;
@@ -148,7 +147,7 @@ public class UserConsentResource {
     }
 
     private UserConsentResponse marshal(UserConsent consent) {
-        Institution institution = institutionService.get(consent.getInstitutionId())
+        RailInstitution institution = institutionService.get(consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentResponse()

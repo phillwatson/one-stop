@@ -3,9 +3,9 @@ package com.hillayes.rail.service;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.Agreement;
+import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -256,7 +256,7 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
@@ -279,9 +279,9 @@ public class UserConsentServiceTest {
             .thenReturn(consents);
 
         // and: an agreement will be created
-        AtomicReference<Agreement> agreement = new AtomicReference<>();
+        AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            Institution i = invocation.getArgument(0);
+            RailInstitution i = invocation.getArgument(0);
             URI uri = invocation.getArgument(1);
             String reference = invocation.getArgument(2);
             agreement.set(returnEndUserAgreement(reference, i, uri));
@@ -321,7 +321,7 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
@@ -349,9 +349,9 @@ public class UserConsentServiceTest {
             .thenReturn(consents);
 
         // and: an agreement will be created
-        AtomicReference<Agreement> agreement = new AtomicReference<>();
+        AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            Institution i = invocation.getArgument(0);
+            RailInstitution i = invocation.getArgument(0);
             URI uri = invocation.getArgument(1);
             String reference = invocation.getArgument(2);
             agreement.set(returnEndUserAgreement(reference, i, uri));
@@ -391,7 +391,7 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.empty());
 
         // and: a client callback URI
@@ -425,7 +425,7 @@ public class UserConsentServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an identified institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a client callback URI
@@ -888,8 +888,8 @@ public class UserConsentServiceTest {
         verify(consentEventSender).sendConsentExpired(updatedConsent);
     }
 
-    private Agreement returnEndUserAgreement(String reference, Institution institution, URI callbackUri) {
-        return Agreement.builder()
+    private RailAgreement returnEndUserAgreement(String reference, RailInstitution institution, URI callbackUri) {
+        return RailAgreement.builder()
             .id(UUID.randomUUID().toString())
             .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))    
             .status(AgreementStatus.INITIATED)

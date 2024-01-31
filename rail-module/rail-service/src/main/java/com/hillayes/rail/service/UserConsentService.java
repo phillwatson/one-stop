@@ -4,8 +4,8 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.Agreement;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailAgreement;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -83,7 +83,7 @@ public class UserConsentService {
     public URI register(UUID userId, String institutionId, URI callbackUri) {
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 
-        Institution institution = institutionService.get(institutionId)
+        RailInstitution institution = institutionService.get(institutionId)
             .orElseThrow(() -> new NotFoundException("Institution", institutionId));
 
         // read any existing consent
@@ -107,7 +107,7 @@ public class UserConsentService {
             // generate a random reference and register the agreement with the rail
             String reference = UUID.randomUUID().toString();
             RailProviderApi railProviderApi = railProviderFactory.get(institution.getProvider());
-            Agreement agreement = railProviderApi.register(institution, registrationCallbackUrl, reference);
+            RailAgreement agreement = railProviderApi.register(institution, registrationCallbackUrl, reference);
 
             // record agreement in a consent record - with the reference
             log.debug("Recording agreement [userId: {}, institutionId: {}, reference: {}]", userId, institutionId, reference);

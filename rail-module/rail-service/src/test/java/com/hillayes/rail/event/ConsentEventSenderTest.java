@@ -3,7 +3,7 @@ package com.hillayes.rail.event;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.InstitutionService;
@@ -40,7 +40,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentInitiated() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
@@ -77,7 +77,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentGiven() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
@@ -115,7 +115,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentDenied() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
@@ -154,7 +154,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentCancelled() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
@@ -193,7 +193,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentSuspended() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record
@@ -232,7 +232,7 @@ public class ConsentEventSenderTest {
     @Test
     public void testSendConsentExpired() {
         // given: a known institution
-        Institution institution = TestApiData.mockInstitution();
+        RailInstitution institution = TestApiData.mockInstitution();
         when(institutionService.get(any(), eq(institution.getId()))).thenReturn(Optional.of(institution));
 
         // and: a consent record

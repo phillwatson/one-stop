@@ -3,7 +3,7 @@ package com.hillayes.rail.event;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +107,7 @@ public class ConsentEventSender {
 
     private String getInstitutionName(UserConsent userConsent) {
         return institutionService.get(userConsent.getProvider(), userConsent.getInstitutionId())
-            .map(Institution::getName)
+            .map(RailInstitution::getName)
             .orElse("Unknown");
     }
 }

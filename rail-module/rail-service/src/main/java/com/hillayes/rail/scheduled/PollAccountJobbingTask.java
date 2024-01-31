@@ -6,7 +6,8 @@ import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
-import com.hillayes.rail.api.domain.Transaction;
+import com.hillayes.rail.api.domain.RailAccount;
+import com.hillayes.rail.api.domain.RailTransaction;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
@@ -100,7 +101,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         }
 
         RailProviderApi railProviderApi = railProviderFactory.get(userConsent.getProvider());
-        com.hillayes.rail.api.domain.Account railAccount = railProviderApi.getAccount(railAccountId).orElse(null);
+        RailAccount railAccount = railProviderApi.getAccount(railAccountId).orElse(null);
         if (railAccount == null) {
             log.info("Unable to find rail-account [consentId: {}, railAccountId: {}]", consentId, railAccountId);
             return TaskConclusion.COMPLETE;
@@ -137,7 +138,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     }
 
     private Account getOrCreateAccount(UserConsent userConsent,
-                                       com.hillayes.rail.api.domain.Account railAccount) {
+                                       RailAccount railAccount) {
         return accountRepository.findByRailAccountId(railAccount.getId())
             .map(account -> {
                 // this may be a new consent record for an expired/suspended consent
@@ -192,13 +193,13 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         }
 
         // retrieve transactions from rail
-        List<Transaction> details = railProviderApi.listTransactions(account.getRailAccountId(), startDate, LocalDate.now());
+        List<RailTransaction> details = railProviderApi.listTransactions(account.getRailAccountId(), startDate, LocalDate.now());
 
         // identify those internal transaction IDs we've seen before
         List<String> existing = (account.getId() == null)
             ? List.of()
             : accountTransactionRepository.findByInternalId(details.stream()
-                .map(Transaction::getId).toList()).stream()
+                .map(RailTransaction::getId).toList()).stream()
             .map(AccountTransaction::getInternalTransactionId).toList();
 
         // map the NEW transactions to our own records
@@ -222,7 +223,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
      * @param detail the rail transaction details.
      * @return the AccountTransaction created from the given rail transaction.
      */
-    private AccountTransaction marshalTransaction(Account account, Transaction detail) {
+    private AccountTransaction marshalTransaction(Account account, RailTransaction detail) {
         return AccountTransaction.builder()
             .userId(account.getUserId())
             .accountId(account.getId())

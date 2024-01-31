@@ -3,7 +3,7 @@ package com.hillayes.rail.resource.admin;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
-import com.hillayes.rail.api.domain.Institution;
+import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.resource.ResourceUtils;
@@ -78,7 +78,7 @@ public class UserConsentAdminResource {
     }
 
     private UserConsentAdminResponse marshal(UserConsent consent) {
-        Institution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
+        RailInstitution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentAdminResponse()

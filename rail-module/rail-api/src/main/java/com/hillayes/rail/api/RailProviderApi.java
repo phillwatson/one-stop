@@ -35,7 +35,7 @@ public interface RailProviderApi {
      * @param id the institution id.
      * @return the institution, or empty if not found.
      */
-    public Optional<Institution> getInstitution(String id);
+    public Optional<RailInstitution> getInstitution(String id);
 
     /**
      * Returns a list of Institutions for the given country code.
@@ -43,8 +43,8 @@ public interface RailProviderApi {
      * @param paymentsEnabled true if only institutions that support payments should be returned.
      * @return the list of institutions, possibly empty.
      */
-    public List<Institution> listInstitutions(String countryCode,
-                                              boolean paymentsEnabled);
+    public List<RailInstitution> listInstitutions(String countryCode,
+                                                  boolean paymentsEnabled);
 
     /**
      * Registers an agreement with the given institution. This will initiate the process of
@@ -53,7 +53,7 @@ public interface RailProviderApi {
      * the registration process.
      *
      * The process is a two phase process, where the user will be redirected to the URL returned
-     * in the {@link Agreement#getAgreementLink()}. That URL will present the user with a form
+     * in the {@link RailAgreement#getAgreementLink()}. That URL will present the user with a form
      * to enter their credentials for the institution, and authorise our access to their accounts.
      *
      * The rail provider will then call the given callback URI to inform us of whether the user has
@@ -65,14 +65,14 @@ public interface RailProviderApi {
      * @param reference a unique reference that will correlate the agreement after authorisation.
      * @return the URI to which the user should be redirected to authorise the registration.
      */
-    public Agreement register(Institution institution, URI callbackUri, String reference);
+    public RailAgreement register(RailInstitution institution, URI callbackUri, String reference);
 
     /**
      * Returns the agreement with the given id, or empty if not found.
      * @param id the agreement id.
      * @return the agreement, or empty if not found.
      */
-    public Optional<Agreement> getAgreement(String id);
+    public Optional<RailAgreement> getAgreement(String id);
 
     /**
      * Deletes the identified agreement, removing the authorisation to access the associated
@@ -87,7 +87,7 @@ public interface RailProviderApi {
      * @param id the account id.
      * @return the account, or empty if not found.
      */
-    public Optional<Account> getAccount(String id);
+    public Optional<RailAccount> getAccount(String id);
 
     /**
      * Returns a list of account balances for the identified account, started from the given
@@ -96,7 +96,7 @@ public interface RailProviderApi {
      * @param dateFrom the date from which balances should be returned.
      * @return the list of balances, possibly empty.
      */
-    public List<Balance> listBalances(String accountId, LocalDate dateFrom);
+    public List<RailBalance> listBalances(String accountId, LocalDate dateFrom);
 
     /**
      * Returns a list of transactions for the identified account, started from the given
@@ -106,7 +106,7 @@ public interface RailProviderApi {
      * @param dateTo the date of the end of the period to be searched, inclusive.
      * @return the list of transactions, possibly empty.
      */
-    public List<Transaction> listTransactions(String accountId,
-                                              LocalDate dateFrom,
-                                              LocalDate dateTo);
+    public List<RailTransaction> listTransactions(String accountId,
+                                                  LocalDate dateFrom,
+                                                  LocalDate dateTo);
 }
