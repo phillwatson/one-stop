@@ -10,10 +10,7 @@ import com.hillayes.nordigen.model.EndUserAgreement;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
-import com.hillayes.onestop.api.InstitutionResponse;
-import com.hillayes.onestop.api.PaginatedTransactions;
-import com.hillayes.onestop.api.UserConsentRequest;
-import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.onestop.api.*;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import io.restassured.response.Response;
@@ -226,7 +223,9 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         }
 
         // when: the user attempts to retrieve the institution consent
-        withServiceError(userConsentApi.getConsentForInstitution(institution.getId(), 404), error -> {
+        withServiceError(userConsentApi.getConsentForInstitution(institution.getId(), 404), errorResponse -> {
+            ServiceError error = errorResponse.getErrors().get(0);
+
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
@@ -236,7 +235,9 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         // when: the user attempts to retrieve any account from the institution
         consentForInstitution.getAccounts().forEach(accountSummary -> {
             // then: a not-found error is returned
-            withServiceError(accountApi.getAccount(accountSummary.getId(), 404), error -> {
+            withServiceError(accountApi.getAccount(accountSummary.getId(), 404), errorResponse -> {
+                ServiceError error = errorResponse.getErrors().get(0);
+
                 // then: a not-found error is returned
                 assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
                 assertNotNull(error.getContextAttributes());

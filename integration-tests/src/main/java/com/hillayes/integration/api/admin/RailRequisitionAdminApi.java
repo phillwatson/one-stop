@@ -21,7 +21,7 @@ public class RailRequisitionAdminApi extends ApiBase {
         return givenAuth()
             .queryParam("offset", offset)
             .queryParam("limit", limit)
-            .get("/api/v1/rails/admin/rail-requisitions")
+            .get("/api/v1/rails/nordigen/requisitions")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -35,7 +35,7 @@ public class RailRequisitionAdminApi extends ApiBase {
 
     public Response get(String requisitionId, int expectedStatus) {
         return givenAuth()
-            .get("/api/v1/rails/admin/rail-requisitions/{requisitionId}", requisitionId)
+            .get("/api/v1/rails/nordigen/requisitions/{requisitionId}", requisitionId)
             .then()
             .statusCode(expectedStatus)
             .contentType(JSON)

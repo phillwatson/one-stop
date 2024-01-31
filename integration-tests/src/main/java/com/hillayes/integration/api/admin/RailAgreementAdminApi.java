@@ -21,7 +21,7 @@ public class RailAgreementAdminApi extends ApiBase {
         return givenAuth()
             .queryParam("offset", offset)
             .queryParam("limit", limit)
-            .get("/api/v1/rails/admin/rail-agreements")
+            .get("/api/v1/rails/nordigen/agreements")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -35,7 +35,7 @@ public class RailAgreementAdminApi extends ApiBase {
 
     public Response get(String agreementId, int expectedStatus) {
         return givenAuth()
-            .get("/api/v1/rails/admin/rail-agreements/{agreementId}", agreementId)
+            .get("/api/v1/rails/nordigen/agreements/{agreementId}", agreementId)
             .then()
             .statusCode(expectedStatus)
             .contentType(JSON)
