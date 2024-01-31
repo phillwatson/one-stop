@@ -156,7 +156,9 @@ public class UserProfileTestIT extends ApiTestBase {
             .newPassword(randomAlphanumeric(20));
 
         // then: the service returns bad-request status
-        withServiceError(userProfileApi.changePassword(request, 400), error -> {
+        withServiceError(userProfileApi.changePassword(request, 400), errorResponse -> {
+            ServiceError error = errorResponse.getErrors().get(0);
+
             // and: the response is a service error identifying the missing parameter
             assertEquals("PARAMETER_MISSING", error.getMessageId());
             assertEquals("oldPassword", error.getContextAttributes().get("parameter-name"));
@@ -181,10 +183,12 @@ public class UserProfileTestIT extends ApiTestBase {
             .oldPassword(user.getPassword());
 
         // then: the service returns bad-request status
-        withServiceError(userProfileApi.changePassword(request, 400), error -> {
+        withServiceError(userProfileApi.changePassword(request, 400), errorResponse -> {
+            ServiceError error = errorResponse.getErrors().get(0);
+
             // and: the response is a service error identifying the missing parameter
-            assertEquals("PARAMETER_MISSING", error.getMessageId());
-            assertEquals("newPassword", error.getContextAttributes().get("parameter-name"));
+            assertEquals("INVALID_REQUEST_CONTENT", error.getMessageId());
+            assertEquals("newPassword", error.getContextAttributes().get("field-name"));
         });
     }
 

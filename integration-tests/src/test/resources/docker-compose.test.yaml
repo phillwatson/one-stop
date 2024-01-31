@@ -6,6 +6,9 @@ services:
       - "9090:8080"
     networks:
       - onestop-http-network
+    environment:
+      ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
+      ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
 
   # Wiremock container. This hosts the email simulator.
   wiremock:
@@ -34,6 +37,8 @@ services:
     environment:
       ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
       ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
+      ONE_STOP_YAPILY_SECRET_ID: "abcdef"
+      ONE_STOP_YAPILY_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
 

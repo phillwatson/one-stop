@@ -7,11 +7,11 @@ import com.hillayes.nordigen.model.EndUserAgreementRequest;
 import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.service.AgreementService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -20,10 +20,10 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
 @Slf4j
 public class AgreementAdminResource {
-    private final AgreementService agreementService;
+    @Inject
+    private AgreementService agreementService;
 
     @GET
     public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,

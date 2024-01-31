@@ -1,6 +1,6 @@
 package com.hillayes.integration.test;
 
-import com.hillayes.onestop.api.ServiceError;
+import com.hillayes.onestop.api.ServiceErrorResponse;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.nordigen.NordigenSimulator;
@@ -11,7 +11,6 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -95,7 +94,7 @@ public class ApiTestBase {
         return new File(resource.getFile());
     }
 
-    protected void withServiceError(Response response, Consumer<ServiceError> consumer) {
-        consumer.accept(response.as(ServiceError.class));
+    protected void withServiceError(Response response, Consumer<ServiceErrorResponse> consumer) {
+        consumer.accept(response.as(ServiceErrorResponse.class));
     }
 }

@@ -6,9 +6,9 @@ import com.hillayes.nordigen.model.Balance;
 import com.hillayes.nordigen.model.TransactionList;
 import com.hillayes.nordigen.service.AccountService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -19,10 +19,10 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
 @Slf4j
 public class AccountAdminResource {
-    private final AccountService accountService;
+    @Inject
+    private AccountService accountService;
 
     @GET
     @Path("{id}")
