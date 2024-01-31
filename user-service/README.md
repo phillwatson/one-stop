@@ -65,7 +65,7 @@ The access token expiry determines the frequency at which the user must refresh 
 tokens, and the refresh token expiry determines the maximum duration of client
 inactivity before the session is invalidated.
 
-#### Rovoking Tokens
+#### Revoking Tokens
 The token refresh provides an opportunity to check if the user's access has been
 revoked, returning a 401 (Unauthorized) response if so.
 
