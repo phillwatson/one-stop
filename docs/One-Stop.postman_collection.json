@@ -1,0 +1,1837 @@
+{
+	"info": {
+		"_postman_id": "bc9d310e-6ad5-4de6-a14f-50c58ab46036",
+		"name": "One-Stop",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3794632"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Get My IP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"hostname\", responseBody.trim());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://checkip.amazonaws.com/",
+							"protocol": "http",
+							"host": [
+								"checkip",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - snoopy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"watson.phill@gmail.com\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login via google",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login/google?state=123",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login",
+								"google"
+							],
+							"query": [
+								{
+									"key": "state",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - failure",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"unknown\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh tokens",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/refresh",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/logout",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login OAuth",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/validate?code=4%2F0AVHEtk79OVCNB6SCz3HHz2S-E-0RTXHeBujPJFw41vdn4rpmlM7UHkCXqtwQQmACMefZuQ&scope=email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0&prompt=consent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"validate"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "4%2F0AVHEtk79OVCNB6SCz3HHz2S-E-0RTXHeBujPJFw41vdn4rpmlM7UHkCXqtwQQmACMefZuQ"
+								},
+								{
+									"key": "scope",
+									"value": "email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email"
+								},
+								{
+									"key": "authuser",
+									"value": "0"
+								},
+								{
+									"key": "prompt",
+									"value": "consent"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Admin",
+					"item": [
+						{
+							"name": "List Users",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update User",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"phillw\",\n    \"title\": \"Mr\",\n    \"givenName\": \"Phillip\",\n    \"familyName\": \"Watson\",\n    \"preferredName\": \"Phill\",\n    \"email\": \"watson.phill+user@gmail.com\",\n    \"phone\": \"07801 494949\",\n    \"roles\": [\n        \"user\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Profile",
+					"item": [
+						{
+							"name": "Get Profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/profiles",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"profiles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Auth Providers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/profiles/authproviders",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"profiles",
+										"authproviders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Profile",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin\",\n    \"givenName\": \"Phillip\",\n    \"familyName\": \"Watson\",\n    \"preferredName\": \"Phill\",\n    \"email\": \"watson.phill+admin@gmail.com\",\n    \"phone\": \"07801 494949\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/profiles",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"profiles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Change Password",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"oldPassword\": \"\",\n    \"newPassword\": \"snoopy\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/profiles/password",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"profiles",
+										"password"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Onboarding",
+					"item": [
+						{
+							"name": "Register",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"watson.phill+one@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/onboard/register",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"onboard",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Acknowledge Token",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/onboard/acknowledge/9c7645d7-339f-4172-9cb4-895239d783b6",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"onboard",
+										"acknowledge",
+										"9c7645d7-339f-4172-9cb4-895239d783b6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Complete Onboarding",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"phill3\",\n    \"title\": \"Mr\",\n    \"givenName\": \"Phillip\",\n    \"familyName\": \"Watson\",\n    \"preferredName\": \"Phill\",\n    \"email\": \"watson.phill@gmail.com\",\n    \"phone\": \"07801 494949\",\n    \"password\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/onboard/complete",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"onboard",
+										"complete"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Rails",
+			"item": [
+				{
+					"name": "Accounts",
+					"item": [
+						{
+							"name": "Get Accounts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/accounts",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"accounts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Account",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/accounts/5c41a9dd-861e-4158-bfb7-cca8e5a76978",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"accounts",
+										"5c41a9dd-861e-4158-bfb7-cca8e5a76978"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Transactions by Account",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?account-id=36a1426c-0cf9-46e5-802f-a36cbbb83cf8&page=0&page-size=25",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "account-id",
+											"value": "36a1426c-0cf9-46e5-802f-a36cbbb83cf8"
+										},
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "page-size",
+											"value": "25"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Transactions By User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?page=0&page-size=25",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "page-size",
+											"value": "25"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Countries",
+					"item": [
+						{
+							"name": "List Countries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"countries"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Country",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/GB",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"countries",
+										"GB"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Country Logo",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "image/png",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/GB/logos",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"countries",
+										"GB",
+										"logos"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Institutions",
+					"item": [
+						{
+							"name": "Get Institution Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"institutions",
+										"SANDBOXFINANCE_SFIN0000"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Institutions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions?country=GB&page=8&page-size=10",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"institutions"
+									],
+									"query": [
+										{
+											"key": "country",
+											"value": "GB"
+										},
+										{
+											"key": "page",
+											"value": "8"
+										},
+										{
+											"key": "page-size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Consents",
+					"item": [
+						{
+							"name": "Get Consents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents?page=0&page-size=20",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"consents"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0",
+											"description": "zero-based page index"
+										},
+										{
+											"key": "page-size",
+											"value": "20",
+											"description": "max entities per page"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Consents by  Institution",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"consents",
+										"SANDBOXFINANCE_SFIN0000"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register Bank",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"callbackUri\": \"http://localhost:80/accounts\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"consents",
+										"SANDBOXFINANCE_SFIN0000"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Consents",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"consents",
+										"SANDBOXFINANCE_SFIN0000"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin",
+					"item": [
+						{
+							"name": "Consents",
+							"item": [
+								{
+									"name": "Get Consents by  User ID",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{user-id}}?page=0&page-size=20",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"admin",
+												"consents",
+												"{{user-id}}"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "zero-based page index"
+												},
+												{
+													"key": "page-size",
+													"value": "20",
+													"description": "max entities per page"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Consent",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{consent-id}}",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"admin",
+												"consents",
+												"{{consent-id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Consent",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{consent-id}}",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"admin",
+												"consents",
+												"{{consent-id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Nordigen Admin",
+					"item": [
+						{
+							"name": "Requisitions",
+							"item": [
+								{
+									"name": "List Requisitions",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions?limit=10000&offset=0",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"requisitions"
+											],
+											"query": [
+												{
+													"key": "limit",
+													"value": "10000"
+												},
+												{
+													"key": "offset",
+													"value": "0"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Requisition",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/bab398d5-155a-44b6-b88d-a1475d53aae5",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"requisitions",
+												"bab398d5-155a-44b6-b88d-a1475d53aae5"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Requisition",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/e3c6416f-b26c-4584-b4c3-d6db71fc2e9e",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"requisitions",
+												"e3c6416f-b26c-4584-b4c3-d6db71fc2e9e"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Agreements",
+							"item": [
+								{
+									"name": "List Agreements",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements?limit=10000&offset=0",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"agreements"
+											],
+											"query": [
+												{
+													"key": "limit",
+													"value": "10000"
+												},
+												{
+													"key": "offset",
+													"value": "0"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Agreement",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/c41b32d9-bdc5-44af-a7fb-2a9cf02271ab",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"agreements",
+												"c41b32d9-bdc5-44af-a7fb-2a9cf02271ab"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Agreement",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/894d93cd-7350-4d0c-ba2e-5dbead69714c",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"agreements",
+												"894d93cd-7350-4d0c-ba2e-5dbead69714c"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Rail Accounts",
+							"item": [
+								{
+									"name": "Get Account",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/629fe84d-9e6c-4709-97ec-cc3dd4470972",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"accounts",
+												"629fe84d-9e6c-4709-97ec-cc3dd4470972"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Account Balances",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/a184cf1a-06ae-4b34-938d-6befc00de89c/balances",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"accounts",
+												"a184cf1a-06ae-4b34-938d-6befc00de89c",
+												"balances"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Account Details",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/629fe84d-9e6c-4709-97ec-cc3dd4470972/details",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"accounts",
+												"629fe84d-9e6c-4709-97ec-cc3dd4470972",
+												"details"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Account Transactions",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1/transactions?date_from=2023-12-01&date_to=2024-01-13",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"nordigen",
+												"accounts",
+												"b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1",
+												"transactions"
+											],
+											"query": [
+												{
+													"key": "date_from",
+													"value": "2023-12-01"
+												},
+												{
+													"key": "date_to",
+													"value": "2024-01-13"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "yapily",
+					"item": [
+						{
+							"name": "Institutions",
+							"item": [
+								{
+									"name": "Get Institution Details",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"institutions",
+												"SANDBOXFINANCE_SFIN0000"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "List Institutions",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/yapily/institutions?country=GB&page=0&page-size=10",
+											"protocol": "{{scheme}}",
+											"host": [
+												"{{hostname}}"
+											],
+											"port": "{{port}}",
+											"path": [
+												"api",
+												"v1",
+												"rails",
+												"yapily",
+												"institutions"
+											],
+											"query": [
+												{
+													"key": "country",
+													"value": "GB"
+												},
+												{
+													"key": "page",
+													"value": "0"
+												},
+												{
+													"key": "page-size",
+													"value": "10"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Management",
+			"item": [
+				{
+					"name": "Beans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/beans",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/stop",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"stop"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/health",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/info",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Loggers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/loggers",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"loggers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/metrics",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"metrics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/refresh",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Routes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/routes",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"routes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Token Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/token_info",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"token_info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Env",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/env",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"env"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thread Dump",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/threaddump",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"threaddump"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Caches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/caches",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"caches"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Flyway",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/flyway",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"flyway"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:9090/nordigen-sim/api/v2/institutions/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"nordigen-sim",
+								"api",
+								"v2",
+								"institutions",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// add XSRF token to ALL requests",
+					"pm.request.headers.add(\"X-XSRF-TOKEN: \" + ",
+					"        pm.collectionVariables.get(\"X-XSRF-TOKEN\"));",
+					"",
+					"var date = new Date();",
+					"pm.collectionVariables.set(\"today\", date.toISOString().split('T')[0]);",
+					"",
+					"date.setDate(date.getDate() - 20)",
+					"pm.collectionVariables.set(\"todayMinus20\", date.toISOString().split('T')[0]);",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// record the XSRF token - to later add to subsequent request headers",
+					"var cookie = postman.getResponseCookie(\"XSRF-TOKEN\");",
+					"pm.collectionVariables.set(\"X-XSRF-TOKEN\", (cookie == null) ? null : cookie.value);"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "scheme",
+			"value": "http"
+		},
+		{
+			"key": "hostname",
+			"value": "localhost"
+		},
+		{
+			"key": "port",
+			"value": "80"
+		},
+		{
+			"key": "X-XSRF-TOKEN",
+			"value": ""
+		},
+		{
+			"key": "todayMinus20",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "today",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

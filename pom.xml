@@ -21,7 +21,6 @@
         <module>client</module>
 
         <module>nordigen-module</module>
-        <module>yapily-module</module>
         <module>share-price-module</module>
         <module>openapi-doc</module>
 
@@ -30,7 +29,7 @@
 
         <module>audit-service</module>
         <module>notification-service</module>
-        <module>rail-service</module>
+        <module>rail-module</module>
         <module>user-service</module>
 
         <module>integration-tests</module>
@@ -38,9 +37,9 @@
 
     <properties>
         <revision>1.0.0-SNAPSHOT</revision>
-        <maven.compiler.release>17</maven.compiler.release>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>20</maven.compiler.release>
+        <maven.compiler.source>20</maven.compiler.source>
+        <maven.compiler.target>20</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -59,7 +58,7 @@
 
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>one-stop</quarkus.container-image.group>
-        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-17-runtime:1.16</quarkus.jib.base-jvm-image>
+        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime:1.18</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
         </quarkus.jib.jvm-additional-arguments>
 
@@ -207,12 +206,22 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>rail-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>nordigen-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>yapily-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.velopayments</groupId>
+                <artifactId>yapily-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

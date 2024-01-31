@@ -5,14 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>rail-module</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>nordigen-module</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>rail-api</artifactId>
 
-    <modules>
-        <module>sim-lib</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>commons-lib</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
