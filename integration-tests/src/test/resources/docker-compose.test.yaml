@@ -6,9 +6,6 @@ services:
       - "9090:8080"
     networks:
       - onestop-http-network
-    environment:
-      ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
-      ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
 
   # Wiremock container. This hosts the email simulator.
   wiremock:

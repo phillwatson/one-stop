@@ -23,9 +23,12 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  */
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {
-    @ConfigProperty(name = "one-stop.nordigen.secret.id")
+    // settings default so that this lib can be imported into other libs without this setting
+    @ConfigProperty(name = "one-stop.nordigen.secret.id", defaultValue = "not-set")
     String SECRET_ID;
-    @ConfigProperty(name = "one-stop.nordigen.secret.key")
+
+    // settings default so that this lib can be imported into other libs without this setting
+    @ConfigProperty(name = "one-stop.nordigen.secret.key", defaultValue = "not-set")
     String SECRET_KEY;
 
     @Inject
