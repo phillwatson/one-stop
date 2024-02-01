@@ -2,9 +2,9 @@
 # One-Stop
 
 ---
-A PoC for interacting with the Nordigen Open-Banking API. Attempts to
-allow users connect to their bank accountDetails and view the transactions
-from multiple accounts in an aggregation.
+A PoC for interacting with the Open-Banking APIs. Allows users connect to
+their bank accounts and view the transactions from multiple accounts in an
+aggregated fashion.
 
 ## Architecture
 One-Stop has been designed using a modulith service architecture, where
