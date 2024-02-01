@@ -5,6 +5,8 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.domain.NotificationId;
+import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -24,6 +27,9 @@ import static org.mockito.Mockito.verify;
 public class UserTopicConsumer_UserActivityTest {
     @InjectMock
     SendEmailTask sendEmailTask;
+
+    @InjectMock
+    NotificationService notificationService;
 
     @Inject
     UserTopicConsumer fixture;
@@ -46,6 +52,13 @@ public class UserTopicConsumer_UserActivityTest {
         verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.ACCOUNT_ACTIVITY), paramsCaptor.capture());
 
         // and: the email template parameters are taken from the event payload
+        assertEquals(event.getActivity().getMessage(), paramsCaptor.getValue().get("activity"));
+
+        // and: a notification is issued
+        verify(notificationService).createNotification(eq(event.getUserId()), any(),
+            eq(NotificationId.ACCOUNT_ACTIVITY), paramsCaptor.capture());
+
+        // and: the notification parameters are taken from the event payload
         assertEquals(event.getActivity().getMessage(), paramsCaptor.getValue().get("activity"));
     }
 

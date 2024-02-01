@@ -91,6 +91,8 @@ one-stop:
         en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
       consent-expired:
         en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
+      account-activity:
+        en: "$activity$"
 
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}
