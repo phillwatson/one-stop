@@ -2,6 +2,13 @@ package com.hillayes.notification.domain;
 
 import com.hillayes.events.domain.Topic;
 
+/**
+ * Serves to identify the notification message template within the
+ * configuration. It also provides the topic and severity of the
+ * notification.
+ *
+ * @see com.hillayes.notification.config.NotificationConfiguration
+ */
 public enum NotificationId {
     CONSENT_DENIED(Topic.CONSENT, NotificationSeverity.info),
     CONSENT_SUSPENDED(Topic.CONSENT, NotificationSeverity.warn),
