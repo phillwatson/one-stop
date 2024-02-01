@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>rail-module</artifactId>
+        <artifactId>integration-module</artifactId>
         <version>${revision}</version>
     </parent>
 

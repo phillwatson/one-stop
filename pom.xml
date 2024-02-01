@@ -31,7 +31,7 @@
         <module>rail-module</module>
         <module>user-service</module>
 
-        <module>integration-tests</module>
+        <module>integration-module</module>
     </modules>
 
     <properties>
