@@ -1,5 +1,8 @@
 package com.hillayes.notification.config;
 
+/**
+ * Identifies the template to be used when rendering the content of the email.
+ */
 public enum TemplateName {
     HEADER,
     USER_REGISTERED,

@@ -175,17 +175,17 @@ public class NotificationService {
             throw new NotificationIdNotFoundException(notificationId);
         }
 
-        String result = messageConfig.templates().get(locale);
+        String result = messageConfig.locales().get(locale);
         if (result == null) {
-            result = messageConfig.templates().get(Locale.of(locale.getLanguage()));
+            result = messageConfig.locales().get(Locale.of(locale.getLanguage()));
         }
 
         if (result == null) {
-            result = messageConfig.templates().get(DEFAULT_LOCALE);
+            result = messageConfig.locales().get(DEFAULT_LOCALE);
         }
 
         if (result == null) {
-            result = messageConfig.templates().get(Locale.of(DEFAULT_LOCALE.getLanguage()));
+            result = messageConfig.locales().get(Locale.of(DEFAULT_LOCALE.getLanguage()));
         }
 
         if (result == null) {
@@ -194,6 +194,13 @@ public class NotificationService {
         return result;
     }
 
+    /**
+     * A function that maps a Notification and its rendered message to a new
+     * entity of type T. This avoids coupling between the service and the client's
+     * domain model. It allows the service to return both the notification
+     * record and its rendered message to the client.
+     * @param <T>
+     */
     public interface NotificationMapper<T> {
         public T map(Notification notification, String message);
     }

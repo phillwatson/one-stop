@@ -13,13 +13,15 @@ import java.util.Map;
 @ConfigMapping(prefix = "one-stop.notification")
 public interface NotificationConfiguration {
     /**
-     * Holds the common arguments, including details of the company owning the company.
+     * Holds the common arguments, including such properties as the application's
+     * company branding.
      * These are available to all notification messages.
      */
     Map<String,String> commonArgs();
 
     /**
-     * The configuration for each notification message configuration, keyed by their ID.
+     * The notification message templates, keyed by their ID. Each template can
+     * have any number of messages, each keyed by their locale.
      */
     Map<NotificationId, MessageConfig> templates();
 
@@ -32,6 +34,6 @@ public interface NotificationConfiguration {
          * that best suits the user's locale/language will be selected.
          */
         @WithParentName()
-        Map<Locale, String> templates();
+        Map<Locale, String> locales();
     }
 }
