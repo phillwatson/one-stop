@@ -10,7 +10,9 @@ import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
 import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.domain.User;
+import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.service.SendEmailService.Recipient;
 import com.hillayes.notification.service.UserService;
 import com.hillayes.notification.task.SendEmailTask;
@@ -34,6 +36,7 @@ public class UserTopicConsumer implements EventConsumer {
 
     private final UserService userService;
     private final SendEmailTask sendEmailTask;
+    private final NotificationService notificationService;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -103,6 +106,8 @@ public class UserTopicConsumer implements EventConsumer {
             "activity", event.getActivity().getMessage()
         );
         sendEmailTask.queueJob(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
+        notificationService.createNotification(event.getUserId(), event.getDateRecorded(),
+            NotificationId.ACCOUNT_ACTIVITY, params);
     }
 
     protected String format(Instant dateTime) {
