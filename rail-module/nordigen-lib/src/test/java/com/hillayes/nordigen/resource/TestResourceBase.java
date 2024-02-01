@@ -28,6 +28,7 @@ public class TestResourceBase {
     public void beforeEach() {
         nordigenSimulator.reset();
     }
+
     public String json(Object object) {
         try {
             return objectMapper.writeValueAsString(object);

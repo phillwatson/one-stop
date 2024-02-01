@@ -1,0 +1,8 @@
+one-stop:
+  auth:
+    xsrf:
+      secret: "this is a secret for xsrf tokens"
+
+  tests: # properties only used for testing
+    nordigen:
+      port: 8089
