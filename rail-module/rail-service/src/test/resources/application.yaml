@@ -4,10 +4,6 @@ quarkus:
       sql: true
       bind-parameters: true
 
-  rest-client:
-    nordigen-api:
-      url: http://localhost:8089
-
   log:
     category:
       "org.apache.http.wire":
@@ -17,15 +13,11 @@ one-stop:
   auth:
     xsrf:
       secret: "this is a secret for xsrf tokens"
-
-  tests: # properties only used for testing
-    nordigen:
-      port: 8089
-
-  nordigen:
-    secret:
-      id: e9309c
-      key: 8653cb
+#
+#  nordigen:
+#    secret:
+#      id: e9309c
+#      key: 8653cb
 
   yapily:
     secret:

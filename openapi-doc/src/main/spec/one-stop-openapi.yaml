@@ -1304,14 +1304,14 @@ components:
           example: interimAvailable
         referenceDate:
           type: string
-          format: date
+          format: date-time
           description: the date the balance refers to
           example: 2023-05-31
         dateRecorded:
           type: string
           format: date-time
           description: the date the balance was recorded.
-          example: 2023-05-31
+          example: 2023-05-31T12:10:25.000Z
         amount:
           type: number
           format: double

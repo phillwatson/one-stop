@@ -7,6 +7,7 @@ import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
 import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.AccountService;
@@ -113,6 +114,7 @@ public class UserConsentResource {
      * will call this endpoint with a positive or negative outcome.
      *
      * @param headers the request headers.
+     * @param railProvider the rail-provider identifier.
      * @param consentReference the user-consent identifier to which the requisition belongs.
      * @param error an error code, provided if the consent was denied.
      * @param details an error message, provided if the consent was denied.
@@ -120,24 +122,25 @@ public class UserConsentResource {
      * was initiated.
      */
     @GET
-    @Path("/response")
+    @Path("/{railProvider}/response")
     @PermitAll
     public Response consentResponse(@Context HttpHeaders headers,
-                                    @QueryParam("ref") String consentReference,
+                                    @PathParam("railProvider") RailProvider railProvider,
                                     @QueryParam("error") String error,
-                                    @QueryParam("details") String details) {
-        // A typical consent callback request:
-        // http://5.81.68.243/api/v1/rails/consents/response
+                                    UriInfo uriInfo) {
+        // A typical Nordigen consent callback request:
+        // http://5.81.68.243/api/v1/rails/consents/NORDIGEN/response
         // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
         // &error=UserCancelledSession
         // &details=User+cancelled+the+session.
 
-        log.info("User consent response [consentReference: {}, error: {}, details: {}]", consentReference, error, details);
+        log.info("User consent response [error: {}]", error);
         logHeaders(headers);
 
+        MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         URI redirectUri = ((error == null) || (error.isBlank()))
-            ? userConsentService.consentGiven(consentReference)
-            : userConsentService.consentDenied(consentReference, error, details);
+            ? userConsentService.consentGiven(railProvider, queryParameters)
+            : userConsentService.consentDenied(railProvider, queryParameters);
 
         return Response.temporaryRedirect(redirectUri).build();
     }

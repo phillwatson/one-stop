@@ -1,0 +1,60 @@
+title Yapily Bank Consent
+
+actor Client
+participant rail-service
+participant database
+participant broker
+participant yapily
+
+Client->rail-service:GET: banks
+activate rail-service
+Client<--rail-service:[bank-a, bank-b, ...]
+deactivateafter rail-service
+space
+
+Client->rail-service:POST: /api/v1/rails/consents\n(user-id, bank-id, callback-url)
+activate rail-service
+rail-service->yapily:POST:/account-auth-requests
+activate yapily
+note over rail-service,broker#e5ffbe:{\n  "applicationUserId": "<user-id>",\n  "institutionId": "modelo-sandbox",\n  "callback": "https://api/v1/rails/consents/YAPILY/response"\n}
+yapily-->rail-service: agreement created
+deactivateafter yapily
+note over database,yapily#e5ffbe:response:\n{\n  "id": "5b2552d5-abcc-497f-a835-1172cd259723",\n  "userUuid": "33588f67-5d42-42fb-8fc3-318d9afda91d",\n  "applicationUserId": "snoopy",\n  "institutionId": "modelo-sandbox",\n  "status": "AWAITING_AUTHORIZATION",\n  "createdAt": "2024-02-03T10:59:41.969Z",\n  "featureScope": [\n  "ACCOUNT_PERIODIC_PAYMENTS",\n  "ACCOUNT",\n  "ACCOUNT_BALANCES",\n  "ACCOUNT_TRANSACTIONS",\n  "IDENTITY",\n  "ACCOUNTS",\n  "ACCOUNT_STATEMENT_FILE",\n  "ACCOUNT_STATEMENTS",\n  "ACCOUNT_SCHEDULED_PAYMENTS",\n  "ACCOUNT_TRANSACTIONS_WITH_MERCHANT",\n  "ACCOUNT_DIRECT_DEBITS",\n  "ACCOUNT_STATEMENT",\n  "ACCOUNT_BENEFICIARIES"\n  ],\n  "state": "0d39ccf8360f456f9c74d3ba655d96b4",\n  "institutionConsentId": "aac-0c623e79-fdcf-4e5a-acd7-fe6fffafb09f",\n  "authorisationUrl": "<url>",\n  "qrCodeUrl": "<qr-url>"\n}
+
+
+rail-service->database:UserConsent.save
+rbox over rail-service,database#bee7ff:id: UUID,\nuser-id: UUID,\ninstitution-id: response.institution.id\nagreement-id: response.id\nstatus: String "WAITING"\ncallbackUri: callback-url
+
+rail-service->broker:CONSENT_INITIATED
+rail-service-->Client:redirect to response.authorisationUrl
+deactivateafter rail-service
+
+space 2
+Client->yapily: submit consent
+activate yapily
+  yapily->rail-service:GET: /api/v1/rails/consents/YAPILY/response\n?**consent**=eyJra...OohA\n&**application-user-id**=snoopy\n&**user-uuid**=33588f67-5d42-42fb-8fc3-318d9afda91d\n&**institution**=modelo-sandbox
+
+activate rail-service
+alt#lightblue error or denied
+rbox over rail-service,yapily#bee7ff:Additional query parameters:\n**error-source** - the high-level source of where the error has occurred\n**error** - the high-level error code summarising what has occurred\n**error-description** - the description of the failure sent by the bank and base64 encoded
+rail-service->database:UserConsent.findByReference(ref)
+
+rail-service->yapily:DELETE: /consents/{consentId}?forceDelete=true
+activate yapily
+deactivateafter yapily
+
+rail-service->database:UserConsent.update
+rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "DENIED"\ndate-denied: Instant\nerror: String
+rail-service->broker:CONSENT_DENIED
+rail-service-->Client:redirect to consent.callbackUri\n(error)
+else accepted
+rail-service->database:UserConsent.findByReference(ref)
+rail-service->database:UserConsent.update
+rbox over rail-service,database#bee7ff:id: UUID,\nstatus: String "GIVEN"\ndate-accepted: Instant
+rail-service->broker:CONSENT_ACCEPTED
+rail-service-->Client:redirect to consent.callbackUri
+end
+
+deactivateafter rail-service
+
+deactivateafter yapily

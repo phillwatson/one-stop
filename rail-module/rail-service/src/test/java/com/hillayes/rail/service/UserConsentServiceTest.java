@@ -6,6 +6,7 @@ import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
 import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -19,6 +20,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -280,10 +282,10 @@ public class UserConsentServiceTest {
 
         // and: an agreement will be created
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
-        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            RailInstitution i = invocation.getArgument(0);
-            URI uri = invocation.getArgument(1);
-            String reference = invocation.getArgument(2);
+        when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
+            RailInstitution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            String reference = invocation.getArgument(3);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -350,10 +352,10 @@ public class UserConsentServiceTest {
 
         // and: an agreement will be created
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
-        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            RailInstitution i = invocation.getArgument(0);
-            URI uri = invocation.getArgument(1);
-            String reference = invocation.getArgument(2);
+        when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
+            RailInstitution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            String reference = invocation.getArgument(3);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -484,7 +486,9 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        URI result = fixture.consentGiven(consent.getReference());
+        MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
+        queryParameters.add("ref", consent.getReference());
+        URI result = fixture.consentGiven(consent.getProvider(), queryParameters);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -516,9 +520,11 @@ public class UserConsentServiceTest {
 
         // when: the service is called
         // then: a not-found exception is thrown
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.consentGiven(consentReference)
-        );
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
+            queryParameters.add("ref", consentReference);
+            fixture.consentGiven(RailProvider.NORDIGEN, queryParameters);
+        });
 
         // and: the exception identifies requested consent
         assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
@@ -548,7 +554,11 @@ public class UserConsentServiceTest {
         // when: the service is called
         String errorCode = "UserCancelledSession";
         String errorDetail = "User Cancelled Session";
-        URI result = fixture.consentDenied(consent.getReference(), errorCode, errorDetail);
+        MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
+        queryParameters.add("ref", consent.getReference());
+        queryParameters.add("error", errorCode);
+        queryParameters.add("details", errorDetail);
+        URI result = fixture.consentDenied(consent.getProvider(), queryParameters);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -586,9 +596,11 @@ public class UserConsentServiceTest {
         // when: the service is called
         // then: a not-found exception is thrown
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            String errorCode = "UserCancelledSession";
-            String errorDetail = "User Cancelled Session";
-            fixture.consentDenied(consentReference, errorCode, errorDetail);
+            MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
+            queryParameters.add("ref", consentReference);
+            queryParameters.add("error", "UserCancelledSession");
+            queryParameters.add("details", "User Cancelled Session");
+            fixture.consentDenied(RailProvider.NORDIGEN, queryParameters);
         });
 
         // and: the exception identifies requested consent

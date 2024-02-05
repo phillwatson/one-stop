@@ -166,10 +166,10 @@ public interface AccountsApi {
     @Path("/accounts/{accountId}/transactions")
     public ApiListResponseOfTransaction getTransactions(@HeaderParam("consent") String consentToken,
                                                         @PathParam("accountId") String accountId,
-                                                        @QueryParam("with") String categorisation,
                                                         @QueryParam("from") Instant from,
                                                         @QueryParam("before") Instant before,
                                                         @QueryParam("offset") int offset,
                                                         @QueryParam("limit") int limit,
+                                                        @QueryParam("with") String categorisation,
                                                         @QueryParam("sort") String sortBy);
 }

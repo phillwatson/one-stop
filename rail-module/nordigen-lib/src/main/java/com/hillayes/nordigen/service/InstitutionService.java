@@ -23,7 +23,7 @@ public class InstitutionService extends AbstractRailService {
         get("SANDBOXFINANCE_SFIN0000")
             .ifPresent(list::add);
 
-        list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled);
+        list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled != null && paymentsEnabled);
         list.sort(null);
         return list;
     }

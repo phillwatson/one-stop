@@ -26,9 +26,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
     public void testFlow() {
         PaginatedInstitutions institutions = given()
             .queryParam("country", "GB")
-            .queryParam("page", 0)
-            .queryParam("page-size", 110)
-            .when().get("/api/v1/rails/institutions")
+            .when().get("/api/v1/rails/nordigen/institutions")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -37,7 +35,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
         assertEquals(107, institutions.getItems().size());
 
         InstitutionDetail institution = given()
-            .when().get("/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000")
+            .when().get("/api/v1/rails/nordigen/institutions/SANDBOXFINANCE_SFIN0000")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -54,7 +52,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
         // create agreement
         EndUserAgreement agreement = given()
             .request().contentType(JSON).body(agreementRequest)
-            .when().post("/api/v1/rails/admin/rail-agreements")
+            .when().post("/api/v1/rails/nordigen/agreements")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -63,7 +61,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
         // get agreement
         given()
             .pathParam("id", agreement.id)
-            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
+            .when().get("/api/v1/rails/nordigen/agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON);

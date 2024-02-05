@@ -9,6 +9,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @RegisterRestClient(configKey = "yapily-api")
 @RegisterClientHeaders(BasicHeaderFactory.class)
@@ -42,7 +43,7 @@ public interface ConsentsApi {
     @GET
     @Path("/consents")
     public ApiListResponseOfConsent getConsents(@QueryParam("filter[applicationUserId]") List<String> appUserIdFilter,
-                                                @QueryParam("filter[userId]") List<String> userIdFilter,
+                                                @QueryParam("filter[userId]") List<UUID> userIdFilter,
                                                 @QueryParam("filter[institution]") List<String> institutionFilter,
                                                 @QueryParam("filter[status]") List<String> statusFilter,
                                                 @QueryParam("from") Instant from,

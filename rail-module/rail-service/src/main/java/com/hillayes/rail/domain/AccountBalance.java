@@ -31,7 +31,7 @@ public class AccountBalance {
 
     @Column(name = "reference_date", nullable = true)
     @EqualsAndHashCode.Include
-    private LocalDate referenceDate;
+    private Instant referenceDate;
 
     @Embedded
     @AttributeOverrides({

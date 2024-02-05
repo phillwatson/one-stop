@@ -8,12 +8,14 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import jakarta.inject.Inject;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +42,7 @@ public class AccountBalanceRepositoryTest {
         // when: an account balance is saved
         AccountBalance accountBalance = fixture.save(AccountBalance.builder()
             .accountId(account.getId())
-            .referenceDate(LocalDate.now())
+            .referenceDate(Instant.now())
             .balanceType("interimAvailable")
             .amount(MonetaryAmount.of("GBP", 123.45))
             .build());
@@ -58,30 +60,32 @@ public class AccountBalanceRepositoryTest {
         // and: linked account
         Account account = createAccounts(consent, 1).get(0);
 
+        Instant now = Instant.now();
+
         // and: the account has several account balance records
         List<AccountBalance> accountBalances = List.of(
             AccountBalance.builder()
                 .accountId(account.getId())
-                .referenceDate(LocalDate.now().minusDays(2))
+                .referenceDate(Instant.now().minus(Duration.ofDays(2)))
                 .balanceType("interimAvailable")
                 .amount(MonetaryAmount.of("GBP", 123.45))
                 .build(),
             AccountBalance.builder()
                 .accountId(account.getId())
-                .referenceDate(LocalDate.now().minusDays(2))
+                .referenceDate(Instant.now().minus(Duration.ofDays(2)))
                 .balanceType("expected")
                 .amount(MonetaryAmount.of("GBP", 223.45))
                 .build(),
 
             AccountBalance.builder()
                 .accountId(account.getId())
-                .referenceDate(LocalDate.now())
+                .referenceDate(now)
                 .balanceType("interimAvailable")
                 .amount(MonetaryAmount.of("GBP", 333.45))
                 .build(),
             AccountBalance.builder()
                 .accountId(account.getId())
-                .referenceDate(LocalDate.now())
+                .referenceDate(now)
                 .balanceType("expected")
                 .amount(MonetaryAmount.of("GBP", 443.45))
                 .build()
@@ -116,6 +120,7 @@ public class AccountBalanceRepositoryTest {
     private UserConsent createUserConsent() {
         return userConsentRepository.save(UserConsent.builder()
             .provider(RailProvider.NORDIGEN)
+            .reference(UUID.randomUUID().toString())
             .userId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())

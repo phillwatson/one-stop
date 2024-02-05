@@ -102,6 +102,7 @@ public class AccountRepositoryTest {
     private UserConsent createUserConsent() {
         return userConsentRepository.save(UserConsent.builder()
             .provider(RailProvider.NORDIGEN)
+            .reference(UUID.randomUUID().toString())
             .userId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())

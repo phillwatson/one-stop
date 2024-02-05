@@ -3,7 +3,7 @@ package com.hillayes.rail.api.domain;
 import com.hillayes.commons.MonetaryAmount;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class RailBalance {
-    private LocalDate dateTime;
+    private Instant dateTime;
     private MonetaryAmount amount;
     private String type;
 }
