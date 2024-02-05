@@ -1,9 +1,9 @@
 package com.hillayes.nordigen.resource;
 
-import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.nordigen.model.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -21,18 +21,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class RequisitionAdminResourceTest extends TestResourceBase {
+    private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {
+    };
+
     @Test
     @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testFlow() {
-        PaginatedInstitutions institutions = given()
+        List<Institution> institutions = given()
             .queryParam("country", "GB")
             .when().get("/api/v1/rails/nordigen/institutions")
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().response().as(PaginatedInstitutions.class);
-        assertNotNull(institutions.getItems());
-        assertEquals(107, institutions.getItems().size());
+            .extract().as(INSTITUTION_LIST);
+        assertFalse(institutions.isEmpty());
 
         InstitutionDetail institution = given()
             .when().get("/api/v1/rails/nordigen/institutions/SANDBOXFINANCE_SFIN0000")

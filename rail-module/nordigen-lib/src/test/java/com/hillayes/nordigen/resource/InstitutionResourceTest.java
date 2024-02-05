@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class InstitutionResourceTest extends TestResourceBase {
     private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {
     };
+
     @Test
     @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testListBanksPaymentNotEnabled() {
