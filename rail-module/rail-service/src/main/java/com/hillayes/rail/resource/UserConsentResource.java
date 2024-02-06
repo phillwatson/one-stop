@@ -122,14 +122,16 @@ public class UserConsentResource {
      * was initiated.
      */
     @GET
-    @Path("/{railProvider}/response")
+    @Path("/response/{railProvider}")
+    @Consumes(MediaType.WILDCARD)
+    @Produces(MediaType.WILDCARD)
     @PermitAll
     public Response consentResponse(@Context HttpHeaders headers,
-                                    @PathParam("railProvider") RailProvider railProvider,
-                                    @QueryParam("error") String error,
-                                    UriInfo uriInfo) {
+                                    @Context UriInfo uriInfo,
+                                    @PathParam("railProvider") String railProviderId,
+                                    @QueryParam("error") String error) {
         // A typical Nordigen consent callback request:
-        // http://5.81.68.243/api/v1/rails/consents/NORDIGEN/response
+        // http://5.81.68.243/api/v1/rails/consents/response/NORDIGEN
         // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
         // &error=UserCancelledSession
         // &details=User+cancelled+the+session.
@@ -137,6 +139,7 @@ public class UserConsentResource {
         log.info("User consent response [error: {}]", error);
         logHeaders(headers);
 
+        RailProvider railProvider = RailProvider.valueOf(railProviderId);
         MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         URI redirectUri = ((error == null) || (error.isBlank()))
             ? userConsentService.consentGiven(railProvider, queryParameters)

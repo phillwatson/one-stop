@@ -38,6 +38,7 @@ services:
       ONE_STOP_YAPILY_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
+      QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
 
   notification-service:
     image: one-stop/notification-service:1.0.0-SNAPSHOT

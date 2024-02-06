@@ -13,6 +13,7 @@ import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.onestop.api.*;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
+import com.hillayes.sim.yapily.YapilySimClient;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +28,15 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequisitionFlowTestIT extends ApiTestBase {
-    private static NordigenSimClient railClient;
+    private static NordigenSimClient nordigenClient;
+    private static YapilySimClient yapilyClient;
 
     private static Map<String, String> adminAuthTokens;
 
     @BeforeAll
     public static void initRailSim() {
-        railClient = newRailClient();
+        nordigenClient = newNordigenClient();
+        yapilyClient = newYapilyClient();
 
         // the admin user signs in
         AuthApi authApi = new AuthApi();
@@ -44,7 +47,8 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
     @BeforeEach
     public void beforeEach() {
-        railClient.reset();
+        nordigenClient.reset();
+        yapilyClient.reset();
     }
 
     @Test
@@ -131,7 +135,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
             // when: the success response is returned from the rails service
-            Response response = userConsentApi.consentResponse(requisition.reference, null, null);
+            Response response = userConsentApi.consentResponse(institution.getProvider(), requisition.reference, null, null);
 
             // then: the redirect response is the original callback URI
             assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));

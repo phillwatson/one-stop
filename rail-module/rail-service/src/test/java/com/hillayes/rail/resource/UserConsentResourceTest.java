@@ -20,6 +20,6 @@ public class UserConsentResourceTest {
             .path(UserConsentResource.class, "consentResponse")
             .buildFromMap(Map.of("railProvider", RailProvider.NORDIGEN));
 
-        assertEquals("http://192.2.2.2:5555/api/v1/rails/consents/NORDIGEN/response", uri.toString());
+        assertEquals("http://192.2.2.2:5555/api/v1/rails/consents/response/NORDIGEN", uri.toString());
     }
 }

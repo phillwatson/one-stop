@@ -7,6 +7,7 @@ import com.hillayes.integration.test.util.UserUtils;
 import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.sim.nordigen.NordigenSimClient;
+import com.hillayes.sim.yapily.YapilySimClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,16 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstitutionTestIT extends ApiTestBase {
-    private static NordigenSimClient railClient;
+    private static NordigenSimClient nordigenClient;
+    private static YapilySimClient yapilyClient;
 
     @BeforeAll
     public static void initRailSim() {
-        railClient = newRailClient();
+        nordigenClient = newNordigenClient();
+        yapilyClient = newYapilyClient();
     }
 
     @BeforeEach
     public void beforeEach() {
-        railClient.reset();
+        nordigenClient.reset();
+        yapilyClient.reset();
     }
 
     @Test

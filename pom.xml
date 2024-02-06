@@ -136,6 +136,12 @@
                 <groupId>com.sendinblue</groupId>
                 <artifactId>sib-api-v3-sdk</artifactId>
                 <version>6.0.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger</groupId>
+                        <artifactId>swagger-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.antlr</groupId>
