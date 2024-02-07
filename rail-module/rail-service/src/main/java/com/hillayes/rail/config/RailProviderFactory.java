@@ -19,6 +19,17 @@ public class RailProviderFactory {
     Instance<RailProviderApi> railProviderApis;
 
     /**
+     * Returns the RailProviderApi implementation for the RailProvider identified
+     * by the given String.
+     * @param railProviderId the string value of the RailProvider enum.
+     * @return the identified RailProviderApi implementation.
+     */
+    public RailProviderApi get(String railProviderId) {
+        RailProvider railProvider = RailProvider.valueOf(railProviderId);
+        return get(railProvider);
+    }
+
+    /**
      * Returns the RailProviderApi implementation for the given RailProvider. Will
      * throw an IllegalArgumentException if no implementation is found.
      * @param railProvider the RailProvider value.

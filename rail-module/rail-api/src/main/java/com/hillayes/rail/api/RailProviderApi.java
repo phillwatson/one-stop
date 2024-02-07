@@ -1,6 +1,7 @@
 package com.hillayes.rail.api;
 
 import com.hillayes.rail.api.domain.*;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -29,7 +30,14 @@ public interface RailProviderApi {
      * @param railProvider the RailProvider value that identifies the implementation.
      * @return true if this instance supports the given RailProvider.
      */
-    boolean isFor(RailProvider railProvider);
+    public default boolean isFor(RailProvider railProvider) {
+        return getProviderId() == railProvider;
+    }
+
+    /**
+     * Returns the RailProvider value that identifies the underlying provider.
+     */
+    public RailProvider getProviderId();
 
     /**
      * Returns the identified Institution, or empty if not found.
@@ -71,6 +79,19 @@ public interface RailProviderApi {
                                   RailInstitution institution,
                                   URI callbackUri,
                                   String reference);
+
+    /**
+     * Returns the consent reference from the given URL query parameters.
+     * The consent reference is a value created by ourselves and passed to the rail
+     * when a new consent is requested (see {@link #register(UUID, RailInstitution, URI, String)}).
+     * The rail provider will return this value in the callback when the consent is
+     * given or denied. This allows us to correlate the consent with the original
+     * request.
+     *
+     * @param queryParams the URL query parameters from the consent request callback.
+     * @return the value of the query parameter that holds the consent reference.
+     */
+    public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams);
 
     /**
      * Returns the agreement with the given id, or empty if not found.

@@ -5,12 +5,10 @@ import com.hillayes.commons.Strings;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
 import com.hillayes.yapily.model.*;
-import com.hillayes.yapily.service.AccountsService;
-import com.hillayes.yapily.service.ConsentsService;
-import com.hillayes.yapily.service.InstitutionsService;
-import com.hillayes.yapily.service.UsersService;
+import com.hillayes.yapily.service.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -24,6 +22,12 @@ import java.util.UUID;
 @ApplicationScoped
 @Slf4j
 public class YapilyRailAdaptor implements RailProviderApi {
+    /**
+     * The number of days for which transaction data can be obtained.
+     * As Yapily doesn't provide this information, we default to 365 days.
+     */
+    private static final int MAX_HISTORY = 365;
+
     @Inject
     ConsentsService consentsService;
 
@@ -36,9 +40,12 @@ public class YapilyRailAdaptor implements RailProviderApi {
     @Inject
     UsersService usersService;
 
+    @Inject
+    AuthorisationsService authorisationsService;
+
     @Override
-    public boolean isFor(RailProvider railProvider) {
-        return railProvider == RailProvider.YAPILY;
+    public RailProvider getProviderId() {
+        return RailProvider.YAPILY;
     }
 
     @Override
@@ -91,7 +98,54 @@ public class YapilyRailAdaptor implements RailProviderApi {
         log.debug("Requesting agreement [userId: {}, reference: {}, institutionId: {}]",
             userId, reference, institution.getId());
 
-        return null;
+        AccountAuthorisationRequest request = new AccountAuthorisationRequest()
+            .institutionId(institution.getId())
+            .callback(callbackUri.toString())
+            .applicationUserId(userId.toString())
+            .addForwardParametersItem("ref:" + reference);
+
+        ApiResponseOfAccountAuthorisationResponse response = authorisationsService.createAccountAuthorisation(request);
+        AccountAuthorisationResponse consent = response.getData();
+        if (consent == null) {
+            throw new NullPointerException("No consent returned in authorisation response");
+        }
+        if (consent.getId() == null) {
+            throw new NullPointerException("No consent ID returned in authorisation response");
+        }
+        if (consent.getAuthorisationUrl() == null) {
+            throw new NullPointerException("No auth-link returned in authorisation response");
+        }
+
+        return RailAgreement.builder()
+            .id(consent.getId().toString())
+            .institutionId(institution.getId())
+            .dateCreated(consent.getCreatedAt())
+            .status(AgreementStatus.INITIATED)
+            .maxHistory(MAX_HISTORY)
+            .agreementLink(URI.create(consent.getAuthorisationUrl()))
+            .build();
+    }
+
+    @Override
+    public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams) {
+        // A typical Yapily consent callback request:
+        // http://5.81.68.243/api/v1/rails/consents/response/YAPIL/
+        // ?application-user-id=snoopy
+        // &user-uuid=6e147c4c-b3f5-4d7b-b0b9-ceaa6ef1fb86
+        // &institution=modelo-sandbox
+        // &error=access_denied
+        // &error-source=user
+        // &error-description=VGhlIHVzZXIgY2FuY2VsbGVkIHRoZSB0cmFuc2FjdGlvbiBvciBmYWlsZWQgdG8gbG9naW4%3D
+        // &ref%3A1234=
+        return ConsentResponse.builder()
+            .consentReference(queryParams.keySet().stream()
+                .filter(key -> key.startsWith("ref:"))
+                .findFirst()
+                .map(ref -> ref.substring(4))
+                .orElse(null))
+            .errorCode(queryParams.getFirst("error"))
+            .errorDescription(queryParams.getFirst("error-description"))
+            .build();
     }
 
     @Override
@@ -110,9 +164,9 @@ public class YapilyRailAdaptor implements RailProviderApi {
                     .status(of(consent.getStatus()))
                     .dateCreated(consent.getCreatedAt())
                     .dateGiven(consent.getAuthorizedAt())
-                    .dateExpires(consent.getExpiresAt())
+                    .dateExpires(consent.getExpiresAt() == null ? consent.getReconfirmBy() : consent.getExpiresAt())
                     .institutionId(consent.getInstitutionId())
-                    .maxHistory(90)
+                    .maxHistory(MAX_HISTORY)
                     .build();
             });
         return Optional.empty();
@@ -177,7 +231,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
             return AgreementStatus.INITIATED;
 
         return switch (consentStatus) {
-            case AWAITING_AUTHORIZATION -> AgreementStatus.WAITING;
+            case AWAITING_AUTHORIZATION -> AgreementStatus.INITIATED;
             case AWAITING_FURTHER_AUTHORIZATION -> AgreementStatus.WAITING;
             case AWAITING_RE_AUTHORIZATION -> AgreementStatus.WAITING;
             case AWAITING_DECOUPLED_PRE_AUTHORIZATION -> AgreementStatus.WAITING;

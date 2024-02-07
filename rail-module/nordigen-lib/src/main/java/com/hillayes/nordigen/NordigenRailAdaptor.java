@@ -14,6 +14,7 @@ import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -42,8 +43,8 @@ public class NordigenRailAdaptor implements RailProviderApi {
     InstitutionService institutionService;
 
     @Override
-    public boolean isFor(RailProvider railProvider) {
-        return railProvider == RailProvider.NORDIGEN;
+    public RailProvider getProviderId() {
+        return RailProvider.NORDIGEN;
     }
 
     @Override
@@ -117,14 +118,28 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
         return RailAgreement.builder()
             .id(requisition.id)
+            .institutionId(agreement.institutionId)
             .accountIds(requisition.accounts)
             .status(of(requisition.status))
             .dateCreated(requisition.created.toInstant())
             .dateGiven(agreement.accepted == null ? null : agreement.accepted.toInstant())
             .dateExpires(agreement.accepted == null ? null : agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
-            .institutionId(agreement.institutionId)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementLink(URI.create(requisition.link))
+            .build();
+    }
+
+    @Override
+    public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams) {
+        // A typical Nordigen consent callback request:
+        // http://5.81.68.243/api/v1/rails/consents/response/NORDIGEN
+        // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
+        // &error=UserCancelledSession
+        // &details=User+cancelled+the+session.
+        return ConsentResponse.builder()
+            .consentReference(queryParams.getFirst("ref"))
+            .errorCode(queryParams.getFirst("error"))
+            .errorDescription(queryParams.getFirst("details"))
             .build();
     }
 

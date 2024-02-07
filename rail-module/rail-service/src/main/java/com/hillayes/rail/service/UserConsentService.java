@@ -4,14 +4,15 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
+import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.RailInstitution;
-import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
@@ -19,7 +20,6 @@ import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -145,17 +145,23 @@ public class UserConsentService {
         }
     }
 
-    public URI consentGiven(RailProvider railProvider, MultivaluedMap<String, String> queryParameters) {
-        String consentReference = queryParameters.getFirst("ref");
-        log.info("User's consent received [railProvider: {}, reference: {}]", railProvider, consentReference);
-        UserConsent userConsent = userConsentRepository.findByReference(consentReference)
-            .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
+    public URI consentGiven(RailProviderApi railProvider, ConsentResponse consentResponse) {
+        log.info("User's consent received [railProvider: {}, reference: {}]",
+            railProvider.getProviderId(), consentResponse.getConsentReference());
+
+        UserConsent userConsent = userConsentRepository.findByReference(consentResponse.getConsentReference())
+            .orElseThrow(() -> new RegistrationNotFoundException(railProvider.getProviderId(), consentResponse));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
+        RailAgreement agreement = railProvider
+            .getAgreement(userConsent.getAgreementId())
+            .orElse(null);
+
         URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.GIVEN);
+        userConsent.setAgreementExpires(agreement == null ? null : agreement.getDateExpires());
         userConsent.setDateGiven(Instant.now());
         userConsent.setCallbackUri(null);
         userConsent = userConsentRepository.save(userConsent);
@@ -169,13 +175,11 @@ public class UserConsentService {
         return redirectUrl;
     }
 
-    public URI consentDenied(RailProvider railProvider, MultivaluedMap<String, String> queryParameters) {
-        String consentReference = queryParameters.getFirst("ref");
-        String error = queryParameters.getFirst("error");;
-        String details = queryParameters.getFirst("details");
-        log.info("User's consent denied [reference: {}, error: {}, details: {}]", consentReference, error, details);
-        UserConsent userConsent = userConsentRepository.findByReference(consentReference)
-            .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
+    public URI consentDenied(RailProviderApi railProvider, ConsentResponse consentResponse) {
+        log.info("User's consent denied [response: {}]", consentResponse);
+
+        UserConsent userConsent = userConsentRepository.findByReference(consentResponse.getConsentReference())
+            .orElseThrow(() -> new RegistrationNotFoundException(railProvider.getProviderId(), consentResponse));
 
         log.debug("Updating consent [userId: {}, consentId: {}, institutionId: {}, expires: {}]",
         userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
@@ -184,15 +188,15 @@ public class UserConsentService {
 
         URI redirectUri = UriBuilder
             .fromPath(userConsent.getCallbackUri())
-            .queryParam("error", error)
-            .queryParam("details", details)
+            .queryParam("error", consentResponse.getErrorCode())
+            .queryParam("details", consentResponse.getErrorDescription())
             .build();
 
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
         userConsent.setCallbackUri(null);
-        userConsent.setErrorCode(error);
-        userConsent.setErrorDetail(details);
+        userConsent.setErrorCode(consentResponse.getErrorCode());
+        userConsent.setErrorDetail(consentResponse.getErrorDescription());
         userConsent = userConsentRepository.save(userConsent);
 
         // send consent-denied event notification
