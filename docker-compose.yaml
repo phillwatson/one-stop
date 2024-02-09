@@ -54,7 +54,7 @@ services:
 
   db:
     restart: unless-stopped
-    image: postgres:16.1-alpine3.19
+    image: postgres:15.5-alpine3.19
     environment:
       POSTGRES_DB: one-stop
       POSTGRES_USER: one-stop

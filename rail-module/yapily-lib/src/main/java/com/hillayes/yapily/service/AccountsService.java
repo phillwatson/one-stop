@@ -2,7 +2,6 @@ package com.hillayes.yapily.service;
 
 import com.hillayes.yapily.api.AccountsApi;
 import com.hillayes.yapily.model.Account;
-import com.hillayes.yapily.model.AccountBalance;
 import com.hillayes.yapily.model.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
