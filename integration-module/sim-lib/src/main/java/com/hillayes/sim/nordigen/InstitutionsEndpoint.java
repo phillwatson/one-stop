@@ -44,14 +44,16 @@ public class InstitutionsEndpoint extends AbstractEndpoint {
         log.info("get institution [id: {}]", id);
         String entity = DEFINITIONS.get(id);
         if (entity == null) {
+            log.info("institution not found [id: {}]", id);
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(Map.of(
                     "summary", "Not found",
-                    "detail", "End User Agreement " + id + " not found"
+                    "detail", "Institution " + id + " not found"
                 ))
                 .build();
         }
 
+        log.info("institution found [id: {}]", id);
         return Response.ok(entity).build();
     }
 

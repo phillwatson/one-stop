@@ -7,6 +7,7 @@ import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AccountStatus;
 import com.hillayes.rail.api.domain.RailAccount;
+import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.RailTransaction;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -101,7 +103,14 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         }
 
         RailProviderApi railProviderApi = railProviderFactory.get(userConsent.getProvider());
-        RailAccount railAccount = railProviderApi.getAccount(railAccountId).orElse(null);
+        RailAgreement railAgreement = railProviderApi.getAgreement(userConsent.getAgreementId()).orElse(null);
+        if (railAgreement == null) {
+            log.info("Unable to find rail-agreement [consentId: {}, railAgreementId: {}]",
+                consentId, userConsent.getAgreementId());
+            return TaskConclusion.COMPLETE;
+        }
+
+        RailAccount railAccount = railProviderApi.getAccount(railAgreement, railAccountId).orElse(null);
         if (railAccount == null) {
             log.info("Unable to find rail-account [consentId: {}, railAccountId: {}]", consentId, railAccountId);
             return TaskConclusion.COMPLETE;
@@ -116,7 +125,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         }
 
         else if (railAccount.getStatus() == AccountStatus.READY) {
-            com.hillayes.rail.domain.Account account = getOrCreateAccount(userConsent, railAccount);
+            Account account = getOrCreateAccount(userConsent, railAccount);
 
             // only process if not already polled within grace period
             Instant grace = Instant.now().minus(configuration.accountPollingInterval());
@@ -127,8 +136,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             }
 
             log.debug("Polling account [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
-            updateBalances(railProviderApi, account);
-            updateTransactions(railProviderApi, account, userConsent.getMaxHistory());
+            updateBalances(account, railAccount);
+            updateTransactions(railProviderApi, railAgreement, account);
 
             account.setDateLastPolled(Instant.now());
             accountRepository.save(account);
@@ -159,23 +168,18 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             );
     }
 
-    private void updateBalances(RailProviderApi railProviderApi, Account account) {
+    private void updateBalances(Account account, RailAccount railAccount) {
         log.debug("Updating balances [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
-        List<AccountBalance> balances = railProviderApi.listBalances(account.getRailAccountId(), LocalDate.now().minusDays(90))
-            .stream()
-            .map(balance -> accountBalanceRepository.save(AccountBalance.builder()
+        accountBalanceRepository.save(AccountBalance.builder()
                 .accountId(account.getId())
-                .balanceType(balance.getType())
-                .referenceDate(balance.getDateTime())
-                .amount(balance.getAmount())
-                .build()))
-            .toList();
-
-        log.debug("Updated balances [size: {}]", balances.size());
+                .balanceType(railAccount.getBalance().getType())
+                .referenceDate(railAccount.getBalance().getDateTime())
+                .amount(railAccount.getBalance().getAmount())
+                .build());
     }
 
-    private void updateTransactions(RailProviderApi railProviderApi, Account account, int maxHistory) {
+    private void updateTransactions(RailProviderApi railProviderApi, RailAgreement railAgreement, Account account) {
         log.debug("Updating transactions [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
         LocalDate startDate;
@@ -186,14 +190,14 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             startDate = accountTransactionRepository.findByAccountId(account.getId(), sort, 0, 1)
                 .stream().findFirst()
                 .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
-                .orElse(LocalDate.now().minusDays(maxHistory)); // or calculate date if no transactions found
+                .orElse(LocalDate.now().minusDays(railAgreement.getMaxHistory())); // or calculate date if no transactions found
             log.debug("Looking for transactions [accountId: {}, startDate: {}]", account.getId(), startDate);
         } else {
-            startDate = LocalDate.now().minusDays(maxHistory);
+            startDate = LocalDate.now().minusDays(railAgreement.getMaxHistory());
         }
 
         // retrieve transactions from rail
-        List<RailTransaction> details = railProviderApi.listTransactions(account.getRailAccountId(), startDate, LocalDate.now());
+        List<RailTransaction> details = railProviderApi.listTransactions(railAgreement, account.getRailAccountId(), startDate);
 
         // identify those internal transaction IDs we've seen before
         List<String> existing = (account.getId() == null)

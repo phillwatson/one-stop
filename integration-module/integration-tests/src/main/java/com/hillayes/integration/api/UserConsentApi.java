@@ -3,6 +3,7 @@ package com.hillayes.integration.api;
 import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.rail.api.domain.RailProvider;
 import io.restassured.response.Response;
 
 import java.net.URI;
@@ -68,7 +69,8 @@ public class UserConsentApi extends ApiBase {
             .extract().response();
     }
 
-    public Response consentResponse(String userConsentId,
+    public Response consentResponse(String railProvider,
+                                    String userConsentId,
                                     String error,
                                     String details) {
         return givenAuth()
@@ -76,7 +78,7 @@ public class UserConsentApi extends ApiBase {
             .queryParam("ref", userConsentId)
             .queryParam("error", error)
             .queryParam("details", details)
-            .get("/api/v1/rails/consents/response")
+            .get("/api/v1/rails/consents/response/{railProvider}", railProvider)
             .then()
             .statusCode(307)
             .extract().response();

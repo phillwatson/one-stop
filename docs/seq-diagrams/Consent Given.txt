@@ -7,9 +7,9 @@ participant database
 participant email-service
 participant broker
 
-nordigen->rail-service:GET: /api/v1/rails/consents/response?ref=consentId
+nordigen->rail-service:GET: /api/v1/rails/consents/NORDIGEN/response?ref=consentRef
 activate rail-service
-rail-service->database:UserConsent.get(consentId)
+rail-service->database:UserConsent.findByReference(consentRef)
 activate database
 rail-service<--database:userConsent
 deactivate database

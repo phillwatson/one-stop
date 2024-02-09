@@ -37,7 +37,7 @@ public class NotificationTestIT extends ApiTestBase {
 
     @BeforeAll
     public static void initRailSim() {
-        railClient = newRailClient();
+        railClient = newNordigenClient();
 
         // the admin user signs in
         AuthApi authApi = new AuthApi();
@@ -85,7 +85,7 @@ public class NotificationTestIT extends ApiTestBase {
         String errorDetails = randomAlphanumeric(30);
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
             // when: an error response is returned from the rails service
-            userConsentApi.consentResponse(requisition.reference, "mock-error-code", errorDetails);
+            userConsentApi.consentResponse(institution.getProvider(), requisition.reference, "mock-error-code", errorDetails);
 
             // then: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),

@@ -69,9 +69,10 @@ public class RequisitionsEndpoint extends AbstractEndpoint {
     @GET
     @Path("{id}/")
     public Response get(@PathParam("id") String id) {
-        log.info("get requisitions [id: {}]", id);
+        log.info("get requisition [id: {}]", id);
         Requisition entity = requisitions.get(id);
         if (entity == null) {
+            log.info("requisition not found [id: {}]", id);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
@@ -91,6 +92,7 @@ public class RequisitionsEndpoint extends AbstractEndpoint {
             }
         }
 
+        log.info("requisition found [id: {}, status: {}]", id, entity.status);
         return Response.ok(entity).build();
     }
 

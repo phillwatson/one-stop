@@ -1,7 +1,6 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.caching.Cache;
-import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
@@ -33,35 +32,37 @@ public class InstitutionService {
     public List<RailInstitution> list(RailProvider railProvider,
                                       String countryCode,
                                       Boolean paymentsEnabled) {
-        CacheKey key = new CacheKey(countryCode, paymentsEnabled);
         if (railProvider == null) {
             // return all institutions from all providers
-            return cacheByCountry.getValueOrCall(key, () ->
-                railProviderFactory.getAll()
-                    .flatMap(api -> api.listInstitutions(countryCode, paymentsEnabled).stream())
-                    .toList());
+            return railProviderFactory.getAll()
+                .flatMap(api -> {
+                    CacheKey key = new CacheKey(api.getProviderId(), countryCode, paymentsEnabled);
+                    return cacheByCountry.getValueOrCall(key, k ->
+                        api.listInstitutions(k.countryCode(), k.paymentsEnabled())
+                    ).stream();
+                }).toList();
         }
 
         // return institutions from the specified provider
-        RailProviderApi railProviderApi = railProviderFactory.get(railProvider);
-        return cacheByCountry.getValueOrCall(key, () ->
-            railProviderApi.listInstitutions(countryCode, paymentsEnabled));
+        CacheKey key = new CacheKey(railProvider, countryCode, paymentsEnabled);
+        return cacheByCountry.getValueOrCall(key, k ->
+            railProviderFactory.get(k.railProvider()).listInstitutions(k.countryCode(), k.paymentsEnabled()));
     }
 
     public Optional<RailInstitution> get(RailProvider railProvider, String id) {
-        return cacheById.getValueOrCall(id, () ->
-            railProviderFactory.get(railProvider).getInstitution(id));
+        return cacheById.getValueOrCall(id, k ->
+            railProviderFactory.get(railProvider).getInstitution(k));
     }
 
     public Optional<RailInstitution> get(String id) {
-        return cacheById.getValueOrCall(id, () -> railProviderFactory.getAll()
-            .map(api -> api.getInstitution(id))
+        return cacheById.getValueOrCall(id, k -> railProviderFactory.getAll()
+            .map(api -> api.getInstitution(k))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
         );
     }
 
-    private record CacheKey(String countryCode, Boolean paymentsEnabled) {
+    private record CacheKey(RailProvider railProvider, String countryCode, Boolean paymentsEnabled) {
     }
 }

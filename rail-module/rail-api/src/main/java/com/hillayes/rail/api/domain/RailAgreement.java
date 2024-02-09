@@ -21,6 +21,11 @@ public class RailAgreement {
     private String id;
 
     /**
+     * The token that authorises access to the account.
+     */
+    private String authToken;
+
+    /**
      * The date-time on which the agreement was created, but not yet acknowledged. 
      */
     @Builder.Default

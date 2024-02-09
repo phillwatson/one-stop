@@ -4,6 +4,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
+import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.config.RailProviderFactory;
@@ -11,6 +12,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -95,6 +98,8 @@ public class UserConsentService {
         }
 
         try {
+            RailProviderApi railProviderApi = railProviderFactory.get(institution.getProvider());
+
             // construct URI from the consent resource callback method
             URI registrationCallbackUrl = UriBuilder
                 .fromResource(UserConsentResource.class)
@@ -102,12 +107,13 @@ public class UserConsentService {
                 .host(gateway.getHost())
                 .port(gateway.getPort())
                 .path(UserConsentResource.class, "consentResponse")
-                .build();
+                .buildFromMap(Map.of("railProvider", institution.getProvider()));
 
-            // generate a random reference and register the agreement with the rail
+            // generate a random reference
             String reference = UUID.randomUUID().toString();
-            RailProviderApi railProviderApi = railProviderFactory.get(institution.getProvider());
-            RailAgreement agreement = railProviderApi.register(institution, registrationCallbackUrl, reference);
+
+            // register the agreement with the rail
+            RailAgreement agreement = railProviderApi.register(userId, institution, registrationCallbackUrl, reference);
 
             // record agreement in a consent record - with the reference
             log.debug("Recording agreement [userId: {}, institutionId: {}, reference: {}]", userId, institutionId, reference);
@@ -139,16 +145,23 @@ public class UserConsentService {
         }
     }
 
-    public URI consentGiven(String consentReference) {
-        log.info("User's consent received [reference: {}]", consentReference);
-        UserConsent userConsent = userConsentRepository.findByReference(consentReference)
-            .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
+    public URI consentGiven(RailProviderApi railProvider, ConsentResponse consentResponse) {
+        log.info("User's consent received [railProvider: {}, reference: {}]",
+            railProvider.getProviderId(), consentResponse.getConsentReference());
+
+        UserConsent userConsent = userConsentRepository.findByReference(consentResponse.getConsentReference())
+            .orElseThrow(() -> new RegistrationNotFoundException(railProvider.getProviderId(), consentResponse));
 
         log.debug("Recording consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
             userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
 
+        RailAgreement agreement = railProvider
+            .getAgreement(userConsent.getAgreementId())
+            .orElse(null);
+
         URI redirectUrl = URI.create(userConsent.getCallbackUri());
         userConsent.setStatus(ConsentStatus.GIVEN);
+        userConsent.setAgreementExpires(agreement == null ? null : agreement.getDateExpires());
         userConsent.setDateGiven(Instant.now());
         userConsent.setCallbackUri(null);
         userConsent = userConsentRepository.save(userConsent);
@@ -162,10 +175,11 @@ public class UserConsentService {
         return redirectUrl;
     }
 
-    public URI consentDenied(String consentReference, String error, String details) {
-        log.info("User's consent denied [reference: {}, error: {}, details: {}]", consentReference, error, details);
-        UserConsent userConsent = userConsentRepository.findByReference(consentReference)
-            .orElseThrow(() -> new NotFoundException("UserConsent.reference", consentReference));
+    public URI consentDenied(RailProviderApi railProvider, ConsentResponse consentResponse) {
+        log.info("User's consent denied [response: {}]", consentResponse);
+
+        UserConsent userConsent = userConsentRepository.findByReference(consentResponse.getConsentReference())
+            .orElseThrow(() -> new RegistrationNotFoundException(railProvider.getProviderId(), consentResponse));
 
         log.debug("Updating consent [userId: {}, consentId: {}, institutionId: {}, expires: {}]",
         userConsent.getUserId(), userConsent.getId(), userConsent.getInstitutionId(), userConsent.getAgreementExpires());
@@ -174,15 +188,15 @@ public class UserConsentService {
 
         URI redirectUri = UriBuilder
             .fromPath(userConsent.getCallbackUri())
-            .queryParam("error", error)
-            .queryParam("details", details)
+            .queryParam("error", consentResponse.getErrorCode())
+            .queryParam("details", consentResponse.getErrorDescription())
             .build();
 
         userConsent.setStatus(ConsentStatus.DENIED);
         userConsent.setDateDenied(Instant.now());
         userConsent.setCallbackUri(null);
-        userConsent.setErrorCode(error);
-        userConsent.setErrorDetail(details);
+        userConsent.setErrorCode(consentResponse.getErrorCode());
+        userConsent.setErrorDetail(consentResponse.getErrorDescription());
         userConsent = userConsentRepository.save(userConsent);
 
         // send consent-denied event notification

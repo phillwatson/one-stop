@@ -70,7 +70,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -101,7 +101,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"watson.phill@gmail.com\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"watson.phill@gmail.com\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -126,12 +126,12 @@
 					"response": []
 				},
 				{
-					"name": "Login via google",
+					"name": "Login via OpenID",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login/google?state=123",
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/auth/login/:authProvider?state=123",
 							"protocol": "{{scheme}}",
 							"host": [
 								"{{hostname}}"
@@ -142,12 +142,18 @@
 								"v1",
 								"auth",
 								"login",
-								"google"
+								":authProvider"
 							],
 							"query": [
 								{
 									"key": "state",
 									"value": "123"
+								}
+							],
+							"variable": [
+								{
+									"key": "authProvider",
+									"value": "google"
 								}
 							]
 						}
@@ -161,7 +167,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"unknown\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"unknown\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -206,7 +212,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -240,7 +246,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -274,7 +280,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -354,7 +360,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/:userId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -364,7 +370,13 @@
 										"api",
 										"v1",
 										"users",
-										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										}
 									]
 								}
 							},
@@ -385,7 +397,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/:userId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -395,7 +407,13 @@
 										"api",
 										"v1",
 										"users",
-										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										}
 									]
 								}
 							},
@@ -407,7 +425,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/9abc5177-421d-4913-a1e4-b5f69ca1ae93",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/users/:userId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -417,7 +435,13 @@
 										"api",
 										"v1",
 										"users",
-										"9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "9abc5177-421d-4913-a1e4-b5f69ca1ae93"
+										}
 									]
 								}
 							},
@@ -508,7 +532,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"oldPassword\": \"\",\n    \"newPassword\": \"snoopy\"\n}",
+									"raw": "{\n    \"oldPassword\": \"password\",\n    \"newPassword\": \"snoopy\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -631,7 +655,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"username\": \"phill3\",\n    \"title\": \"Mr\",\n    \"givenName\": \"Phillip\",\n    \"familyName\": \"Watson\",\n    \"preferredName\": \"Phill\",\n    \"email\": \"watson.phill@gmail.com\",\n    \"phone\": \"07801 494949\",\n    \"password\": \"\"\n}",
+									"raw": "{\n    \"username\": \"phill3\",\n    \"title\": \"Mr\",\n    \"givenName\": \"Phillip\",\n    \"familyName\": \"Watson\",\n    \"preferredName\": \"Phill\",\n    \"email\": \"watson.phill@gmail.com\",\n    \"phone\": \"07801 494949\",\n    \"password\": \"password\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -694,7 +718,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/accounts/5c41a9dd-861e-4158-bfb7-cca8e5a76978",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/accounts/:accountId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -705,7 +729,13 @@
 										"v1",
 										"rails",
 										"accounts",
-										"5c41a9dd-861e-4158-bfb7-cca8e5a76978"
+										":accountId"
+									],
+									"variable": [
+										{
+											"key": "accountId",
+											"value": "65f51527-ac99-4d13-9816-4fa1953881e8"
+										}
 									]
 								}
 							},
@@ -717,7 +747,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?account-id=36a1426c-0cf9-46e5-802f-a36cbbb83cf8&page=0&page-size=25",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?account-id=65f51527-ac99-4d13-9816-4fa1953881e8&page=0&page-size=25",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -732,7 +762,7 @@
 									"query": [
 										{
 											"key": "account-id",
-											"value": "36a1426c-0cf9-46e5-802f-a36cbbb83cf8"
+											"value": "65f51527-ac99-4d13-9816-4fa1953881e8"
 										},
 										{
 											"key": "page",
@@ -812,7 +842,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/GB",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/:countryCode",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -823,7 +853,13 @@
 										"v1",
 										"rails",
 										"countries",
-										"GB"
+										":countryCode"
+									],
+									"variable": [
+										{
+											"key": "countryCode",
+											"value": "GB"
+										}
 									]
 								}
 							},
@@ -841,7 +877,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/GB/logos",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/countries/:countryCode/logos",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -852,8 +888,14 @@
 										"v1",
 										"rails",
 										"countries",
-										"GB",
+										":countryCode",
 										"logos"
+									],
+									"variable": [
+										{
+											"key": "countryCode",
+											"value": "GB"
+										}
 									]
 								}
 							},
@@ -870,7 +912,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/:institutionId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -881,7 +923,13 @@
 										"v1",
 										"rails",
 										"institutions",
-										"SANDBOXFINANCE_SFIN0000"
+										":institutionId"
+									],
+									"variable": [
+										{
+											"key": "institutionId",
+											"value": "SANDBOXFINANCE_SFIN0000"
+										}
 									]
 								}
 							},
@@ -893,7 +941,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions?country=GB&page=8&page-size=10",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions?rail=YAPILY&country=GB&page=0&page-size=10",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -907,12 +955,16 @@
 									],
 									"query": [
 										{
+											"key": "rail",
+											"value": "YAPILY"
+										},
+										{
 											"key": "country",
 											"value": "GB"
 										},
 										{
 											"key": "page",
-											"value": "8"
+											"value": "0"
 										},
 										{
 											"key": "page-size",
@@ -968,7 +1020,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/:institutionId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -979,7 +1031,13 @@
 										"v1",
 										"rails",
 										"consents",
-										"SANDBOXFINANCE_SFIN0000"
+										":institutionId"
+									],
+									"variable": [
+										{
+											"key": "institutionId",
+											"value": "SANDBOXFINANCE_SFIN0000"
+										}
 									]
 								}
 							},
@@ -1000,7 +1058,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/:institutionId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -1011,7 +1069,13 @@
 										"v1",
 										"rails",
 										"consents",
-										"SANDBOXFINANCE_SFIN0000"
+										":institutionId"
+									],
+									"variable": [
+										{
+											"key": "institutionId",
+											"value": "SANDBOXFINANCE_SFIN0000"
+										}
 									]
 								}
 							},
@@ -1023,7 +1087,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/SANDBOXFINANCE_SFIN0000",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/consents/:institutionId",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -1034,7 +1098,13 @@
 										"v1",
 										"rails",
 										"consents",
-										"SANDBOXFINANCE_SFIN0000"
+										":institutionId"
+									],
+									"variable": [
+										{
+											"key": "institutionId",
+											"value": "modelo-sandbox"
+										}
 									]
 								}
 							},
@@ -1054,7 +1124,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{user-id}}?page=0&page-size=20",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/:userId?page=0&page-size=20",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1066,7 +1136,7 @@
 												"rails",
 												"admin",
 												"consents",
-												"{{user-id}}"
+												":userId"
 											],
 											"query": [
 												{
@@ -1079,6 +1149,12 @@
 													"value": "20",
 													"description": "max entities per page"
 												}
+											],
+											"variable": [
+												{
+													"key": "userId",
+													"value": "{{user-id}}"
+												}
 											]
 										}
 									},
@@ -1090,7 +1166,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{consent-id}}",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/:consentId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1102,7 +1178,13 @@
 												"rails",
 												"admin",
 												"consents",
-												"{{consent-id}}"
+												":consentId"
+											],
+											"variable": [
+												{
+													"key": "consentId",
+													"value": "{{consent-id}}"
+												}
 											]
 										}
 									},
@@ -1114,7 +1196,7 @@
 										"method": "DELETE",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/{{consent-id}}",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/admin/consents/:consentId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1126,7 +1208,13 @@
 												"rails",
 												"admin",
 												"consents",
-												"{{consent-id}}"
+												":consentId"
+											],
+											"variable": [
+												{
+													"key": "consentId",
+													"value": "{{consent-id}}"
+												}
 											]
 										}
 									},
@@ -1181,7 +1269,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/bab398d5-155a-44b6-b88d-a1475d53aae5",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/:requisitionId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1193,7 +1281,13 @@
 												"rails",
 												"nordigen",
 												"requisitions",
-												"bab398d5-155a-44b6-b88d-a1475d53aae5"
+												":requisitionId"
+											],
+											"variable": [
+												{
+													"key": "requisitionId",
+													"value": "bab398d5-155a-44b6-b88d-a1475d53aae5"
+												}
 											]
 										}
 									},
@@ -1205,7 +1299,7 @@
 										"method": "DELETE",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/e3c6416f-b26c-4584-b4c3-d6db71fc2e9e",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/requisitions/:requisitionId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1217,7 +1311,13 @@
 												"rails",
 												"nordigen",
 												"requisitions",
-												"e3c6416f-b26c-4584-b4c3-d6db71fc2e9e"
+												":requisitionId"
+											],
+											"variable": [
+												{
+													"key": "requisitionId",
+													"value": "bab398d5-155a-44b6-b88d-a1475d53aae5"
+												}
 											]
 										}
 									},
@@ -1267,7 +1367,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/c41b32d9-bdc5-44af-a7fb-2a9cf02271ab",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/:agreementId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1279,7 +1379,13 @@
 												"rails",
 												"nordigen",
 												"agreements",
-												"c41b32d9-bdc5-44af-a7fb-2a9cf02271ab"
+												":agreementId"
+											],
+											"variable": [
+												{
+													"key": "agreementId",
+													"value": "c41b32d9-bdc5-44af-a7fb-2a9cf02271ab"
+												}
 											]
 										}
 									},
@@ -1291,7 +1397,7 @@
 										"method": "DELETE",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/894d93cd-7350-4d0c-ba2e-5dbead69714c",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/agreements/:agreementId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1303,7 +1409,13 @@
 												"rails",
 												"nordigen",
 												"agreements",
-												"894d93cd-7350-4d0c-ba2e-5dbead69714c"
+												":agreementId"
+											],
+											"variable": [
+												{
+													"key": "agreementId",
+													"value": "894d93cd-7350-4d0c-ba2e-5dbead69714c"
+												}
 											]
 										}
 									},
@@ -1320,7 +1432,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/629fe84d-9e6c-4709-97ec-cc3dd4470972",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1332,7 +1444,13 @@
 												"rails",
 												"nordigen",
 												"accounts",
-												"629fe84d-9e6c-4709-97ec-cc3dd4470972"
+												":railAccountId"
+											],
+											"variable": [
+												{
+													"key": "railAccountId",
+													"value": "629fe84d-9e6c-4709-97ec-cc3dd4470972"
+												}
 											]
 										}
 									},
@@ -1344,7 +1462,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/a184cf1a-06ae-4b34-938d-6befc00de89c/balances",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId/balances",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1356,8 +1474,14 @@
 												"rails",
 												"nordigen",
 												"accounts",
-												"a184cf1a-06ae-4b34-938d-6befc00de89c",
+												":railAccountId",
 												"balances"
+											],
+											"variable": [
+												{
+													"key": "railAccountId",
+													"value": "a184cf1a-06ae-4b34-938d-6befc00de89c"
+												}
 											]
 										}
 									},
@@ -1369,7 +1493,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/629fe84d-9e6c-4709-97ec-cc3dd4470972/details",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId/details",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1381,8 +1505,14 @@
 												"rails",
 												"nordigen",
 												"accounts",
-												"629fe84d-9e6c-4709-97ec-cc3dd4470972",
+												":railAccountId",
 												"details"
+											],
+											"variable": [
+												{
+													"key": "railAccountId",
+													"value": "629fe84d-9e6c-4709-97ec-cc3dd4470972"
+												}
 											]
 										}
 									},
@@ -1394,7 +1524,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1/transactions?date_from=2023-12-01&date_to=2024-01-13",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId/transactions?date_from=2023-12-01&date_to=2024-01-13",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1406,7 +1536,7 @@
 												"rails",
 												"nordigen",
 												"accounts",
-												"b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1",
+												":railAccountId",
 												"transactions"
 											],
 											"query": [
@@ -1417,6 +1547,12 @@
 												{
 													"key": "date_to",
 													"value": "2024-01-13"
+												}
+											],
+											"variable": [
+												{
+													"key": "railAccountId",
+													"value": "b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1"
 												}
 											]
 										}
@@ -1439,7 +1575,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/institutions/:institutionId",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1450,7 +1586,13 @@
 												"v1",
 												"rails",
 												"institutions",
-												"SANDBOXFINANCE_SFIN0000"
+												":institutionId"
+											],
+											"variable": [
+												{
+													"key": "institutionId",
+													"value": "modelo-sandbox"
+												}
 											]
 										}
 									},

@@ -6,7 +6,10 @@ import com.hillayes.onestop.api.AccountSummaryResponse;
 import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.rail.api.RailProviderApi;
+import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.AccountService;
@@ -33,6 +36,7 @@ public class UserConsentResource {
     private final UserConsentService userConsentService;
     private final InstitutionService institutionService;
     private final AccountService accountService;
+    private final RailProviderFactory railProviderFactory;
 
     @GET
     @RolesAllowed("user")
@@ -113,31 +117,30 @@ public class UserConsentResource {
      * will call this endpoint with a positive or negative outcome.
      *
      * @param headers the request headers.
-     * @param consentReference the user-consent identifier to which the requisition belongs.
-     * @param error an error code, provided if the consent was denied.
-     * @param details an error message, provided if the consent was denied.
+     * @param uriInfo the request URI information from which the consent reference is extracted.
+     * @param railProviderId the rail-provider identifier.
      * @return a redirect to the callback-uri provided by the client when the request
      * was initiated.
      */
     @GET
-    @Path("/response")
+    @Path("/response/{railProvider}")
+    @Consumes(MediaType.WILDCARD)
+    @Produces(MediaType.WILDCARD)
     @PermitAll
     public Response consentResponse(@Context HttpHeaders headers,
-                                    @QueryParam("ref") String consentReference,
-                                    @QueryParam("error") String error,
-                                    @QueryParam("details") String details) {
-        // A typical consent callback request:
-        // http://5.81.68.243/api/v1/rails/consents/response
-        // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
-        // &error=UserCancelledSession
-        // &details=User+cancelled+the+session.
-
-        log.info("User consent response [consentReference: {}, error: {}, details: {}]", consentReference, error, details);
+                                    @Context UriInfo uriInfo,
+                                    @PathParam("railProvider") String railProviderId) {
+        log.info("User consent response [railProvider: {}]", railProviderId);
         logHeaders(headers);
 
-        URI redirectUri = ((error == null) || (error.isBlank()))
-            ? userConsentService.consentGiven(consentReference)
-            : userConsentService.consentDenied(consentReference, error, details);
+        // ask rail to extract the consent details from the query parameters
+        RailProviderApi railProvider = railProviderFactory.getImplementation(railProviderId);
+        MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
+        ConsentResponse consentResponse = railProvider.parseConsentResponse(queryParameters);
+
+        URI redirectUri = consentResponse.isError()
+            ? userConsentService.consentDenied(railProvider, consentResponse)
+            : userConsentService.consentGiven(railProvider, consentResponse);
 
         return Response.temporaryRedirect(redirectUri).build();
     }

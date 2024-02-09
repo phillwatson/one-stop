@@ -1,60 +1,54 @@
 package com.hillayes.nordigen.resource;
 
-import com.hillayes.onestop.api.PageLinks;
-import com.hillayes.onestop.api.PaginatedInstitutions;
+import com.hillayes.nordigen.model.Institution;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 public class InstitutionResourceTest extends TestResourceBase {
+    private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {
+    };
+
     @Test
     @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
-    public void testListBanks() {
-        PaginatedInstitutions response = given()
+    public void testListBanksPaymentNotEnabled() {
+        List<Institution> response = given()
             .queryParam("country", "GB")
-            .queryParam("page", 0)
-            .queryParam("page-size", 10)
-            .when().get("/api/v1/rails/institutions")
+            .when().get("/api/v1/rails/nordigen/institutions")
             .then()
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(PaginatedInstitutions.class);
+            .as(INSTITUTION_LIST);
 
-        // and: the response corresponds to the paged list of accounts
-        assertEquals(107, response.getTotal());
-        assertEquals(10, response.getCount());
-        assertNotNull(response.getItems());
-        assertEquals(10, response.getItems().size());
-        assertEquals(0, response.getPage());
-        assertEquals(10, response.getPageSize());
+        // and: the response corresponds to the expected list of banks
+        assertEquals(34, response.size());
+    }
 
-        // and: all page links are present - there is only one page
-        PageLinks links = response.getLinks();
-        assertEquals("/api/v1/rails/institutions", links.getFirst().getPath());
-        assertTrue(links.getFirst().getQuery().contains("country=GB"));
-        assertTrue(links.getFirst().getQuery().contains("page-size=10"));
-        assertTrue(links.getFirst().getQuery().contains("page=0"));
+    @Test
+    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
+    public void testListBanksPaymentEnabled() {
+        List<Institution> response = given()
+            .queryParam("country", "GB")
+            .queryParam("paymentsEnabled", true)
+            .when().get("/api/v1/rails/nordigen/institutions")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(INSTITUTION_LIST);
 
-        assertNull(links.getPrevious());
-
-        assertNotNull(links.getNext());
-        assertEquals("/api/v1/rails/institutions", links.getNext().getPath());
-        assertTrue(links.getNext().getQuery().contains("country=GB"));
-        assertTrue(links.getNext().getQuery().contains("page-size=10"));
-        assertTrue(links.getNext().getQuery().contains("page=1"));
-
-        assertEquals("/api/v1/rails/institutions", links.getLast().getPath());
-        assertTrue(links.getLast().getQuery().contains("country=GB"));
-        assertTrue(links.getLast().getQuery().contains("page-size=10"));
-        assertTrue(links.getLast().getQuery().contains("page=10"));
+        // and: the response corresponds to the expected list of banks
+        assertEquals(74, response.size());
     }
 
     @Test
@@ -62,7 +56,7 @@ public class InstitutionResourceTest extends TestResourceBase {
     public void testGetBank() {
         given()
             .pathParam("id", "FIRST_DIRECT_MIDLGB22")
-            .when().get("/api/v1/rails/institutions/{id}")
+            .when().get("/api/v1/rails/nordigen/institutions/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON)

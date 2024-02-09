@@ -3,6 +3,7 @@ package com.hillayes.rail.api.domain;
 import lombok.*;
 
 import java.util.Currency;
+import java.util.List;
 
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -15,19 +16,21 @@ public class RailAccount {
     @ToString.Include
     private String id;
 
-    private AccountStatus status;
+    @ToString.Include
+    private String institutionId;
 
     @ToString.Include
     private String name;
 
-    @ToString.Include
-    private String institutionId;
+    private String ownerName;
 
     private String iban;
 
+    private AccountStatus status;
+
     private String accountType;
 
-    private String ownerName;
-
     private Currency currency;
+
+    private RailBalance balance;
 }

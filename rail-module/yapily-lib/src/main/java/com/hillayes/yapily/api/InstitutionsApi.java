@@ -15,10 +15,10 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @ApplicationScoped
 public interface InstitutionsApi {
     @GET
-    @Path("institutions")
+    @Path("/institutions")
     public ApiListResponseOfInstitution getInstitutions();
 
     @GET
-    @Path("institutions/{id}")
+    @Path("/institutions/{id}")
     public Institution getInstitution(@PathParam("id") String id);
 }

@@ -65,13 +65,17 @@ public class TestApiData {
             .name(randomAlphanumeric(20))
             .accountType(randomAlphanumeric(6))
             .currency(Currency.getInstance("GBP"))
+            .balance(RailBalance.builder()
+                .amount(MonetaryAmount.of("GBP", nextDouble()))
+                .type(randomAlphanumeric(5))
+                .build())
             .build();
 
     }
     public static RailBalance mockBalance() {
         return RailBalance.builder()
             .amount(MonetaryAmount.of("GBP", nextDouble()))
-            .dateTime(LocalDate.now().minusDays(nextInt()))
+            .dateTime(Instant.now().minus(Duration.ofDays(nextInt())))
             .type(randomAlphanumeric(5))
             .build();
     }

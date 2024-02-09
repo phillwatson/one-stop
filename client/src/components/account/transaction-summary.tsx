@@ -24,20 +24,26 @@ interface Props {
 
 export default function TransactionSummaryList(props: Props) {
   const showNotification = useNotificationDispatch();
-  const [transactions, setTransactions] = useState<Array<TransactionSummary>>([]);
+  const [transactions, setTransactions] = useState<Array<TransactionSummary> | undefined>(undefined);
 
   useEffect(() => {
-    if (transactions.length === 0) {
+    if (transactions === undefined) {
       AccountService.getTransactions(props.accountId, 0, 10)
         .then(response => setTransactions(response.items))
         .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }))
     }
   }, [props.accountId, transactions, showNotification]);
 
+  const noTransactions = (transactions === undefined || transactions.length === 0);
   return(
     <Paper sx={{ margin: 1 }} elevation={3}>
       <Table size="small" aria-label="transactions">
-        <caption><i>most recent {transactions.length} transactions</i></caption>
+        <caption><i>
+          { noTransactions
+            ? 'there are no transactions available'
+            : 'most recent ${transactions.length} transactions'
+          }
+        </i></caption>
         <TableHead>
           <TableRow>
             <TableCell sx={colhead}>Date</TableCell>
@@ -47,7 +53,7 @@ export default function TransactionSummaryList(props: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          { transactions.map(transaction => (
+          { transactions && transactions.map(transaction => (
             <TableRow key={transaction.id}>
               <TableCell>{new Date(transaction.date).toLocaleDateString("en-GB")}</TableCell>
               <TableCell>{transaction.description}</TableCell>

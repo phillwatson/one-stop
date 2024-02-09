@@ -1,9 +1,9 @@
 package com.hillayes.nordigen.resource;
 
-import com.hillayes.onestop.api.PaginatedInstitutions;
 import com.hillayes.nordigen.model.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -21,23 +21,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class RequisitionAdminResourceTest extends TestResourceBase {
+    private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {
+    };
+
     @Test
     @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
     public void testFlow() {
-        PaginatedInstitutions institutions = given()
+        List<Institution> institutions = given()
             .queryParam("country", "GB")
-            .queryParam("page", 0)
-            .queryParam("page-size", 110)
-            .when().get("/api/v1/rails/institutions")
+            .when().get("/api/v1/rails/nordigen/institutions")
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().response().as(PaginatedInstitutions.class);
-        assertNotNull(institutions.getItems());
-        assertEquals(107, institutions.getItems().size());
+            .extract().as(INSTITUTION_LIST);
+        assertFalse(institutions.isEmpty());
 
         InstitutionDetail institution = given()
-            .when().get("/api/v1/rails/institutions/SANDBOXFINANCE_SFIN0000")
+            .when().get("/api/v1/rails/nordigen/institutions/SANDBOXFINANCE_SFIN0000")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -54,7 +54,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
         // create agreement
         EndUserAgreement agreement = given()
             .request().contentType(JSON).body(agreementRequest)
-            .when().post("/api/v1/rails/admin/rail-agreements")
+            .when().post("/api/v1/rails/nordigen/agreements")
             .then()
             .statusCode(201)
             .contentType(JSON)
@@ -63,7 +63,7 @@ public class RequisitionAdminResourceTest extends TestResourceBase {
         // get agreement
         given()
             .pathParam("id", agreement.id)
-            .when().get("/api/v1/rails/admin/rail-agreements/{id}")
+            .when().get("/api/v1/rails/nordigen/agreements/{id}")
             .then()
             .statusCode(200)
             .contentType(JSON);

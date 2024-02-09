@@ -4,6 +4,8 @@ import com.hillayes.onestop.api.ServiceErrorResponse;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.nordigen.NordigenSimulator;
+import com.hillayes.sim.yapily.YapilySimClient;
+import com.hillayes.sim.yapily.YapilySimulator;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +38,14 @@ public class ApiTestBase {
      * This is passed to the Rail Service container (via the config properties) to allow it
      * to connect to the simulator.
      */
-    public static final String RAIL_HOST = "http://sim:" + WIREMOCK_PORT + NordigenSimulator.BASE_URI;
+    public static final String NORDIGEN_RAIL_HOST = "http://sim:" + WIREMOCK_PORT + NordigenSimulator.BASE_URI;
+
+    /**
+     * The URI on which the yapily simulator is running. This is INTERNAL to docker network.
+     * This is passed to the Rail Service container (via the config properties) to allow it
+     * to connect to the simulator.
+     */
+    public static final String YAPILY_RAIL_HOST = "http://sim:" + WIREMOCK_PORT + YapilySimulator.BASE_URI;
 
     /**
      * The URI on which the email simulator is running. This is INTERNAL to docker work.
@@ -68,12 +77,13 @@ public class ApiTestBase {
 
     private static DockerComposeContainer<?> initContainers() {
         return new DockerComposeContainer<>(
-            new File("../docker-compose.yaml"),
+            new File("../../docker-compose.yaml"),
             resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client_1", CLIENT_PORT)
             .withExposedService("wiremock_1", WIREMOCK_PORT)
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", EMAIL_HOST)
-            .withEnv("REST_CLIENT_NORDIGEN_API_URL", RAIL_HOST)
+            .withEnv("REST_CLIENT_NORDIGEN_API_URL", NORDIGEN_RAIL_HOST)
+            .withEnv("REST_CLIENT_YAPILY_API_URL", YAPILY_RAIL_HOST)
             .waitingFor("client_1", new HttpWaitStrategy().forPort(CLIENT_PORT).forPath("/api/v1/auth/jwks.json"));
     }
 
@@ -81,8 +91,16 @@ public class ApiTestBase {
      * Creates a new client connected to the Rail Simulator which is running in a docker
      * container. The instance can be reused by calling its reset() method.
      */
-    protected static NordigenSimClient newRailClient() {
+    protected static NordigenSimClient newNordigenClient() {
         return NordigenSimulator.client("http://localhost:" + RAIL_PORT);
+    }
+
+    /**
+     * Creates a new client connected to the Rail Simulator which is running in a docker
+     * container. The instance can be reused by calling its reset() method.
+     */
+    protected static YapilySimClient newYapilyClient() {
+        return YapilySimulator.client("http://localhost:" + RAIL_PORT);
     }
 
     private static File resourceFile(String filename) {

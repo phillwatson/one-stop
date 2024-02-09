@@ -5,7 +5,7 @@ import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AccountBalance;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class AccountBalanceRepository extends RepositoryBase<AccountBalance, UUID> {
-    public List<AccountBalance> findByAccountIdAndReferenceDate(UUID accountId, LocalDate referenceDate) {
+    public List<AccountBalance> findByAccountIdAndReferenceDate(UUID accountId, Instant referenceDate) {
         return listAll("accountId = :accountId AND referenceDate = :referenceDate",
             Map.of(
                 "accountId", accountId,

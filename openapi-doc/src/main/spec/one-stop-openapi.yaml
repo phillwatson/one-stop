@@ -214,35 +214,6 @@ paths:
         500:
           description: "Internal server error"
 
-  /users/onboard/acknowledge:
-    get:
-      tags: [ "users" ]
-      summary: "Acknowledge user receipt of registration email"
-      description: |
-        Confirms the user has received the registration email, verifying their email
-        address. The user will be redirected to the user confirmation page to allow a
-        username and password to be selected.
-      operationId: "acknowledgeUser"
-      security: []
-      parameters:
-        - name: "magicToken"
-          in: "path"
-          description: |
-            The magicToken emailed to the user on registration. This identifies the
-            user and verifies the email receipt. It expires after a configured duration,
-            and is revoked once used.
-          required: true
-          schema:
-            type: string
-            example: bdfovw78y1fhjda87sdqus
-      responses:
-        307:
-          description: "redirected to user profile page"
-        401:
-          description: "Token not valid or has expired"
-        500:
-          description: "Internal server error"
-
   /users/onboard/complete:
     post:
       tags: [ "users" ]
@@ -418,14 +389,10 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
+        - $ref: "#/components/parameters/RailProviderParam"
         - name: "countryCode"
-          in: "path"
-          required: true
-          schema:
-            type: string
-        - name: "rail"
           in: "query"
-          description: "The rail provider to filter the institutions"
+          required: true
           schema:
             type: string
         - $ref: "#/components/parameters/PageIndexParam"
@@ -848,6 +815,16 @@ components:
         minimum: 1
       example: 30
 
+    RailProviderParam:
+      name: rail
+      in: query
+      description: The rail provider identity.
+      required: false
+      schema:
+        type: string
+        enum: [NORDIGEN, YAPILY]
+      example: NORDIGEN
+
   schemas:
     LoginRequest:
       description: The authentication credentials
@@ -862,6 +839,7 @@ components:
         password:
           type: string
           description: the user's password
+
     ErrorSeverity:
       description: An indication of the severity of a service error.
       type: string
@@ -1075,7 +1053,7 @@ components:
           type: array
           description: The list of Open-ID Connect Providers with which the user has authenticated.
           items:
-            type: UserAuthProvider
+            $ref: "#/components/schemas/UserAuthProvider"
 
     UserProfileResponse:
       type: object
@@ -1304,14 +1282,14 @@ components:
           example: interimAvailable
         referenceDate:
           type: string
-          format: date
+          format: date-time
           description: the date the balance refers to
           example: 2023-05-31
         dateRecorded:
           type: string
           format: date-time
           description: the date the balance was recorded.
-          example: 2023-05-31
+          example: 2023-05-31T12:10:25.000Z
         amount:
           type: number
           format: double
