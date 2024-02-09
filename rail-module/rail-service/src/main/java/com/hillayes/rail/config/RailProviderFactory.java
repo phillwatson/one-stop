@@ -24,7 +24,7 @@ public class RailProviderFactory {
      * @param railProviderId the string value of the RailProvider enum.
      * @return the identified RailProviderApi implementation.
      */
-    public RailProviderApi get(String railProviderId) {
+    public RailProviderApi getImplementation(String railProviderId) {
         RailProvider railProvider = RailProvider.valueOf(railProviderId);
         return get(railProvider);
     }

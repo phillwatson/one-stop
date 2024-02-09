@@ -26,7 +26,7 @@ public class AccountsService extends AbstractRailService {
 
     public List<Account> getAccounts(String consentToken) {
         log.debug("Retrieving accounts");
-            return accountsApi.getAccounts(consentToken).getData();
+        return accountsApi.getAccounts(consentToken).getData();
     }
 
     public Optional<Account> getAccount(String consentToken, String accountId) {
@@ -39,11 +39,6 @@ public class AccountsService extends AbstractRailService {
             }
             throw e;
         }
-    }
-
-    public List<AccountBalance> getAccountBalances(String consentToken, String accountId) {
-        log.debug("Retrieving account balances [accountId: {}]", accountId);
-        return accountsApi.getBalances(consentToken, accountId).getData().getBalances();
     }
 
     public List<Transaction> getAccountTransactions(String consentToken, String accountId, LocalDate from) {

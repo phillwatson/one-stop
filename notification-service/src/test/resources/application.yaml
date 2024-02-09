@@ -4,6 +4,10 @@ quarkus:
       sql: true
       bind-parameters: true
 
+  datasource:
+    devservices:
+      image-name: postgres:16.1-alpine3.19
+
 one-stop:
   auth:
     xsrf:

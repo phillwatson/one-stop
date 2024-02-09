@@ -134,7 +134,7 @@ public class UserConsentResource {
         logHeaders(headers);
 
         // ask rail to extract the consent details from the query parameters
-        RailProviderApi railProvider = railProviderFactory.get(railProviderId);
+        RailProviderApi railProvider = railProviderFactory.getImplementation(railProviderId);
         MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         ConsentResponse consentResponse = railProvider.parseConsentResponse(queryParameters);
 

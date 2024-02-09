@@ -48,7 +48,7 @@ CREATE TABLE ${flyway:defaultSchema}.account_balance (
     reference_date timestamp NULL,
     last_committed_transaction varchar(256) NULL
 );
-CREATE INDEX idx_account_balance_date ON ${flyway:defaultSchema}.account_balance (account_id, date_created);
+CREATE INDEX idx_account_balance_date ON ${flyway:defaultSchema}.account_balance (account_id, reference_date);
 
 CREATE TABLE ${flyway:defaultSchema}.account_transaction (
 	id uuid NOT NULL CONSTRAINT transaction_pkey PRIMARY KEY,

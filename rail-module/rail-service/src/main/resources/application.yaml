@@ -29,6 +29,8 @@ quarkus:
         level: INFO
       "org.apache.kafka":
         level: WARN
+      "org.apache.http.wire":
+        level: INFO
       "com.hillayes":
         level: DEBUG
 

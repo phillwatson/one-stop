@@ -54,7 +54,10 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
         RailProviderApi railProviderApi = railProviderFactory.get(userConsent.getProvider());
         return railProviderApi.getAgreement(userConsent.getAgreementId())
             .map(agreement -> {
+                log.debug("Agreement status [consentId: {}, status: {}]", consentId, agreement.getStatus());
                 if (agreement.getStatus() == AgreementStatus.GIVEN) {
+                    log.debug("Queuing tasks for account polling [consentId: {}, accountSize: {}]",
+                        consentId, agreement.getAccountIds().size());
                     agreement.getAccountIds().forEach(accountId -> pollAccountJobbingTask.queueJob(userConsent.getId(), accountId));
                 }
 

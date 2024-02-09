@@ -24,9 +24,9 @@ import java.util.UUID;
 public class YapilyRailAdaptor implements RailProviderApi {
     /**
      * The number of days for which transaction data can be obtained.
-     * As Yapily doesn't provide this information, we default to 365 days.
+     * As Yapily doesn't provide this information, we default to this.
      */
-    private static final int MAX_HISTORY = 365;
+    private static final int MAX_HISTORY = 89;
 
     @Inject
     ConsentsService consentsService;
@@ -151,8 +151,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
     @Override
     public Optional<RailAgreement> getAgreement(String id) {
         log.debug("Getting agreement [id: {}]", id);
-
-        consentsService.getConsent(id)
+        return consentsService.getConsent(id)
             .map(consent -> {
                 List<String> accountIds = accountsService.getAccounts(consent.getConsentToken()).stream()
                     .map(Account::getId)
@@ -169,7 +168,6 @@ public class YapilyRailAdaptor implements RailProviderApi {
                     .maxHistory(MAX_HISTORY)
                     .build();
             });
-        return Optional.empty();
     }
 
     @Override
@@ -211,8 +209,9 @@ public class YapilyRailAdaptor implements RailProviderApi {
     public List<RailTransaction> listTransactions(RailAgreement agreement,
                                                   String accountId,
                                                   LocalDate dateFrom) {
+        log.debug("Getting transactions [agreementId: {}, accountId: {}]", agreement.getId(), accountId);
         return accountsService.getAccountTransactions(agreement.getAuthToken(), accountId, dateFrom).stream()
-            .filter(transaction -> transaction.getStatus() == TransactionStatusEnum.BOOKED)
+            .filter(transaction -> transaction.getStatus() == TransactionStatusEnum.PENDING)
             .map(transaction -> RailTransaction.builder()
                 .id(transaction.getId())
                 .originalTransactionId(Strings.getOrDefault(transaction.getTransactionMutability(), transaction.getReference()))
@@ -295,7 +294,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
     }
 
     private RailBalance of(List<AccountBalance> balances) {
-        if ((balances == null) || (balances.isEmpty())) {
+        if (balances == null) {
             return RailBalance.builder()
                 .type("UNKNOWN")
                 .dateTime(Instant.now())
@@ -303,12 +302,24 @@ public class YapilyRailAdaptor implements RailProviderApi {
                 .build();
         }
 
-        AccountBalance accountBalance = balances.get(0);
-        return RailBalance.builder()
-            .type(accountBalance.getType().getValue())
-            .dateTime(accountBalance.getDateTime())
-            .amount(of(accountBalance.getBalanceAmount()))
-            .build();
+        return balances.stream()
+            .filter(balance -> balance.getType() != null)
+            .filter(balance -> balance.getDateTime() != null)
+            .max((a, b) -> {
+                assert b.getDateTime() != null;
+                return b.getDateTime().compareTo(a.getDateTime());
+            })
+            .map(balance -> RailBalance.builder()
+                .type(balance.getType().getValue())
+                .dateTime(balance.getDateTime())
+                .amount(of(balance.getBalanceAmount()))
+                .build()
+            ).orElse(RailBalance.builder()
+                .type("UNKNOWN")
+                .dateTime(Instant.now())
+                .amount(MonetaryAmount.ZERO)
+                .build()
+            );
     }
 
     private Optional<String> getLogo(Institution institution) {
@@ -317,7 +328,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
         }
         return institution.getMedia().stream()
             .filter(media -> media.getSource() != null)
-            .filter(media -> "LOGO".equalsIgnoreCase(media.getType()))
+            .filter(media -> "ICON".equalsIgnoreCase(media.getType()))
             .map(Media::getSource)
             .findFirst();
     }

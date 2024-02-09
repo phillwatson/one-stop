@@ -3,14 +3,12 @@ package com.hillayes.rail.service;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.RailAgreement;
-import com.hillayes.rail.api.domain.AgreementStatus;
-import com.hillayes.rail.api.domain.RailInstitution;
-import com.hillayes.rail.api.domain.RailProvider;
+import com.hillayes.rail.api.domain.*;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
+import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
@@ -20,7 +18,6 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -82,6 +79,7 @@ public class UserConsentServiceTest {
         });
 
         railProviderApi = mock();
+        when(railProviderApi.getProviderId()).thenReturn(RailProvider.NORDIGEN);
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
 
@@ -486,9 +484,10 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
-        queryParameters.add("ref", consent.getReference());
-        URI result = fixture.consentGiven(consent.getProvider(), queryParameters);
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consent.getReference())
+            .build();
+        URI result = fixture.consentGiven(railProviderApi, consentResponse);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -520,15 +519,16 @@ public class UserConsentServiceTest {
 
         // when: the service is called
         // then: a not-found exception is thrown
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
-            queryParameters.add("ref", consentReference);
-            fixture.consentGiven(RailProvider.NORDIGEN, queryParameters);
+        RegistrationNotFoundException exception = assertThrows(RegistrationNotFoundException.class, () -> {
+            ConsentResponse consentResponse = ConsentResponse.builder()
+                .consentReference(consentReference)
+                .build();
+            fixture.consentGiven(railProviderApi, consentResponse);
         });
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
-        assertEquals(consentReference, exception.getParameter("entity-id"));
+        assertEquals(railProviderApi.getProviderId(), exception.getParameter("railProvider"));
+        assertEquals(consentReference, exception.getParameter("consentReference"));
 
         // and: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -552,13 +552,12 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        String errorCode = "UserCancelledSession";
-        String errorDetail = "User Cancelled Session";
-        MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
-        queryParameters.add("ref", consent.getReference());
-        queryParameters.add("error", errorCode);
-        queryParameters.add("details", errorDetail);
-        URI result = fixture.consentDenied(consent.getProvider(), queryParameters);
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consent.getReference())
+            .errorCode("UserCancelledSession")
+            .errorDescription("User Cancelled Session")
+            .build();
+        URI result = fixture.consentDenied(railProviderApi, consentResponse);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -581,31 +580,34 @@ public class UserConsentServiceTest {
 
         // and: the result is the initial client call-back URI - with error params
         URI callback = UriBuilder.fromUri(clientCallbackUri)
-            .queryParam("error", errorCode)
-            .queryParam("details", errorDetail)
+            .queryParam("error", consentResponse.getErrorCode())
+            .queryParam("details", consentResponse.getErrorDescription())
             .build();
         assertEquals(callback, result);
     }
 
     @Test
-    public void testConsentDenied_NotFound() {
+    public void testConsentDenied_ConsentNotFound() {
         // given: a consent that has is waiting to be accepted
         String consentReference = UUID.randomUUID().toString();
         when(userConsentRepository.findByReference(consentReference)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            MultivaluedMapImpl<String, String> queryParameters = new MultivaluedMapImpl<>();
-            queryParameters.add("ref", consentReference);
-            queryParameters.add("error", "UserCancelledSession");
-            queryParameters.add("details", "User Cancelled Session");
-            fixture.consentDenied(RailProvider.NORDIGEN, queryParameters);
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consentReference)
+            .errorCode("UserCancelledSession")
+            .errorDescription("User Cancelled Session")
+            .build();
+        RegistrationNotFoundException exception = assertThrows(RegistrationNotFoundException.class, () -> {
+            fixture.consentDenied(railProviderApi, consentResponse);
         });
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
-        assertEquals(consentReference, exception.getParameter("entity-id"));
+        assertEquals(railProviderApi.getProviderId(), exception.getParameter("railProvider"));
+        assertEquals(consentResponse.getConsentReference(), exception.getParameter("consentReference"));
+        assertEquals(consentResponse.getErrorCode(), exception.getParameter("errorCode"));
+        assertEquals(consentResponse.getErrorDescription(), exception.getParameter("errorDescription"));
 
         // then: the consent is updated
         verify(userConsentRepository, never()).save(any());

@@ -3,6 +3,10 @@ quarkus:
     nordigen-api:
       url: http://localhost:8089
 
+  datasource:
+    devservices:
+      image-name: postgres:16.1-alpine3.19
+
 one-stop:
   auth:
     xsrf:
