@@ -81,7 +81,7 @@ public final class ResourceUtils {
 
         PageLinks result = new PageLinks()
             .first(uriBuilder.replaceQueryParam("page", 0).build())
-            .last(uriBuilder.replaceQueryParam("page", pageCount - 1).build());
+            .last(uriBuilder.replaceQueryParam("page", Math.max(0, pageCount - 1)).build());
 
         if (pageIndex > 0) {
             result.previous(uriBuilder.replaceQueryParam("page", pageIndex - 1).build());

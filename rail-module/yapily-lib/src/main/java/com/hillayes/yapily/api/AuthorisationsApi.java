@@ -28,7 +28,7 @@ public interface AuthorisationsApi {
      * @return
      */
     @POST
-    @Path("payment-auth-requests")
+    @Path("/payment-auth-requests")
     public ApiResponseOfPaymentAuthorisationRequestResponse createPaymentAuthorisation(PaymentAuthorisationRequest request);
 
     /**
@@ -50,6 +50,6 @@ public interface AuthorisationsApi {
      * @return
      */
     @POST
-    @Path("account-auth-requests")
+    @Path("/account-auth-requests")
     public ApiResponseOfAccountAuthorisationResponse createAccountAuthorisation(AccountAuthorisationRequest request);
 }

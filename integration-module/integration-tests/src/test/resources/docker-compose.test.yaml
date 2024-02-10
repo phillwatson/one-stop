@@ -18,42 +18,22 @@ services:
         max-size: "500k"
         max-file: "1"
 
-  user-service:
-    image: one-stop/user-service:1.0.0-SNAPSHOT
-    ports:
-      - "8081:8080"
-      - "5001:5005"
+  one-stop-service:
+    image: one-stop/one-stop-main:1.0.0-SNAPSHOT
     environment:
-      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
-
-  rail-service:
-    image: one-stop/rail-service:1.0.0-SNAPSHOT
-    ports:
-      - "8082:8080"
-      - "5002:5005"
-    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
+      QUARKUS_DATASOURCE_USERNAME: one-stop
+      QUARKUS_DATASOURCE_PASSWORD: password
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
       ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
       ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
       ONE_STOP_YAPILY_SECRET_ID: "abcdef"
       ONE_STOP_YAPILY_SECRET_KEY: "abcdef"
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
-
-  notification-service:
-    image: one-stop/notification-service:1.0.0-SNAPSHOT
-    ports:
-      - "8084:8080"
-      - "5004:5005"
-    environment:
+      QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
       ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
-      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
-
-  audit-service:
-    image: one-stop/audit-service:1.0.0-SNAPSHOT
-    ports:
-      - "8083:8080"
-      - "5003:5005"
 
   client:
     image: one-stop/client:1.0.0-SNAPSHOT

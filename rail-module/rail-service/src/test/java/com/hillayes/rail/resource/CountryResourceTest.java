@@ -29,10 +29,10 @@ public class CountryResourceTest extends TestBase {
             .as(PaginatedCountries.class);
 
         // and: the response corresponds to the paged list of accounts
-        assertEquals(4, response.getTotal());
-        assertEquals(4, response.getCount());
+        assertEquals(5, response.getTotal());
+        assertEquals(5, response.getCount());
         assertNotNull(response.getItems());
-        assertEquals(4, response.getItems().size());
+        assertEquals(5, response.getItems().size());
         assertEquals(0, response.getPage());
         assertEquals(20, response.getPageSize());
 

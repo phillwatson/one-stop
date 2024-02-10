@@ -1,3 +1,8 @@
+quarkus:
+  rest-client:
+    nordigen-api:
+      url: http://localhost:8089
+
 one-stop:
   auth:
     xsrf:

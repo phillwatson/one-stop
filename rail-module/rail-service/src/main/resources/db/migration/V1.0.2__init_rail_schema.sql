@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS rails;
 
-CREATE TABLE rails.userconsent (
+CREATE TABLE IF NOT EXISTS rails.userconsent (
     id uuid NOT NULL CONSTRAINT userconsent_pkey PRIMARY KEY,
     provider varchar(256) NOT NULL,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -18,10 +18,10 @@ CREATE TABLE rails.userconsent (
     error_code varchar(256) NULL,
     error_detail varchar(256) NULL
 );
-CREATE INDEX idx_userconsent_user_id ON rails.userconsent (user_id);
-CREATE INDEX idx_userconsent_reference ON rails.userconsent (reference);
+CREATE INDEX IF NOT EXISTS idx_userconsent_user_id ON rails.userconsent (user_id);
+CREATE INDEX IF NOT EXISTS idx_userconsent_reference ON rails.userconsent (reference);
 
-CREATE TABLE rails.account (
+CREATE TABLE IF NOT EXISTS rails.account (
 	id uuid NOT NULL CONSTRAINT account_pkey PRIMARY KEY,
     user_id UUID NOT NULL,
 	userconsent_id UUID NOT NULL CONSTRAINT fk_userconsent REFERENCES rails.userconsent (id) ON DELETE CASCADE,
@@ -35,22 +35,22 @@ CREATE TABLE rails.account (
 	currency_code varchar(12) NULL,
 	date_last_polled timestamp NULL
 );
-CREATE INDEX idx_account_rail_id ON rails.account (rail_account_id);
-CREATE INDEX idx_account_user_id ON rails.account (user_id);
+CREATE INDEX IF NOT EXISTS idx_account_rail_id ON rails.account (rail_account_id);
+CREATE INDEX IF NOT EXISTS idx_account_user_id ON rails.account (user_id);
 
-CREATE TABLE rails.account_balance (
+CREATE TABLE IF NOT EXISTS rails.account_balance (
 	id uuid NOT NULL CONSTRAINT balance_pkey PRIMARY KEY,
 	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES rails.account (id) ON DELETE CASCADE,
 	date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     amount bigint NOT NULL,
     currency_code varchar(12) NOT NULL,
     balance_type varchar(256) NULL,
-    reference_date date NULL,
+    reference_date timestamp NULL,
     last_committed_transaction varchar(256) NULL
 );
-CREATE INDEX idx_account_balance_date ON rails.account_balance (account_id, date_created);
+CREATE INDEX IF NOT EXISTS idx_account_balance_date ON rails.account_balance (account_id, reference_date);
 
-CREATE TABLE rails.account_transaction (
+CREATE TABLE IF NOT EXISTS rails.account_transaction (
 	id uuid NOT NULL CONSTRAINT transaction_pkey PRIMARY KEY,
     user_id UUID NOT NULL,
 	account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES rails.account (id) ON DELETE CASCADE,
@@ -65,6 +65,6 @@ CREATE TABLE rails.account_transaction (
     creditor_name varchar(256) NULL,
     reference varchar(256) NULL
 );
-CREATE INDEX idx_account_trans_date ON rails.account_transaction (account_id, booking_datetime);
-CREATE INDEX idx_account_user_date ON rails.account_transaction (user_id, booking_datetime);
-CREATE INDEX idx_account_intrnl_id ON rails.account_transaction (internal_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_account_trans_date ON rails.account_transaction (account_id, booking_datetime);
+CREATE INDEX IF NOT EXISTS idx_account_user_date ON rails.account_transaction (user_id, booking_datetime);
+CREATE INDEX IF NOT EXISTS idx_account_intrnl_id ON rails.account_transaction (internal_transaction_id);

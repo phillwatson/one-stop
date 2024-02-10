@@ -36,6 +36,7 @@ public class UserConsentRepositoryTest {
             for (int i = 0; i < 3; i++) {
                 fixture.save(UserConsent.builder()
                     .provider(RailProvider.NORDIGEN)
+                    .reference(UUID.randomUUID().toString())
                     .userId(userId)
                     .institutionId(UUID.randomUUID().toString())
                     .agreementId(UUID.randomUUID().toString())
@@ -72,6 +73,7 @@ public class UserConsentRepositoryTest {
             for (int i = 0; i < 35; i++) {
                 fixture.save(UserConsent.builder()
                     .provider(RailProvider.NORDIGEN)
+                    .reference(UUID.randomUUID().toString())
                     .userId(userId)
                     .institutionId(UUID.randomUUID().toString())
                     .agreementId(UUID.randomUUID().toString())

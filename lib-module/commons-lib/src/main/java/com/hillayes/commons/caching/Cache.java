@@ -2,6 +2,7 @@ package com.hillayes.commons.caching;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -51,13 +52,13 @@ public class Cache<K,T> {
      * If the supplier returns null, the value will be not be cached.
      *
      * @param key the key of the cached value.
-     * @param supplier the callback to call if the entry is not cached, or has expired.
+     * @param resolver the callback to call if the entry is not cached, or has expired.
      * @return the cached value, may be null if the supplier can return null.
      */
-    public T getValueOrCall(K key, Supplier<T> supplier) {
+    public T getValueOrCall(K key, Function<K,T> resolver) {
         Entry<T> entry = values.get(key);
         if ((entry == null) || (entry.isExpired())) {
-            T value = supplier.get();
+            T value = resolver.apply(key);
             if (value != null) {
                 entry = new Entry<>(value, timeToLive);
                 values.put(key, entry);

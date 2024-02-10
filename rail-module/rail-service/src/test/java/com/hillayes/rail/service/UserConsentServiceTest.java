@@ -3,13 +3,12 @@ package com.hillayes.rail.service;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.RailAgreement;
-import com.hillayes.rail.api.domain.AgreementStatus;
-import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.api.domain.*;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
+import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
@@ -80,6 +79,7 @@ public class UserConsentServiceTest {
         });
 
         railProviderApi = mock();
+        when(railProviderApi.getProviderId()).thenReturn(RailProvider.NORDIGEN);
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
 
@@ -280,10 +280,10 @@ public class UserConsentServiceTest {
 
         // and: an agreement will be created
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
-        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            RailInstitution i = invocation.getArgument(0);
-            URI uri = invocation.getArgument(1);
-            String reference = invocation.getArgument(2);
+        when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
+            RailInstitution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            String reference = invocation.getArgument(3);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -350,10 +350,10 @@ public class UserConsentServiceTest {
 
         // and: an agreement will be created
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
-        when(railProviderApi.register(any(), any(), any())).then(invocation -> {
-            RailInstitution i = invocation.getArgument(0);
-            URI uri = invocation.getArgument(1);
-            String reference = invocation.getArgument(2);
+        when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
+            RailInstitution i = invocation.getArgument(1);
+            URI uri = invocation.getArgument(2);
+            String reference = invocation.getArgument(3);
             agreement.set(returnEndUserAgreement(reference, i, uri));
             return agreement.get();
         });
@@ -484,7 +484,10 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        URI result = fixture.consentGiven(consent.getReference());
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consent.getReference())
+            .build();
+        URI result = fixture.consentGiven(railProviderApi, consentResponse);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -516,13 +519,16 @@ public class UserConsentServiceTest {
 
         // when: the service is called
         // then: a not-found exception is thrown
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.consentGiven(consentReference)
-        );
+        RegistrationNotFoundException exception = assertThrows(RegistrationNotFoundException.class, () -> {
+            ConsentResponse consentResponse = ConsentResponse.builder()
+                .consentReference(consentReference)
+                .build();
+            fixture.consentGiven(railProviderApi, consentResponse);
+        });
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
-        assertEquals(consentReference, exception.getParameter("entity-id"));
+        assertEquals(railProviderApi.getProviderId(), exception.getParameter("railProvider"));
+        assertEquals(consentReference, exception.getParameter("consentReference"));
 
         // and: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -546,9 +552,12 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        String errorCode = "UserCancelledSession";
-        String errorDetail = "User Cancelled Session";
-        URI result = fixture.consentDenied(consent.getReference(), errorCode, errorDetail);
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consent.getReference())
+            .errorCode("UserCancelledSession")
+            .errorDescription("User Cancelled Session")
+            .build();
+        URI result = fixture.consentDenied(railProviderApi, consentResponse);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -571,29 +580,34 @@ public class UserConsentServiceTest {
 
         // and: the result is the initial client call-back URI - with error params
         URI callback = UriBuilder.fromUri(clientCallbackUri)
-            .queryParam("error", errorCode)
-            .queryParam("details", errorDetail)
+            .queryParam("error", consentResponse.getErrorCode())
+            .queryParam("details", consentResponse.getErrorDescription())
             .build();
         assertEquals(callback, result);
     }
 
     @Test
-    public void testConsentDenied_NotFound() {
+    public void testConsentDenied_ConsentNotFound() {
         // given: a consent that has is waiting to be accepted
         String consentReference = UUID.randomUUID().toString();
         when(userConsentRepository.findByReference(consentReference)).thenReturn(Optional.empty());
 
         // when: the service is called
         // then: a not-found exception is thrown
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            String errorCode = "UserCancelledSession";
-            String errorDetail = "User Cancelled Session";
-            fixture.consentDenied(consentReference, errorCode, errorDetail);
+        ConsentResponse consentResponse = ConsentResponse.builder()
+            .consentReference(consentReference)
+            .errorCode("UserCancelledSession")
+            .errorDescription("User Cancelled Session")
+            .build();
+        RegistrationNotFoundException exception = assertThrows(RegistrationNotFoundException.class, () -> {
+            fixture.consentDenied(railProviderApi, consentResponse);
         });
 
         // and: the exception identifies requested consent
-        assertEquals("UserConsent.reference", exception.getParameter("entity-type"));
-        assertEquals(consentReference, exception.getParameter("entity-id"));
+        assertEquals(railProviderApi.getProviderId(), exception.getParameter("railProvider"));
+        assertEquals(consentResponse.getConsentReference(), exception.getParameter("consentReference"));
+        assertEquals(consentResponse.getErrorCode(), exception.getParameter("errorCode"));
+        assertEquals(consentResponse.getErrorDescription(), exception.getParameter("errorDescription"));
 
         // then: the consent is updated
         verify(userConsentRepository, never()).save(any());

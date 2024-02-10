@@ -14,16 +14,14 @@ import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Currency;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @ApplicationScoped
 @Slf4j
@@ -45,8 +43,8 @@ public class NordigenRailAdaptor implements RailProviderApi {
     InstitutionService institutionService;
 
     @Override
-    public boolean isFor(RailProvider railProvider) {
-        return railProvider == RailProvider.NORDIGEN;
+    public RailProvider getProviderId() {
+        return RailProvider.NORDIGEN;
     }
 
     @Override
@@ -87,7 +85,10 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public RailAgreement register(RailInstitution institution, URI callbackUri, String reference) {
+    public RailAgreement register(UUID userId,
+                                  RailInstitution institution,
+                                  URI callbackUri,
+                                  String reference) {
         log.debug("Requesting agreement [reference: {}, institutionId: {}]", reference, institution.getId());
         EndUserAgreement agreement = agreementService.create(EndUserAgreementRequest.builder()
             .institutionId(institution.getId())
@@ -117,14 +118,28 @@ public class NordigenRailAdaptor implements RailProviderApi {
 
         return RailAgreement.builder()
             .id(requisition.id)
+            .institutionId(agreement.institutionId)
             .accountIds(requisition.accounts)
             .status(of(requisition.status))
             .dateCreated(requisition.created.toInstant())
             .dateGiven(agreement.accepted == null ? null : agreement.accepted.toInstant())
             .dateExpires(agreement.accepted == null ? null : agreement.accepted.plusDays(agreement.accessValidForDays).toInstant())
-            .institutionId(agreement.institutionId)
             .maxHistory(agreement.maxHistoricalDays)
             .agreementLink(URI.create(requisition.link))
+            .build();
+    }
+
+    @Override
+    public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams) {
+        // A typical Nordigen consent callback request:
+        // http://5.81.68.243/api/v1/rails/consents/response/NORDIGEN
+        // ?ref=cbaee100-3f1f-4d7c-9b3b-07244e6a019f
+        // &error=UserCancelledSession
+        // &details=User+cancelled+the+session.
+        return ConsentResponse.builder()
+            .consentReference(queryParams.getFirst("ref"))
+            .errorCode(queryParams.getFirst("error"))
+            .errorDescription(queryParams.getFirst("details"))
             .build();
     }
 
@@ -154,7 +169,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public Optional<RailAccount> getAccount(String id) {
+    public Optional<RailAccount> getAccount(RailAgreement agreement, String id) {
         log.debug("Getting account [id: {}]", id);
         return accountService.get(id)
             .map(account -> RailAccount.builder()
@@ -164,6 +179,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
                 .name(account.ownerName)
                 .ownerName(account.ownerName)
                 .status(AccountStatus.valueOf(account.status.name()))
+                .balance(getBalance(id).orElse(RailBalance.builder()
+                        .type("")
+                        .dateTime(Instant.now())
+                        .amount(MonetaryAmount.ZERO)
+                        .build()))
                 .build()
             )
             .map(account -> accountService.details(id)
@@ -179,26 +199,11 @@ public class NordigenRailAdaptor implements RailProviderApi {
     }
 
     @Override
-    public List<RailBalance> listBalances(String accountId, LocalDate dateFrom) {
-        log.debug("Listing balances [accountId: {}, from: {}]", accountId, dateFrom);
-        return accountService.balances(accountId)
-            .map(balances -> balances.stream()
-                .filter(balance -> balance.referenceDate.isAfter(dateFrom))
-                .map(balance -> RailBalance.builder()
-                    .type(balance.balanceType)
-                    .dateTime(balance.referenceDate)
-                    .amount(of(balance.balanceAmount))
-                    .build()
-                )
-                .toList()
-            )
-            .orElse(List.of());
-    }
-
-    @Override
-    public List<RailTransaction> listTransactions(String accountId, LocalDate dateFrom, LocalDate dateTo) {
-        log.debug("Listing transactions [accountId: {}, from: {}, to: {}]", accountId, dateFrom, dateTo);
-        return accountService.transactions(accountId, dateFrom, dateTo)
+    public List<RailTransaction> listTransactions(RailAgreement agreement,
+                                                  String accountId,
+                                                  LocalDate dateFrom) {
+        log.debug("Listing transactions [accountId: {}, from: {}]", accountId, dateFrom);
+        return accountService.transactions(accountId, dateFrom, LocalDate.now())
             .map(transactions -> transactions.booked.stream()
                 .map(transaction -> RailTransaction.builder()
                     .id(Strings.getOrDefault(transaction.internalTransactionId, transaction.transactionId))
@@ -216,19 +221,32 @@ public class NordigenRailAdaptor implements RailProviderApi {
             .orElse(List.of());
     }
 
+    private Optional<RailBalance> getBalance(String accountId) {
+        log.debug("Listing balances [accountId: {}]", accountId);
+        return accountService.balances(accountId)
+            .flatMap(balances -> balances.stream()
+                .max((a, b) -> b.referenceDate.compareTo(a.referenceDate))
+                .map(balance -> RailBalance.builder()
+                    .type(balance.balanceType)
+                    .dateTime(balance.referenceDate.atStartOfDay().toInstant(ZoneOffset.UTC))
+                    .amount(of(balance.balanceAmount))
+                    .build()
+                )
+            );
+    }
+
     private AgreementStatus of(RequisitionStatus status) {
         return switch (status) {
             case CR -> AgreementStatus.INITIATED; // CREATED Requisition has been successfully created
             case GC -> AgreementStatus.WAITING; // GIVING_CONSENT End-user is giving consent at GoCardless's consent screen
             case UA -> AgreementStatus.WAITING; // UNDERGOING_AUTHENTICATION End-user is redirected to the financial institution for authentication
-            case RJ -> AgreementStatus.DENIED; // REJECTED Either SSN verification has failed or end-user has entered incorrect credentials
             case SA -> AgreementStatus.WAITING; // SELECTING_ACCOUNTS End-user is selecting accounts
             case GA -> AgreementStatus.WAITING; // GRANTING_ACCESS End-user is granting access to their account information
             case LN -> AgreementStatus.GIVEN; // LINKED Account has been successfully linked to requisition
+            case RJ -> AgreementStatus.DENIED; // REJECTED Either SSN verification has failed or end-user has entered incorrect credentials
             case SU -> AgreementStatus.SUSPENDED; // SUSPENDED Requisition is suspended due to numerous consecutive errors that happened while accessing its accounts
             case EX -> AgreementStatus.EXPIRED; // EXPIRED Access to accounts has expired as set in End User Agreement
-            case ID -> AgreementStatus.WAITING;
-            case ER -> AgreementStatus.WAITING;
+            case ID, ER -> AgreementStatus.WAITING;
         };
     }
 

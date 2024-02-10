@@ -12,6 +12,16 @@ public class Strings {
     }
 
     /**
+     * Tests whether the given string is not null and not empty.
+     *
+     * @param str the string to test.
+     * @return true if the string is NOT null and NOT empty, false otherwise.
+     */
+    static public boolean isNotBlank(String str) {
+        return !isBlank(str);
+    }
+
+    /**
      * Returns the given value, or null if the value is blank.
      * @see #isBlank(String)
      */

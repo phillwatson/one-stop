@@ -16,9 +16,9 @@ import java.util.Base64;
  * ongoing request.
  */
 public class BasicHeaderFactory implements ClientHeadersFactory {
-    @ConfigProperty(name = "one-stop.yapily.secret.id")
+    @ConfigProperty(name = "one-stop.yapily.secret.id", defaultValue = "not-set")
     String SECRET_ID;
-    @ConfigProperty(name = "one-stop.yapily.secret.key")
+    @ConfigProperty(name = "one-stop.yapily.secret.key", defaultValue = "not-set")
     String SECRET_KEY;
 
     private String CREDENTIALS = null;

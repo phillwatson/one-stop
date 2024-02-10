@@ -20,10 +20,23 @@ public class InstitutionService extends AbstractRailService {
     public List<Institution> list(String countryCode,
                                   Boolean paymentsEnabled) {
         List<Institution> list = institutionApi.list(countryCode, paymentsEnabled);
+
+        // add the sandbox institution to all results
         get("SANDBOXFINANCE_SFIN0000")
+            .map(detail -> {
+                Institution institution = new Institution();
+                institution.id = detail.id;
+                institution.name = detail.name;
+                institution.bic = detail.bic;
+                institution.logo = detail.logo;
+                institution.countries = detail.countries;
+                institution.transactionTotalDays = detail.transactionTotalDays;
+                institution.paymentsEnabled = detail.paymentsEnabled;
+                return institution;
+            })
             .ifPresent(list::add);
 
-        list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled);
+        list.forEach(entry -> entry.paymentsEnabled = paymentsEnabled != null && paymentsEnabled);
         list.sort(null);
         return list;
     }

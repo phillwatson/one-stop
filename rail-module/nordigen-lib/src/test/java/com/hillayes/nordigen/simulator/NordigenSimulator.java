@@ -42,7 +42,7 @@ public class NordigenSimulator {
         wireMockServer = new WireMockServer(
             options()
                 .port(portNumber)
-                .notifier(log.isDebugEnabled() ? new ConsoleNotifier(true) : new NullNotifier())
+                .notifier(new ConsoleNotifier(true))
                 .extensions(
                     institutionsEndpoint,
                     agreementsEndpoint,

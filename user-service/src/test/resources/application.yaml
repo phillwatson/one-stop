@@ -12,6 +12,8 @@ quarkus:
 
   flyway:
     migrate-at-start: true
+    # allows tests to apply migrations without conflicting with other modules
+    default-schema: users
 
   log:
     min-level: TRACE

@@ -57,7 +57,7 @@ public class TestData {
             .accountId(account.getId())
             .balanceType(balanceType)
             .amount(MonetaryAmount.of("GBP", nextDouble()))
-            .referenceDate(LocalDate.now().minusDays(1))
+            .referenceDate(Instant.now().minus(Duration.ofDays(1)))
             .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC))
             .build();
     }

@@ -1,11 +1,13 @@
 package com.hillayes.rail.api;
 
 import com.hillayes.rail.api.domain.*;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents the interface made available by all Rail Providers that we intend
@@ -28,7 +30,14 @@ public interface RailProviderApi {
      * @param railProvider the RailProvider value that identifies the implementation.
      * @return true if this instance supports the given RailProvider.
      */
-    boolean isFor(RailProvider railProvider);
+    public default boolean isFor(RailProvider railProvider) {
+        return getProviderId() == railProvider;
+    }
+
+    /**
+     * Returns the RailProvider value that identifies the underlying provider.
+     */
+    public RailProvider getProviderId();
 
     /**
      * Returns the identified Institution, or empty if not found.
@@ -60,12 +69,29 @@ public interface RailProviderApi {
      * given or denied the authorisation. The given reference will be returned in that callback,
      * and can be used to correlate the agreement.
      *
+     * @param userId the user for whom authorisation is required.
      * @param institution the institution for which authorisation is required.
      * @param callbackUri the URI that the rail provider will call to confirm the registration.
      * @param reference a unique reference that will correlate the agreement after authorisation.
      * @return the URI to which the user should be redirected to authorise the registration.
      */
-    public RailAgreement register(RailInstitution institution, URI callbackUri, String reference);
+    public RailAgreement register(UUID userId,
+                                  RailInstitution institution,
+                                  URI callbackUri,
+                                  String reference);
+
+    /**
+     * Returns the consent reference from the given URL query parameters.
+     * The consent reference is a value created by ourselves and passed to the rail
+     * when a new consent is requested (see {@link #register(UUID, RailInstitution, URI, String)}).
+     * The rail provider will return this value in the callback when the consent is
+     * given or denied. This allows us to correlate the consent with the original
+     * request.
+     *
+     * @param queryParams the URL query parameters from the consent request callback.
+     * @return the value of the query parameter that holds the consent reference.
+     */
+    public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams);
 
     /**
      * Returns the agreement with the given id, or empty if not found.
@@ -84,29 +110,23 @@ public interface RailProviderApi {
 
     /**
      * Returns the account with the given id, or empty if not found.
+     * 
+     * @param agreement the agreement that authorises access to the account.
      * @param id the account id.
      * @return the account, or empty if not found.
      */
-    public Optional<RailAccount> getAccount(String id);
-
-    /**
-     * Returns a list of account balances for the identified account, started from the given
-     * date.
-     * @param accountId the account id.
-     * @param dateFrom the date from which balances should be returned.
-     * @return the list of balances, possibly empty.
-     */
-    public List<RailBalance> listBalances(String accountId, LocalDate dateFrom);
+    public Optional<RailAccount> getAccount(RailAgreement agreement, String id);
 
     /**
      * Returns a list of transactions for the identified account, started from the given
      * date.
+     *
+     * @param agreement the agreement that authorises access to the account.
      * @param accountId the rail account's unique identifier.
      * @param dateFrom the date of the start of the period to be searched, inclusive.
-     * @param dateTo the date of the end of the period to be searched, inclusive.
      * @return the list of transactions, possibly empty.
      */
-    public List<RailTransaction> listTransactions(String accountId,
-                                                  LocalDate dateFrom,
-                                                  LocalDate dateTo);
+    public List<RailTransaction> listTransactions(RailAgreement agreement,
+                                                  String accountId,
+                                                  LocalDate dateFrom);
 }
