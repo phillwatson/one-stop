@@ -9,10 +9,6 @@ quarkus:
       "org.apache.http.wire":
         level: DEBUG
 
-  datasource:
-    devservices:
-      image-name: postgres:15.5-alpine3.19
-
 one-stop:
   auth:
     xsrf:
