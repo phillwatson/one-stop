@@ -200,8 +200,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
                 .ownerName(getOwnerName(account).orElse("Unknown"))
                 .currency(currency(account.getCurrency()))
                 .accountType(account.getAccountType().getValue())
-
-                .balance(of(account.getAccountBalances()))
+                .balance(of(account))
                 .build()
             );
     }
@@ -293,7 +292,8 @@ public class YapilyRailAdaptor implements RailProviderApi {
             : MonetaryAmount.of(amount.getCurrency(), amount.getAmount().doubleValue());
     }
 
-    private RailBalance of(List<AccountBalance> balances) {
+    private RailBalance of(Account account) {
+        List<AccountBalance> balances = account.getAccountBalances();
         if (balances == null) {
             return RailBalance.builder()
                 .type("UNKNOWN")
@@ -303,8 +303,12 @@ public class YapilyRailAdaptor implements RailProviderApi {
         }
 
         return balances.stream()
-            .filter(balance -> balance.getType() != null)
-            .filter(balance -> balance.getDateTime() != null)
+            .filter(
+                balance -> balance.getType() != null &&
+                balance.getDateTime() != null &&
+                balance.getBalanceAmount() != null &&
+                balance.getBalanceAmount().getCurrency().equals(account.getCurrency())
+            )
             .max((a, b) -> {
                 assert b.getDateTime() != null;
                 return b.getDateTime().compareTo(a.getDateTime());
