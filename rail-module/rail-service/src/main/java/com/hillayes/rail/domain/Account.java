@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 @Entity
 @Getter
-@Builder
+@Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -25,7 +25,7 @@ public class Account {
     @Setter
     private UUID id;
 
-    @Builder.Default
+    @lombok.Builder.Default
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 

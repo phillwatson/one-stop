@@ -233,8 +233,8 @@ public class AccountResourceTest extends TestBase {
 
         // and: the account's recent balance records
         List<AccountBalance> balances = List.of(
-            mockAccountBalance(account, "expected"),
-            mockAccountBalance(account, "interimAvailable")
+            mockAccountBalance(account, (a) -> a.balanceType("expected")),
+            mockAccountBalance(account, (a) -> a.balanceType("interimAvailable"))
         );
         when(accountService.getMostRecentBalance(account)).thenReturn(balances);
 

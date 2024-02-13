@@ -10,7 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "account_transaction")
 @Getter
-@Builder
+@Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -28,7 +28,7 @@ public class AccountTransaction {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Builder.Default
+    @lombok.Builder.Default
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 

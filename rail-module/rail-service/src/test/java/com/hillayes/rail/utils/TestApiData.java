@@ -1,7 +1,9 @@
 package com.hillayes.rail.utils;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -14,8 +16,17 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextDouble;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestApiData {
+    public static RailProviderApi mockRailProviderApi(RailProvider railProvider) {
+        RailProviderApi result = mock(RailProviderApi.class);
+        when(result.isFor(railProvider)).thenReturn(true);
+        when(result.getProviderId()).thenReturn(railProvider);
+        return result;
+    }
+
     public static RailInstitution mockInstitution() {
         return RailInstitution.builder()
             .id(UUID.randomUUID().toString())

@@ -51,7 +51,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .as(TransactionList.class);
 
         // then: the account-trans-service is called with the authenticated user-id, and date range
-        verify(accountTransactionService).getTransactions(userId, null, fromDate, toDate);
+        verify(accountTransactionService).listTransactions(userId, null, fromDate, toDate);
 
         // and: no account look-up is performed
         verifyNoInteractions(accountService);

@@ -150,7 +150,7 @@ public class UserConsentResource {
     }
 
     private UserConsentResponse marshal(UserConsent consent) {
-        RailInstitution institution = institutionService.get(consent.getInstitutionId())
+        RailInstitution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentResponse()

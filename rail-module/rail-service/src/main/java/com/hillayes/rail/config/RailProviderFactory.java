@@ -2,6 +2,7 @@ package com.hillayes.rail.config;
 
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.RailProvider;
+import com.hillayes.rail.errors.RailNotFoundException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -39,7 +40,7 @@ public class RailProviderFactory {
         return railProviderApis.stream()
             .filter(api -> api.isFor(railProvider))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No RailProviderApi found for " + railProvider));
+            .orElseThrow(() -> new RailNotFoundException(railProvider));
     }
 
     /**

@@ -5,13 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "account_balance")
 @Getter
-@Builder
+@Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -25,7 +24,7 @@ public class AccountBalance {
     @EqualsAndHashCode.Include
     private UUID accountId;
 
-    @Builder.Default
+    @lombok.Builder.Default
     @Column(name = "date_created", nullable = false)
     private Instant dateCreated = Instant.now();
 
