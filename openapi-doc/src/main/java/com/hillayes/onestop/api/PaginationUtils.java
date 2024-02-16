@@ -1,23 +1,13 @@
-package com.hillayes.rail.resource;
+package com.hillayes.onestop.api;
 
 import com.hillayes.commons.jpa.Page;
-import com.hillayes.onestop.api.PageLinks;
 
-import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.util.UUID;
 import java.util.function.Function;
 
-public final class ResourceUtils {
-    /**
-     * Extracts any UUID of the calling user, from the given SecurityContext.
-     */
-    public static UUID getUserId(SecurityContext context) {
-        return UUID.fromString(context.getUserPrincipal().getName());
-    }
-
+public class PaginationUtils {
     /**
      * Builds page links for the given page, using the given uriInfo.
      *

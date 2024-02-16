@@ -3,6 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.onestop.api.CountryResponse;
 import com.hillayes.onestop.api.PaginatedCountries;
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.onestop.api.PaginationUtils;
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.service.CountryService;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class CountryResource {
             .count(countryPage.size())
             .total((long) allCountries.size())
             .items(countryPage)
-            .links(ResourceUtils.buildPageLinks(uriInfo, pageIndex, pageSize, totalPages));
+            .links(PaginationUtils.buildPageLinks(uriInfo, pageIndex, pageSize, totalPages));
 
         log.debug("List countries [page: {}, pageSize: {}, count: {}, total: {}]",
             pageIndex, pageSize, response.getCount(), response.getTotal());

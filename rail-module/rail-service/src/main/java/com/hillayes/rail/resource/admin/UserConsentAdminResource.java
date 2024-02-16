@@ -6,7 +6,6 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
-import com.hillayes.rail.resource.ResourceUtils;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.InstitutionService;
 import com.hillayes.rail.service.UserConsentService;
@@ -44,7 +43,7 @@ public class UserConsentAdminResource {
             .count(consentsPage.getContentSize())
             .total(consentsPage.getTotalCount())
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, consentsPage));
 
         log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, size: {}]",
             userId, page, pageSize, response.getCount());

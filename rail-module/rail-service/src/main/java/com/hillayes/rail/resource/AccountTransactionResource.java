@@ -1,9 +1,11 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
+import com.hillayes.onestop.api.PaginationUtils;
 import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
@@ -33,7 +35,7 @@ public class AccountTransactionResource {
                                     @QueryParam("page") @DefaultValue("0") int page,
                                     @QueryParam("page-size") @DefaultValue("20") int pageSize,
                                     @QueryParam("account-id") UUID accountId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
             userId, accountId, page, pageSize);
 
@@ -46,7 +48,7 @@ public class AccountTransactionResource {
             .count(transactionsPage.getContentSize())
             .total(transactionsPage.getTotalCount())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, transactionsPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage));
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, accountId, page, pageSize, response.getCount(), response.getTotal());
@@ -59,7 +61,7 @@ public class AccountTransactionResource {
                                                 @QueryParam("account-id") UUID accountId,
                                                 @QueryParam("from-date") LocalDate fromDate,
                                                 @QueryParam("to-date") LocalDate toDate) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
 
@@ -74,11 +76,11 @@ public class AccountTransactionResource {
     @GET
     @Path("/{transactionId}")
     public Response getTransaction(@Context SecurityContext ctx, @PathParam("transactionId") UUID transactionId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting account transaction [userId: {}, transactionId: {}]", userId, transactionId);
 
         AccountTransaction transaction = accountTransactionService.getTransaction(transactionId)
-            .filter(t -> t.getUserId().equals(ResourceUtils.getUserId(ctx)))
+            .filter(t -> t.getUserId().equals(userId))
             .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
         return Response.ok(marshal(transaction)).build();
     }

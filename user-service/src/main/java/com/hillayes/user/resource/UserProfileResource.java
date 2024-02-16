@@ -1,5 +1,6 @@
 package com.hillayes.user.resource;
 
+import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.Strings;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
@@ -30,7 +31,7 @@ public class UserProfileResource {
 
     @GET
     public Response getProfile(@Context SecurityContext ctx) {
-        UUID id = ResourceUtils.getUserId(ctx);
+        UUID id = AuthUtils.getUserId(ctx);
         log.info("Getting user profile [id: {}]", id);
 
         return userService.getUser(id)
@@ -45,7 +46,7 @@ public class UserProfileResource {
     @GET
     @Path("/authproviders")
     public Response getUserAuthProviders(@Context SecurityContext ctx) {
-        UUID id = ResourceUtils.getUserId(ctx);
+        UUID id = AuthUtils.getUserId(ctx);
         log.info("Getting user auth-providers [id: {}]", id);
 
         List<UserAuthProvider> authProviders = userService.getUserAuthProviders(id).stream()
@@ -59,7 +60,7 @@ public class UserProfileResource {
     @PUT
     public Response updateProfile(@Context SecurityContext ctx,
                                   @Valid UserProfileRequest request) {
-        UUID id = ResourceUtils.getUserId(ctx);
+        UUID id = AuthUtils.getUserId(ctx);
         log.info("Update user profile [id: {}]", id);
 
         User userUpdate = User.builder()
@@ -86,7 +87,7 @@ public class UserProfileResource {
     @Path("/password")
     public Response changePassword(@Context SecurityContext ctx,
                                    @Valid PasswordUpdateRequest request) {
-        UUID id = ResourceUtils.getUserId(ctx);
+        UUID id = AuthUtils.getUserId(ctx);
         log.info("Update user password [id: {}]", id);
 
         char[] currentPassword = Strings.isBlank(request.getOldPassword())
