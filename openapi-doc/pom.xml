@@ -11,10 +11,6 @@
 
     <artifactId>openapi-doc</artifactId>
 
-    <properties>
-        <openapi-generator.version>7.0.1</openapi-generator.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -27,7 +23,6 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator.version}</version>
                 <executions>
                     <execution>
                         <id>genpojo</id>
