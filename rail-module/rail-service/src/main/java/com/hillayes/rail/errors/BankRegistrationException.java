@@ -5,9 +5,9 @@ import com.hillayes.exception.MensaException;
 import java.util.UUID;
 
 public class BankRegistrationException extends MensaException {
-    public BankRegistrationException(UUID aUserId, String aInstitution, Throwable aCause) {
+    public BankRegistrationException(UUID aUserId, String aInstitutionId, Throwable aCause) {
         super(RailsErrorCodes.BANK_REGISTRATION_FAILED, aCause);
-        addParameter("userId", aUserId);
-        addParameter("institution", aInstitution);
+        addParameter("user-id", aUserId);
+        addParameter("institution-id", aInstitutionId);
     }
 }

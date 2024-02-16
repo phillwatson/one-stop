@@ -52,7 +52,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.7.2</quarkus.platform.version>
+        <quarkus.platform.version>3.7.3</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -62,7 +62,7 @@
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
         </quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.2.0</openapi-generator.version>
+        <openapi-generator.version>7.3.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -157,7 +157,7 @@
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
                 <artifactId>jose4j</artifactId>
-                <version>0.9.4</version>
+                <version>0.9.5</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -494,7 +494,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.1.5</version>
+                    <version>3.1.6</version>
                     <executions>
                         <execution>
                             <id>make-index</id>

@@ -64,7 +64,7 @@ public class AccountTransactionResource {
             userId, accountId, fromDate, toDate);
 
         List<AccountTransaction> transactions =
-            accountTransactionService.getTransactions(userId, accountId, fromDate, toDate);
+            accountTransactionService.listTransactions(userId, accountId, fromDate, toDate);
 
         TransactionList response = new TransactionList()
             .transactions(transactions.stream().map(this::marshal).toList());

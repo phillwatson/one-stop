@@ -7,7 +7,8 @@ import lombok.Getter;
 public enum RailsErrorCodes implements ErrorCode {
     BANK_ALREADY_REGISTERED(Severity.info, "You have already registered that bank.", CONFLICT_STATUS),
     BANK_REGISTRATION_FAILED(Severity.info, "Failed to register the bank.", INTERNAL_SERVER_ERROR_STATUS),
-    REGISTRATION_NOT_FOUND(Severity.info, "Unable to identify registration consent record.", INTERNAL_SERVER_ERROR_STATUS);
+    REGISTRATION_NOT_FOUND(Severity.info, "Unable to identify registration consent record.", INTERNAL_SERVER_ERROR_STATUS),
+    RAIL_NOT_FOUND(Severity.error, "Unable to identify rail.", INTERNAL_SERVER_ERROR_STATUS);
 
     private final Severity severity;
     private final String message;

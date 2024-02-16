@@ -2,26 +2,23 @@ package com.hillayes.rail.utils;
 
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.api.domain.RailProvider;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AccountBalance;
-import com.hillayes.rail.domain.ConsentStatus;
-import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.domain.*;
 
 import java.time.*;
 import java.util.Currency;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextDouble;
 
 public class TestData {
     public static UserConsent mockUserConsent(UUID userId) {
-        return mockUserConsent(userId, consent -> consent);
+        return mockUserConsent(userId, null);
     }
 
-    public static UserConsent mockUserConsent(UUID userId, Function<UserConsent, UserConsent> modifier) {
-        UserConsent result = UserConsent.builder()
+    public static UserConsent mockUserConsent(UUID userId, Consumer<UserConsent.UserConsentBuilder> modifier) {
+        UserConsent.UserConsentBuilder builder = UserConsent.builder()
             .id(UUID.randomUUID())
             .provider(RailProvider.NORDIGEN)
             .userId(userId)
@@ -31,34 +28,80 @@ public class TestData {
             .agreementId(UUID.randomUUID().toString())
             .agreementExpires(Instant.now().plus(Duration.ofDays(90)))
             .maxHistory(270)
-            .dateGiven(Instant.now().minusSeconds(2))
-            .build();
+            .dateGiven(Instant.now().minusSeconds(2));
 
-        return modifier.apply(result);
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
     }
 
     public static Account mockAccount(UUID userId, UUID userConsentId) {
-        return Account.builder()
+        return mockAccount(userId, (a) -> a.userConsentId(userConsentId));
+    }
+
+    public static Account mockAccount(UUID userId, Consumer<Account.Builder> modifier) {
+        Account.Builder builder = Account.builder()
             .id(UUID.randomUUID())
             .userId(userId)
-            .userConsentId(userConsentId)
+            .userConsentId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .railAccountId(UUID.randomUUID().toString())
             .accountName(randomAlphanumeric(20))
             .currency(Currency.getInstance("GBP"))
             .iban(randomAlphanumeric(20))
-            .accountType("CHEK")
-            .build();
+            .accountType("CHEK");
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
     }
 
-    public static AccountBalance mockAccountBalance(Account account, String balanceType) {
-        return AccountBalance.builder()
+    public static AccountBalance mockAccountBalance(Account account) {
+        return mockAccountBalance(account, null);
+    }
+
+    public static AccountBalance mockAccountBalance(Account account,
+                                                    Consumer<AccountBalance.Builder> modifier) {
+        AccountBalance.Builder builder = AccountBalance.builder()
             .id(UUID.randomUUID())
             .accountId(account.getId())
-            .balanceType(balanceType)
+            .balanceType(randomAlphanumeric(30))
             .amount(MonetaryAmount.of("GBP", nextDouble()))
             .referenceDate(Instant.now().minus(Duration.ofDays(1)))
-            .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC))
-            .build();
+            .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
+    }
+
+    public static AccountTransaction mockAccountTransaction(Account account) {
+        return mockAccountTransaction(c -> {
+            c.accountId(account.getId());
+            c.userId(account.getUserId());
+        });
+    }
+
+    public static AccountTransaction mockAccountTransaction(Consumer<AccountTransaction.Builder> modifier) {
+        AccountTransaction.Builder builder = AccountTransaction.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .accountId(UUID.randomUUID())
+            .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
+            .valueDateTime(Instant.now().minus(Duration.ofDays(1)))
+            .amount(MonetaryAmount.of("GBP", nextDouble()))
+            .reference(randomAlphanumeric(30))
+            .additionalInformation(randomAlphanumeric(30))
+            .creditorName(randomAlphanumeric(30))
+            .transactionId(randomAlphanumeric(30))
+            .internalTransactionId(randomAlphanumeric(30));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
     }
 }

@@ -21,6 +21,13 @@ public class Page<T> {
     private final int pageIndex;
     private final int pageSize;
 
+    /**
+     * Constructs a new Page with the given content, total count, page index and
+     * @param content the page content (a sub-set of the total items).
+     * @param totalCount the total number of items in the collection.
+     * @param pageIndex the zero-based index of this page of elements.
+     * @param pageSize the number of elements per page.
+     */
     public Page(List<T> content, long totalCount, int pageIndex, int pageSize) {
         this.content = content == null ? List.of() : content;
         this.totalCount = totalCount;
@@ -109,5 +116,24 @@ public class Page<T> {
     public static <T> Page<T> of(List<T> content) {
         List<T> data = content == null ? List.of() : content;
         return new Page<>(data, data.size(), 0, data.size());
+    }
+
+    /**
+     * A factory method to create a page from a subset of the given full content.
+     *
+     * @param fullContent the full list of the elements from which the page is to
+     * be derived.
+     * @param pageIndex the zero-based page index.
+     * @param pageSize the number of elements per page.
+     */
+    public static <T> Page<T> of(List<T> fullContent, int pageIndex, int pageSize) {
+        int startIndex = pageIndex * pageSize;
+        if (startIndex > fullContent.size()) {
+            return new Page<>(List.of(), fullContent.size(), pageIndex, pageSize);
+        }
+
+        int endIndex = Math.min(startIndex + pageSize, fullContent.size());
+        List<T> subset = fullContent.subList(startIndex, endIndex);
+        return new Page<>(subset, fullContent.size(), pageIndex, pageSize);
     }
 }

@@ -66,10 +66,10 @@ public class AccountTransactionService {
      * @param toDate the inclusive end date of the search.
      * @return the list of transaction, ordered by booking-datetime.
      */
-    public List<AccountTransaction> getTransactions(UUID userId,
-                                                    UUID accountId,
-                                                    LocalDate fromDate,
-                                                    LocalDate toDate) {
+    public List<AccountTransaction> listTransactions(UUID userId,
+                                                     UUID accountId,
+                                                     LocalDate fromDate,
+                                                     LocalDate toDate) {
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
 

@@ -97,9 +97,8 @@ public class UserConsentService {
             throw new BankAlreadyRegisteredException(userId, institutionId);
         }
 
+        RailProviderApi railProviderApi = railProviderFactory.get(institution.getProvider());
         try {
-            RailProviderApi railProviderApi = railProviderFactory.get(institution.getProvider());
-
             // construct URI from the consent resource callback method
             URI registrationCallbackUrl = UriBuilder
                 .fromResource(UserConsentResource.class)
@@ -114,32 +113,36 @@ public class UserConsentService {
 
             // register the agreement with the rail
             RailAgreement agreement = railProviderApi.register(userId, institution, registrationCallbackUrl, reference);
+            try {
+                // record agreement in a consent record - with the reference
+                log.debug("Recording agreement [userId: {}, institutionId: {}, reference: {}]", userId, institutionId, reference);
+                if (userConsent == null) {
+                    userConsent = UserConsent.builder()
+                        .dateCreated(Instant.now())
+                        .userId(userId)
+                        .provider(institution.getProvider())
+                        .institutionId(institution.getId())
+                        .build();
+                }
+                userConsent.setAgreementId(agreement.getId());
+                userConsent.setReference(reference);
+                userConsent.setMaxHistory(agreement.getMaxHistory());
+                userConsent.setAgreementExpires(agreement.getDateExpires());
+                userConsent.setCallbackUri(callbackUri.toString());
+                userConsent.setStatus(ConsentStatus.WAITING);
+                userConsent = userConsentRepository.saveAndFlush(userConsent);
 
-            // record agreement in a consent record - with the reference
-            log.debug("Recording agreement [userId: {}, institutionId: {}, reference: {}]", userId, institutionId, reference);
-            if (userConsent == null) {
-                userConsent = UserConsent.builder()
-                    .dateCreated(Instant.now())
-                    .userId(userId)
-                    .provider(institution.getProvider())
-                    .institutionId(institution.getId())
-                    .build();
+                // send consent initiated event notification
+                consentEventSender.sendConsentInitiated(userConsent);
+
+                // return link for user consent
+                log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]",
+                    userId, institutionId, agreement.getAgreementLink());
+                return agreement.getAgreementLink();
+            } catch (Exception e) {
+                railProviderApi.deleteAgreement(agreement.getId());
+                throw e;
             }
-            userConsent.setAgreementId(agreement.getId());
-            userConsent.setReference(reference);
-            userConsent.setMaxHistory(agreement.getMaxHistory());
-            userConsent.setAgreementExpires(agreement.getDateExpires());
-            userConsent.setCallbackUri(callbackUri.toString());
-            userConsent.setStatus(ConsentStatus.WAITING);
-            userConsent = userConsentRepository.saveAndFlush(userConsent);
-
-            // send consent initiated event notification
-            consentEventSender.sendConsentInitiated(userConsent);
-
-            // return link for user consent
-            log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]",
-                userId, institutionId, agreement.getAgreementLink());
-            return agreement.getAgreementLink();
         } catch (Exception e) {
             throw new BankRegistrationException(userId, institutionId, e);
         }

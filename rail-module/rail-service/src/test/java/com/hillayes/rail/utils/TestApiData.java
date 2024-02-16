@@ -1,7 +1,9 @@
 package com.hillayes.rail.utils;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -9,23 +11,39 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextDouble;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestApiData {
+    public static RailProviderApi mockRailProviderApi(RailProvider railProvider) {
+        RailProviderApi result = mock(RailProviderApi.class);
+        when(result.isFor(railProvider)).thenReturn(true);
+        when(result.getProviderId()).thenReturn(railProvider);
+        return result;
+    }
+
     public static RailInstitution mockInstitution() {
-        return RailInstitution.builder()
+        return mockInstitution(null);
+    }
+
+    public static RailInstitution mockInstitution(Consumer<RailInstitution.RailInstitutionBuilder> modifier) {
+        RailInstitution.RailInstitutionBuilder builder = RailInstitution.builder()
             .id(UUID.randomUUID().toString())
             .provider(RailProvider.NORDIGEN)
             .name(randomAlphanumeric(20))
             .countries(List.of("GB"))
             .logo("https://example.com/logo.png")
             .paymentsEnabled(true)
-            .transactionTotalDays(nextInt(100, 900))
-            .build();
+            .transactionTotalDays(nextInt(100, 900));
+
+        if (modifier != null) modifier.accept(builder);
+        return builder.build();
     }
 
     public static RailAgreement mockAgreement() {

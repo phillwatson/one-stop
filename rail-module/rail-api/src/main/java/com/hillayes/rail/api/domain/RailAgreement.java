@@ -11,7 +11,6 @@ import java.util.List;
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
 public class RailAgreement {
     /**
      * The rail ID for the agreement.

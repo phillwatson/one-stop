@@ -29,19 +29,6 @@ public final class ResourceUtils {
     }
 
     /**
-     * Builds page links for a page of the given sizes, using the given uriInfo.
-     *
-     * @param uriInfo the UriInfo for the request, used to obtain the base URI.
-     * @param pageIndex the page number - zero-based.
-     * @param pageSize the size of this page.
-     * @param pageCount the total number of pages.
-     * @return a PageLinks object containing the links for the given page.
-     */
-    public static PageLinks buildPageLinks(UriInfo uriInfo, int pageIndex, int pageSize, int pageCount) {
-        return buildPageLinks(uriInfo, pageIndex, pageSize, pageCount, Function.identity());
-    }
-
-    /**
      * Builds page links for the given page, using the given uriInfo and uriDecorator.
      *
      * The decorator is used to add any additional query parameters to the links. For
