@@ -153,9 +153,12 @@ public class YapilyRailAdaptor implements RailProviderApi {
         log.debug("Getting agreement [id: {}]", id);
         return consentsService.getConsent(id)
             .map(consent -> {
-                List<String> accountIds = accountsService.getAccounts(consent.getConsentToken()).stream()
+                AgreementStatus agreementStatus = of(consent.getStatus());
+                List<String> accountIds = (agreementStatus == AgreementStatus.GIVEN)
+                    ? accountsService.getAccounts(consent.getConsentToken()).stream()
                     .map(Account::getId)
-                    .toList();
+                    .toList()
+                    : List.of();
                 return RailAgreement.builder()
                     .id(id)
                     .authToken(consent.getConsentToken())
@@ -179,9 +182,10 @@ public class YapilyRailAdaptor implements RailProviderApi {
                 consentsService.deleteConsent(id);
 
                 // if user has no more consents, delete user
-                if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
-                    usersService.deleteUser(consent.getUserUuid());
-                }
+// TODO: deleting user will prevent user subsequent registrations
+//                if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
+//                    usersService.deleteUser(consent.getUserUuid());
+//                }
                 return true;
             })
             .orElse(false);
@@ -229,26 +233,19 @@ public class YapilyRailAdaptor implements RailProviderApi {
             return AgreementStatus.INITIATED;
 
         return switch (consentStatus) {
-            case AWAITING_AUTHORIZATION -> AgreementStatus.INITIATED;
-            case AWAITING_FURTHER_AUTHORIZATION -> AgreementStatus.WAITING;
-            case AWAITING_RE_AUTHORIZATION -> AgreementStatus.WAITING;
-            case AWAITING_DECOUPLED_PRE_AUTHORIZATION -> AgreementStatus.WAITING;
-            case AWAITING_PRE_AUTHORIZATION -> AgreementStatus.WAITING;
-            case AWAITING_DECOUPLED_AUTHORIZATION -> AgreementStatus.WAITING;
-            case AWAITING_SCA_METHOD -> AgreementStatus.WAITING;
-            case AWAITING_SCA_CODE -> AgreementStatus.WAITING;
+            case AWAITING_AUTHORIZATION, UNKNOWN -> AgreementStatus.INITIATED;
 
-            case AUTHORIZED -> AgreementStatus.GIVEN;
-            case CONSUMED -> AgreementStatus.GIVEN;
-            case PRE_AUTHORIZED -> AgreementStatus.GIVEN;
+            case AWAITING_FURTHER_AUTHORIZATION,
+                AWAITING_DECOUPLED_PRE_AUTHORIZATION,
+                AWAITING_PRE_AUTHORIZATION,
+                AWAITING_DECOUPLED_AUTHORIZATION,
+                AWAITING_SCA_METHOD,
+                AWAITING_SCA_CODE -> AgreementStatus.WAITING;
 
-            case REJECTED -> AgreementStatus.DENIED;
-            case FAILED -> AgreementStatus.DENIED;
-            case INVALID -> AgreementStatus.DENIED;
-
+            case AUTHORIZED, PRE_AUTHORIZED, CONSUMED -> AgreementStatus.GIVEN;
+            case REJECTED, INVALID, FAILED -> AgreementStatus.DENIED;
+            case EXPIRED, AWAITING_RE_AUTHORIZATION -> AgreementStatus.EXPIRED;
             case REVOKED -> AgreementStatus.CANCELLED;
-            case EXPIRED -> AgreementStatus.EXPIRED;
-            case UNKNOWN -> AgreementStatus.INITIATED;
         };
     }
 

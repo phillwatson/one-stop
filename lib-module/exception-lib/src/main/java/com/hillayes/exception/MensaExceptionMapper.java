@@ -1,7 +1,6 @@
 package com.hillayes.exception;
 
 import com.hillayes.commons.correlation.Correlation;
-import com.hillayes.onestop.api.ErrorSeverity;
 import com.hillayes.onestop.api.ServiceError;
 import com.hillayes.onestop.api.ServiceErrorResponse;
 import jakarta.ws.rs.core.Response;
