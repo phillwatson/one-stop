@@ -26,8 +26,12 @@ public class RailProviderFactory {
      * @return the identified RailProviderApi implementation.
      */
     public RailProviderApi getImplementation(String railProviderId) {
-        RailProvider railProvider = RailProvider.valueOf(railProviderId);
-        return get(railProvider);
+        try {
+            RailProvider railProvider = RailProvider.valueOf(railProviderId);
+            return get(railProvider);
+        } catch (IllegalArgumentException e) {
+            throw new RailNotFoundException(railProviderId);
+        }
     }
 
     /**

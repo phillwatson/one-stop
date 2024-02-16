@@ -63,7 +63,8 @@ public class CountryResource {
     public Response getById(@Context UriInfo uriInfo,
                             @PathParam("countryId") String countryId) {
         log.info("Get country [countryId: {}]", countryId);
-        Country country = countryService.get(countryId).orElseThrow(() -> new NotFoundException("country", countryId));
+        Country country = countryService.get(countryId)
+            .orElseThrow(() -> new NotFoundException("Country", countryId));
 
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
         return Response.ok(marshal(country, uriBuilder)).build();

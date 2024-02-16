@@ -9,7 +9,6 @@ import java.util.List;
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
 public class RailInstitution implements Comparable<RailInstitution> {
     @EqualsAndHashCode.Include
     private String id;

@@ -3,6 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.onestop.api.CountryResponse;
 import com.hillayes.onestop.api.PageLinks;
 import com.hillayes.onestop.api.PaginatedCountries;
+import com.hillayes.onestop.api.ServiceErrorResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
@@ -67,6 +68,26 @@ public class CountryResourceTest extends TestBase {
         assertNotNull(response.getFlagUri());
         assertEquals("/api/v1/rails/countries/GB/logos", response.getFlagUri().getPath());
         assertEquals("version=1", response.getFlagUri().getQuery());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetCountry_NotFound() {
+        ServiceErrorResponse response = given()
+            .pathParam("id", "XX")
+            .when().get("/api/v1/rails/countries/{id}")
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        assertNotNull(response);
+
+        assertNotFoundError(response, (contextAttributes) -> {
+            assertEquals("Country", contextAttributes.get("entity-type"));
+            assertEquals("XX", contextAttributes.get("entity-id"));
+        });
     }
 
     @Test

@@ -40,8 +40,8 @@ public class AccountTransactionServiceTest {
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
             .limit(23)
+            .map(n -> TestData.mockAccountTransaction(account))
             .toList();
         when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(), anyInt(), anyInt()))
             .then(invocation -> {

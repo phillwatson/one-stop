@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -28,15 +29,21 @@ public class TestApiData {
     }
 
     public static RailInstitution mockInstitution() {
-        return RailInstitution.builder()
+        return mockInstitution(null);
+    }
+
+    public static RailInstitution mockInstitution(Consumer<RailInstitution.RailInstitutionBuilder> modifier) {
+        RailInstitution.RailInstitutionBuilder builder = RailInstitution.builder()
             .id(UUID.randomUUID().toString())
             .provider(RailProvider.NORDIGEN)
             .name(randomAlphanumeric(20))
             .countries(List.of("GB"))
             .logo("https://example.com/logo.png")
             .paymentsEnabled(true)
-            .transactionTotalDays(nextInt(100, 900))
-            .build();
+            .transactionTotalDays(nextInt(100, 900));
+
+        if (modifier != null) modifier.accept(builder);
+        return builder.build();
     }
 
     public static RailAgreement mockAgreement() {

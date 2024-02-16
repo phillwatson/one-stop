@@ -8,7 +8,6 @@ import lombok.*;
 @ToString
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
 public class ConsentResponse {
     @EqualsAndHashCode.Include
     private String consentReference;

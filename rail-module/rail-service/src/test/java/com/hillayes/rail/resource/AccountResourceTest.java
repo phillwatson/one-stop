@@ -1,10 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.commons.jpa.Page;
-import com.hillayes.onestop.api.AccountBalanceResponse;
-import com.hillayes.onestop.api.AccountResponse;
-import com.hillayes.onestop.api.PageLinks;
-import com.hillayes.onestop.api.PaginatedAccounts;
+import com.hillayes.onestop.api.*;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountBalance;
@@ -338,17 +335,29 @@ public class AccountResourceTest extends TestBase {
         UUID accountId = UUID.randomUUID();
         when(accountService.getAccount(accountId)).thenReturn(Optional.empty());
 
-        int status = given()
+        ServiceErrorResponse response = given()
             .request()
             .contentType(JSON)
             .when()
             .pathParam("accountId", accountId)
             .get("/api/v1/rails/accounts/{accountId}")
             .then()
-            .extract().statusCode();
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
 
-        // then: the account is not found
-        assertEquals(404, status);
+        // then: the account service was called
+        verify(accountService).getAccount(accountId);
+
+        // and: the response contains the expected error message
+        assertNotNull(response);
+
+        // and: the response contains an error message
+        assertNotFoundError(response, (contextAttributes) -> {
+            assertEquals("Account", contextAttributes.get("entity-type"));
+            assertEquals(accountId.toString(), contextAttributes.get("entity-id"));
+        });
     }
 
     @Test

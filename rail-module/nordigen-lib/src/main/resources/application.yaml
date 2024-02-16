@@ -1,4 +1,4 @@
 quarkus:
   rest-client:
     nordigen-api:
-      url: https://ob.nordigen.com
+      url: https://bankaccountdata.gocardless.com

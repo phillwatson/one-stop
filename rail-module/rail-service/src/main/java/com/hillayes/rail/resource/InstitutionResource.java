@@ -33,7 +33,7 @@ public class InstitutionResource {
                            @QueryParam("page") @DefaultValue("0") int page,
                            @QueryParam("page-size") @DefaultValue("20") int pageSize,
                            @QueryParam("rail") RailProvider railProvider,
-                           @QueryParam("country") String countryCode) {
+                           @QueryParam("country") @DefaultValue("GB") String countryCode) {
         log.info("List institutions [country: {}, page: {}, pageSize: {}]", countryCode, page, pageSize);
         Set<RailInstitution> allBanks = new HashSet<>(institutionService.list(railProvider, countryCode, true));
         allBanks.addAll(institutionService.list(railProvider, countryCode, false));

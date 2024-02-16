@@ -10,7 +10,6 @@ import java.time.Instant;
 @ToString(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
 public class RailTransaction {
     @EqualsAndHashCode.Include
     private String id;

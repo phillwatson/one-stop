@@ -384,7 +384,7 @@ paths:
     get:
       tags: [ "rails" ]
       summary: "Get all institutions for identified country"
-      description: "Returns the supported institutions within the registered country."
+      description: "Returns the supported institutions within the identified country."
       operationId: "getAllInstitutions"
       security:
         - cookieAuth: [ ]
@@ -395,6 +395,7 @@ paths:
           required: true
           schema:
             type: string
+            default: "GB"
         - $ref: "#/components/parameters/PageIndexParam"
         - $ref: "#/components/parameters/PageSizeParam"
       responses:

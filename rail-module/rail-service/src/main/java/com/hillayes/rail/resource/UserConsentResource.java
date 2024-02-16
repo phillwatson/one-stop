@@ -9,6 +9,7 @@ import com.hillayes.onestop.api.UserConsentResponse;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
@@ -45,7 +46,7 @@ public class UserConsentResource {
                                 @QueryParam("page") @DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = ResourceUtils.getUserId(ctx);
-        log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
+        log.info("Listing user's consents [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
 
         Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
 
@@ -57,7 +58,7 @@ public class UserConsentResource {
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
             .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
 
-        log.debug("Listing user's banks [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+        log.debug("Listing user's consents [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
@@ -88,10 +89,10 @@ public class UserConsentResource {
         UUID userId = ResourceUtils.getUserId(ctx);
         log.info("Deleting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
-        UserConsent result = userConsentService.getUserConsent(userId, institutionId)
+        UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
-        userConsentService.consentCancelled(result.getId());
+        userConsentService.consentCancelled(consent.getId());
         return Response.noContent().build();
     }
 
@@ -118,7 +119,7 @@ public class UserConsentResource {
      *
      * @param headers the request headers.
      * @param uriInfo the request URI information from which the consent reference is extracted.
-     * @param railProviderId the rail-provider identifier.
+     * @param railProvider the rail-provider identifier.
      * @return a redirect to the callback-uri provided by the client when the request
      * was initiated.
      */
@@ -129,18 +130,18 @@ public class UserConsentResource {
     @PermitAll
     public Response consentResponse(@Context HttpHeaders headers,
                                     @Context UriInfo uriInfo,
-                                    @PathParam("railProvider") String railProviderId) {
-        log.info("User consent response [railProvider: {}]", railProviderId);
+                                    @PathParam("railProvider") RailProvider railProvider) {
+        log.info("User consent response [railProvider: {}]", railProvider);
         logHeaders(headers);
 
         // ask rail to extract the consent details from the query parameters
-        RailProviderApi railProvider = railProviderFactory.getImplementation(railProviderId);
+        RailProviderApi railProviderApi = railProviderFactory.get(railProvider);
         MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
-        ConsentResponse consentResponse = railProvider.parseConsentResponse(queryParameters);
+        ConsentResponse consentResponse = railProviderApi.parseConsentResponse(queryParameters);
 
         URI redirectUri = consentResponse.isError()
-            ? userConsentService.consentDenied(railProvider, consentResponse)
-            : userConsentService.consentGiven(railProvider, consentResponse);
+            ? userConsentService.consentDenied(railProviderApi, consentResponse)
+            : userConsentService.consentGiven(railProviderApi, consentResponse);
 
         return Response.temporaryRedirect(redirectUri).build();
     }
