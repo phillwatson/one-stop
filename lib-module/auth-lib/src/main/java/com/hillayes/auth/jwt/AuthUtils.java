@@ -1,10 +1,10 @@
-package com.hillayes.notification.resource;
+package com.hillayes.auth.jwt;
 
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.UUID;
 
-public class ResourceUtils {
+public class AuthUtils {
     /**
      * Extracts any UUID of the calling user, from the given SecurityContext.
      */

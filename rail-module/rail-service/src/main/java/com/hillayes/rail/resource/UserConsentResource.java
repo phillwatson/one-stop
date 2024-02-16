@@ -1,11 +1,9 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.AccountSummaryResponse;
-import com.hillayes.onestop.api.PaginatedUserConsents;
-import com.hillayes.onestop.api.UserConsentRequest;
-import com.hillayes.onestop.api.UserConsentResponse;
+import com.hillayes.onestop.api.*;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailInstitution;
@@ -45,7 +43,7 @@ public class UserConsentResource {
                                 @Context UriInfo uriInfo,
                                 @QueryParam("page") @DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing user's consents [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
 
         Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
@@ -56,7 +54,7 @@ public class UserConsentResource {
             .count(consentsPage.getContentSize())
             .total(consentsPage.getTotalCount())
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, consentsPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, consentsPage));
 
         log.debug("Listing user's consents [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, page, pageSize, response.getCount(), response.getTotal());
@@ -68,7 +66,7 @@ public class UserConsentResource {
     @RolesAllowed("user")
     public Response getConsentForInstitution(@Context SecurityContext ctx,
                                              @PathParam("institutionId") String institutionId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
@@ -86,7 +84,7 @@ public class UserConsentResource {
     @RolesAllowed("user")
     public Response deleteConsent(@Context SecurityContext ctx,
                                   @PathParam("institutionId") String institutionId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Deleting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
 
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
@@ -102,7 +100,7 @@ public class UserConsentResource {
     public Response register(@Context SecurityContext ctx,
                              @PathParam("institutionId") String institutionId,
                              @Valid UserConsentRequest consentRequest) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Registering user's bank [userId: {}, institutionId: {}]", userId, institutionId);
 
         URI consentLink = userConsentService.register(userId, institutionId, consentRequest.getCallbackUri());

@@ -1,5 +1,6 @@
 package com.hillayes.notification.resource;
 
+import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.onestop.api.NotificationResponse;
@@ -30,7 +31,7 @@ public class NotificationResource {
     @GET
     public Response getNotifications(@Context SecurityContext ctx,
                                      @QueryParam("after") Instant after) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting user notifications [userId: {}, after: {}]", userId, after);
 
         List<NotificationResponse> notifications = notificationService.listNotifications(userId, after, MAPPER);
@@ -43,7 +44,7 @@ public class NotificationResource {
     @Path("{id}")
     public Response deleteNotification(@Context SecurityContext ctx,
                                        @PathParam("id") UUID notificationId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Deleting user notification [userId: {}, notificationId: {}]", userId, notificationId);
 
         notificationService.deleteNotification(userId, notificationId);

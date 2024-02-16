@@ -40,7 +40,7 @@ public class UserAdminResource {
             .count(usersPage.getContentSize())
             .total(usersPage.getTotalCount())
             .items(usersPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, usersPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, usersPage));
 
         return Response.ok(response).build();
     }

@@ -3,6 +3,7 @@ package com.hillayes.rail.resource;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.PaginatedInstitutions;
+import com.hillayes.onestop.api.PaginationUtils;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.service.InstitutionService;
@@ -54,7 +55,7 @@ public class InstitutionResource {
             .count(bankPage.size())
             .total((long) allBanks.size())
             .items(bankPage)
-            .links(ResourceUtils.buildPageLinks(uriInfo, page, pageSize, totalPages));
+            .links(PaginationUtils.buildPageLinks(uriInfo, page, pageSize, totalPages));
 
         log.debug("List institutions [country: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             countryCode, page, pageSize, response.getCount(), response.getTotal());

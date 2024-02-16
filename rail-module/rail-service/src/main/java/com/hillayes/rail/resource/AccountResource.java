@@ -1,11 +1,9 @@
 package com.hillayes.rail.resource;
 
+import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.AccountBalanceResponse;
-import com.hillayes.onestop.api.AccountResponse;
-import com.hillayes.onestop.api.InstitutionResponse;
-import com.hillayes.onestop.api.PaginatedAccounts;
+import com.hillayes.onestop.api.*;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.service.AccountService;
@@ -33,7 +31,7 @@ public class AccountResource {
                                 @Context UriInfo uriInfo,
                                 @QueryParam("page")@DefaultValue("0") int page,
                                 @QueryParam("page-size") @DefaultValue("20") int pageSize) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing accounts [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         Page<Account> accountsPage = accountService.getAccounts(userId, page, pageSize);
 
@@ -43,7 +41,7 @@ public class AccountResource {
             .count(accountsPage.getContentSize())
             .total(accountsPage.getTotalCount())
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
-            .links(ResourceUtils.buildPageLinks(uriInfo, accountsPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, accountsPage));
 
         log.debug("Listing accounts [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, page, pageSize, response.getCount(), response.getTotal());
@@ -54,7 +52,7 @@ public class AccountResource {
     @Path("/{accountId}")
     public Response getAccountById(@Context SecurityContext ctx,
                                    @PathParam("accountId") UUID accountId) {
-        UUID userId = ResourceUtils.getUserId(ctx);
+        UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting account [userId: {}, accountId: {}]", userId, accountId);
         Account account = accountService.getAccount(accountId)
             .filter(acc -> acc.getUserId().equals(userId))
