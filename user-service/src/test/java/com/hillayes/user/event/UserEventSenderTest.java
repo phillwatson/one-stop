@@ -13,9 +13,7 @@ import com.hillayes.events.events.user.UserUpdated;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -32,19 +30,21 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@QuarkusTest
 public class UserEventSenderTest {
-    @InjectMock
-    EventSender eventSender;
-    @InjectMock
-    RequestHeaders requestHeaders;
+    private EventSender eventSender;
+    private RequestHeaders requestHeaders;
 
-    @Inject
-    UserEventSender fixture;
+    private UserEventSender fixture;
 
+    @BeforeEach
+    public void setUp() {
+        eventSender = mock();
+        requestHeaders = mock();
+
+        fixture = new UserEventSender(eventSender, requestHeaders);
+    }
     @Test
     public void testSendUserRegistered() {
         // given: a registered user's email and acknowledgement details
