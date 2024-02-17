@@ -41,7 +41,7 @@ export default function TransactionSummaryList(props: Props) {
         <caption><i>
           { noTransactions
             ? 'there are no transactions available'
-            : 'most recent ${transactions.length} transactions'
+            : `most recent ${transactions.length} transactions`
           }
         </i></caption>
         <TableHead>
