@@ -48,7 +48,7 @@ public class NotificationTestIT extends ApiTestBase {
 
     @BeforeEach
     public void beforeEach() {
-        railClient.reset();
+        railClient.reset().close();
     }
 
     @Test
