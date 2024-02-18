@@ -22,12 +22,11 @@ on:
       - 'docs/**'
 
 env:
-  LOCAL_REGISTRY: localhost:5000
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  QUARKUS_CONTAINER_IMAGE_REGISTRY: localhost:5000
+  QUARKUS_CONTAINER_IMAGE_REGISTRY: ghcr.io
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
-  # QUARKUS_CONTAINER_IMAGE_PUSH: true
+  QUARKUS_CONTAINER_IMAGE_PUSH: true
 
 jobs:
   build:
@@ -36,12 +35,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
 
     steps:
     - name: Checkout the code
@@ -72,7 +65,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.LOCAL_REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push Client Docker image
       uses: docker/build-push-action@v5
