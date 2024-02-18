@@ -22,9 +22,10 @@ on:
       - 'docs/**'
 
 env:
+  LOCAL_REGISTRY: localhost:5000
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  QUARKUS_CONTAINER_IMAGE_REGISTRY: localhost:5000
+  QUARKUS_CONTAINER_IMAGE_REGISTRY: ${{ env.LOCAL_REGISTRY }}
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
   # QUARKUS_CONTAINER_IMAGE_PUSH: true
 
@@ -56,13 +57,13 @@ jobs:
     - name: Log in to the Container registry
       uses: docker/login-action@v3
       with:
-        registry: ghcr.io
+        registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build with Maven
       run: |
-        mvn -B package -Pclient -Ptest --file pom.xml \
+        mvn -B verify -Pclient -Ptest --file pom.xml \
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
           -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
@@ -71,12 +72,12 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.LOCAL_REGISTRY }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push Client Docker image
       uses: docker/build-push-action@v5
       with:
         context: client/
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/client:1.0.0-SNAPSHOT
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:1.0.0-SNAPSHOT
         labels: ${{ steps.meta.outputs.labels }}
