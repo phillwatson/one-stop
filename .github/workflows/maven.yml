@@ -25,10 +25,9 @@ env:
   LOCAL_REGISTRY: localhost:5000
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  QUARKUS_CONTAINER_IMAGE_REGISTRY: ${{ env.LOCAL_REGISTRY }}
+  QUARKUS_CONTAINER_IMAGE_REGISTRY: localhost:5000
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
   # QUARKUS_CONTAINER_IMAGE_PUSH: true
-
 
 jobs:
   build:
