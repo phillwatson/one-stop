@@ -1,4 +1,4 @@
-FROM nginx:1.17.0-alpine
+FROM nginx:1.25.4-alpine
 
 # Copy the react build output
 COPY build /etc/nginx/html/
