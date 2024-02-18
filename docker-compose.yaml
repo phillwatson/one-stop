@@ -75,7 +75,7 @@ services:
 
   user-service:
     restart: unless-stopped
-    image: one-stop/user-service:1.0.0
+    image: phillwatson/user-service:1.0.0
     depends_on:
       - db
       - broker
@@ -96,7 +96,7 @@ services:
 
   rail-service:
     restart: unless-stopped
-    image: one-stop/rail-service:1.0.0
+    image: phillwatson/rail-service:1.0.0
     depends_on:
       - db
       - broker
@@ -117,7 +117,7 @@ services:
 
   audit-service:
     restart: unless-stopped
-    image: one-stop/audit-service:1.0.0
+    image: phillwatson/audit-service:1.0.0
     depends_on:
       - db
       - broker
@@ -138,7 +138,7 @@ services:
 
   notification-service:
     restart: unless-stopped
-    image: one-stop/notification-service:1.0.0
+    image: phillwatson/notification-service:1.0.0
     depends_on:
       - db
       - broker
@@ -159,7 +159,7 @@ services:
 
   client:
     restart: unless-stopped
-    image: one-stop/client:1.0.0
+    image: phillwatson/client:1.0.0
     depends_on:
       - rail-service
       - user-service
