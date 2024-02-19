@@ -1,6 +1,7 @@
 package com.hillayes.user.event;
 
 import com.hillayes.auth.audit.RequestHeaders;
+import com.hillayes.commons.Strings;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.AccountActivity;
 import com.hillayes.events.events.auth.AuthenticationFailed;
@@ -31,7 +32,7 @@ public class UserEventSender {
     private final RequestHeaders requestHeaders;
 
     public void sendUserRegistered(String email, Duration expires, URI acknowledgerUri) {
-        log.debug("Sending UserRegistered event [email: {}]", email);
+        log.debug("Sending UserRegistered event [email: {}]", Strings.maskEmail(email));
         List<Locale> languages = requestHeaders.getAcceptableLanguages();
 
         eventSender.send(Topic.USER, UserRegistered.builder()

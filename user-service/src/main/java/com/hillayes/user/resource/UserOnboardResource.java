@@ -2,6 +2,7 @@ package com.hillayes.user.resource;
 
 import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.auth.jwt.AuthTokens;
+import com.hillayes.commons.Strings;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.user.domain.User;
@@ -33,7 +34,7 @@ public class UserOnboardResource {
     @Path("/register")
     @PermitAll
     public Response registerUser(@Valid UserRegisterRequest request) {
-        log.info("Registering user [email: {}]", request.getEmail());
+        log.info("Registering user [email: {}]", Strings.maskEmail(request.getEmail()));
         userService.registerUser(request.getEmail());
 
         // don't give away whether the email is registered or not

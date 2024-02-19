@@ -297,6 +297,7 @@ public class OpenIdAuthenticationTest {
         idToken.setIssuer("https://accounts.google.com/");
         idToken.setSubject(randomAlphanumeric(30));
         idToken.setStringClaim("email", null);
+        idToken.setStringClaim("locale", "en");
 
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
@@ -305,8 +306,31 @@ public class OpenIdAuthenticationTest {
             .thenReturn(Optional.empty());
 
         // when: the service is called
-        // then: an exception is raised
-        assertThrows(NotAuthorizedException.class, () -> fixture.oauthExchange(authProvider, authCode));
+        User result = fixture.oauthExchange(authProvider, authCode);
+
+        // then: the identified user is returned
+        assertNotNull(result);
+
+        // and: the user's properties are taken from ID token
+        assertEquals(idToken.getClaimValueAsString("name"), result.getPreferredName());
+        assertEquals(idToken.getClaimValueAsString("given_name"), result.getGivenName());
+        assertEquals(idToken.getClaimValueAsString("family_name"), result.getFamilyName());
+        assertEquals(idToken.getClaimValueAsString("locale"), result.getLocale().toLanguageTag());
+
+        // and: no email address is recorded
+        assertNull(result.getEmail());
+
+        // and: the username is taken from the subject
+        assertEquals(idToken.getClaimValueAsString("sub"), result.getUsername());
+
+        // and: user is onboarded
+        assertNotNull(result.getDateCreated());
+        assertNotNull(result.getDateOnboarded());
+
+        // and: auth-provider's identifier is recorded against the user
+        OidcIdentity oidcIdentity = result.getOidcIdentity(idToken.getIssuer()).orElse(null);
+        assertNotNull(oidcIdentity);
+        assertEquals(idToken.getSubject(), oidcIdentity.getSubject());
 
         // and: no events are issued
         verifyNoInteractions(userEventSender);

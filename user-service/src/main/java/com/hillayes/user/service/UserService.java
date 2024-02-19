@@ -62,7 +62,7 @@ public class UserService {
      * @param email the email of the client wishing to register.
      */
     public void registerUser(String email) {
-        log.info("Registering user [email: {}]", email);
+        log.info("Registering user [email: {}]", Strings.maskEmail(email));
 
         try {
             // ensure email is unique
@@ -86,9 +86,9 @@ public class UserService {
                 .build();
             userEventSender.sendUserRegistered(email, tokenDuration, acknowledgerUri);
 
-            log.debug("User registered [email: {}, ackUri: {}]", email, acknowledgerUri);
+            log.debug("User registered [email: {}, ackUri: {}]", Strings.maskEmail(email), acknowledgerUri);
         } catch (IllegalArgumentException | IOException e) {
-            log.error("Failed to construct acknowledge URI [email: {}]", email, e);
+            log.error("Failed to construct acknowledge URI [email: {}]", Strings.maskEmail(email), e);
             throw new UserRegistrationException(email);
         }
     }

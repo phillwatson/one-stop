@@ -39,4 +39,20 @@ public class Strings {
     static public String getOrDefault(String value, String defaultValue) {
         return isBlank(value) ? defaultValue : value;
     }
+
+    /**
+     * Masks the email address by replacing the characters before the '@' with
+     * a single character followed by '****'. This is intended for including
+     * email addresses in log messages.
+     */
+    static public String maskEmail(String email) {
+        if (isBlank(email)) {
+            return email;
+        }
+        int at = email.indexOf('@');
+        if (at < 0) {
+            return email;
+        }
+        return email.substring(0, 1) + "****" + email.substring(at);
+    }
 }
