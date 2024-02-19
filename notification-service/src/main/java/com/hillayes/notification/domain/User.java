@@ -27,7 +27,6 @@ public class User {
     private String username;
 
     @Setter
-    @Column(nullable = false)
     private String email;
 
     @Setter

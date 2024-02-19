@@ -57,8 +57,8 @@
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
         <quarkus.container-image.build>true</quarkus.container-image.build>
-        <quarkus.container-image.group>one-stop</quarkus.container-image.group>
-        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime:1.18</quarkus.jib.base-jvm-image>
+        <quarkus.container-image.group>phillwatson</quarkus.container-image.group>
+        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:1f152b70f833d4a0028f3da0a1b8122cdceb49728f41ec93660371aa73de2344</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
         </quarkus.jib.jvm-additional-arguments>
 

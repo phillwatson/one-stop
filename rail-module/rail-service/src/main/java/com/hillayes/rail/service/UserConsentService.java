@@ -140,7 +140,9 @@ public class UserConsentService {
                     userId, institutionId, agreement.getAgreementLink());
                 return agreement.getAgreementLink();
             } catch (Exception e) {
-                railProviderApi.deleteAgreement(agreement.getId());
+                try {
+                    railProviderApi.deleteAgreement(agreement.getId());
+                } catch (Exception ignore) { }
                 throw e;
             }
         } catch (Exception e) {

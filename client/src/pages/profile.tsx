@@ -31,15 +31,15 @@ export default function UpdateProfile() {
   function validateForm(): Array<string> {
     const errors = Array<string>();
 
-    if (profile.username.length === 0) {
+    if (profile.username?.length === 0) {
       errors.push("Username is required");
     }
 
-    if (profile.email.length === 0) {
+    if (profile.email?.length === 0) {
       errors.push("Email is required");
     }
 
-    if (profile.givenName.length === 0) {
+    if (profile.givenName?.length === 0) {
       errors.push("Given name is required");
     }
 

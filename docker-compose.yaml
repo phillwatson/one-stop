@@ -75,7 +75,7 @@ services:
 
   one-stop-service:
     restart: unless-stopped
-    image: one-stop/one-stop-main:1.0.0
+    image: phillwatson/one-stop-main:1.0.0
     depends_on:
       - db
       - broker
@@ -96,7 +96,7 @@ services:
 
   client:
     restart: unless-stopped
-    image: one-stop/client:1.0.0
+    image: phillwatson/client:1.0.0
     depends_on:
       - one-stop-service
     ports:

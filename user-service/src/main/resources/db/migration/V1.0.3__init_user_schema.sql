@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users.user (
     id uuid PRIMARY KEY,
     username varchar(256) NOT NULL UNIQUE,
     password_hash varchar(256) NOT NULL,
-    email varchar(256) NOT NULL,
+    email varchar(256) NULL,
     title varchar(256),
     given_name varchar(256) NOT NULL,
     family_name varchar(256),

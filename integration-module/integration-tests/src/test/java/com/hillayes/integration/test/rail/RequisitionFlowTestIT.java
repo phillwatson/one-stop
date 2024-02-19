@@ -47,8 +47,8 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
     @BeforeEach
     public void beforeEach() {
-        nordigenClient.reset();
-        yapilyClient.reset();
+        nordigenClient.reset().close();
+        yapilyClient.reset().close();
     }
 
     @Test
