@@ -1,5 +1,6 @@
 package com.hillayes.notification.service;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
@@ -92,7 +93,7 @@ public class UserService {
 
         // send email to notify user of change
         log.debug("Sending email to notify user update [oldEmail: {}, newEmail: {}]",
-            oldRecipient.getEmail(), user.getEmail());
+            Strings.maskEmail(oldRecipient.getEmail()), Strings.maskEmail(user.getEmail()));
 
         Map<String, Object> params = Map.of("user", existingUser);
 

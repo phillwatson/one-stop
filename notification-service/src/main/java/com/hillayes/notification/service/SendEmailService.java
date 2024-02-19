@@ -1,5 +1,6 @@
 package com.hillayes.notification.service;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.net.Network;
 import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
@@ -30,11 +31,6 @@ public class SendEmailService {
     private final TransactionalEmailsApi emailApi;
 
     public void sendEmail(TemplateName templateName,
-                          EmailConfiguration.Corresponder recipient) throws SendEmailException {
-        sendEmail(templateName, recipient, null);
-    }
-
-    public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient,
                           Map<String, Object> params) throws SendEmailException {
         log.debug("Sending email [template: {}]", templateName);
@@ -54,6 +50,11 @@ public class SendEmailService {
         }
         if (recipient == null) {
             log.error("No recipient found [templateName: {}]", templateName);
+            return;
+        }
+
+        if (Strings.isBlank(recipient.getEmail())) {
+            log.warn("Recipient has no email address [templateName: {}]", templateName);
             return;
         }
 
