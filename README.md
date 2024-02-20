@@ -31,10 +31,6 @@ services. This can be also be achieved by creating a docker-compose-override.yam
 # the http schema to use (http or https)
 ONE_STOP_GATEWAY_SCHEME: http
 
-# the port exposed on the router to the outside world
-# used by callback from 3rd party services (e.g. rails)
-ONE_STOP_GATEWAY_OPEN_PORT: 9876
-
 # the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars>
 
@@ -84,6 +80,23 @@ ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previosly Send-With-Blue)>
 
 # to disable the sending of emails - default false
 ONE_STOP_EMAIL_DISABLED: true
+```
+
+## Receiving 3rd Party Callbacks
+The application uses the `ONE_STOP_GATEWAY_OPEN_PORT` to receive callbacks from
+3rd party services. It is used by the Rails service to receive callbacks from
+Nordigen/GoCardless and Yapily when obtaining users' consent to access their bank
+details. It is also used by the User service to receive callbacks from OpenID
+Connection Providers; e.g., Google, GitHub, GitLab and Apple.
+
+This port must be open on the router to the outside world and forwarded to the
+device IP and port on which the application is running. The application is able
+to determine the IP address on which the router is listening (see the class
+`com.hillayes.commons.net.Network`).
+```yaml
+# the port exposed on the router to the outside world
+# used by callback from 3rd party services (e.g. rails)
+ONE_STOP_GATEWAY_OPEN_PORT: 9876
 ```
 
 ## To Build and Start Docker Images
