@@ -129,7 +129,7 @@ public class YapilyRailAdaptor implements RailProviderApi {
     @Override
     public ConsentResponse parseConsentResponse(MultivaluedMap<String, String> queryParams) {
         // A typical Yapily consent callback request:
-        // http://5.81.68.243/api/v1/rails/consents/response/YAPIL/
+        // http://5.81.68.243/api/v1/rails/consents/response/YAPILY/
         // ?application-user-id=snoopy
         // &user-uuid=6e147c4c-b3f5-4d7b-b0b9-ceaa6ef1fb86
         // &institution=modelo-sandbox
@@ -144,8 +144,19 @@ public class YapilyRailAdaptor implements RailProviderApi {
                 .map(ref -> ref.substring(4))
                 .orElse(null))
             .errorCode(queryParams.getFirst("error"))
-            .errorDescription(queryParams.getFirst("error-description"))
+            .errorDescription(decode(queryParams.getFirst("error-description")))
             .build();
+    }
+
+    /**
+     * Used to decode the error description in the consent response.
+     * @param encoded the base-64 encoded string.
+     * @return the decoded string, or null if the encoded string is null.
+     */
+    private String decode(String encoded) {
+        return Strings.isBlank(encoded)
+            ? null
+            : new String(java.util.Base64.getDecoder().decode(encoded));
     }
 
     @Override
