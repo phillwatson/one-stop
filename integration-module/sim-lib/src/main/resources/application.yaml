@@ -1,4 +1,8 @@
 quarkus:
+  native:
+    resources:
+      includes: "*.json"
+
   log:
     min-level: TRACE
     level: INFO

@@ -457,7 +457,8 @@
                                         <!-- https://openapi-generator.tech/docs/generators/spring/ -->
                                         @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
                                         <!-- https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection -->
-                                        @io.quarkus.runtime.annotations.RegisterForReflection
+                                        <!-- https://github.com/quarkusio/quarkus/issues/32070?ref=saile.it -->
+                                        @io.quarkus.runtime.annotations.RegisterForReflection(registerFullHierarchy = true)
                                     </additionalModelTypeAnnotations>
                                 </configOptions>
 

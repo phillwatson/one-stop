@@ -28,8 +28,8 @@ public class InstitutionTestIT extends ApiTestBase {
 
     @BeforeEach
     public void beforeEach() {
-        nordigenClient.reset().close();
-        yapilyClient.reset().close();
+        nordigenClient.reset();
+        yapilyClient.reset();
     }
 
     @Test

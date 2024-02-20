@@ -54,6 +54,7 @@ public class ApiTestBase {
      */
     public static final String EMAIL_HOST = "http://wiremock:" + WIREMOCK_PORT + SendWithBlueSimulator.BASE_URI;
 
+    // a semaphore to ensure that the docker containers are only initialized once
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     private static DockerComposeContainer<?> dockerContainers;
@@ -63,6 +64,8 @@ public class ApiTestBase {
         if (! initialized.getAndSet(true)) {
             dockerContainers = initContainers();
             dockerContainers.start();
+
+            // all calls go through the client container (nginx gateway)
             RestAssured.port = dockerContainers.getServicePort("client_1", CLIENT_PORT);
         }
     }
