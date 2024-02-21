@@ -4,24 +4,17 @@
 ---
 ## Rail-Module
 ### Rail-Service
-This service provides a facade over the suppored financial Rail services.
-It provides the REST functionality required to connect to and retrieve data
-from the Rail Provider APIs.
+This is the main service for this module, interacting with the Rail Provider APIs.
+It provides a REST interface for the supported Rail Providers; calling upon the
+Rail Providers below for functionality required to connect to and retrieve data from
+the Rail.
 
 ### Rail-API
 Presents an Adaptor interface to the Rail Provider APIs. Allowing a common
 interface to the support Rail Providers.
 
 ### Nordigen-Lib
-Provides an implementation of the `com.hillayes.rail.api.RailProviderApi` for
-the Nordigen API.
+The Nordigen implementation of the Rail Provider API (`com.hillayes.rail.api.RailProviderApi`).
 
 ### Yapily-Lib
-Provides an implementation of the `com.hillayes.rail.api.RailProviderApi` for
-the Yapily API.
-
-### SIM-Lib
-Provides a simulator for integration testing. This mocks the external email and Rail
-Provider services.
-
-
+The Yapily implementation of the Rail Provider API (`com.hillayes.rail.api.RailProviderApi`).
