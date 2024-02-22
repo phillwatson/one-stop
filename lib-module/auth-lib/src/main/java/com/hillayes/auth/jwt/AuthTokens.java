@@ -128,6 +128,9 @@ public class AuthTokens {
             .sameSite(NewCookie.SameSite.STRICT)
             .build();
 
+        // the value of this cookie must be read by the client-side script and
+        // returned in the request header identified by the configuration property
+        // "one-stop.auth.xsrf.header"
         NewCookie xsrfTokenCookie = new NewCookie.Builder(xsrfCookieName)
             .value(xsrfToken)
             .path("/")
