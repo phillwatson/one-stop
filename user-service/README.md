@@ -71,9 +71,9 @@ revoked, returning a 401 (Unauthorized) response if so.
 
 ### Cross-Site Resource Forgery (XSRF)
 Each authenticated response from the server will carry an XSRF cookie containing a
-cryptographically signed random value. The same value is contained in the claims of
-the access and refresh cookies. The client must return this value in the headers of
-its requests. 
+cryptographically signed random value. The value is generated on every access-token
+refresh, and contained in the claims of the signed access and refresh cookies. The
+client must return this value in the headers of its requests. 
 
 For authenticated endpoints, the server will ensure the presence of the XSRF header,
 and verify that its signature is correct. It then compares the value with that in
@@ -84,5 +84,5 @@ The name of the XSRF cookie and header are, by default, `"XSRF-TOKEN"` and `"X-X
 respectively. These names can be overridden using the config properties;
 `"one-stop.auth.xsrf.cookie"` and `"one-stop.auth.xsrf.header"`.
 
-As the XSRF cookie is verified when the auth tokens are refreshed, the cookie has the
-same expiry time as the refresh token.
+NOTE: As the XSRF cookie is verified when the auth tokens are refreshed, the cookie
+has the same expiry time as the refresh token; see `"one-stop.auth.refresh-token.expires-in"`

@@ -89,8 +89,7 @@ public class XsrfTokens {
         }
 
         // compare values
-        final byte[] tokenBytes = token1.getBytes(StandardCharsets.UTF_8);
-        if (!MessageDigest.isEqual(tokenBytes, token2.getBytes(StandardCharsets.UTF_8))) {
+        if (!MessageDigest.isEqual(token1.getBytes(StandardCharsets.UTF_8), token2.getBytes(StandardCharsets.UTF_8))) {
             log.warn("XSRF token validation failed - no match");
             return false;
         }

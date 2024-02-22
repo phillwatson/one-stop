@@ -114,6 +114,7 @@ public class AuthTokens {
             .expiry(Date.from(Instant.now().plus(accessDuration)))
             .secure(false)
             .httpOnly(true)
+            .sameSite(NewCookie.SameSite.STRICT)
             .build();
 
         NewCookie refreshTokenCookie = new NewCookie.Builder(refreshCookieName)
@@ -124,6 +125,7 @@ public class AuthTokens {
             .expiry(Date.from(Instant.now().plus(refreshDuration)))
             .secure(false)
             .httpOnly(true)
+            .sameSite(NewCookie.SameSite.STRICT)
             .build();
 
         NewCookie xsrfTokenCookie = new NewCookie.Builder(xsrfCookieName)
@@ -134,14 +136,14 @@ public class AuthTokens {
             .expiry(Date.from(Instant.now().plus(refreshDuration)))
             .secure(false)
             .httpOnly(false) // script must have access
+            .sameSite(NewCookie.SameSite.STRICT)
             .build();
 
         return new NewCookie[]{accessTokenCookie, refreshTokenCookie, xsrfTokenCookie};
     }
 
     /**
-     * Set auth cookies in the given response, adding the SameSite=Strict attribute to
-     * each cookie.
+     * Set auth cookies in the given response.
      *
      * @param responseBuilder   the response builder to which the cookies are to be added.
      * @param userPrincipalName the user principal name to be used in the JWT.
@@ -151,7 +153,7 @@ public class AuthTokens {
     public Response authResponse(Response.ResponseBuilder responseBuilder,
                                  Object userPrincipalName, Set<String> groups) {
         for (NewCookie cookie : buildCookies(userPrincipalName, groups)) {
-            responseBuilder.header("Set-Cookie", cookie + ";SameSite=Strict");
+            responseBuilder.header("Set-Cookie", cookie);
         }
         return responseBuilder.build();
     }
