@@ -70,6 +70,10 @@ The token refresh provides an opportunity to check if the user's access has been
 revoked, returning a 401 (Unauthorized) response if so.
 
 ### Cross-Site Resource Forgery (XSRF)
+This application uses the Signed "Double Submit Cookie" method to protect against
+XSRF attacks. For more information, see the OWASP Cheat Sheet;
+https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#alternative-using-a-double-submit-cookie-pattern
+
 Each authenticated response from the server will carry an XSRF cookie containing a
 cryptographically signed random value. The value is generated on every access-token
 refresh, and contained in the claims of the signed access and refresh cookies. The
