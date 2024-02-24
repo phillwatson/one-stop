@@ -1,6 +1,7 @@
 package com.hillayes.auth.crypto;
 
 import com.hillayes.auth.errors.EncryptionConfigException;
+import com.hillayes.commons.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKeyFactory;
@@ -92,6 +93,11 @@ public class PasswordCrypto {
      * @return <code>true</code> if the given password is a match for the given encrypted form.
      */
     public boolean verify(char[] aPassword, String aSecret) {
+        // if no original password supplied - the result will always be false
+        if (Strings.isBlank(aSecret)) {
+            return false;
+        }
+
         String[] parts = aSecret.split(String.valueOf(PasswordCrypto.DELIMITER));
         int iterations = Integer.parseInt(parts[0]);
         byte[] salt = fromHex(parts[1]);

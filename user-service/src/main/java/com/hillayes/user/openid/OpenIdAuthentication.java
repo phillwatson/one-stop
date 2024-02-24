@@ -181,7 +181,7 @@ public class OpenIdAuthentication {
 
                 return User.builder()
                     .username(username)
-                    .passwordHash(passwordCrypto.getHash(UUID.randomUUID().toString().toCharArray()))
+                    .passwordHash(null)
                     .email(email)
                     .givenName(givenName == null ? name == null ? email : name : givenName)
                     .familyName(familyName)

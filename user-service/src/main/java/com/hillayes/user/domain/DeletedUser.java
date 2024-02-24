@@ -26,13 +26,11 @@ public class DeletedUser {
     @Column(nullable = false)
     private String username;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(nullable = false)
     private String email;
 
-    @Column(name = "title", nullable = true)
     private String title;
 
     @Column(name = "given_name", nullable = false)
@@ -50,7 +48,6 @@ public class DeletedUser {
     /**
      * Indicates the natural language and locale that the user prefers.
      */
-    @Column(name = "locale", nullable = true)
     @Convert(converter = LocaleAttrConverter.class)
     private Locale locale;
 

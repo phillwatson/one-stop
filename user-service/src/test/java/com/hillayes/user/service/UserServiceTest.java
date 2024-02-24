@@ -26,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -152,6 +153,8 @@ public class UserServiceTest {
         User registeredUser = mockUser(UUID.randomUUID());
         when(userRepository.findByIdOptional(userId)).thenReturn(Optional.of(registeredUser));
 
+        Instant timeServiceCalled = Instant.now();
+
         // when: completing the onboarding
         User onboardedUser = fixture.completeOnboarding(user, password);
 
@@ -160,6 +163,9 @@ public class UserServiceTest {
 
         // and: the user is onboarded
         assertTrue(onboardedUser.isOnboarded());
+
+        // and: the user's passwordLastSet date is recorded
+        assertTrue(onboardedUser.getPasswordLastSet().isAfter(timeServiceCalled));
 
         // and: the user was updated
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -379,11 +385,17 @@ public class UserServiceTest {
         // and: the given old password is correct
         when(passwordCrypto.verify("oldpassword".toCharArray(), user.getPasswordHash())).thenReturn(true);
 
+        // and: the user's passwordLastSet date is recorded
+        Instant passwordLastSet = user.getPasswordLastSet();
+
         // when: the service is called
         Optional<User> result = fixture.updatePassword(user.getId(), "oldpassword".toCharArray(), "newpassword".toCharArray());
 
         // then: the user is returned
         assertTrue(result.isPresent());
+
+        // and: the passwordLastSet date is updated
+        assertNotEquals(passwordLastSet, result.get().getPasswordLastSet());
 
         // and: the password is hashed
         verify(passwordCrypto).getHash("newpassword".toCharArray());

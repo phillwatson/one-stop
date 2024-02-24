@@ -4,8 +4,9 @@ CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
     id uuid PRIMARY KEY,
     username varchar(256) NOT NULL UNIQUE,
-    password_hash varchar(256) NOT NULL,
-    email varchar(256) NULL,
+    password_hash varchar(256),
+    password_last_set timestamp,
+    email varchar(256),
     title varchar(256),
     given_name varchar(256) NOT NULL,
     family_name varchar(256),
@@ -50,8 +51,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_oidcissuer ON ${flyway:defaultSchema}.oidc
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.deleted_user (
     id uuid PRIMARY KEY,
     username varchar(256) NOT NULL,
-    password_hash varchar(256) NOT NULL,
-    email varchar(256) NOT NULL,
+    password_hash varchar(256),
+    email varchar(256),
     title varchar(256),
     given_name varchar(256) NOT NULL,
     family_name varchar(256),
