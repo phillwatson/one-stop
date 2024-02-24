@@ -29,13 +29,15 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "password_last_set")
+    private Instant passwordLastSet;
 
     @ColumnTransformer(write = "LOWER(?)")
     private String email;
 
-    @Column(name="title", nullable = true)
     private String title;
 
     @Column(name = "given_name", nullable = false)

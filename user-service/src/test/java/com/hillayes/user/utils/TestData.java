@@ -2,6 +2,8 @@ package com.hillayes.user.utils;
 
 import com.hillayes.user.domain.User;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -28,6 +30,7 @@ public class TestData {
             .email(randomAlphanumeric(20))
             .phoneNumber(randomNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
+            .passwordLastSet(Instant.now().minus(Duration.ofDays(10)))
             .locale(Locale.ENGLISH)
             .roles(Set.of("user"))
             .build();

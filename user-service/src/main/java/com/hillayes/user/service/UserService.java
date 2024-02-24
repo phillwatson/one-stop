@@ -126,6 +126,7 @@ public class UserService {
         userProfile.setPhoneNumber(userProfile.getPhoneNumber());
         userProfile.setLocale(userProfile.getLocale());
         userProfile.setPasswordHash(passwordCrypto.getHash(password));
+        userProfile.setPasswordLastSet(Instant.now());
         userProfile.setDateOnboarded(Instant.now());
         userProfile.setRoles(Set.of("user"));
         userProfile = userRepository.save(userProfile);
@@ -177,17 +178,21 @@ public class UserService {
             return Optional.empty();
         }
 
-        // if the user currently has a password - the old password must be provided
-        if ((user.getPasswordHash() != null) &&
-            (oldPassword == null) || (oldPassword.length == 0)) {
-            throw new MissingParameterException("oldPassword");
-        }
+        // if the user currently has a password
+        if (Strings.isNotBlank(user.getPasswordHash())) {
+            // the old password must be provided in the request
+            if ((oldPassword == null) || (oldPassword.length == 0)) {
+                throw new MissingParameterException("oldPassword");
+            }
 
-        if (!passwordCrypto.verify(oldPassword, user.getPasswordHash())) {
-            return Optional.empty();
+            // compare the old password
+            if (!passwordCrypto.verify(oldPassword, user.getPasswordHash())) {
+                return Optional.empty();
+            }
         }
 
         user.setPasswordHash(passwordCrypto.getHash(newPassword));
+        user.setPasswordLastSet(Instant.now());
         user = userRepository.save(user);
 
         userEventSender.sendUserUpdated(user);
