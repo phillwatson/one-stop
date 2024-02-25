@@ -449,6 +449,23 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.44.0</version>
+                    <configuration>
+                        <skip>true</skip>
+                        <skipPush>false</skipPush>
+                        <jib>true</jib>
+                        <pushRegistry>ghcr.io</pushRegistry>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>push-images</id>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
                     <groupId>org.openapitools</groupId>
                     <artifactId>openapi-generator-maven-plugin</artifactId>
                     <version>${openapi-generator.version}</version>
