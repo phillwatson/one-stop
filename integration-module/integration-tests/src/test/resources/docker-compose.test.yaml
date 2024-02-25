@@ -1,7 +1,7 @@
 services:
   # Simulator container. This hosts the rail simulator.
   sim:
-    image: phillwatson/sim-lib:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/sim-lib:1.0.0-SNAPSHOT
     ports:
       - "9090:8080"
     networks:
@@ -19,7 +19,7 @@ services:
         max-file: "1"
 
   user-service:
-    image: phillwatson/user-service:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/user-service:1.0.0-SNAPSHOT
     ports:
       - "8081:8080"
       - "5001:5005"
@@ -27,7 +27,7 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
 
   rail-service:
-    image: phillwatson/rail-service:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/rail-service:1.0.0-SNAPSHOT
     ports:
       - "8082:8080"
       - "5002:5005"
@@ -41,7 +41,7 @@ services:
       QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
 
   notification-service:
-    image: phillwatson/notification-service:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/notification-service:1.0.0-SNAPSHOT
     ports:
       - "8084:8080"
       - "5004:5005"
@@ -51,7 +51,7 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
 
   audit-service:
-    image: phillwatson/audit-service:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/audit-service:1.0.0-SNAPSHOT
     ports:
       - "8083:8080"
       - "5003:5005"
