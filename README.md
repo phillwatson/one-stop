@@ -143,6 +143,6 @@ container should expose a unique port - to avoid clashes.
   one-stop-service:
     image: one-stop/one-stop-main:1.0.0-SNAPSHOT
     ports:
-      - "8081:8080"
+      - "8181:8080"
       - "5001:5005"
 ```

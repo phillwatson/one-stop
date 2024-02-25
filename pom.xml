@@ -57,6 +57,7 @@
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
         <quarkus.container-image.build>true</quarkus.container-image.build>
+        <quarkus.container-image.registry>ghcr.io</quarkus.container-image.registry>
         <quarkus.container-image.group>phillwatson</quarkus.container-image.group>
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:1f152b70f833d4a0028f3da0a1b8122cdceb49728f41ec93660371aa73de2344</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
@@ -354,6 +355,22 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.3.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+
                 <plugin>
                     <groupId>${quarkus.platform.group-id}</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
