@@ -57,6 +57,6 @@ services:
       - "5003:5005"
 
   client:
-    image: phillwatson/client:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/client:1.0.0-SNAPSHOT
     build:
       context: ./client

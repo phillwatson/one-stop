@@ -14,7 +14,7 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "main" ]
-    paths-ignore: [ 'docs/**' ]
+    paths-ignore: [ 'docs/**', 'client/**' ]
 
 env:
   REGISTRY: ghcr.io
@@ -27,8 +27,8 @@ jobs:
     name: test and package
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
+      contents: read
 
     steps:
     - name: Checkout the code
