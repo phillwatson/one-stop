@@ -54,7 +54,7 @@
                          Delete node_modules folder otherwise the test-containers used for
                          integration tests will attempt to copy it to the build container.
                          Unfortunately, it does mean that the node modules will be downloaded
-                         again when the client is built.
+                         again when the client is next built.
                          -->
                         <id>delete-node-modules</id>
                         <phase>pre-integration-test</phase>
