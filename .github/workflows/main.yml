@@ -18,7 +18,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   QUARKUS_CONTAINER_IMAGE_REGISTRY: ghcr.io
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
   QUARKUS_CONTAINER_IMAGE_PUSH: true
@@ -46,7 +45,7 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build with Maven
@@ -60,7 +59,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ github.repository }}
 
     - name: Build and push Client Docker image
       uses: docker/build-push-action@v5
