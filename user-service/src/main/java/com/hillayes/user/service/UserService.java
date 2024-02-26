@@ -75,8 +75,11 @@ public class UserService {
         }
 
         try {
+            // generate a one-time-token for the user
             String token = authTokens.generateToken(email.toLowerCase(), tokenDuration);
 
+            // email the client with a link to the UI to complete the registration
+            // the link will contain the one-time-token for the client to use
             URI acknowledgerUri = UriBuilder.newInstance()
                 .scheme(gateway.getScheme())
                 .host(gateway.getHost())
@@ -281,7 +284,7 @@ public class UserService {
      */
     private void validateUniqueEmail(UUID userId, String email) {
         // ensure no onboarded user has the same email
-        findUserByEmail(email.toLowerCase())
+        findUserByEmail(email)
             .filter(existing -> !existing.getId().equals(userId))
             .ifPresent(existing -> {
                 throw new DuplicateEmailAddressException(email);
