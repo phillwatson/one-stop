@@ -68,6 +68,16 @@ public class AuthTokens {
             .collect(Collectors.toSet());
     }
 
+    /**
+     * Generates a signed JWT for the given principal, with the given expiry duration.
+     * This is used when a user registers for an account with their email address.
+     * The token (a one-time-token) will be emailed to them, and they will use it to
+     * complete their registration.
+     *
+     * @param principalName the principal name to be used to identify the registration.
+     * @param expiresIn the time-to-live of the token.
+     * @return the signed JWT with the given principal and expiry duration.
+     */
     public String generateToken(String principalName, Duration expiresIn) {
         return jwkSet.signClaims(Jwt
             .issuer(issuer)
@@ -193,13 +203,26 @@ public class AuthTokens {
      * @return the given response builder with the cookies added.
      */
     public Response deleteCookies(Response.ResponseBuilder responseBuilder) {
-        NewCookie accessToken = new NewCookie(accessCookieName, null,
-            "/api", null, NewCookie.DEFAULT_VERSION, null,
-            0, Date.from(Instant.now()), false, true);
+        Date expires = Date.from(Instant.now());
+        NewCookie accessToken = new NewCookie.Builder(accessCookieName)
+            .path("/api")
+            .version(NewCookie.DEFAULT_VERSION)
+            .maxAge(0)
+            .expiry(expires)
+            .secure(false)
+            .httpOnly(true)
+            .sameSite(NewCookie.SameSite.STRICT)
+            .build();
 
-        NewCookie refreshToken = new NewCookie(refreshCookieName, null,
-            "/api/v1/auth/refresh", null, NewCookie.DEFAULT_VERSION, null,
-            0, Date.from(Instant.now()), false, true);
+        NewCookie refreshToken = new NewCookie.Builder(refreshCookieName)
+            .path("/api/v1/auth/refresh")
+            .version(NewCookie.DEFAULT_VERSION)
+            .maxAge(0)
+            .expiry(expires)
+            .secure(false)
+            .httpOnly(true)
+            .sameSite(NewCookie.SameSite.STRICT)
+            .build();
 
         return responseBuilder.cookie(accessToken, refreshToken).build();
     }

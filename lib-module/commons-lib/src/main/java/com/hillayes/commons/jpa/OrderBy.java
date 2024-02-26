@@ -9,7 +9,7 @@ import java.util.List;
  * named columns, each of which may be ordered ascending or descending.
  */
 public class OrderBy {
-    private List<Column> columns = new ArrayList();
+    private final List<Column> columns = new ArrayList<>();
 
     private OrderBy() {
     }
