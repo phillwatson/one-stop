@@ -42,6 +42,23 @@ public class Correlation {
     }
 
     /**
+     * A utility method to call the given Runnable function, setting the given correlation
+     * ID for the duration of the call. Restores any previous correlation ID when the function
+     * is complete.
+     *
+     * @param aCorrelationId the correlation ID to be set for the duration of the call.
+     * @param aRunnable the function to be called.
+     */
+    public static void run(String aCorrelationId, Runnable aRunnable) {
+        String prevId = setCorrelationId(aCorrelationId);
+        try {
+            aRunnable.run();
+        } finally {
+            setCorrelationId(prevId);
+        }
+    }
+
+    /**
      * A utility method to call the given Callable function, setting the given correlation
      * ID for the duration of the call. Restores any previous correlation ID when the function
      * is complete.
@@ -56,23 +73,6 @@ public class Correlation {
         String prevId = setCorrelationId(aCorrelationId);
         try {
             return aCallable.call();
-        } finally {
-            setCorrelationId(prevId);
-        }
-    }
-
-    /**
-     * A utility method to call the given Runnable function, setting the given correlation
-     * ID for the duration of the call. Restores any previous correlation ID when the function
-     * is complete.
-     *
-     * @param aCorrelationId the correlation ID to be set for the duration of the call.
-     * @param aRunnable the function to be called.
-     */
-    public static void run(String aCorrelationId, Runnable aRunnable) {
-        String prevId = setCorrelationId(aCorrelationId);
-        try {
-            aRunnable.run();
         } finally {
             setCorrelationId(prevId);
         }
