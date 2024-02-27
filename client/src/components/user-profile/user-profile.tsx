@@ -30,6 +30,13 @@ export default function UserProfileForm(props: Props) {
     ProfileService.getAuthProviders().then( response => setAuthProviders(response));
   }, []);
 
+  function formatDateTime(dateStr?: string): string {
+    if (dateStr == null) return "";
+
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB") + " " + date.toLocaleTimeString("en-GB");
+  }
+
   return (
     <div className="panel">
       <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
@@ -60,6 +67,7 @@ export default function UserProfileForm(props: Props) {
           <TableRow>
             <TableCell sx={colhead} colSpan={2}>Auth Provider</TableCell>
             <TableCell sx={colhead}>Created</TableCell>
+            <TableCell sx={colhead}>Last Used</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -67,7 +75,8 @@ export default function UserProfileForm(props: Props) {
             <TableRow key={authProvider.name}>
               <TableCell><img src={ authProvider.logo } alt={authProvider.name + " logo"} width="32px" height="32px"/></TableCell>
               <TableCell width={"70%"}>{authProvider.name}</TableCell>
-              <TableCell>{new Date(authProvider.dateCreated).toLocaleDateString("en-GB")}</TableCell>
+              <TableCell>{formatDateTime(authProvider.dateCreated)}</TableCell>
+              <TableCell>{formatDateTime(authProvider.dateLastUsed)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -17,6 +17,10 @@ import java.util.Optional;
  * @param <Id> the type of the entity's identifier.
  */
 public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBase<Entity, Id> {
+    public void clearCache() {
+        getEntityManager().clear();
+    }
+
     public Optional<Entity> findFirst(String query, Object... parameters) {
         return find(query, parameters)
             .firstResultOptional();

@@ -12,6 +12,7 @@ import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
 import com.hillayes.events.sender.EventSender;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -83,20 +84,22 @@ public class UserEventSender {
             .build());
     }
 
-    public void sendUserAuthenticated(User user) {
+    public void sendUserAuthenticated(User user, AuthProvider authProvider) {
         log.debug("Sending UserAuthenticated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER_AUTH, UserAuthenticated.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
+            .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }
 
-    public void sendAuthenticationFailed(String username, String reason) {
+    public void sendAuthenticationFailed(String username, AuthProvider authProvider, String reason) {
         log.debug("Sending AuthenticationFailed event [username: {}, reason: {}]", username, reason);
         eventSender.send(Topic.USER_AUTH, AuthenticationFailed.builder()
             .username(username)
             .dateLogin(Instant.now())
+            .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .reason(reason)
             .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());

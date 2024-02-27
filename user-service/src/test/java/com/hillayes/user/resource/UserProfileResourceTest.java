@@ -209,6 +209,7 @@ public class UserProfileResourceTest extends TestBase {
                 .issuer(randomAlphanumeric(20))
                 .subject(randomAlphanumeric(15))
                 .dateCreated(Instant.now())
+                .dateLastUsed(Instant.now())
                 .build()
         ).toList();
         when(userService.getUserAuthProviders(userId)).thenReturn(oidcIdentities);

@@ -120,6 +120,7 @@ public class UserProfileResource {
         return new UserAuthProvider()
             .name(oidcIdentity.getProvider().getProviderName())
             .dateCreated(oidcIdentity.getDateCreated())
+            .dateLastUsed(oidcIdentity.getDateLastUsed())
             .logo(oidcIdentity.getProvider().getLogo());
     }
 }

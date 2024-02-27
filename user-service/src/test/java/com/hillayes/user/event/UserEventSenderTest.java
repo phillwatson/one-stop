@@ -11,6 +11,7 @@ import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.events.events.user.UserUpdated;
 import com.hillayes.events.sender.EventSender;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,7 +94,7 @@ public class UserEventSenderTest {
         // and: a locale in the original client request headers
         when(requestHeaders.getAcceptableLanguages()).thenReturn(List.of(user.getLocale()));
 
-        // when: the fixure is called
+        // when: the fixture is called
         fixture.sendUserCreated(user);
 
         // then: the correct event is emitted
@@ -136,7 +137,7 @@ public class UserEventSenderTest {
         // and: a locale in the original client request headers
         when(requestHeaders.getAcceptableLanguages()).thenReturn(List.of(user.getLocale()));
 
-        // when: the fixure is called
+        // when: the fixture is called
         fixture.sendUserUpdated(user);
 
         // then: the correct event is emitted
@@ -179,7 +180,7 @@ public class UserEventSenderTest {
         // and: a locale in the original client request headers
         when(requestHeaders.getAcceptableLanguages()).thenReturn(List.of(user.getLocale()));
 
-        // when: the fixure is called
+        // when: the fixture is called
         fixture.sendUserDeleted(user);
 
         // then: the correct event is emitted
@@ -217,8 +218,8 @@ public class UserEventSenderTest {
         // and: a user-agent is identified by the request headers
         when(requestHeaders.getFirst("User-Agent")).thenReturn("ssssss");
 
-        // when: the fixure is called
-        fixture.sendUserAuthenticated(user);
+        // when: the fixture is called
+        fixture.sendUserAuthenticated(user, AuthProvider.GOOGLE);
 
         // then: the correct event is emitted
         ArgumentCaptor<UserAuthenticated> captor = ArgumentCaptor.forClass(UserAuthenticated.class);
@@ -227,6 +228,7 @@ public class UserEventSenderTest {
         // and: the content is correct
         UserAuthenticated event = captor.getValue();
         assertEquals(user.getId(), event.getUserId());
+        assertEquals(AuthProvider.GOOGLE.getProviderName(), event.getAuthProvider());
         assertNotNull(event.getDateLogin());
         assertEquals(requestHeaders.getFirst("User-Agent"), event.getUserAgent());
     }
@@ -240,8 +242,8 @@ public class UserEventSenderTest {
         // and: a user-agent is identified by the request headers
         when(requestHeaders.getFirst("User-Agent")).thenReturn("ssssss");
 
-        // when: the fixure is called
-        fixture.sendAuthenticationFailed(username, reason);
+        // when: the fixture is called
+        fixture.sendAuthenticationFailed(username, AuthProvider.GOOGLE, reason);
 
         // then: the correct event is emitted
         ArgumentCaptor<AuthenticationFailed> captor = ArgumentCaptor.forClass(AuthenticationFailed.class);
@@ -250,6 +252,7 @@ public class UserEventSenderTest {
         // and: the content is correct
         AuthenticationFailed event = captor.getValue();
         assertEquals(username, event.getUsername());
+        assertEquals(AuthProvider.GOOGLE.getProviderName(), event.getAuthProvider());
         assertEquals(reason, event.getReason());
         assertNotNull(event.getDateLogin());
         assertEquals(requestHeaders.getFirst("User-Agent"), event.getUserAgent());
@@ -277,7 +280,7 @@ public class UserEventSenderTest {
         // and: suspicious activity has been see
         SuspiciousActivity activity = SuspiciousActivity.EMAIL_REGISTRATION;
 
-        // when: the fixure is called
+        // when: the fixture is called
         fixture.sendAccountActivity(user, activity);
 
         // then: the correct event is emitted

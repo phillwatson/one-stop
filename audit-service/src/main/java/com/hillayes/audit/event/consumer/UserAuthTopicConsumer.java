@@ -28,11 +28,13 @@ public class UserAuthTopicConsumer {
     }
 
     private void processAuthenticationFailed(AuthenticationFailed event) {
-        log.info("Login failure [username: {}]", event.getUsername());
+        log.info("Login failure [username: {}, authProvider: {}, agent: {}]",
+            event.getUsername(), event.getAuthProvider(), event.getUserAgent());;
         throw new RuntimeException("Test event retry");
     }
 
     private void processUserAuthenticated(UserAuthenticated event) {
-        log.info("User login [userId: {}]", event.getUserId());
+        log.info("User login [userId: {}, authProvider: {}, agent: {}]",
+            event.getUserId(), event.getAuthProvider(), event.getUserAgent());
     }
 }
