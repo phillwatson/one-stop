@@ -7,6 +7,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +32,10 @@ public class UserRepositoryTest {
             .toList();
         users = fixture.saveAll(users);
 
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
+
         users.forEach(user -> {
             user.getOidcIdentities().forEach(oidc -> {
                 // when: we search for each user by their issuer and subject
@@ -54,6 +59,10 @@ public class UserRepositoryTest {
                 })
                 .toList());
 
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
+
         // when: we search for a user by unknown issue and subject
         Optional<User> found = fixture.findByIssuerAndSubject("google", UUID.randomUUID().toString());
 
@@ -62,9 +71,49 @@ public class UserRepositoryTest {
     }
 
     @Test
+    public void testUpdateOidcIdentityLastUsed() {
+        // given: some users in the database with some oidc identities
+        Iterable<User> users = mockUsers(3).stream()
+            .map(user -> {
+                user.addOidcIdentity(AuthProvider.GOOGLE, "google", UUID.randomUUID().toString());
+                user.addOidcIdentity(AuthProvider.APPLE, "apple", UUID.randomUUID().toString());
+                return user;
+            })
+            .toList();
+        users = fixture.saveAll(users);
+
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
+
+        users.forEach(user ->
+            user.getOidcIdentities().forEach(oidc -> {
+                // when: we search for each user by their issuer and subject
+                Optional<User> found = fixture.findByIssuerAndSubject(oidc.getIssuer(), oidc.getSubject());
+
+                // then: we should find the user
+                assertTrue(found.isPresent());
+                User userFound = found.get();
+                assertEquals(user.getId(), userFound.getId());
+
+                // and: we update the last used date of the oidc identity
+                userFound.getOidcIdentity(oidc.getIssuer())
+                    .ifPresent(oidcIdentity ->  oidcIdentity.setDateLastUsed(Instant.now()));
+
+                // and: we can update the user
+                fixture.saveAndFlush(userFound);
+            })
+        );
+    }
+
+    @Test
     public void testFindByEmail() {
         // given: some users in the database
         Iterable<User> users = fixture.saveAll(mockUsers(3));
+
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
 
         users.forEach(user -> {
             // when: we search for a user with an existing email
@@ -82,6 +131,10 @@ public class UserRepositoryTest {
         // given: some users in the database
         fixture.saveAll(mockUsers(3));
 
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
+
         // when: we search for a user with a non-existent email
         Optional<User> found = fixture.findByEmail("mock-user@work.com");
 
@@ -93,6 +146,10 @@ public class UserRepositoryTest {
     public void testFindByUsername() {
         // given: some users in the database
         Iterable<User> users = fixture.saveAll(mockUsers(3));
+
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
 
         users.forEach(user -> {
             // when: we search for a user with an existing username
@@ -109,6 +166,10 @@ public class UserRepositoryTest {
     public void testFindByUsername_NotFound() {
         // given: some users in the database
         fixture.saveAll(mockUsers(3));
+
+        // and: the data is flushed and the cache is cleared
+        fixture.flush();
+        fixture.clearCache();
 
         // when: we search for a user with a non-existent username
         Optional<User> found = fixture.findByUsername("mock-username");

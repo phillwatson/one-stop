@@ -38,7 +38,7 @@ export default function UserConsentList(props: Props) {
     if (dateStr == null) return "";
 
     const date = new Date(dateStr);
-    return date.toLocaleTimeString("en-GB") + " " + date.toLocaleDateString("en-GB");
+    return date.toLocaleDateString("en-GB") + " " + date.toLocaleTimeString("en-GB");
   }
 
   function getLogo(consentInfo: UserConsent): string | undefined {

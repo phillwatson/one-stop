@@ -18,6 +18,9 @@ public class AuthenticationFailed {
 
     private Instant dateLogin;
 
+    // the OiDC auth-provider that authenticated the user, null for username login
+    private String authProvider;
+
     private String reason;
 
     // the HTTP request header "User-Agent" from the login request

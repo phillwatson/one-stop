@@ -117,7 +117,9 @@ public class OpenIdAuthentication {
                     .orElseThrow(() -> {
                         log.debug("User's OpenID is disabled");
                         return new NotAuthorizedException("OpenId");
-                    });
+                    })
+                    // otherwise, record the login timestamp
+                    .setDateLastUsed(Instant.now());
 
                 // take opportunity to update user's email address
                 if ((email != null) && (! email.equals(user.getEmail()))) {
@@ -134,7 +136,8 @@ public class OpenIdAuthentication {
                 user = findOrCreateUser(email, idToken);
 
                 // record Auth Provider Identity against user
-                user.addOidcIdentity(authProvider, issuer, subject);
+                user.addOidcIdentity(authProvider, issuer, subject)
+                    .setDateLastUsed(Instant.now());
             }
 
             if (user.getId() == null) {

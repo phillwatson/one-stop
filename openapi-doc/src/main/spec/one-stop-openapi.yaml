@@ -1046,6 +1046,11 @@ components:
           format: date-time
           description: The date and time the user first authenticated with the provider
           example: 2019-01-01T00:00:00.000Z
+        dateLastUsed:
+          type: string
+          format: date-time
+          description: The date and time the user last authenticated with the provider
+          example: 2019-01-31T00:00:00.000Z
 
     UserAuthProvidersResponse:
       type: object

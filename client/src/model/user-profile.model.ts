@@ -18,5 +18,6 @@ export interface UserAuthProvidersResponse {
 export interface UserAuthProvider {
   name: string;
   logo: string;
-  dateCreated: Date;
+  dateCreated: string;
+  dateLastUsed: string;
 }

@@ -43,7 +43,12 @@ public class OidcIdentity {
     private Instant dateCreated = Instant.now();
 
     @ToString.Include
-    @Column(name = "date_disabled", nullable = true)
+    @Setter
+    @Column(name = "date_last_used")
+    private Instant dateLastUsed;
+
+    @ToString.Include
+    @Column(name = "date_disabled")
     private Instant dateDisabled;
 
     @Transient

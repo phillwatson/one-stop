@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.oidcidentity (
     issuer varchar(256) NOT NULL,
     subject varchar(256) NOT NULL,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    date_disabled timestamp NULL
+    date_last_used timestamp,
+    date_disabled timestamp
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_oidcissuer ON ${flyway:defaultSchema}.oidcidentity (user_id, issuer);
 
