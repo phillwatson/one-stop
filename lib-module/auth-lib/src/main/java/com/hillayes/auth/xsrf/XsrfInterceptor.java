@@ -27,8 +27,8 @@ import static com.hillayes.commons.Strings.isBlank;
 
 /**
  * Intercepts all incoming HTTP requests and, if required, validates the XSRF token
- * contained in the request headers and access-token. The request is rejected if the
- * token is deemed to be invalid.
+ * contained in the request headers and access-token (or refresh-token). The request
+ * is rejected if the token is deemed to be invalid.
  */
 @ApplicationScoped
 @Provider
@@ -43,9 +43,11 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Collection<Class<? extends Annotation>> DENY_ACCESS = List.of(DenyAll.class);
 
     // method and class annotations for which authentication is required
+    // the XSRF token is checked in the access-token cookie
     private static final Collection<Class<? extends Annotation>> AUTH_REQUIRED = List.of(RolesAllowed.class, Authenticated.class);
 
     // method and class annotations for which XSRF authentication is required
+    // the XSRF token is checked in the refresh-token cookie
     private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
 
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")

@@ -40,7 +40,7 @@ public class UserProfileResource {
                 return marshal(user);
             })
             .map(user -> Response.ok(user).build())
-            .orElseThrow(() -> new NotFoundException("user", id));
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @GET
@@ -80,7 +80,7 @@ public class UserProfileResource {
                 return marshal(user);
             })
             .map(user -> Response.ok(user).build())
-            .orElseThrow(() -> new NotFoundException("user", id));
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @PUT

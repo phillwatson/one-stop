@@ -3,7 +3,6 @@ package com.hillayes.notification.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.notification.config.NotificationConfiguration;
 import com.hillayes.notification.domain.Notification;
@@ -114,7 +113,8 @@ public class NotificationService {
         }
 
         if (!notification.getUserId().equals(userId)) {
-            throw new NotFoundException("Notification", notificationId);
+            log.debug("Notification does not belong to user [userId: {}, notificationId: {}]", userId, notificationId);
+            return;
         }
 
         notificationRepository.delete(notification);

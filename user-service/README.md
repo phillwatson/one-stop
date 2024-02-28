@@ -13,17 +13,23 @@ their name or email address) must listen to those events and maintain their own
 user records - remembering to delete them when a user-deleted event is issued.
 
 ## Authentication
-### Access and Refresh Tokens
+### Access and Refresh Tokens (JWT)
 Upon successful authentication, each response to the client will contain an access
 and refresh token; passed as cookies. The client is not able to read these cookies,
 but they will be returned on each request.
 
 The refresh token will only be returned to the token refresh endpoint.
 
+The fact that the browser will automatically send the cookies with each request
+means that the front-end client does not need to manage the tokens. If the client
+receives a 401 (Unauthorized) response, it can simply make a call to the token
+refresh endpoint to obtain new tokens. If the token refresh also returns 401, then
+the user should be redirected to the login page.
+
 #### Token Security
 In addition to marking the cookies as `Same-Site=Strict`, `Secure=true` and
 `Http-Only=true`, the tokens within the cookies are signed using "rotating" Private
-Keys; and carry the Private Key ID in the header claim "kid".
+Keys; and carry the Private Key ID in the JWT header claim "kid".
 
 The number of Private Keys and the frequency at which they are renewed are
 determined by the configuration properties; `"one-stop.auth.jwk.set-size"` and
@@ -36,9 +42,11 @@ Private Key is valid for, at least, 60 seconds and, at most, 90 seconds.
 It is important that the refresh tokens have a lifespan that divides equally into
 the minimum validity period of the Private Keys.
 
+#### Token Verification
 In order to perform their own verification of the signed tokens, clients (such as
 other micro-services) can obtain the list of Public Keys as JSON Web Keys (JWKS)
-using the User Service endpoint `"/api/v1/auth/jwks.json"`.
+using the User Service endpoint `"/api/v1/auth/jwks.json"`. The "kid" claim in the
+JWT header can then be used to select the correct Public Key for verification.
 
 #### Token Content
 The tokens carry various claims on which they are later verified. The main claims
@@ -87,6 +95,10 @@ in the refresh token claims.
 The name of the XSRF cookie and header are, by default, `"XSRF-TOKEN"` and `"X-XSRF-TOKEN"`,
 respectively. These names can be overridden using the config properties;
 `"one-stop.auth.xsrf.cookie"` and `"one-stop.auth.xsrf.header"`.
+
+Some client-side frameworks will automatically include the XSRF header in requests
+when the cookie is present. For those that do not, the client must manually include
+the header in its requests.
 
 NOTE: As the XSRF cookie is verified when the auth tokens are refreshed, the cookie
 has the same expiry time as the refresh token; see `"one-stop.auth.refresh-token.expires-in"`

@@ -8,6 +8,7 @@ import org.jose4j.lang.JoseException;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -47,11 +48,15 @@ public class Jws {
                                   X509Certificate rootCertificate) throws GeneralSecurityException {
         // check the validity of the certificate chain
         // should be at least 3 certificates
-        if (x509Chain.size() >= 3) {
-            for (int i = 0; i < x509Chain.size() - 1; i++) {
-                x509Chain.get(i).checkValidity();
-                x509Chain.get(i).verify(x509Chain.get(i + 1).getPublicKey());
-            }
+        if (x509Chain.size() < 3) {
+            throw new InvalidKeyException("Invalid certificate chain");
+        }
+
+        // verify the signature of each certificate in the chain against
+        // the public key of the next certificate in the chain
+        for (int i = 0; i < x509Chain.size() - 1; i++) {
+            x509Chain.get(i).checkValidity();
+            x509Chain.get(i).verify(x509Chain.get(i + 1).getPublicKey());
         }
 
         PublicKey publicKey = rootCertificate.getPublicKey();
@@ -60,7 +65,7 @@ public class Jws {
         x509Chain.get(x509Chain.size() - 2).verify(publicKey);
 
         // compare chain root with root cert
-        x509Chain.get(x509Chain.size() - 1).verify(publicKey);
+        x509Chain.getLast().verify(publicKey);
     }
 
 

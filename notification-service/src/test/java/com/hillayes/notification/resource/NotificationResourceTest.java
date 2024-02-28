@@ -6,8 +6,6 @@ import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.NotificationRepository;
 import com.hillayes.notification.service.UserService;
 import com.hillayes.onestop.api.NotificationResponse;
-import com.hillayes.onestop.api.ServiceError;
-import com.hillayes.onestop.api.ServiceErrorResponse;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -119,36 +117,16 @@ public class NotificationResourceTest extends TestBase {
         when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
 
         // when: the resource is called
-        // then: a not-found response is returned
-        ServiceErrorResponse response = given()
+        given()
             .request()
             .contentType(JSON)
             .when()
             .pathParam("id", notification.getId())
             .delete("/api/v1/notifications/{id}")
             .then()
-            .statusCode(404)
-            .contentType(JSON)
-            .extract().as(ServiceErrorResponse.class);
+            .statusCode(204);
 
-        assertNotNull(response.getErrors());
-        assertFalse(response.getErrors().isEmpty());
-        ServiceError error = response.getErrors().get(0);
-
-        // and: the error shows reason
-        assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
-
-        // and: context attributes are present
-        assertNotNull(error.getContextAttributes());
-        assertFalse(error.getContextAttributes().isEmpty());
-
-        // and: the entity type is identified
-        assertEquals("Notification", error.getContextAttributes().get("entity-type"));
-
-        // and: the notification ID is identified
-        assertEquals(notification.getId().toString(), error.getContextAttributes().get("entity-id"));
-
-        // and: no notification is deleted
+        // then: no notification is deleted
         verify(notificationRepository, never()).deleteById(any());
         verify(notificationRepository, never()).delete(any());
     }

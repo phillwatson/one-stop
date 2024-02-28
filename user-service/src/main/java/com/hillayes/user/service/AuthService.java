@@ -107,7 +107,7 @@ public class AuthService {
         } catch (Exception e) {
             log.error("Failed to verify OpenId auth-code.", e);
             userEventSender.sendAuthenticationFailed(code, authProvider, "Invalid open-id auth-code.");
-            throw new NotAuthorizedException("jwt");
+            throw new NotAuthorizedException("JWT");
         }
     }
 
