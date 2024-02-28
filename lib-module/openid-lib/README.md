@@ -18,7 +18,7 @@ a connection (secret keys), exchange auth-codes and retrieve public keys
 for JWT verification. Most of these configurations will be located in
 the provider's own "well-known" configuration URL.
 
-Each entry in the configuration is :
+Each entry in the configuration is:
 ```yaml
 one-stop:
   auth:
@@ -44,14 +44,23 @@ access-token. With that we can call the GitHub REST API to retrieve the user's
 profile data.
 
 **IMPORTANT:**
-For authentication to work we need access to the user's email address registered
-with the open-id provider. For GitHub that requires explicit action on the user's
-part to allow access to their email address.
-In their GitHub email settings (https://github.com/settings/emails), uncheck the
-"Keep my email address private".
-Then, in their GitHub profile (https://github.com/settings/profile), select the
+> Ideally, the user's email address should be provided in the claims of the ID-Token
+(or the profile data) returned by the open-id provider. If not provided, no emails can
+be delivered to the user until they supply an email address in their one-stop profile
+settings.
+
+> When the user authenticates via an open-id provider for the first time, their email
+address is also used to match them to an existing record in the database; and the
+user is logged in as that user.
+If the email address is not provided by the open-id provider, a new user will be created.
+
+> For GitHub that requires explicit action on the user's part, to allow access to
+their email address:
+> 1. In their GitHub email settings (https://github.com/settings/emails),
+uncheck the "Keep my email address private"
+> 2. Then, in their GitHub profile (https://github.com/settings/profile), select the
 email address in the "Public email" drop-down.
-Having authenticated once, they can make their email address private again.
+> 3. Having authenticated once, they can make their email address private again.
 
 ## Adding a New Open-Id Connect Provider
 For most providers only two classes need to be implemented; OpenIdFactory
