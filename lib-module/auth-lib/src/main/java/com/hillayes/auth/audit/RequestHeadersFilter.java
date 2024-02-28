@@ -14,7 +14,8 @@ import java.util.Locale;
 
 /**
  * A thread-safe utility to provide global access to the headers of the
- * current request.
+ * current request. Allows access to the request headers from low-level
+ * classes that do not have access to the request context.
  */
 @ApplicationScoped
 @Provider
@@ -59,11 +60,7 @@ public class RequestHeadersFilter implements ContainerRequestFilter, ContainerRe
      */
     public List<String> get(String headerName) {
         MultivaluedMap<String, String> map = requestHeaders.get();
-        if (map == null) {
-            return List.of();
-        }
-
-        return map.get(headerName);
+        return (map == null) ? List.of() : map.get(headerName);
     }
 
     /**
@@ -73,11 +70,7 @@ public class RequestHeadersFilter implements ContainerRequestFilter, ContainerRe
      */
     public String getFirst(String headerName) {
         MultivaluedMap<String, String> map = requestHeaders.get();
-        if (map == null) {
-            return null;
-        }
-
-        return map.getFirst(headerName);
+        return (map == null) ? null : map.getFirst(headerName);
     }
 
     /**
