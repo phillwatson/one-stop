@@ -56,7 +56,7 @@ public class UserAdminResource {
                 return marshal(user);
             })
             .map(user -> Response.ok(user).build())
-            .orElseThrow(() -> new NotFoundException("user", id));
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @PUT
@@ -70,7 +70,7 @@ public class UserAdminResource {
                 return marshal(user);
             })
             .map(user -> Response.ok(user).build())
-            .orElseThrow(() -> new NotFoundException("user", id));
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @DELETE
@@ -82,7 +82,7 @@ public class UserAdminResource {
                 log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
                 return Response.noContent().build();
             })
-            .orElseThrow(() -> new NotFoundException("user", id));
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     private User marshal(UserUpdateRequest request) {

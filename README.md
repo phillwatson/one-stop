@@ -21,6 +21,24 @@ In general, and to reduce clutter, the library modules are grouped under the par
 module `lib-module`. The exception to this is the event libraries; which are grouped
 under the parent module `event-module`.
 
+As mush as possible, framework (e.g. Quarkus) specific code is kept to the outer
+layers of the application. This is to allow the services to be easily ported to
+other frameworks (e.g. Micrnauts, Spring Boot). Where framework specific code has
+been used, it's exposure to the rest of the application has been minimised. For
+example; the repository classes are "masked" by a simple facade (or adaptor) class,
+rather than exposing a framework specific repository interface.
+
+### Documentation
+The majority of code contains in-line documentation, and most of the sub-modules
+contain their own README.md file; intended to provide information specific to that
+module.
+
+Some sequence diagrams have been included, in the docs folder, to illustrate the
+implementation of those more complex areas of the application. Also included is a
+Postman collection to allow the manual testing of the application.
+
+In addition to this documentation, comprehensive unit and integration tests provide
+a good source of information on how the application is intended to be used.
 
 ## Docker Configuration
 The following must be added to `environment:` section of the docker-compose.yaml

@@ -14,6 +14,13 @@ import java.util.Optional;
 @ApplicationScoped
 @Slf4j
 public class JwtTokens {
+    /**
+     * An injected JWTParser used to parse and verify JWTs. The parser will verify JWTs
+     * against the public key found in the location provided by the configuration property
+     * <code>mp.jwt.verify.publickey.location</code>. The JWT issuer and audience claims
+     * will be verified against the configuration properties <code>mp.jwt.verify.issuer</code>
+     * and <code>mp.jwt.verify.audiences</code>, respectively.
+     */
     @Inject
     JWTParser jwtParser;
 

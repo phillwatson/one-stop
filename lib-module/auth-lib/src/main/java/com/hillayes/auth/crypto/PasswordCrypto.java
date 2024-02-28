@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * A class for generating an encrypted hash value of a given password. This hash
@@ -188,7 +189,7 @@ public class PasswordCrypto {
 
         if (random == null) {
             // late-initialisation to support native build
-            random = new Random(System.currentTimeMillis());
+            random = new SecureRandom(UUID.randomUUID().toString().getBytes());
         }
 
         for (int i = 0; i < aLength; i++) {

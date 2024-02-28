@@ -379,7 +379,7 @@ public class UserAdminResourceTest extends TestBase {
         assertEquals("The identified entity cannot be found.", serviceError.getMessage());
 
         assertNotNull(serviceError.getContextAttributes());
-        assertEquals("user", serviceError.getContextAttributes().get("entity-type"));
+        assertEquals("User", serviceError.getContextAttributes().get("entity-type"));
         assertEquals(userId.toString(), serviceError.getContextAttributes().get("entity-id"));
     }
 }

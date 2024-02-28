@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Random;
@@ -29,7 +30,7 @@ public class XsrfTokens {
     public XsrfTokens(@ConfigProperty(name = "one-stop.auth.xsrf.secret") String secret) {
         log.debug("Creating XSRF generator");
         try {
-            random = new Random();
+            random = new SecureRandom();
             mac = Mac.getInstance(SIGNATURE_ALG);
             mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SIGNATURE_ALG));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {

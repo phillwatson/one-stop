@@ -3,7 +3,6 @@ package com.hillayes.commons.caching;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * A simple cache to avoid making expensive calls for data that rarely changes.
@@ -56,15 +55,20 @@ public class Cache<K,T> {
      * @return the cached value, may be null if the supplier can return null.
      */
     public T getValueOrCall(K key, Function<K,T> resolver) {
+        // if an entry exists and is not expired, return it
         Entry<T> entry = values.get(key);
-        if ((entry == null) || (entry.isExpired())) {
-            T value = resolver.apply(key);
-            if (value != null) {
-                entry = new Entry<>(value, timeToLive);
-                values.put(key, entry);
-            }
+        if ((entry != null) && (!entry.isExpired())) {
+            return entry.value;
         }
-        return entry.value;
+
+        // otherwise, call the resolver to get the value
+        T value = resolver.apply(key);
+
+        // if the resolver returned a value, cache it
+        if (value != null) {
+            values.put(key, new Entry<>(value, timeToLive));
+        }
+        return value;
     }
 
     /**

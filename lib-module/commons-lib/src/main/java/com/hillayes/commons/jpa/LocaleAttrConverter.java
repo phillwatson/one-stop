@@ -5,6 +5,9 @@ import jakarta.persistence.AttributeConverter;
 
 import java.util.Locale;
 
+/**
+ * Allows Locale objects to be persisted as strings in the database.
+ */
 public class LocaleAttrConverter implements AttributeConverter<Locale, String> {
     @Override
     public String convertToDatabaseColumn(Locale locale) {

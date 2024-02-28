@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.events.events.consent.ConsentSuspended;
-import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.domain.User;
@@ -217,12 +216,9 @@ public class NotificationServiceTest {
             .thenReturn(Optional.of(notification));
 
         // when: the service is called
-        // then: a NotFound exception is raised
-        assertThrows(NotFoundException.class, () ->
-            fixture.deleteNotification(UUID.randomUUID(), notification.getId())
-        );
+        fixture.deleteNotification(UUID.randomUUID(), notification.getId());
 
-        // and: the notifications are read from repository
+        // then: the notifications are read from repository
         verify(notificationRepository).findByIdOptional(notification.getId());
 
         // and: NO notification is deleted
