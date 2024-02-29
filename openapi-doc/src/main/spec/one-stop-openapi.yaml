@@ -302,6 +302,22 @@ paths:
           description: "Unauthorized"
         500:
           description: "Internal server error"
+    delete:
+      tags: [ "profiles" ]
+      summary: "Delete the identified auth-provider from the caller's auth-providers"
+      description: "Delete the identified auth-provider information for the authenticated user."
+      operationId: "deleteUserAuthProvider"
+      security:
+        - cookieAuth: [ ]
+      responses:
+        204:
+          description: "successful operation"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "User or AuthProvider not found"
+        500:
+          description: "Internal server error"
 
   /profiles/password:
     put:
@@ -1032,7 +1048,15 @@ components:
       type: object
       description: |
         The detail of an auth-provider with which a user has user for authentication
+      required:
+        - id
+        - name
+        - dateCreated
       properties:
+        id:
+          type: string
+          description: The unique identifier for the auth-provider
+          example: GOOGLE
         name:
           type: string
           description: the recognised name of the auth-provider

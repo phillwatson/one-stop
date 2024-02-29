@@ -4,6 +4,7 @@ import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.Strings;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
 import com.hillayes.user.service.UserService;
@@ -55,6 +56,18 @@ public class UserProfileResource {
             .toList();
         return Response.ok(new UserAuthProvidersResponse()
             .authProviders(authProviders)).build();
+    }
+
+    @DELETE
+    @Path("/authproviders/{provider}")
+    public Response deleteUserAuthProvider(@Context SecurityContext ctx,
+                                          @PathParam("provider") AuthProvider provider) {
+        UUID id = AuthUtils.getUserId(ctx);
+        log.info("Deleting user auth-provider [id: {}, provider: {}]", id, provider);
+
+        return userService.deleteUserAuthProvider(id, provider)
+            .map(user -> Response.noContent().build())
+            .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @PUT
@@ -118,6 +131,7 @@ public class UserProfileResource {
 
     private UserAuthProvider marshal(OidcIdentity oidcIdentity) {
         return new UserAuthProvider()
+            .id(oidcIdentity.getProvider().name())
             .name(oidcIdentity.getProvider().getProviderName())
             .dateCreated(oidcIdentity.getDateCreated())
             .dateLastUsed(oidcIdentity.getDateLastUsed())
