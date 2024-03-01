@@ -8,14 +8,12 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 
 import './account-list.css';
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
-import DeleteAccountDialog from './delete-account-dialog';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
@@ -29,8 +27,6 @@ export default function AccountList(props: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
-  const [ deleteDialogOpen, setDeleteDialogOpen ] = useState<boolean>(false);
-
   function toggleMenu(event: React.MouseEvent<HTMLElement>) {
     setAnchorEl(event.currentTarget);
   };
@@ -42,20 +38,6 @@ export default function AccountList(props: Props) {
 
   function handleSelectAccount() {
     props.onSelect(props.account);
-  }
-
-  function removeAccountConfirmed(account: AccountDetail) {
-    setDeleteDialogOpen(false);
-    props.onDelete(account);
-  }
-
-  function removeAccountCancelled(account: AccountDetail) {
-    setDeleteDialogOpen(false);
-  }
-
-  function removeAccount() {
-    closeMenu();
-    setDeleteDialogOpen(true);
   }
 
   function exportAccount() {
@@ -85,10 +67,6 @@ export default function AccountList(props: Props) {
             <ListItemIcon><FileDownloadIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Export...</ListItemText>
           </MenuItem>
-          <MenuItem onClick={removeAccount}>
-            <ListItemIcon><DeleteOutlineIcon fontSize="small"/></ListItemIcon>
-            <ListItemText>Remove...</ListItemText>
-          </MenuItem>
         </Menu>
     );
   }
@@ -105,7 +83,7 @@ export default function AccountList(props: Props) {
         </TableCell>
 
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}>
-          <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="68px" height="68px"/>
+          <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="48px" height="48px"/>
         </TableCell>
 
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
@@ -130,9 +108,6 @@ export default function AccountList(props: Props) {
       </TableRow>
 
       <AccountMenu accountId={props.account.id}/>
-
-      <DeleteAccountDialog account={props.account} open={deleteDialogOpen}
-         onCancel={removeAccountCancelled} onConfirm={removeAccountConfirmed}/>
     </>
   );
 };

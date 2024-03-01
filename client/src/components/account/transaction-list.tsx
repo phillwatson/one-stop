@@ -9,7 +9,7 @@ import { SxProps } from '@mui/material/styles';
 
 import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionSummary } from "../../model/account.model";
-import ServiceError from '../../model/service-error';
+import ServiceErrorResponse from '../../model/service-error';
 import CurrencyService from '../../services/currency.service';
 import { useNotificationDispatch } from "../../contexts/notification-context";
 
@@ -28,7 +28,7 @@ export default function TransactionList(props: Props) {
   useEffect(() => {
     AccountService.getTransactions(props.account.id, 0, 30)
       .then( response => setTransactions(response.items))
-      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }));
+      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }));
     }, [props.account.id, showNotification]);
 
   return (

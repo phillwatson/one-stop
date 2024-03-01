@@ -3,8 +3,8 @@ import PaginatedList from '../model/paginated-list.model';
 import http from './http-common';
 
 class UserConsentService {
-  getConsent(bankId: string): Promise<UserConsent> {
-    return http.get<UserConsent>(`/rails/consents/${bankId}`)
+  getConsent(institutionId: string): Promise<UserConsent> {
+    return http.get<UserConsent>(`/rails/consents/${institutionId}`)
       .then(response => response.data);
   }
 
@@ -23,9 +23,9 @@ class UserConsentService {
       .then(response => response.data);
   }
 
-  cancelConsent(institutionId: string) {
+  cancelConsent(institutionId: string, purge: boolean = false) {
     console.log(`Closing bank [name: ${institutionId}]`);
-    return http.delete(`/rails/consents/${institutionId}`);
+    return http.delete(`/rails/consents/${institutionId}?purge=${purge}`);
   }
 }
 

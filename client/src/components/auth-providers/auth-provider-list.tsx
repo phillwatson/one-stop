@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import "./auth-provider-list.css";
 import DeleteIcon from '@mui/icons-material/LinkOffOutlined';
 import { SxProps } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -9,7 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
 import { UserAuthProvider } from "../../model/user-profile.model";
-import ServiceError from '../../model/service-error';
+import ServiceErrorResponse from '../../model/service-error';
 import ProfileService from "../../services/profile.service"
 import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useNotificationDispatch } from '../../contexts/notification-context';
@@ -47,11 +48,11 @@ export default function AuthProviderList() {
     var authProvider = selectedAuthProvider!
     ProfileService.deleteAuthProvider(authProvider.id)
       .then(() => setAuthProviders(authProviders.filter(ap => ap.id !== authProvider.id)))
-      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceError).message }))
+      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
   }
 
   return (
-    <>
+    <div>
       <Table size="small" aria-label="authproviders">
         <caption><i>You're registered with the above auth providers</i></caption>
         <TableHead>
@@ -69,7 +70,8 @@ export default function AuthProviderList() {
               <TableCell width={"70%"}>{authProvider.name}</TableCell>
               <TableCell>{formatDateTime(authProvider.dateCreated)}</TableCell>
               <TableCell>{formatDateTime(authProvider.dateLastUsed)}</TableCell>
-              <TableCell onClick={() => confirmDelete(authProvider)}><Tooltip title="Unlink Auth Provider"><DeleteIcon/></Tooltip>
+              <TableCell onClick={() => confirmDelete(authProvider)}>
+                <Tooltip title="Unlink Auth Provider..."><DeleteIcon/></Tooltip>
               </TableCell>
             </TableRow>
           ))}
@@ -81,6 +83,6 @@ export default function AuthProviderList() {
                   content="Are you sure you want to unlink this auth provider?"
                   onConfirm={onDeleteConfirmed}
                   onCancel={() => setDeleteDialogOpen(false)} />
-    </>
+    </div>
   );
 }

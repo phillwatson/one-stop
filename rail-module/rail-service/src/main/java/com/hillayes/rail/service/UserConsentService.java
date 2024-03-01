@@ -12,6 +12,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.errors.DeleteRailConsentException;
 import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
@@ -248,9 +249,10 @@ public class UserConsentService {
      * Marks the consent record as cancelled but does not delete it, or the
      * account records associated with it.
      * @param userConsentId the identifier of the consent to be cancelled.
+     * @param purge if true, the associated accounts and transactions will be deleted.
      */
-    public void consentCancelled(UUID userConsentId) {
-        log.info("User's consent cancelled [userConsentId: {}]", userConsentId);
+    public void consentCancelled(UUID userConsentId, boolean purge) {
+        log.info("User's consent cancelled [userConsentId: {}, purge: {}]", userConsentId, purge);
         userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.CANCELLED)
             .ifPresent(userConsent -> {
@@ -258,7 +260,13 @@ public class UserConsentService {
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.CANCELLED);
                 userConsent.setDateCancelled(Instant.now());
-                userConsent = userConsentRepository.save(userConsent);
+
+                if (purge) {
+                    // will cascade delete accounts, balances and transactions
+                    userConsentRepository.delete(userConsent);
+                } else {
+                    userConsent = userConsentRepository.save(userConsent);
+                }
 
                 deleteAgreement(userConsent);
 
@@ -304,6 +312,7 @@ public class UserConsentService {
             // log and continue
             log.info("Error whilst deleting user's agreement [userId: {}, agreementId: {}]",
                 userConsent.getUserId(), userConsent.getAgreementId(), e);
+            throw new DeleteRailConsentException(userConsent);
         }
     }
 }

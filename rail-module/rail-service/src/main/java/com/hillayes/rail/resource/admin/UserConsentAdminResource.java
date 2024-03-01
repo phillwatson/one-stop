@@ -37,7 +37,7 @@ public class UserConsentAdminResource {
 
         Page<UserConsent> consentsPage = userConsentService.listConsents(userId, page, pageSize);
 
-        PaginatedUserConsentsAdmin response = new PaginatedUserConsentsAdmin()
+        PaginatedUserConsents response = new PaginatedUserConsents()
             .page(consentsPage.getPageIndex())
             .pageSize(consentsPage.getPageSize())
             .count(consentsPage.getContentSize())
@@ -58,7 +58,7 @@ public class UserConsentAdminResource {
         UserConsent consent = userConsentService.getUserConsent(consentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", consentId));
 
-        UserConsentAdminResponse result = marshal(consent);
+        UserConsentResponse result = marshal(consent);
 
         log.debug("Getting user's consent record [consentId: {}]", consentId);
         return Response.ok(result).build();
@@ -72,15 +72,15 @@ public class UserConsentAdminResource {
         UserConsent result = userConsentService.getUserConsent(consentId)
             .orElseThrow(() -> new NotFoundException("UserConsent", consentId));
 
-        userConsentService.consentCancelled(result.getId());
+        userConsentService.consentCancelled(result.getId(), true);
         return Response.noContent().build();
     }
 
-    private UserConsentAdminResponse marshal(UserConsent consent) {
+    private UserConsentResponse marshal(UserConsent consent) {
         RailInstitution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
-        return new UserConsentAdminResponse()
+        return new UserConsentResponse()
             .id(consent.getId())
             .institutionId(consent.getInstitutionId())
             .institutionName(institution.getName())

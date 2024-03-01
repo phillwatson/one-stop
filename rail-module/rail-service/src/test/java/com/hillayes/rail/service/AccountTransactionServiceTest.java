@@ -36,7 +36,7 @@ public class AccountTransactionServiceTest {
     public void testGetTransactions_WithAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -69,14 +69,14 @@ public class AccountTransactionServiceTest {
         verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any(), anyInt(), anyInt());
 
         // and: the account is verified
-        verify(accountService).getAccount(account.getId());
+        verify(accountService).getAccount(account.getUserId(), account.getId());
     }
 
     @Test
     public void testGetTransactions_WithWrongAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -101,7 +101,7 @@ public class AccountTransactionServiceTest {
     public void testGetTransactions_WithNoAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -134,14 +134,14 @@ public class AccountTransactionServiceTest {
         verify(accountTransactionRepository).findByUserId(eq(account.getUserId()), any(), anyInt(), anyInt());
 
         // and: the account is NOT verified
-        verify(accountService, never()).getAccount(account.getId());
+        verify(accountService, never()).getAccount(account.getUserId(), account.getId());
     }
 
     @Test
     public void testListTransactions_WithAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -166,14 +166,14 @@ public class AccountTransactionServiceTest {
         verify(accountTransactionRepository).findByAccountAndDateRange(eq(account.getId()), any(), any());
 
         // and: the account is verified
-        verify(accountService).getAccount(account.getId());
+        verify(accountService).getAccount(account.getUserId(), account.getId());
     }
 
     @Test
     public void testListTransactions_WithWrongAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -194,7 +194,7 @@ public class AccountTransactionServiceTest {
     public void testListTransactions_WithNoAccountId() {
         // given: an account
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getId())).thenReturn(Optional.of(account));
+        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
@@ -219,7 +219,7 @@ public class AccountTransactionServiceTest {
         verify(accountTransactionRepository).findByUserAndDateRange(eq(account.getUserId()), any(), any());
 
         // and: the account is NOT verified
-        verify(accountService, never()).getAccount(account.getId());
+        verify(accountService, never()).getAccount(account.getUserId(), account.getId());
     }
 
     @Test

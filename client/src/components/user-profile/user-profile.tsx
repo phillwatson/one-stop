@@ -1,7 +1,5 @@
 import TextField from '@mui/material/TextField';
 
-import AuthProviderList from "../auth-providers/auth-provider-list";
-
 import "./user-profile.css";
 import UserProfile from "../../model/user-profile.model";
 
@@ -14,7 +12,7 @@ export default function UserProfileForm(props: Props) {
   const [profile, setProfile] = [ props.profile, props.setter ];
 
   return (
-    <div className="panel">
+    <>
       <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
         value={profile.username} onChange={e => setProfile({...profile, username: e.target.value})}/>
 
@@ -35,9 +33,6 @@ export default function UserProfileForm(props: Props) {
 
       <TextField className="field" id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
-
-      <p/>
-      <AuthProviderList/>
-    </div>
+    </>
   );
 }

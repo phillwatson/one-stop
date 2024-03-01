@@ -25,8 +25,8 @@ export default function ConfirmationDialog(props: Props) {
               </DialogContentText>
           </DialogContent>
           <DialogActions>
-              <Button variant="contained" autoFocus onClick={props.onConfirm}>OK</Button>
               <Button variant="outlined" onClick={props.onCancel}>Cancel</Button>
+              <Button variant="contained" autoFocus onClick={props.onConfirm}>OK</Button>
           </DialogActions>
       </Dialog>
   );

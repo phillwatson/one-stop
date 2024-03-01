@@ -54,11 +54,23 @@ public class AccountResource {
                                    @PathParam("accountId") UUID accountId) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting account [userId: {}, accountId: {}]", userId, accountId);
-        Account account = accountService.getAccount(accountId)
-            .filter(acc -> acc.getUserId().equals(userId))
+        Account account = accountService.getAccount(userId, accountId)
             .orElseThrow(() -> new NotFoundException("Account", accountId));
 
         return Response.ok(marshal(account)).build();
+    }
+
+    @DELETE
+    @Path("/{accountId}")
+    public Response deleteAccount(@Context SecurityContext ctx,
+                                  @PathParam("accountId") UUID accountId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting account [userId: {}, accountId: {}]", userId, accountId);
+
+        if (accountService.deleteAccount(userId, accountId)) {
+            return Response.noContent().build();
+        }
+        throw new NotFoundException("Account", accountId);
     }
 
     private AccountResponse marshal(Account account) {
