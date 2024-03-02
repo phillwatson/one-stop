@@ -1,5 +1,6 @@
 export default interface PaginatedList<T> {
   total: number,
+  totalPages: number,
   count: number,
   page: number,
   pageSize: number,
