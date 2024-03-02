@@ -51,7 +51,8 @@ jobs:
     - name: Build with Maven
       # skips the tests due to lack of "test" profile
       run: |
-        mvn -B deploy -Pclient --file pom.xml \
+        mvn -B deploy -Pclient \
+          -Drevision=1.0.${{ github.run_number }} \
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
           -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
@@ -67,5 +68,5 @@ jobs:
       with:
         context: client/
         push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:1.0.0-SNAPSHOT
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:1.0.${{ github.run_number }}
         labels: ${{ steps.meta.outputs.labels }}
