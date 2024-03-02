@@ -37,7 +37,7 @@ public class Jws {
         validateKeyChain(x509Chain, rootCertificate);
 
         // validate signature
-        jws.setKey(x509Chain.get(0).getPublicKey());
+        jws.setKey(x509Chain.getFirst().getPublicKey());
         boolean valid = jws.verifySignature();
 
         // return the body if valid

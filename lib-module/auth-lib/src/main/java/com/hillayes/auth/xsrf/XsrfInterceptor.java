@@ -146,7 +146,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             return true;
         }
 
-        String headerValue = headerList.get(0);
+        String headerValue = headerList.getFirst();
         if (isBlank(headerValue)) {
             log.warn("XSRF token header blank [name: {}, path: {}]", xsrfHeaderName.get(), request.getUriInfo().getPath());
             return true;

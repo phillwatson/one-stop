@@ -373,7 +373,7 @@ public class UserAdminResourceTest extends TestBase {
         assertNotNull(response.getCorrelationId());
         assertNotNull(response.getErrors());
 
-        ServiceError serviceError = response.getErrors().get(0);
+        ServiceError serviceError = response.getErrors().getFirst();
         assertEquals(ErrorSeverity.INFO, serviceError.getSeverity());
         assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
         assertEquals("The identified entity cannot be found.", serviceError.getMessage());

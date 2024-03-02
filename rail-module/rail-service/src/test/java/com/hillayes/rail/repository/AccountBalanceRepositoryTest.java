@@ -37,7 +37,7 @@ public class AccountBalanceRepositoryTest {
         UserConsent consent = createUserConsent();
 
         // and: linked account
-        Account account = createAccounts(consent, 1).get(0);
+        Account account = createAccounts(consent, 1).getFirst();
 
         // when: an account balance is saved
         AccountBalance accountBalance = fixture.save(AccountBalance.builder()
@@ -58,7 +58,7 @@ public class AccountBalanceRepositoryTest {
         UserConsent consent = createUserConsent();
 
         // and: linked account
-        Account account = createAccounts(consent, 1).get(0);
+        Account account = createAccounts(consent, 1).getFirst();
 
         Instant now = Instant.now();
 
@@ -93,8 +93,8 @@ public class AccountBalanceRepositoryTest {
         fixture.saveAll(accountBalances);
 
         // when: the repository is called
-        List<AccountBalance> mostRecent = fixture.findFirstByAccountIdOrderByReferenceDateDesc(account.getId())
-            .map(balance -> fixture.findByAccountIdAndReferenceDate(account.getId(), balance.getReferenceDate()))
+        List<AccountBalance> mostRecent = fixture.findMostRecentByAccountId(account.getId())
+            .map(balance -> fixture.listByReferenceDate(account.getId(), balance.getReferenceDate()))
             .orElse(List.of());
 
         // then: the most records are returned

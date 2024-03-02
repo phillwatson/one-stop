@@ -338,7 +338,7 @@ public class UserProfileResourceTest extends TestBase {
         assertFalse(response.getErrors().isEmpty());
 
         // and: the response identified the field
-        ServiceError error = response.getErrors().get(0);
+        ServiceError error = response.getErrors().getFirst();
         assertEquals(CommonErrorCodes.INVALID_REQUEST_CONTENT.getId(), error.getMessageId());
         assertEquals("newPassword", error.getContextAttributes().get("field-name"));
 
@@ -351,7 +351,7 @@ public class UserProfileResourceTest extends TestBase {
         assertNotNull(response.getCorrelationId());
         assertNotNull(response.getErrors());
 
-        ServiceError serviceError = response.getErrors().get(0);
+        ServiceError serviceError = response.getErrors().getFirst();
         assertEquals(ErrorSeverity.INFO, serviceError.getSeverity());
         assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
         assertEquals("The identified entity cannot be found.", serviceError.getMessage());

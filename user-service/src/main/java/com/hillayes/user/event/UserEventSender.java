@@ -40,7 +40,7 @@ public class UserEventSender {
             .email(email)
             .expires(Instant.now().plus(expires))
             .acknowledgerUri(acknowledgerUri)
-            .locale(languages.isEmpty() ? null : languages.get(0))
+            .locale(languages.isEmpty() ? null : languages.getFirst())
             .build());
     }
 

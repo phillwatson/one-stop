@@ -52,7 +52,7 @@ public class UserOnboardTestIT extends ApiTestBase {
         assertEquals(1, emailRequests.size());
 
         // and: the email contains HTMl body content
-        EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
+        EmailMessage emailMessage = emailSim.parse(emailRequests.getFirst());
         String htmlContent = emailMessage.getHtmlContent();
         assertNotNull(htmlContent);
 
