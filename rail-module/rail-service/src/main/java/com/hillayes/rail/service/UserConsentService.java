@@ -312,7 +312,7 @@ public class UserConsentService {
             // log and continue
             log.info("Error whilst deleting user's agreement [userId: {}, agreementId: {}]",
                 userConsent.getUserId(), userConsent.getAgreementId(), e);
-            throw new DeleteRailConsentException(userConsent);
+            throw new DeleteRailConsentException(userConsent, e);
         }
     }
 }

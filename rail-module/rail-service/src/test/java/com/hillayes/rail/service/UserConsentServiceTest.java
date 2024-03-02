@@ -9,6 +9,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.errors.DeleteRailConsentException;
 import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
@@ -998,21 +999,20 @@ public class UserConsentServiceTest {
             .thenThrow(new RuntimeException("some rail exception"));
 
         // when: the consent is expired
-        fixture.consentExpired(consent.getId());
+        // then: exception is thrown
+        DeleteRailConsentException exception = assertThrows(DeleteRailConsentException.class, () ->
+            fixture.consentExpired(consent.getId())
+        );
 
-        // then: the consent is updated
-        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
-        verify(userConsentRepository).save(captor.capture());
-        UserConsent updatedConsent = captor.getValue();
+        // and: the exception identifies the rail provider and consent
+        assertEquals(consent.getProvider(), exception.getParameter("rail-provider"));
+        assertEquals(consent.getId(), exception.getParameter("consent-id"));
 
-        // and: the status is set to EXPIRED
-        assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
+        // and: the rail is called to delete the agreement
+        verify(railProviderApi).deleteAgreement(consent.getAgreementId());
 
-        // and: the agreement is deleted - the exception is ignored
-        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
-
-        // and: a consent event is issued
-        verify(consentEventSender).sendConsentExpired(updatedConsent);
+        // and: NO consent event is issued
+        verify(consentEventSender, never()).sendConsentExpired(any());
     }
 
     private RailAgreement returnEndUserAgreement(RailInstitution institution) {
