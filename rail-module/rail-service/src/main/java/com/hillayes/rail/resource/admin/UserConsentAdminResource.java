@@ -42,6 +42,7 @@ public class UserConsentAdminResource {
             .pageSize(consentsPage.getPageSize())
             .count(consentsPage.getContentSize())
             .total(consentsPage.getTotalCount())
+            .totalPages(consentsPage.getTotalPages())
             .items(consentsPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, consentsPage));
 

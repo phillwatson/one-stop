@@ -22,26 +22,31 @@ interface Props {
   accountId: string;
 }
 
+interface TransactionsList {
+  page: Array<TransactionSummary>,
+  total: number
+}
+
 export default function TransactionSummaryList(props: Props) {
   const showNotification = useNotificationDispatch();
-  const [transactions, setTransactions] = useState<Array<TransactionSummary> | undefined>(undefined);
+  const [transactions, setTransactions] = useState<TransactionsList | undefined>(undefined);
 
   useEffect(() => {
     if (transactions === undefined) {
       AccountService.getTransactions(props.accountId, 0, 10)
-        .then(response => setTransactions(response.items))
+        .then(response => setTransactions({ page: response.items, total: response.total }))
         .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
     }
   }, [props.accountId, transactions, showNotification]);
 
-  const noTransactions = (transactions === undefined || transactions.length === 0);
+  const noTransactions = (transactions === undefined || transactions.page.length === 0);
   return(
     <Paper sx={{ margin: 1 }} elevation={3}>
       <Table size="small" aria-label="transactions">
         <caption><i>
           { noTransactions
             ? 'there are no transactions available'
-            : `most recent ${transactions.length} transactions`
+            : `most recent ${transactions.page.length} transactions of ${transactions.total}`
           }
         </i></caption>
         <TableHead>
@@ -53,7 +58,7 @@ export default function TransactionSummaryList(props: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          { transactions && transactions.map(transaction => (
+          { transactions && transactions.page.map(transaction => (
             <TableRow key={transaction.id}>
               <TableCell>{new Date(transaction.date).toLocaleDateString("en-GB")}</TableCell>
               <TableCell>{transaction.description}</TableCell>

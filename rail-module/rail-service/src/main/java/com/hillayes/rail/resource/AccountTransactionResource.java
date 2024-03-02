@@ -47,6 +47,7 @@ public class AccountTransactionResource {
             .pageSize(transactionsPage.getPageSize())
             .count(transactionsPage.getContentSize())
             .total(transactionsPage.getTotalCount())
+            .totalPages(transactionsPage.getTotalPages())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage));
 

@@ -39,6 +39,7 @@ public class UserAdminResource {
             .pageSize(usersPage.getPageSize())
             .count(usersPage.getContentSize())
             .total(usersPage.getTotalCount())
+            .totalPages(usersPage.getTotalPages())
             .items(usersPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, usersPage));
 
