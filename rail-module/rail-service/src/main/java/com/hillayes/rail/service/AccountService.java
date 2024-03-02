@@ -81,8 +81,8 @@ public class AccountService {
      */
     public List<AccountBalance> getMostRecentBalance(Account account) {
         log.info("Get user's account balance [accountId: {}]", account.getId());
-        return accountBalanceRepository.findFirstByAccountIdOrderByReferenceDateDesc(account.getId())
-            .map(balance -> accountBalanceRepository.findByAccountIdAndReferenceDate(account.getId(), balance.getReferenceDate()))
+        return accountBalanceRepository.findMostRecentByAccountId(account.getId())
+            .map(balance -> accountBalanceRepository.listByReferenceDate(account.getId(), balance.getReferenceDate()))
             .orElse(List.of());
     }
 }

@@ -204,9 +204,9 @@ public class AccountServiceTest {
             .map(n -> TestData.mockAccountBalance(account))
             .limit(5)
             .toList();
-        when(accountBalanceRepository.findFirstByAccountIdOrderByReferenceDateDesc(account.getId()))
-            .thenReturn(Optional.of(balances.get(0)));
-        when(accountBalanceRepository.findByAccountIdAndReferenceDate(account.getId(), balances.get(0).getReferenceDate()))
+        when(accountBalanceRepository.findMostRecentByAccountId(account.getId()))
+            .thenReturn(Optional.of(balances.getFirst()));
+        when(accountBalanceRepository.listByReferenceDate(account.getId(), balances.getFirst().getReferenceDate()))
             .thenReturn(balances);
 
         // when: the most recent balance is requested
@@ -223,7 +223,7 @@ public class AccountServiceTest {
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
 
         // and: NO balance records
-        when(accountBalanceRepository.findFirstByAccountIdOrderByReferenceDateDesc(account.getId()))
+        when(accountBalanceRepository.findMostRecentByAccountId(account.getId()))
             .thenReturn(Optional.empty());
 
         // when: the most recent balance is requested
@@ -234,10 +234,10 @@ public class AccountServiceTest {
         assertTrue(result.isEmpty());
 
         // and: an attempt to retrieve balances by date order is made
-        verify(accountBalanceRepository).findFirstByAccountIdOrderByReferenceDateDesc(any());
+        verify(accountBalanceRepository).findMostRecentByAccountId(any());
 
         // and: no attempt to retrieve the balances on reference date is made
-        verify(accountBalanceRepository, never()).findByAccountIdAndReferenceDate(any(), any());
+        verify(accountBalanceRepository, never()).listByReferenceDate(any(), any());
     }
 
     @Test

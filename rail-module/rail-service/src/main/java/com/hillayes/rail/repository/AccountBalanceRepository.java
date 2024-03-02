@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class AccountBalanceRepository extends RepositoryBase<AccountBalance, UUID> {
-    public List<AccountBalance> findByAccountIdAndReferenceDate(UUID accountId, Instant referenceDate) {
+    public List<AccountBalance> listByReferenceDate(UUID accountId, Instant referenceDate) {
         return listAll("accountId = :accountId AND referenceDate = :referenceDate",
             Map.of(
                 "accountId", accountId,
@@ -21,7 +21,7 @@ public class AccountBalanceRepository extends RepositoryBase<AccountBalance, UUI
         );
     }
 
-    public Optional<AccountBalance> findFirstByAccountIdOrderByReferenceDateDesc(UUID accountId) {
+    public Optional<AccountBalance> findMostRecentByAccountId(UUID accountId) {
         return findFirst("accountId = :accountId",
             OrderBy.descending("referenceDate"),
             Map.of("accountId", accountId));

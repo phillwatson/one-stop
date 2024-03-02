@@ -170,12 +170,20 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     private void updateBalances(Account account, RailAccount railAccount) {
         log.debug("Updating balances [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
 
-        accountBalanceRepository.save(AccountBalance.builder()
+        // find most recent recorded balance for this account
+        Instant lastReferenceDate = accountBalanceRepository.findMostRecentByAccountId(account.getId())
+            .map(AccountBalance::getReferenceDate)
+            .orElse(null);
+
+        // if no balance found OR the last recorded balance is older than the current balance
+        if ((lastReferenceDate == null) || (lastReferenceDate.isAfter(railAccount.getBalance().getDateTime()))) {
+            accountBalanceRepository.save(AccountBalance.builder()
                 .accountId(account.getId())
                 .balanceType(railAccount.getBalance().getType())
                 .referenceDate(railAccount.getBalance().getDateTime())
                 .amount(railAccount.getBalance().getAmount())
                 .build());
+        }
     }
 
     private void updateTransactions(RailProviderApi railProviderApi, RailAgreement railAgreement, Account account) {

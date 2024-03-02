@@ -83,7 +83,7 @@ public class UserAdminTestIT extends ApiTestBase {
 
             // and: the user has the role "user"
             assertEquals(1, user.getRoles().size());
-            assertEquals("user", user.getRoles().get(0));
+            assertEquals("user", user.getRoles().getFirst());
         });
     }
 
