@@ -1510,6 +1510,7 @@ components:
       type: object
       required:
         - total
+        - totalPages
         - count
         - page
         - pageSize
@@ -1518,7 +1519,12 @@ components:
         total:
           type: integer
           format: int64
-          description: The total number of items in the list
+          description: The total number of items available
+          example: 292
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages available
           example: 292
         count:
           type: integer

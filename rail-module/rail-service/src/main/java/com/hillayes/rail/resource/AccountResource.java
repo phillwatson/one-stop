@@ -40,6 +40,7 @@ public class AccountResource {
             .pageSize(accountsPage.getPageSize())
             .count(accountsPage.getContentSize())
             .total(accountsPage.getTotalCount())
+            .totalPages(accountsPage.getTotalPages())
             .items(accountsPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, accountsPage));
 
