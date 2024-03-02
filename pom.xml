@@ -60,8 +60,7 @@
         <quarkus.container-image.registry>ghcr.io</quarkus.container-image.registry>
         <quarkus.container-image.group>phillwatson</quarkus.container-image.group>
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:1f152b70f833d4a0028f3da0a1b8122cdceb49728f41ec93660371aa73de2344</quarkus.jib.base-jvm-image>
-        <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005
-        </quarkus.jib.jvm-additional-arguments>
+        <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
         <openapi-generator.version>7.3.0</openapi-generator.version>
     </properties>
