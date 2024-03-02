@@ -108,6 +108,15 @@ public class User {
     }
 
     @Transient
+    public Optional<OidcIdentity> removeOidcIdentity(AuthProvider provider) {
+        Optional<OidcIdentity> result = oidcIdentities.stream()
+            .filter(oidc -> oidc.getProvider().equals(provider))
+            .findFirst();
+        result.ifPresent(oidcIdentities::remove);
+        return result;
+    }
+
+    @Transient
     public Optional<OidcIdentity> getOidcIdentity(String issuer) {
         return oidcIdentities.stream()
             .filter(oidc -> oidc.getIssuer().equals(issuer))

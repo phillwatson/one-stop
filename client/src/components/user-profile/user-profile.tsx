@@ -1,44 +1,18 @@
-import { useEffect, useState } from 'react';
-
-import { SxProps } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-import Table from '@mui/material/Table';
-import TableHead from '@mui/material/TableHead';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
 
 import "./user-profile.css";
-import UserProfile, { UserAuthProvider } from "../../model/user-profile.model";
-import ProfileService from "../../services/profile.service"
+import UserProfile from "../../model/user-profile.model";
 
 interface Props {
   profile: UserProfile;
   setter: (profile: UserProfile) => void;
 }
 
-const colhead: SxProps = {
-  fontWeight: 'bold'
-};
-
 export default function UserProfileForm(props: Props) {
   const [profile, setProfile] = [ props.profile, props.setter ];
 
-  const [authProviders, setAuthProviders] = useState<Array<UserAuthProvider>>([]);
-
-  useEffect(() => {
-    ProfileService.getAuthProviders().then( response => setAuthProviders(response));
-  }, []);
-
-  function formatDateTime(dateStr?: string): string {
-    if (dateStr == null) return "";
-
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB") + " " + date.toLocaleTimeString("en-GB");
-  }
-
   return (
-    <div className="panel">
+    <>
       <TextField className="field" id="username" label="Username" required variant="outlined" fullWidth margin="normal"
         value={profile.username} onChange={e => setProfile({...profile, username: e.target.value})}/>
 
@@ -59,28 +33,6 @@ export default function UserProfileForm(props: Props) {
 
       <TextField className="field" id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
-
-      <p/>
-      <Table size="small" aria-label="authproviders">
-        <caption><i>You're registered with the above auth providers</i></caption>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={colhead} colSpan={2}>Auth Provider</TableCell>
-            <TableCell sx={colhead}>Created</TableCell>
-            <TableCell sx={colhead}>Last Used</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          { authProviders.map(authProvider => (
-            <TableRow key={authProvider.name}>
-              <TableCell><img src={ authProvider.logo } alt={authProvider.name + " logo"} width="32px" height="32px"/></TableCell>
-              <TableCell width={"70%"}>{authProvider.name}</TableCell>
-              <TableCell>{formatDateTime(authProvider.dateCreated)}</TableCell>
-              <TableCell>{formatDateTime(authProvider.dateLastUsed)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    </>
   );
 }

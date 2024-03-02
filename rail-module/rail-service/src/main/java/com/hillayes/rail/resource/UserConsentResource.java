@@ -83,14 +83,15 @@ public class UserConsentResource {
     @Path("{institutionId}")
     @RolesAllowed("user")
     public Response deleteConsent(@Context SecurityContext ctx,
-                                  @PathParam("institutionId") String institutionId) {
+                                  @PathParam("institutionId") String institutionId,
+                                  @QueryParam("purge") @DefaultValue("false") boolean purge) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Deleting user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
+        log.info("Deleting user's consent record [userId: {}, institutionId: {}, purge: {}]", userId, institutionId, purge);
 
         UserConsent consent = userConsentService.getUserConsent(userId, institutionId)
             .orElseThrow(() -> new NotFoundException("UserConsent", Map.of("userId", userId, "institutionId", institutionId)));
 
-        userConsentService.consentCancelled(consent.getId());
+        userConsentService.consentCancelled(consent.getId(), purge);
         return Response.noContent().build();
     }
 
@@ -153,6 +154,7 @@ public class UserConsentResource {
             .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
 
         return new UserConsentResponse()
+            .id(consent.getId())
             .institutionId(consent.getInstitutionId())
             .institutionName(institution.getName())
             .dateGiven(consent.getDateGiven())

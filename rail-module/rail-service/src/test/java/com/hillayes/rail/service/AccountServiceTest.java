@@ -129,7 +129,10 @@ public class AccountServiceTest {
 
     @Test
     public void testGetAccount_NotFound() {
-        // given: an unknown account ID
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: an unknown account ID
         UUID accountId = UUID.randomUUID();
         when(accountRepository.findByIdOptional(accountId))
             .thenReturn(Optional.empty());
@@ -139,7 +142,7 @@ public class AccountServiceTest {
             .thenReturn(Optional.empty());
 
         // when: the account is requested
-        Optional<Account> result = fixture.getAccount(accountId);
+        Optional<Account> result = fixture.getAccount(userId, accountId);
 
         // then: the account is NOT returned
         assertNotNull(result);
@@ -162,7 +165,7 @@ public class AccountServiceTest {
             .thenReturn(Optional.of(userConsent));
 
         // when: the account is requested
-        Optional<Account> result = fixture.getAccount(account.getId());
+        Optional<Account> result = fixture.getAccount(account.getUserId(), account.getId());
 
         // then: the account is returned
         assertNotNull(result);
@@ -184,7 +187,7 @@ public class AccountServiceTest {
             .thenReturn(Optional.empty());
 
         // when: the account is requested
-        Optional<Account> result = fixture.getAccount(account.getId());
+        Optional<Account> result = fixture.getAccount(account.getUserId(), account.getId());
 
         // then: the account is NOT returned
         assertNotNull(result);
@@ -235,5 +238,65 @@ public class AccountServiceTest {
 
         // and: no attempt to retrieve the balances on reference date is made
         verify(accountBalanceRepository, never()).findByAccountIdAndReferenceDate(any(), any());
+    }
+
+    @Test
+    public void testDeleteAccount_HappyPath() {
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: an account
+        Account account = TestData.mockAccount(userId, UUID.randomUUID());
+        when(accountRepository.findByIdOptional(account.getId()))
+            .thenReturn(Optional.of(account));
+
+        // when: the account is deleted
+        boolean result = fixture.deleteAccount(userId, account.getId());
+
+        // then: the result is true
+        assertTrue(result);
+
+        // and: the account is deleted
+        verify(accountRepository).delete(account);
+    }
+
+    @Test
+    public void testDeleteAccount_WrongUser() {
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: an account belonging to another user
+        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        when(accountRepository.findByIdOptional(account.getId()))
+            .thenReturn(Optional.of(account));
+
+        // when: the account is deleted
+        boolean result = fixture.deleteAccount(userId, account.getId());
+
+        // then: the result is false
+        assertFalse(result);
+
+        // and: the account is NOT deleted
+        verify(accountRepository, never()).delete(account);
+    }
+
+    @Test
+    public void testDeleteAccount_NotFound() {
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: an unknown account ID
+        UUID accountId = UUID.randomUUID();
+        when(accountRepository.findByIdOptional(accountId))
+            .thenReturn(Optional.empty());
+
+        // when: the account is deleted
+        boolean result = fixture.deleteAccount(userId, accountId);
+
+        // then: the result is false
+        assertFalse(result);
+
+        // and: no attempt to delete the account is made
+        verify(accountRepository, never()).delete(any());
     }
 }

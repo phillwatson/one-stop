@@ -302,6 +302,22 @@ paths:
           description: "Unauthorized"
         500:
           description: "Internal server error"
+    delete:
+      tags: [ "profiles" ]
+      summary: "Delete the identified auth-provider from the caller's auth-providers"
+      description: "Delete the identified auth-provider information for the authenticated user."
+      operationId: "deleteUserAuthProvider"
+      security:
+        - cookieAuth: [ ]
+      responses:
+        204:
+          description: "successful operation"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "User or AuthProvider not found"
+        500:
+          description: "Internal server error"
 
   /profiles/password:
     put:
@@ -549,6 +565,13 @@ paths:
           example: 07061d7674f3
           schema:
             type: string
+        - name: "purge"
+          in: "query"
+          description: "Indicates that the accounts and transaction records are to be purged"
+          required: false
+          example: "true"
+          schema:
+            type: boolean
       responses:
         204:
           description: "successful operation"
@@ -607,6 +630,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccountResponse"
+        400:
+          description: "Invalid ID supplied"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Account not found"
+        500:
+          description: "Internal server error"
+
+    delete:
+      tags: [ "accounts" ]
+      summary: "Delete account by id"
+      description: "Delete account by id for the authenticated user"
+      operationId: "deleteAccountById"
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of account to be deleted"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: "successful operation"
         400:
           description: "Invalid ID supplied"
         401:
@@ -1032,7 +1082,15 @@ components:
       type: object
       description: |
         The detail of an auth-provider with which a user has user for authentication
+      required:
+        - id
+        - name
+        - dateCreated
       properties:
+        id:
+          type: string
+          description: The unique identifier for the auth-provider
+          example: GOOGLE
         name:
           type: string
           description: the recognised name of the auth-provider
@@ -1203,10 +1261,16 @@ components:
     UserConsentResponse:
       type: object
       required:
+        - id
         - institutionId
         - institutionName
         - status
       properties:
+        id:
+          type: string
+          format: uuid
+          description: The user-consent Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
         institutionId:
           type: string
           description: Identifies the institution record to which the consent relates
@@ -1252,19 +1316,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AccountSummaryResponse'
-
-    UserConsentAdminResponse:
-      allOf:
-        - $ref: "#/components/schemas/UserConsentResponse"
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: The user-consent Id
-              example: 07061d76-74f3-4163-aa07-fb6909681f81
 
     AccountBalanceResponse:
       description: A snapshot of an account's balance
@@ -1530,17 +1581,6 @@ components:
               description: The list of consents
               items:
                 $ref: "#/components/schemas/UserConsentResponse"
-
-    PaginatedUserConsentsAdmin:
-      allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
-        - type: object
-          properties:
-            items:
-              type: array
-              description: The list of consents
-              items:
-                $ref: "#/components/schemas/UserConsentAdminResponse"
 
     PaginatedAccounts:
       allOf:

@@ -42,14 +42,33 @@ public class AccountService {
         return accountRepository.findByUserConsentId(userConsent.getId());
     }
 
-    public Optional<Account> getAccount(UUID accountId) {
+    public Optional<Account> getAccount(UUID userId, UUID accountId) {
         log.info("Get user's account [accountId: {}]", accountId);
         return accountRepository.findByIdOptional(accountId)
+            .filter(account -> userId.equals(account.getUserId()) )
             .filter(account ->
                 // this will return empty if consent is cancelled or denied
                 userConsentService.getUserConsent(account.getUserId(), account.getInstitutionId())
                     .isPresent()
             );
+    }
+
+    public boolean deleteAccount(UUID userId, UUID accountId) {
+        log.info("Delete user's account [userId: {}, accountId: {}]", userId, accountId);
+
+        return accountRepository.findByIdOptional(accountId)
+            // ensure the account belongs to the user
+            .filter(account -> account.getUserId().equals(userId))
+            .map(account -> {
+                // this will cascade delete account balances and transactions
+                accountRepository.delete(account);
+                log.debug("Deleted user's account [userId: {}, accountId: {}]", userId, accountId);
+                return true;
+            })
+            .orElseGet(() -> {
+                log.debug("User's account not found [userId: {}, accountId: {}]", userId, accountId);
+                return false;
+            });
     }
 
     /**

@@ -3,7 +3,6 @@ package com.hillayes.integration.api;
 import com.hillayes.onestop.api.PaginatedUserConsents;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.onestop.api.UserConsentResponse;
-import com.hillayes.rail.api.domain.RailProvider;
 import io.restassured.response.Response;
 
 import java.net.URI;
@@ -41,12 +40,13 @@ public class UserConsentApi extends ApiBase {
             .extract().response();
     }
 
-    public void deleteConsent(String institutionId) {
-        deleteConsent(institutionId, 204);
+    public void deleteConsent(String institutionId, boolean purge) {
+        deleteConsent(institutionId, purge, 204);
     }
 
-    public Response deleteConsent(String institutionId, int expectedStatus) {
+    public Response deleteConsent(String institutionId, boolean purge, int expectedStatus) {
         return givenAuth()
+            .queryParam("purge", purge)
             .delete("/api/v1/rails/consents/{institutionId}", institutionId)
             .then()
             .statusCode(expectedStatus)

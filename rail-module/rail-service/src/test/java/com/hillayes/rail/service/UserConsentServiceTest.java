@@ -9,6 +9,7 @@ import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
 import com.hillayes.rail.errors.BankRegistrationException;
+import com.hillayes.rail.errors.DeleteRailConsentException;
 import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
@@ -311,9 +312,7 @@ public class UserConsentServiceTest {
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
             RailInstitution i = invocation.getArgument(1);
-            URI uri = invocation.getArgument(2);
-            String reference = invocation.getArgument(3);
-            agreement.set(returnEndUserAgreement(reference, i, uri));
+            agreement.set(returnEndUserAgreement(i));
             return agreement.get();
         });
 
@@ -379,9 +378,7 @@ public class UserConsentServiceTest {
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
             RailInstitution i = invocation.getArgument(1);
-            URI uri = invocation.getArgument(2);
-            String reference = invocation.getArgument(3);
-            agreement.set(returnEndUserAgreement(reference, i, uri));
+            agreement.set(returnEndUserAgreement(i));
             return agreement.get();
         });
 
@@ -515,7 +512,6 @@ public class UserConsentServiceTest {
             .thenReturn(List.of());
 
         // and: the rail API throws an exception
-        AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any(), any()))
             .thenThrow(new RuntimeException("Mock Exception"));
 
@@ -560,9 +556,7 @@ public class UserConsentServiceTest {
         AtomicReference<RailAgreement> agreement = new AtomicReference<>();
         when(railProviderApi.register(any(), any(), any(), any())).then(invocation -> {
             RailInstitution i = invocation.getArgument(1);
-            URI uri = invocation.getArgument(2);
-            String reference = invocation.getArgument(3);
-            agreement.set(returnEndUserAgreement(reference, i, uri));
+            agreement.set(returnEndUserAgreement(i));
             return agreement.get();
         });
 
@@ -859,8 +853,8 @@ public class UserConsentServiceTest {
         consent.setStatus(consentStatus);
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
-        // when: the service is called
-        fixture.consentCancelled(consent.getId());
+        // when: the service is called - and the purge flag is NOT set
+        fixture.consentCancelled(consent.getId(), false);
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -876,6 +870,39 @@ public class UserConsentServiceTest {
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentCancelled(updatedConsent);
+
+        // and: NO consent is deleted
+        verify(userConsentRepository, never()).delete(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"CANCELLED"})
+    public void testConsentCancelled_Purge_HappyPath(ConsentStatus consentStatus) {
+        // given: a consent identifier
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
+        consent.setStatus(consentStatus);
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // when: the service is called - and the purge flag is set
+        fixture.consentCancelled(consent.getId(), true);
+
+        // then: the consent is deleted
+        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
+        verify(userConsentRepository).delete(captor.capture());
+        UserConsent updatedConsent = captor.getValue();
+
+        // and: the status is set to CANCELLED
+        assertEquals(ConsentStatus.CANCELLED, updatedConsent.getStatus());
+        assertNotNull(updatedConsent.getDateCancelled());
+
+        // and: the agreement is deleted
+        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
+
+        // and: a consent event is issued
+        verify(consentEventSender).sendConsentCancelled(updatedConsent);
+
+        // and: NO consent is updated
+        verify(userConsentRepository, never()).save(any());
     }
 
     @Test
@@ -886,7 +913,7 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        fixture.consentCancelled(consent.getId());
+        fixture.consentCancelled(consent.getId(), false);
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -902,7 +929,7 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
-        fixture.consentCancelled(consentId);
+        fixture.consentCancelled(consentId, false);
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -972,24 +999,23 @@ public class UserConsentServiceTest {
             .thenThrow(new RuntimeException("some rail exception"));
 
         // when: the consent is expired
-        fixture.consentExpired(consent.getId());
+        // then: exception is thrown
+        DeleteRailConsentException exception = assertThrows(DeleteRailConsentException.class, () ->
+            fixture.consentExpired(consent.getId())
+        );
 
-        // then: the consent is updated
-        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
-        verify(userConsentRepository).save(captor.capture());
-        UserConsent updatedConsent = captor.getValue();
+        // and: the exception identifies the rail provider and consent
+        assertEquals(consent.getProvider(), exception.getParameter("rail-provider"));
+        assertEquals(consent.getId(), exception.getParameter("consent-id"));
 
-        // and: the status is set to EXPIRED
-        assertEquals(ConsentStatus.EXPIRED, updatedConsent.getStatus());
+        // and: the rail is called to delete the agreement
+        verify(railProviderApi).deleteAgreement(consent.getAgreementId());
 
-        // and: the agreement is deleted - the exception is ignored
-        verify(railProviderApi).deleteAgreement(updatedConsent.getAgreementId());
-
-        // and: a consent event is issued
-        verify(consentEventSender).sendConsentExpired(updatedConsent);
+        // and: NO consent event is issued
+        verify(consentEventSender, never()).sendConsentExpired(any());
     }
 
-    private RailAgreement returnEndUserAgreement(String reference, RailInstitution institution, URI callbackUri) {
+    private RailAgreement returnEndUserAgreement(RailInstitution institution) {
         return RailAgreement.builder()
             .id(UUID.randomUUID().toString())
             .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))    

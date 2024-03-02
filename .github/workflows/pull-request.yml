@@ -3,28 +3,22 @@
 # For more information
 # see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
 
-name: Build and Deploy CI with Maven
-
-# to login to the github container repo use:
-#    docker login https://ghcr.io -u phillwatson -p <personal-access-token>
-# where:
-#  <personal-access-token> is created here https://github.com/settings/tokens
-# This will create an auth entry in the ~/.docker/config.json/
+name: Pull Request CI with Maven
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
     paths-ignore: [ 'docs/**', 'client/**' ]
 
 env:
   REGISTRY: ghcr.io
   QUARKUS_CONTAINER_IMAGE_REGISTRY: ghcr.io
   QUARKUS_CONTAINER_IMAGE_GROUP: ${{ github.repository_owner }}
-  QUARKUS_CONTAINER_IMAGE_PUSH: true
+  QUARKUS_CONTAINER_IMAGE_PUSH: false
 
 jobs:
   build:
-    name: package and deploy
+    name: build and test
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -49,23 +43,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build with Maven
-      # skips the tests due to lack of "test" profile
       run: |
-        mvn -B deploy -Pclient --file pom.xml \
+        mvn -B verify -Pclient -Ptest --file pom.xml \
           -Dquarkus.hibernate-orm.log.sql=false \
           -Dquarkus.hibernate-orm.log.bind-parameters=false \
           -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
-
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ github.repository }}
-
-    - name: Build and push Client Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: client/
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:1.0.0-SNAPSHOT
-        labels: ${{ steps.meta.outputs.labels }}

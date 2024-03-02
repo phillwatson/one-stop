@@ -8,6 +8,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.net.Gateway;
 import com.hillayes.events.events.auth.SuspiciousActivity;
 import com.hillayes.exception.common.MissingParameterException;
+import com.hillayes.openid.AuthProvider;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.OidcIdentity;
 import com.hillayes.user.domain.User;
@@ -157,14 +158,32 @@ public class UserService {
         return result;
     }
 
-    public Collection<OidcIdentity> getUserAuthProviders(UUID id) {
-        log.info("Retrieving user auth-providers [userId: {}]", id);
-        Optional<User> user = userRepository.findByIdOptional(id);
+    public Collection<OidcIdentity> getUserAuthProviders(UUID userId) {
+        log.info("Retrieving user auth-providers [userId: {}]", userId);
+        Optional<User> user = userRepository.findByIdOptional(userId);
         Set<OidcIdentity> oidcIdentities = user.map(User::getOidcIdentities).orElse(Set.of());
 
         // the call to size() will load the lazy collection
-        log.debug("Retrieved user auth-providers [userId: {}, size: {}]", id, oidcIdentities.size());
+        log.debug("Retrieved user auth-providers [userId: {}, size: {}]", userId, oidcIdentities.size());
         return oidcIdentities;
+    }
+
+    public Optional<OidcIdentity> deleteUserAuthProvider(UUID userId, AuthProvider authProvider) {
+        log.info("Retrieving user auth-providers [userId: {}]", userId);
+        User user = userRepository.findByIdOptional(userId).orElse(null);
+        if (user == null) {
+            log.debug("Failed to find user [userId: {}]", userId);
+            return Optional.empty();
+        }
+
+        Optional<OidcIdentity> result = user.removeOidcIdentity(authProvider);
+        if (result.isPresent()) {
+            userRepository.save(user);
+            userEventSender.sendUserUpdated(user);
+            log.debug("Deleted user auth-provider [userId: {}, provider: {}]", userId, authProvider);
+        }
+
+        return result;
     }
 
     public Optional<User> updatePassword(UUID userId,

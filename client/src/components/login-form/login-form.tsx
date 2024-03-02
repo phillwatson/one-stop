@@ -57,7 +57,7 @@ export default function LoginForm() {
             value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value})} />
         </div>
         <div className="panel">
-          <Button type="submit" variant="outlined" disabled={!validateForm()}>Login</Button>
+          <Button type="submit" variant="contained" disabled={!validateForm()}>Login</Button>
         </div>
       </form>
 

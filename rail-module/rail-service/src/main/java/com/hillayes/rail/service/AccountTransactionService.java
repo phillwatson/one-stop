@@ -102,8 +102,7 @@ public class AccountTransactionService {
     private void verifyAccountHolder(UUID userId, UUID accountId) {
         if (accountId != null) {
             // verify that the account belongs to the user
-            accountService.getAccount(accountId)
-                .filter(account -> userId.equals(account.getUserId()) )
+            accountService.getAccount(userId, accountId)
                 .orElseThrow(() -> new NotFoundException("Account", accountId));
         }
     }

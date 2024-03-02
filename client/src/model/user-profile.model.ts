@@ -16,6 +16,7 @@ export interface UserAuthProvidersResponse {
 }
 
 export interface UserAuthProvider {
+  id: string;
   name: string;
   logo: string;
   dateCreated: string;

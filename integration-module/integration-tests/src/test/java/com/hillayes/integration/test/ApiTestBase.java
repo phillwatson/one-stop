@@ -87,6 +87,7 @@ public class ApiTestBase {
             .withEnv("ONE_STOP_EMAIL_SERVICE_URL", EMAIL_HOST)
             .withEnv("REST_CLIENT_NORDIGEN_API_URL", NORDIGEN_RAIL_HOST)
             .withEnv("REST_CLIENT_YAPILY_API_URL", YAPILY_RAIL_HOST)
+            .withBuild(true) // force build of client image
             .waitingFor("client_1", new HttpWaitStrategy().forPort(CLIENT_PORT).forPath("/api/v1/auth/jwks.json"));
     }
 

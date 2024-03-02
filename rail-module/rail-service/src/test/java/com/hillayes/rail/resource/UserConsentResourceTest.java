@@ -19,6 +19,8 @@ import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URI;
 import java.util.List;
@@ -209,8 +211,40 @@ public class UserConsentResourceTest extends TestBase {
         // then: the service is called to retrieve the consent
         verify(userConsentService).getUserConsent(userId, userConsent.getInstitutionId());
 
-        // and: the service is called to cancel the consent
-        verify(userConsentService).consentCancelled(userConsent.getId());
+        // and: the service is called to cancel the consent - without purge
+        verify(userConsentService).consentCancelled(userConsent.getId(), false);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testDeleteConsent_WithPurgeParameter(boolean purge) {
+        UUID userId = UUID.fromString(userIdStr);
+
+        UserConsent userConsent = TestData.mockUserConsent(userId);
+        when(userConsentService.getUserConsent(userId, userConsent.getInstitutionId()))
+            .thenReturn(Optional.of(userConsent));
+
+        // and: the institution exists
+        when(institutionService.get(userConsent.getProvider(), userConsent.getInstitutionId()))
+            .thenReturn(Optional.of(TestApiData.mockInstitution()));
+
+        // when: client calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .queryParam("purge", purge)
+            .pathParam("institutionId", userConsent.getInstitutionId())
+            .delete("/api/v1/rails/consents/{institutionId}")
+            .then()
+            .statusCode(204);
+
+        // then: the service is called to retrieve the consent
+        verify(userConsentService).getUserConsent(userId, userConsent.getInstitutionId());
+
+        // and: the service is called to cancel the consent - with selected purge option
+        verify(userConsentService).consentCancelled(userConsent.getId(), purge);
     }
 
     @Test
@@ -252,7 +286,7 @@ public class UserConsentResourceTest extends TestBase {
         });
 
         // and: the service is NOT called to cancel the consent
-        verify(userConsentService, never()).consentCancelled(any());
+        verify(userConsentService, never()).consentCancelled(any(), anyBoolean());
     }
 
     @Test

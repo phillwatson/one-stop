@@ -1,0 +1,30 @@
+form {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: center;
+}
+
+.panel {
+  margin-top: 9px;
+}
+
+.splitpanel {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 9px;
+}
+
+.box {
+  margin: 9px 3px 0 3px;
+  width: 100%;
+  min-width: 600px;
+  max-width: 600px;
+}
+
+.grid {
+  border: 1px solid #e0e0e0;
+}

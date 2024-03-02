@@ -8,6 +8,9 @@ import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
 import UserProfile from "../model/user-profile.model";
 import UserConsentList from "../components/consents/user-consents";
+import AuthProviderList from "../components/auth-providers/auth-provider-list";
+
+import "./profile.css";
 
 const emptyProfile: UserProfile = {
   id: undefined, 
@@ -63,8 +66,17 @@ export default function UpdateProfile() {
       <h2>Profile information</h2>
       <hr></hr>
       <form onSubmit={ handleSubmit }>
-        <UserProfileForm profile={ profile } setter={ setProfile }/>
-        <UserConsentList />
+        <div className="panel">
+          <div className="splitpanel">
+            <div className="box">
+            <UserProfileForm profile={ profile } setter={ setProfile }/>
+            </div>
+          </div>
+          <div className="splitpanel">
+            <div className="box grid"><AuthProviderList/></div>
+            <div className="box grid"><UserConsentList/></div>
+          </div>
+        </div>
         <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
       </form>
     </div>
