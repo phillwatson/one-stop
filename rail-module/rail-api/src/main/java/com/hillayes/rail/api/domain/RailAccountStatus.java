@@ -1,6 +1,6 @@
 package com.hillayes.rail.api.domain;
 
-public enum AccountStatus {
+public enum RailAccountStatus {
     DISCOVERED,
     PROCESSING,
     ERROR,
