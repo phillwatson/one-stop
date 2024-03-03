@@ -5,7 +5,7 @@ import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.AccountStatus;
+import com.hillayes.rail.api.domain.RailAccountStatus;
 import com.hillayes.rail.api.domain.RailAccount;
 import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.RailTransaction;
@@ -115,15 +115,15 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             return TaskConclusion.COMPLETE;
         }
 
-        if (railAccount.getStatus() == AccountStatus.SUSPENDED) {
+        if (railAccount.getStatus() == RailAccountStatus.SUSPENDED) {
             userConsentService.consentSuspended(userConsent.getId());
         }
 
-        else if (railAccount.getStatus() == AccountStatus.EXPIRED) {
+        else if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
             userConsentService.consentExpired(userConsent.getId());
         }
 
-        else if (railAccount.getStatus() == AccountStatus.READY) {
+        else if (railAccount.getStatus() == RailAccountStatus.READY) {
             Account account = getOrCreateAccount(userConsent, railAccount);
 
             // only process if not already polled within grace period

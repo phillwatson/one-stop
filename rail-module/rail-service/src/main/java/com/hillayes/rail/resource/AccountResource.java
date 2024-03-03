@@ -61,19 +61,6 @@ public class AccountResource {
         return Response.ok(marshal(account)).build();
     }
 
-    @DELETE
-    @Path("/{accountId}")
-    public Response deleteAccount(@Context SecurityContext ctx,
-                                  @PathParam("accountId") UUID accountId) {
-        UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Deleting account [userId: {}, accountId: {}]", userId, accountId);
-
-        if (accountService.deleteAccount(userId, accountId)) {
-            return Response.noContent().build();
-        }
-        throw new NotFoundException("Account", accountId);
-    }
-
     private AccountResponse marshal(Account account) {
         RailInstitution institution = institutionService.get(account.getInstitutionId())
             .orElseThrow(() -> new NotFoundException("Institution", account.getInstitutionId()));

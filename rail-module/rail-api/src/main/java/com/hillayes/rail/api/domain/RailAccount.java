@@ -24,7 +24,7 @@ public class RailAccount {
 
     private String iban;
 
-    private AccountStatus status;
+    private RailAccountStatus status;
 
     private String accountType;
 

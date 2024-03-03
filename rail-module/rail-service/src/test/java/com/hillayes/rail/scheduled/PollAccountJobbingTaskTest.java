@@ -555,7 +555,7 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAgreement));
 
         // and: a rail-account associated with that consent
-        RailAccount railAccount = TestApiData.mockAccount(AccountStatus.SUSPENDED);
+        RailAccount railAccount = TestApiData.mockAccount(RailAccountStatus.SUSPENDED);
         when(railProviderApi.getAccount(railAgreement, railAccount.getId()))
             .thenReturn(Optional.of(railAccount));
 
@@ -612,7 +612,7 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAgreement));
 
         // and: a rail-account associated with that consent
-        RailAccount railAccount = TestApiData.mockAccount(AccountStatus.EXPIRED);
+        RailAccount railAccount = TestApiData.mockAccount(RailAccountStatus.EXPIRED);
         when(railProviderApi.getAccount(railAgreement, railAccount.getId()))
             .thenReturn(Optional.of(railAccount));
 
@@ -654,7 +654,7 @@ public class PollAccountJobbingTaskTest {
 
     @ParameterizedTest
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "READY", "EXPIRED", "SUSPENDED" })
-    public void testNoRailAccountStatusNotCorrect(AccountStatus accountStatus) {
+    public void testNoRailAccountStatusNotCorrect(RailAccountStatus accountStatus) {
         // given: an identified user-consent ready to be polled
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())

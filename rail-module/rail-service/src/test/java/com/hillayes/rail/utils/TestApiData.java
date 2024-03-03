@@ -3,11 +3,9 @@ package com.hillayes.rail.utils;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -71,10 +69,10 @@ public class TestApiData {
     }
 
     public static RailAccount mockAccount() {
-        return mockAccount(AccountStatus.READY);
+        return mockAccount(RailAccountStatus.READY);
     }
 
-    public static RailAccount mockAccount(AccountStatus status) {
+    public static RailAccount mockAccount(RailAccountStatus status) {
         return RailAccount.builder()
             .id(randomAlphanumeric(20))
             .status(status)

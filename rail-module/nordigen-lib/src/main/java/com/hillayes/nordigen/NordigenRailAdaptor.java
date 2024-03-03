@@ -8,7 +8,7 @@ import com.hillayes.nordigen.service.AgreementService;
 import com.hillayes.nordigen.service.InstitutionService;
 import com.hillayes.nordigen.service.RequisitionService;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.AccountStatus;
+import com.hillayes.rail.api.domain.RailAccountStatus;
 import com.hillayes.rail.api.domain.RailBalance;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.*;
@@ -178,7 +178,7 @@ public class NordigenRailAdaptor implements RailProviderApi {
                 .institutionId(account.institutionId)
                 .name(account.ownerName)
                 .ownerName(account.ownerName)
-                .status(AccountStatus.valueOf(account.status.name()))
+                .status(RailAccountStatus.valueOf(account.status.name()))
                 .balance(getBalance(id).orElse(RailBalance.builder()
                         .type("")
                         .dateTime(Instant.now())

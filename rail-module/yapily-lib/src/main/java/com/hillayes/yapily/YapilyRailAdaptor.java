@@ -260,13 +260,13 @@ public class YapilyRailAdaptor implements RailProviderApi {
         };
     }
 
-    private AccountStatus accountStatus(AgreementStatus agreementStatus) {
+    private RailAccountStatus accountStatus(AgreementStatus agreementStatus) {
         return switch (agreementStatus) {
-            case GIVEN -> AccountStatus.READY;
-            case WAITING, INITIATED -> AccountStatus.PROCESSING;
-            case DENIED -> AccountStatus.ERROR;
-            case SUSPENDED, CANCELLED -> AccountStatus.SUSPENDED;
-            case EXPIRED -> AccountStatus.EXPIRED;
+            case GIVEN -> RailAccountStatus.READY;
+            case WAITING, INITIATED -> RailAccountStatus.PROCESSING;
+            case DENIED -> RailAccountStatus.ERROR;
+            case SUSPENDED, CANCELLED -> RailAccountStatus.SUSPENDED;
+            case EXPIRED -> RailAccountStatus.EXPIRED;
         };
     }
 
