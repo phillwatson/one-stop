@@ -93,7 +93,7 @@ public class UserConsentResourceTest extends TestBase {
         assertEquals(pageSize, response.getPageSize());
         assertEquals(pageSize, response.getCount());
         assertEquals(consents.size(), response.getTotal());
-        assertEquals(pageSize, response.getItems().size());
+        assertEquals(5, response.getTotalPages());
     }
 
     @Test

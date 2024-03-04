@@ -133,7 +133,7 @@ public class PollAccountJobbingTaskTest {
             .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))
             .build();
         Page<AccountTransaction> page = Page.of(List.of(transaction));
-        when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(), anyInt(), anyInt()))
+        when(accountTransactionRepository.findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt()))
             .thenReturn(page);
 
         // and: rail-transactions records are available
@@ -164,7 +164,7 @@ public class PollAccountJobbingTaskTest {
         verify(accountBalanceRepository).save(any());
 
         // and: the most recent transaction is queried to get start date for poll
-        verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any(), anyInt(), anyInt());
+        verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt());
 
         // and: the account transactions are retrieved
         verify(railProviderApi).listTransactions(eq(railAgreement), eq(railAccount.getId()), any());
@@ -212,7 +212,7 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findByRailAccountId(railAccount.getId())).thenReturn(Optional.empty());
 
         // and: NO existing transactions
-        when(accountTransactionRepository.findByAccountId(any(), any(), anyInt(), anyInt()))
+        when(accountTransactionRepository.findByFilter(any(), any(), anyInt(), anyInt()))
             .thenReturn(Page.empty());
 
         // and: rail-transactions records are available

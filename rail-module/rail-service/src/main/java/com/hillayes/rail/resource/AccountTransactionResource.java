@@ -6,9 +6,9 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.PaginationUtils;
-import com.hillayes.onestop.api.TransactionList;
 import com.hillayes.onestop.api.TransactionSummaryResponse;
 import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.AccountTransactionService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/rails/transactions")
@@ -34,13 +33,30 @@ public class AccountTransactionResource {
                                     @Context UriInfo uriInfo,
                                     @QueryParam("page") @DefaultValue("0") int page,
                                     @QueryParam("page-size") @DefaultValue("20") int pageSize,
-                                    @QueryParam("account-id") UUID accountId) {
+                                    @QueryParam("account-id") UUID accountId,
+                                    @QueryParam("from-date") LocalDate fromDate,
+                                    @QueryParam("to-date") LocalDate toDate,
+                                    @QueryParam("min-amount") Float minAmount,
+                                    @QueryParam("max-amount") Float maxAmount,
+                                    @QueryParam("reference") String refContaining,
+                                    @QueryParam("info") String infoContaining,
+                                    @QueryParam("creditor") String creditorContaining) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Listing transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
-            userId, accountId, page, pageSize);
+        log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
+            userId, accountId, fromDate, toDate);
+
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(accountId)
+            .minAmount(minAmount)
+            .maxAmount(maxAmount)
+            .reference(refContaining)
+            .info(infoContaining)
+            .creditor(creditorContaining)
+            .build()
+            .dateRange(fromDate, toDate);
 
         Page<AccountTransaction> transactionsPage =
-            accountTransactionService.getTransactions(userId, accountId, page, pageSize);
+            accountTransactionService.getTransactions(userId, filter, page, pageSize);
 
         PaginatedTransactions response = new PaginatedTransactions()
             .page(transactionsPage.getPageIndex())
@@ -53,24 +69,6 @@ public class AccountTransactionResource {
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, accountId, page, pageSize, response.getCount(), response.getTotal());
-        return Response.ok(response).build();
-    }
-
-    @GET
-    @Path("/dates")
-    public Response getTransactionsForDateRange(@Context SecurityContext ctx,
-                                                @QueryParam("account-id") UUID accountId,
-                                                @QueryParam("from-date") LocalDate fromDate,
-                                                @QueryParam("to-date") LocalDate toDate) {
-        UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
-            userId, accountId, fromDate, toDate);
-
-        List<AccountTransaction> transactions =
-            accountTransactionService.listTransactions(userId, accountId, fromDate, toDate);
-
-        TransactionList response = new TransactionList()
-            .transactions(transactions.stream().map(this::marshal).toList());
         return Response.ok(response).build();
     }
 

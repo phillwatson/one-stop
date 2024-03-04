@@ -15,6 +15,7 @@ import com.hillayes.rail.domain.*;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
+import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.UserConsentService;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,7 +26,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * A jobbing task to retrieve the balance and transaction data for an identified
@@ -194,7 +197,10 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             // find the date of the most recent transaction we hold locally
             // we then use that as the start date for our rails request for transactions
             OrderBy sort = OrderBy.by("bookingDateTime").descending();
-            startDate = accountTransactionRepository.findByAccountId(account.getId(), sort, 0, 1)
+            TransactionFilter filter = TransactionFilter.builder()
+                .accountId(account.getId())
+                .build();
+            startDate = accountTransactionRepository.findByFilter(account.getUserId(), filter, 0, 1)
                 .stream().findFirst()
                 .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
                 .orElse(LocalDate.now().minusDays(railAgreement.getMaxHistory())); // or calculate date if no transactions found
@@ -207,11 +213,17 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         List<RailTransaction> details = railProviderApi.listTransactions(railAgreement, account.getRailAccountId(), startDate);
 
         // identify those internal transaction IDs we've seen before
-        List<String> existing = (account.getId() == null)
-            ? List.of()
+        // TODO: For large lists, we should consider batching this to reduce memory load
+        Set<String> existing = (account.getId() == null)
+            ? Set.of()
             : accountTransactionRepository.findByInternalId(details.stream()
-                .map(RailTransaction::getId).toList()).stream()
-            .map(AccountTransaction::getInternalTransactionId).toList();
+                .unordered()
+                .map(RailTransaction::getId)
+                .distinct()
+                .toList())
+            .stream()
+            .map(AccountTransaction::getInternalTransactionId)
+            .collect(Collectors.toUnmodifiableSet());
 
         // map the NEW transactions to our own records
         List<AccountTransaction> transactions = details.stream()
