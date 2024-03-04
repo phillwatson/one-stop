@@ -17,8 +17,9 @@ class AccountService {
 
   getTransactions(accountId: string, page: number = 0, pageSize = 25): Promise<PaginatedList<TransactionSummary>> {
     console.log(`Retrieving account transactions [id: ${accountId}, page: ${page}, pageSize: ${pageSize}]`);
-    return http.get<PaginatedList<TransactionSummary>>('/rails/transactions', { params: { "account-id": accountId, "page": page, "page-size": pageSize }})
-      .then(response => response.data);
+    return http.get<PaginatedList<TransactionSummary>>('/rails/transactions',
+     { params: { "account-id": accountId, "page": page, "page-size": pageSize }})
+     .then(response => response.data);
   }
 }
 

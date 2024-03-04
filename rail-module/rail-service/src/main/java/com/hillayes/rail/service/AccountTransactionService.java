@@ -1,19 +1,15 @@
 package com.hillayes.rail.service;
 
-import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
+import com.hillayes.rail.repository.TransactionFilter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,63 +24,31 @@ public class AccountTransactionService {
     AccountTransactionRepository accountTransactionRepository;
 
     /**
-     * Returns a paged list of transactions for the identified user; optionally filtered by
-     * the identified account. The transactions (and pages) are ordered by date, descending.
+     * Returns the transactions for the given user, and optionally filtered by the
+     * given properties; ordered by booking-datetime, descending.
      *
      * @param userId the user to whom the transaction belong.
-     * @param accountId the, optional, account to which the transaction belong.
+     * @param filter the filter to apply to the transaction properties.
      * @param page the, zero-based, page number of transactions.
      * @param pageSize the size of a page, and the maximum number of transactions to be returned.
      * @return the page of identified transactions.
      */
     public Page<AccountTransaction> getTransactions(UUID userId,
-                                                    UUID accountId,
+                                                    TransactionFilter filter,
                                                     int page,
                                                     int pageSize) {
-        log.info("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}]",
-            userId, accountId, page, pageSize);
+        log.info("Listing transaction [userId: {}, filter: {}]", userId, filter);
 
-        verifyAccountHolder(userId, accountId);
+        if (filter == null) {
+            filter = TransactionFilter.NULL;
+        } else {
+            verifyAccountHolder(userId, filter.getAccountId());
+        }
 
-        OrderBy sort = OrderBy.by("bookingDateTime").descending();
-        Page<AccountTransaction> result = (accountId != null)
-            ? accountTransactionRepository.findByAccountId(accountId, sort, page, pageSize)
-            : accountTransactionRepository.findByUserId(userId, sort, page, pageSize);
+        Page<AccountTransaction> result = accountTransactionRepository.findByFilter(userId, filter, page, pageSize);
 
-        log.debug("Listing account's transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, size: {}]",
-            userId, accountId, page, pageSize, result.getContentSize());
-        return result;
-    }
-
-    /**
-     * Returns the transactions for the given user, and optionally filtered by account,
-     * over the given date range; ordered by booking-datetime, earliest first.
-     *
-     * @param userId the user to whom the transaction belong.
-     * @param accountId the account to which the transaction belong (optional).
-     * @param fromDate the inclusive start date of the search.
-     * @param toDate the inclusive end date of the search.
-     * @return the list of transaction, ordered by booking-datetime.
-     */
-    public List<AccountTransaction> listTransactions(UUID userId,
-                                                     UUID accountId,
-                                                     LocalDate fromDate,
-                                                     LocalDate toDate) {
-        log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
-            userId, accountId, fromDate, toDate);
-
-        verifyAccountHolder(userId, accountId);
-
-        // convert dates to instant
-        Instant from = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant to = toDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-
-        List<AccountTransaction> result = (accountId != null)
-            ? accountTransactionRepository.findByAccountAndDateRange(accountId, from, to)
-            : accountTransactionRepository.findByUserAndDateRange(userId, from, to);
-
-        log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}, size: {}]",
-            userId, accountId, fromDate, toDate, result.size());
+        log.info("Listing transaction [userId: {}, filter: {}, size: {}, total: {}]",
+            userId, filter, result.getContentSize(), result.getTotalCount());
         return result;
     }
 
@@ -106,4 +70,5 @@ public class AccountTransactionService {
                 .orElseThrow(() -> new NotFoundException("Account", accountId));
         }
     }
+
 }

@@ -6,21 +6,13 @@ import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AccountTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
 public class AccountTransactionRepository extends RepositoryBase<AccountTransaction, UUID> {
-    public Page<AccountTransaction> findByUserId(UUID userId, OrderBy sortBy, int pageNumber, int pageSize) {
-        return pageAll("userId", sortBy, pageNumber, pageSize, userId);
-    }
-
-    public Page<AccountTransaction> findByAccountId(UUID accountId, OrderBy sortBy, int pageNumber, int pageSize) {
-        return pageAll("accountId", sortBy, pageNumber, pageSize, accountId);
-    }
-
     /**
      * Locates the transactions whose internal ID is in the given list. The internal
      * transaction ID is assigned by the rail service.
@@ -34,44 +26,48 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
             : listAll("internalTransactionId in ?1", internalTransactionIds);
     }
 
-    /**
-     * Returns the transactions, for the identified user, whose booking-datetime is between
-     * the given date range; and ordered by the booking-datetime ascending.
-     *
-     * @param userId the user whose transactions are to be returned.
-     * @param fromDate the date-time from which the search will begin (inclusive)
-     * @param toDate the date-time to which the search will end (exclusive).
-     * @return the ordered list of transaction between the given dates.
-     */
-    public List<AccountTransaction> findByUserAndDateRange(UUID userId,
-                                                           Instant fromDate,
-                                                           Instant toDate) {
-        return listAll("userId = :userId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
-            OrderBy.by("bookingDateTime"),
-            Map.of(
-                "userId", userId,
-                "fromDate", fromDate,
-                "toDate", toDate
-            ));
-    }
+    public Page<AccountTransaction> findByFilter(UUID userId,
+                                                 TransactionFilter filter,
+                                                 int page,
+                                                 int pageSize) {
+        StringBuilder query = new StringBuilder("userId = :userId");
+        Map<String, Object> params = new HashMap();
+        params.put("userId", userId);
 
-    /**
-     * Returns the transactions, for the identified account, whose booking-datetime is between
-     * the given date range; and ordered by the booking-datetime ascending.
-     *
-     * @param accountId the account whose transactions are to be returned.
-     * @param fromDate the date-time from which the search will begin (inclusive)
-     * @param toDate the date-time to which the search will end (exclusive).
-     * @return the ordered list of transaction between the given dates.
-     */
-    public List<AccountTransaction> findByAccountAndDateRange(UUID accountId,
-                                                              Instant fromDate,
-                                                              Instant toDate) {
-        return listAll("accountId = :accountId AND bookingDateTime >= :fromDate AND bookingDateTime < :toDate",
-            OrderBy.by("bookingDateTime"),
-            Map.of("accountId", accountId,
-                "fromDate", fromDate,
-                "toDate", toDate)
-        );
+        if (filter.getAccountId() != null) {
+            query.append(" AND accountId = :accountId");
+            params.put("accountId", filter.getAccountId());
+        }
+        if (filter.getFromDate() != null) {
+            query.append(" AND bookingDateTime >= :fromDate");
+            params.put("fromDate", filter.getFromDate());
+        }
+        if (filter.getToDate() != null) {
+            query.append(" AND bookingDateTime < :toDate");
+            params.put("toDate", filter.getToDate());
+        }
+        if (filter.getMinAmount() != null) {
+            query.append(" AND amount >= :minAmount");
+            params.put("minAmount", filter.getMinAmount());
+        }
+        if (filter.getMaxAmount() != null) {
+            query.append(" AND amount <= :maxAmount");
+            params.put("maxAmount", filter.getMaxAmount());
+        }
+        if (filter.getReference() != null) {
+            query.append(" AND reference like :reference");
+            params.put("reference", "%" + filter.getReference() + "%");
+        }
+        if (filter.getInfo() != null) {
+            query.append(" AND additional_information like :info");
+            params.put("info", "%" + filter.getInfo() + "%");
+        }
+        if (filter.getCreditor() != null) {
+            query.append(" AND creditor_name like :creditor");
+            params.put("creditor", "%" + filter.getCreditor() + "%");
+        }
+
+        return pageAll(query.toString(), page, pageSize,
+            OrderBy.by("bookingDateTime", OrderBy.Direction.Descending), params);
     }
 }

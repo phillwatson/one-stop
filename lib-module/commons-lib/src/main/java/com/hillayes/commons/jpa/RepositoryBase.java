@@ -100,6 +100,11 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
         return findByPage(find(query, toSort(orderBy), parameters), pageNumber, pageSize);
     }
 
+    public Page<Entity> pageAll(String query, int page, int pageSize,
+                                OrderBy orderBy, Map<String,Object> parameters) {
+        return findByPage(find(query, toSort(orderBy), parameters), page, pageSize);
+    }
+
     /**
      * Returns the identified page of results from the given query.
      * @param query the query to retrieve the full results.

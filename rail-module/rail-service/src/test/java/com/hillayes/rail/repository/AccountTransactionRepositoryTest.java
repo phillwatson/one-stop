@@ -1,7 +1,6 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
-import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
@@ -54,8 +53,10 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the most recent transaction by bookingDate is queried
-        OrderBy sort = OrderBy.by("bookingDateTime").descending();
-        Page<AccountTransaction> result = fixture.findByAccountId(account.getId(), sort, 0, 1);
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(account.getId())
+            .build();
+        Page<AccountTransaction> result = fixture.findByFilter(account.getUserId(), filter, 0, 1);
 
         // then: the result contains only the most recent transaction
         assertEquals(1, result.getContentSize());
@@ -81,22 +82,25 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the transactions are returned by date range
-        Instant dateFrom = Instant.now().minus(Duration.ofDays(21));
-        Instant dateTo = Instant.now();
-        List<AccountTransaction> result =
-            fixture.findByUserAndDateRange(consent.getUserId(), dateFrom, dateTo);
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(account.getId())
+            .fromDate(Instant.now().minus(Duration.ofDays(21)))
+            .toDate(Instant.now())
+            .build();
+        Page<AccountTransaction> result =
+            fixture.findByFilter(consent.getUserId(), filter, 0, 10 );
 
         // then: the results contain the transaction with the date range
         assertFalse(result.isEmpty());
-        assertEquals(2, result.size());
+        assertEquals(2, result.getContentSize());
 
         // and: the transactions belong to the identified user
         result.forEach(transaction -> assertEquals(consent.getUserId(), transaction.getUserId()));
 
         // and: the transactions are within the date range
         result.forEach(transaction -> {
-            assertTrue(transaction.getBookingDateTime().compareTo(dateFrom) >= 0);
-            assertTrue(transaction.getBookingDateTime().isBefore(dateTo));
+            assertTrue(transaction.getBookingDateTime().compareTo(filter.getFromDate()) >= 0);
+            assertTrue(transaction.getBookingDateTime().isBefore(filter.getToDate()));
         });
     }
 
@@ -123,23 +127,26 @@ public class AccountTransactionRepositoryTest {
         }
 
         // when: the transactions are returned by date range for each account
-        Instant dateFrom = Instant.now().minus(Duration.ofDays(21));
-        Instant dateTo = Instant.now();
         accounts.forEach(account -> {
-            List<AccountTransaction> result =
-                fixture.findByAccountAndDateRange(account.getId(), dateFrom, dateTo);
+            TransactionFilter filter = TransactionFilter.builder()
+                .accountId(account.getId())
+                .fromDate(Instant.now().minus(Duration.ofDays(21)))
+                .toDate(Instant.now())
+                .build();
+            Page<AccountTransaction> result =
+                fixture.findByFilter(account.getUserId(), filter, 0, 100);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());
-            assertEquals(2, result.size());
+            assertEquals(2, result.getContentSize());
 
             // and: each transaction belongs to the identified account
             result.forEach(transaction -> assertEquals(account.getId(), transaction.getAccountId()));
 
             // and: the transactions are within the date range
             result.forEach(transaction -> {
-                assertTrue(transaction.getBookingDateTime().compareTo(dateFrom) >= 0);
-                assertTrue(transaction.getBookingDateTime().isBefore(dateTo));
+                assertTrue(transaction.getBookingDateTime().compareTo(filter.getFromDate()) >= 0);
+                assertTrue(transaction.getBookingDateTime().isBefore(filter.getToDate()));
             });
         });
     }
@@ -164,7 +171,10 @@ public class AccountTransactionRepositoryTest {
         fixture.flush();
 
         // when: the first page transactions are returned by account ID
-        Page<AccountTransaction> page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 0, 3);
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(account.getId())
+            .build();
+        Page<AccountTransaction> page = fixture.findByFilter(account.getUserId(), filter, 0, 3);
 
         // then: the first page transactions are returned by account ID
         assertNotNull(page);
@@ -175,7 +185,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the second page transactions are returned by account ID
-        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 1, 3);
+        page = fixture.findByFilter(account.getUserId(), filter, 1, 3);
 
         // then: the second page transactions are returned by account ID
         assertNotNull(page);
@@ -186,7 +196,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the last page transactions are returned by account ID
-        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 2, 3);
+        page = fixture.findByFilter(account.getUserId(), filter, 2, 3);
 
         // then: the last page transactions are returned by account ID
         assertNotNull(page);
@@ -197,7 +207,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the page above the last is selected
-        page = fixture.findByAccountId(account.getId(), OrderBy.by("bookingDateTime"), 12, 3);
+        page = fixture.findByFilter(account.getUserId(), filter, 12, 3);
 
         // then: the page above the last is selected
         assertNotNull(page);

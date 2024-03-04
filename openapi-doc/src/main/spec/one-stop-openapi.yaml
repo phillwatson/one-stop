@@ -639,70 +639,77 @@ paths:
         500:
           description: "Internal server error"
 
-  /rails/transactions/dates:
+  /rails/transactions:
     get:
       tags: [ "transactions" ]
-      summary: "Get all transactions for a given date range"
-      description: "Get all transactions for the authenticated user over a given date range"
-      operationId: "getTransactionsForDateRange"
+      summary: "Get the calling user's transactions"
+      description: |
+        Get the transactions for the authenticated user, filtered by the given values.
+        The results will be returned in descending booking date order.
+      operationId: "getTransactions"
       security:
         - cookieAuth: [ ]
       parameters:
+        - $ref: "#/components/parameters/PageIndexParam"
+        - $ref: "#/components/parameters/PageSizeParam"
         - name: "account-id"
           in: "query"
-          description: "ID of account to filter transactions"
+          description: ID of account to filter transactions.
           required: false
           schema:
             type: string
             format: uuid
         - name: "from-date"
           in: "query"
-          description: "The date, inclusive, from which the transaction list should start"
+          description: The date, inclusive, from which the transaction list should start.
           required: false
           schema:
             type: string
             format: date
         - name: "to-date"
           in: "query"
-          description: "The date, exclusive, to which the transaction list should end"
+          description: The date, inclusive, to which the transaction list should end.
           required: false
           schema:
             type: string
             format: date
-      responses:
-        200:
-          description: "successful operation"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TransactionList"
-        400:
-          description: "Invalid ID supplied"
-        401:
-          description: "Unauthorized"
-        404:
-          description: "Account not found"
-        500:
-          description: "Internal server error"
-
-  /rails/transactions:
-    get:
-      tags: [ "transactions" ]
-      summary: "Get all transactions"
-      description: "Get all transactions for the authenticated user"
-      operationId: "getTransactions"
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "account-id"
+        - name: "min-amount"
           in: "query"
-          description: "ID of account to filter transactions"
+          description: |
+            The minimum amount of the transaction. The value can be negative, but less than max-amount if specified.
+          required: false
+          schema:
+            type: number
+            format: float
+        - name: "max-amount"
+          in: "query"
+          description: |
+            The maximum amount of the transaction. The value can be negative, but greater than min-amount if specified.
+          required: false
+          schema:
+            type: number
+            format: float
+        - name: "reference"
+          in: "query"
+          description: |
+            Any occurrence of the value within the transaction reference will match. The comparison is case-insensitive.
+          required: false
+          schema:
+              type: string
+        - name: "info"
+          in: "query"
+          description: |
+            Any occurrence of the value within the additional info will match. The comparison is case-insensitive.
           required: false
           schema:
             type: string
-            format: uuid
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - name: "creditor"
+          in: "query"
+          description: |
+            Any occurrence of the value within the creditor name will match. The comparison is case-insensitive.
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: "successful operation"
@@ -1582,15 +1589,6 @@ components:
               description: The list of transactions
               items:
                 $ref: "#/components/schemas/TransactionSummaryResponse"
-
-    TransactionList:
-      type: object
-      properties:
-        transactions:
-          type: array
-          description: The list of transactions
-          items:
-            $ref: "#/components/schemas/TransactionSummaryResponse"
 
     NotificationResponse:
       type: object

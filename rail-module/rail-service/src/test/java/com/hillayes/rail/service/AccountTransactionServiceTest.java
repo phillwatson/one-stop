@@ -5,13 +5,13 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
+import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,21 +38,17 @@ public class AccountTransactionServiceTest {
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .limit(23)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .toList();
-        when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(), anyInt(), anyInt()))
-            .then(invocation -> {
-                int pageIndex = invocation.getArgument(2);
-                int pageSize = invocation.getArgument(3);
-                return Page.of(transactions, pageIndex, pageSize);
-            });
+        // and: a collection of transactions belonging to that account
+        List<AccountTransaction> transactions = mockTransactions(account);
+
+        // and: a filter containing the account ID
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(account.getId())
+            .build();
 
         // when: the transactions are requested
         Page<AccountTransaction> result =
-            fixture.getTransactions(account.getUserId(), account.getId(), 2, 5);
+            fixture.getTransactions(account.getUserId(), filter, 2, 5);
 
         // then: the transactions are returned
         assertNotNull(result);
@@ -66,7 +62,7 @@ public class AccountTransactionServiceTest {
         assertEquals(5, result.getTotalPages());
 
         // and: the transactions are retrieved by account ID
-        verify(accountTransactionRepository).findByAccountId(eq(account.getId()), any(), anyInt(), anyInt());
+        verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), eq(filter), anyInt(), anyInt());
 
         // and: the account is verified
         verify(accountService).getAccount(account.getUserId(), account.getId());
@@ -78,22 +74,16 @@ public class AccountTransactionServiceTest {
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .limit(23)
-            .toList();
-        when(accountTransactionRepository.findByAccountId(eq(account.getId()), any(), anyInt(), anyInt()))
-            .then(invocation -> {
-                int pageIndex = invocation.getArgument(2);
-                int pageSize = invocation.getArgument(3);
-                return Page.of(transactions, pageIndex, pageSize);
-            });
+        // and: a collection of transactions belonging to that account
+        mockTransactions(account);
 
         // when: the transactions are requested - with wrong account ID
         // then: an NotFoundException is thrown
+        TransactionFilter filter = TransactionFilter.builder()
+            .accountId(UUID.randomUUID())
+            .build();
         assertThrows(NotFoundException.class, () ->
-            fixture.getTransactions(account.getUserId(), UUID.randomUUID(), 2, 5)
+            fixture.getTransactions(account.getUserId(), filter, 2, 5)
         );
     }
 
@@ -103,19 +93,10 @@ public class AccountTransactionServiceTest {
         Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .limit(23)
-            .toList();
-        when(accountTransactionRepository.findByUserId(eq(account.getUserId()), any(), anyInt(), anyInt()))
-            .then(invocation -> {
-                int pageIndex = invocation.getArgument(2);
-                int pageSize = invocation.getArgument(3);
-                return Page.of(transactions, pageIndex, pageSize);
-            });
+        // and: a collection of transactions belonging to that account
+        List<AccountTransaction> transactions = mockTransactions(account);
 
-        // when: the transactions are requested - without account ID
+        // when: the transactions are requested - without account ID (or any other filter)
         Page<AccountTransaction> result =
             fixture.getTransactions(account.getUserId(), null, 2, 5);
 
@@ -131,92 +112,7 @@ public class AccountTransactionServiceTest {
         assertEquals(5, result.getTotalPages());
 
         // and: the transactions are retrieved by user ID
-        verify(accountTransactionRepository).findByUserId(eq(account.getUserId()), any(), anyInt(), anyInt());
-
-        // and: the account is NOT verified
-        verify(accountService, never()).getAccount(account.getUserId(), account.getId());
-    }
-
-    @Test
-    public void testListTransactions_WithAccountId() {
-        // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
-
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .limit(23)
-            .toList();
-        when(accountTransactionRepository.findByAccountAndDateRange(eq(account.getId()), any(), any()))
-            .thenReturn(transactions);
-
-        // when: the transactions are requested - with account ID
-        List<AccountTransaction> result =
-            fixture.listTransactions(account.getUserId(), account.getId(),
-                LocalDate.now().minusDays(20), LocalDate.now());
-
-        // then: the transactions are returned
-        assertNotNull(result);
-
-        // and: the accounts are returned
-        assertEquals(transactions.size(), result.size());
-
-        // and: the transactions are retrieved by account ID
-        verify(accountTransactionRepository).findByAccountAndDateRange(eq(account.getId()), any(), any());
-
-        // and: the account is verified
-        verify(accountService).getAccount(account.getUserId(), account.getId());
-    }
-
-    @Test
-    public void testListTransactions_WithWrongAccountId() {
-        // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
-
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .limit(23)
-            .toList();
-        when(accountTransactionRepository.findByAccountAndDateRange(eq(account.getId()), any(), any()))
-            .thenReturn(transactions);
-
-        // when: the transactions are requested - with account ID
-        assertThrows(NotFoundException.class, () ->
-            fixture.listTransactions(account.getUserId(), UUID.randomUUID(),
-                LocalDate.now().minusDays(20), LocalDate.now())
-        );
-    }
-
-    @Test
-    public void testListTransactions_WithNoAccountId() {
-        // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
-
-        // and: a collection of transactions
-        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
-            .map(n -> TestData.mockAccountTransaction(account))
-            .limit(23)
-            .toList();
-        when(accountTransactionRepository.findByUserAndDateRange(eq(account.getUserId()), any(), any()))
-            .thenReturn(transactions);
-
-        // when: the transactions are requested - with account ID
-        List<AccountTransaction> result =
-            fixture.listTransactions(account.getUserId(), null,
-                LocalDate.now().minusDays(20), LocalDate.now());
-
-        // then: the transactions are returned
-        assertNotNull(result);
-
-        // and: the accounts are returned
-        assertEquals(transactions.size(), result.size());
-
-        // and: the transactions are retrieved by user ID
-        verify(accountTransactionRepository).findByUserAndDateRange(eq(account.getUserId()), any(), any());
+        verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt());
 
         // and: the account is NOT verified
         verify(accountService, never()).getAccount(account.getUserId(), account.getId());
@@ -252,5 +148,21 @@ public class AccountTransactionServiceTest {
         // then: NO transaction is returned
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    private List<AccountTransaction> mockTransactions(Account account) {
+        // and: a collection of transactions belonging to that account
+        List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
+            .limit(23)
+            .map(n -> TestData.mockAccountTransaction(account))
+            .toList();
+        when(accountTransactionRepository.findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt()))
+            .then(invocation -> {
+                int pageIndex = invocation.getArgument(2);
+                int pageSize = invocation.getArgument(3);
+                return Page.of(transactions, pageIndex, pageSize);
+            });
+
+        return transactions;
     }
 }

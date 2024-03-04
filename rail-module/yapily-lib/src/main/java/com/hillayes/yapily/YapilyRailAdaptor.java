@@ -193,10 +193,10 @@ public class YapilyRailAdaptor implements RailProviderApi {
                 consentsService.deleteConsent(id);
 
                 // if user has no more consents, delete user
-// TODO: deleting user will prevent user subsequent registrations
-//                if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
-//                    usersService.deleteUser(consent.getUserUuid());
-//                }
+                // TODO: deleting user will prevent user subsequent registrations
+                //  if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
+                //      usersService.deleteUser(consent.getUserUuid());
+                //  }
                 return true;
             })
             .orElse(false);

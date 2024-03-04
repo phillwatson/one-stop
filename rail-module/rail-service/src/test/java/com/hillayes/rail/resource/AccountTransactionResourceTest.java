@@ -5,11 +5,14 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.service.AccountService;
 import com.hillayes.rail.service.AccountTransactionService;
+import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
+import static org.apache.commons.lang3.RandomStringUtils.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -31,36 +34,6 @@ public class AccountTransactionResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetTransactionsForDateRange() {
-        UUID userId = UUID.fromString(userIdStr);
-
-        // and: a date range for the transactions
-        LocalDate fromDate = LocalDate.now().minusDays(30);
-        LocalDate toDate = LocalDate.now();
-
-        // when: client calls the endpoint
-        TransactionList response = given()
-            .request()
-            .queryParam("from-date", fromDate.toString())
-            .queryParam("to-date", toDate.toString())
-            .contentType(JSON)
-            .when()
-            .get("/api/v1/rails/transactions/dates")
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract()
-            .as(TransactionList.class);
-
-        // then: the account-trans-service is called with the authenticated user-id, and date range
-        verify(accountTransactionService).listTransactions(userId, null, fromDate, toDate);
-
-        // and: no account look-up is performed
-        verifyNoInteractions(accountService);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
     public void testGetTransactions() {
         UUID userId = UUID.fromString(userIdStr);
 
@@ -69,7 +42,7 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(userId, null, page, pageSize))
+        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
 
         // when: client calls the endpoint
@@ -87,7 +60,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .as(PaginatedTransactions.class);
 
         // then: the account-trans-service is called with the authenticated user-id and page
-        verify(accountTransactionService).getTransactions(userId, null, page, pageSize);
+        verify(accountTransactionService).getTransactions(eq(userId), any(), eq(page), eq(pageSize));
 
         // and: no account look-up is performed
         verifyNoInteractions(accountService);
@@ -95,7 +68,7 @@ public class AccountTransactionResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetTransactions_WithAccountId() {
+    public void testGetTransactions_WithFilter() {
         UUID userId = UUID.fromString(userIdStr);
         UUID accountId = UUID.randomUUID();
 
@@ -104,8 +77,17 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(userId, accountId, page, pageSize))
+        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
+
+        // and: transaction filter properties
+        LocalDate fromDate = LocalDate.now().minusDays(10);
+        LocalDate toDate = LocalDate.now().minusDays(2);
+        Float minAmount = 12.45f;
+        Float maxAmount = 45.67f;
+        String reference = randomAlphanumeric(10);
+        String info = randomAlphanumeric(10);
+        String creditor =randomAlphanumeric(10);
 
         // when: client calls the endpoint
         PaginatedTransactions response = given()
@@ -113,6 +95,13 @@ public class AccountTransactionResourceTest extends TestBase {
             .queryParam("page", page)
             .queryParam("page-size", pageSize)
             .queryParam("account-id", accountId)
+            .queryParam("from-date", fromDate.toString())
+            .queryParam("to-date", toDate.toString())
+            .queryParam("min-amount", minAmount)
+            .queryParam("max-amount", maxAmount)
+            .queryParam("reference", reference)
+            .queryParam("info", info)
+            .queryParam("creditor", creditor)
             .contentType(JSON)
             .when()
             .get("/api/v1/rails/transactions")
@@ -123,16 +112,26 @@ public class AccountTransactionResourceTest extends TestBase {
             .as(PaginatedTransactions.class);
 
         // then: the account-trans-service is called with the authenticated user-id and page
-        verify(accountTransactionService).getTransactions(userId, accountId, page, pageSize);
+        ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
+        verify(accountTransactionService).getTransactions(eq(userId), filterCaptor.capture(), eq(page), eq(pageSize));
 
-        // and: no account look-up is performed
-        verifyNoInteractions(accountService);
+        // and: the filter contains the account-id
+        TransactionFilter capturedFilter = filterCaptor.getValue();
+        assertNotNull(capturedFilter);
+        assertEquals(accountId, capturedFilter.getAccountId());
 
-        // and: the page links contain given parameters
+        // and: the page links contain given filter properties
         PageLinks links = response.getLinks();
-        assertTrue(links.getFirst().getQuery().contains("account-id=" + accountId));
-        assertTrue(links.getFirst().getQuery().contains("page=" + 0));
+        assertTrue(links.getFirst().getQuery().contains("page=0"));
         assertTrue(links.getFirst().getQuery().contains("page-size=" + pageSize));
+        assertTrue(links.getFirst().getQuery().contains("account-id=" + accountId));
+        assertTrue(links.getFirst().getQuery().contains("from-date=" + fromDate));
+        assertTrue(links.getFirst().getQuery().contains("to-date=" + toDate));
+        assertTrue(links.getFirst().getQuery().contains("min-amount=" + minAmount));
+        assertTrue(links.getFirst().getQuery().contains("max-amount=" + maxAmount));
+        assertTrue(links.getFirst().getQuery().contains("reference=" + reference));
+        assertTrue(links.getFirst().getQuery().contains("info=" + info));
+        assertTrue(links.getFirst().getQuery().contains("creditor=" + creditor));
     }
 
     @Test
