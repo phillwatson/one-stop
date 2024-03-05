@@ -17,8 +17,6 @@ import TransactionSummaryList from './transaction-summary';
 
 interface Props {
   accounts: Array<AccountDetail>;
-  onSelect: (account: AccountDetail) => void;
-  onDelete: (account: AccountDetail) => void;
 }
 
 const colhead: SxProps = {
@@ -42,11 +40,6 @@ export default function AccountList(props: Props) {
     } else {
       setSelectedAccounts([...selectedAccounts, account.id])
     }
-    //props.onSelect(accountId);
-  }
-
-  function handleDeleteAccount(account: AccountDetail) {
-    props.onDelete(account);
   }
 
   const balanceTotals: Array<AccountBalance> = useMemo(() => {
@@ -91,7 +84,7 @@ export default function AccountList(props: Props) {
           { props.accounts && props.accounts
             .sort((a, b) => (a.institution.name !== b.institution.name) ? a.institution.name < b.institution.name ? -1 : 1 : (a.iban < b.iban) ? -1 : 1 )
             .map(account =>
-              <AccountRow key={account.id} account={account} onSelect={handleSelectAccount} onDelete={handleDeleteAccount}>
+              <AccountRow key={account.id} account={account} onSelect={handleSelectAccount}>
                 <Collapse in={isSelected(account.id)} timeout="auto" unmountOnExit>
                   <TransactionSummaryList accountId={account.id}/>
                 </Collapse>
@@ -102,7 +95,7 @@ export default function AccountList(props: Props) {
             <TableCell colSpan={6} sx={balanceRow}></TableCell>
             <TableCell colSpan={2} align="center" sx={colhead}>Totals</TableCell>
           </TableRow>
-          { balanceTotals.length > 1 && balanceTotals.map( balance =>
+          { balanceTotals.map( balance =>
             <TableRow key={balance.id}>
               <TableCell colSpan={6} sx={balanceRow}></TableCell>
               <TableCell>{balance.type}</TableCell>

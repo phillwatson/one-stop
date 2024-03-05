@@ -18,7 +18,6 @@ import { AccountDetail } from '../../model/account.model';
 interface Props extends PropsWithChildren {
   account: AccountDetail;
   onSelect: (account: AccountDetail) => void;
-  onDelete: (account: AccountDetail) => void;
 }
 
 export default function AccountList(props: Props) {
