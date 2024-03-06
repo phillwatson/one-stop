@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import GraphIcon from '@mui/icons-material/Equalizer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 
@@ -50,6 +51,12 @@ export default function AccountList(props: Props) {
     navigation(`/accounts/${accountId}/transactions`);
   }
 
+  function showGraph(accountId: string) { 
+    closeMenu();
+    console.log("Show graph");
+    navigation(`/accounts/${accountId}/graph`);
+  }
+
   function AccountMenu(props: { accountId: string }) {
     return(
         <Menu
@@ -61,6 +68,10 @@ export default function AccountList(props: Props) {
           <MenuItem onClick={() => showAccount(props.accountId)} sx={{ width: 190, maxWidth: '100%' }}>
             <ListItemIcon><ReadMoreIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Show More...</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => showGraph(props.accountId)} >
+            <ListItemIcon><GraphIcon fontSize="small"/></ListItemIcon>
+            <ListItemText>Show Graph...</ListItemText>
           </MenuItem>
           <MenuItem onClick={exportAccount}>
             <ListItemIcon><FileDownloadIcon fontSize="small"/></ListItemIcon>
