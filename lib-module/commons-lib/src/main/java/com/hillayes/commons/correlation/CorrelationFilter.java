@@ -20,7 +20,7 @@ import java.util.UUID;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 @Slf4j
-public class RequestFilter implements ContainerRequestFilter, ContainerResponseFilter {
+public class CorrelationFilter implements ContainerRequestFilter, ContainerResponseFilter {
     /**
      * The optional HTTP header, of the incoming request, from which a correlation
      * ID may be passed by the calling component. This is used for service-2-service
