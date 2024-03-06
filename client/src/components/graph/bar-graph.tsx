@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 
+import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
 import { BarChart } from "@mui/x-charts/BarChart";
 
 import { useNotificationDispatch } from "../../contexts/notification-context";
-import AccountService from '../../services/account.service';
 import ServiceErrorResponse from '../../model/service-error';
+import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
 
 interface Props {
@@ -16,41 +17,65 @@ interface Props {
 export default function BarGraph(props: Props) {
   const showNotification = useNotificationDispatch();
   const [xAxis, setXAxis] = useState<Array<string>>([]);
-  const [yAxis, setYAxis] = useState<Array<number>>([]);
+  const [yAxis, setYAxis] = useState<Array<{
+    credits: number;
+    debits: number;
+  }>>([]);
 
   useEffect(() => {
-    // create an initial range of dates with 0 values
-    const range = new Map<string, number>();
-    var date = new Date(props.fromDate);
-    while (date <= props.toDate) {
-      range.set(date.toLocaleDateString(), 0);
-      date.setDate(date.getDate() + 1);
-    }
-
     // fetch transactions and group the amounts by date
     AccountService.fetchTransactions(props.account.id, props.fromDate, props.toDate)
       .then( transactions => {
-        const data = transactions.reduce((result, current) => {
-          const date = new Date(current.date).toLocaleDateString();
-          return result.set(date, (result.get(date) || 0) + current.amount);
-        }, range)
+        // create an initial range of dates with 0 values
+        const range = new Map<string, any>();
+        var date = new Date(props.fromDate);
+        while (date <= props.toDate) {
+          range.set(date.toLocaleDateString(), { credits: 0, debits: 0 });
+          date.setDate(date.getDate() + 1);
+        }
 
-        setXAxis(Array.from(data.keys()));
-        setYAxis(Array.from(data.values()));
+        transactions.forEach(transaction => {
+          const date = new Date(transaction.date).toLocaleDateString();
+          const entry = range.get(date);
+          (transaction.amount < 0) ? entry.debits += transaction.amount : entry.credits += transaction.amount;
+        })
+
+        setXAxis(Array.from(range.keys()));
+        setYAxis(Array.from(range.values()));
       })
       .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }));
   }, [props, showNotification]);
 
-  if ((xAxis.length === 0) || (yAxis.length === 0)) return <div>Loading...</div>;
+  if ((xAxis.length === 0) || (yAxis.length === 0))
+    return <>Loading...</>;
+
   return (
-    <BarChart xAxis={[{
-                        id: 'dates',
-                        data: xAxis,
-                        scaleType: 'band',
-                      }]}
-        series={[ { data: yAxis, } ]}
-        height={ 300 }
-        margin={{ top: 20, right: 20, bottom: 20, left: 100 }}
-    />
+    <>
+      <BarChart
+          dataset={ yAxis }
+          series={[
+            { dataKey: 'credits', stack: 'a', color: '#00BF00', label: 'credits' },
+            { dataKey: 'debits',  stack: 'a', color: '#BF0000', label: 'debits' }
+          ]}
+          yAxis={[{ id: 'amount', scaleType: 'linear' }]}
+          xAxis={[{ id: 'dates', data: xAxis, scaleType: 'band', tickLabelInterval: (_, index) => index % 2 === 0 }]}
+          height={ 450 }
+          margin={{ top: 50, right: 10, bottom: 70, left: 120 }}
+          bottomAxis={{
+            axisId: 'dates',
+            tickLabelStyle: {
+              angle: -40,
+              textAnchor: 'end',
+              fontSize: 12,
+            }
+          }}
+      >
+        <ChartsReferenceLine
+            y={ 0 }
+            lineStyle={{ strokeDasharray: '6 10' }}
+            labelAlign="start"
+          />
+      </BarChart>
+    </>
   );
 }
