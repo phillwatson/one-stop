@@ -25,7 +25,7 @@ export default function AccountHeader(props: Props) {
             <TableHead>
               <TableRow key={props.account.id}>
                 <TableCell size="small" padding='none'>
-                  <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="68px" height="68px"/>
+                  <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="52px" height="52px"/>
                 </TableCell>
                 <TableCell size="small">{props.account.institution.name}</TableCell>
                 <TableCell size="small">{props.account.ownerName}</TableCell>
