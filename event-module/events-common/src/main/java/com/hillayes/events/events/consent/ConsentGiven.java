@@ -55,10 +55,4 @@ public class ConsentGiven {
      * The date-time at which the agreement will expire.
      */
     private Instant agreementExpires;
-
-    /**
-     * The ID of the requisition to grant access to the user's bank account. This
-     * record is held in the rail providing the open-banking service.
-     */
-    private String requisitionId;
 }

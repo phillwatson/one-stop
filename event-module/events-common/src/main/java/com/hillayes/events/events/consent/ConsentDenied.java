@@ -56,12 +56,6 @@ public class ConsentDenied {
     private Instant agreementExpires;
 
     /**
-     * The ID of the requisition to grant access to the user's bank account. This
-     * record is held in the rail providing the open-banking service.
-     */
-    private String requisitionId;
-
-    /**
      * Records the error code returned by the rail.
      */
     private String errorCode;

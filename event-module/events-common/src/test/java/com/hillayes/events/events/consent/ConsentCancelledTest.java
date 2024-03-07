@@ -18,7 +18,7 @@ public class ConsentCancelledTest {
             .institutionId(null)
             .agreementId(null)
             .agreementExpires(null)
-            .requisitionId(null)
+            .institutionName(null)
             .build();
 
         String json = objectMapper.writeValueAsString(instance);

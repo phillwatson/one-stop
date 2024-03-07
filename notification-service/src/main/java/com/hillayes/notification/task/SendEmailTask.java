@@ -68,8 +68,12 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
 
         Map<String, Object> params = new HashMap<>();
 
+        // use any recipient in the payload, otherwise try to identify the user
         EmailRecipient recipient = payload.recipient;
+
+        // if the payload identifies a user
         if (payload.userId != null) {
+            // try to identify the user
             User user = userService.getUser(payload.userId).orElse(null);
             if (user == null) {
                 if (recipient == null) {
@@ -77,7 +81,10 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
                     return TaskConclusion.COMPLETE;
                 }
             } else {
+                // add user details to the template parameters
                 params.put("user", user);
+
+                // if payload doesn't have a recipient, use the user as the recipient
                 if (payload.recipient == null) {
                     recipient = new EmailRecipient(user);
                 }

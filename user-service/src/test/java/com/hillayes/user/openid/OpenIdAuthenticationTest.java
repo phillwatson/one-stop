@@ -87,6 +87,9 @@ public class OpenIdAuthenticationTest {
         // and: the user's email address has been updated
         assertEquals(idToken.getClaimValueAsString("email").toLowerCase(), user.getEmail());
         verify(userEventSender).sendUserUpdated(user);
+
+        // and: no other events are issued
+        verifyNoMoreInteractions(userEventSender);
     }
 
     @Test
@@ -187,8 +190,11 @@ public class OpenIdAuthenticationTest {
         assertNotNull(oidcIdentity);
         assertEquals(idToken.getSubject(), oidcIdentity.getSubject());
 
-        // and: no events are issued
-        verifyNoInteractions(userEventSender);
+        // and: a NewAuthProvider event is issued
+        verify(userEventSender).sendNewAuthProvider(user, authProvider);
+
+        // and: no other events are issued
+        verifyNoMoreInteractions(userEventSender);
     }
 
     @Test
