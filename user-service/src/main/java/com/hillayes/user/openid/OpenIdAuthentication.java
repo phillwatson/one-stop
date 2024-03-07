@@ -1,6 +1,5 @@
 package com.hillayes.user.openid;
 
-import com.hillayes.auth.crypto.PasswordCrypto;
 import com.hillayes.commons.Strings;
 import com.hillayes.openid.AuthProvider;
 import com.hillayes.openid.OpenIdAuth;
@@ -31,9 +30,6 @@ public class OpenIdAuthentication {
     @Inject
     UserRepository userRepository;
 
-    @Inject
-    PasswordCrypto passwordCrypto;
-
     @Inject @Any
     Instance<OpenIdAuth> openIdAuths;
 
@@ -62,7 +58,7 @@ public class OpenIdAuthentication {
     }
 
     /**
-     * Exchanges, with the identifed AuthProvider, the given auth-code for an ID-Token and
+     * Exchanges, with the identified AuthProvider, the given auth-code for an ID-Token and
      * uses the ID-Token to authenticate the user.
      * <p>
      * Each user holds is associated with one or more OpenID Connect identities; by their
