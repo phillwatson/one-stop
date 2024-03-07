@@ -85,7 +85,7 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
                 params.put("user", user);
 
                 // if payload doesn't have a recipient, use the user as the recipient
-                if (payload.recipient == null) {
+                if (recipient == null) {
                     recipient = new EmailRecipient(user);
                 }
             }
