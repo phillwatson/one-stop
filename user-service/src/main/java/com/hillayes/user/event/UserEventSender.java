@@ -3,10 +3,7 @@ package com.hillayes.user.event;
 import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.commons.Strings;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.auth.AccountActivity;
-import com.hillayes.events.events.auth.AuthenticationFailed;
-import com.hillayes.events.events.auth.SuspiciousActivity;
-import com.hillayes.events.events.auth.UserAuthenticated;
+import com.hillayes.events.events.auth.*;
 import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserRegistered;
@@ -84,6 +81,16 @@ public class UserEventSender {
             .build());
     }
 
+    public void sendAccountActivity(User user, SuspiciousActivity activity) {
+        log.debug("Sending AccountActivity event [userId: {}]", user.getId());
+        eventSender.send(Topic.USER, AccountActivity.builder()
+            .userId(user.getId())
+            .activity(activity)
+            .dateRecorded(Instant.now())
+            .userAgent(requestHeaders.getFirst("User-Agent"))
+            .build());
+    }
+
     public void sendUserAuthenticated(User user, AuthProvider authProvider) {
         log.debug("Sending UserAuthenticated event [userId: {}]", user.getId());
         eventSender.send(Topic.USER_AUTH, UserAuthenticated.builder()
@@ -105,12 +112,12 @@ public class UserEventSender {
             .build());
     }
 
-    public void sendAccountActivity(User user, SuspiciousActivity activity) {
-        log.debug("Sending AccountActivity event [userId: {}]", user.getId());
-        eventSender.send(Topic.USER, AccountActivity.builder()
+    public void sendNewAuthProvider(User user, AuthProvider authProvider) {
+        log.debug("Sending NewAuthProvider event [userId: {}, reason: {}]", user.getId(), authProvider);
+        eventSender.send(Topic.USER_AUTH, NewAuthProvider.builder()
             .userId(user.getId())
-            .activity(activity)
-            .dateRecorded(Instant.now())
+            .dateLogin(Instant.now())
+            .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .userAgent(requestHeaders.getFirst("User-Agent"))
             .build());
     }

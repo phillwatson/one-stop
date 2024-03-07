@@ -138,6 +138,12 @@ public class OpenIdAuthentication {
                 // record Auth Provider Identity against user
                 user.addOidcIdentity(authProvider, issuer, subject)
                     .setDateLastUsed(Instant.now());
+
+                // if this is an existing user
+                if (user.getId() != null) {
+                    // notify of new Auth Provider
+                    userEventSender.sendNewAuthProvider(user, authProvider);
+                }
             }
 
             if (user.getId() == null) {

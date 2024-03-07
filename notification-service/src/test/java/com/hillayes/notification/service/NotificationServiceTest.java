@@ -90,7 +90,6 @@ public class NotificationServiceTest {
         assertEquals(event.getConsentId().toString(), eventMap.get("consentId"));
         assertEquals(event.getInstitutionId(), eventMap.get("institutionId"));
         assertEquals(event.getInstitutionName(), eventMap.get("institutionName"));
-        assertEquals(event.getRequisitionId(), eventMap.get("requisitionId"));
         assertEquals(event.getAgreementId(), eventMap.get("agreementId"));
         assertEquals(event.getAgreementExpires(), Instant.parse((String) eventMap.get("agreementExpires")));
         assertEquals(event.getDateExpired(), Instant.parse((String) eventMap.get("dateExpired")));
@@ -291,7 +290,6 @@ public class NotificationServiceTest {
             .institutionName(randomAlphanumeric(30))
             .dateExpired(Instant.now())
             .agreementId(randomAlphanumeric(30))
-            .requisitionId(randomAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
     }
@@ -304,7 +302,6 @@ public class NotificationServiceTest {
             .institutionName(randomAlphanumeric(30))
             .dateSuspended(Instant.now())
             .agreementId(randomAlphanumeric(30))
-            .requisitionId(randomAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
     }

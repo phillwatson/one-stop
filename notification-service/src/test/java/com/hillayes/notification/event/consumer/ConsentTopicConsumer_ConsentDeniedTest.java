@@ -46,7 +46,6 @@ public class ConsentTopicConsumer_ConsentDeniedTest {
             .institutionName(randomAlphanumeric(30))
             .dateDenied(Instant.now())
             .agreementId(randomAlphanumeric(30))
-            .requisitionId(randomAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
         EventPacket eventPacket = mockEventPacket(event);

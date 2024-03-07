@@ -83,6 +83,11 @@ one-stop:
           subject: "Activity on your OneStop account"
           template: "account-activity/en.html"
 
+      new-oidc-login:
+        en:
+          subject: "New authentication on your OneStop account"
+          template: "new-oidc-login/en.html"
+
       consent-given:
         en:
           subject: "Your OneStop access to $event.institutionName$"

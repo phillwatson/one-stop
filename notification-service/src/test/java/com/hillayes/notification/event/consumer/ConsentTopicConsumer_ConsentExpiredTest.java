@@ -46,7 +46,6 @@ public class ConsentTopicConsumer_ConsentExpiredTest {
             .institutionName(randomAlphanumeric(30))
             .dateExpired(Instant.now())
             .agreementId(randomAlphanumeric(30))
-            .requisitionId(randomAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
         EventPacket eventPacket = mockEventPacket(event);
