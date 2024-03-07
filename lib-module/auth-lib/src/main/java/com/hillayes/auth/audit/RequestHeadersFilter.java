@@ -7,6 +7,8 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.Provider;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +22,10 @@ import java.util.Locale;
 @ApplicationScoped
 @Provider
 public class RequestHeadersFilter implements ContainerRequestFilter, ContainerResponseFilter, RequestHeaders {
+    // an empty, immutable instance of the request headers
+    private static final MultivaluedMap<String, String> EMPTY
+        = new UnmodifiableMultivaluedMap<>(new MultivaluedMapImpl<>());
+
     private static final ThreadLocal<MultivaluedMap<String, String>> requestHeaders = new ThreadLocal<>();
     private static final ThreadLocal<List<Locale>> acceptableLanguages = new ThreadLocal<>();
 
@@ -30,7 +36,7 @@ public class RequestHeadersFilter implements ContainerRequestFilter, ContainerRe
      */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        requestHeaders.set(requestContext.getHeaders());
+        requestHeaders.set(new UnmodifiableMultivaluedMap<>(requestContext.getHeaders()));
         acceptableLanguages.set(requestContext.getAcceptableLanguages());
     }
 
@@ -48,6 +54,14 @@ public class RequestHeadersFilter implements ContainerRequestFilter, ContainerRe
         requestHeaders.remove();
     }
 
+    /**
+     * Returns an unmodifiable map of the request headers. If no headers are present
+     * then an empty map is returned.
+     */
+    public MultivaluedMap<String, String> getAll() {
+        MultivaluedMap<String, String> map = requestHeaders.get();
+        return (map == null) ? EMPTY : map;
+    }
 
     /**
      * Gets the values of the named request header as a single string value.

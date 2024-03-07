@@ -3,6 +3,7 @@ package com.hillayes.user.event;
 import com.hillayes.auth.audit.RequestHeaders;
 import com.hillayes.commons.Strings;
 import com.hillayes.events.domain.Topic;
+import com.hillayes.events.events.UserLocation;
 import com.hillayes.events.events.auth.*;
 import com.hillayes.events.events.user.UserCreated;
 import com.hillayes.events.events.user.UserDeleted;
@@ -88,6 +89,7 @@ public class UserEventSender {
             .activity(activity)
             .dateRecorded(Instant.now())
             .userAgent(requestHeaders.getFirst("User-Agent"))
+            .userLocation(UserLocation.fromHeaders(requestHeaders.getAll()))
             .build());
     }
 
@@ -98,6 +100,7 @@ public class UserEventSender {
             .dateLogin(Instant.now())
             .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .userAgent(requestHeaders.getFirst("User-Agent"))
+            .userLocation(UserLocation.fromHeaders(requestHeaders.getAll()))
             .build());
     }
 
@@ -109,6 +112,7 @@ public class UserEventSender {
             .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .reason(reason)
             .userAgent(requestHeaders.getFirst("User-Agent"))
+            .userLocation(UserLocation.fromHeaders(requestHeaders.getAll()))
             .build());
     }
 
@@ -119,6 +123,7 @@ public class UserEventSender {
             .dateLogin(Instant.now())
             .authProvider((authProvider == null) ? null : authProvider.getProviderName())
             .userAgent(requestHeaders.getFirst("User-Agent"))
+            .userLocation(UserLocation.fromHeaders(requestHeaders.getAll()))
             .build());
     }
 }
