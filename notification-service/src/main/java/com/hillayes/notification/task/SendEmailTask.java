@@ -75,12 +75,7 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
         if (payload.userId != null) {
             // try to identify the user
             User user = userService.getUser(payload.userId).orElse(null);
-            if (user == null) {
-                if (recipient == null) {
-                    log.info("Failed to identify email recipient [userId: {}]", payload.userId);
-                    return TaskConclusion.COMPLETE;
-                }
-            } else {
+            if (user != null) {
                 // add user details to the template parameters
                 params.put("user", user);
 
@@ -95,7 +90,11 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
             params.putAll(payload.params);
         }
 
-        sendEmailService.sendEmail(payload.templateName, recipient.toCorresponder(), params);
+        // if no recipient is identified, the template may provide a default
+        EmailConfiguration.Corresponder corresponder = (recipient == null) ? null : recipient.toCorresponder();
+
+        // send the email
+        sendEmailService.sendEmail(payload.templateName, corresponder, params);
         return TaskConclusion.COMPLETE;
     }
 
