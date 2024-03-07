@@ -36,7 +36,7 @@ one-stop:
 
       user-created:
         en:
-          subject: "Welcome to OneStop $user.preferredName$"
+          subject: "Welcome to One-Stop $user.preferredName$"
           template: "user-created/en.html"
 
       user-updated:
@@ -51,37 +51,37 @@ one-stop:
 
       account-activity:
         en:
-          subject: "Activity on your OneStop account"
+          subject: "Activity on your One-Stop account"
           template: "account-activity/en.html"
 
       new-oidc-login:
         en:
-          subject: "New authentication on your OneStop account"
+          subject: "New authentication on your One-Stop account"
           template: "new-oidc-login/en.html"
 
       consent-given:
         en:
-          subject: "Your OneStop access to $event.institutionName$"
+          subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-given/en.html"
 
       consent-denied:
         en:
-          subject: "Your OneStop access to $event.institutionName$"
+          subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-denied/en.html"
 
       consent-cancelled:
         en:
-          subject: "Your OneStop access to $event.institutionName$"
+          subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-cancelled/en.html"
 
       consent-suspended:
         en:
-          subject: "Your OneStop access to $event.institutionName$"
+          subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-suspended/en.html"
 
       consent-expired:
         en:
-          subject: "Your OneStop access to $event.institutionName$"
+          subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-expired/en.html"
 
   notification:
