@@ -17,6 +17,14 @@
         <url>http://www.hillayes.co.uk</url>
     </organization>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/phillwatson/one-stop</url>
+        </repository>
+    </distributionManagement>
+
     <modules>
         <module>client</module>
 
