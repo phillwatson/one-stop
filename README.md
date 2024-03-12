@@ -7,8 +7,8 @@ their bank accounts and view the transactions from multiple accounts in an
 aggregated fashion.
 
 ## Architecture
-One-Stop has been designed using a micro-service architecture, where
-each service has a specific area of responsibility. However, to keep the
+One-Stop has been designed using an event-driven, micro-service architecture,
+where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 

@@ -12,7 +12,7 @@ Those services wishing to publish events must also include a dependency on the
 library `outbox-lib`.
 
 #### Events vs Actions
-Events notify listeners that some action has occurred. The action is often the change
+Events notify listeners that something has occurred. The event is often the change
 in an entity's state. For example; a new user may have been created, or a user may
 have given consent to access their bank account.
 
@@ -63,12 +63,13 @@ service and account service need to perform explicit actions when a user's conse
 given. Also, any new actions would require changes to the consent service.
 
 These explicit events can often be recognised by the fact that their name is not a
-past participle. For example; SendEmail or RetrieveTransactions. They are often used
-when a service needs to perform: 
-- long-running actions that may cause the client to wait an unacceptable length of time
+past participle. For example; SendEmail or RetrieveTransactions.
+
+Actions are often used when a service needs to perform: 
+- long-running tasks that may cause the client to wait an unacceptable length of time
 for a response
-- actions that have a dependency on remote third-party services, and need to be
-repeated should communication fail
+- a task that has a dependency on remote third-party services, and need to be repeated
+should communication fail
 
 A better solution for such explicit actions would be to use some form of background
 task scheduler; allowing tasks to be queued for execution, and repeated on failure.
