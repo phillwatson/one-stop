@@ -21,14 +21,28 @@ In general, and to reduce clutter, the library modules are grouped under the par
 module `lib-module`. The exception to this is the event libraries; which are grouped
 under the parent module `event-module`.
 
-As mush as possible, framework (e.g. Quarkus) specific code is kept to the outer
+As much as possible, framework specific code (e.g. Quarkus) is kept to the outer
 layers of the application. This is to allow the services to be easily ported to
-other frameworks (e.g. Micrnauts, Spring Boot). Where framework specific code has
+other frameworks (e.g. Micronauts, Spring Boot). Where framework specific code has
 been used, it's exposure to the rest of the application has been minimised. For
 example; the repository classes are "masked" by a simple facade (or adaptor) class,
 rather than exposing a framework specific repository interface.
 
-### Documentation
+#### User Service
+Responsible for on-boarding and managing internal user accounts.
+
+#### Rail Service
+Responsible for communicating with external banking rail services; managing and
+downloading account information.
+
+#### Notification Service
+Responsible for issuing notifications to users and administrators; via email and
+REST API.
+
+#### Audit Service
+Responsible for recording audit events.
+
+## Documentation
 The majority of code contains in-line documentation, and most of the sub-modules
 contain their own README.md file; intended to provide information specific to that
 module.
