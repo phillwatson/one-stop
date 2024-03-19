@@ -4,16 +4,17 @@ import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.config.RailProviderFactory;
+import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.utils.TestApiData;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +24,26 @@ import java.util.stream.Stream;
 import static com.hillayes.rail.utils.TestApiData.mockRailProviderApi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class InstitutionServiceTest {
-    @InjectMock
+    @Mock
     RailProviderFactory railProviderFactory;
 
-    @Inject
+    @Mock
+    ServiceConfiguration config;
+
+    @InjectMocks
     InstitutionService fixture;
 
     @BeforeEach
     public void clearCaches() {
+        openMocks(this);
+
+        ServiceConfiguration.Caches caches = mock(ServiceConfiguration.Caches.class);
+        when(caches.institutions()).thenReturn(Duration.ofSeconds(30));
+        when(config.caches()).thenReturn(caches);
+
         fixture.init();
     }
 

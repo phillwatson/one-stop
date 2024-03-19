@@ -1,6 +1,7 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.commons.net.Gateway;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
@@ -16,16 +17,16 @@ import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import com.hillayes.rail.utils.TestApiData;
 import com.hillayes.rail.utils.TestData;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,31 +40,41 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserConsentServiceTest {
-    @InjectMock
+    @Mock
     UserConsentRepository userConsentRepository;
 
-    @InjectMock
+    @Mock
     InstitutionService institutionService;
 
-    @InjectMock
+    @Mock
     RailProviderFactory railProviderFactory;
 
-    @InjectMock
+    @Mock
     PollConsentJobbingTask pollConsentJobbingTask;
 
-    @InjectMock
+    @Mock
     ConsentEventSender consentEventSender;
 
-    @Inject
+    @Mock
+    RailProviderApi railProviderApi;
+
+    @Mock
+    Gateway gateway;
+
+    @InjectMocks
     UserConsentService fixture;
 
-    private RailProviderApi railProviderApi;
-
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException {
+        openMocks(this);
+
+        when(gateway.getHost()).thenReturn("localhost");
+        when(gateway.getPort()).thenReturn(8080);
+        when(gateway.getScheme()).thenReturn("http");
+
         // simulate user-consent repo
         when(userConsentRepository.saveAndFlush(any())).then(invocation -> {
             UserConsent consent = invocation.getArgument(0);
@@ -80,7 +91,6 @@ public class UserConsentServiceTest {
             return consent;
         });
 
-        railProviderApi = mock();
         when(railProviderApi.getProviderId()).thenReturn(RailProvider.NORDIGEN);
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
@@ -950,7 +960,7 @@ public class UserConsentServiceTest {
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.EXPIRED)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.DENIED)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN)),
-            TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.INITIATED)),
+            TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.WAITING)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.WAITING)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN))

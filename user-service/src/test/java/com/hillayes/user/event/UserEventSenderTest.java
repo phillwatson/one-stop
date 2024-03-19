@@ -14,9 +14,12 @@ import com.hillayes.openid.AuthProvider;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Duration;
@@ -32,20 +35,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserEventSenderTest {
+    @Mock
     private EventSender eventSender;
+    @Mock
     private RequestHeaders requestHeaders;
 
+    @InjectMocks
     private UserEventSender fixture;
 
     @BeforeEach
     public void setUp() {
-        eventSender = mock();
-        requestHeaders = mock();
+        openMocks(this);
 
-        fixture = new UserEventSender(eventSender, requestHeaders);
+        when(requestHeaders.getAll()).thenReturn(new MultivaluedMapImpl());
     }
+
     @Test
     public void testSendUserRegistered() {
         // given: a registered user's email and acknowledgement details

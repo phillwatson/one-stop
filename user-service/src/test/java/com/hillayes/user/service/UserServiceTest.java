@@ -17,12 +17,11 @@ import com.hillayes.user.errors.UserRegistrationException;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,32 +37,34 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserServiceTest {
-    @InjectMock
+    @Mock
     UserRepository userRepository;
 
-    @InjectMock
+    @Mock
     DeletedUserRepository deletedUserRepository;
 
-    @InjectMock
+    @Mock
     PasswordCrypto passwordCrypto;
 
-    @InjectMock
+    @Mock
     AuthTokens authTokens;
 
-    @InjectMock
+    @Mock
     UserEventSender userEventSender;
     
-    @InjectMock
+    @Mock
     Gateway gateway;
 
-    @Inject
+    @InjectMocks
     UserService fixture;
 
     @BeforeEach
     public void beforeEach() {
+        openMocks(this);
+
         // simulate a successful password hash
         when(passwordCrypto.getHash(any())).thenReturn(randomAlphanumeric(20));
 

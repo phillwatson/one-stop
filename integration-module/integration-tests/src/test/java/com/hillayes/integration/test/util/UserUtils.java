@@ -49,7 +49,7 @@ public class UserUtils {
         List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(user.getEmail(),
             await().atMost(Duration.ofSeconds(60)));
 
-        EmailMessage emailMessage = emailSim.parse(emailRequests.getFirst());
+        EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
 
         // extract the magic-link token
         String htmlContent = emailMessage.getHtmlContent();

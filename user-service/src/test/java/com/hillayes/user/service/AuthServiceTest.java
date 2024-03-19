@@ -10,10 +10,7 @@ import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
 import io.smallrye.jwt.auth.cdi.NullJsonWebToken;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Instant;
@@ -30,28 +29,27 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class AuthServiceTest {
-    @InjectMock
+    @Mock
     UserRepository userRepository;
-    @InjectMock
+    @Mock
     PasswordCrypto passwordCrypto;
-    @InjectMock
+    @Mock
     UserEventSender userEventSender;
-    @InjectMock
+    @Mock
     OpenIdAuthentication openIdAuth;
-    @Inject
+    @Mock
     RotatedJwkSet jwkSet;
 
-    @Inject
-    ObjectMapper jsonMapper;
-
-    @Inject
+    @InjectMocks
     AuthService fixture;
 
     @BeforeEach
     public void beforeEach() {
+        openMocks(this);
+
         // simulate setting of ID when record is persisted
         when(userRepository.save(any())).then((invocation) -> {
             User user = invocation.getArgument(0);
@@ -64,6 +62,9 @@ public class AuthServiceTest {
 
     @Test
     public void testGetJwkSet() throws JsonProcessingException {
+        // given: the JWK set is configured
+        when(jwkSet.toJson()).thenReturn("{\"keys\":[{\"kty\":\"RSA\"}]}");
+
         // when: we request the JWK set
         String json = fixture.getJwkSet();
 
@@ -71,7 +72,7 @@ public class AuthServiceTest {
         assertNotNull(json);
 
         // and: the payload looks like a key-set
-        JsonNode node = jsonMapper.reader().readTree(json);
+        JsonNode node = new ObjectMapper().reader().readTree(json);
         assertNotNull(node);
         assertEquals("RSA", node.get("keys").get(0).get("kty").asText());
     }

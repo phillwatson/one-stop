@@ -7,10 +7,10 @@ import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.utils.TestData;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,18 +20,23 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class AccountServiceTest {
-    @InjectMock
+    @Mock
     AccountRepository accountRepository;
-    @InjectMock
+    @Mock
     AccountBalanceRepository accountBalanceRepository;
-    @InjectMock
+    @Mock
     UserConsentService userConsentService;
 
-    @Inject
+    @InjectMocks
     AccountService fixture;
+
+    @BeforeEach
+    public void clearCaches() {
+        openMocks(this);
+    }
 
     @Test
     public void testGetAccounts() {
