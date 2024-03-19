@@ -29,17 +29,15 @@ interface TransactionsList {
 
 export default function TransactionSummaryList(props: Props) {
   const showNotification = useNotificationDispatch();
-  const [transactions, setTransactions] = useState<TransactionsList | undefined>(undefined);
+  const [transactions, setTransactions] = useState<TransactionsList>({ page: [], total: 0});
 
   useEffect(() => {
-    if (transactions === undefined) {
-      AccountService.getTransactions(props.accountId, 0, 10)
-        .then(response => setTransactions({ page: response.items, total: response.total }))
-        .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
-    }
-  }, [props.accountId, transactions, showNotification]);
+    AccountService.getTransactions(props.accountId, 0, 10)
+      .then(response => setTransactions({ page: response.items, total: response.total }))
+      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
+  }, [props.accountId, showNotification]);
 
-  const noTransactions = (transactions === undefined || transactions.page.length === 0);
+  const noTransactions = (transactions.page.length === 0);
   return(
     <Paper sx={{ margin: 1 }} elevation={3}>
       <Table size="small" aria-label="transactions">
@@ -58,7 +56,7 @@ export default function TransactionSummaryList(props: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          { transactions && transactions.page.map(transaction => (
+          { transactions.page.map(transaction => (
             <TableRow key={transaction.id}>
               <TableCell>{new Date(transaction.date).toLocaleDateString("en-GB")}</TableCell>
               <TableCell>{transaction.description}</TableCell>
