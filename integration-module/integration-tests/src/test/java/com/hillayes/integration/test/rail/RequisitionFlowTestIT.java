@@ -95,7 +95,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         PaginatedList<EndUserAgreement> agreements = agreementAdminApi.list(0, 100);
         assertNotNull(agreements);
         assertEquals(1, agreements.count); // only one as we clear data on each test
-        EndUserAgreement agreement = agreements.results.getFirst();
+        EndUserAgreement agreement = agreements.results.get(0);
 
         // and: the agreement references the institution
         assertEquals(institution.getId(), agreement.institutionId);
@@ -111,7 +111,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         PaginatedList<Requisition> requisitions = requisitionAdminApi.list(0, 100);
         assertNotNull(requisitions);
         assertEquals(1, requisitions.count); // only one as we clear data on each test
-        Requisition requisition = requisitions.results.getFirst();
+        Requisition requisition = requisitions.results.get(0);
 
         // and: the requisition status is "created"
         assertEquals(RequisitionStatus.CR, requisition.status);
@@ -228,7 +228,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
         // when: the user attempts to retrieve the institution consent
         withServiceError(userConsentApi.getConsentForInstitution(institution.getId(), 404), errorResponse -> {
-            ServiceError error = errorResponse.getErrors().getFirst();
+            ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
@@ -240,7 +240,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         consentForInstitution.getAccounts().forEach(accountSummary -> {
             // then: a not-found error is returned
             withServiceError(accountApi.getAccount(accountSummary.getId(), 404), errorResponse -> {
-                ServiceError error = errorResponse.getErrors().getFirst();
+                ServiceError error = errorResponse.getErrors().get(0);
 
                 // then: a not-found error is returned
                 assertEquals("ENTITY_NOT_FOUND", error.getMessageId());

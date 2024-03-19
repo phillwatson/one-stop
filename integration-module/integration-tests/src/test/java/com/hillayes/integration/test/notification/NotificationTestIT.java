@@ -77,7 +77,7 @@ public class NotificationTestIT extends ApiTestBase {
         // and: the requisition process is complete
         RailRequisitionAdminApi requisitionAdminApi = new RailRequisitionAdminApi(adminAuthTokens);
         PaginatedList<Requisition> requisitions = requisitionAdminApi.list(0, 100);
-        Requisition requisition = requisitions.results.getFirst();
+        Requisition requisition = requisitions.results.get(0);
         while (requisition.status != RequisitionStatus.LN) {
             requisition = requisitionAdminApi.get(requisition.id);
         }
@@ -98,7 +98,7 @@ public class NotificationTestIT extends ApiTestBase {
         assertEquals(1, notifications.size());
 
         // and: the notification shows the reason for denial
-        NotificationResponse notification = notifications.getFirst();
+        NotificationResponse notification = notifications.get(0);
         assertEquals("CONSENT", notification.getTopic());
         assertTrue(notification.getMessage().contains("Reason given '" + errorDetails + "'"));
 

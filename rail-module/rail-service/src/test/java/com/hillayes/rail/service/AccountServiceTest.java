@@ -210,8 +210,8 @@ public class AccountServiceTest {
             .limit(5)
             .toList();
         when(accountBalanceRepository.findMostRecentByAccountId(account.getId()))
-            .thenReturn(Optional.of(balances.getFirst()));
-        when(accountBalanceRepository.listByReferenceDate(account.getId(), balances.getFirst().getReferenceDate()))
+            .thenReturn(Optional.of(balances.get(0)));
+        when(accountBalanceRepository.listByReferenceDate(account.getId(), balances.get(0).getReferenceDate()))
             .thenReturn(balances);
 
         // when: the most recent balance is requested

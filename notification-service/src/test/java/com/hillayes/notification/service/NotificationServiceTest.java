@@ -136,7 +136,7 @@ public class NotificationServiceTest {
         assertEquals(notifications.size(), messages.size());
 
         // and: the messages passed through the
-        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.getFirst());
+        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.get(0));
         assertEquals("Access to " + consentExpired.getInstitutionName() + " has expired.\nYou need to renew your consent.", messages.get(1));
     }
 
