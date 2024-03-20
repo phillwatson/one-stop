@@ -79,7 +79,7 @@ public class UserUtils {
         log.info("Created user [username: {}]", user.getUsername());
 
         // wait for welcome email
-        emailSim.verifyEmailSent(user.getEmail(), "Welcome to OneStop",
+        emailSim.verifyEmailSent(user.getEmail(), "Welcome to One-Stop",
             await().atMost(Duration.ofSeconds(60)));
 
         return user;

@@ -88,7 +88,7 @@ public class NotificationTestIT extends ApiTestBase {
             userConsentApi.consentResponse(institution.getProvider(), requisition.reference, "mock-error-code", errorDetails);
 
             // then: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
         }
 

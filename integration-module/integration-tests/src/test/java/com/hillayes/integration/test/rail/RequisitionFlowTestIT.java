@@ -88,7 +88,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         userConsent.institutionName(institution.getName());
 
         // and: the consent is waiting to be given
-        assertEquals("WAITING", userConsent.getStatus());
+        assertEquals("INITIATED", userConsent.getStatus());
 
         // and: an end-user agreement is created for the institution
         RailAgreementAdminApi agreementAdminApi = new RailAgreementAdminApi(adminAuthTokens);
@@ -141,7 +141,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
 
             // and: the user can retrieve their consent record
@@ -222,7 +222,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             userConsentApi.deleteConsent(institution.getId(), false);
 
             // then: an email is sent to the user for confirmation
-            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
         }
 
