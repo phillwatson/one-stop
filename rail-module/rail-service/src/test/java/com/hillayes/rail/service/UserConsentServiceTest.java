@@ -674,7 +674,7 @@ public class UserConsentServiceTest {
 
     @ParameterizedTest
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"INITIATED"})
-    public void testRegistrationTimeout_ConsentNotFound(ConsentStatus status) {
+    public void testRegistrationTimeout_NoLongerWaiting(ConsentStatus status) {
         // given: a consent that has is waiting to be accepted
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> builder.status(status));
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
@@ -693,7 +693,7 @@ public class UserConsentServiceTest {
     }
 
     @Test
-    public void testRegistrationTimeout_NoLongerWaiting() {
+    public void testRegistrationTimeout_ConsentNotFound() {
         // given: an ID for an unknown consent
         UUID consentId = UUID.randomUUID();
         when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
