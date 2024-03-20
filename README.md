@@ -29,7 +29,9 @@ example; the repository classes are "masked" by a simple facade (or adaptor) cla
 rather than exposing a framework specific repository interface.
 
 #### User Service
-Responsible for on-boarding and managing internal user accounts.
+Responsible for on-boarding and managing internal user accounts. Provides OpenID
+Connect authentication. Generates and renews JWT and XSRF tokens; signed with rotating
+private keys.
 
 #### Rail Service
 Responsible for communicating with external banking rail services; managing and
@@ -37,7 +39,7 @@ downloading account information.
 
 #### Notification Service
 Responsible for issuing notifications to users and administrators; via email and
-REST API.
+REST API. Generates email and notifications in the user's locale.
 
 #### Audit Service
 Responsible for recording audit events.
