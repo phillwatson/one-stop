@@ -89,7 +89,7 @@ public class SchedulerFactory {
      * @param when the date-time at which the job is to be run.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(String jobbingTaskName, Object payload, Instant when) {
+    protected String addJob(String jobbingTaskName, Object payload, Instant when) {
         Task<JobbingTaskData> task = jobbingTasks.get(jobbingTaskName);
         if (task == null) {
             throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTaskName + "\"");
