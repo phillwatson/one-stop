@@ -71,5 +71,12 @@ public class ConsentTopicConsumer {
             notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
                 NotificationId.CONSENT_EXPIRED, params);
         }
+
+        else if (ConsentTimedOut.class.getName().equals(payloadClass)) {
+            ConsentTimedOut event = eventPacket.getPayloadContent();
+            params.put("event", event);
+            notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
+                NotificationId.CONSENT_TIMEOUT, params);
+        }
     }
 }

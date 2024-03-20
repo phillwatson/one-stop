@@ -105,6 +105,19 @@ public class ConsentEventSender {
             .build());
     }
 
+    public void sendConsentTimedOut(UserConsent userConsent) {
+        log.debug("Sending ConsentTimedOut event [consentId: {}, userId: {}, institutionId: {}]",
+            userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId());
+        eventSender.send(Topic.CONSENT, ConsentTimedOut.builder()
+            .consentId(userConsent.getId())
+            .dateTimeout(userConsent.getDateDenied())
+            .userId(userConsent.getUserId())
+            .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent))
+            .agreementId(userConsent.getAgreementId())
+            .build());
+    }
+
     private String getInstitutionName(UserConsent userConsent) {
         return institutionService.get(userConsent.getProvider(), userConsent.getInstitutionId())
             .map(RailInstitution::getName)

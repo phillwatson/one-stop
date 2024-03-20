@@ -17,6 +17,14 @@
         <url>http://www.hillayes.co.uk</url>
     </organization>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/phillwatson/one-stop</url>
+        </repository>
+    </distributionManagement>
+
     <modules>
         <module>client</module>
 
@@ -52,7 +60,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.8.1</quarkus.platform.version>
+        <quarkus.platform.version>3.8.2</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 

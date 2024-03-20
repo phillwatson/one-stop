@@ -37,7 +37,7 @@ public class AccountBalanceRepositoryTest {
         UserConsent consent = createUserConsent();
 
         // and: linked account
-        Account account = createAccounts(consent, 1).getFirst();
+        Account account = createAccounts(consent, 1).get(0);
 
         // when: an account balance is saved
         AccountBalance accountBalance = fixture.save(AccountBalance.builder()
@@ -58,7 +58,7 @@ public class AccountBalanceRepositoryTest {
         UserConsent consent = createUserConsent();
 
         // and: linked account
-        Account account = createAccounts(consent, 1).getFirst();
+        Account account = createAccounts(consent, 1).get(0);
 
         Instant now = Instant.now();
 

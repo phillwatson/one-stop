@@ -51,11 +51,9 @@ jobs:
     - name: Build with Maven
       # skips the tests due to lack of "test" profile
       run: |
-        mvn -B deploy -Pclient \
-          -Drevision=1.0.${{ github.run_number }} \
-          -Dquarkus.hibernate-orm.log.sql=false \
-          -Dquarkus.hibernate-orm.log.bind-parameters=false \
-          -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
+        mvn -B deploy -Pclient -Drevision=1.0.${{ github.run_number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta

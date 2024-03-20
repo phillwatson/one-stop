@@ -1,10 +1,12 @@
 package com.hillayes.rail.service;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.commons.net.Gateway;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
 import com.hillayes.rail.config.RailProviderFactory;
+import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
@@ -13,19 +15,20 @@ import com.hillayes.rail.errors.DeleteRailConsentException;
 import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
+import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import com.hillayes.rail.utils.TestApiData;
 import com.hillayes.rail.utils.TestData;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,31 +42,47 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserConsentServiceTest {
-    @InjectMock
+    @Mock
     UserConsentRepository userConsentRepository;
 
-    @InjectMock
+    @Mock
     InstitutionService institutionService;
 
-    @InjectMock
+    @Mock
     RailProviderFactory railProviderFactory;
 
-    @InjectMock
+    @Mock
     PollConsentJobbingTask pollConsentJobbingTask;
 
-    @InjectMock
+    @Mock
+    ConsentTimeoutJobbingTask consentTimeoutJobbingTask;
+
+    @Mock
     ConsentEventSender consentEventSender;
 
-    @Inject
+    @Mock
+    ServiceConfiguration configuration;
+
+    @Mock
+    RailProviderApi railProviderApi;
+
+    @Mock
+    Gateway gateway;
+
+    @InjectMocks
     UserConsentService fixture;
 
-    private RailProviderApi railProviderApi;
-
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException {
+        openMocks(this);
+
+        when(gateway.getHost()).thenReturn("localhost");
+        when(gateway.getPort()).thenReturn(8080);
+        when(gateway.getScheme()).thenReturn("http");
+
         // simulate user-consent repo
         when(userConsentRepository.saveAndFlush(any())).then(invocation -> {
             UserConsent consent = invocation.getArgument(0);
@@ -80,7 +99,8 @@ public class UserConsentServiceTest {
             return consent;
         });
 
-        railProviderApi = mock();
+        when(configuration.consentTimeout()).thenReturn(Duration.ofMinutes(5));
+
         when(railProviderApi.getProviderId()).thenReturn(RailProvider.NORDIGEN);
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
@@ -328,7 +348,7 @@ public class UserConsentServiceTest {
         UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
-        assertEquals(ConsentStatus.WAITING, consent.getStatus());
+        assertEquals(ConsentStatus.INITIATED, consent.getStatus());
         assertEquals(userId, consent.getUserId());
         assertEquals(callbackUri.toString(), consent.getCallbackUri());
         assertEquals(institution.getId(), consent.getInstitutionId());
@@ -338,6 +358,9 @@ public class UserConsentServiceTest {
 
         // and: the initiated consent event is issued
         verify(consentEventSender).sendConsentInitiated(consent);
+
+        // and: the consent timeout task was scheduled
+        verify(consentTimeoutJobbingTask).queueJob(consent, configuration.consentTimeout());
 
         // and: the result is the requisition link URI
         assertEquals(requisitionUri, agreement.get().getAgreementLink());
@@ -394,7 +417,7 @@ public class UserConsentServiceTest {
         UserConsent consent = consentCaptor.getValue();
 
         // and: the consent contains expected values
-        assertEquals(ConsentStatus.WAITING, consent.getStatus());
+        assertEquals(ConsentStatus.INITIATED, consent.getStatus());
         assertEquals(userId, consent.getUserId());
         assertEquals(callbackUri.toString(), consent.getCallbackUri());
         assertEquals(institution.getId(), consent.getInstitutionId());
@@ -404,6 +427,9 @@ public class UserConsentServiceTest {
 
         // and: the initiated consent event is issued
         verify(consentEventSender).sendConsentInitiated(consent);
+
+        // and: the consent timeout task was scheduled
+        verify(consentTimeoutJobbingTask).queueJob(consent, configuration.consentTimeout());
 
         // and: the result is the requisition link URI
         assertEquals(requisitionUri, agreement.get().getAgreementLink());
@@ -443,7 +469,7 @@ public class UserConsentServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"INITIATED", "WAITING", "GIVEN", "SUSPENDED"})
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"EXPIRED", "SUSPENDED", "DENIED", "TIMEOUT", "CANCELLED"})
     public void testRegister_AlreadyRegistered(ConsentStatus consentStatus) {
         // given: a user identity
         UUID userId = UUID.randomUUID();
@@ -493,6 +519,9 @@ public class UserConsentServiceTest {
 
         // and: no event is issued
         verifyNoInteractions(consentEventSender);
+
+        // and: NO consent timeout task was scheduled
+        verifyNoInteractions(consentTimeoutJobbingTask);
     }
 
     @Test
@@ -582,11 +611,116 @@ public class UserConsentServiceTest {
     }
 
     @Test
+    public void testRegistrationTimeout_HappyPath() {
+        // given: a consent that has is waiting to be accepted
+        URI clientCallbackUri = URI.create("http://mock-uri");
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
+            builder.status(ConsentStatus.INITIATED);
+            builder.callbackUri(clientCallbackUri.toString());
+        });
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // when: the service is called
+        fixture.registrationTimeout(consent.getId());
+
+        // then: the consent is updated
+        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
+        verify(userConsentRepository).save(captor.capture());
+
+        // and: the consent status is set to TIMEOUT
+        UserConsent updatedConsent = captor.getValue();
+        assertEquals(ConsentStatus.TIMEOUT, updatedConsent.getStatus());
+        assertNull(consent.getCallbackUri());
+
+        // and: the consent event is issued
+        verify(consentEventSender).sendConsentTimedOut(updatedConsent);
+
+        // and: the agreement is deleted
+        verify(railProviderApi).deleteAgreement(consent.getAgreementId());
+    }
+
+    @Test
+    public void testRegistrationTimeout_RailException() {
+        // given: a consent that has is waiting to be accepted
+        URI clientCallbackUri = URI.create("http://mock-uri");
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
+            builder.status(ConsentStatus.INITIATED);
+            builder.callbackUri(clientCallbackUri.toString());
+        });
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // and: the rail provider throws an exception on deleting agreement
+        // the consent will still be timed-out
+        when(railProviderApi.deleteAgreement(any())).thenThrow(new RuntimeException("Mock Exception"));
+
+        // when: the service is called
+        fixture.registrationTimeout(consent.getId());
+
+        // then: the consent is updated
+        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
+        verify(userConsentRepository).save(captor.capture());
+
+        // and: the consent status is set to TIMEOUT
+        UserConsent updatedConsent = captor.getValue();
+        assertEquals(ConsentStatus.TIMEOUT, updatedConsent.getStatus());
+        assertNull(consent.getCallbackUri());
+
+        // and: the consent event is issued
+        verify(consentEventSender).sendConsentTimedOut(updatedConsent);
+
+        // and: the delete agreement was called
+        verify(railProviderApi).deleteAgreement(consent.getAgreementId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"INITIATED"})
+    public void testRegistrationTimeout_NoLongerWaiting(ConsentStatus status) {
+        // given: a consent that has is waiting to be accepted
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> builder.status(status));
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // when: the service is called
+        fixture.registrationTimeout(consent.getId());
+
+        // then: NO consent is updated
+        verify(userConsentRepository, never()).save(any());
+
+        // and: NO consent event is issued
+        verifyNoInteractions(consentEventSender);
+
+        // and: NO agreement is deleted
+        verifyNoInteractions(railProviderApi);
+    }
+
+    @Test
+    public void testRegistrationTimeout_ConsentNotFound() {
+        // given: an ID for an unknown consent
+        UUID consentId = UUID.randomUUID();
+        when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
+
+        // when: the service is called
+        fixture.registrationTimeout(consentId);
+
+        // then: NO consent is updated
+        verify(userConsentRepository, never()).save(any());
+
+        // and: NO consent event is issued
+        verifyNoInteractions(consentEventSender);
+
+        // and: NO agreement is deleted
+        verifyNoInteractions(railProviderApi);
+    }
+
+    @Test
     public void testConsentGiven_HappyPath() {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
-        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
-        consent.setStatus(ConsentStatus.WAITING);
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
+            builder.status(ConsentStatus.INITIATED);
+            builder.callbackUri(clientCallbackUri.toString());
+        });
+        when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
+        consent.setStatus(ConsentStatus.INITIATED);
         consent.setCallbackUri(clientCallbackUri.toString());
         consent.setReference(UUID.randomUUID().toString());
         when(userConsentRepository.findByReference(consent.getReference())).thenReturn(Optional.of(consent));
@@ -653,7 +787,7 @@ public class UserConsentServiceTest {
         // given: a consent that has is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
-        consent.setStatus(ConsentStatus.WAITING);
+        consent.setStatus(ConsentStatus.INITIATED);
         consent.setCallbackUri(clientCallbackUri.toString());
         consent.setReference(UUID.randomUUID().toString());
         consent.setDateGiven(null);
@@ -951,7 +1085,7 @@ public class UserConsentServiceTest {
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.DENIED)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.INITIATED)),
-            TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.WAITING)),
+            TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.INITIATED)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN)),
             TestData.mockUserConsent(userId, consent -> consent.status(ConsentStatus.GIVEN))
         );

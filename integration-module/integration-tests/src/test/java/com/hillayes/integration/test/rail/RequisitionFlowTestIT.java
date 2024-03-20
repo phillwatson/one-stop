@@ -88,14 +88,14 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         userConsent.institutionName(institution.getName());
 
         // and: the consent is waiting to be given
-        assertEquals("WAITING", userConsent.getStatus());
+        assertEquals("INITIATED", userConsent.getStatus());
 
         // and: an end-user agreement is created for the institution
         RailAgreementAdminApi agreementAdminApi = new RailAgreementAdminApi(adminAuthTokens);
         PaginatedList<EndUserAgreement> agreements = agreementAdminApi.list(0, 100);
         assertNotNull(agreements);
         assertEquals(1, agreements.count); // only one as we clear data on each test
-        EndUserAgreement agreement = agreements.results.getFirst();
+        EndUserAgreement agreement = agreements.results.get(0);
 
         // and: the agreement references the institution
         assertEquals(institution.getId(), agreement.institutionId);
@@ -111,7 +111,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         PaginatedList<Requisition> requisitions = requisitionAdminApi.list(0, 100);
         assertNotNull(requisitions);
         assertEquals(1, requisitions.count); // only one as we clear data on each test
-        Requisition requisition = requisitions.results.getFirst();
+        Requisition requisition = requisitions.results.get(0);
 
         // and: the requisition status is "created"
         assertEquals(RequisitionStatus.CR, requisition.status);
@@ -141,7 +141,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
 
             // and: the user can retrieve their consent record
@@ -222,13 +222,13 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             userConsentApi.deleteConsent(institution.getId(), false);
 
             // then: an email is sent to the user for confirmation
-            emailSim.verifyEmailSent(user.getEmail(), "Your OneStop access to " + institution.getName(),
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
                 await().atMost(Duration.ofSeconds(60)));
         }
 
         // when: the user attempts to retrieve the institution consent
         withServiceError(userConsentApi.getConsentForInstitution(institution.getId(), 404), errorResponse -> {
-            ServiceError error = errorResponse.getErrors().getFirst();
+            ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
@@ -240,7 +240,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         consentForInstitution.getAccounts().forEach(accountSummary -> {
             // then: a not-found error is returned
             withServiceError(accountApi.getAccount(accountSummary.getId(), 404), errorResponse -> {
-                ServiceError error = errorResponse.getErrors().getFirst();
+                ServiceError error = errorResponse.getErrors().get(0);
 
                 // then: a not-found error is returned
                 assertEquals("ENTITY_NOT_FOUND", error.getMessageId());

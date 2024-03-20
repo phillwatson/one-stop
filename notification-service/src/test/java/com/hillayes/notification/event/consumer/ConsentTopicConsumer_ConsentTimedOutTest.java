@@ -2,8 +2,7 @@ package com.hillayes.notification.event.consumer;
 
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.consent.ConsentExpired;
-import com.hillayes.notification.config.TemplateName;
+import com.hillayes.events.events.consent.ConsentTimedOut;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
@@ -13,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -24,9 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class ConsentTopicConsumer_ConsentExpiredTest {
+public class ConsentTopicConsumer_ConsentTimedOutTest {
     @Mock
     SendEmailTask sendEmailTask;
 
@@ -43,40 +42,39 @@ public class ConsentTopicConsumer_ConsentExpiredTest {
 
     @Test
     public void test() {
-        // given: a ConsentExpired event
-        ConsentExpired event = ConsentExpired.builder()
+        // given: a ConsentTimedOut event
+        ConsentTimedOut event = ConsentTimedOut.builder()
             .userId(UUID.randomUUID())
             .consentId(UUID.randomUUID())
             .institutionId(randomAlphanumeric(30))
             .institutionName(randomAlphanumeric(30))
-            .dateExpired(Instant.now())
+            .dateTimeout(Instant.now())
             .agreementId(randomAlphanumeric(30))
-            .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
         EventPacket eventPacket = mockEventPacket(event);
 
         // when: the event is consumed
         fixture.consume(eventPacket);
 
-        // then: an email is sent to the user
+        // then: a notification is issued
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.CONSENT_EXPIRED), paramsCaptor.capture());
-
-        // and: the parameters contain the event payload
-        ConsentExpired param = (ConsentExpired) paramsCaptor.getValue().get("event");
-        assertNotNull(param);
-        assertEquals(event.getUserId(), param.getUserId());
-        assertEquals(event.getConsentId(), param.getConsentId());
-
-        // and: a notification is issued
         verify(notificationService).createNotification(eq(event.getUserId()), any(),
-            eq(NotificationId.CONSENT_EXPIRED), paramsCaptor.capture());
+            eq(NotificationId.CONSENT_TIMEOUT), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
-        param = (ConsentExpired)paramsCaptor.getValue().get("event");
+        ConsentTimedOut param = (ConsentTimedOut) paramsCaptor.getValue().get("event");
         assertNotNull(param);
         assertEquals(event.getUserId(), param.getUserId());
         assertEquals(event.getConsentId(), param.getConsentId());
+
+        // and: the parameters contain the event payload
+        param = (ConsentTimedOut)paramsCaptor.getValue().get("event");
+        assertNotNull(param);
+        assertEquals(event.getUserId(), param.getUserId());
+        assertEquals(event.getConsentId(), param.getConsentId());
+
+        // and: NO email is sent to the user
+        verifyNoInteractions(sendEmailTask);
     }
 
     private EventPacket mockEventPacket(Object payload) {

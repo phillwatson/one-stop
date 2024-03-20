@@ -83,11 +83,11 @@ public class AppleAuthTest {
         // and the token exchange request is correct
         Form request = tokenExchangeCaptor.getValue();
         MultivaluedMap<String, String> paramMap = request.asMap();
-        assertEquals("authorization_code", paramMap.get("grant_type").getFirst());
-        assertEquals("mock-auth-code", paramMap.get("code").getFirst());
-        assertEquals(config.clientId(), paramMap.get("client_id").getFirst());
-        assertEquals("mock-client-secret", paramMap.get("client_secret").getFirst());
-        assertEquals(config.redirectUri(), paramMap.get("redirect_uri").getFirst());
+        assertEquals("authorization_code", paramMap.get("grant_type").get(0));
+        assertEquals("mock-auth-code", paramMap.get("code").get(0));
+        assertEquals(config.clientId(), paramMap.get("client_id").get(0));
+        assertEquals("mock-client-secret", paramMap.get("client_secret").get(0));
+        assertEquals(config.redirectUri(), paramMap.get("redirect_uri").get(0));
 
         // and the client secret is generated correctly
         verify(clientSecretGenerator).decodePrivateKey(eq(config.privateKey().get()), eq(SignatureAlgorithm.ES256));

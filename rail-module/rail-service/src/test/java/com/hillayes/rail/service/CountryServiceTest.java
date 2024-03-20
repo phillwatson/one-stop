@@ -3,10 +3,10 @@ package com.hillayes.rail.service;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.repository.CountryRepository;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -16,14 +16,19 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class CountryServiceTest {
-    @InjectMock
+    @Mock
     CountryRepository countryRepository;
 
-    @Inject
+    @InjectMocks
     CountryService fixture;
+
+    @BeforeEach
+    public void clearCaches() {
+        openMocks(this);
+    }
 
     @Test
     public void testList() {

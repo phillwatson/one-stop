@@ -49,7 +49,7 @@ public class UserUtils {
         List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(user.getEmail(),
             await().atMost(Duration.ofSeconds(60)));
 
-        EmailMessage emailMessage = emailSim.parse(emailRequests.getFirst());
+        EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
 
         // extract the magic-link token
         String htmlContent = emailMessage.getHtmlContent();
@@ -79,7 +79,7 @@ public class UserUtils {
         log.info("Created user [username: {}]", user.getUsername());
 
         // wait for welcome email
-        emailSim.verifyEmailSent(user.getEmail(), "Welcome to OneStop",
+        emailSim.verifyEmailSent(user.getEmail(), "Welcome to One-Stop",
             await().atMost(Duration.ofSeconds(60)));
 
         return user;

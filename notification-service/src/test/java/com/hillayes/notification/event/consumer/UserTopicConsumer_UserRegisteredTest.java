@@ -1,18 +1,17 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.notification.config.TemplateName;
-import com.hillayes.notification.repository.UserRepository;
-import com.hillayes.notification.service.SendEmailService;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserRegistered;
+import com.hillayes.notification.config.TemplateName;
+import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.service.SendEmailService;
 import com.hillayes.notification.task.SendEmailTask;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Instant;
@@ -28,17 +27,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserTopicConsumer_UserRegisteredTest {
-    @InjectMock
+    @Mock
     UserRepository userRepository;
 
-    @InjectMock
+    @Mock
     SendEmailTask sendEmailTask;
 
-    @Inject
+    @InjectMocks
     UserTopicConsumer fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @BeforeEach
     public void beforeEach() {

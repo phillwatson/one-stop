@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -29,24 +31,35 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class PollAccountJobbingTaskTest {
-    private UserConsentService userConsentService;
-    private AccountRepository accountRepository;
-    private AccountBalanceRepository accountBalanceRepository;
-    private AccountTransactionRepository accountTransactionRepository;
-    private RailProviderApi railProviderApi;
-    private SchedulerFactory scheduler;
-    private PollAccountJobbingTask fixture;
+    @Mock
+    UserConsentService userConsentService;
+    @Mock
+    AccountRepository accountRepository;
+    @Mock
+    AccountBalanceRepository accountBalanceRepository;
+    @Mock
+    AccountTransactionRepository accountTransactionRepository;
+    @Mock
+    RailProviderFactory railProviderFactory;
+    @Mock
+    RailProviderApi railProviderApi;
+    @Mock
+    SchedulerFactory scheduler;
+    @Mock
+    ServiceConfiguration configuration;
+
+    @InjectMocks
+    PollAccountJobbingTask fixture;
 
     @BeforeEach
     public void init() {
-        userConsentService = mock();
-        accountRepository = mock();
-        accountBalanceRepository = mock();
-        accountTransactionRepository = mock();
-        railProviderApi = mock();
-        scheduler = mock();
+        openMocks(this);
+
+        when(railProviderFactory.get(any())).thenReturn(railProviderApi);
+        when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 
         // simulate save functionality
         when(accountRepository.save(any())).then(invocation -> {
@@ -70,8 +83,6 @@ public class PollAccountJobbingTaskTest {
 
         RailProviderFactory railProviderFactory = mock();
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
-        fixture = new PollAccountJobbingTask(configuration, userConsentService,
-            accountRepository, accountBalanceRepository, accountTransactionRepository, railProviderFactory);
     }
 
     @Test

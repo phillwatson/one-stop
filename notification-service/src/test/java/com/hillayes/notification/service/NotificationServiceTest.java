@@ -4,15 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.events.events.consent.ConsentSuspended;
+import com.hillayes.notification.config.NotificationConfiguration;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.NotificationRepository;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,20 +25,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class NotificationServiceTest {
-    @Inject
-    ObjectMapper objectMapper;
+    @Spy
+    ObjectMapper objectMapper = new ObjectMapper()
+        .configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
-    @InjectMock
+    @Mock
     NotificationRepository notificationRepository;
 
-    @InjectMock
+    @Mock
     UserService userService;
 
-    @Inject
+    @Mock
+    NotificationConfiguration configuration;
+
+    @InjectMocks
     NotificationService fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @BeforeEach
     public void beforeEach() {
@@ -122,6 +133,13 @@ public class NotificationServiceTest {
         // and: a NotificationMapper implementation - to assert results and return rendered messages
         NotificationService.NotificationMapper<String> mapper = mockNotificationMapper(notifications);
 
+        // and: a configured notification message
+        Map<NotificationId, NotificationConfiguration.MessageConfig> messageConfigs = Map.of(
+            NotificationId.CONSENT_SUSPENDED, mockMessageConfig("Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."),
+            NotificationId.CONSENT_EXPIRED, mockMessageConfig("Access to $event.institutionName$ has expired.\nYou need to renew your consent.")
+        );
+        when(configuration.templates()).thenReturn(messageConfigs);
+
         // when: the service is called
         List<String> messages = fixture.listNotifications(user.getId(), after, mapper);
 
@@ -135,8 +153,8 @@ public class NotificationServiceTest {
         assertNotNull(messages);
         assertEquals(notifications.size(), messages.size());
 
-        // and: the messages passed through the
-        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.getFirst());
+        // and: the messages passed through the template parameters
+        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.get(0));
         assertEquals("Access to " + consentExpired.getInstitutionName() + " has expired.\nYou need to renew your consent.", messages.get(1));
     }
 
@@ -304,5 +322,14 @@ public class NotificationServiceTest {
             .agreementId(randomAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
+    }
+
+    private NotificationConfiguration.MessageConfig mockMessageConfig(String message) {
+        return new NotificationConfiguration.MessageConfig() {
+            @Override
+            public Map<Locale, String> locales() {
+                return Map.of(Locale.ENGLISH, message);
+            }
+        };
     }
 }

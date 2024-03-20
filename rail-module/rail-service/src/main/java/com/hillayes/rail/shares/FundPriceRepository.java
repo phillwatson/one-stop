@@ -40,7 +40,7 @@ public class FundPriceRepository {
 
         return rowCols.stream().map(row ->
             new DailyPrice(
-                LocalDate.parse(row.getFirst(), DATE_FORMATTER),
+                LocalDate.parse(row.get(0), DATE_FORMATTER),
                 Float.parseFloat(row.get(2)),
                 Float.parseFloat(row.get(3)),
                 Float.parseFloat(row.get(4)),

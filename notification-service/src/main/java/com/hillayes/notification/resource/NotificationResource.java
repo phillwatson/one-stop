@@ -34,6 +34,7 @@ public class NotificationResource {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting user notifications [userId: {}, after: {}]", userId, after);
 
+        if (after == null) after = Instant.EPOCH;
         List<NotificationResponse> notifications = notificationService.listNotifications(userId, after, MAPPER);
 
         log.debug("Get user notifications [userId: {}, after: {}, count: {}]", userId, after, notifications.size());

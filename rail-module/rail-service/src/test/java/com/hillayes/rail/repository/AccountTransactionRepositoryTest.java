@@ -60,7 +60,7 @@ public class AccountTransactionRepositoryTest {
 
         // then: the result contains only the most recent transaction
         assertEquals(1, result.getContentSize());
-        assertEquals(transactions.get(transactions.size() - 1), result.getContent().getFirst());
+        assertEquals(transactions.get(transactions.size() - 1), result.getContent().get(0));
     }
 
     @Test

@@ -5,11 +5,10 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.notification.repository.UserRepository;
 import com.hillayes.notification.service.UserService;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -17,17 +16,22 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserTopicConsumer_UserDeletedTest {
-    @InjectMock
+    @Mock
     UserService userService;
 
-    @InjectMock
+    @Mock
     UserRepository userRepository;
 
-    @Inject
+    @InjectMocks
     UserTopicConsumer fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @BeforeEach
     public void beforeEach() {

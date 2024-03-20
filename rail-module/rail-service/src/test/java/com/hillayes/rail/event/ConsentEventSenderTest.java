@@ -53,7 +53,7 @@ public class ConsentEventSenderTest {
             .maxHistory(80)
             .agreementExpires(Instant.now().plus(Duration.ofDays(80)))
             .callbackUri("http://mock/callback")
-            .status(ConsentStatus.WAITING)
+            .status(ConsentStatus.INITIATED)
             .build();
 
         // when: the fixture is called

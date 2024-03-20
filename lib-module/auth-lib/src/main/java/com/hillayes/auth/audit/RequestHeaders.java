@@ -1,5 +1,7 @@
 package com.hillayes.auth.audit;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -8,6 +10,12 @@ import java.util.Locale;
  * current request.
  */
 public interface RequestHeaders {
+    /**
+     * Returns an unmodifiable map of the request headers. If no headers are present
+     * then an empty map is returned.
+     */
+    public MultivaluedMap<String, String> getAll();
+
     /**
      * Gets the values of the named request header as a single string value.
      * If the message header is not present then null is returned. If the message header

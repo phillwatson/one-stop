@@ -8,6 +8,7 @@ import com.hillayes.rail.api.domain.ConsentResponse;
 import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.config.RailProviderFactory;
+import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.errors.BankAlreadyRegisteredException;
@@ -17,6 +18,7 @@ import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
+import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -28,12 +30,22 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
 @Slf4j
 public class UserConsentService {
+    // those statuses in which an existing user-consent can be renewed/registered
+    private static final Set<ConsentStatus> RENEWABLE_STATUSES = Set.of(
+        ConsentStatus.EXPIRED, ConsentStatus.SUSPENDED, ConsentStatus.DENIED,
+        ConsentStatus.TIMEOUT, ConsentStatus.CANCELLED
+    );
+
+    @Inject
+    ServiceConfiguration configuration;
+
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -45,6 +57,9 @@ public class UserConsentService {
 
     @Inject
     PollConsentJobbingTask pollConsentJobbingTask;
+
+    @Inject
+    ConsentTimeoutJobbingTask consentTimeoutJobbingTask;
 
     @Inject
     ConsentEventSender consentEventSender;
@@ -64,6 +79,7 @@ public class UserConsentService {
         log.info("Looking for user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
         return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).stream()
             .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
+            .filter(consent -> consent.getStatus() != ConsentStatus.TIMEOUT)
             .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
             .findFirst();
     }
@@ -93,8 +109,9 @@ public class UserConsentService {
         // read any existing consent
         UserConsent userConsent = getUserConsent(userId, institutionId).orElse(null);
 
-        // if the existing consent has not expired
-        if ((userConsent != null) && (userConsent.getStatus() != ConsentStatus.EXPIRED)) {
+        // if the existing consent is not of a renewable status
+        if ((userConsent != null) &&
+            (! RENEWABLE_STATUSES.contains(userConsent.getStatus()))) {
             throw new BankAlreadyRegisteredException(userId, institutionId);
         }
 
@@ -130,11 +147,14 @@ public class UserConsentService {
                 userConsent.setMaxHistory(agreement.getMaxHistory());
                 userConsent.setAgreementExpires(agreement.getDateExpires());
                 userConsent.setCallbackUri(callbackUri.toString());
-                userConsent.setStatus(ConsentStatus.WAITING);
+                userConsent.setStatus(ConsentStatus.INITIATED);
                 userConsent = userConsentRepository.saveAndFlush(userConsent);
 
                 // send consent initiated event notification
                 consentEventSender.sendConsentInitiated(userConsent);
+
+                // queue job to check for consent timeout
+                consentTimeoutJobbingTask.queueJob(userConsent, configuration.consentTimeout());
 
                 // return link for user consent
                 log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]",
@@ -149,6 +169,37 @@ public class UserConsentService {
         } catch (Exception e) {
             throw new BankRegistrationException(userId, institutionId, e);
         }
+    }
+
+    /**
+     * Called after the configured consent-timeout period to check if the consent
+     * registration is still pending and, if so, mark it as timed out. It will also
+     * delete the rail agreement, and issue a consent-timed-out event.
+     *
+     * @param consentId the identifier of the consent to be checked.
+     * @return true if the consent was found and marked as timed out.
+     */
+    public boolean registrationTimeout(UUID consentId) {
+        log.info("Checking consent timeout [consentId: {}]", consentId);
+        UserConsent userConsent = userConsentRepository.findByIdOptional(consentId).orElse(null);
+
+        // if consent not found - or is no longer in INITIATED state
+        if ((userConsent == null) || (userConsent.getStatus() != ConsentStatus.INITIATED)) {
+            return false;
+        }
+
+        log.info("Consent has timed-out [consentId: {}]", consentId);
+        try {
+            deleteAgreement(userConsent);
+        } catch (DeleteRailConsentException ignore) {}
+
+        userConsent.setStatus(ConsentStatus.TIMEOUT);
+        userConsent.setCallbackUri(null);
+        userConsent = userConsentRepository.save(userConsent);
+
+        // send consent-timed-out event notification
+        consentEventSender.sendConsentTimedOut(userConsent);
+        return true;
     }
 
     public URI consentGiven(RailProviderApi railProvider, ConsentResponse consentResponse) {

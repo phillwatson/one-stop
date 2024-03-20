@@ -96,6 +96,8 @@ one-stop:
         en: "Access to $event.institutionName$ has been suspended.\nYou need to renew your consent."
       consent-expired:
         en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
+      consent-timeout:
+        en: "Your consent registration for $event.institutionName$ has timed out.\nYou can try to register again."
       account-activity:
         en: "$activity$"
 

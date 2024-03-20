@@ -8,11 +8,11 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Instant;
 import java.util.Map;
@@ -22,17 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserTopicConsumer_UserActivityTest {
-    @InjectMock
+    @Mock
     SendEmailTask sendEmailTask;
 
-    @InjectMock
+    @Mock
     NotificationService notificationService;
 
-    @Inject
+    @InjectMocks
     UserTopicConsumer fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @Test
     public void testUserActivity() {

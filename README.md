@@ -7,10 +7,10 @@ their bank accounts and view the transactions from multiple accounts in an
 aggregated fashion.
 
 ## Architecture
-One-Stop has been designed using a modulith service architecture, where
-each service has a specific area of responsibility. The Maven model of parent
-POM and sub-modules has been adopted; with each module adopting the same
-version as the parent.
+One-Stop has been designed using an event-driven, modulith service architecture,
+where each service has a specific area of responsibility. However, to keep the
+PoC build simple, the Maven model of parent POM and sub-modules has been
+adopted; with each module adopting the same version as the parent.
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
@@ -21,14 +21,30 @@ In general, and to reduce clutter, the library modules are grouped under the par
 module `lib-module`. The exception to this is the event libraries; which are grouped
 under the parent module `event-module`.
 
-As mush as possible, framework (e.g. Quarkus) specific code is kept to the outer
+As much as possible, framework specific code (e.g. Quarkus) is kept to the outer
 layers of the application. This is to allow the services to be easily ported to
-other frameworks (e.g. Micrnauts, Spring Boot). Where framework specific code has
+other frameworks (e.g. Micronauts, Spring Boot). Where framework specific code has
 been used, it's exposure to the rest of the application has been minimised. For
 example; the repository classes are "masked" by a simple facade (or adaptor) class,
 rather than exposing a framework specific repository interface.
 
-### Documentation
+#### User Service
+Responsible for on-boarding and managing internal user accounts. Provides OpenID
+Connect authentication. Generates and renews JWT and XSRF tokens; signed with rotating
+private keys.
+
+#### Rail Service
+Responsible for communicating with external banking rail services; managing and
+downloading account information.
+
+#### Notification Service
+Responsible for issuing notifications to users and administrators; via email and
+REST API. Generates email and notifications in the user's locale.
+
+#### Audit Service
+Responsible for recording audit events.
+
+## Documentation
 The majority of code contains in-line documentation, and most of the sub-modules
 contain their own README.md file; intended to provide information specific to that
 module.

@@ -7,10 +7,10 @@ import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.utils.TestData;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,17 +20,22 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class AccountTransactionServiceTest {
-    @InjectMock
+    @Mock
     AccountService accountService;
 
-    @InjectMock
+    @Mock
     AccountTransactionRepository accountTransactionRepository;
 
-    @Inject
+    @InjectMocks
     AccountTransactionService fixture;
+
+    @BeforeEach
+    public void clearCaches() {
+        openMocks(this);
+    }
 
     @Test
     public void testGetTransactions_WithAccountId() {

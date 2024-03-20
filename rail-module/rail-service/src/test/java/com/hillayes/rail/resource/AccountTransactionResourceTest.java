@@ -234,7 +234,7 @@ public class AccountTransactionResourceTest extends TestBase {
         assertNotNull(response.getErrors());
         assertFalse(response.getErrors().isEmpty());
 
-        ServiceError error = response.getErrors().getFirst();
+        ServiceError error = response.getErrors().get(0);
         assertEquals(ErrorSeverity.INFO, error.getSeverity());
         assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
         assertEquals("The identified entity cannot be found.", error.getMessage());

@@ -56,7 +56,7 @@ public class UserOnboardResource {
                 .username(request.getUsername())
                 .givenName(request.getGivenName())
                 .email(jwt.getName())
-                .locale(languages.isEmpty() ? null : languages.getFirst())
+                .locale(languages.isEmpty() ? null : languages.get(0))
                 .build();
 
             newUser = userService.completeOnboarding(newUser, request.getPassword().toCharArray());

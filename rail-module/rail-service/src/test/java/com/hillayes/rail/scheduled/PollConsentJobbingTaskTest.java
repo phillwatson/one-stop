@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,29 +26,28 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class PollConsentJobbingTaskTest {
-    private UserConsentService userConsentService;
-    private RailProviderApi railProviderApi;
-    private PollAccountJobbingTask pollAccountJobbingTask;
-    private SchedulerFactory scheduler;
+    @Mock
+    UserConsentService userConsentService;
+    @Mock
+    RailProviderFactory railProviderFactory;
+    @Mock
+    RailProviderApi railProviderApi;
+    @Mock
+    PollAccountJobbingTask pollAccountJobbingTask;
+    @Mock
+    SchedulerFactory scheduler;
 
-    private PollConsentJobbingTask fixture;
+    @InjectMocks
+    PollConsentJobbingTask fixture;
 
     @BeforeEach
     public void init() {
-        userConsentService = mock();
-        railProviderApi = mock();
-        pollAccountJobbingTask = mock();
-        scheduler = mock();
+        openMocks(this);
 
-        RailProviderFactory railProviderFactory = mock();
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
-
-        fixture = new PollConsentJobbingTask(
-            userConsentService,
-            railProviderFactory,
-            pollAccountJobbingTask);
     }
 
     @Test

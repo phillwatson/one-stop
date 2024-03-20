@@ -26,6 +26,9 @@ one-stop:
       institutions: PT6H
       account-details: PT5H
 
+    # The duration that a consent registration will wait until timed-out
+    consent-timeout: PT10M
+
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}
     tasks:

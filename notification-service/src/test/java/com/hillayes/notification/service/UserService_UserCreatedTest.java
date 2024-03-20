@@ -5,12 +5,11 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
 import com.hillayes.notification.task.SendEmailTask;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,20 +25,21 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserService_UserCreatedTest {
-    @InjectMock
+    @Mock
     UserRepository userRepository;
 
-    @InjectMock
+    @Mock
     SendEmailTask sendEmailTask;
 
-    @Inject
+    @InjectMocks
     UserService fixture;
 
     @BeforeEach
     public void beforeEach() {
+        openMocks(this);
         when(userRepository.save(any())).then(invocation ->
             invocation.getArgument(0)
         );
