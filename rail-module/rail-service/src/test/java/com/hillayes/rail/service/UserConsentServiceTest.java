@@ -639,6 +639,39 @@ public class UserConsentServiceTest {
         verify(railProviderApi).deleteAgreement(consent.getAgreementId());
     }
 
+    @Test
+    public void testRegistrationTimeout_RailException() {
+        // given: a consent that has is waiting to be accepted
+        URI clientCallbackUri = URI.create("http://mock-uri");
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
+            builder.status(ConsentStatus.INITIATED);
+            builder.callbackUri(clientCallbackUri.toString());
+        });
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // and: the rail provider throws an exception on deleting agreement
+        // the consent will still be timed-out
+        when(railProviderApi.deleteAgreement(any())).thenThrow(new RuntimeException("Mock Exception"));
+
+        // when: the service is called
+        fixture.registrationTimeout(consent.getId());
+
+        // then: the consent is updated
+        ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
+        verify(userConsentRepository).save(captor.capture());
+
+        // and: the consent status is set to TIMEOUT
+        UserConsent updatedConsent = captor.getValue();
+        assertEquals(ConsentStatus.TIMEOUT, updatedConsent.getStatus());
+        assertNull(consent.getCallbackUri());
+
+        // and: the consent event is issued
+        verify(consentEventSender).sendConsentTimedOut(updatedConsent);
+
+        // and: the delete agreement was called
+        verify(railProviderApi).deleteAgreement(consent.getAgreementId());
+    }
+
     @ParameterizedTest
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"INITIATED"})
     public void testRegistrationTimeout_ConsentNotFound(ConsentStatus status) {
