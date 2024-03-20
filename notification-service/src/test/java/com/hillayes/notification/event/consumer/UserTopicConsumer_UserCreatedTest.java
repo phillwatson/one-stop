@@ -1,15 +1,15 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.notification.domain.User;
-import com.hillayes.notification.service.UserService;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserCreated;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
-import jakarta.inject.Inject;
+import com.hillayes.notification.domain.User;
+import com.hillayes.notification.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Instant;
 import java.util.Locale;
@@ -19,14 +19,19 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class UserTopicConsumer_UserCreatedTest {
-    @InjectMock
+    @Mock
     UserService userService;
 
-    @Inject
+    @InjectMocks
     UserTopicConsumer fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @Test
     public void testUserCreated() {

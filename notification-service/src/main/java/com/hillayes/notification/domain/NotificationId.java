@@ -13,6 +13,7 @@ public enum NotificationId {
     CONSENT_DENIED(Topic.CONSENT, NotificationSeverity.info),
     CONSENT_SUSPENDED(Topic.CONSENT, NotificationSeverity.warn),
     CONSENT_EXPIRED(Topic.CONSENT, NotificationSeverity.warn),
+    CONSENT_TIMEOUT(Topic.CONSENT, NotificationSeverity.info),
     ACCOUNT_ACTIVITY(Topic.USER, NotificationSeverity.warn);
 
     private final Topic topic;

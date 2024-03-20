@@ -27,6 +27,14 @@ public interface ServiceConfiguration {
     Duration accountPollingInterval();
 
     /**
+     * The duration after which an INITIATED consent registration is considered to have
+     * timed out, if no confirmation of its acceptance or denial has been received
+     * from the rail.
+     */
+    @WithDefault("PT10M")
+    Duration consentTimeout();
+
+    /**
      * The detail that describes a country supported by the rail service.
      */
     interface Country {

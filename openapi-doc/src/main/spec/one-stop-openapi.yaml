@@ -775,6 +775,7 @@ paths:
           schema:
             type: string
             format: date-time
+            default: 1970-01-01T00:00:00Z
       responses:
         200:
           description: "successful operation"

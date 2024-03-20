@@ -86,33 +86,48 @@ public class SchedulerFactory {
      *
      * @param jobbingTaskName the name of the Jobbing task to pass the payload to for processing.
      * @param payload the payload to be processed.
+     * @param when the date-time at which the job is to be run.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(String jobbingTaskName, Object payload) {
+    public String addJob(String jobbingTaskName, Object payload, Instant when) {
         Task<JobbingTaskData> task = jobbingTasks.get(jobbingTaskName);
         if (task == null) {
             throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTaskName + "\"");
         }
 
         String id = UUID.randomUUID().toString();
-        log.debug("Scheduling job [name: {}, id: {}]", task.getName(), id);
+        log.debug("Scheduling job [name: {}, id: {}, when: {}]", task.getName(), id, when);
 
         // schedule the job's payload - with the caller's correlation ID
         String correlationId = Correlation.getCorrelationId().orElse(id);
-        scheduler.schedule(task.instance(id, new JobbingTaskData(correlationId, payload)), Instant.now());
+        scheduler.schedule(task.instance(id, new JobbingTaskData(correlationId, payload)), when);
 
         return id;
     }
 
     /**
      * Schedules a job of work for the Jobbing task, to process the given payload.
+     * The task is scheduled to run at the given Instant.
+     *
+     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param payload the payload to be processed.
+     * @param when the date-time at which the job is to be run.
+     * @return the unique identifier for the scheduled job.
+     */
+    public String addJob(NamedJobbingTask<?> jobbingTask, Object payload, Instant when) {
+        return addJob(jobbingTask.getName(), payload, when);
+    }
+
+    /**
+     * Schedules a job of work for the Jobbing task, to process the given payload.
+     * The task is scheduled to run at the earliest opportunity.
      *
      * @param jobbingTask the Jobbing task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
     public String addJob(NamedJobbingTask<?> jobbingTask, Object payload) {
-        return addJob(jobbingTask.getName(), payload);
+        return addJob(jobbingTask, payload, Instant.now());
     }
 
     /**
@@ -238,7 +253,7 @@ public class SchedulerFactory {
                             try {
                                 log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                                 Correlation.run(inst.getData().correlationId, () ->
-                                    addJob(onMaxRetryTaskName, inst.getData().getPayloadContent())
+                                    addJob(onMaxRetryTaskName, inst.getData().getPayloadContent(), Instant.now())
                                 );
                             } catch (Exception e) {
                                 log.error("Failed to queue on-max-retry task", e);
@@ -421,7 +436,7 @@ public class SchedulerFactory {
                         log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                         JobbingTaskData taskData = (JobbingTaskData) executionComplete.getExecution().taskInstance.getData();
                         Correlation.run(taskData.correlationId, () ->
-                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.getPayloadContent())
+                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.getPayloadContent(), Instant.now())
                         );
                     } catch (Exception e) {
                         log.error("Failed to queue on-max-retry task", e);

@@ -6,11 +6,11 @@ import com.hillayes.events.events.consent.ConsentCancelled;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -23,17 +23,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@QuarkusTest
 public class ConsentTopicConsumer_ConsentCancelledTest {
-    @InjectMock
+    @Mock
     SendEmailTask sendEmailTask;
 
-    @InjectMock
+    @Mock
     NotificationService notificationService;
 
-    @Inject
+    @InjectMocks
     ConsentTopicConsumer fixture;
+
+    @BeforeEach
+    public void setup() {
+        openMocks(this);
+    }
 
     @Test
     public void test() {

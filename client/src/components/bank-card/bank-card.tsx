@@ -13,8 +13,11 @@ interface Props {
     onLinkSelect?: (institution: Institution) => void;
 }
 
+// those statuses in which an existing consent can be renewed/registered
+const RENEWABLE_STATUSES = ["EXPIRED", "SUSPENDED", "DENIED", "TIMEOUT", "CANCELLED"];
+
 export default function BankCard(props: Props) {
-  const enabled = props.consent === undefined || props.consent.status === "EXPIRED";
+  const enabled = props.consent === undefined || RENEWABLE_STATUSES.includes(props.consent.status);
   const css = "card " + (enabled ? "enabled" : "disabled");
   const label = props.institution.bic + (props.consent === undefined ? "" : ": " + props.consent?.status);
 

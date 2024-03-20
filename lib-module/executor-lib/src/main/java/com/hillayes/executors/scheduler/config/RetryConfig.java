@@ -27,13 +27,13 @@ public interface RetryConfig {
      * The exponential rate at which a task will be retried. The retryInterval will be
      * increased by this factor on each retry. This will only apply if retryInterval is
      * specified.
-     * If retryInterval is specified, a default value of 1.5 is applies.
+     * If retryInterval is specified, a default value of 1.5 is applied.
      */
     OptionalDouble retryExponent();
 
     /**
      * The maximum number of times a task will be retried. If required, a value of 5 is
-     * suggested.
+     * suggested. If not specified the task will be retried indefinitely.
      * When both on-failure and on-incomplete configures are supplied, the on-failure
      * max-retry only apply for consecutive failures. If the task returns an "incomplete"
      * result, the failure count will be reset. However, the on-incomplete max-retry will
