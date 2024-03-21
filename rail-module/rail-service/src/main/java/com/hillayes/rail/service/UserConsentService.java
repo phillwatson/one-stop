@@ -86,8 +86,7 @@ public class UserConsentService {
      */
     public Optional<UserConsent> getUserConsent(UUID userId, String institutionId) {
         log.info("Looking for user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
-        return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).stream()
-            .min(Comparator.comparing(UserConsent::getStatus));
+        return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId);
     }
 
     public Optional<UserConsent> getUserConsent(UUID consentId) {

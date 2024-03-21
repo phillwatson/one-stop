@@ -219,7 +219,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
             // when: the user deletes the consent
-            userConsentApi.deleteConsent(institution.getId(), false);
+            userConsentApi.deleteConsent(institution.getId(), true);
 
             // then: an email is sent to the user for confirmation
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),

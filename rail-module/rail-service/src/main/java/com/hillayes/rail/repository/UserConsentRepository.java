@@ -20,8 +20,8 @@ public class UserConsentRepository extends RepositoryBase<UserConsent, UUID> {
         return find("userId", userId).list();
     }
 
-    public List<UserConsent> findByUserIdAndInstitutionId(UUID userId, String institutionId) {
-        return listAll("select u from UserConsent u where u.userId = :userId AND u.institutionId = :institutionId",
+    public Optional<UserConsent> findByUserIdAndInstitutionId(UUID userId, String institutionId) {
+        return findFirst("select u from UserConsent u where u.userId = :userId AND u.institutionId = :institutionId",
             Map.of("userId", userId, "institutionId", institutionId));
     }
 

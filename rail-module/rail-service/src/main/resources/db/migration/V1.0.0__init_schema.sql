@@ -18,7 +18,7 @@ CREATE TABLE ${flyway:defaultSchema}.userconsent (
     error_code varchar(256) NULL,
     error_detail varchar(256) NULL
 );
-CREATE INDEX idx_userconsent_user_id ON ${flyway:defaultSchema}.userconsent (user_id);
+CREATE UNIQUE INDEX idx_userconsent_user_id ON ${flyway:defaultSchema}.userconsent (user_id, institution_id);
 CREATE INDEX idx_userconsent_reference ON ${flyway:defaultSchema}.userconsent (reference);
 
 CREATE TABLE ${flyway:defaultSchema}.account (
