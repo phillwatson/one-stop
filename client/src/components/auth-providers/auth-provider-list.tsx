@@ -10,10 +10,9 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
 import { UserAuthProvider } from "../../model/user-profile.model";
-import ServiceErrorResponse from '../../model/service-error';
 import ProfileService from "../../services/profile.service"
 import Tooltip from '@mui/material/Tooltip/Tooltip';
-import { useNotificationDispatch } from '../../contexts/notification-context';
+import { useNotificationDispatch } from '../../contexts/notification/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
 
 const colhead: SxProps = {
@@ -48,7 +47,7 @@ export default function AuthProviderList() {
     var authProvider = selectedAuthProvider!
     ProfileService.deleteAuthProvider(authProvider.id)
       .then(() => setAuthProviders(authProviders.filter(ap => ap.id !== authProvider.id)))
-      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
+      .catch(err => showNotification(err))
   }
 
   return (

@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 
 import "./login-form.css";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
-import { useNotificationDispatch } from "../../contexts/notification-context";
+import { useNotificationDispatch } from "../../contexts/notification/context";
 import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 import { useNavigate } from "react-router-dom";
@@ -32,12 +32,8 @@ export default function LoginForm() {
   function handleSubmit(event: any) {
     event.preventDefault();
     ProfileService.login(credentials.username, credentials.password)
-      .then(() => {
-        ProfileService.get().then(user => setCurrentUser(user))
-      })
-      .catch(e => {
-        showNotification({ type: 'add', level: "warning", message: e.response.statusText });
-      });
+      .then(() =>  ProfileService.get().then(user => setCurrentUser(user)))
+      .catch(e => showNotification(e));
   }
 
   function handleNewUser(event: any) {

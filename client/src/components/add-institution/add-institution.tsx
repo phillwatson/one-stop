@@ -9,8 +9,7 @@ import InstitutionService from '../../services/institution.service';
 import BankList from '../bank-list/bank-list'
 import UserConsentService from '../../services/consent.service';
 import UserConsent from "../../model/user-consent.model";
-import { useNotificationDispatch } from '../../contexts/notification-context';
-import ServiceErrorResponse from '../../model/service-error';
+import { useNotificationDispatch } from '../../contexts/notification/context';
 import { TransitionProps } from "@mui/material/transitions";
 
 interface Props {
@@ -75,7 +74,7 @@ export default function Institutions(props: Props) {
       console.log(`Redirecting to ${registerUri}`);
       window.location = registerUri;
     })
-    .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
+    .catch(err => showNotification(err))
   }
 
   return (

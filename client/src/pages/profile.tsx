@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import Button from '@mui/material/Button';
 
-import { useNotificationDispatch } from "../contexts/notification-context";
+import { useNotificationDispatch } from "../contexts/notification/context";
 import { useCurrentUser } from "../contexts/user-context";
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
@@ -58,7 +58,7 @@ export default function UpdateProfile() {
         setCurrentUser(update)
         showNotification({ type: 'add', level: 'success', message: 'Profile updated' });
       })
-      .catch(error => showNotification({ type: 'add', level: 'error', message: error}));
+      .catch(error => showNotification(error));
   }
 
   return (

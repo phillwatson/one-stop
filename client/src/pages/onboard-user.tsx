@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { useNotificationDispatch } from "../contexts/notification-context";
+import { useNotificationDispatch } from "../contexts/notification/context";
 import StaticAppHeader from "../components/app-header/static-app-header";
 import RegistrationForm from "../components/registration-form/registration-form";
 import UserService, { RegistrationCredentials } from '../services/user.service'
@@ -18,7 +18,7 @@ export default function OnboardUser() {
         showNotification({ type: 'add', level: 'success', message: 'Your account has been opened.' });
         navigate('/profile');
       })
-      .catch(error => showNotification({ type: 'add', level: 'error', message: error}));
+      .catch(error => showNotification(error));
   }
 
   return (

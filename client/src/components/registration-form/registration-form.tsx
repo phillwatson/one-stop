@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 
 import "./registration-form.css";
 import { RegistrationCredentials} from "../../services/user.service";
-import { useNotificationDispatch } from '../../contexts/notification-context';
+import { useNotificationDispatch } from '../../contexts/notification/context';
 
 interface Props {
   onSubmit: (profile: RegistrationCredentials) => void;
