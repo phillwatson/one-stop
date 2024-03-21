@@ -54,9 +54,7 @@ class HttpService {
 
     // add Ip-Address and location data to default headers
     // TODO: this is a bit of a hack - it doesn't set the headers for the authentication requests
-    console.log("Fetching user location");
     this.getLocation().then(location => {
-      console.log("User location obtained", location)
       this.http.defaults.headers.common["X-Location-IP"] = location.ip;
       this.http.defaults.headers.common["X-Location-City"] = location.city;
       this.http.defaults.headers.common["X-Location-Country"] = location.country_name;
