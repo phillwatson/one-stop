@@ -78,8 +78,7 @@ public class UserConsentService {
     }
 
     /**
-     * Returns the consent record for the identified user and institution. If multiple
-     * records are found, the one with the lowest status value is returned.
+     * Returns the consent record for the identified user and institution.
      * @param userId the user identifier.
      * @param institutionId the institution identifier.
      * @return the user-consent record, or an empty result.

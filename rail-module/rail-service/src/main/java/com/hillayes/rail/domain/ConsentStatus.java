@@ -1,10 +1,5 @@
 package com.hillayes.rail.domain;
 
-/**
- * The status of a consent. The order of the enum values is important as it is
- * used to select which consent is returned when a user holds multiple consents
- * for the same institution.
- */
 public enum ConsentStatus {
     // consent has been registered and awaiting user acceptance
     INITIATED,
