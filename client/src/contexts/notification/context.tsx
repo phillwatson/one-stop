@@ -31,7 +31,7 @@ function notificationReducer(notifications: Notification[], action: Notification
 
   switch (action.type) {
     case 'add': {
-      return [ { id: Date.now(), message: (action.message as string), level: action.level }, ...notifications ];
+      return [ { id: Date.now(), message: action.message, level: action.level }, ...notifications ];
     }
 
     case 'delete': {

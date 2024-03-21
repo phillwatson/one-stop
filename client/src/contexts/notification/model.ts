@@ -16,5 +16,5 @@ export type Notification = {
  * An action to be performed on the list of Notifications.
  */
 export type NotificationAction = 
-  | { type: 'add', level: Severity, message: string | AxiosError }
+  | { type: 'add', level: Severity, message: string }
   | { type: 'delete', id: number };
