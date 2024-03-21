@@ -217,6 +217,10 @@ public class UserConsentServiceTest {
             TestData.mockUserConsent(userId, consent -> {
                 consent.institutionId(institutionId);
                 consent.status(ConsentStatus.DENIED);
+            }),
+            TestData.mockUserConsent(userId, consent -> {
+                consent.institutionId(institutionId);
+                consent.status(ConsentStatus.TIMEOUT);
             })
         );
         when(userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId))
@@ -228,8 +232,11 @@ public class UserConsentServiceTest {
         // then: the repository is called with the given parameters
         verify(userConsentRepository).findByUserIdAndInstitutionId(userId, institutionId);
 
-        // and: NO consent is returned
-        assertTrue(result.isEmpty());
+        // and: a consent is returned
+        assertFalse(result.isEmpty());
+
+        // and: the consent is the one with the lowest status
+        assertEquals(ConsentStatus.DENIED, result.get().getStatus());
     }
 
     @Test
