@@ -57,7 +57,7 @@ export function useNotifications(): Notification[] {
  * A context that allows components to dispatch NotificationAction to update the list of
  * Notifications.
  */
-const NotificationDispatchContext = createContext(function(action: NotificationAction) {});
+const NotificationDispatchContext = createContext(function(action: NotificationAction | AxiosError) {});
 export function useNotificationDispatch() {
   return useContext(NotificationDispatchContext);
 }
