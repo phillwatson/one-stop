@@ -1,0 +1,11 @@
+.stack {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 10px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  row-gap: 9px;
+}
