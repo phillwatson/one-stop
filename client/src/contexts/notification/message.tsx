@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
-import Alert from "@mui/material/Alert";
+import Alert from "@mui/material/Alert/Alert";
+import Slide from "@mui/material/Slide/Slide";
 
 import { Notification, NotificationAction } from "./model";
 
@@ -25,10 +26,12 @@ export default function Message(props: MessageProps) {
   }, [notification, handleCloseAlert]);
 
   return (
-    <Alert elevation={24} onClose={ handleCloseAlert } severity={ notification.level }>
-      {
-        notification.message.split('\n').map((line) => <div>{ line }</div>)
-      }
-    </Alert>
+    <Slide direction="left" in={ true }>
+      <Alert elevation={24} onClose={ handleCloseAlert } severity={ notification.level }>
+        {
+          notification.message.split('\n').map((line) => <div>{ line }</div>)
+        }
+      </Alert>
+    </Slide>
   );
 }
