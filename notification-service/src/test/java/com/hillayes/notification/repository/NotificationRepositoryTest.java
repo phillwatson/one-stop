@@ -1,5 +1,6 @@
 package com.hillayes.notification.repository;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
 import io.quarkus.test.TestTransaction;
@@ -39,7 +40,7 @@ public class NotificationRepositoryTest {
         Instant after = start.plus(Duration.ofHours(5));
 
         // when: the fixture is called
-        List<Notification> results = fixture.listByUserAndTime(userId, after);
+        Page<Notification> results = fixture.listByUserAndTime(userId, after, 0, 1000);
 
         // then: the result is not empty
         assertFalse(results.isEmpty());

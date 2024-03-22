@@ -24,7 +24,7 @@ class UserConsentService {
   }
 
   cancelConsent(institutionId: string, purge: boolean = false) {
-    console.log(`Closing bank [name: ${institutionId}]`);
+    console.log(`Closing institution [id: ${institutionId}]`);
     return http.delete(`/rails/consents/${institutionId}?purge=${purge}`);
   }
 }

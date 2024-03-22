@@ -1,23 +1,24 @@
 package com.hillayes.notification.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.jpa.Page;
+import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.NotificationRepository;
 import com.hillayes.notification.service.UserService;
-import com.hillayes.onestop.api.NotificationResponse;
+import com.hillayes.onestop.api.PaginatedNotifications;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import io.restassured.common.mapper.TypeRef;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -29,7 +30,8 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class NotificationResourceTest extends TestBase {
-    private static final TypeRef<List<NotificationResponse>> NOTIFICATION_LIST = new TypeRef<>() {};
+    @Inject
+    ObjectMapper jsonMapper;
 
     @InjectMock
     UserService userService;
@@ -39,7 +41,7 @@ public class NotificationResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetNotifications() {
+    public void testGetNotifications() throws JsonProcessingException {
         // given: a user
         User user = User.builder()
             .id(UUID.fromString(userIdStr))
@@ -49,42 +51,44 @@ public class NotificationResourceTest extends TestBase {
         when(userService.getUser(user.getId()))
             .thenReturn(Optional.of(user));
 
+        int pageIndex = 0;
+        int pageSize = 5;
+
         // and: a collection of notifications exist
         Instant start = Instant.now().minus(Duration.ofHours(10));
         List<Notification> notifications = mockNotifications(user.getId(), start);
-        when(notificationRepository.listByUserAndTime(eq(user.getId()), any()))
-            .thenReturn(notifications);
+        when(notificationRepository.listByUserAndTime(eq(user.getId()), any(), anyInt(), anyInt()))
+            .thenReturn(Page.of(notifications, pageIndex, pageSize));
 
         // when: the resource is called
         Instant after = start.plus(Duration.ofHours(5));
-        List<NotificationResponse> response = given()
+        PaginatedNotifications response = given()
             .request()
             .queryParam("after", after.toString())
+            .queryParam("page", pageIndex)
+            .queryParam("page-size", pageSize)
             .contentType(JSON)
             .when()
             .get("/api/v1/notifications")
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().as(NOTIFICATION_LIST);
+            .extract().as(PaginatedNotifications.class);
 
         // then: the repository is called with correct parameters
-        verify(notificationRepository).listByUserAndTime(user.getId(), after);
+        verify(notificationRepository).listByUserAndTime(user.getId(), after, pageIndex, pageSize);
 
-        // and: the result is not empty
-        assertEquals(notifications.size(), response.size());
-
-        // and: the result contains all notifications
-        notifications.forEach(expected -> {
-            assertNotNull(response.stream()
-                .filter(notification -> notification.getId().equals(expected.getId()))
-                .findFirst().orElse(null));
-        });
+        // and: the response contains the notifications
+        assertEquals(pageIndex, response.getPage());
+        assertEquals(pageSize, response.getPageSize());
+        assertEquals(pageSize, response.getCount());
+        assertEquals(notifications.size(), response.getTotal());
+        assertEquals(3, response.getTotalPages());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testDeleteNotification_HappyPath() {
+    public void testDeleteNotification_HappyPath() throws JsonProcessingException {
         // given: a user
         UUID userId = UUID.fromString(userIdStr);
 
@@ -111,7 +115,7 @@ public class NotificationResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testDeleteNotification_WrongUser() {
+    public void testDeleteNotification_WrongUser() throws JsonProcessingException {
         // given: a notification to be deleted
         Notification notification = mockNotification(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
         when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
@@ -159,7 +163,7 @@ public class NotificationResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = adminIdStr, roles = "admin")
-    public void testDeleteNotification_WrongRole() {
+    public void testDeleteNotification_WrongRole() throws JsonProcessingException {
         // given: a notification to be deleted
         Notification notification = mockNotification(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
         when(notificationRepository.findByIdOptional(notification.getId())).thenReturn(Optional.of(notification));
@@ -176,17 +180,26 @@ public class NotificationResourceTest extends TestBase {
             .statusCode(403);
     }
 
-    private Notification mockNotification(UUID userId, UUID id, Instant dateCreated) {
+    private Notification mockNotification(UUID userId, UUID id, Instant dateCreated) throws JsonProcessingException {
+        Map<String, Object> params = Map.of(
+            "event", ConsentExpired.builder()
+                .userId(userId)
+                .consentId(UUID.randomUUID())
+                .institutionId(UUID.randomUUID().toString())
+                .institutionName(randomAlphanumeric(30))
+                .build()
+        );
         return Notification.builder()
             .id(id)
             .userId(userId)
             .correlationId(randomAlphanumeric(20))
             .dateCreated(dateCreated)
             .messageId(NotificationId.CONSENT_EXPIRED)
+            .attributes(jsonMapper.writeValueAsString(params))
             .build();
     }
 
-    private List<Notification> mockNotifications(UUID userId, Instant startDateTime) {
+    private List<Notification> mockNotifications(UUID userId, Instant startDateTime) throws JsonProcessingException {
         Instant now = Instant.now();
         List<Notification> notifications = new ArrayList<>();
 

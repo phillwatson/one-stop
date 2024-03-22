@@ -88,16 +88,16 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
             .list();
     }
 
-    public Page<Entity> pageAll(OrderBy orderBy, int pageNumber, int pageSize) {
-        return findByPage(findAll(toSort(orderBy)), pageNumber, pageSize);
+    public Page<Entity> pageAll(OrderBy orderBy, int pageIndex, int pageSize) {
+        return findByPage(findAll(toSort(orderBy)), pageIndex, pageSize);
     }
 
-    public Page<Entity> pageAll(String query, int pageNumber, int pageSize, Object... parameters) {
-        return findByPage(find(query, parameters), pageNumber, pageSize);
+    public Page<Entity> pageAll(String query, int pageIndex, int pageSize, Object... parameters) {
+        return findByPage(find(query, parameters), pageIndex, pageSize);
     }
 
-    public Page<Entity> pageAll(String query, OrderBy orderBy, int pageNumber, int pageSize, Object... parameters) {
-        return findByPage(find(query, toSort(orderBy), parameters), pageNumber, pageSize);
+    public Page<Entity> pageAll(String query, OrderBy orderBy, int pageIndex, int pageSize, Object... parameters) {
+        return findByPage(find(query, toSort(orderBy), parameters), pageIndex, pageSize);
     }
 
     public Page<Entity> pageAll(String query, int page, int pageSize,
@@ -108,20 +108,20 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
     /**
      * Returns the identified page of results from the given query.
      * @param query the query to retrieve the full results.
-     * @param pageNumber the, zero-based, page number of the requested page.
+     * @param pageIndex the, zero-based, page number of the requested page.
      * @param pageSize the max number of elements to be returned.
      * @return the requested page of results.
      */
-    protected Page<Entity> findByPage(PanacheQuery<Entity> query, int pageNumber, int pageSize) {
+    protected Page<Entity> findByPage(PanacheQuery<Entity> query, int pageIndex, int pageSize) {
         List<Entity> list = query
-            .page(pageNumber, pageSize)
+            .page(pageIndex, pageSize)
             .list();
 
         long count = (!list.isEmpty()) && (pageSize > list.size())
-            ? ((long) pageSize * pageNumber) + list.size()
-            : (pageNumber == 0) && (list.isEmpty()) ? 0 : query.count();
+            ? ((long) pageSize * pageIndex) + list.size()
+            : (pageIndex == 0) && (list.isEmpty()) ? 0 : query.count();
 
-        return new Page<>(list, count, pageNumber, pageSize);
+        return new Page<>(list, count, pageIndex, pageSize);
     }
 
     /**

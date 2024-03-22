@@ -9,7 +9,7 @@ import InstitutionService from '../../services/institution.service';
 import BankList from '../bank-list/bank-list'
 import UserConsentService from '../../services/consent.service';
 import UserConsent from "../../model/user-consent.model";
-import { useNotificationDispatch } from '../../contexts/notification/context';
+import { useMessageDispatch } from '../../contexts/messages/context';
 import { TransitionProps } from "@mui/material/transitions";
 
 interface Props {
@@ -37,7 +37,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Institutions(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
 
   const handleClose = () => {
     props.onClose();
@@ -74,7 +74,7 @@ export default function Institutions(props: Props) {
       console.log(`Redirecting to ${registerUri}`);
       window.location = registerUri;
     })
-    .catch(err => showNotification(err))
+    .catch(err => showMessage(err))
   }
 
   return (

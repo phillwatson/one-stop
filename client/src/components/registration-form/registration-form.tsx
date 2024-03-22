@@ -4,14 +4,14 @@ import Button from '@mui/material/Button';
 
 import "./registration-form.css";
 import { RegistrationCredentials} from "../../services/user.service";
-import { useNotificationDispatch } from '../../contexts/notification/context';
+import { useMessageDispatch } from '../../contexts/messages/context';
 
 interface Props {
   onSubmit: (profile: RegistrationCredentials) => void;
 }
 
 export default function RegistrationForm(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
 
   const [profile, setProfile] = useState<RegistrationCredentials>({ 
     username: "", 
@@ -45,7 +45,7 @@ export default function RegistrationForm(props: Props) {
 
     const errors = validateForm();
     if (errors.length > 0) {
-      errors.forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
+      errors.forEach(value => showMessage({ type: 'add', level: 'error', text: value}))
     } else {
       props.onSubmit(profile);
     }

@@ -1,0 +1,18 @@
+import "./message-stack.css";
+import { Message, MessageAction } from "./model";
+import MessagePane from './message-pane';
+
+interface MessageBoardProps {
+  messages: Array<Message>;
+  dispatch: React.Dispatch<MessageAction>;
+}
+
+export default function MessageStack(props: MessageBoardProps) {
+  return (
+    <div className="message-stack" >
+      { props.messages.map((message) =>
+        <MessagePane key={ message.id } message={ message } dispatch={ props.dispatch }/>
+      )}
+    </div>
+  );
+}

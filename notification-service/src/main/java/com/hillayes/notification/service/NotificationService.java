@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.correlation.Correlation;
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.notification.config.NotificationConfiguration;
 import com.hillayes.notification.domain.Notification;
 import com.hillayes.notification.domain.NotificationId;
@@ -79,26 +80,30 @@ public class NotificationService {
      *
      * @param userId the identifier for the user to whom the notifications belong.
      * @param after the timestamp that all notification must proceed.
+     * @param pageIndex the, zero-based, page number of the requested page.
+     * @param pageSize the max number of elements to be returned.
      * @param mapper the NotificationMapper used to construct the resulting entities.
      * @param <T> the type of the mapped notification entities.
      * @return the collection of mapped notifications in the order they were issued.
      */
-    public <T> List<T> listNotifications(UUID userId, Instant after,
+    public <T> Page<T> listNotifications(UUID userId, Instant after,
+                                         int pageIndex, int pageSize,
                                          NotificationMapper<T> mapper) {
         log.info("List notifications [userId: {}, after: {}]", userId, after);
 
         return userService.getUser(userId)
             .map(user -> {
                 Optional<Locale> locale = Optional.ofNullable(user.getLocale());
-                List<T> notifications = notificationRepository.listByUserAndTime(userId, after)
+                Page<Notification> notifications = notificationRepository.listByUserAndTime(userId, after, pageIndex, pageSize);
+                List<T> mapped = notifications
                     .stream()
                     .map(notification -> mapper.map(notification, renderMessage(notification, locale)))
                     .toList();
 
-                log.debug("List notifications [userId: {}, after: {}, count: {}]", userId, after, notifications.size());
-                return notifications;
+                log.debug("List notifications [userId: {}, after: {}, count: {}]", userId, after, notifications.getContentSize());
+                return new Page<>(mapped, notifications.getTotalCount(), pageIndex, pageSize);
             })
-            .orElse(List.of());
+            .orElse(Page.empty());
     }
 
     public void deleteNotification(UUID userId, UUID notificationId) {
@@ -135,9 +140,8 @@ public class NotificationService {
     private String renderMessage(Notification notification,
                                  Optional<Locale> locale) throws NotificationIdNotFoundException {
         // find the message template from the notification configuration
-        String subject = selectByLocale(notification.getMessageId(), locale.orElse(DEFAULT_LOCALE));
-
-        ST engine = new ST(subject, '$', '$');
+        String template = selectByLocale(notification.getMessageId(), locale.orElse(DEFAULT_LOCALE));
+        ST engine = new ST(template, '$', '$');
 
         // apply any common parameters to the message template
         if (configuration.commonArgs() != null) {

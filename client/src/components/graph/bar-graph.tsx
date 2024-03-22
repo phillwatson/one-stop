@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
 import { BarChart } from "@mui/x-charts/BarChart";
 
-import { useNotificationDispatch } from "../../contexts/notification/context";
+import { useMessageDispatch } from "../../contexts/messages/context";
 import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
 
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function BarGraph(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [xAxis, setXAxis] = useState<Array<string>>([]);
   const [yAxis, setYAxis] = useState<Array<{
     credits: number;
@@ -42,8 +42,8 @@ export default function BarGraph(props: Props) {
         setXAxis(Array.from(range.keys()));
         setYAxis(Array.from(range.values()));
       })
-      .catch(err => showNotification(err));
-  }, [props, showNotification]);
+      .catch(err => showMessage(err));
+  }, [props, showMessage]);
 
   if ((xAxis.length === 0) || (yAxis.length === 0))
     return <>Loading...</>;

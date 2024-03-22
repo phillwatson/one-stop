@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import Button from '@mui/material/Button';
 
-import { useNotificationDispatch } from "../contexts/notification/context";
+import { useMessageDispatch } from "../contexts/messages/context";
 import { useCurrentUser } from "../contexts/user-context";
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
@@ -26,7 +26,7 @@ const emptyProfile: UserProfile = {
 };
 
 export default function UpdateProfile() {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [ currentUser, setCurrentUser ] = useCurrentUser();
 
   const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : emptyProfile);
@@ -52,13 +52,13 @@ export default function UpdateProfile() {
   function handleSubmit(event: any) {
     event.preventDefault();
 
-    validateForm().forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
+    validateForm().forEach(value => showMessage({ type: 'add', level: 'error', text: value}))
     ProfileService.update(profile)
       .then(update => {
         setCurrentUser(update)
-        showNotification({ type: 'add', level: 'success', message: 'Profile updated' });
+        showMessage({ type: 'add', level: 'success', text: 'Profile updated' });
       })
-      .catch(error => showNotification(error));
+      .catch(error => showMessage(error));
   }
 
   return (
