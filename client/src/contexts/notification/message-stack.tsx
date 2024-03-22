@@ -1,3 +1,4 @@
+import "./message-stack.css";
 import { Notification, NotificationAction } from "./model";
 import Message from './message';
 
@@ -8,10 +9,10 @@ interface MessageBoardProps {
 
 export default function MessageStack(props: MessageBoardProps) {
   return (
-      <>
-        { props.notifications.map((notification, index) =>
-          <Message key={ notification.id } notification={ notification } dispatch={ props.dispatch } index={ index }/>
-        )}
-      </>
+    <div className="stack" >
+      { props.notifications.map((notification) =>
+        <Message key={ notification.id } notification={ notification } dispatch={ props.dispatch }/>
+      )}
+    </div>
   );
 }
