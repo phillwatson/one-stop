@@ -11,8 +11,17 @@ function extractMessages(error: AxiosError): Notification[] {
     return [ { id: Date.now(), message: error.message, level: 'error' } ];
   }
 
-  return response.data.errors.map((error: ServiceError) => {
-    return { id: Date.now(), message: error.message, level: error.severity };
+  return response.data.errors.map((error: ServiceError, index: number) => {
+    let message = error.message;
+
+    // append context attributes - would be better to apply these to a message locale template
+    if (error.contextAttributes) {
+      for (const prop in error.contextAttributes) {
+        let value = error.contextAttributes[prop];
+        message = message + `\n${prop}: ${value}`;
+      };
+    }
+    return { id: Date.now() + index, message: message, level: error.severity };
   });
 }
 

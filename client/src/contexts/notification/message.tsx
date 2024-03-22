@@ -8,6 +8,9 @@ interface MessageProps {
   dispatch: React.Dispatch<NotificationAction>;
 }
 
+// those severities that should be auto-closed
+const AUTO_CLOSE = ['success', 'info'];
+
 export default function Message(props: MessageProps) {
   const notification = props.notification;
   const dispatch = props.dispatch;
@@ -17,8 +20,7 @@ export default function Message(props: MessageProps) {
   }, [notification, dispatch]);
 
   useEffect(() => {
-    // set a timeout for "success" and "info" messages
-    const t = (['success', 'info'].includes(notification.level)) ? setTimeout(() => { handleCloseAlert(); }, 5000) : null;
+    const t = (AUTO_CLOSE.includes(notification.level)) ? setTimeout(() => { handleCloseAlert(); }, 5000) : null;
     return () => { if (t !== null) clearTimeout(t); }
   }, [notification, handleCloseAlert]);
 

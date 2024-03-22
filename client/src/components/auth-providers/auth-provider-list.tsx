@@ -56,7 +56,7 @@ export default function AuthProviderList() {
         <caption><i>You're registered with the above auth providers</i></caption>
         <TableHead>
           <TableRow>
-            <TableCell sx={colhead} colSpan={2}>Auth Provider</TableCell>
+            <TableCell sx={colhead} colSpan={2}>Auth Providers</TableCell>
             <TableCell sx={colhead}>Created</TableCell>
             <TableCell sx={colhead}>Last Used</TableCell>
             <TableCell sx={colhead}></TableCell>
