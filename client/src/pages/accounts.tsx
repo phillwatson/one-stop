@@ -7,7 +7,7 @@ import { AccountDetail } from "../model/account.model";
 import AccountList from "../components/account/account-list";
 import Institutions from "../components/add-institution/add-institution";
 import { useSearchParams } from "react-router-dom";
-import { useNotificationDispatch } from "../contexts/notification/context";
+import { useMessageDispatch } from "../contexts/messages/context";
 
 const bottomFabStyle: SxProps = {
   position: 'fixed',
@@ -19,15 +19,15 @@ export default function Accounts() {
   const [ queryParams ] = useSearchParams();
   const [ accounts, setAccounts ] = useState<Array<AccountDetail>>([]);
   const [ showInstitutions, setShowInstitutions ] = useState<boolean>(false);
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
 
   useEffect(() => {
     const error = queryParams.get("error");
     if (error) {
       const details = queryParams.get("details")
-      showNotification({ type: 'add', level: 'error', message: details ? details : error!!});
+      showMessage({ type: 'add', level: 'error', text: details ? details : error!!});
     }
-  }, [ queryParams, showNotification ]);
+  }, [ queryParams, showMessage ]);
 
   useEffect(() => {
     AccountService.getAll().then( response => setAccounts(response.items));

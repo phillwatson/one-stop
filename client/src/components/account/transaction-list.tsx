@@ -10,7 +10,7 @@ import { SxProps } from '@mui/material/styles';
 import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionSummary } from "../../model/account.model";
 import CurrencyService from '../../services/currency.service';
-import { useNotificationDispatch } from "../../contexts/notification/context";
+import { useMessageDispatch } from "../../contexts/messages/context";
 
 interface Props {
   account: AccountDetail;
@@ -21,14 +21,14 @@ const colhead: SxProps = {
 };
 
 export default function TransactionList(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [transactions, setTransactions] = useState<Array<TransactionSummary>>([]);
 
   useEffect(() => {
     AccountService.getTransactions(props.account.id, 0, 30)
       .then( response => setTransactions(response.items))
-      .catch(err => showNotification(err));
-    }, [props.account.id, showNotification]);
+      .catch(err => showMessage(err));
+    }, [props.account.id, showMessage]);
 
   return (
     <Table size="small" aria-label="transactions">

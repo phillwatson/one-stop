@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { SxProps } from '@mui/material/styles';
 
-import { useNotificationDispatch } from '../../contexts/notification/context';
+import { useMessageDispatch } from '../../contexts/messages/context';
 import AccountService from '../../services/account.service';
 import CurrencyService from '../../services/currency.service';
 import { TransactionSummary } from '../../model/account.model';
@@ -27,14 +27,14 @@ interface TransactionsList {
 }
 
 export default function TransactionSummaryList(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [transactions, setTransactions] = useState<TransactionsList>({ page: [], total: 0});
 
   useEffect(() => {
     AccountService.getTransactions(props.accountId, 0, 10)
       .then(response => setTransactions({ page: response.items, total: response.total }))
-      .catch(err => showNotification(err))
-  }, [props.accountId, showNotification]);
+      .catch(err => showMessage(err))
+  }, [props.accountId, showMessage]);
 
   const noTransactions = (transactions.page.length === 0);
   return(

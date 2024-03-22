@@ -13,6 +13,7 @@ import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.NotificationResponse;
+import com.hillayes.onestop.api.PaginatedNotifications;
 import com.hillayes.onestop.api.UserConsentRequest;
 import com.hillayes.sim.email.SendWithBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -93,12 +93,12 @@ public class NotificationTestIT extends ApiTestBase {
         }
 
         // and: a notification is issued to the user
-        List<NotificationResponse> notifications = notificationApi.getNotifications(testStarted);
+        PaginatedNotifications notifications = notificationApi.getNotifications(testStarted, 0, 1000);
         assertNotNull(notifications);
-        assertEquals(1, notifications.size());
+        assertEquals(1, notifications.getCount());
 
         // and: the notification shows the reason for denial
-        NotificationResponse notification = notifications.get(0);
+        NotificationResponse notification = notifications.getItems().get(0);
         assertEquals("CONSENT", notification.getTopic());
         assertTrue(notification.getMessage().contains("Reason given '" + errorDetails + "'"));
 
@@ -106,6 +106,6 @@ public class NotificationTestIT extends ApiTestBase {
         notificationApi.deleteNotification(notification.getId());
 
         // then: the notifications are empty
-        assertTrue(notificationApi.getNotifications(testStarted).isEmpty());
+        assertEquals(0, notificationApi.getNotifications(testStarted, 0, 1000).getTotal());
    }
 }

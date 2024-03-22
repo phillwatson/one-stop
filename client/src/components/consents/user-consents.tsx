@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 
 import "./user-consents.css";
-import { useNotificationDispatch } from "../../contexts/notification/context";
+import { useMessageDispatch } from "../../contexts/messages/context";
 import UserConsentService from "../../services/consent.service"
 import InstitutionService from "../../services/institution.service";
 import Institution from '../../model/institution.model';
@@ -25,7 +25,7 @@ const colhead: SxProps = {
 };
 
 export default function UserConsentList(props: Props) {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [userConsents, setUserConsents] = useState<Array<UserConsent>>([]);
   const [institutions, setInstitutions] = useState<Array<Institution>>([]);
   const [selectedUserConsent, setSelectedUserConsent] = useState<UserConsent|undefined>(undefined);
@@ -53,7 +53,7 @@ export default function UserConsentList(props: Props) {
     userConsents.forEach(consent => console.log("   >> " + consent.id))
     UserConsentService.cancelConsent(userConsent.institutionId, includeAccounts)
       .then(() => setUserConsents(userConsents.filter(consent => consent.id !== userConsent.id)))
-      .catch(err => showNotification(err))
+      .catch(err => showMessage(err))
   }
 
   function formatDateTime(dateStr?: string): string {

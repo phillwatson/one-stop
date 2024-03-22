@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Button from "@mui/material/Button";
 
-import { useNotificationDispatch } from "../contexts/notification/context";
+import { useMessageDispatch } from "../contexts/messages/context";
 import UserService from '../services/user.service'
 import StaticAppHeader from "../components/app-header/static-app-header";
 import TextField from "@mui/material/TextField";
 
 export default function NewUser() {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
 
   const [email, setEmail] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -27,14 +27,14 @@ export default function NewUser() {
 
     const errors = validateForm();
     if (errors.length > 0) {
-      errors.forEach(value => showNotification({ type: 'add', level: 'error', message: value}))
+      errors.forEach(value => showMessage({ type: 'add', level: 'error', text: value}))
     } else {
       UserService.registerNewUser(email)
         .then(() => {
           setSubmitted(true);
-          showNotification({ type: 'add', level: 'success', message: 'Please check your email.' });
+          showMessage({ type: 'add', level: 'success', text: 'Please check your email.' });
         })
-        .catch(error => showNotification(error));
+        .catch(error => showMessage(error));
     }
   }
 

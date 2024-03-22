@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 
 import "./login-form.css";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
-import { useNotificationDispatch } from "../../contexts/notification/context";
+import { useMessageDispatch } from "../../contexts/messages/context";
 import { useCurrentUser } from "../../contexts/user-context";
 import ProfileService from "../../services/profile.service";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,7 @@ interface Credentials {
 export default function LoginForm() {
   const [credentials, setCredentials] = useState<Credentials>({ username: "", password: "" });
 
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [, setCurrentUser ] = useCurrentUser();
 
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function LoginForm() {
     event.preventDefault();
     ProfileService.login(credentials.username, credentials.password)
       .then(() =>  ProfileService.get().then(user => setCurrentUser(user)))
-      .catch(e => showNotification(e));
+      .catch(e => showMessage(e));
   }
 
   function handleNewUser(event: any) {
