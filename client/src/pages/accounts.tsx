@@ -7,7 +7,7 @@ import { AccountDetail } from "../model/account.model";
 import AccountList from "../components/account/account-list";
 import Institutions from "../components/add-institution/add-institution";
 import { useSearchParams } from "react-router-dom";
-import { useNotificationDispatch } from "../contexts/notification-context";
+import { useNotificationDispatch } from "../contexts/notification/context";
 
 const bottomFabStyle: SxProps = {
   position: 'fixed',

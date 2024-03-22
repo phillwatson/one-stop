@@ -9,8 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 
 import "./user-consents.css";
-import { useNotificationDispatch } from "../../contexts/notification-context";
-import ServiceErrorResponse from '../../model/service-error';
+import { useNotificationDispatch } from "../../contexts/notification/context";
 import UserConsentService from "../../services/consent.service"
 import InstitutionService from "../../services/institution.service";
 import Institution from '../../model/institution.model';
@@ -54,7 +53,7 @@ export default function UserConsentList(props: Props) {
     userConsents.forEach(consent => console.log("   >> " + consent.id))
     UserConsentService.cancelConsent(userConsent.institutionId, includeAccounts)
       .then(() => setUserConsents(userConsents.filter(consent => consent.id !== userConsent.id)))
-      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }))
+      .catch(err => showNotification(err))
   }
 
   function formatDateTime(dateStr?: string): string {

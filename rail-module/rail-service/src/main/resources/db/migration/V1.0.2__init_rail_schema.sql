@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS rails.userconsent (
     error_code varchar(256) NULL,
     error_detail varchar(256) NULL
 );
-CREATE INDEX IF NOT EXISTS idx_userconsent_user_id ON rails.userconsent (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_userconsent_user_id ON rails.userconsent (user_id, institution_id);
 CREATE INDEX IF NOT EXISTS idx_userconsent_reference ON rails.userconsent (reference);
 
 CREATE TABLE IF NOT EXISTS rails.account (

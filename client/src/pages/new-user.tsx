@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "@mui/material/Button";
 
-import { useNotificationDispatch } from "../contexts/notification-context";
+import { useNotificationDispatch } from "../contexts/notification/context";
 import UserService from '../services/user.service'
 import StaticAppHeader from "../components/app-header/static-app-header";
 import TextField from "@mui/material/TextField";
@@ -34,9 +34,7 @@ export default function NewUser() {
           setSubmitted(true);
           showNotification({ type: 'add', level: 'success', message: 'Please check your email.' });
         })
-        .catch(error => {
-          showNotification({ type: 'add', level: 'error', message: error});
-        });
+        .catch(error => showNotification(error));
     }
   }
 

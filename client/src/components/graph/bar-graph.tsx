@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
 import { BarChart } from "@mui/x-charts/BarChart";
 
-import { useNotificationDispatch } from "../../contexts/notification-context";
-import ServiceErrorResponse from '../../model/service-error';
+import { useNotificationDispatch } from "../../contexts/notification/context";
 import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
 
@@ -43,7 +42,7 @@ export default function BarGraph(props: Props) {
         setXAxis(Array.from(range.keys()));
         setYAxis(Array.from(range.values()));
       })
-      .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }));
+      .catch(err => showNotification(err));
   }, [props, showNotification]);
 
   if ((xAxis.length === 0) || (yAxis.length === 0))

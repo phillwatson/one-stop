@@ -7,7 +7,7 @@ import {
 import MainPage from './pages/main';
 import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
-import NotificationProvider from "./contexts/notification-context";
+import NotificationProvider from "./contexts/notification/context";
 import UserProfileProvider from "./contexts/user-context";
 import NewUser from "./pages/new-user";
 import OnboardUser from "./pages/onboard-user";

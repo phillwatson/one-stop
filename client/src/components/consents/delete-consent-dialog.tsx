@@ -49,7 +49,7 @@ export default function DeleteConsentDialog(props: Props) {
             value={confirmation.institutionName}
             onChange={(e) => setConfirmation({ ...confirmation, institutionName: e.target.value })}
           />
-          <p/>
+          <p></p>
           <FormControlLabel control={ <Checkbox value="deleteAccounts" checked={confirmation.deleteAccounts}
               onChange={(e) => setConfirmation({ ...confirmation, deleteAccounts: e.target.checked })}/>
             } label="Delete Stored Account Data" />

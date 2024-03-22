@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useNotificationDispatch } from "../contexts/notification-context";
+import { useNotificationDispatch } from "../contexts/notification/context";
 import AccountService from '../services/account.service';
 import { AccountDetail } from "../model/account.model";
-import ServiceErrorResponse from '../model/service-error';
 
 import AccountHeader from "../components/account/account-header";
 import BarGraph from "../components/graph/bar-graph";
@@ -18,7 +17,7 @@ export default function Graph() {
     if (accountId) {
       AccountService.get(accountId)
         .then( response => setAccount(response))
-        .catch(err => showNotification({ type: "add", level: "error", message: (err as ServiceErrorResponse).errors[0].message }));
+        .catch(err => showNotification(err));
     }
   }, [accountId, showNotification]);
 

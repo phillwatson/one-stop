@@ -20,6 +20,7 @@ import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
 import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
+import com.hillayes.yapily.model.Consent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -28,10 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 @Transactional
@@ -41,6 +39,10 @@ public class UserConsentService {
     private static final Set<ConsentStatus> RENEWABLE_STATUSES = Set.of(
         ConsentStatus.EXPIRED, ConsentStatus.SUSPENDED, ConsentStatus.DENIED,
         ConsentStatus.TIMEOUT, ConsentStatus.CANCELLED
+    );
+
+    private static final Set<ConsentStatus> ACTIVE_STATUSES = Set.of(
+        ConsentStatus.INITIATED, ConsentStatus.GIVEN
     );
 
     @Inject
@@ -75,13 +77,15 @@ public class UserConsentService {
         return result;
     }
 
+    /**
+     * Returns the consent record for the identified user and institution.
+     * @param userId the user identifier.
+     * @param institutionId the institution identifier.
+     * @return the user-consent record, or an empty result.
+     */
     public Optional<UserConsent> getUserConsent(UUID userId, String institutionId) {
         log.info("Looking for user's consent record [userId: {}, institutionId: {}]", userId, institutionId);
-        return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId).stream()
-            .filter(consent -> consent.getStatus() != ConsentStatus.CANCELLED)
-            .filter(consent -> consent.getStatus() != ConsentStatus.TIMEOUT)
-            .filter(consent -> consent.getStatus() != ConsentStatus.DENIED)
-            .findFirst();
+        return userConsentRepository.findByUserIdAndInstitutionId(userId, institutionId);
     }
 
     public Optional<UserConsent> getUserConsent(UUID consentId) {

@@ -1,8 +1,3 @@
-export interface ContextParameter {
-  name: string,
-  value: string
-}
-
 export default interface ServiceErrorResponse {
   correlationId: any,
   severity: string,
@@ -13,5 +8,5 @@ export interface ServiceError {
   severity: string,
   messageId: string,
   message: string,
-  contextAttributes: Array<ContextParameter>
+  contextAttributes: any;
 }
