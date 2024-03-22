@@ -1,31 +1,29 @@
 package com.hillayes.integration.api;
 
-import com.hillayes.onestop.api.NotificationResponse;
-import io.restassured.common.mapper.TypeRef;
+import com.hillayes.onestop.api.PaginatedNotifications;
 import io.restassured.response.Response;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static io.restassured.http.ContentType.JSON;
 
 public class NotificationApi extends ApiBase {
-    private static final TypeRef<List<NotificationResponse>> NOTIFICATION_LIST = new TypeRef<>() {};
-
     public NotificationApi(Map<String, String> authCookies) {
         super(authCookies);
     }
 
-    public List<NotificationResponse> getNotifications(Instant after) {
+    public PaginatedNotifications getNotifications(Instant after, int pageIndex, int pageSize) {
         return givenAuth()
             .queryParam("after", after.toString())
+            .queryParam("page", pageIndex)
+            .queryParam("page-size", pageSize)
             .get("/api/v1/notifications")
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().as(NOTIFICATION_LIST);
+            .extract().as(PaginatedNotifications.class);
     }
 
     public void deleteNotification(UUID notificationId) {

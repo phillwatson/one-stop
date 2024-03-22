@@ -12,7 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import { UserAuthProvider } from "../../model/user-profile.model";
 import ProfileService from "../../services/profile.service"
 import Tooltip from '@mui/material/Tooltip/Tooltip';
-import { useNotificationDispatch } from '../../contexts/notification/context';
+import { useMessageDispatch } from '../../contexts/messages/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
 
 const colhead: SxProps = {
@@ -27,7 +27,7 @@ function formatDateTime(dateStr?: string): string {
 }
 
 export default function AuthProviderList() {
-  const showNotification = useNotificationDispatch();
+  const showMessage = useMessageDispatch();
   const [ authProviders, setAuthProviders ] = useState<Array<UserAuthProvider>>([]);
   const [ deleteDialogOpen, setDeleteDialogOpen ] = useState<boolean>(false);
   const [ selectedAuthProvider, setSelectedAuthProvider ] = useState<UserAuthProvider|undefined>(undefined);
@@ -47,7 +47,7 @@ export default function AuthProviderList() {
     var authProvider = selectedAuthProvider!
     ProfileService.deleteAuthProvider(authProvider.id)
       .then(() => setAuthProviders(authProviders.filter(ap => ap.id !== authProvider.id)))
-      .catch(err => showNotification(err))
+      .catch(err => showMessage(err))
   }
 
   return (

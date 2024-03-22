@@ -2,6 +2,7 @@ package com.hillayes.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.events.events.consent.ConsentSuspended;
 import com.hillayes.notification.config.NotificationConfiguration;
@@ -124,8 +125,8 @@ public class NotificationServiceTest {
             mockNotification(NotificationId.CONSENT_SUSPENDED, Map.of("event", consentSuspended)),
             mockNotification(NotificationId.CONSENT_EXPIRED, Map.of("event", consentExpired))
         );
-        when(notificationRepository.listByUserAndTime(eq(user.getId()), any()))
-            .thenReturn(notifications);
+        when(notificationRepository.listByUserAndTime(eq(user.getId()), any(), anyInt(), anyInt()))
+            .thenReturn(Page.of(notifications));
 
         // and: a date-time from which to start
         Instant after = Instant.now();
@@ -141,21 +142,22 @@ public class NotificationServiceTest {
         when(configuration.templates()).thenReturn(messageConfigs);
 
         // when: the service is called
-        List<String> messages = fixture.listNotifications(user.getId(), after, mapper);
+        Page<String> messages = fixture.listNotifications(user.getId(), after, 0, 1000, mapper);
 
         // then: the user is read from repository
         verify(userService).getUser(user.getId());
 
         // and: the notifications are read from repository
-        verify(notificationRepository).listByUserAndTime(user.getId(), after);
+        verify(notificationRepository).listByUserAndTime(user.getId(), after, 0, 1000);
 
         // and: the messages are rendered
         assertNotNull(messages);
-        assertEquals(notifications.size(), messages.size());
+        assertEquals(notifications.size(), messages.getContentSize());
 
         // and: the messages passed through the template parameters
-        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", messages.get(0));
-        assertEquals("Access to " + consentExpired.getInstitutionName() + " has expired.\nYou need to renew your consent.", messages.get(1));
+        List<String> content = messages.getContent();
+        assertEquals("Access to " + consentSuspended.getInstitutionName() + " has been suspended.\nYou need to renew your consent.", content.get(0));
+        assertEquals("Access to " + consentExpired.getInstitutionName() + " has expired.\nYou need to renew your consent.", content.get(1));
     }
 
     @Test
@@ -172,8 +174,8 @@ public class NotificationServiceTest {
             mockNotification(NotificationId.CONSENT_SUSPENDED, Map.of("event", consentSuspended)),
             mockNotification(NotificationId.CONSENT_EXPIRED, Map.of("event", consentExpired))
         );
-        when(notificationRepository.listByUserAndTime(eq(userId), any()))
-            .thenReturn(notifications);
+        when(notificationRepository.listByUserAndTime(eq(userId), any(), anyInt(), anyInt()))
+            .thenReturn(Page.of(notifications));
 
         // and: a date-time from which to start
         Instant after = Instant.now();
@@ -182,7 +184,7 @@ public class NotificationServiceTest {
         NotificationService.NotificationMapper<String> mapper = mockNotificationMapper(notifications);
 
         // when: the service is called
-        List<String> messages = fixture.listNotifications(userId, after, mapper);
+        Page<String> messages = fixture.listNotifications(userId, after, 0, 1000, mapper);
 
         // then: the user is read from repository
         verify(userService).getUser(userId);
