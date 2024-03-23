@@ -71,7 +71,6 @@ export default function Institutions(props: Props) {
 
   function handleLinkSelect(institution: Institution) {
     UserConsentService.registerConsent(institution.id).then(registerUri => {
-      console.log(`Redirecting to ${registerUri}`);
       window.location = registerUri;
     })
     .catch(err => showMessage(err))

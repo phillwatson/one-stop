@@ -6,6 +6,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { useMessageDispatch } from "../../contexts/messages/context";
 import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
+import { formatDate } from "../../util/date-util";
 
 interface Props {
   account: AccountDetail
@@ -34,7 +35,7 @@ export default function BarGraph(props: Props) {
         }
 
         transactions.forEach(transaction => {
-          const date = new Date(transaction.date).toLocaleDateString();
+          const date = formatDate(transaction.date);
           const entry = range.get(date);
           (transaction.amount < 0) ? entry.debits += transaction.amount : entry.credits += transaction.amount;
         })

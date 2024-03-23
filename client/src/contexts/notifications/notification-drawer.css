@@ -1,0 +1,8 @@
+.notification-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: 7px;
+  margin: 5px;
+  min-width: 450px;
+}

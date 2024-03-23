@@ -11,6 +11,7 @@ import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionSummary } from "../../model/account.model";
 import CurrencyService from '../../services/currency.service';
 import { useMessageDispatch } from "../../contexts/messages/context";
+import { formatDate } from "../../util/date-util";
 
 interface Props {
   account: AccountDetail;
@@ -43,7 +44,7 @@ export default function TransactionList(props: Props) {
       <TableBody>
         { transactions.map(transaction => (
           <TableRow key={transaction.id}>
-            <TableCell>{ new Date(transaction.date).toLocaleDateString("en-GB") }</TableCell>
+            <TableCell>{ formatDate(transaction.date) }</TableCell>
             <TableCell>{ transaction.description }</TableCell>
             <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
             <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>

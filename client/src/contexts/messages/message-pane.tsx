@@ -29,7 +29,7 @@ export default function MessagePane(props: MessageProps) {
     <Slide direction="left" in={ true }>
       <Alert elevation={24} onClose={ handleCloseAlert } severity={ message.level }>
         {
-          message.text.split('\n').map((line) => <div>{ line }</div>)
+          message.text.split('\n').map((line, index) => <div key={ index }>{ line }</div>)
         }
       </Alert>
     </Slide>

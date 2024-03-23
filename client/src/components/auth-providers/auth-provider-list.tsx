@@ -14,17 +14,11 @@ import ProfileService from "../../services/profile.service"
 import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
+import { formatDateTime } from '../../util/date-util';
 
 const colhead: SxProps = {
   fontWeight: 'bold'
 };
-
-function formatDateTime(dateStr?: string): string {
-  if (dateStr == null) return "";
-
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-GB") + " " + date.toLocaleTimeString("en-GB");
-}
 
 export default function AuthProviderList() {
   const showMessage = useMessageDispatch();

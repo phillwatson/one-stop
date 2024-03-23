@@ -4,7 +4,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsOnIcon from '@mui/icons-material/NotificationsActive';
+import NotificationsOffIcon from '@mui/icons-material/Notifications';
 import { useCurrentUser } from '../../contexts/user-context';
+import { useNotificationDispatch, useNotifications } from '../../contexts/notifications/context';
 
 interface AppHeaderProps extends MuiAppBarProps {
   drawerWidth: number;
@@ -31,7 +34,6 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export default function AppHeader(props: AppHeaderProps) {
   const [currentUser] = useCurrentUser();
-
   function getName() {
     if (!currentUser) {
       return null;
@@ -48,6 +50,20 @@ export default function AppHeader(props: AppHeaderProps) {
     return currentUser.username;
   }
 
+  const userNotifications = useNotifications();
+  const openNotifications = useNotificationDispatch();
+  function showNotifications() {
+    openNotifications({ type: 'show', value: true });
+  }
+
+  function notificationsBell(off: boolean) {
+    return (
+      <IconButton color="inherit" disabled={ off } onClick={ showNotifications }>
+        { off ? <NotificationsOffIcon/> : <NotificationsOnIcon/> }
+      </IconButton>
+    );
+  }
+
   return (
     <AppBar position="fixed" open={ props.open } drawerWidth={ props.drawerWidth }>
       <Toolbar>
@@ -60,6 +76,7 @@ export default function AppHeader(props: AppHeaderProps) {
             { props.title }
           </Typography>
           <span style={{ marginLeft: "auto" }}>{getName()}</span>
+          { notificationsBell(userNotifications.length === 0) }
       </Toolbar>
     </AppBar>
   );

@@ -40,17 +40,9 @@ function messageActionReducer(messages: Message[], action: MessageAction | Axios
   }
 
   switch (action.type) {
-    case 'add': {
-      return [ { id: Date.now(), text: action.text, level: action.level }, ...messages ];
-    }
-
-    case 'delete': {
-      return messages.filter(e => e.id !== action.id);
-    }
-
-    default: {
-      throw Error('Unknown message action: ' + action);
-    }
+    case 'add':    return [ { id: Date.now(), text: action.text, level: action.level }, ...messages ];
+    case 'delete': return messages.filter(e => e.id !== action.id);
+    default: throw Error('Unknown message action: ' + action);
   }
 }
 
