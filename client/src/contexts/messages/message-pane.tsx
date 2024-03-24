@@ -21,8 +21,8 @@ export default function MessagePane(props: MessageProps) {
   }, [message, dispatch]);
 
   useEffect(() => {
-    const t = (AUTO_CLOSE.includes(message.level)) ? setTimeout(() => { handleCloseAlert(); }, 5000) : null;
-    return () => { if (t !== null) clearTimeout(t); }
+    const timer = (AUTO_CLOSE.includes(message.level)) ? setTimeout(() => { handleCloseAlert(); }, 5000) : null;
+    return () => { if (timer !== null) clearTimeout(timer); }
   }, [message, handleCloseAlert]);
 
   return (

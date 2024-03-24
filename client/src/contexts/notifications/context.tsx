@@ -21,7 +21,7 @@ export type NotificationAction =
   | { type: 'addAll', notifications: Notification[] }
   | { type: 'delete', id: string };
 
-// the interval at which the notifications are refreshed = 60 seconds
+// the interval at which the notifications are refreshed = 10 seconds
 const NOTIFICATION_REFRESH_INTERVAL = 10 * 1000;
 
 /**
@@ -34,8 +34,8 @@ const NOTIFICATION_REFRESH_INTERVAL = 10 * 1000;
 function notificationActionReducer(state: NotificationState, action: NotificationAction): NotificationState {
   switch (action.type) {
     case "show":   return { ...state, show: action.value };
-    case 'add':    return { ...state, notifications: [ action.notification, ...state.notifications ] };
-    case 'addAll': return { ...state, notifications: [ ...action.notifications, ...state.notifications ] };
+    case 'add':    return { ...state, notifications: [ ...state.notifications, action.notification ] };
+    case 'addAll': return { ...state, notifications: [ ...state.notifications, ...action.notifications ] };
     case 'delete': return { ...state, notifications: state.notifications.filter(e => e.id !== action.id), show: state.show && state.notifications.length > 1 };
     default: throw Error('Unknown message action: ' + action);
   }
@@ -68,7 +68,7 @@ export function useNotificationDispatch() {
 export default function NotificationProvider(props: React.PropsWithChildren) {
   const [currentUser] = useCurrentUser();
 
-  const showMessage = useMessageDispatch();
+  const showError = useMessageDispatch();
   const [state, dispatch] = useReducer(notificationActionReducer, { show: false, notifications: []});
 
   // records the timestamp of the last notification received
@@ -76,7 +76,7 @@ export default function NotificationProvider(props: React.PropsWithChildren) {
   const notificationMarker = useRef(new Date(0).toISOString());
 
   useEffect(() => {
-    var timer: NodeJS.Timer | undefined = undefined;
+    var timer: any = undefined;
     if (currentUser) {
       timer = setInterval(async () => {
         try {
@@ -87,25 +87,26 @@ export default function NotificationProvider(props: React.PropsWithChildren) {
               dispatch({ type: 'addAll', notifications: response.items });
               notificationMarker.current = response.items[response.count - 1].timestamp;
             }
-            // if response contained less than a page size
-            if (response.count < 100) {
+            if (! response.links.next) {
               break; // no more pages
             }
           }
         } catch (error) {
-          showMessage(error as AxiosError);
+          showError(error as AxiosError);
         }
       }, NOTIFICATION_REFRESH_INTERVAL);
     }
+
+    // clear the timer when the component is unmounted
     return () => { if (timer) clearInterval(timer); }
-  }, [currentUser, showMessage]);
+  }, [currentUser, showError]);
 
   return (
     <NotificationContext.Provider value={ state.notifications }>
       <NotificationActionDispatchContext.Provider value={ dispatch }>
         { props.children }
 
-        <NotificationDrawer state={ state } dispatch={ dispatch } />
+        <NotificationDrawer state={ state } dispatch={ dispatch } showError={ showError } />
       </NotificationActionDispatchContext.Provider>
     </NotificationContext.Provider>
   );
