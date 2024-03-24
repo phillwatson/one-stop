@@ -18,6 +18,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationRepository extends RepositoryBase<Notification, UUID> {
+    /**
+     * Returns a page of notifications for the identified user, after the specified
+     * date-time, ordered oldest first.
+     * @param userId the user to which the notifications relate.
+     * @param after the date-time after which notifications are to be returned.
+     * @param pageIndex the page index to be returned.
+     * @param pageSize the max number of notifications to be returned.
+     * @return the page of notifications.
+     */
     public Page<Notification> listByUserAndTime(UUID userId, Instant after, int pageIndex, int pageSize) {
         OrderBy orderBy = OrderBy.ascending("dateCreated");
         Map<String,Object> parameters = Map.of(

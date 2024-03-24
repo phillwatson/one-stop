@@ -42,18 +42,15 @@ export default function AccountList(props: Props) {
 
   function exportAccount() {
     closeMenu();
-    console.log("Export account: " + props.account.id);
   }
 
   function showAccount(accountId: string) {
     closeMenu();
-    console.log("Show account: " + accountId);
     navigation(`/accounts/${accountId}/transactions`);
   }
 
   function showGraph(accountId: string) { 
     closeMenu();
-    console.log("Show graph");
     navigation(`/accounts/${accountId}/graph`);
   }
 

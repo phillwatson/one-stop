@@ -5,13 +5,16 @@ import MessageStack from "./message-stack";
 import { AxiosError } from "axios";
 import { ServiceError } from "../../model/service-error";
 
+// a local index to assign unique IDs to messages
+var messageIndex = 0;
+
 function extractMessages(error: AxiosError): Message[] {
   const response: any = error.response;
   if ((! response) || (!response.data)) {
     return [ { id: Date.now(), text: error.message, level: 'error' } ];
   }
 
-  return response.data.errors.map((error: ServiceError, index: number) => {
+  return response.data.errors.map((error: ServiceError) => {
     let message = error.message;
 
     // append context attributes - would be better to apply these to a message locale template
@@ -22,7 +25,7 @@ function extractMessages(error: AxiosError): Message[] {
       };
     }
 
-    return { id: Date.now() + index, text: message, level: error.severity };
+    return { id: messageIndex++, text: message, level: error.severity };
   });
 }
 
@@ -40,17 +43,9 @@ function messageActionReducer(messages: Message[], action: MessageAction | Axios
   }
 
   switch (action.type) {
-    case 'add': {
-      return [ { id: Date.now(), text: action.text, level: action.level }, ...messages ];
-    }
-
-    case 'delete': {
-      return messages.filter(e => e.id !== action.id);
-    }
-
-    default: {
-      throw Error('Unknown message action: ' + action);
-    }
+    case 'add':    return [ { id: messageIndex++, text: action.text, level: action.level }, ...messages ];
+    case 'delete': return messages.filter(e => e.id !== action.id);
+    default: throw Error('Unknown message action: ' + action);
   }
 }
 

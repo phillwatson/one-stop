@@ -16,6 +16,7 @@ import Institution from '../../model/institution.model';
 import UserConsent from '../../model/user-consent.model';
 import DeleteConsentDialog from './delete-consent-dialog';
 import Tooltip from '@mui/material/Tooltip';
+import { formatDateTime } from '../../util/date-util';
 
 interface Props {
 }
@@ -48,19 +49,9 @@ export default function UserConsentList(props: Props) {
 
   function onDeleteConfirmed(userConsent: UserConsent, includeAccounts: boolean) {
     setDeleteDialogOpen(false);
-
-    console.log("Deleting consent: " + userConsent.id)
-    userConsents.forEach(consent => console.log("   >> " + consent.id))
     UserConsentService.cancelConsent(userConsent.institutionId, includeAccounts)
       .then(() => setUserConsents(userConsents.filter(consent => consent.id !== userConsent.id)))
       .catch(err => showMessage(err))
-  }
-
-  function formatDateTime(dateStr?: string): string {
-    if (dateStr == null) return "";
-
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB") + " " + date.toLocaleTimeString("en-GB");
   }
 
   function getLogo(consentInfo: UserConsent): string | undefined {

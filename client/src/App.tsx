@@ -1,14 +1,12 @@
-import {
-  createBrowserRouter,
-  redirect,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
+
+import MessageProvider from "./contexts/messages/context";
+import NotificationProvider from "./contexts/notifications/context";
+import UserProfileProvider from "./contexts/user-context";
 
 import MainPage from './pages/main';
 import Accounts from "./pages/accounts";
 import UpdateProfile from "./pages/profile";
-import MessageProvider from "./contexts/messages/context";
-import UserProfileProvider from "./contexts/user-context";
 import NewUser from "./pages/new-user";
 import OnboardUser from "./pages/onboard-user";
 import Transactions from "./pages/transactions";
@@ -64,7 +62,9 @@ export default function App() {
   return (
     <MessageProvider>
       <UserProfileProvider>
-        <RouterProvider router={router} />
+        <NotificationProvider>
+          <RouterProvider router={router} />
+        </NotificationProvider>
       </UserProfileProvider>
     </MessageProvider>
   );
