@@ -346,7 +346,8 @@ public class UserConsentService {
             if ((userConsent.getStatus() != ConsentStatus.CANCELLED) &&
                 (userConsent.getStatus() != ConsentStatus.EXPIRED) &&
                 (userConsent.getStatus() != ConsentStatus.SUSPENDED) &&
-                (userConsent.getStatus() != ConsentStatus.DENIED)) {
+                (userConsent.getStatus() != ConsentStatus.DENIED) &&
+                (userConsent.getStatus() != ConsentStatus.TIMEOUT)) {
                 deleteAgreement(userConsent);
 
                 // send consent cancelled event notification
