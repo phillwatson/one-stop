@@ -25,6 +25,8 @@ const colhead: SxProps = {
   fontWeight: 'bold'
 };
 
+const VISIBLE_CONSENTS = ["GIVEN", "DENIED", "SUSPENDED", "EXPIRED"];
+
 export default function UserConsentList(props: Props) {
   const showMessage = useMessageDispatch();
   const [userConsents, setUserConsents] = useState<Array<UserConsent>>([]);
@@ -33,7 +35,8 @@ export default function UserConsentList(props: Props) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    UserConsentService.getConsents().then(response => setUserConsents(response.items));
+    UserConsentService.getConsents().then(response => 
+      setUserConsents(response.items.filter(consent => VISIBLE_CONSENTS.includes(consent.status))));
   }, []);
   
   useEffect(() => {
@@ -50,7 +53,10 @@ export default function UserConsentList(props: Props) {
   function onDeleteConfirmed(userConsent: UserConsent, includeAccounts: boolean) {
     setDeleteDialogOpen(false);
     UserConsentService.cancelConsent(userConsent.institutionId, includeAccounts)
-      .then(() => setUserConsents(userConsents.filter(consent => consent.id !== userConsent.id)))
+      .then(() => {
+        showMessage({ type: "add", text: `Revoked consent for ${userConsent.institutionName}.`, level: "success"})
+        setUserConsents(userConsents.filter(consent => consent.id !== userConsent.id));
+      })
       .catch(err => showMessage(err))
   }
 
