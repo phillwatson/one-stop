@@ -1,4 +1,4 @@
 quarkus:
   rest-client:
     alpha-vantage-api:
-      url: https://www.alphavantage.co/query
+      url: https://www.alphavantage.co
