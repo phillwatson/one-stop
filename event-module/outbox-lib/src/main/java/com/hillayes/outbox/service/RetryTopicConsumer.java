@@ -48,11 +48,12 @@ public class RetryTopicConsumer implements EventConsumer {
         Headers headers = record.headers();
         String reason = getHeader(headers, REASON_HEADER).orElse(null);
         String cause = getHeader(headers, CAUSE_HEADER).orElse(null);
+        String consumer = getHeader(headers, CONSUMER_HEADER).orElse(null);
 
         EventPacket event = record.value();
         if (log.isDebugEnabled()) {
-            log.debug("Retrying failed event [topic: {}, retryCount: {}, reason: {}, cause: {}]",
-                event.getTopic(), event.getRetryCount(), reason, cause);
+            log.debug("Retrying failed event [topic: {}, retryCount: {}, consumer: {}, reason: {}, cause: {}]",
+                event.getTopic(), event.getRetryCount(), consumer, reason, cause);
         }
 
         // determine when to retry the event - error handler may have set a schedule-for header

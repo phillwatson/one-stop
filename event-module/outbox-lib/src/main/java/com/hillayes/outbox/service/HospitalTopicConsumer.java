@@ -44,13 +44,14 @@ public class HospitalTopicConsumer implements EventConsumer {
         Headers headers = record.headers();
         String reason = getHeader(headers, REASON_HEADER).orElse(null);
         String cause = getHeader(headers, CAUSE_HEADER).orElse(null);
+        String consumer = getHeader(headers, CONSUMER_HEADER).orElse(null);
 
         EventPacket event = record.value();
 
-        log.error("Writing failed event to message hospital [id: {}, topic: {}, retryCount: {}, reason: {}, cause: {}]",
-            event.getId(), event.getTopic(), event.getRetryCount(), reason, cause);
+        log.error("Writing failed event to message hospital [id: {}, topic: {}, retryCount: {}, consumer: {}, reason: {}, cause: {}]",
+            event.getId(), event.getTopic(), event.getRetryCount(), consumer, reason, cause);
 
-        // write the record to the event hospital table - with reason and cause
-        hospitalRepository.save(HospitalEntity.fromEventPacket(event, reason, cause));
+        // write the record to the event hospital table - with consumer, reason and cause
+        hospitalRepository.save(HospitalEntity.fromEventPacket(event, consumer, reason, cause));
     }
 }

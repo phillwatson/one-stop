@@ -25,7 +25,7 @@ public class HospitalEntity {
      * @param cause the cause of the failure.
      */
     public static HospitalEntity fromEventPacket(EventPacket eventPacket,
-                                                 String reason, String cause) {
+                                                 String consumer, String reason, String cause) {
         Instant now = Instant.now();
         return HospitalEntity.builder()
             .eventId(eventPacket.getId())
@@ -34,6 +34,7 @@ public class HospitalEntity {
             .timestamp(now)
             .reason(reason)
             .cause(cause)
+            .consumer(consumer)
             .topic(eventPacket.getTopic())
             .key(eventPacket.getKey())
             .payloadClass(eventPacket.getPayloadClass())
@@ -67,6 +68,11 @@ public class HospitalEntity {
     private String reason;
 
     private String cause;
+
+    /**
+     * The consumer class that raised the error.
+     */
+    private String consumer;
 
     @Enumerated(EnumType.STRING)
     private Topic topic;

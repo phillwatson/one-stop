@@ -25,7 +25,9 @@ import static com.hillayes.events.consumer.HeadersUtils.*;
 public class ConsumerErrorHandler {
     private final Producer<String, EventPacket> producer;
 
-    public void handle(ConsumerRecord<String, EventPacket> record, Throwable error) {
+    public void handle(ConsumerRecord<String, EventPacket> record,
+                       EventConsumer eventConsumer,
+                       Throwable error) {
         EventPacket eventPacket = record.value();
 
         // has the event reached the max retry count
@@ -44,7 +46,8 @@ public class ConsumerErrorHandler {
 
         retryRecord.headers()
             .add(REASON_HEADER, error.getClass().getName().getBytes(StandardCharsets.UTF_8))
-            .add(CAUSE_HEADER, error.getMessage().getBytes(StandardCharsets.UTF_8));
+            .add(CAUSE_HEADER, error.getMessage().getBytes(StandardCharsets.UTF_8))
+            .add(CONSUMER_HEADER, eventConsumer.getClass().getName().getBytes(StandardCharsets.UTF_8));
 
         if (failureTopic == Topic.RETRY_TOPIC) {
             // calculate a time to retry the event

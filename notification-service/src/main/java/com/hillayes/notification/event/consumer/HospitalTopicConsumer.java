@@ -41,11 +41,13 @@ public class HospitalTopicConsumer implements EventConsumer {
         log.info("Received event hospital event [payloadClass: {}]", event.getPayloadClass());
 
         Headers headers = record.headers();
+        String consumer = getHeader(headers, CONSUMER_HEADER).orElse(null);
         String reason = getHeader(headers, REASON_HEADER).orElse(null);
         String cause = getHeader(headers, CAUSE_HEADER).orElse(null);
 
         Map<String, Object> params = new HashMap<>();
         params.put("event", event);
+        params.put("consumer", consumer);
         params.put("reason", reason);
         params.put("cause", cause);
         sendEmailTask.queueJob(TemplateName.EVENT_HOSPITAL, params);

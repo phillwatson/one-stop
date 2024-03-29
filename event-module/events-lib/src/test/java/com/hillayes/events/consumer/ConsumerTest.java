@@ -125,7 +125,7 @@ public class ConsumerTest {
         verify(broker).commitSync(any(Map.class));
 
         // and: the error handler is never called
-        verify(errorHandler, never()).handle(any(ConsumerRecord.class), any(RuntimeException.class));
+        verify(errorHandler, never()).handle(any(ConsumerRecord.class), eq(eventConsumer), any(RuntimeException.class));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ConsumerTest {
         );
 
         // then: the error handler is called
-        verify(errorHandler, times(size)).handle(any(ConsumerRecord.class), any(RuntimeException.class));
+        verify(errorHandler, times(size)).handle(any(ConsumerRecord.class), eq(eventConsumer), any(RuntimeException.class));
 
         // and: the event offsets are committed
         verify(broker, times(size)).commitSync(any(Map.class));

@@ -9,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -76,7 +77,8 @@ public class RetryConsumerTest {
         // and: the message has reason headers - with NO scheduled time
         record.headers()
             .add(REASON_HEADER, "test reason".getBytes())
-            .add(CAUSE_HEADER, "test cause".getBytes());
+            .add(CAUSE_HEADER, "test cause".getBytes())
+            .add(CONSUMER_HEADER, "com.hillayes.event.EventConsumer".getBytes(StandardCharsets.UTF_8));
 
         // when: the message is consumed
         fixture.consume(record);

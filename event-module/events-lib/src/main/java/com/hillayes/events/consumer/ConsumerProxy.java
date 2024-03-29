@@ -118,7 +118,7 @@ public class ConsumerProxy implements Runnable {
                         log.warn("Error from event handler [topic: {}]", record.topic(), e);
                         hardCommit(record);
 
-                        errorHandler.handle(record, e);
+                        errorHandler.handle(record, eventConsumer, e);
                     } finally {
                         Correlation.setCorrelationId(prevId);
                     }
