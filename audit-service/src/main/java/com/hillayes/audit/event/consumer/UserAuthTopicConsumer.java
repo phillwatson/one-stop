@@ -40,9 +40,6 @@ public class UserAuthTopicConsumer implements EventConsumer {
     private void processAuthenticationFailed(AuthenticationFailed event) {
         log.info("Login failure [username: {}, authProvider: {}, agent: {}, location: {}]",
             event.getUsername(), event.getAuthProvider(), event.getUserAgent(), event.getUserLocation());
-
-        // throw an exception to test event error handling
-        throw new RuntimeException("Mock event delivery failure");
     }
 
     private void processUserAuthenticated(UserAuthenticated event) {
