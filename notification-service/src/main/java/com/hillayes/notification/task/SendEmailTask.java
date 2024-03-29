@@ -37,6 +37,26 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
         this.sendEmailService = sendEmailService;
     }
 
+    /**
+     * Sends an email using the specified template and parameters. As no recipient
+     * is provided, the template configuration is assumed to provide a default recipient.
+     * @param templateName the email template to use
+     * @param params the parameters to use in the template.
+     * @return the id of the queued job that will send the email.
+     */
+    public String queueJob(TemplateName templateName,
+                           Map<String, Object> params) {
+        return queueJob((UUID) null, templateName, params);
+    }
+
+    /**
+     * Sends an email using the specified template and parameters. The identified
+     * user will be the recipient.
+     * @param userId the id of the user to send the email to.
+     * @param templateName the email template to use
+     * @param params the parameters to use in the template.
+     * @return the id of the queued job that will send the email.
+     */
     public String queueJob(UUID userId,
                            TemplateName templateName,
                            Map<String, Object> params) {
@@ -49,6 +69,14 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
         return scheduler.addJob(this, payload);
     }
 
+    /**
+     * Sends an email using the specified template and parameters. The identified
+     * recipient will be used.
+     * @param recipient the recipient of the email.
+     * @param templateName the email template to use
+     * @param params the parameters to use in the template.
+     * @return the id of the queued job that will send the email.
+     */
     public String queueJob(EmailConfiguration.Corresponder recipient,
                            TemplateName templateName,
                            Map<String, Object> params) {

@@ -140,6 +140,28 @@ By specifying an explicit consumer group (using the annotation `@ConsumerGroup`)
 events from the same topic can be distributed across consumers within different
 application/service boundaries.
 
+### Modules
+#### events-common
+This library contains the common classes used by both event publishers and
+consumers.
+#### events-lib
+This library contains the classes used by event consumers, and should be included
+in the dependencies of any service that wishes to listen for events.
+The class `ConsumerProxy` receives events from the message broker and forwards
+them to the appropriate `EventConsumer` class. If an exception is raised by the
+`EventConsumer`, the event is queued for retry by the message broker; or, if the
+event has been retried a number of times, it is placed on the `message-hospital`
+topic.
+#### outbox-lib
+This module contains the classes to queue and publish events, and should be
+included in the dependencies of any service that wishes to publish events.
+It includes the class `EventSender` used to queue events for publishing. The
+class `EventDeliverer` will periodically check the event queue and publish
+any queued events to the message broker.
+
+When a service includes a dependency on this library two tables will be added
+to that service's database schema; `events` and `message_hospital`.
+
 ### Consumers
 To consume (listen to) events, a class implements the interface
 `com.hillayes.events.consumer.EventConsumer` and specifies the topic(s) to be
@@ -173,7 +195,7 @@ This is not recommended; and shouldn't be necessary anyway.
 If an exception is raised by the `EventConsumer` during the processing of an
 event, that event will be queued for retry by the message broker and later
 published to ALL consumers. Resulting in an `EventConsumer` receiving duplicate
-events.
+events. Consumers must ensure that they are idempotent.
 
 If, after the event has been retried a number of times, the event fails again,
 it will be placed on the message-hospital queue (HOSPITAL_TOPIC). 

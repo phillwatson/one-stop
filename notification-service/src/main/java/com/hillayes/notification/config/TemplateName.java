@@ -7,6 +7,7 @@ package com.hillayes.notification.config;
  */
 public enum TemplateName {
     HEADER,
+    EVENT_HOSPITAL,
     USER_REGISTERED,
     USER_CREATED,
     USER_UPDATED,
