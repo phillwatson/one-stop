@@ -96,13 +96,13 @@ one-stop:
   email:
     templates:
       message-hospital:
+        recipient:
+          name: "Administrator"
+          email: "admin@one-stop.com"
+          locale: "en"
         en:
           subject: "An event has failed to be processed"
           template: "event-failure/en.html"
-          recipient:
-            name: "Administrator"
-            email: "admin@one-stop.com"
-            locale: "en"  
 ```
 
 #### Sender
@@ -112,13 +112,13 @@ one-stop:
   email:
     templates:
       user-registered:
+        sender:
+          name: "Administrator"
+          email: "admin@one-stop.com"
+          locale: "en"
         en:
           subject: "Hi $user.preferredName$, please complete your One-Stop registration"
           template: "user-registered/en.html"
-          sender:
-            name: "Administrator"
-            email: "admin@one-stop.com"
-            locale: "en"  
 ```
 
 If no sender is provided in the template, the `default-sender` is used.

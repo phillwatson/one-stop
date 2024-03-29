@@ -55,6 +55,15 @@ one-stop:
           subject: not-applicable
           template: "header/en.html"
 
+      event-hospital:
+        recipient:
+          name: "Administrator"
+          email: "watson.phill+onestop@gmail.com"
+          locale: "en"
+        en:
+          subject: "An event has failed to be processed"
+          template: "event-hospital/en.html"
+
       user-registered:
         en:
           subject: "Hi $user.preferredName$, please complete your One-Stop registration"
