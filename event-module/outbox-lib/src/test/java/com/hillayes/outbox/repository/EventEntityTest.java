@@ -62,7 +62,7 @@ public class EventEntityTest {
         assertEquals(eventEntity.getPayloadClass(), redelivery.getPayloadClass());
         assertEquals(eventEntity.getPayload(), redelivery.getPayload());
         assertEquals(redeliveryTime, redelivery.getScheduledFor());
-        assertEquals(eventEntity.getTimestamp(), eventEntity.getTimestamp());
+        assertEquals(eventEntity.getTimestamp().toEpochMilli(), redelivery.getTimestamp().toEpochMilli(), 100);
 
         // and: the retry count is incremented
         assertEquals(eventEntity.getRetryCount() + 1, redelivery.getRetryCount());
