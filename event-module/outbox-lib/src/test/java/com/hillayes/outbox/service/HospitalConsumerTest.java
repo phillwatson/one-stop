@@ -9,11 +9,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
-import static com.hillayes.events.consumer.HeadersUtils.CAUSE_HEADER;
-import static com.hillayes.events.consumer.HeadersUtils.REASON_HEADER;
+import static com.hillayes.events.consumer.HeadersUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,7 +34,8 @@ public class HospitalConsumerTest {
         );
         record.headers()
             .add(REASON_HEADER, "test reason".getBytes())
-            .add(CAUSE_HEADER, "test cause".getBytes());
+            .add(CAUSE_HEADER, "test cause".getBytes())
+            .add(CONSUMER_HEADER, "com.hillayes.event.EventConsumer".getBytes(StandardCharsets.UTF_8));
 
         // when: the message is consumed
         fixture.consume(record);
