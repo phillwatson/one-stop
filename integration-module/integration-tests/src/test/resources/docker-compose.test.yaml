@@ -1,7 +1,7 @@
 services:
   # Simulator container. This hosts the rail simulator.
   sim:
-    image: phillwatson/sim-lib:1.0.0-SNAPSHOT
+    image: ghcr.io/phillwatson/sim-lib:1.0.0-SNAPSHOT
     ports:
       - "9090:8080"
     networks:
