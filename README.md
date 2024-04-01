@@ -28,6 +28,9 @@ been used, it's exposure to the rest of the application has been minimised. For
 example; the repository classes are "masked" by a simple facade (or adaptor) class,
 rather than exposing a framework specific repository interface.
 
+#### Client
+A simple browser UI, based on React, to demonstrate the functionality of the back-end.
+
 #### User Service
 Responsible for on-boarding and managing internal user accounts. Provides OpenID
 Connect authentication. Generates and renews JWT and XSRF tokens; signed with rotating
