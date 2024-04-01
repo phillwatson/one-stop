@@ -14,7 +14,7 @@ name: Build and Deploy CI with Maven
 on:
   push:
     branches: [ "main" ]
-    paths-ignore: [ 'docs/**', 'client/**' ]
+    #paths-ignore: [ 'docs/**', 'client/**' ]
 
 env:
   REGISTRY: ghcr.io
