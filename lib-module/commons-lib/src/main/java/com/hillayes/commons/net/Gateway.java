@@ -24,6 +24,13 @@ public class Gateway {
     }
 
     /**
+     * Tests whether the application is listening on a secure connection.
+     */
+    public boolean isSecure() {
+        return "https".equalsIgnoreCase(getScheme());
+    }
+
+    /**
      * The port number on which the application is exposed to the outside world.
      * This port will need to be mapped to a forwarding port on the router.
      */
