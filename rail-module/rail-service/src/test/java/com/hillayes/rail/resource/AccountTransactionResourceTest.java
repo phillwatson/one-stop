@@ -46,7 +46,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .thenReturn(Page.empty());
 
         // when: client calls the endpoint
-        PaginatedTransactions response = given()
+        given()
             .request()
             .queryParam("page", page)
             .queryParam("page-size", pageSize)
@@ -145,7 +145,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .thenReturn(Optional.of(transaction));
 
         // when: the client calls the endpoint
-        TransactionSummaryResponse response = given()
+        TransactionResponse response = given()
             .request()
             .contentType(JSON)
             .when()
@@ -155,7 +155,7 @@ public class AccountTransactionResourceTest extends TestBase {
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(TransactionSummaryResponse.class);
+            .as(TransactionResponse.class);
 
         // then: the identified transaction is returned
         assertNotNull(response);
@@ -164,8 +164,8 @@ public class AccountTransactionResourceTest extends TestBase {
         assertEquals(transaction.getId(), response.getId());
         assertEquals(transaction.getAmount().toDecimal() , response.getAmount());
         assertEquals(transaction.getAmount().getCurrencyCode() , response.getCurrency());
-        assertEquals(transaction.getBookingDateTime() , response.getDate());
-        assertEquals(transaction.getReference() , response.getDescription());
+        assertEquals(transaction.getBookingDateTime() , response.getBookingDateTime());
+        assertEquals(transaction.getReference() , response.getReference());
         assertEquals(transaction.getAccountId() , response.getAccountId());
 
         // and: the service was called to retrieve the transaction
