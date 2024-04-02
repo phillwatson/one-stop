@@ -35,7 +35,7 @@ export default function BarGraph(props: Props) {
         }
 
         transactions.forEach(transaction => {
-          const date = formatDate(transaction.date);
+          const date = formatDate(transaction.bookingDateTime);
           const entry = range.get(date);
           (transaction.amount < 0) ? entry.debits += transaction.amount : entry.credits += transaction.amount;
         })

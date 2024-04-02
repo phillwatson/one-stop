@@ -8,7 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import { SxProps } from '@mui/material/styles';
 
 import AccountService from '../../services/account.service';
-import { AccountDetail, TransactionSummary } from "../../model/account.model";
+import { AccountDetail, TransactionDetail } from "../../model/account.model";
 import CurrencyService from '../../services/currency.service';
 import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate } from "../../util/date-util";
@@ -23,7 +23,7 @@ const colhead: SxProps = {
 
 export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
-  const [transactions, setTransactions] = useState<Array<TransactionSummary>>([]);
+  const [transactions, setTransactions] = useState<Array<TransactionDetail>>([]);
 
   useEffect(() => {
     AccountService.getTransactions(props.account.id, 0, 30)
@@ -44,8 +44,8 @@ export default function TransactionList(props: Props) {
       <TableBody>
         { transactions.map(transaction => (
           <TableRow key={transaction.id}>
-            <TableCell>{ formatDate(transaction.date) }</TableCell>
-            <TableCell>{ transaction.description }</TableCell>
+            <TableCell>{ formatDate(transaction.bookingDateTime) }</TableCell>
+            <TableCell>{ transaction.reference }</TableCell>
             <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
             <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>
           </TableRow>

@@ -11,7 +11,7 @@ import { SxProps } from '@mui/material/styles';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import AccountService from '../../services/account.service';
 import CurrencyService from '../../services/currency.service';
-import { TransactionSummary } from '../../model/account.model';
+import { TransactionDetail } from '../../model/account.model';
 import { formatDate } from '../../util/date-util';
 
 const colhead: SxProps = {
@@ -23,7 +23,7 @@ interface Props {
 }
 
 interface TransactionsList {
-  page: Array<TransactionSummary>,
+  page: Array<TransactionDetail>,
   total: number
 }
 
@@ -58,8 +58,8 @@ export default function TransactionSummaryList(props: Props) {
         <TableBody>
           { transactions.page.map(transaction => (
             <TableRow key={transaction.id}>
-              <TableCell>{formatDate(transaction.date)}</TableCell>
-              <TableCell>{transaction.description}</TableCell>
+              <TableCell>{formatDate(transaction.bookingDateTime)}</TableCell>
+              <TableCell>{transaction.reference}</TableCell>
               <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
               <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>
             </TableRow>

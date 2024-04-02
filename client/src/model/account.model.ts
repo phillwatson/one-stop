@@ -1,12 +1,16 @@
 import Institution from "./institution.model"
 
-export interface TransactionSummary {
+export interface TransactionDetail {
   id: string;
   accountId: string;
-  date: string;
-  description: string;
+  transactionId: string;
+  bookingDateTime: string;
+  valueDateTime: string;
   amount: number;
   currency: string;
+  reference: string;
+  additionalInformation: string;
+  creditorName: string;
 }
 
 export interface AccountBalance {

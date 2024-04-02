@@ -1,7 +1,7 @@
 package com.hillayes.integration.api;
 
 import com.hillayes.onestop.api.PaginatedTransactions;
-import com.hillayes.onestop.api.TransactionSummaryResponse;
+import com.hillayes.onestop.api.TransactionResponse;
 
 import java.util.Map;
 import java.util.UUID;
@@ -29,12 +29,12 @@ public class AccountTransactionsApi extends ApiBase {
             .extract().as(PaginatedTransactions.class);
     }
 
-    public TransactionSummaryResponse getTransaction(UUID transactionId) {
+    public TransactionResponse getTransaction(UUID transactionId) {
         return givenAuth()
             .get("/api/v1/rails/transactions/{transactionId}", transactionId)
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().as(TransactionSummaryResponse.class);
+            .extract().as(TransactionResponse.class);
     }
 }

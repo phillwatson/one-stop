@@ -748,7 +748,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionSummaryResponse"
+                $ref: "#/components/schemas/TransactionResponse"
         400:
           description: "Invalid ID supplied"
         401:
@@ -1421,7 +1421,7 @@ components:
         institution:
           $ref: "#/components/schemas/InstitutionResponse"
 
-    TransactionSummaryResponse:
+    TransactionResponse:
       type: object
       required:
         - id
@@ -1434,6 +1434,24 @@ components:
           format: uuid
           description: The transaction Id
           example: 07061d76-74f3-4163-aa07-fb6909681f81
+        accountId:
+          type: string
+          format: uuid
+          description: The account Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        transactionId:
+          type: string
+          description: The transaction identifier given by financial institution.
+        bookingDateTime:
+          type: string
+          format: date-time
+          description: The date and time when an entry is posted to an account on the financial institutions books.
+          example: 2019-01-01T00:00:00.000Z
+        valueDateTime:
+          type: string
+          format: date-time
+          description: The date and time at which assets become available to the account owner in case of a credit.
+          example: 2019-01-01T00:00:00.000Z
         amount:
           type: number
           format: double
@@ -1445,20 +1463,18 @@ components:
           minLength: 3
           maxLength: 3
           example: GBP
-        date:
+        reference:
           type: string
-          format: date-time
-          description: The transaction date
-          example: 2019-01-01T00:00:00.000Z
-        description:
+          description: The identification of the transaction as used for reference given by financial institution.
+          example: 1234567890
+        additionalInformation:
           type: string
-          description: The transaction description
+          description: Might be used by the financial institution to transport additional transaction related information
           example: My transaction description
-        accountId:
+        creditorName:
           type: string
-          format: uuid
-          description: The account Id
-          example: 07061d76-74f3-4163-aa07-fb6909681f81
+          description: The name of the creditor
+          example: John Doe
 
     NotificationResponse:
       type: object
@@ -1622,7 +1638,7 @@ components:
               type: array
               description: The list of transactions
               items:
-                $ref: "#/components/schemas/TransactionSummaryResponse"
+                $ref: "#/components/schemas/TransactionResponse"
 
     PaginatedNotifications:
       allOf:

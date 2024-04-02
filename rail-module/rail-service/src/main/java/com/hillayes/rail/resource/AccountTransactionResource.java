@@ -1,12 +1,11 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.auth.jwt.AuthUtils;
-import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.PaginationUtils;
-import com.hillayes.onestop.api.TransactionSummaryResponse;
+import com.hillayes.onestop.api.TransactionResponse;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.AccountTransactionService;
@@ -84,13 +83,17 @@ public class AccountTransactionResource {
         return Response.ok(marshal(transaction)).build();
     }
 
-    private TransactionSummaryResponse marshal(AccountTransaction transaction) {
-        return new TransactionSummaryResponse()
+    private TransactionResponse marshal(AccountTransaction transaction) {
+        return new TransactionResponse()
             .id(transaction.getId())
             .accountId(transaction.getAccountId())
+            .transactionId(transaction.getTransactionId())
             .amount(transaction.getAmount().toDecimal())
             .currency(transaction.getAmount().getCurrencyCode())
-            .date(transaction.getBookingDateTime())
-            .description(Strings.getOrDefault(transaction.getReference(), transaction.getAdditionalInformation()));
+            .bookingDateTime(transaction.getBookingDateTime())
+            .valueDateTime(transaction.getValueDateTime())
+            .reference(transaction.getReference())
+            .additionalInformation(transaction.getAdditionalInformation())
+            .creditorName(transaction.getCreditorName());
     }
 }
