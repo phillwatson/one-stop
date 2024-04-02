@@ -1,6 +1,7 @@
 package com.hillayes.auth.jwt;
 
 import com.hillayes.auth.xsrf.XsrfTokens;
+import com.hillayes.commons.net.Gateway;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,9 @@ public class AuthTokens {
      */
     @Inject
     XsrfTokens xsrfTokens;
+
+    @Inject
+    Gateway gateway;
 
     @PostConstruct
     void init() {
@@ -122,7 +126,7 @@ public class AuthTokens {
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge((int)accessDuration.toSeconds())
             .expiry(Date.from(Instant.now().plus(accessDuration)))
-            .secure(false)
+            .secure(gateway.isSecure())
             .httpOnly(true)
             .sameSite(NewCookie.SameSite.STRICT)
             .build();
@@ -133,7 +137,7 @@ public class AuthTokens {
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge((int)refreshDuration.toSeconds())
             .expiry(Date.from(Instant.now().plus(refreshDuration)))
-            .secure(false)
+            .secure(gateway.isSecure())
             .httpOnly(true)
             .sameSite(NewCookie.SameSite.STRICT)
             .build();
@@ -147,7 +151,7 @@ public class AuthTokens {
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge((int)refreshDuration.toSeconds())
             .expiry(Date.from(Instant.now().plus(refreshDuration)))
-            .secure(false)
+            .secure(gateway.isSecure())
             .httpOnly(false) // script must have access
             .sameSite(NewCookie.SameSite.STRICT)
             .build();

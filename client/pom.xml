@@ -20,6 +20,7 @@
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
         <skip.install>true</skip.install>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <profiles>
