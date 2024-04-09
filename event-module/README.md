@@ -144,8 +144,7 @@ and use a "new" transaction, in order to isolate it from the event delivery tran
 public class UserEventConsumer {
     @TopicObserver
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
-                        @TopicObserved(Topic.CONSENT) EventPacket eventPacket) throws Exception {
+    public void consume(@Observes @TopicObserved(Topic.CONSENT) EventPacket eventPacket) throws Exception {
         // perform some action related to the event
         
         // use the payload class to identify the event type

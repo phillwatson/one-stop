@@ -1,14 +1,13 @@
 package com.hillayes.notification.event.consumer;
 
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.events.annotation.TopicObserver;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.task.SendEmailTask;
-import com.hillayes.events.annotation.TopicObserved;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,7 @@ public class HospitalTopicConsumer {
      */
     @TopicObserver
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+    public void consume(@Observes
                         @TopicObserved(Topic.HOSPITAL_TOPIC) EventPacket event) {
         log.info("Received event hospital event [payloadClass: {}]", event.getPayloadClass());
 

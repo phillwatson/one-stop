@@ -1,12 +1,12 @@
 package com.hillayes.outbox.service;
 
 import com.hillayes.commons.correlation.Correlation;
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.executors.concurrent.ExecutorConfiguration;
 import com.hillayes.executors.concurrent.ExecutorFactory;
 import com.hillayes.executors.concurrent.ExecutorType;
-import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import com.hillayes.outbox.repository.HospitalEntity;
