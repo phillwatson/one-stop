@@ -1,6 +1,6 @@
 package com.hillayes.notification.event.consumer;
 
-import com.hillayes.events.annotation.TopicObserved;
+import com.hillayes.events.annotation.TopicObserver;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
@@ -8,6 +8,7 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
+import com.hillayes.events.annotation.TopicObserved;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -25,6 +26,7 @@ public class ConsentTopicConsumer {
     private final SendEmailTask sendEmailTask;
     private final NotificationService notificationService;
 
+    @TopicObserver
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
                         @TopicObserved(Topic.CONSENT) EventPacket eventPacket) {

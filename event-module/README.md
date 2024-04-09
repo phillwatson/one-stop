@@ -108,69 +108,44 @@ methods to send events to observers on a named topic.
 See `com.hillayes.user.event.UserEventSender` for an example of how the `EventSender`
 is used.
 
-
-### Kafka / Redpanda
-The Kafka (or Redpanda) message broker can be used to communicate both internally
-and externally of the application.
-Those services that are only interested in listening for events, and not interested
-in publishing them, only need include library `events-lib` in their dependencies.
-
-Those services wishing to publish events to external listeners must use the "kafka"
-broker, by include a dependency on the library `outbox-lib`.
-
 ### Topics
-Event topics are defined in the enum `com.hillayes.events.domain.Topic`; the
-topic channel is taken from the lower-case form of the enum's name. Multiple
-event classes may share the same Topic. For example; the `USER` topic includes
-the event classes `UserCreated`, `UserUpdated` and `UserDelete`.
-
-### Topic Groups
-EventConsumers can also indicate the consumer group they belong to using the
-annotation `@ConsumerGroup`.
-
-Events will be sent to all consumer groups. Within a consumer group, events of
-the same topic will be distributed to those topic consumers within that group;
-with only one consumer in the group receiving a given event instance. If an event
-is retried (see later), it may be allocated to another consumer in the group.
-
-By default, the consumer group is taken from the configuration property "kafka.group.id"
-or, if that property is not defined, the application/service name.
-
-By specifying an explicit consumer group (using the annotation `@ConsumerGroup`)
-events from the same topic can be distributed across consumers within different
-application/service boundaries.
+Event topics are defined in the enum `com.hillayes.events.domain.Topic`.
+Events will be sent to all observers of the event's topic.
+Multiple event classes may share the same Topic. For example; the `USER` topic
+includes the event classes `UserCreated`, `UserUpdated` and `UserDelete`.
 
 ### Modules
 #### events-common
 This library contains the common classes used by both event publishers and
 consumers.
-#### events-lib
-This library contains the classes used by event consumers, and should be included
-in the dependencies of any service that wishes to listen for events.
-The class `ConsumerProxy` receives events from the message broker and forwards
-them to the appropriate `EventConsumer` class. If an exception is raised by the
-`EventConsumer`, the event is queued for retry by the message broker; or, if the
-event has been retried a number of times, it is placed on the `message-hospital`
-topic.
+
 #### outbox-lib
 This module contains the classes to queue and publish events, and should be
 included in the dependencies of any service that wishes to publish events.
 It includes the class `EventSender` used to queue events for publishing. The
 class `EventDeliverer` will periodically check the event queue and publish
 any queued events to the message broker.
-
-When a service includes a dependency on this library two tables will be added
-to that service's database schema; `events` and `message_hospital`.
+If an exception is raised by the `EventConsumer`, the event is queued for retry
+by the message broker; or, if the event has been retried a number of times, it
+is placed on the `message-hospital` topic.
 
 ### Consumers
-To consume (listen to) events, a class implements the interface
-`com.hillayes.events.consumer.EventConsumer` and specifies the topic(s) to be
-consumed using the annotation  `@TopicConsumer`. For example;
+To consume (listen to) events, a class must implement a method that receives an
+`EventPacket` argument; the argument must be annotated `@Observes` and the qualifier
+`@TopicObserved` that names the topic to be observed.
+
+In order to apply the event's correlation ID to the consumer's invocation context,
+the method should be annotated `@TopicObserver'.
+
+If the method is to be transactional, it should use the `@Transactional` annotation
+and use a "new" transaction, in order to isolate it from the event delivery transaction.
 ```Java
 @TopicConsumer(Topic.USER)
-public class UserEventConsumer implements EventConsumer {
-    @Transactional
-    public void consume(EventPacket eventPacket) throws Exception {
+public class UserEventConsumer {
+    @TopicObserver
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+                        @TopicObserved(Topic.CONSENT) EventPacket eventPacket) throws Exception {
         // perform some action related to the event
         
         // use the payload class to identify the event type
@@ -181,15 +156,6 @@ public class UserEventConsumer implements EventConsumer {
     }
 }
 ```
-A class may include multiple `@TopicConsumer` annotations to consume events
-from multiple topics but, for the sake of coherence, it is recommended to use
-a single class per topic.
-
-### Event Delivery
-Each service will maintain form own event group (as per Kafka Group). So,
-if a service implements multiple `EventConsumer` classes consuming from the same
-Topic, each class will only receive a portion of the events on that topic.
-This is not recommended; and shouldn't be necessary anyway.
 
 ### Event Retry
 If an exception is raised by the `EventConsumer` during the processing of an

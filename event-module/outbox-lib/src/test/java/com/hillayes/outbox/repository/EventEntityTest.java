@@ -51,7 +51,8 @@ public class EventEntityTest {
 
         // when: the event entity is to be redelivered
         Instant redeliveryTime = Instant.now().plusSeconds(60);
-        EventEntity redelivery = EventEntity.forRedelivery(eventPacket, redeliveryTime);
+        Throwable error = new RuntimeException("Mock error");
+        EventEntity redelivery = EventEntity.forRedelivery(eventPacket, error, redeliveryTime);
 
         // then: the redelivery event entity matches the original
         assertNull(eventEntity.getId());

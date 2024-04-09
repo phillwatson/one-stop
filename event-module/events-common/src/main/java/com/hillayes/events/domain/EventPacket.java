@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
@@ -27,27 +26,6 @@ import java.util.UUID;
 @RegisterForReflection
 public class EventPacket {
     private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
-
-    /**
-     * A factory method to create a new event packet for its initial delivery.
-     * Called when an event is first submitted delivery.
-     *
-     * @param topic the topic on which the event is to be delivered.
-     * @param key the optional key of the event. Used to ensure that events with
-     *     the same key are delivered in order.
-     * @param payloadObject the payload to be passed in the event.
-     */
-    public static EventPacket forInitialDelivery(Topic topic, Object key, Object payloadObject) {
-        Instant now = Instant.now();
-        return new EventPacket(
-            UUID.randomUUID(),
-            topic,
-            Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()),
-            0, now,
-            key == null ? null : key.toString(),
-            payloadObject == null ? null : payloadObject.getClass().getName(),
-            EventPacket.serialize(payloadObject));
-    }
 
     /**
      * The event's unique identifier. This is suitable for testing whether the event
@@ -111,6 +89,16 @@ public class EventPacket {
     private transient Object payloadContent;
 
     /**
+     * The exception class, if any, that caused the event to be retried.
+     */
+    private String reason;
+
+    /**
+     * The exception message of the exception that caused the event to be retried.
+     */
+    private String cause;
+
+    /**
      * A no-args constructor for JSON deserialization.
      */
     protected EventPacket() {}
@@ -118,6 +106,14 @@ public class EventPacket {
     public EventPacket(UUID id, Topic topic, String correlationId,
                        int retryCount, Instant timestamp,
                        String key, String payloadClass, String payload) {
+        this(id, topic, correlationId, retryCount, timestamp, key,
+         payloadClass, payload, null, null);
+    }
+
+    public EventPacket(UUID id, Topic topic, String correlationId,
+                       int retryCount, Instant timestamp,
+                       String key, String payloadClass, String payload,
+                       String reason, String cause) {
         this.id = id;
         this.topic = topic;
         this.correlationId = correlationId;
@@ -126,6 +122,8 @@ public class EventPacket {
         this.key = key;
         this.payloadClass = payloadClass;
         this.payload = payload;
+        this.reason = reason;
+        this.cause = cause;
     }
 
     /**

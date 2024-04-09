@@ -14,8 +14,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>events-lib</module>
-        <module>local-events-lib</module>
         <module>outbox-lib</module>
         <module>events-common</module>
     </modules>

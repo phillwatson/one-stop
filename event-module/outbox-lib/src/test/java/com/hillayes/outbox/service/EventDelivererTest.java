@@ -3,49 +3,56 @@ package com.hillayes.outbox.service;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.UserAuthenticated;
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
-import io.quarkus.runtime.ShutdownEvent;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.TopicPartition;
+import jakarta.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class EventDelivererTest {
-    private final Producer<String, EventPacket> producer = mock(Producer.class);
-    private final EventRepository eventRepository = mock(EventRepository.class);
+    @Mock
+    @TopicObserved(Topic.USER)
+    Event<EventPacket> userEvent;
 
-    private final EventDeliverer fixture = new EventDeliverer(eventRepository, producer);
+    @Mock
+    @TopicObserved(Topic.USER_AUTH)
+    Event<EventPacket> userAuthEvent;
+
+    @Mock
+    @TopicObserved(Topic.CONSENT)
+    Event<EventPacket> consentEvent;
+
+    @Mock
+    @TopicObserved(Topic.HOSPITAL_TOPIC)
+    Event<EventPacket> hospitalEvent;
+
+    @Mock
+    EventRepository eventRepository;
+
+    @InjectMocks
+    EventDeliverer fixture = new EventDeliverer();
 
     @BeforeEach
     public void beforeEach() {
-        reset(producer, eventRepository);
-
-        when(producer.send(any())).then(invocationOnMock -> mockResult());
+        openMocks(this);
     }
 
     @Test
-    public void testStop() {
-        // when: the fixture is stopped
-        fixture.onStop(new ShutdownEvent());
-
-        // then: the producer is closed
-        verify(producer).close();
-    }
-
-    @Test
-    public void testDeliverEvents_noEvents() throws Exception {
+    public void testDeliverEvents_noEvents() {
         // given: no waiting events
         when(eventRepository.listUndelivered(anyInt())).thenReturn(Collections.emptyList());
 
@@ -57,12 +64,12 @@ public class EventDelivererTest {
     }
 
     @Test
-    public void testDeliverEvents() throws Exception {
+    public void testDeliverEvents() {
         // given: waiting events
         List<EventEntity> waitingEvents = List.of(
-            createEventEntity(),
-            createEventEntity(),
-            createEventEntity()
+            createEventEntity(Topic.USER_AUTH),
+            createEventEntity(Topic.USER_AUTH),
+            createEventEntity(Topic.USER_AUTH)
         );
         when(eventRepository.listUndelivered(anyInt())).thenReturn(waitingEvents);
 
@@ -72,14 +79,19 @@ public class EventDelivererTest {
         // then: waiting events are retrieved from the repository
         verify(eventRepository).listUndelivered(anyInt());
 
-        // and: events are all sent to the broker
-        verify(producer, times(waitingEvents.size())).send(any());
+        // and: events are all sent to the user-auth topic
+        verify(userAuthEvent, times(waitingEvents.size())).fire(any());
+
+        // and: no events are sent to the other topics
+        verify(userEvent, never()).fire(any());
+        verify(consentEvent, never()).fire(any());
+        verify(hospitalEvent, never()).fire(any());
 
         // and: the events are deleted from the repository
         verify(eventRepository, times(waitingEvents.size())).delete(any());
     }
 
-    private EventEntity createEventEntity() {
+    private EventEntity createEventEntity(Topic topic) {
         // given: an event payload
         UserAuthenticated event = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
@@ -87,52 +99,14 @@ public class EventDelivererTest {
             .build();
 
         // and: an event entity is created
-        return EventEntity.forInitialDelivery(Topic.USER_AUTH, "test-key", event);
+        return EventEntity.forInitialDelivery(topic, "test-key", event);
     }
 
-    private Future<RecordMetadata> mockResult() {
-        return new Future<>() {
-            @Override
-            public RecordMetadata get() {
-                return get(100, TimeUnit.MILLISECONDS);
-            }
+    private CompletionStage<EventPacket> mockCompletionStage() {
+        CompletionStage<EventPacket> result = mock(CompletionStage.class);
+        CompletableFuture<EventPacket> mockFuture = mock(CompletableFuture.class);
+        when(result.toCompletableFuture()).thenReturn(mockFuture);
 
-            @Override
-            public RecordMetadata get(long timeout, TimeUnit unit) {
-                try {
-                    Thread.sleep(500);
-                    return mockRecordMetadata();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return false;
-            }
-        };
-    }
-
-    private RecordMetadata mockRecordMetadata() {
-        return new RecordMetadata(
-            new TopicPartition("test-topic", 0),
-            0,
-            0,
-            0,
-            0L,
-            0,
-            0
-        );
+        return result;
     }
 }

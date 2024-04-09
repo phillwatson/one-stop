@@ -1,9 +1,10 @@
 package com.hillayes.rail.event.consumer;
 
-import com.hillayes.events.annotation.TopicObserved;
+import com.hillayes.events.annotation.TopicObserver;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.rail.service.UserConsentService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserTopicConsumer {
     private final UserConsentService userConsentService;
 
+    @TopicObserver
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
                         @TopicObserved(Topic.USER) EventPacket eventPacket) {
