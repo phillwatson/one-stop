@@ -29,7 +29,8 @@ public class HospitalEntityTest {
         );
 
         // when: the event packet is converted to a hospital entity
-        HospitalEntity hospitalEntity = HospitalEntity.fromEventPacket(eventPacket,  "mock consumer", "mock reason", "mock cause");
+        Throwable error = new RuntimeException("mock cause");
+        HospitalEntity hospitalEntity = HospitalEntity.fromEventPacket(eventPacket,  "mock consumer", error);
 
         // then: the hospital entity is created with correct values
         assertNotNull(hospitalEntity);
@@ -43,7 +44,7 @@ public class HospitalEntityTest {
         assertEquals(eventPacket.getPayloadClass(), hospitalEntity.getPayloadClass());
         assertEquals(eventPacket.getPayload(), hospitalEntity.getPayload());
         assertEquals("mock consumer", hospitalEntity.getConsumer());
-        assertEquals("mock reason", hospitalEntity.getReason());
+        assertEquals(RuntimeException.class.getName(), hospitalEntity.getReason());
         assertEquals("mock cause", hospitalEntity.getCause());
     }
 }

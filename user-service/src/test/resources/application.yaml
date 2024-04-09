@@ -6,14 +6,16 @@ mp:
 
 quarkus:
   hibernate-orm:
+    database:
+      # allows tests to apply migrations without conflicting with other modules
+      default-schema: users
     log:
       sql: true
       bind-parameters: true
 
   flyway:
     migrate-at-start: true
-    # allows tests to apply migrations without conflicting with other modules
-    default-schema: users
+    default-schema: ${quarkus.hibernate-orm.database.default-schema}
 
   log:
     min-level: TRACE
@@ -25,8 +27,6 @@ quarkus:
         level: INFO
       "org.jose4j.jwk":
         level: INFO
-      "org.apache.kafka":
-        level: WARN
       "com.hillayes":
         level: DEBUG
 

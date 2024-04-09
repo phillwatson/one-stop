@@ -7,6 +7,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -49,16 +50,22 @@ public class EventEntity {
 
     /**
      * A factory method to create a new event entity for the re-delivery of a failed
-     * event. This is called by the event dead-letter topic listener.
+     * event.
      * <p>
      * The event's retry count is incremented, and its scheduled delivery is delayed
      * in order to allow the listeners time to recover from any error condition.
      *
      * @param eventPacket the event packet that failed delivery and is to be rescheduled.
+     * @param error the error that caused the event to fail.
      * @param scheduleFor the time at which the event is to be delivered.
      */
-    public static EventEntity forRedelivery(EventPacket eventPacket, Instant scheduleFor) {
+    public static EventEntity forRedelivery(EventPacket eventPacket,
+                                            Throwable error,
+                                            Instant scheduleFor) {
         Instant now = Instant.now();
+        String reason = error.getClass().getName();
+        String cause = error.getMessage();
+
         return EventEntity.builder()
             .eventId(eventPacket.getId())
             .correlationId(eventPacket.getCorrelationId())
@@ -69,6 +76,8 @@ public class EventEntity {
             .key(eventPacket.getKey())
             .payloadClass(eventPacket.getPayloadClass())
             .payload(eventPacket.getPayload())
+            .reason(reason)
+            .cause(cause)
             .build();
     }
 
@@ -77,7 +86,8 @@ public class EventEntity {
      * broker.
      */
     public EventPacket toEventPacket() {
-        return new EventPacket(eventId, topic, correlationId, retryCount, timestamp, key, payloadClass, payload);
+        return new EventPacket(eventId, topic, correlationId, retryCount, timestamp, key,
+            payloadClass, payload, reason, cause);
     }
 
     /**
@@ -157,4 +167,16 @@ public class EventEntity {
      */
     @Column(nullable = true)
     private String payload;
+
+    @Column(nullable = true)
+    private String reason;
+
+    @Column(nullable = true)
+    private String cause;
+
+    /**
+     * The consumer class that raised the error.
+     */
+    @Column(nullable = true)
+    private String consumer;
 }

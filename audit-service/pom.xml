@@ -37,7 +37,7 @@
 
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>local-events-lib</artifactId>
+            <artifactId>events-common</artifactId>
         </dependency>
     </dependencies>
 
@@ -49,10 +49,6 @@
                     <name>native</name>
                 </property>
             </activation>
-            <properties>
-                <!-- see https://quarkus.io/guides/writing-native-applications-tips -->
-                <quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator</quarkus.native.additional-build-args>
-            </properties>
         </profile>
     </profiles>
 </project>

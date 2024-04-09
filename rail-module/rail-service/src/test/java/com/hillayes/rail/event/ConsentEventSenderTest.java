@@ -2,7 +2,7 @@ package com.hillayes.rail.event;
 
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
-import com.hillayes.events.sender.EventSender;
+import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;

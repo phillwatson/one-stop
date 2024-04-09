@@ -17,16 +17,18 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
 public class HospitalEntity {
     /**
-     * A factory method to create a new hospital for the failed event. This is called by
-     * the event dead-letter topic listener.
+     * A factory method to create a new hospital for the failed event.
      *
      * @param eventPacket the event packet that failed delivery and is to be rescheduled.
-     * @param reason the reason for the failure.
-     * @param cause the cause of the failure.
+     * @param error the error that caused the event to fail.
      */
     public static HospitalEntity fromEventPacket(EventPacket eventPacket,
-                                                 String consumer, String reason, String cause) {
+                                                 String consumer,
+                                                 Throwable error) {
         Instant now = Instant.now();
+        String reason = error.getClass().getName();
+        String cause = error.getMessage();
+
         return HospitalEntity.builder()
             .eventId(eventPacket.getId())
             .correlationId(eventPacket.getCorrelationId())

@@ -1,6 +1,7 @@
 package com.hillayes.audit.event.consumer;
 
 import com.hillayes.events.annotation.TopicObserved;
+import com.hillayes.events.annotation.TopicObserver;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserCreated;
@@ -8,7 +9,6 @@ import com.hillayes.events.events.user.UserDeleted;
 import com.hillayes.events.events.user.UserUpdated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.TransactionPhase;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class UserTopicConsumer {
-    public void consume(@Observes(during = TransactionPhase.AFTER_SUCCESS)
+    @TopicObserver
+    public void consume(@Observes
                         @TopicObserved(Topic.USER) EventPacket eventPacket) {
         String payloadClass = eventPacket.getPayloadClass();
         log.info("Received user event [payloadClass: {}]", payloadClass);

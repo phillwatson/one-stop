@@ -9,8 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates an implementation of EventConsumer to indicate the topic it consumes from.
- * This is a repeatable annotation, so a consumer may listen to multiple topics.
+ * Annotates the Event Consumer to indicate the topic it consumes from.
  */
 @Qualifier
 @Target({ElementType.PARAMETER, ElementType.FIELD})
