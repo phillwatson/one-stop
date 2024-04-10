@@ -1,6 +1,5 @@
 package com.hillayes.outbox.service;
 
-import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
@@ -18,6 +17,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,26 +37,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class EventDeliverer {
     /**
      * The delay before messages polling begins.
-     * TODO: move to a configurable property
      */
+    @ConfigProperty(name = "one-stop.event.outbox.init-delay", defaultValue = "10s")
     private final static Duration INIT_DELAY = Duration.ofSeconds(10);
 
     /**
      * The frequency at which messages are polled from the database.
-     * TODO: move to a configurable property
      */
+    @ConfigProperty(name = "one-stop.event.outbox.poll-frequency", defaultValue = "2s")
     private final static Duration POLL_FREQUENCY = Duration.ofSeconds(2);
 
     /**
      * The maximum number of messages retrieved on each poll.
-     * TODO: move to a configurable property
      */
+    @ConfigProperty(name = "one-stop.event.outbox.poll-batch-size", defaultValue = "25")
     private final static int POLL_BATCH_SIZE = 25;
 
     /**
      * The maximum number of times a failed event will be retried before being sent to the hospital.
-     * TODO: move to a configurable property
      */
+    @ConfigProperty(name = "one-stop.event.outbox.max-retry-count", defaultValue = "3")
     private final static int MAX_RETRY_COUNT = 3;
 
     // the repository to poll messages from the database
@@ -89,11 +89,12 @@ public class EventDeliverer {
 
     public void init(@Observes StartupEvent ev) {
         log.info("Scheduling EventDeliverer");
-        ScheduledExecutorService executor = (ScheduledExecutorService) ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
-            .executorType(ExecutorType.SCHEDULED)
-            .name("event-deliverer")
-            .numberOfThreads(1)
-            .build());
+        ScheduledExecutorService executor = (ScheduledExecutorService) ExecutorFactory.newExecutor(
+            ExecutorConfiguration.builder()
+                .executorType(ExecutorType.SCHEDULED)
+                .name("event-deliverer")
+                .numberOfThreads(1)
+                .build());
 
         executor.scheduleAtFixedRate(this::deliverEvents,
             INIT_DELAY.toSeconds(), POLL_FREQUENCY.toSeconds(), TimeUnit.SECONDS);
@@ -130,31 +131,27 @@ public class EventDeliverer {
         }
         log.trace("Event batch delivery started");
 
-        events.forEach(entity -> {
-            Event<EventPacket> sender = switch (entity.getTopic()) {
+        events.forEach(event -> {
+            Event<EventPacket> sender = switch (event.getTopic()) {
                 case USER -> userEvent;
                 case USER_AUTH -> userAuthEvent;
                 case CONSENT -> consentEvent;
                 case HOSPITAL_TOPIC -> hospitalEvent;
                 default -> {
-                    log.error("Unknown topic [topic: {}]", entity.getTopic());
-                    throw new IllegalArgumentException("Unknown topic: " + entity.getTopic());
+                    log.error("Unknown topic [topic: {}]", event.getTopic());
+                    throw new IllegalArgumentException("Unknown topic: " + event.getTopic());
                 }
             };
 
-            EventPacket eventPacket = entity.toEventPacket();
-            String prevCorrelation = Correlation.setCorrelationId(entity.getCorrelationId());
             try {
                 // send event to consumers
-                sender.fire(eventPacket);
-            } catch (Exception e) {
-                onError(eventPacket, e);
-            } finally {
-                Correlation.setCorrelationId(prevCorrelation);
-            }
+                sender.fire(event.toEventPacket());
 
-            // delete the entity
-            eventRepository.delete(entity);
+                // on success - delete the event
+                eventRepository.delete(event);
+            } catch (Exception e) {
+                onError(event, e);
+            }
         });
 
         log.trace("Event delivery complete");
@@ -168,11 +165,19 @@ public class EventDeliverer {
      * @param event the event that failed delivery.
      * @param error the error that occurred.
      */
-    private void onError(EventPacket event, Throwable error) {
+    private void onError(EventEntity event, Throwable error) {
         log.error("Event delivery failed [id: {}, topic: {}, payload: {}]",
             event.getId(), event.getTopic(), event.getPayloadClass(), error);
 
-        // has the event reached the max retry count
+        // if the failed event was for the hospital
+        if (event.getTopic() == Topic.HOSPITAL_TOPIC) {
+            // delete it, as we have already tried to redeliver it.
+            // it will have been recorded in the hospital table
+            eventRepository.delete(event);
+            return;
+        }
+
+        // has the event reached the max retry count - redirect to hospital topic
         int retryCount = event.getRetryCount();
         Topic failureTopic = (retryCount < MAX_RETRY_COUNT)
             ? event.getTopic()
@@ -180,7 +185,7 @@ public class EventDeliverer {
 
         if (log.isDebugEnabled()) {
             log.debug("Reposting event [failureTopic: {}, topic: {}, retryCount: {}]",
-                failureTopic, event.getTopic(), event.getRetryCount());
+                failureTopic, event.getTopic(), retryCount);
         }
 
         // persist event for redelivery at a delayed time
@@ -189,12 +194,13 @@ public class EventDeliverer {
             : Instant.now().plusSeconds(20L * (retryCount + 1));
         eventRepository.save(EventEntity.forRedelivery(event, error, scheduleFor));
 
+        // if the event has reached the max retry count, save it to the hospital table
         if (failureTopic == Topic.HOSPITAL_TOPIC) {
             log.error("Writing failed event to message hospital [id: {}, topic: {}, retryCount: {}]",
                 event.getId(), event.getTopic(), event.getRetryCount());
 
             // write the record to the event hospital table - with consumer and error
-            hospitalRepository.save(HospitalEntity.fromEventPacket(event, null, error));
+            hospitalRepository.save(HospitalEntity.fromEventEntity(event, null, error));
         }
     }
 }

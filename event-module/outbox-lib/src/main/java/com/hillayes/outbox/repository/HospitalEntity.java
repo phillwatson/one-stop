@@ -1,6 +1,5 @@
 package com.hillayes.outbox.repository;
 
-import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import lombok.*;
 
@@ -19,10 +18,10 @@ public class HospitalEntity {
     /**
      * A factory method to create a new hospital for the failed event.
      *
-     * @param eventPacket the event packet that failed delivery and is to be rescheduled.
+     * @param event the event that failed delivery and is to be rescheduled.
      * @param error the error that caused the event to fail.
      */
-    public static HospitalEntity fromEventPacket(EventPacket eventPacket,
+    public static HospitalEntity fromEventEntity(EventEntity event,
                                                  String consumer,
                                                  Throwable error) {
         Instant now = Instant.now();
@@ -30,17 +29,17 @@ public class HospitalEntity {
         String cause = error.getMessage();
 
         return HospitalEntity.builder()
-            .eventId(eventPacket.getId())
-            .correlationId(eventPacket.getCorrelationId())
-            .retryCount(eventPacket.getRetryCount())
+            .eventId(event.getId())
+            .correlationId(event.getCorrelationId())
+            .retryCount(event.getRetryCount())
             .timestamp(now)
             .reason(reason)
             .cause(cause)
             .consumer(consumer)
-            .topic(eventPacket.getTopic())
-            .key(eventPacket.getKey())
-            .payloadClass(eventPacket.getPayloadClass())
-            .payload(eventPacket.getPayload())
+            .topic(event.getTopic())
+            .key(event.getKey())
+            .payloadClass(event.getPayloadClass())
+            .payload(event.getPayload())
             .build();
     }
 

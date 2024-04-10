@@ -17,10 +17,10 @@ import java.util.Optional;
 public class TopicObserverInterceptor {
     @AroundInvoke
     public Object intercept(InvocationContext context) throws Exception {
-        String prevCorrelationId = findEventPacket(context)
-            .map(EventPacket::getCorrelationId)
+        // use event's correlation ID if available, otherwise use the current thread's correlation ID
+        String prevCorrelationId = getEventCorrelationId(context)
             .map(Correlation::setCorrelationId)
-            .orElse(null);
+            .orElseGet(() -> Correlation.getCorrelationId().orElse(null));
         try {
             return context.proceed();
         } finally {
@@ -28,12 +28,12 @@ public class TopicObserverInterceptor {
         }
     }
 
-    private Optional<EventPacket> findEventPacket(InvocationContext context) {
+    private Optional<String> getEventCorrelationId(InvocationContext context) {
         Object[] parameters = context.getParameters();
         if (parameters != null) {
             for (Object parameter : parameters) {
                 if (parameter instanceof EventPacket) {
-                    return Optional.of((EventPacket) parameter);
+                    return Optional.ofNullable(((EventPacket) parameter).getCorrelationId());
                 }
             }
         }

@@ -7,7 +7,6 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -55,30 +54,21 @@ public class EventEntity {
      * The event's retry count is incremented, and its scheduled delivery is delayed
      * in order to allow the listeners time to recover from any error condition.
      *
-     * @param eventPacket the event packet that failed delivery and is to be rescheduled.
+     * @param event the event that failed delivery and is to be rescheduled.
      * @param error the error that caused the event to fail.
      * @param scheduleFor the time at which the event is to be delivered.
      */
-    public static EventEntity forRedelivery(EventPacket eventPacket,
+    public static EventEntity forRedelivery(EventEntity event,
                                             Throwable error,
                                             Instant scheduleFor) {
-        Instant now = Instant.now();
         String reason = error.getClass().getName();
         String cause = error.getMessage();
 
-        return EventEntity.builder()
-            .eventId(eventPacket.getId())
-            .correlationId(eventPacket.getCorrelationId())
-            .retryCount(eventPacket.getRetryCount() + 1)
-            .timestamp(now)
-            .scheduledFor(scheduleFor)
-            .topic(eventPacket.getTopic())
-            .key(eventPacket.getKey())
-            .payloadClass(eventPacket.getPayloadClass())
-            .payload(eventPacket.getPayload())
-            .reason(reason)
-            .cause(cause)
-            .build();
+        event.setRetryCount(event.getRetryCount() + 1);
+        event.setScheduledFor(scheduleFor);
+        event.setReason(reason);
+        event.setCause(cause);
+        return event;
     }
 
     /**
@@ -123,7 +113,7 @@ public class EventEntity {
      * placed on the message-hospital topic.
      */
     @Column(name = "retry_count")
-    @Setter
+    @Setter(AccessLevel.PRIVATE)
     private int retryCount;
 
     /**
@@ -134,6 +124,7 @@ public class EventEntity {
      * from any error condition.
      */
     @Column(name = "scheduled_for")
+    @Setter(AccessLevel.PRIVATE)
     private Instant scheduledFor;
 
     /**
@@ -169,14 +160,17 @@ public class EventEntity {
     private String payload;
 
     @Column(nullable = true)
+    @Setter(AccessLevel.PRIVATE)
     private String reason;
 
     @Column(nullable = true)
+    @Setter(AccessLevel.PRIVATE)
     private String cause;
 
     /**
      * The consumer class that raised the error.
      */
     @Column(nullable = true)
+    @Setter(AccessLevel.PRIVATE)
     private String consumer;
 }
