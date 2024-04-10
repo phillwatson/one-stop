@@ -39,8 +39,8 @@
         <module>rail-module</module>
         <module>user-service</module>
 
-        <module>integration-module</module>
         <module>one-stop-main</module>
+        <module>integration-module</module>
     </modules>
 
     <properties>
