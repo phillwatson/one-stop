@@ -31,6 +31,7 @@ public class GitHubFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITHUB)
+    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig githubConfig() {
         log.debug("Retrieving GitHub OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITHUB);

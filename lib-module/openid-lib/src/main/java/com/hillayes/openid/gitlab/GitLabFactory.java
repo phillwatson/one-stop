@@ -29,6 +29,7 @@ public class GitLabFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GITLAB)
+    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig gitlabConfig() {
         log.debug("Retrieving GitLab OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GITLAB);

@@ -29,6 +29,7 @@ public class AppleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.APPLE)
+    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig appleConfig() {
         log.debug("Retrieving Apple OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.APPLE);

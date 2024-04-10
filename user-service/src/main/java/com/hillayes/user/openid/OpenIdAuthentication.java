@@ -53,7 +53,6 @@ public class OpenIdAuthentication {
         log.info("OAuth login [authProvider: {}, state: {}]", authProvider, state);
 
         URI redirect = getOpenIdAuth(authProvider).initiateLogin(state);
-        log.info("OAuth login [authProvider: {}, redirect: {}]", authProvider, redirect);
         return redirect;
     }
 
