@@ -29,6 +29,7 @@ public class GoogleFactory extends OpenIdFactory {
      */
     @Produces
     @NamedAuthProvider(AuthProvider.GOOGLE)
+    @ApplicationScoped
     public OpenIdConfiguration.AuthConfig googleConfig() {
         log.debug("Retrieving Google OpenId Config");
         return openIdConfiguration.configs().get(AuthProvider.GOOGLE);

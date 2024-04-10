@@ -1,8 +1,8 @@
 import { createContext, useContext, useReducer } from "react";
+import { AxiosError } from "axios";
 
 import { Message, MessageAction } from "./model";
 import MessageStack from "./message-stack";
-import { AxiosError } from "axios";
 import { ServiceError } from "../../model/service-error";
 
 // a local index to assign unique IDs to messages
@@ -11,7 +11,7 @@ var messageIndex = 0;
 function extractMessages(error: AxiosError): Message[] {
   const response: any = error.response;
   if ((! response) || (!response.data)) {
-    return [ { id: Date.now(), text: error.message, level: 'error' } ];
+    return [ { id: messageIndex++, text: error.message, level: 'error' } ];
   }
 
   return response.data.errors.map((error: ServiceError) => {
@@ -40,6 +40,10 @@ function messageActionReducer(messages: Message[], action: MessageAction | Axios
   if (action instanceof AxiosError) {
     const errors = extractMessages(action);
     return [ ...errors, ...messages ];
+  }
+
+  if (action instanceof Error) {
+    return [ { id: messageIndex++, text: action.message, level: 'error' }, ...messages ];
   }
 
   switch (action.type) {

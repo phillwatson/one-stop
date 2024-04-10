@@ -37,7 +37,7 @@ public class UserTopicConsumer {
     }
 
     private void processUserCreated(UserCreated event) {
-        log.info("User created [username: {}]", event.getUsername());
+        log.info("User created [userId: {}]", event.getUserId());
     }
 
     private void processUserDeleted(UserDeleted event) {
@@ -45,6 +45,6 @@ public class UserTopicConsumer {
     }
 
     private void processUserUpdated(UserUpdated event) {
-        log.info("User updated [username: {}]", event.getUsername());
+        log.info("User updated [userId: {}]", event.getUserId());
     }
 }
