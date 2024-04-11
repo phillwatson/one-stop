@@ -119,7 +119,7 @@ Brevo (previously known as Send-With-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
 # the Brevo (SendInBlue) Email-Service key
-ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previosly Send-With-Blue)>
+ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previously Send-With-Blue)>
 
 # to disable the sending of emails - default false
 ONE_STOP_EMAIL_DISABLED: true
