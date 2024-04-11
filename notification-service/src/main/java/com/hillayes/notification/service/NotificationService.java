@@ -89,8 +89,7 @@ public class NotificationService {
     public <T> Page<T> listNotifications(UUID userId, Instant after,
                                          int pageIndex, int pageSize,
                                          NotificationMapper<T> mapper) {
-        log.info("List notifications [userId: {}, after: {}]", userId, after);
-
+        log.trace("List notifications [userId: {}, after: {}]", userId, after);
         return userService.getUser(userId)
             .map(user -> {
                 Optional<Locale> locale = Optional.ofNullable(user.getLocale());
@@ -100,7 +99,10 @@ public class NotificationService {
                     .map(notification -> mapper.map(notification, renderMessage(notification, locale)))
                     .toList();
 
-                log.debug("List notifications [userId: {}, after: {}, count: {}]", userId, after, notifications.getContentSize());
+                if (log.isTraceEnabled()) {
+                    log.trace("List notifications [userId: {}, after: {}, count: {}]",
+                        userId, after, notifications.getContentSize());
+                }
                 return new Page<>(mapped, notifications.getTotalCount(), pageIndex, pageSize);
             })
             .orElse(Page.empty());

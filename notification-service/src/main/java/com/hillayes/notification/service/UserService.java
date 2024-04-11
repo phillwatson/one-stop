@@ -49,7 +49,7 @@ public class UserService {
     }
 
     public Optional<User> getUser(UUID userId) {
-        log.info("Get user [id: {}]", userId);
+        log.trace("Get user [id: {}]", userId);
         Optional<User> result = userRepository.findByIdOptional(userId);
         if (result.isEmpty()) {
             log.warn("User not found [id: {}]", userId);
