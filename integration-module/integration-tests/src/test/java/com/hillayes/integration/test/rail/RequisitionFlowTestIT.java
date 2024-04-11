@@ -85,7 +85,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         UserConsentResponse userConsent = userConsentApi.getConsentForInstitution(institution.getId());
         assertNotNull(userConsent);
         assertEquals(institution.getId(), userConsent.getInstitutionId());
-        userConsent.institutionName(institution.getName());
+        assertEquals(institution.getName(), userConsent.getInstitutionName());
 
         // and: the consent is waiting to be given
         assertEquals("INITIATED", userConsent.getStatus());

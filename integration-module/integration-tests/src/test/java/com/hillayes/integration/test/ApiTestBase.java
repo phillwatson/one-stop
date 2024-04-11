@@ -116,6 +116,20 @@ public class ApiTestBase {
         return new File(resource.getFile());
     }
 
+    /**
+     * Invokes the given consumer with the ServiceErrorResponse object extracted
+     * from the given response.
+     * This is useful for testing error responses from an API request. An example
+     * usage is:
+     * <pre>
+     *    withServiceError(userProfileApi.changePassword(request, 400), errorResponse -> {
+     *      ServiceError error = errorResponse.getErrors().get(0);
+     *    }
+     * </pre>
+     *
+     * @param response the API response object from which to extract the error
+     * @param consumer the consumer to invoke with the extracted error
+     */
     protected void withServiceError(Response response, Consumer<ServiceErrorResponse> consumer) {
         consumer.accept(response.as(ServiceErrorResponse.class));
     }
