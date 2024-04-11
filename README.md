@@ -12,6 +12,10 @@ where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 
+An alternative implementation is presented in the branch "modulith". That
+implementation demonstrates how the same application can be built, and maintained,
+as a single module.
+
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
 consist of services (that provide client functionality) and libraries (that provide
@@ -29,7 +33,12 @@ example; the repository classes are "masked" by a simple facade (or adaptor) cla
 rather than exposing a framework specific repository interface.
 
 #### Client
-A simple browser UI, based on React, to demonstrate the functionality of the back-end.
+A simple browser UI, written in React, to demonstrate the back-end functionality.
+One important aspect of this UI is the authentication. Requests are authenticated
+by JWT tokens; signed by rotating private keys and passed in Secure, HTTP-Only,
+Strict Same-Site cookies, without any intervention required by the UI. It also
+demonstrates the use of XSRF tokens to protect against Cross-Site Request Forgery
+attacks.
 
 #### User Service
 Responsible for on-boarding and managing internal user accounts. Provides OpenID
