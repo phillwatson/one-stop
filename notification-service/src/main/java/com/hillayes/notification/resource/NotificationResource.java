@@ -34,8 +34,6 @@ public class NotificationResource {
                                      @QueryParam("page") @DefaultValue("0") int pageIndex,
                                      @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting user notifications [userId: {}, after: {}]", userId, after);
-
         if (after == null) after = Instant.EPOCH;
         Page<NotificationResponse> consentsPage = notificationService.listNotifications(userId, after, pageIndex, pageSize, MAPPER);
 
@@ -48,8 +46,10 @@ public class NotificationResource {
             .items(consentsPage.getContent())
             .links(PaginationUtils.buildPageLinks(uriInfo, consentsPage));
 
-        log.debug("Listing user's notifications [userId: {}, after: {}, page: {}, pageSize: {}, count: {}, total: {}]",
-            userId, after, pageIndex, pageSize, response.getCount(), response.getTotal());
+        if (log.isDebugEnabled()) {
+            log.debug("Getting user's notifications [userId: {}, after: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, after, pageIndex, pageSize, response.getCount(), response.getTotal());
+            }
         return Response.ok(response).build();
     }
 
