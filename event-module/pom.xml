@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>outbox-lib</module>
         <module>events-common</module>
+        <module>outbox-lib</module>
     </modules>
 </project>
