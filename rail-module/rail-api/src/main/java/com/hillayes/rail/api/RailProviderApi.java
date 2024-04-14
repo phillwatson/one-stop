@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Represents the interface made available by all Rail Providers that we intend
  * to support. This is intended to be agnostic of the underlying provider, and
- * implementations will use the Adaptor pattern to map the Rail Provider's
+ * implementations will use the Bridge pattern to map the Rail Provider's
  * functionality to this interface.
  */
 public interface RailProviderApi {

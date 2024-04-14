@@ -25,7 +25,7 @@ import java.util.*;
 
 @ApplicationScoped
 @Slf4j
-public class NordigenRailAdaptor implements RailProviderApi {
+public class NordigenRailProvider implements RailProviderApi {
     // The number of days for which account access will be agreed
     private final static int ACCESS_VALID_FOR_DAYS = 90;
     private final static List<String> CONSENT_SCOPES = List.of("balances", "details", "transactions");
