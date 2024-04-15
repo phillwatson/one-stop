@@ -10,7 +10,7 @@ Rail Providers below for functionality required to connect to and retrieve data 
 the Rail.
 
 ### Rail-API
-Presents an Adaptor interface to the Rail Provider APIs. Allowing a common
+Presents a Bridge interface to the Rail Provider APIs. Allowing a common
 interface to the support Rail Providers.
 
 ### Nordigen-Lib

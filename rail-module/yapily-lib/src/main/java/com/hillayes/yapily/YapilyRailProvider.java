@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @ApplicationScoped
 @Slf4j
-public class YapilyRailAdaptor implements RailProviderApi {
+public class YapilyRailProvider implements RailProviderApi {
     /**
      * The number of days for which transaction data can be obtained.
      * As Yapily doesn't provide this information, we default to this.

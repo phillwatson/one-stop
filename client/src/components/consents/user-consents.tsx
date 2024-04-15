@@ -17,6 +17,7 @@ import UserConsent from '../../model/user-consent.model';
 import DeleteConsentDialog from './delete-consent-dialog';
 import Tooltip from '@mui/material/Tooltip';
 import { formatDateTime } from '../../util/date-util';
+import Avatar from '@mui/material/Avatar/Avatar';
 
 interface Props {
 }
@@ -84,7 +85,9 @@ export default function UserConsentList(props: Props) {
         <TableBody>
           { userConsents.map(consent => (
             <TableRow key={consent.id}>
-              <TableCell><img src={ getLogo(consent) } alt={consent.institutionName + " logo"} width="32px" height="32px"/></TableCell>
+              <TableCell>
+                <Avatar src={ getLogo(consent) } alt={ consent.institutionName + " logo" } sx={{ width: "32px", height: "32px" }}></Avatar>
+              </TableCell>
               <TableCell width={"90%"}>{consent.institutionName}</TableCell>
               <TableCell>{consent.status}</TableCell>
               <TableCell>{formatDateTime(consent.dateGiven)}</TableCell>
