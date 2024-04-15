@@ -15,6 +15,7 @@ import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import './account-list.css';
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
+import Avatar from '@mui/material/Avatar';
 
 interface Props extends PropsWithChildren {
   account: AccountDetail;
@@ -90,7 +91,7 @@ export default function AccountList(props: Props) {
         </TableCell>
 
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}>
-          <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="48px" height="48px"/>
+          <Avatar src={ props.account.institution.logo } alt="{ props.bank.name } logo" sx={{ width: "38px", height: "38px" }}></Avatar>
         </TableCell>
 
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>

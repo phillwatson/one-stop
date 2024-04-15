@@ -6,6 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Avatar from '@mui/material/Avatar';
 
 import { AccountDetail } from "../../model/account.model";
 
@@ -21,16 +22,16 @@ export default function AccountHeader(props: Props) {
       <hr></hr>
       { props.account &&
         <TableContainer>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow key={props.account.id}>
-                <TableCell size="small" padding='none'>
-                  <img src={ props.account.institution.logo } alt="{ props.bank.name } logo" width="52px" height="52px"/>
+                <TableCell>
+                  <Avatar src={ props.account.institution.logo } alt="{ props.bank.name } logo" sx={{ width: "38px", height: "38px" }}></Avatar>
                 </TableCell>
-                <TableCell size="small">{props.account.institution.name}</TableCell>
-                <TableCell size="small">{props.account.ownerName}</TableCell>
-                <TableCell size="small">{props.account.name}</TableCell>
-                <TableCell size="small">{props.account.iban}</TableCell>
+                <TableCell>{props.account.institution.name}</TableCell>
+                <TableCell>{props.account.ownerName}</TableCell>
+                <TableCell>{props.account.name}</TableCell>
+                <TableCell>{props.account.iban}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
