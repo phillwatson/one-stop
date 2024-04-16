@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef } from "react";
 
 import Notification from "../../model/notification-model";
 import NotificationDrawer from "./notification-drawer";
@@ -21,8 +21,8 @@ export type NotificationAction =
   | { type: 'addAll', notifications: Notification[] }
   | { type: 'delete', id: string };
 
-// the interval at which the notifications are refreshed = 10 seconds
-const NOTIFICATION_REFRESH_INTERVAL = 10 * 1000;
+// the interval at which the notifications are refreshed = 20 seconds
+const NOTIFICATION_REFRESH_INTERVAL = 20 * 1000;
 
 /**
  * Accepts actions and updates the list of Notifications accordingly.
@@ -75,31 +75,60 @@ export default function NotificationProvider(props: React.PropsWithChildren) {
   // so that we can retrieve only new notifications
   const notificationMarker = useRef(new Date(0).toISOString());
 
+  // records whether the window has focus
+  const fucused = useRef(true);
+  function onFocus() {
+    fucused.current = true;
+  }
+  function onBlur() {
+    fucused.current = false;
+  }
+
+  const fetchNotifications = useCallback(async () => {
+    // only poll for notifications if the window is focused
+    if (fucused.current) {
+      try {
+        let page = 0;
+        while (true) {
+          let response = await NotificationService.getNotifications(notificationMarker.current, page++, 100);
+          if (response.count > 0) {
+            dispatch({ type: 'addAll', notifications: response.items });
+            notificationMarker.current = response.items[response.count - 1].timestamp;
+          }
+          if (! response.links.next) {
+            break; // no more pages
+          }
+        }
+      } catch (error) {
+        showError(error as AxiosError);
+      }
+    }
+  }, [showError]);
+
+
+  useEffect(() => {
+    // we only want to poll when window is focused
+    // otherwise the access-token will be constantly refreshed
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
+
+    // clear the listeners when the component is unmounted
+    return () => { 
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('blur', onBlur);
+    }
+  }, []);
+
   useEffect(() => {
     var timer: any = undefined;
     if (currentUser) {
-      timer = setInterval(async () => {
-        try {
-          let page = 0;
-          while (true) {
-            let response = await NotificationService.getNotifications(notificationMarker.current, page++, 100);
-            if (response.count > 0) {
-              dispatch({ type: 'addAll', notifications: response.items });
-              notificationMarker.current = response.items[response.count - 1].timestamp;
-            }
-            if (! response.links.next) {
-              break; // no more pages
-            }
-          }
-        } catch (error) {
-          showError(error as AxiosError);
-        }
-      }, NOTIFICATION_REFRESH_INTERVAL);
+      fetchNotifications();
+      timer = setInterval(fetchNotifications, NOTIFICATION_REFRESH_INTERVAL);
     }
 
     // clear the timer when the component is unmounted
     return () => { if (timer) clearInterval(timer); }
-  }, [currentUser, showError]);
+  }, [currentUser, fetchNotifications]);
 
   return (
     <NotificationContext.Provider value={ state.notifications }>
