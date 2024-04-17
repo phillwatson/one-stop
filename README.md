@@ -7,7 +7,7 @@ their bank accounts and view the transactions from multiple accounts in an
 aggregated fashion.
 
 ## Architecture
-One-Stop has been designed using an event-driven, micro-service architecture,
+One-Stop has been designed using an event-driven, microservice architecture,
 where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
@@ -118,6 +118,9 @@ In order to use the notification service, you will need to obtain an API key fro
 Brevo (previously known as Send-With-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
+# the secret used to generate and verify the XSRF token
+ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars - must be same as user service>
+
 # the Brevo (SendInBlue) Email-Service key
 ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previously Send-With-Blue)>
 
@@ -184,7 +187,7 @@ Combinations of these can be used.
 ## Debugging Docker Images
 All non-native docker images are built with remote JVM debugging enabled. In
 order to connect to the images the debug port 5005 must be exposed. Each
-container should expose a unique port - to avoid clashes.
+container should expose that internal port on a unique port - to avoid clashes.
 ```yaml
   user-service:
     image: one-stop/user-service:1.0.0-SNAPSHOT

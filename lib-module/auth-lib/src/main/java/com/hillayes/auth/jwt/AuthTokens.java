@@ -29,11 +29,19 @@ public class AuthTokens {
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
     String accessCookieName;
 
+    // the path on which access-token cookies are submitted
+    @ConfigProperty(name = "one-stop.auth.access-token.path", defaultValue = "/api")
+    String accessCookiePath;
+
     @ConfigProperty(name = "one-stop.auth.access-token.expires-in")
     Duration accessDuration;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
     String refreshCookieName;
+
+    // the path on which refresh-token cookies are submitted
+    @ConfigProperty(name = "one-stop.auth.refresh-token.path", defaultValue = "/api/v1/auth/refresh")
+    String refreshCookiePath;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
     Duration refreshDuration;
@@ -122,7 +130,7 @@ public class AuthTokens {
 
         NewCookie accessTokenCookie = new NewCookie.Builder(accessCookieName)
             .value(accessToken)
-            .path("/api")
+            .path(accessCookiePath)
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge((int)accessDuration.toSeconds())
             .expiry(Date.from(Instant.now().plus(accessDuration)))
@@ -133,7 +141,7 @@ public class AuthTokens {
 
         NewCookie refreshTokenCookie = new NewCookie.Builder(refreshCookieName)
             .value(refreshToken)
-            .path("/api/v1/auth/refresh")
+            .path(refreshCookiePath)
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge((int)refreshDuration.toSeconds())
             .expiry(Date.from(Instant.now().plus(refreshDuration)))
@@ -209,7 +217,7 @@ public class AuthTokens {
     public Response deleteCookies(Response.ResponseBuilder responseBuilder) {
         Date expires = Date.from(Instant.now());
         NewCookie accessToken = new NewCookie.Builder(accessCookieName)
-            .path("/api")
+            .path(accessCookiePath)
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge(0)
             .expiry(expires)
@@ -219,7 +227,7 @@ public class AuthTokens {
             .build();
 
         NewCookie refreshToken = new NewCookie.Builder(refreshCookieName)
-            .path("/api/v1/auth/refresh")
+            .path(refreshCookiePath)
             .version(NewCookie.DEFAULT_VERSION)
             .maxAge(0)
             .expiry(expires)
