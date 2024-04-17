@@ -75,10 +75,10 @@ services. This can be also be achieved by creating a docker-compose-override.yam
 ### User Services
 ```yaml
 # the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars>
+ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
 
 # the secret used to authenticate with Google Open-ID Connect
-ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: <the secret issued by Google>
+ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: "<the secret issued by Google>"
 
 # the secret used to authenticate with GitHub Open-ID Connect
 ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_SECRET: "<the secret issued by GitHub>"
@@ -102,15 +102,15 @@ The application also supports Yapily. Sandbox sign-up and access is free:
 https://docs.yapily.com/
 ```yaml
 # the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars - must be same as user service>
+ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
 
 # the Nordigen/GoCardless authentication keys
-ONE_STOP_RAILS_SECRET_ID: <the secret ID issued by Nordigen>
-ONE_STOP_RAILS_SECRET_KEY: <the secret issue by Nordigen>
+ONE_STOP_RAILS_SECRET_ID: "<the secret ID issued by Nordigen>"
+ONE_STOP_RAILS_SECRET_KEY: "<the secret issue by Nordigen>"
 
 # the Yapily authentication keys
-ONE_STOP_YAPILY_SECRET_ID: <the secret ID issued by Yapily>
-ONE_STOP_YAPILY_SECRET_KEY: <the secret issue by Yapily>
+ONE_STOP_YAPILY_SECRET_ID: "<the secret ID issued by Yapily>"
+ONE_STOP_YAPILY_SECRET_KEY: "<the secret issue by Yapily>"
 ```
 
 ### Notification Service
@@ -119,13 +119,13 @@ Brevo (previously known as Send-With-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
 # the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: <any string value 18+ chars - must be same as user service>
+ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
 
 # the Brevo (SendInBlue) Email-Service key
-ONE_STOP_EMAIL_API_KEY: <the secret issue by Brevo (previously Send-With-Blue)>
+ONE_STOP_EMAIL_API_KEY: "<the secret issue by Brevo (previously Send-With-Blue)>"
 
 # to disable the sending of emails - default false
-ONE_STOP_EMAIL_DISABLED: true
+ONE_STOP_EMAIL_DISABLED: "true"
 ```
 
 ## Gateway for 3rd Party Callbacks
@@ -141,11 +141,11 @@ to determine the IP address on which the router is listening (see the class
 `com.hillayes.commons.net.Network`).
 ```yaml
 # the http schema to use (http or https)
-ONE_STOP_GATEWAY_SCHEME: http
+ONE_STOP_GATEWAY_SCHEME: "http"
 
 # the port exposed on the router to the outside world
 # used by callback from 3rd party services (e.g. rails)
-ONE_STOP_GATEWAY_OPEN_PORT: 9876
+ONE_STOP_GATEWAY_OPEN_PORT: "9876"
 ```
 
 ## To Build and Start Docker Images
