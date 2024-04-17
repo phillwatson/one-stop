@@ -96,13 +96,6 @@ ONE_STOP_AUTH_OPENID_APPLE_KEY_ID: "<App key id issued by Apple>"
 ONE_STOP_AUTH_OPENID_APPLE_PRIVATE_KEY: "<the private key in PEM form>"
 ```
 
-The Cross-Site Request Forgery (XSRF) token requires a secret from which a Message
-Authentication Code (MAC) is generated.
-```yaml
-# the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
-```
-
 ### Rail Service
 The application relies upon the bank data provided by the Nordigen service
 (now owned by GoCardless). Sign-up and access is free:
