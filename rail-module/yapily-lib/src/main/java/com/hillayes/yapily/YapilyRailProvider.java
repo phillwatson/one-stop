@@ -120,6 +120,8 @@ public class YapilyRailProvider implements RailProviderApi {
             .id(consent.getId().toString())
             .institutionId(institution.getId())
             .dateCreated(consent.getCreatedAt())
+            .dateGiven(consent.getAuthorizedAt())
+            .dateExpires(consent.getExpiresAt())
             .status(AgreementStatus.INITIATED)
             .maxHistory(MAX_HISTORY)
             .agreementLink(URI.create(consent.getAuthorisationUrl()))
