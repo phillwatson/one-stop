@@ -20,7 +20,6 @@ import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
 import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
 import com.hillayes.rail.scheduled.PollConsentJobbingTask;
-import com.hillayes.yapily.model.Consent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -150,6 +149,8 @@ public class UserConsentService {
                 userConsent.setReference(reference);
                 userConsent.setMaxHistory(agreement.getMaxHistory());
                 userConsent.setAgreementExpires(agreement.getDateExpires());
+                userConsent.setDateGiven(null);
+                userConsent.setDateDenied(null);
                 userConsent.setCallbackUri(callbackUri.toString());
                 userConsent.setStatus(ConsentStatus.INITIATED);
                 userConsent = userConsentRepository.saveAndFlush(userConsent);
