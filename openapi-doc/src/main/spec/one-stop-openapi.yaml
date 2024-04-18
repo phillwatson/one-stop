@@ -1204,6 +1204,7 @@ components:
       type: object
       required:
         - id
+        - provider
         - name
         - bic
       properties:

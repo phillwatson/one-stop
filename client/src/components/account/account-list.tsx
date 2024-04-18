@@ -64,7 +64,7 @@ export default function AccountList(props: Props) {
 
   return (
     <TableContainer>
-      <Table>
+      <Table size='small'>
         <TableHead>
           <TableRow>
             <TableCell align="center" colSpan={6} sx={colhead}>Details</TableCell>
