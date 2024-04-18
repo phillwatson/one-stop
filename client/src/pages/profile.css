@@ -2,8 +2,7 @@ form {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  align-items: baseline;
-  align-content: center;
+  align-items: flex-start;
 }
 
 .panel {
@@ -14,6 +13,7 @@ form {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: center;
   margin-top: 9px;
 }

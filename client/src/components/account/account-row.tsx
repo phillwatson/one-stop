@@ -12,7 +12,6 @@ import GraphIcon from '@mui/icons-material/Equalizer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 
-import './account-list.css';
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail } from '../../model/account.model';
 import Avatar from '@mui/material/Avatar';
@@ -81,7 +80,7 @@ export default function AccountList(props: Props) {
 
   return(
     <>
-      <TableRow key={props.account.id}>
+      <TableRow key={props.account.id} >
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}
           id="account-button" onClick={toggleMenu}
           aria-haspopup="true"
@@ -90,8 +89,9 @@ export default function AccountList(props: Props) {
           <MoreVertIcon fontSize="small"/>
         </TableCell>
 
-        <TableCell size="small" padding='none' rowSpan={props.account.balance.length}>
-          <Avatar src={ props.account.institution.logo } alt="{ props.bank.name } logo" sx={{ width: "38px", height: "38px" }}></Avatar>
+        <TableCell size="small" padding='none' rowSpan={props.account.balance.length} onClick={handleSelectAccount}>
+          <Avatar src={ props.account.institution.logo } alt="{ props.bank.name } logo"
+            sx={{ margin: "3px", width: "38px", height: "38px" }}></Avatar>
         </TableCell>
 
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
