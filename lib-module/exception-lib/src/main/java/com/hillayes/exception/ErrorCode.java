@@ -51,7 +51,7 @@ public interface ErrorCode {
     enum Severity
     {
         info(ErrorSeverity.INFO),
-        warn(ErrorSeverity.WARN),
+        warning(ErrorSeverity.WARNING),
         error(ErrorSeverity.ERROR);
 
         private final ErrorSeverity apiSeverity;

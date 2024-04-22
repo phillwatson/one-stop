@@ -35,7 +35,10 @@ function notificationActionReducer(state: NotificationState, action: Notificatio
   switch (action.type) {
     case "show":   return { ...state, show: action.value };
     case 'add':    return { ...state, notifications: [ ...state.notifications, action.notification ] };
-    case 'addAll': return { ...state, notifications: [ ...state.notifications, ...action.notifications ] };
+    case 'addAll': {
+      const newEntries = action.notifications.filter(e => !state.notifications.find(n => n.id === e.id));
+      return { ...state, notifications: [ ...state.notifications, ...newEntries ] };
+    }
     case 'delete': return { ...state, notifications: state.notifications.filter(e => e.id !== action.id), show: state.show && state.notifications.length > 1 };
     default: throw Error('Unknown message action: ' + action);
   }

@@ -22,7 +22,7 @@ export default function NotificationPane(props: NotificationPaneProps) {
   }, [ props ]);
 
   return (
-    <Alert key={ props.notification.id } onClose={ handleCloseAlert } severity={ props.notification.severity }>
+    <Alert key={ props.notification.id} onClose={ handleCloseAlert } severity={ props.notification.severity }>
       <AlertTitle>{ formatDateTime(props.notification.timestamp) }: { props.notification.topic }</AlertTitle>
       {
         props.notification.message.split('\n').map((line, index) => <div key={ index }>{ line }</div>)

@@ -875,7 +875,7 @@ components:
     ErrorSeverity:
       description: An indication of the severity of a service error.
       type: string
-      enum: [info, warn, error]
+      enum: [info, warning, error]
       example: info
 
     ServiceErrorResponse:
@@ -1505,7 +1505,7 @@ components:
         severity:
           description: An indication of the severity of the notification.
           type: string
-          enum: [info, warn, error]
+          enum: [info, warning, error]
         message:
           description: The notification message to be displayed.
           type: string
