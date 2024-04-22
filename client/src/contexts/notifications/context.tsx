@@ -34,7 +34,12 @@ const NOTIFICATION_REFRESH_INTERVAL = 20 * 1000;
 function notificationActionReducer(state: NotificationState, action: NotificationAction): NotificationState {
   switch (action.type) {
     case "show":   return { ...state, show: action.value };
-    case 'add':    return { ...state, notifications: [ ...state.notifications, action.notification ] };
+    case 'add':    {
+      if (state.notifications.find(n => n.id === action.notification.id)) {
+        return state;
+      }
+      return { ...state, notifications: [ ...state.notifications, action.notification ] };
+    }
     case 'addAll': {
       const newEntries = action.notifications.filter(e => !state.notifications.find(n => n.id === e.id));
       return { ...state, notifications: [ ...state.notifications, ...newEntries ] };
