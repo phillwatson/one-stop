@@ -59,7 +59,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.9.3</quarkus.platform.version>
+        <quarkus.platform.version>3.9.4</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -69,7 +69,7 @@
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:1f152b70f833d4a0028f3da0a1b8122cdceb49728f41ec93660371aa73de2344</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.4.0</openapi-generator.version>
+        <openapi-generator.version>7.5.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -139,7 +139,7 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
-                <version>3.5.1</version>
+                <version>3.5.3</version>
             </dependency>
             <dependency>
                 <groupId>com.sendinblue</groupId>
@@ -160,7 +160,7 @@
             <dependency>
                 <groupId>com.github.kagkarlsson</groupId>
                 <artifactId>db-scheduler</artifactId>
-                <version>13.0.0</version>
+                <version>14.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
@@ -170,7 +170,7 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.77</version>
+                <version>1.78.1</version>
             </dependency>
 
             <dependency>
@@ -359,7 +359,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
