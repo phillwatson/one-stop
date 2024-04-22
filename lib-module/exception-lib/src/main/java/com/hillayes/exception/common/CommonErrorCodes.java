@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 public enum CommonErrorCodes implements ErrorCode {
     ENTITY_NOT_FOUND(Severity.info, "The identified entity cannot be found.", NOT_FOUND_STATUS),
-    PARAMETER_MISSING(Severity.warn, "The named parameter is missing from request.", BAD_REQUEST_STATUS),
-    INVALID_REQUEST_CONTENT(Severity.warn, "Invalid request content.", BAD_REQUEST_STATUS);
+    PARAMETER_MISSING(Severity.warning, "The named parameter is missing from request.", BAD_REQUEST_STATUS),
+    INVALID_REQUEST_CONTENT(Severity.warning, "Invalid request content.", BAD_REQUEST_STATUS);
 
     private final Severity severity;
     private final String message;

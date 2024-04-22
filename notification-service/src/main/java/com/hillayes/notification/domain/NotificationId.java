@@ -11,10 +11,10 @@ import com.hillayes.events.domain.Topic;
  */
 public enum NotificationId {
     CONSENT_DENIED(Topic.CONSENT, NotificationSeverity.info),
-    CONSENT_SUSPENDED(Topic.CONSENT, NotificationSeverity.warn),
-    CONSENT_EXPIRED(Topic.CONSENT, NotificationSeverity.warn),
+    CONSENT_SUSPENDED(Topic.CONSENT, NotificationSeverity.warning),
+    CONSENT_EXPIRED(Topic.CONSENT, NotificationSeverity.warning),
     CONSENT_TIMEOUT(Topic.CONSENT, NotificationSeverity.info),
-    ACCOUNT_ACTIVITY(Topic.USER, NotificationSeverity.warn);
+    ACCOUNT_ACTIVITY(Topic.USER, NotificationSeverity.warning);
 
     private final Topic topic;
     private final NotificationSeverity severity;
