@@ -179,7 +179,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             .orElse(null);
 
         // if no balance found OR the last recorded balance is older than the current balance
-        if ((lastReferenceDate == null) || (lastReferenceDate.isAfter(railAccount.getBalance().getDateTime()))) {
+        if ((lastReferenceDate == null) || (lastReferenceDate.isBefore(railAccount.getBalance().getDateTime()))) {
             accountBalanceRepository.save(AccountBalance.builder()
                 .accountId(account.getId())
                 .balanceType(railAccount.getBalance().getType())
