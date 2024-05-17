@@ -151,6 +151,11 @@ public class PollAccountJobbingTaskTest {
         List<RailTransaction> transactions = TestApiData.mockTransactionList(10);
         when(railProviderApi.listTransactions(eq(railAgreement), eq(railAccount.getId()), any())).thenReturn(transactions);
 
+        // and: balance records already exist for earlier dates
+        when(accountBalanceRepository.findMostRecentByAccountId(account.getId())).thenReturn(
+            Optional.of(AccountBalance.builder().referenceDate(Instant.now().minus(Duration.ofDays(1))).build())
+        );
+
         // when: the fixture is called to process the user-consent and account
         PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
         TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
@@ -172,7 +177,15 @@ public class PollAccountJobbingTaskTest {
         assertEquals(userConsent.getId(), account.getUserConsentId());
 
         // and: the balances are saved
-        verify(accountBalanceRepository).save(any());
+        ArgumentCaptor<AccountBalance> balanceCaptor = ArgumentCaptor.forClass(AccountBalance.class);
+        verify(accountBalanceRepository).save(balanceCaptor.capture());
+        AccountBalance accountBalance = balanceCaptor.getValue();
+
+        // and: the balance is taken from the rail account data
+        assertEquals(account.getId(), accountBalance.getAccountId());
+        assertEquals(railAccount.getBalance().getType(), accountBalance.getBalanceType());
+        assertEquals(railAccount.getBalance().getDateTime(), accountBalance.getReferenceDate());
+        assertEquals(railAccount.getBalance().getAmount(), accountBalance.getAmount());
 
         // and: the most recent transaction is queried to get start date for poll
         verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt());

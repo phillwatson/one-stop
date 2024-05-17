@@ -84,6 +84,7 @@ public class TestApiData {
             .balance(RailBalance.builder()
                 .amount(MonetaryAmount.of("GBP", nextDouble()))
                 .type(randomAlphanumeric(5))
+                .dateTime(Instant.now())
                 .build())
             .build();
 
