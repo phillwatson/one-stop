@@ -41,13 +41,24 @@ public class MonetaryAmount {
      * @param amount the amount.
      * @return a new MonetaryAmount instance.
      */
-    public static MonetaryAmount of(String currencyStr, double amount) {
+    public static MonetaryAmount of(String currencyStr, BigDecimal amount) {
         Currency currency = Currency.getInstance(currencyStr);
-        long value = BigDecimal.valueOf(amount)
+        long value = (amount == null) ? 0 : amount
             .movePointRight(currency.getDefaultFractionDigits())
             .longValue();
 
         return new MonetaryAmount(value, currency);
+    }
+
+    /**
+     * A factory method to create a new MonetaryAmount from a currency code and
+     * an amount expressed in the currency's major units.
+     * @param currencyStr the ISO 4217 currency code.
+     * @param amount the amount.
+     * @return a new MonetaryAmount instance.
+     */
+    public static MonetaryAmount of(String currencyStr, double amount) {
+        return of(currencyStr, BigDecimal.valueOf(amount));
     }
 
     /**

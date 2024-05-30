@@ -2,6 +2,8 @@ package com.hillayes.yapily.service;
 
 import com.hillayes.yapily.api.AccountsApi;
 import com.hillayes.yapily.model.Account;
+import com.hillayes.yapily.model.AccountAuthorisationRequest;
+import com.hillayes.yapily.model.ApiResponseOfAccountAuthorisationResponse;
 import com.hillayes.yapily.model.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,9 +21,16 @@ import java.util.Optional;
 @ApplicationScoped
 @Slf4j
 public class AccountsService extends AbstractRailService {
+    private static final int TRANSACTION_PAGE_SIZE = 999;
+
     @Inject
     @RestClient
     AccountsApi accountsApi;
+
+    public ApiResponseOfAccountAuthorisationResponse createAccountAuthorisation(AccountAuthorisationRequest request) {
+        log.debug("Creating account authorisation [institution: {}]", request.getInstitutionId());
+        return accountsApi.createAccountAuthorisation(request);
+    }
 
     public List<Account> getAccounts(String consentToken) {
         log.debug("Retrieving accounts");
@@ -50,13 +59,13 @@ public class AccountsService extends AbstractRailService {
         List<Transaction> data;
         do {
             data = accountsApi.getTransactions(consentToken, accountId,
-                start, now, offset, 999, null, "date").getData();
+                start, now, offset, TRANSACTION_PAGE_SIZE, null, "date").getData();
             if ((data == null) || (data.isEmpty())) {
                 break;
             }
             result.addAll(data);
-            offset += 999;
-        } while (data.size() == 999);
+            offset += TRANSACTION_PAGE_SIZE;
+        } while (data.size() == TRANSACTION_PAGE_SIZE);
         return result;
     }
 }

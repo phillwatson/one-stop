@@ -16,6 +16,28 @@ import java.time.Instant;
 @ApplicationScoped
 public interface AccountsApi {
     /**
+     * Used to initiate the authorisation process and direct users to the login screen of their
+     * financial institution in order to give consent to access account data.
+     *
+     * <ol>
+     *     <li>Select institution</li>
+     *     <li>Create Account Authorisation</li>
+     *     <li>Record the auth request in a database record</li>
+     *     <li>Generate callback URL with DB record id</li>
+     *     <li>Redirect user to the authorisation URL in the response - incl callback URL</li>
+     *     <li>Listen on callback URL</li>
+     *     <li>Looking up auth request record using ID in the callback url</li>
+     *     <li>Record the consent token from the callback body</li>
+     * </ol>
+     *
+     * @param request
+     * @return
+     */
+    @POST
+    @Path("/account-auth-requests")
+    public ApiResponseOfAccountAuthorisationResponse createAccountAuthorisation(AccountAuthorisationRequest request);
+
+    /**
      * Get accounts.
      *
      * @param consentToken The `consent-token` containing the user's authorisation to make the request.
