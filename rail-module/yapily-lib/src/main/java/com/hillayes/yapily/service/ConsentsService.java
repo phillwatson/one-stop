@@ -5,7 +5,6 @@ import com.hillayes.yapily.model.ApiResponseOfConsent;
 import com.hillayes.yapily.model.Consent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

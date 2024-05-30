@@ -37,12 +37,6 @@ public class YapilyRailProvider implements RailProviderApi {
     @Inject
     InstitutionsService institutionsService;
 
-    @Inject
-    UsersService usersService;
-
-    @Inject
-    AuthorisationsService authorisationsService;
-
     @Override
     public RailProvider getProviderId() {
         return RailProvider.YAPILY;
@@ -104,7 +98,7 @@ public class YapilyRailProvider implements RailProviderApi {
             .applicationUserId(userId.toString())
             .addForwardParametersItem("ref:" + reference);
 
-        ApiResponseOfAccountAuthorisationResponse response = authorisationsService.createAccountAuthorisation(request);
+        ApiResponseOfAccountAuthorisationResponse response = accountsService.createAccountAuthorisation(request);
         AccountAuthorisationResponse consent = response.getData();
         if (consent == null) {
             throw new NullPointerException("No consent returned in authorisation response");
@@ -121,7 +115,7 @@ public class YapilyRailProvider implements RailProviderApi {
             .institutionId(institution.getId())
             .dateCreated(consent.getCreatedAt())
             .dateGiven(consent.getAuthorizedAt())
-            .dateExpires(consent.getExpiresAt())
+            .dateExpires(consent.getExpiresAt() == null ? consent.getReconfirmBy() : consent.getExpiresAt())
             .status(AgreementStatus.INITIATED)
             .maxHistory(MAX_HISTORY)
             .agreementLink(URI.create(consent.getAuthorisationUrl()))
@@ -189,19 +183,23 @@ public class YapilyRailProvider implements RailProviderApi {
     @Override
     public boolean deleteAgreement(String id) {
         log.debug("Deleting agreement [id: {}]", id);
-        return consentsService.getConsent(id)
-            .map(consent -> {
-                // delete the consent
-                consentsService.deleteConsent(id);
 
-                // if user has no more consents, delete user
-                // TODO: deleting user will prevent user subsequent registrations
-                //  if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
-                //      usersService.deleteUser(consent.getUserUuid());
-                //  }
-                return true;
-            })
-            .orElse(false);
+        // TODO: deleting user will prevent user subsequent registrations
+        //return consentsService.getConsent(id)
+        //    .map(consent -> {
+        //        // delete the consent
+        //        consentsService.deleteConsent(id);
+        //
+        //        // if user has no more consents, delete user
+        //        //  if (consentsService.listConsents(consent.getUserUuid()).isEmpty()) {
+        //        //      usersService.deleteUser(consent.getUserUuid());
+        //        //  }
+        //        return true;
+        //    })
+        //    .orElse(false);
+
+        // TODO: simply delete the consent
+        return consentsService.deleteConsent(id);
     }
 
     @Override
@@ -233,7 +231,7 @@ public class YapilyRailProvider implements RailProviderApi {
                 .originalTransactionId(Strings.getOrDefault(transaction.getTransactionMutability(), transaction.getReference()))
                 .dateBooked(transaction.getBookingDateTime())
                 .dateValued(transaction.getValueDateTime())
-                .amount(MonetaryAmount.of(transaction.getCurrency(), transaction.getAmount().doubleValue()))
+                .amount(MonetaryAmount.of(transaction.getCurrency(), transaction.getAmount()))
                 .description(transaction.getDescription())
                 .reference(transaction.getReference())
                 .creditor(transaction.getPayeeDetails() == null ? null : transaction.getPayeeDetails().getName())
@@ -343,8 +341,8 @@ public class YapilyRailProvider implements RailProviderApi {
         return institution.getMedia().stream()
             .filter(media -> media.getSource() != null)
             .filter(media -> "ICON".equalsIgnoreCase(media.getType()))
-            .map(Media::getSource)
-            .findFirst();
+            .findFirst()
+            .map(Media::getSource);
     }
 
     private String getIBAN(Account account) {
@@ -354,8 +352,8 @@ public class YapilyRailProvider implements RailProviderApi {
 
         return account.getAccountIdentifications().stream()
             .filter(identification -> AccountIdentificationType.IBAN.equals(identification.getType()))
-            .map(AccountIdentification::getIdentification)
             .findFirst()
+            .map(AccountIdentification::getIdentification)
             .orElse(null);
     }
 }

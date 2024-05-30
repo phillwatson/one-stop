@@ -14,6 +14,21 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @ApplicationScoped
 public interface PaymentsApi {
     /**
+     * Used to initiate the authorisation process and direct users to the login screen of their
+     * financial Institution in order to give their consent for a payment. This endpoint is used
+     * to initiate all the different payments. Based on the type of payment you wish to make,
+     * you may be required to provide specific properties in PaymentRequest. First make sure that
+     * the payment feature you wish to execute is supported by the bank by checking the features
+     * array in InstitutionsApi.getInstitution(String).
+     *
+     * @param request
+     * @return
+     */
+    @POST
+    @Path("/payment-auth-requests")
+    public ApiResponseOfPaymentAuthorisationRequestResponse createPaymentAuthorisation(PaymentAuthorisationRequest request);
+
+    /**
      * Creates a payment after obtaining the user's authorisation.
      *
      * @param consentToken The consent-token containing the user's authorisation to make the request.
