@@ -154,6 +154,12 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             .map(account -> {
                 // this may be a new consent record for an expired/suspended consent
                 account.setUserConsentId(userConsent.getId());
+
+                // refresh account details
+                account.setAccountName(railAccount.getName());
+                account.setAccountType(railAccount.getAccountType());
+                account.setIban(railAccount.getIban());
+                account.setOwnerName(railAccount.getOwnerName());
                 return account;
             })
             .orElseGet(() -> accountRepository.save(Account.builder()
@@ -162,10 +168,10 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
                 .railAccountId(railAccount.getId())
                 .institutionId(userConsent.getInstitutionId())
                 .accountName(railAccount.getName())
+                .accountType(railAccount.getAccountType())
                 .iban(railAccount.getIban())
                 .ownerName(railAccount.getOwnerName())
                 .currency(railAccount.getCurrency())
-                .accountType(railAccount.getAccountType())
                 .build())
             );
     }
