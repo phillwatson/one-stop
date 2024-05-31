@@ -51,15 +51,19 @@ public class Account {
     @Column(name = "rail_account_id", nullable = false)
     private String railAccountId;
 
+    @Setter
     @Column(name = "iban", nullable = true)
     private String iban;
 
+    @Setter
     @Column(name = "account_name", nullable = true)
     private String accountName;
 
+    @Setter
     @Column(name = "account_type", nullable = true)
     private String accountType;
 
+    @Setter
     @Column(name = "owner_name", nullable = true)
     private String ownerName;
 
