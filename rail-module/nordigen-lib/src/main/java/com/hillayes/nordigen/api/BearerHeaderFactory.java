@@ -3,6 +3,7 @@ package com.hillayes.nordigen.api;
 import com.hillayes.nordigen.model.ObtainJwtResponse;
 import com.hillayes.nordigen.model.RefreshJwtResponse;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -21,6 +22,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  * If the access token has expired, the refresh token will be used to obtain
  * a new one.
  */
+@Singleton
 @Slf4j
 public class BearerHeaderFactory implements ClientHeadersFactory {
     // settings default so that this lib can be imported into other libs without this setting
@@ -50,25 +52,36 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
 
     private String getAccessToken() {
         if (accessToken == null) {
-            log.info("Get new access and refresh token [secretId: {}]", SECRET_ID);
-            ObtainJwtResponse response = authApi.newToken(SECRET_ID, SECRET_KEY);
-            accessToken = new Token(response.getAccess(), response.getAccessExpires());
-            refreshToken = new Token(response.getRefresh(), response.getRefreshExpires());
-            log.debug("Access and refresh token retrieved [secretId: {}]", SECRET_ID);
+            synchronized (this) {
+                if (accessToken == null) {
+                    log.info("Get new access and refresh token [secretId: {}]", SECRET_ID);
+                    ObtainJwtResponse response = authApi.newToken(SECRET_ID, SECRET_KEY);
+                    Token access = new Token(response.getAccess(), response.getAccessExpires());
+                    Token refresh = new Token(response.getRefresh(), response.getRefreshExpires());
+                    log.debug("Access and refresh token retrieved [secretId: {}]", SECRET_ID);
+
+                    refreshToken = refresh;
+                    accessToken = access;
+                }
+            }
         }
 
         else if (accessToken.hasExpired()) {
-            if (refreshToken.hasExpired()) {
-                log.info("Refresh token expired [secretId: {}]", SECRET_ID);
-                // obtain new token pair
-                accessToken = null;
-                refreshToken = null;
-                return getAccessToken();
-            }
+            synchronized (this) {
+                if (accessToken.hasExpired()) {
+                    if (refreshToken.hasExpired()) {
+                        log.info("Refresh token expired [secretId: {}]", SECRET_ID);
+                        // obtain new token pair
+                        accessToken = null;
+                        refreshToken = null;
+                        return getAccessToken();
+                    }
 
-            log.info("Refresh access token [secretId: {}]", SECRET_ID);
-            RefreshJwtResponse response = authApi.refreshToken(refreshToken.token);
-            accessToken = new Token(response.access, response.accessExpires);
+                    log.info("Refresh access token [secretId: {}]", SECRET_ID);
+                    RefreshJwtResponse response = authApi.refreshToken(refreshToken.token);
+                    accessToken = new Token(response.access, response.accessExpires);
+                }
+            }
         }
 
         return accessToken.token;
@@ -82,11 +95,11 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
 
         Token(String token, Integer expiresInSecs) {
             this.token = token;
-            this.expires = System.currentTimeMillis() + (expiresInSecs * 1000);
+            this.expires = System.currentTimeMillis() + (expiresInSecs * 1000) - EXPIRY_TOLERANCE;
         }
 
         public boolean hasExpired() {
-            return expires <= System.currentTimeMillis() - EXPIRY_TOLERANCE;
+            return expires <= System.currentTimeMillis();
         }
     }
 }
