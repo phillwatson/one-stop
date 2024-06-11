@@ -45,7 +45,7 @@ export default function TransactionList(props: Props) {
         { transactions.map(transaction => (
           <TableRow key={transaction.id}>
             <TableCell>{ formatDate(transaction.bookingDateTime) }</TableCell>
-            <TableCell>{ transaction.reference }</TableCell>
+            <TableCell>{ transaction.additionalInformation || transaction.reference }</TableCell>
             <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
             <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>
           </TableRow>
