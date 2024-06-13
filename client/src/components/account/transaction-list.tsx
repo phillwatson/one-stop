@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import "./transaction-list.css";
-import { DataGrid, GridColDef, GridFilterOperator, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel } from '@mui/x-data-grid';
 
 import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionDetail } from "../../model/account.model";
@@ -22,8 +22,8 @@ const columns: GridColDef[] = [
     headerName: 'Date',
     width: 110,
     filterOperators: getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter'),
-    valueFormatter: (value: string, row: TransactionDetail) => formatDate(value),
-    valueGetter: (value: string, row: TransactionDetail) => new Date(value)
+    valueFormatter: (value: string) => formatDate(value),
+    valueGetter: (value: string) => new Date(value)
   },
   {
     field: 'additionalInformation',
@@ -66,7 +66,7 @@ const columns: GridColDef[] = [
     align: 'right',
     width: 130,
     filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
-    valueFormatter: (value: any, row: TransactionDetail) => row.amount > 0 ? CurrencyService.format(row.amount, row.currency) : '',
+    valueFormatter: (value: any, row: TransactionDetail) => row.amount >= 0 ? CurrencyService.format(row.amount, row.currency) : '',
     valueGetter: (value: any, row: TransactionDetail) => row.amount
   },
 ];
