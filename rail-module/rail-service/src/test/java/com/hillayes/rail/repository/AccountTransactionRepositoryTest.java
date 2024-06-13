@@ -7,6 +7,7 @@ import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -19,6 +20,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -152,6 +154,55 @@ public class AccountTransactionRepositoryTest {
     }
 
     @Test
+    public void testFilterAdditionalInfo() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: several linked accounts
+        List<Account> accounts = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Account account = accountRepository.save(mockAccount(consent));
+            accounts.add(account);
+
+            // and: a list of transactions
+            List<AccountTransaction> transactions = new ArrayList<>();
+            IntStream.range(0, 5).forEach(index ->
+                transactions.add(TestData.mockAccountTransaction(transaction -> {
+                    transaction.id(null);
+                    transaction.accountId(account.getId());
+                    transaction.userId(account.getUserId());
+                    transaction.additionalInformation("Transaction " + index);
+                }))
+            );
+
+            fixture.saveAll(transactions);
+            fixture.flush();
+        }
+
+        // when: the transactions are returned by date range for each account
+        accounts.forEach(account -> {
+            TransactionFilter filter = TransactionFilter.builder()
+                .accountId(account.getId())
+                .info("Transaction 2")
+                .build();
+            Page<AccountTransaction> result =
+                fixture.findByFilter(account.getUserId(), filter, 0, 100);
+
+            // then: the results contain the transaction with the date range
+            assertFalse(result.isEmpty());
+            assertEquals(1, result.getContentSize());
+
+            // and: each transaction belongs to the identified account
+            result.forEach(transaction -> assertEquals(account.getId(), transaction.getAccountId()));
+
+            // and: the transactions are within the date range
+            result.forEach(transaction -> {
+                assertEquals("Transaction 2", transaction.getAdditionalInformation());
+            });
+        });
+    }
+
+    @Test
     public void testPagination() {
         // given: a user-consent
         UserConsent consent = userConsentRepository.save(mockUserConsent());
@@ -241,12 +292,13 @@ public class AccountTransactionRepositoryTest {
     }
 
     private AccountTransaction mockTransaction(Account account, LocalDate bookingDate) {
-        return AccountTransaction.builder()
-            .userId(account.getUserId())
-            .accountId(account.getId())
-            .internalTransactionId(UUID.randomUUID().toString())
-            .bookingDateTime(bookingDate.atStartOfDay(ZoneOffset.UTC).toInstant())
-            .amount(MonetaryAmount.of("GBP", 123.33))
-            .build();
+        return TestData.mockAccountTransaction(transaction -> {
+            transaction.id(null);
+            transaction.userId(account.getUserId());
+            transaction.accountId(account.getId());
+            transaction.internalTransactionId(UUID.randomUUID().toString());
+            transaction.bookingDateTime(bookingDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            transaction.amount(MonetaryAmount.of("GBP", 123.33));
+        });
     }
 }
