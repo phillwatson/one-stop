@@ -1,11 +1,8 @@
 package com.hillayes.rail.repository;
 
-import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.Page;
-import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.TestTransaction;
@@ -270,25 +267,17 @@ public class AccountTransactionRepositoryTest {
     }
 
     private UserConsent mockUserConsent() {
-        return UserConsent.builder()
-            .provider(RailProvider.NORDIGEN)
-            .reference(UUID.randomUUID().toString())
-            .userId(UUID.randomUUID())
-            .institutionId(UUID.randomUUID().toString())
-            .agreementId(UUID.randomUUID().toString())
-            .agreementExpires(Instant.now().plus(Duration.ofDays(20)))
-            .maxHistory(80)
-            .status(ConsentStatus.GIVEN)
-            .build();
+        return TestData.mockUserConsent(UUID.randomUUID(), consent -> {
+            consent.id(null);
+        });
     }
 
     private Account mockAccount(UserConsent consent) {
-        return Account.builder()
-            .userConsentId(consent.getId())
-            .userId(consent.getUserId())
-            .institutionId(consent.getInstitutionId())
-            .railAccountId(UUID.randomUUID().toString())
-            .build();
+        return TestData.mockAccount(consent.getUserId(), account -> {
+            account.id(null);
+            account.userConsentId(consent.getId());
+            account.institutionId(consent.getInstitutionId());
+        });
     }
 
     private AccountTransaction mockTransaction(Account account, LocalDate bookingDate) {
@@ -296,9 +285,7 @@ public class AccountTransactionRepositoryTest {
             transaction.id(null);
             transaction.userId(account.getUserId());
             transaction.accountId(account.getId());
-            transaction.internalTransactionId(UUID.randomUUID().toString());
             transaction.bookingDateTime(bookingDate.atStartOfDay(ZoneOffset.UTC).toInstant());
-            transaction.amount(MonetaryAmount.of("GBP", 123.33));
         });
     }
 }
