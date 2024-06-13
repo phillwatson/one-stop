@@ -16,7 +16,7 @@ public class InstantConverter implements ParamConverter<Instant> {
             }
         } catch (DateTimeParseException e) {
         }
-        return null;
+        throw new IllegalArgumentException("Invalid Instant date time format: " + value);
     }
 
     public String toString(Instant value){

@@ -50,7 +50,7 @@ public class TransactionFilter {
     public TransactionFilter dateRange(LocalDate from, LocalDate to) {
         // convert dates to instant
         fromDate = (from == null) ? null : from.atStartOfDay(ZoneOffset.UTC).toInstant();
-        toDate = (to == null) ? null : to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        toDate = (to == null) ? null : to.atStartOfDay(ZoneOffset.UTC).toInstant();
         return this;
     }
 }

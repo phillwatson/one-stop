@@ -1,0 +1,7 @@
+.colhead {
+  font-weight: bolder;
+}
+
+.grid {
+  height: calc(100vh - 270px);
+}

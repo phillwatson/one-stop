@@ -12,3 +12,16 @@ export default interface PaginatedList<T> {
   }
   items: Array<T>
 }
+
+export const EMPTY_PAGINATED_LIST = {
+  total: 0,
+  totalPages: 0,
+  count: 0,
+  page: 0,
+  pageSize: 0,
+  links: {
+    first: '',
+    last: ''
+  },
+  items: []
+}

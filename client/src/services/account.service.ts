@@ -15,10 +15,10 @@ class AccountService {
       .then(response => response.data);
   }
 
-  getTransactions(accountId: string, page: number = 0, pageSize = 25): Promise<PaginatedList<TransactionDetail>> {
+  getTransactions(accountId: string, page: number = 0, pageSize = 25, filters: any = {}): Promise<PaginatedList<TransactionDetail>> {
     console.log(`Retrieving account transactions [id: ${accountId}, page: ${page}, pageSize: ${pageSize}]`);
     return http.get<PaginatedList<TransactionDetail>>('/rails/transactions',
-     { params: { "account-id": accountId, "page": page, "page-size": pageSize }})
+     { params: { "account-id": accountId, "page": page, "page-size": pageSize, ...filters} })
      .then(response => response.data);
   }
 

@@ -16,7 +16,7 @@ public class LocalDateConverter implements ParamConverter<LocalDate> {
             }
         } catch (DateTimeParseException e) {
         }
-        return null;
+        throw new IllegalArgumentException("Invalid Local date time format: " + value);
     }
 
     public String toString(LocalDate value){

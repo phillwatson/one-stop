@@ -12,3 +12,7 @@ export function formatDateTime(dateStr?: string): string {
   if (!dateStr) return "";
   return formatDate(dateStr) + ' ' + formatTime(dateStr);
 }
+
+export function toISODate(date: Date): string {
+  return date.toISOString().substring(0, 10);
+}

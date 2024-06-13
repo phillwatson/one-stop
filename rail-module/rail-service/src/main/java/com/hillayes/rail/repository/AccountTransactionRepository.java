@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
@@ -48,22 +49,22 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         }
         if (filter.getMinAmount() != null) {
             query.append(" AND amount >= :minAmount");
-            params.put("minAmount", filter.getMinAmount());
+            params.put("minAmount", MonetaryAmount.of("GBP", filter.getMinAmount()));
         }
         if (filter.getMaxAmount() != null) {
             query.append(" AND amount <= :maxAmount");
-            params.put("maxAmount", filter.getMaxAmount());
+            params.put("maxAmount", MonetaryAmount.of("GBP", filter.getMaxAmount()));
         }
         if (filter.getReference() != null) {
             query.append(" AND reference like :reference");
             params.put("reference", "%" + filter.getReference() + "%");
         }
         if (filter.getInfo() != null) {
-            query.append(" AND additional_information like :info");
+            query.append(" AND additionalInformation like :info");
             params.put("info", "%" + filter.getInfo() + "%");
         }
         if (filter.getCreditor() != null) {
-            query.append(" AND creditor_name like :creditor");
+            query.append(" AND creditorName like :creditor");
             params.put("creditor", "%" + filter.getCreditor() + "%");
         }
 
