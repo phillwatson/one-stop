@@ -6,6 +6,7 @@ form {
 }
 
 .panel {
+  align-self: center;
   margin-top: 9px;
 }
 
@@ -25,6 +26,6 @@ form {
   max-width: 600px;
 }
 
-.grid {
+.bordered {
   border: 1px solid #e0e0e0;
 }

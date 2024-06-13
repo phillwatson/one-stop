@@ -73,8 +73,8 @@ export default function UpdateProfile() {
             </div>
           </div>
           <div className="splitpanel">
-            <div className="box grid"><AuthProviderList/></div>
-            <div className="box grid"><UserConsentList/></div>
+            <div className="box bordered"><AuthProviderList/></div>
+            <div className="box bordered"><UserConsentList/></div>
           </div>
         </div>
         <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
