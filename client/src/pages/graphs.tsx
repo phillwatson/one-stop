@@ -7,6 +7,7 @@ import { AccountDetail } from "../model/account.model";
 
 import AccountHeader from "../components/account/account-header";
 import BarGraph from "../components/graph/bar-graph";
+import PageHeader from "../components/page-header/page-header";
 
 export default function Graph() {
   const { accountId } = useParams();
@@ -26,12 +27,12 @@ export default function Graph() {
   const toDate = new Date();
 
   return (
-    <div>
+    <PageHeader title="Account Graphs" >
       { account &&
-        <AccountHeader title="Account Graphs" account={ account }>
+        <AccountHeader account={ account }>
           <BarGraph account={ account } fromDate={ fromDate } toDate={ toDate }/>
         </AccountHeader>
       }
-    </div>
+    </PageHeader>
   );
 }

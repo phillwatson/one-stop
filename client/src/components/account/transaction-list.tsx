@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 
-import "./transaction-list.css";
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel } from '@mui/x-data-grid';
 
 import AccountService from '../../services/account.service';
@@ -9,7 +8,6 @@ import CurrencyService from '../../services/currency.service';
 import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate, toISODate } from "../../util/date-util";
 import PaginatedList, { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
-import Box from "@mui/material/Box/Box";
 
 interface Props {
   account: AccountDetail;
@@ -127,14 +125,12 @@ export default function TransactionList(props: Props) {
     }, [props.account.id, paginationModel.page, paginationModel.pageSize, queryOptions, showMessage]);
 
   return (
-    <Box className="grid">
       <DataGrid rows={transactions.items} rowCount={transactions.total} columns={columns} 
-        autoHeight density="compact" disableDensitySelector
+        density="compact" disableDensitySelector
         loading={loading} slots={{ toolbar: GridToolbar }}
         pagination paginationModel={paginationModel}
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={setPaginationModel}
         filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}/>
-    </Box>
   )
 }

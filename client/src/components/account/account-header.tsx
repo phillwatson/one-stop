@@ -11,15 +11,12 @@ import Avatar from '@mui/material/Avatar';
 import { AccountDetail } from "../../model/account.model";
 
 interface Props extends PropsWithChildren {
-  title: string;
   account: AccountDetail;
 }
 
 export default function AccountHeader(props: Props) {
   return (
     <div>
-      <h2>{ props.title }</h2>
-      <hr></hr>
       { props.account &&
         <TableContainer>
           <Table size="small">

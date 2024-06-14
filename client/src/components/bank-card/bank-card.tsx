@@ -5,7 +5,7 @@ import Avatar from '@mui/material/Avatar';
 import Institution from '../../model/institution.model';
 import UserConsent from '../../model/user-consent.model';
 
-import './bank-card.css';
+import styles from './bank-card.module.css';
 
 interface Props {
   institution: Institution;
@@ -18,9 +18,7 @@ const RENEWABLE_STATUSES = ["EXPIRED", "SUSPENDED", "DENIED", "TIMEOUT", "CANCEL
 
 export default function BankCard(props: Props) {
   const enabled = props.consent === undefined || RENEWABLE_STATUSES.includes(props.consent.status);
-  const css = "card " + (enabled ? "enabled" : "disabled");
   const label = props.institution.bic + (props.consent === undefined ? "" : ": " + props.consent?.status);
-
 
   function handleConnectToBank(institution: Institution) {
     if ((enabled) && (props.onLinkSelect !== undefined)) {
@@ -29,7 +27,7 @@ export default function BankCard(props: Props) {
   }
 
   return (
-    <Card className={css} elevation={enabled ? 7 : 1}>
+    <Card className={`${styles.card} (enabled ? "enabled" : "disabled")`} elevation={enabled ? 7 : 1}>
       <CardHeader 
         avatar={ <Avatar aria-label={ props.institution.name } src={ props.institution.logo } /> }
         title={ props.institution.name } subheader={ label }
