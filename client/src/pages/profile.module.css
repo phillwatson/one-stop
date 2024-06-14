@@ -1,4 +1,4 @@
-form {
+.profile {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -7,20 +7,17 @@ form {
 
 .panel {
   align-self: center;
-  margin-top: 9px;
 }
 
 .splitpanel {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  align-items: flex-start;
   justify-content: center;
-  margin-top: 9px;
 }
 
 .box {
-  margin: 9px 3px 0 3px;
+  margin: 9px;
   width: 100%;
   min-width: 600px;
   max-width: 600px;

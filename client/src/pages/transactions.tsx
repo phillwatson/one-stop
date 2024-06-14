@@ -6,6 +6,7 @@ import { AccountDetail } from "../model/account.model";
 import { useMessageDispatch } from "../contexts/messages/context";
 import TransactionList from "../components/account/transaction-list";
 import AccountHeader from "../components/account/account-header";
+import PageHeader from "../components/page-header/page-header";
 
 export default function Transactions() {
   const { accountId } = useParams();
@@ -22,12 +23,12 @@ export default function Transactions() {
   }, [accountId, showMessage]);
 
   return (
-    <div>
+    <PageHeader title="Account Transactions" >
       { account &&
-        <AccountHeader title="Account Transactions" account={ account }>
+        <AccountHeader account={ account }>
             <TransactionList account={account} />
         </AccountHeader>
       }
-    </div>
+    </PageHeader>
   );
 }

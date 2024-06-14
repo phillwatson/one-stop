@@ -8,6 +8,7 @@ import AccountList from "../components/account/account-list";
 import Institutions from "../components/add-institution/add-institution";
 import { useSearchParams } from "react-router-dom";
 import { useMessageDispatch } from "../contexts/messages/context";
+import PageHeader from "../components/page-header/page-header";
 
 const bottomFabStyle: SxProps = {
   position: 'fixed',
@@ -34,13 +35,11 @@ export default function Accounts() {
   }, []);
 
   return (
-    <div>
-      <h2>Accounts</h2>
-      <hr></hr>
+    <PageHeader title="Accounts">
       <AccountList accounts={accounts}/>
 
       <Fab color="primary" aria-label="add" sx={bottomFabStyle} onClick={() => setShowInstitutions(true)}><AddIcon /></Fab>
       <Institutions open={showInstitutions} onClose={() => setShowInstitutions(false)}></Institutions>
-    </div>
+    </PageHeader>
   );
 }

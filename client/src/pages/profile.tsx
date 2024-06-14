@@ -10,7 +10,8 @@ import UserProfile from "../model/user-profile.model";
 import UserConsentList from "../components/consents/user-consents";
 import AuthProviderList from "../components/auth-providers/auth-provider-list";
 
-import "./profile.css";
+import styles from "./profile.module.css";
+import PageHeader from "../components/page-header/page-header";
 
 const emptyProfile: UserProfile = {
   id: undefined, 
@@ -62,23 +63,21 @@ export default function UpdateProfile() {
   }
 
   return (
-    <div>
-      <h2>Profile information</h2>
-      <hr></hr>
-      <form onSubmit={ handleSubmit }>
-        <div className="panel">
-          <div className="splitpanel">
-            <div className="box">
+    <PageHeader title="Profile information" >
+      <form className={ styles.profile } onSubmit={ handleSubmit }>
+        <div className={ styles.panel }>
+          <div className={ styles.splitpanel }>
+            <div className={ styles.box }>
             <UserProfileForm profile={ profile } setter={ setProfile }/>
             </div>
           </div>
-          <div className="splitpanel">
-            <div className="box bordered"><AuthProviderList/></div>
-            <div className="box bordered"><UserConsentList/></div>
+          <div className={ styles.splitpanel }>
+            <div className={ `${styles.box} ${styles.bordered}` }><AuthProviderList/></div>
+            <div className={ `${styles.box} ${styles.bordered}` }><UserConsentList/></div>
           </div>
         </div>
         <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
       </form>
-    </div>
+    </PageHeader>
   );
 }

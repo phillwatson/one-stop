@@ -2,7 +2,7 @@ import Institution from '../../model/institution.model';
 import BankCard from '../bank-card/bank-card'
 import UserConsent from '../../model/user-consent.model';
 
-import './bank-list.css';
+import styles from './bank-list.module.css';
 
 interface Props {
     institutions: Array<Institution> | undefined;
@@ -18,7 +18,7 @@ export default function BankList(props: Props) {
   }
 
   return (
-    <span className="bank-list">
+    <span className={ styles.bank_list }>
       { props.institutions && props.institutions
         .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
         .map((institution, index: number) =>
