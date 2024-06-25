@@ -204,9 +204,10 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             // we then use that as the start date for our rails request for transactions
             OrderBy sort = OrderBy.by("bookingDateTime").descending();
             TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
                 .accountId(account.getId())
                 .build();
-            startDate = accountTransactionRepository.findByFilter(account.getUserId(), filter, 0, 1)
+            startDate = accountTransactionRepository.findByFilter(filter, 0, 1)
                 .stream().findFirst()
                 .map(transaction -> LocalDate.ofInstant(transaction.getBookingDateTime(), ZoneOffset.UTC)) // take date of most recent transaction
                 .orElse(LocalDate.now().minusDays(railAgreement.getMaxHistory())); // or calculate date if no transactions found

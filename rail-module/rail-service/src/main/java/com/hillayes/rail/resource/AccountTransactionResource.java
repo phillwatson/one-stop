@@ -45,6 +45,7 @@ public class AccountTransactionResource {
             userId, accountId, fromDate, toDate);
 
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(userId)
             .accountId(accountId)
             .minAmount(minAmount)
             .maxAmount(maxAmount)
@@ -55,7 +56,7 @@ public class AccountTransactionResource {
             .dateRange(fromDate, toDate);
 
         Page<AccountTransaction> transactionsPage =
-            accountTransactionService.getTransactions(userId, filter, page, pageSize);
+            accountTransactionService.getTransactions(filter, page, pageSize);
 
         PaginatedTransactions response = new PaginatedTransactions()
             .page(transactionsPage.getPageIndex())

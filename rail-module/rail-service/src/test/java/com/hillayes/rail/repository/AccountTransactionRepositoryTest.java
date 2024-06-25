@@ -53,9 +53,10 @@ public class AccountTransactionRepositoryTest {
 
         // when: the most recent transaction by bookingDate is queried
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .build();
-        Page<AccountTransaction> result = fixture.findByFilter(account.getUserId(), filter, 0, 1);
+        Page<AccountTransaction> result = fixture.findByFilter(filter, 0, 1);
 
         // then: the result contains only the most recent transaction
         assertEquals(1, result.getContentSize());
@@ -82,12 +83,13 @@ public class AccountTransactionRepositoryTest {
 
         // when: the transactions are returned by date range
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(consent.getUserId())
             .accountId(account.getId())
             .fromDate(Instant.now().minus(Duration.ofDays(21)))
             .toDate(Instant.now())
             .build();
         Page<AccountTransaction> result =
-            fixture.findByFilter(consent.getUserId(), filter, 0, 10 );
+            fixture.findByFilter(filter, 0, 10 );
 
         // then: the results contain the transaction with the date range
         assertFalse(result.isEmpty());
@@ -128,12 +130,13 @@ public class AccountTransactionRepositoryTest {
         // when: the transactions are returned by date range for each account
         accounts.forEach(account -> {
             TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
                 .accountId(account.getId())
                 .fromDate(Instant.now().minus(Duration.ofDays(21)))
                 .toDate(Instant.now())
                 .build();
             Page<AccountTransaction> result =
-                fixture.findByFilter(account.getUserId(), filter, 0, 100);
+                fixture.findByFilter(filter, 0, 100);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());
@@ -179,11 +182,12 @@ public class AccountTransactionRepositoryTest {
         // when: the transactions are returned by date range for each account
         accounts.forEach(account -> {
             TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
                 .accountId(account.getId())
                 .info("Transaction 2")
                 .build();
             Page<AccountTransaction> result =
-                fixture.findByFilter(account.getUserId(), filter, 0, 100);
+                fixture.findByFilter(filter, 0, 100);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());
@@ -220,9 +224,10 @@ public class AccountTransactionRepositoryTest {
 
         // when: the first page transactions are returned by account ID
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .build();
-        Page<AccountTransaction> page = fixture.findByFilter(account.getUserId(), filter, 0, 3);
+        Page<AccountTransaction> page = fixture.findByFilter(filter, 0, 3);
 
         // then: the first page transactions are returned by account ID
         assertNotNull(page);
@@ -233,7 +238,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the second page transactions are returned by account ID
-        page = fixture.findByFilter(account.getUserId(), filter, 1, 3);
+        page = fixture.findByFilter(filter, 1, 3);
 
         // then: the second page transactions are returned by account ID
         assertNotNull(page);
@@ -244,7 +249,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the last page transactions are returned by account ID
-        page = fixture.findByFilter(account.getUserId(), filter, 2, 3);
+        page = fixture.findByFilter(filter, 2, 3);
 
         // then: the last page transactions are returned by account ID
         assertNotNull(page);
@@ -255,7 +260,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the page above the last is selected
-        page = fixture.findByFilter(account.getUserId(), filter, 12, 3);
+        page = fixture.findByFilter(filter, 12, 3);
 
         // then: the page above the last is selected
         assertNotNull(page);
