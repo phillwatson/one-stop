@@ -31,7 +31,7 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         String query = filter.toQuery();
         Map<String, Object> params = filter.toParams();
 
-        return pageAll(query.toString(), page, pageSize,
+        return pageAll(query, page, pageSize,
             OrderBy.by("bookingDateTime", OrderBy.Direction.Descending), params);
     }
 }
