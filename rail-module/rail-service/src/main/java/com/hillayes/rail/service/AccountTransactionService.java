@@ -33,22 +33,21 @@ public class AccountTransactionService {
      * @param pageSize the size of a page, and the maximum number of transactions to be returned.
      * @return the page of identified transactions.
      */
-    public Page<AccountTransaction> getTransactions(UUID userId,
-                                                    TransactionFilter filter,
+    public Page<AccountTransaction> getTransactions(TransactionFilter filter,
                                                     int page,
                                                     int pageSize) {
-        log.info("Listing transaction [userId: {}, filter: {}]", userId, filter);
+        log.info("Listing transaction [filter: {}]", filter);
 
         if (filter == null) {
             filter = TransactionFilter.NULL;
         } else {
-            verifyAccountHolder(userId, filter.getAccountId());
+            verifyAccountHolder(filter.getUserId(), filter.getAccountId());
         }
 
-        Page<AccountTransaction> result = accountTransactionRepository.findByFilter(userId, filter, page, pageSize);
+        Page<AccountTransaction> result = accountTransactionRepository.findByFilter(filter, page, pageSize);
 
-        log.info("Listing transaction [userId: {}, filter: {}, size: {}, total: {}]",
-            userId, filter, result.getContentSize(), result.getTotalCount());
+        log.info("Listing transaction [filter: {}, size: {}, total: {}]",
+            filter, result.getContentSize(), result.getTotalCount());
         return result;
     }
 

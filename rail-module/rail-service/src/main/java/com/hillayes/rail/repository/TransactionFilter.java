@@ -1,12 +1,14 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.service.AccountTransactionService;
 import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A filter for transactions. Each property is an optional value that can be used
@@ -19,9 +21,11 @@ import java.util.UUID;
 @ToString
 @EqualsAndHashCode
 public class TransactionFilter {
-    // a NULl value instance of the transaction filter.
+    // a NULl value instance of the transaction 
     public static final TransactionFilter NULL = TransactionFilter.builder().build();
 
+    // the user to which the transaction must belong.
+    private UUID userId;
     // the account to which the transaction must belong.
     private UUID accountId;
     // the inclusive start of the date range for the transaction.
@@ -40,17 +44,82 @@ public class TransactionFilter {
     private String creditor;
 
     /**
-     * Sets the date range for the transaction filter. The date range is inclusive of the
+     * Sets the date range for the transaction  The date range is inclusive of the
      * fromDate and exclusive of the toDate.
      *
      * @param from the date from which the transaction should be included - inclusive.
      * @param to the date to which the transaction should be included - exclusive.
-     * @return the transaction filter.
+     * @return the transaction 
      */
     public TransactionFilter dateRange(LocalDate from, LocalDate to) {
         // convert dates to instant
         fromDate = (from == null) ? null : from.atStartOfDay(ZoneOffset.UTC).toInstant();
         toDate = (to == null) ? null : to.atStartOfDay(ZoneOffset.UTC).toInstant();
         return this;
+    }
+    
+    public Map<String, Object> toParams() {
+        Map<String, Object> params = new HashMap();
+
+        if (getAccountId() != null) {
+            params.put("accountId", getAccountId());
+        }
+        if (getFromDate() != null) {
+            params.put("fromDate", getFromDate());
+        }
+        if (getToDate() != null) {
+            params.put("toDate", getToDate());
+        }
+        if (getMinAmount() != null) {
+            params.put("minAmount", MonetaryAmount.of("GBP", getMinAmount()));
+        }
+        if (getMaxAmount() != null) {
+            params.put("maxAmount", MonetaryAmount.of("GBP", getMaxAmount()));
+        }
+        if (getReference() != null) {
+            params.put("reference", "%" + getReference() + "%");
+        }
+        if (getInfo() != null) {
+            params.put("info", "%" + getInfo() + "%");
+        }
+        if (getCreditor() != null) {
+            params.put("creditor", "%" + getCreditor() + "%");
+        }
+
+        return params;
+    }
+
+    public String toProjection() {
+        List<String> projection = new ArrayList<>();
+
+        if (getAccountId() != null) {
+            projection.add("userId = :userId");
+        }
+        if (getAccountId() != null) {
+            projection.add("accountId = :accountId");
+        }
+        if (getFromDate() != null) {
+            projection.add("bookingDateTime >= :fromDate");
+        }
+        if (getToDate() != null) {
+            projection.add("bookingDateTime < :toDate");
+        }
+        if (getMinAmount() != null) {
+            projection.add("amount >= :minAmount");
+        }
+        if (getMaxAmount() != null) {
+            projection.add("amount <= :maxAmount");
+        }
+        if (getReference() != null) {
+            projection.add("reference like :reference");
+        }
+        if (getInfo() != null) {
+            projection.add("additionalInformation like :info");
+        }
+        if (getCreditor() != null) {
+            projection.add("creditorName like :creditor");
+        }
+
+        return String.join("AND", projection);
     }
 }

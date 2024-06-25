@@ -42,7 +42,7 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
+        when(accountTransactionService.getTransactions(any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
 
         // when: client calls the endpoint
@@ -60,7 +60,11 @@ public class AccountTransactionResourceTest extends TestBase {
             .as(PaginatedTransactions.class);
 
         // then: the account-trans-service is called with the authenticated user-id and page
-        verify(accountTransactionService).getTransactions(eq(userId), any(), eq(page), eq(pageSize));
+        ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
+        verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
+
+        // and: the user-id is passed in the filter
+        assertEquals(userId, filterCaptor.getValue().getUserId());
 
         // and: no account look-up is performed
         verifyNoInteractions(accountService);
@@ -77,7 +81,7 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
+        when(accountTransactionService.getTransactions(any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
 
         // and: transaction filter properties
@@ -113,11 +117,12 @@ public class AccountTransactionResourceTest extends TestBase {
 
         // then: the account-trans-service is called with the authenticated user-id and page
         ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
-        verify(accountTransactionService).getTransactions(eq(userId), filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
 
         // and: the filter contains the account-id
         TransactionFilter capturedFilter = filterCaptor.getValue();
         assertNotNull(capturedFilter);
+        assertEquals(userId, capturedFilter.getUserId());
         assertEquals(accountId, capturedFilter.getAccountId());
 
         // and: the page links contain given filter properties
