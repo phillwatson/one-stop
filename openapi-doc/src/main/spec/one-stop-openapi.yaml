@@ -926,9 +926,6 @@ components:
           type: object
           additionalProperties:
             type: string
-          example:
-            min: '0'
-            max: '10'
 
     UserRegisterRequest:
       type: object
@@ -1635,6 +1632,15 @@ components:
         - $ref: "#/components/schemas/PaginatedItems"
         - type: object
           properties:
+            currencyTotals:
+              description: |
+                An array of the monetary totals for the filtered transactions, keyed on currency.
+              type: string
+              additionalProperties:
+                type: number
+                format: double
+                description: The total amount for filtered transactions
+                example: 123.45
             items:
               type: array
               description: The list of transactions

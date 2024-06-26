@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.auth.jwt.AuthUtils;
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.PaginatedTransactions;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/api/v1/rails/transactions")
 @RolesAllowed("user")
@@ -35,8 +37,8 @@ public class AccountTransactionResource {
                                     @QueryParam("account-id") UUID accountId,
                                     @QueryParam("from-date") LocalDate fromDate,
                                     @QueryParam("to-date") LocalDate toDate,
-                                    @QueryParam("min-amount") Float minAmount,
-                                    @QueryParam("max-amount") Float maxAmount,
+                                    @QueryParam("min-amount") Double minAmount,
+                                    @QueryParam("max-amount") Double maxAmount,
                                     @QueryParam("reference") String refContaining,
                                     @QueryParam("info") String infoContaining,
                                     @QueryParam("creditor") String creditorContaining) {
@@ -45,6 +47,7 @@ public class AccountTransactionResource {
             userId, accountId, fromDate, toDate);
 
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(userId)
             .accountId(accountId)
             .minAmount(minAmount)
             .maxAmount(maxAmount)
@@ -55,7 +58,7 @@ public class AccountTransactionResource {
             .dateRange(fromDate, toDate);
 
         Page<AccountTransaction> transactionsPage =
-            accountTransactionService.getTransactions(userId, filter, page, pageSize);
+            accountTransactionService.getTransactions(filter, page, pageSize);
 
         PaginatedTransactions response = new PaginatedTransactions()
             .page(transactionsPage.getPageIndex())
@@ -64,7 +67,12 @@ public class AccountTransactionResource {
             .total(transactionsPage.getTotalCount())
             .totalPages(transactionsPage.getTotalPages())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage));
+            .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage))
+            .currencyTotals(
+                accountTransactionService.getTransactionTotals(filter)
+                    .stream()
+                    .collect(Collectors.toMap(t -> t.getCurrency().getCurrencyCode(), MonetaryAmount::toDecimal))
+            );
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, accountId, page, pageSize, response.getCount(), response.getTotal());

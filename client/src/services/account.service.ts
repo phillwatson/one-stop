@@ -1,6 +1,6 @@
 import http from './http-common';
 import PaginatedList from '../model/paginated-list.model';
-import { AccountDetail, TransactionDetail } from '../model/account.model';
+import { AccountDetail, TransactionDetail, PaginatedTransactions } from '../model/account.model';
 
 class AccountService {
   getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AccountDetail>> {
@@ -15,19 +15,19 @@ class AccountService {
       .then(response => response.data);
   }
 
-  getTransactions(accountId: string, page: number = 0, pageSize = 25, filters: any = {}): Promise<PaginatedList<TransactionDetail>> {
+  getTransactions(accountId: string, page: number = 0, pageSize = 25, filters: any = {}): Promise<PaginatedTransactions> {
     console.log(`Retrieving account transactions [id: ${accountId}, page: ${page}, pageSize: ${pageSize}]`);
-    return http.get<PaginatedList<TransactionDetail>>('/rails/transactions',
+    return http.get<PaginatedTransactions>('/rails/transactions',
      { params: { "account-id": accountId, "page": page, "page-size": pageSize, ...filters} })
      .then(response => response.data);
   }
 
-  getTransactionsForDateRange(accountId: string, fromDate: Date, toDate: Date, page: number = 0, pageSize = 25): Promise<PaginatedList<TransactionDetail>> {
+  getTransactionsForDateRange(accountId: string, fromDate: Date, toDate: Date, page: number = 0, pageSize = 25): Promise<PaginatedTransactions> {
     const from = fromDate.toISOString().substring(0, 10);
     const to = toDate.toISOString().substring(0, 10);
     console.log(`Retrieving account transactions [id: ${accountId}, from-date: ${from}, to-date: ${to}, page: ${page}, pageSize: ${pageSize}]`);
 
-    return http.get<PaginatedList<TransactionDetail>>('/rails/transactions',
+    return http.get<PaginatedTransactions>('/rails/transactions',
      { params: { "account-id": accountId, "from-date": from, "to-date": to, "page": page, "page-size": pageSize }})
      .then(response => response.data);
   }

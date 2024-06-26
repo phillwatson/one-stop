@@ -1,4 +1,5 @@
 import Institution from "./institution.model"
+import PaginatedList from "./paginated-list.model";
 
 export interface TransactionDetail {
   id: string;
@@ -41,3 +42,25 @@ export default interface Account {
   institutionId: string;
   institutionName: string;
 }
+
+export type CurrencyTotal = {
+  [currency: string]: number
+};
+
+export interface PaginatedTransactions extends PaginatedList<TransactionDetail> {
+  currencyTotals: CurrencyTotal;
+}
+
+export const EMPTY_PAGINATED_TRANSACTIONS: PaginatedTransactions = {
+  total: 0,
+  totalPages: 0,
+  count: 0,
+  page: 0,
+  pageSize: 0,
+  links: {
+    first: '',
+    last: ''
+  },
+  items: [],
+  currencyTotals: {}
+};

@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
@@ -14,9 +15,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,9 +54,10 @@ public class AccountTransactionRepositoryTest {
 
         // when: the most recent transaction by bookingDate is queried
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .build();
-        Page<AccountTransaction> result = fixture.findByFilter(account.getUserId(), filter, 0, 1);
+        Page<AccountTransaction> result = fixture.findByFilter(filter, 0, 1);
 
         // then: the result contains only the most recent transaction
         assertEquals(1, result.getContentSize());
@@ -82,12 +84,13 @@ public class AccountTransactionRepositoryTest {
 
         // when: the transactions are returned by date range
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(consent.getUserId())
             .accountId(account.getId())
             .fromDate(Instant.now().minus(Duration.ofDays(21)))
             .toDate(Instant.now())
             .build();
         Page<AccountTransaction> result =
-            fixture.findByFilter(consent.getUserId(), filter, 0, 10 );
+            fixture.findByFilter(filter, 0, 10 );
 
         // then: the results contain the transaction with the date range
         assertFalse(result.isEmpty());
@@ -128,12 +131,13 @@ public class AccountTransactionRepositoryTest {
         // when: the transactions are returned by date range for each account
         accounts.forEach(account -> {
             TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
                 .accountId(account.getId())
                 .fromDate(Instant.now().minus(Duration.ofDays(21)))
                 .toDate(Instant.now())
                 .build();
             Page<AccountTransaction> result =
-                fixture.findByFilter(account.getUserId(), filter, 0, 100);
+                fixture.findByFilter(filter, 0, 100);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());
@@ -179,11 +183,12 @@ public class AccountTransactionRepositoryTest {
         // when: the transactions are returned by date range for each account
         accounts.forEach(account -> {
             TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
                 .accountId(account.getId())
                 .info("Transaction 2")
                 .build();
             Page<AccountTransaction> result =
-                fixture.findByFilter(account.getUserId(), filter, 0, 100);
+                fixture.findByFilter(filter, 0, 100);
 
             // then: the results contain the transaction with the date range
             assertFalse(result.isEmpty());
@@ -220,9 +225,10 @@ public class AccountTransactionRepositoryTest {
 
         // when: the first page transactions are returned by account ID
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .build();
-        Page<AccountTransaction> page = fixture.findByFilter(account.getUserId(), filter, 0, 3);
+        Page<AccountTransaction> page = fixture.findByFilter(filter, 0, 3);
 
         // then: the first page transactions are returned by account ID
         assertNotNull(page);
@@ -233,7 +239,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the second page transactions are returned by account ID
-        page = fixture.findByFilter(account.getUserId(), filter, 1, 3);
+        page = fixture.findByFilter(filter, 1, 3);
 
         // then: the second page transactions are returned by account ID
         assertNotNull(page);
@@ -244,7 +250,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the last page transactions are returned by account ID
-        page = fixture.findByFilter(account.getUserId(), filter, 2, 3);
+        page = fixture.findByFilter(filter, 2, 3);
 
         // then: the last page transactions are returned by account ID
         assertNotNull(page);
@@ -255,7 +261,7 @@ public class AccountTransactionRepositoryTest {
         assertEquals(3, page.getPageSize());
 
         // when: the page above the last is selected
-        page = fixture.findByFilter(account.getUserId(), filter, 12, 3);
+        page = fixture.findByFilter(filter, 12, 3);
 
         // then: the page above the last is selected
         assertNotNull(page);
@@ -264,6 +270,108 @@ public class AccountTransactionRepositoryTest {
         assertEquals(8, page.getTotalCount());
         assertEquals(12, page.getPageIndex());
         assertEquals(3, page.getPageSize());
+    }
+
+    @Test
+    public void testFindTotals() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: several linked accounts
+        Map<Account, List<AccountTransaction>> accounts = new HashMap<>();
+        for (int i = 0; i < 3; i++) {
+            Account account = accountRepository.save(mockAccount(consent));
+            List<AccountTransaction> transactions = new ArrayList<>();
+            accounts.put(account, transactions);
+
+            // and: a list of transactions for each account
+            LocalDate bookingDate = LocalDate.now().minusWeeks(5);
+            AtomicInteger index = new AtomicInteger(0);
+            while (bookingDate.isBefore(LocalDate.now())) {
+                transactions.add(mockTransaction(account, bookingDate, transaction -> {
+                    transaction.creditorName(account.getId() + "-Creditor-" + index.get());
+                    transaction.additionalInformation(account.getId() + "-Info-" + index.get());
+                    transaction.reference(account.getId() + "-Reference-" + index.get());
+                }));
+
+                bookingDate = bookingDate.plusWeeks(1);
+                index.getAndIncrement();
+            }
+            fixture.saveAll(transactions);
+            fixture.flush();
+        }
+
+        // when: the transactions totals are requested for each account by creditor
+        accounts.forEach((account, transactions) -> {
+            TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
+                .accountId(account.getId())
+                .creditor("Creditor-2")
+                .build();
+            List<MonetaryAmount> totals = fixture.findTotals(filter);
+
+            // then: the totals are returned
+            assertNotNull(totals);
+
+            // and: the totals are correct
+            assertEquals(1, totals.size());
+
+            // and: the total amount is correct
+            Long expected = transactions.stream()
+                .filter(transaction -> transaction.getCreditorName().contains("Creditor-2"))
+                .map(t -> t.getAmount().getAmount())
+                .reduce(Long::sum)
+                .orElse(0L);
+            assertEquals(expected, totals.get(0).getAmount());
+        });
+
+        // when: the transactions totals are requested for each account by reference
+        accounts.forEach((account, transactions) -> {
+            TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
+                .accountId(account.getId())
+                .reference("Reference-2")
+                .build();
+            List<MonetaryAmount> totals = fixture.findTotals(filter);
+
+            // then: the totals are returned
+            assertNotNull(totals);
+
+            // and: the totals are correct
+            assertEquals(1, totals.size());
+
+            // and: the total amount is correct
+            Long expected = transactions.stream()
+                .filter(transaction -> transaction.getReference().contains("Reference-2"))
+                .map(t -> t.getAmount().getAmount())
+                .reduce(Long::sum)
+                .orElse(0L);
+            assertEquals(expected, totals.get(0).getAmount());
+        });
+
+        // when: the transactions totals are requested for each account by info
+        accounts.forEach((account, transactions) -> {
+            TransactionFilter filter = TransactionFilter.builder()
+                .userId(account.getUserId())
+                .accountId(account.getId())
+                .info("Info-2")
+                .build();
+            List<MonetaryAmount> totals = fixture.findTotals(filter);
+
+            // then: the totals are returned
+            assertNotNull(totals);
+
+            // and: the totals are correct
+            assertEquals(1, totals.size());
+
+            // and: the total amount is correct
+            Long expected = transactions.stream()
+                .filter(transaction -> transaction.getAdditionalInformation().contains("Info-2"))
+                .map(t -> t.getAmount().getAmount())
+                .reduce(Long::sum)
+                .orElse(0L);
+            assertEquals(expected, totals.get(0).getAmount());
+        });
     }
 
     private UserConsent mockUserConsent() {
@@ -281,11 +389,19 @@ public class AccountTransactionRepositoryTest {
     }
 
     private AccountTransaction mockTransaction(Account account, LocalDate bookingDate) {
+        return mockTransaction(account, bookingDate, null);
+    }
+
+    private AccountTransaction mockTransaction(Account account, LocalDate bookingDate,
+                                               Consumer<AccountTransaction.Builder> modifier) {
         return TestData.mockAccountTransaction(transaction -> {
             transaction.id(null);
             transaction.userId(account.getUserId());
             transaction.accountId(account.getId());
             transaction.bookingDateTime(bookingDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            if (modifier != null) {
+                modifier.accept(transaction);
+            }
         });
     }
 }

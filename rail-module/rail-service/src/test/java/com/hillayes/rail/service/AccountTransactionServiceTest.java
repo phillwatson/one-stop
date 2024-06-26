@@ -48,12 +48,13 @@ public class AccountTransactionServiceTest {
 
         // and: a filter containing the account ID
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(account.getId())
             .build();
 
         // when: the transactions are requested
         Page<AccountTransaction> result =
-            fixture.getTransactions(account.getUserId(), filter, 2, 5);
+            fixture.getTransactions(filter, 2, 5);
 
         // then: the transactions are returned
         assertNotNull(result);
@@ -67,7 +68,7 @@ public class AccountTransactionServiceTest {
         assertEquals(5, result.getTotalPages());
 
         // and: the transactions are retrieved by account ID
-        verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), eq(filter), anyInt(), anyInt());
+        verify(accountTransactionRepository).findByFilter(eq(filter), anyInt(), anyInt());
 
         // and: the account is verified
         verify(accountService).getAccount(account.getUserId(), account.getId());
@@ -85,10 +86,11 @@ public class AccountTransactionServiceTest {
         // when: the transactions are requested - with wrong account ID
         // then: an NotFoundException is thrown
         TransactionFilter filter = TransactionFilter.builder()
+            .userId(account.getUserId())
             .accountId(UUID.randomUUID())
             .build();
         assertThrows(NotFoundException.class, () ->
-            fixture.getTransactions(account.getUserId(), filter, 2, 5)
+            fixture.getTransactions(filter, 2, 5)
         );
     }
 
@@ -103,7 +105,7 @@ public class AccountTransactionServiceTest {
 
         // when: the transactions are requested - without account ID (or any other filter)
         Page<AccountTransaction> result =
-            fixture.getTransactions(account.getUserId(), null, 2, 5);
+            fixture.getTransactions(null, 2, 5);
 
         // then: the transactions are returned
         assertNotNull(result);
@@ -117,7 +119,7 @@ public class AccountTransactionServiceTest {
         assertEquals(5, result.getTotalPages());
 
         // and: the transactions are retrieved by user ID
-        verify(accountTransactionRepository).findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt());
+        verify(accountTransactionRepository).findByFilter(any(), anyInt(), anyInt());
 
         // and: the account is NOT verified
         verify(accountService, never()).getAccount(account.getUserId(), account.getId());
@@ -161,10 +163,10 @@ public class AccountTransactionServiceTest {
             .limit(23)
             .map(n -> TestData.mockAccountTransaction(account))
             .toList();
-        when(accountTransactionRepository.findByFilter(eq(account.getUserId()), any(), anyInt(), anyInt()))
+        when(accountTransactionRepository.findByFilter(any(), anyInt(), anyInt()))
             .then(invocation -> {
-                int pageIndex = invocation.getArgument(2);
-                int pageSize = invocation.getArgument(3);
+                int pageIndex = invocation.getArgument(1);
+                int pageSize = invocation.getArgument(2);
                 return Page.of(transactions, pageIndex, pageSize);
             });
 

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
+        when(accountTransactionService.getTransactions(any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
 
         // when: client calls the endpoint
@@ -60,7 +61,12 @@ public class AccountTransactionResourceTest extends TestBase {
             .as(PaginatedTransactions.class);
 
         // then: the account-trans-service is called with the authenticated user-id and page
-        verify(accountTransactionService).getTransactions(eq(userId), any(), eq(page), eq(pageSize));
+        ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
+        verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactionTotals(filterCaptor.capture());
+
+        // and: the user-id is passed in the filter
+        assertEquals(userId, filterCaptor.getValue().getUserId());
 
         // and: no account look-up is performed
         verifyNoInteractions(accountService);
@@ -77,8 +83,10 @@ public class AccountTransactionResourceTest extends TestBase {
         int pageSize = 12;
 
         // and: a list of transactions
-        when(accountTransactionService.getTransactions(eq(userId), any(), eq(page), eq(pageSize)))
+        when(accountTransactionService.getTransactions(any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
+        when(accountTransactionService.getTransactionTotals(any()))
+            .thenReturn(List.of());
 
         // and: transaction filter properties
         LocalDate fromDate = LocalDate.now().minusDays(10);
@@ -113,11 +121,13 @@ public class AccountTransactionResourceTest extends TestBase {
 
         // then: the account-trans-service is called with the authenticated user-id and page
         ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
-        verify(accountTransactionService).getTransactions(eq(userId), filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactionTotals(filterCaptor.capture());
 
         // and: the filter contains the account-id
         TransactionFilter capturedFilter = filterCaptor.getValue();
         assertNotNull(capturedFilter);
+        assertEquals(userId, capturedFilter.getUserId());
         assertEquals(accountId, capturedFilter.getAccountId());
 
         // and: the page links contain given filter properties

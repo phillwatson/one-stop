@@ -29,10 +29,10 @@ import java.util.Currency;
 public class MonetaryAmount {
     public static final MonetaryAmount ZERO = MonetaryAmount.of("GBP", 0);
 
-    private long amount;
-
     @Convert(converter = CurrencyConverter.class)
     private Currency currency;
+
+    private long amount;
 
     /**
      * A factory method to create a new MonetaryAmount from a currency code and
@@ -47,7 +47,7 @@ public class MonetaryAmount {
             .movePointRight(currency.getDefaultFractionDigits())
             .longValue();
 
-        return new MonetaryAmount(value, currency);
+        return new MonetaryAmount(currency, value);
     }
 
     /**
@@ -69,7 +69,7 @@ public class MonetaryAmount {
      * @return a new MonetaryAmount instance.
      */
     public static MonetaryAmount of(String currencyStr, long amount) {
-        return new MonetaryAmount(amount, Currency.getInstance(currencyStr));
+        return new MonetaryAmount(Currency.getInstance(currencyStr), amount);
     }
 
     /**
