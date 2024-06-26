@@ -11,9 +11,9 @@ export default interface PaginatedList<T> {
     last: string
   }
   items: Array<T>
-}
+};
 
-export const EMPTY_PAGINATED_LIST = {
+export const EMPTY_PAGINATED_LIST: PaginatedList<any> = {
   total: 0,
   totalPages: 0,
   count: 0,
@@ -24,4 +24,4 @@ export const EMPTY_PAGINATED_LIST = {
     last: ''
   },
   items: []
-}
+};

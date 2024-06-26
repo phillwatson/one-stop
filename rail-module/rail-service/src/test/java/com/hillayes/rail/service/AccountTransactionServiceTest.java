@@ -165,8 +165,8 @@ public class AccountTransactionServiceTest {
             .toList();
         when(accountTransactionRepository.findByFilter(any(), anyInt(), anyInt()))
             .then(invocation -> {
-                int pageIndex = invocation.getArgument(2);
-                int pageSize = invocation.getArgument(3);
+                int pageIndex = invocation.getArgument(1);
+                int pageSize = invocation.getArgument(2);
                 return Page.of(transactions, pageIndex, pageSize);
             });
 

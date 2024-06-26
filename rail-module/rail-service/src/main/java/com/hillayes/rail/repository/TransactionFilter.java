@@ -1,6 +1,10 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.rail.domain.AccountTransaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.*;
 
 import java.time.Instant;
@@ -31,9 +35,9 @@ public class TransactionFilter {
     // the exclusive end of the date range for the transaction.
     private Instant toDate;
     // the minimum amount for the transaction.
-    private Float minAmount;
+    private Double minAmount;
     // the maximum amount for the transaction.
-    private Float maxAmount;
+    private Double maxAmount;
     // the value that the transaction's reference must contain - case-insensitive.
     private String reference;
     // the value that the transaction's info must contain - case-insensitive.
@@ -64,6 +68,9 @@ public class TransactionFilter {
     public Map<String, Object> toParams() {
         Map<String, Object> params = new HashMap();
 
+        if (getUserId() != null) {
+            params.put("userId", getUserId());
+        }
         if (getAccountId() != null) {
             params.put("accountId", getAccountId());
         }
@@ -101,7 +108,7 @@ public class TransactionFilter {
     public String toQuery() {
         List<String> projection = new ArrayList<>();
 
-        if (getAccountId() != null) {
+        if (getUserId() != null) {
             projection.add("userId = :userId");
         }
         if (getAccountId() != null) {
@@ -129,6 +136,41 @@ public class TransactionFilter {
             projection.add("creditorName like :creditor");
         }
 
-        return String.join("AND", projection);
+        return String.join(" AND ", projection);
+    }
+
+    public Predicate toPredicate(CriteriaBuilder builder, Root<AccountTransaction> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (getUserId() != null) {
+            predicates.add(builder.equal(root.get("userId"), getUserId()));
+        }
+        if (getAccountId() != null) {
+            predicates.add(builder.equal(root.get("accountId"), getAccountId()));
+        }
+        if (getFromDate() != null) {
+            predicates.add(builder.greaterThanOrEqualTo(root.get("bookingDateTime"), getFromDate()));
+        }
+        if (getToDate() != null) {
+            predicates.add(builder.lessThan(root.get("bookingDateTime"), getToDate()));
+        }
+        if (getMinAmount() != null) {
+            MonetaryAmount amount = MonetaryAmount.of("GBP", getMinAmount());
+            predicates.add(builder.ge(root.get("amount").get("amount"), amount.getAmount()));
+        }
+        if (getMaxAmount() != null) {
+            MonetaryAmount amount = MonetaryAmount.of("GBP", getMaxAmount());
+            predicates.add(builder.le(root.get("amount").get("amount"), amount.getAmount()));
+        }
+        if (getReference() != null) {
+            predicates.add(builder.like(root.get("reference"), "%" + getReference() + "%"));
+        }
+        if (getInfo() != null) {
+            predicates.add(builder.like(root.get("additionalInformation"), "%" + getInfo() + "%"));
+        }
+        if (getCreditor() != null) {
+            predicates.add(builder.like(root.get("creditorName"), "%" + getCreditor() + "%"));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,6 +63,7 @@ public class AccountTransactionResourceTest extends TestBase {
         // then: the account-trans-service is called with the authenticated user-id and page
         ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
         verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactionTotals(filterCaptor.capture());
 
         // and: the user-id is passed in the filter
         assertEquals(userId, filterCaptor.getValue().getUserId());
@@ -83,6 +85,8 @@ public class AccountTransactionResourceTest extends TestBase {
         // and: a list of transactions
         when(accountTransactionService.getTransactions(any(), eq(page), eq(pageSize)))
             .thenReturn(Page.empty());
+        when(accountTransactionService.getTransactionTotals(any()))
+            .thenReturn(List.of());
 
         // and: transaction filter properties
         LocalDate fromDate = LocalDate.now().minusDays(10);
@@ -118,6 +122,7 @@ public class AccountTransactionResourceTest extends TestBase {
         // then: the account-trans-service is called with the authenticated user-id and page
         ArgumentCaptor<TransactionFilter> filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
         verify(accountTransactionService).getTransactions(filterCaptor.capture(), eq(page), eq(pageSize));
+        verify(accountTransactionService).getTransactionTotals(filterCaptor.capture());
 
         // and: the filter contains the account-id
         TransactionFilter capturedFilter = filterCaptor.getValue();

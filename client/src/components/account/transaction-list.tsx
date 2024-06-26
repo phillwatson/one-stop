@@ -7,7 +7,11 @@ import { AccountDetail, TransactionDetail } from "../../model/account.model";
 import CurrencyService from '../../services/currency.service';
 import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate, toISODate } from "../../util/date-util";
-import PaginatedList, { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
+import { PaginatedTransactions, EMPTY_PAGINATED_TRANSACTIONS } from "../../model/account.model";
+import Table from "@mui/material/Table";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import { TableContainer } from "@mui/material";
 
 interface Props {
   account: AccountDetail;
@@ -74,57 +78,56 @@ const DEFAULT_PAGE_SIZE: number = 30;
 export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
   const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState<PaginatedList<TransactionDetail>>(EMPTY_PAGINATED_LIST);
+  const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_TRANSACTIONS);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
-  const [queryOptions, setQueryOptions] = useState<GridFilterModel>({ items: [] });
+  const [transactionFilter, setTransactionFilter] = useState<any | undefined>(undefined);
 
   const onFilterChange = useCallback((filterModel: GridFilterModel) => {
-    // Here you save the data you need from the filter model
-    setQueryOptions(filterModel);
+    var filter: any;
+    filterModel.items
+      .filter(item => item.value !== undefined)
+      .forEach((item) => {
+        if (item.field === 'additionalInformation') {
+          filter = { "info": item.value as string, ...filter };
+        }
+        if (item.field === 'reference') {
+          filter = { "reference": item.value as string, ...filter };
+        }
+        if (item.field === 'creditorName') {
+          filter = { "creditorName": item.value as string, ...filter };
+        }
+        if (item.field === 'bookingDateTime') {
+          const dateStr = toISODate(item.value);
+          if (item.operator === 'before')
+            filter = { "to-date": dateStr, ...filter };
+          else
+            filter = { "from-date": dateStr, ...filter };
+        }
+        if (item.field === 'debit') {
+          filter = { "max-amount": 0 - item.value as number, ...filter };
+        }
+        if (item.field === 'credit') {
+          filter = { "min-amount": item.value as number, ...filter };
+        }
+      }
+    );
+
+    setTransactionFilter(filter);
   }, []);
 
   useEffect(() => {
     setLoading(true);
-    var filter = {};
-    queryOptions.items.forEach((item) => {
-      if (item.value === undefined) {
-        return
-      }
-
-      if (item.field === 'additionalInformation') {
-        filter = { "info": item.value as string };
-      }
-      if (item.field === 'reference') {
-        filter = { "reference": item.value as string, ...filter };
-      }
-      if (item.field === 'creditorName') {
-        filter = { "creditorName": item.value as string, ...filter };
-      }
-      if (item.field === 'bookingDateTime') {
-        const dateStr = toISODate(item.value);
-        if (item.operator === 'before')
-          filter = { "to-date": dateStr, ...filter };
-        else
-          filter = { "from-date": dateStr, ...filter };
-      }
-      if (item.field === 'debit') {
-        filter = { "max-amount": 0 - item.value as number, ...filter };
-      }
-      if (item.field === 'credit') {
-        filter = { "min-amount": item.value as number, ...filter };
-      }
-    });
-
-    AccountService.getTransactions(props.account.id, paginationModel.page, paginationModel.pageSize, filter)
+    AccountService.getTransactions(props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter)
       .then( response => setTransactions(response))
       .catch(err => showMessage(err))
       .finally(() => setLoading(false));
-    }, [props.account.id, paginationModel.page, paginationModel.pageSize, queryOptions, showMessage]);
+    }, [props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter, showMessage]);
 
   return (
+    <>
       <DataGrid rows={transactions.items} rowCount={transactions.total} columns={columns} 
         density="compact" disableDensitySelector
         loading={loading} slots={{ toolbar: GridToolbar }}
@@ -132,5 +135,21 @@ export default function TransactionList(props: Props) {
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={setPaginationModel}
         filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}/>
+
+      { transactionFilter &&
+        <TableContainer>
+          <Table style={{width: "250px"}}>
+            {
+              Object.keys(transactions.currencyTotals).map(currency =>
+                <TableRow>
+                  <TableCell align="right" width={"50px"}>{currency}</TableCell>
+                  <TableCell align="right">{CurrencyService.format(transactions.currencyTotals[currency], currency)}</TableCell>
+                </TableRow>
+              )
+            }
+          </Table>
+        </TableContainer>
+      }
+    </>
   )
 }

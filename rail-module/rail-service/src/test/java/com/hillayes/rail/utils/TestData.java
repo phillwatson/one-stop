@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextDouble;
+import static org.apache.commons.lang3.RandomUtils.nextLong;
 
 public class TestData {
     public static UserConsent mockUserConsent(UUID userId) {
@@ -68,7 +68,7 @@ public class TestData {
             .id(UUID.randomUUID())
             .accountId(account.getId())
             .balanceType(randomAlphanumeric(30))
-            .amount(MonetaryAmount.of("GBP", nextDouble()))
+            .amount(MonetaryAmount.of("GBP", nextLong(0, 20000)))
             .referenceDate(Instant.now().minus(Duration.ofDays(1)))
             .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
 
@@ -92,7 +92,7 @@ public class TestData {
             .accountId(UUID.randomUUID())
             .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
             .valueDateTime(Instant.now().minus(Duration.ofDays(1)))
-            .amount(MonetaryAmount.of("GBP", nextDouble()))
+            .amount(MonetaryAmount.of("GBP", nextLong(0, 200000)))
             .reference(randomAlphanumeric(30))
             .additionalInformation(randomAlphanumeric(30))
             .creditorName(randomAlphanumeric(30))
