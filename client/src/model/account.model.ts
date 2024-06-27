@@ -48,19 +48,5 @@ export type CurrencyTotal = {
 };
 
 export interface PaginatedTransactions extends PaginatedList<TransactionDetail> {
-  currencyTotals: CurrencyTotal;
+  currencyTotals?: CurrencyTotal;
 }
-
-export const EMPTY_PAGINATED_TRANSACTIONS: PaginatedTransactions = {
-  total: 0,
-  totalPages: 0,
-  count: 0,
-  page: 0,
-  pageSize: 0,
-  links: {
-    first: '',
-    last: ''
-  },
-  items: [],
-  currencyTotals: {}
-};

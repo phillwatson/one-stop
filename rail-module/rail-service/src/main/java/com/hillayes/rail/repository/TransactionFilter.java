@@ -61,6 +61,21 @@ public class TransactionFilter {
     }
 
     /**
+     * Tests if the filter is empty, i.e. the filter will not result in a sub-set of
+     * transactions.
+     */
+    public boolean isEmpty() {
+        return (getAccountId() != null) // when null, this includes all accounts - therefore, a non-empty filter
+            && (getFromDate() == null)
+            && (getToDate() == null)
+            && (getMinAmount() == null)
+            && (getMaxAmount() == null)
+            && (getReference() == null)
+            && (getInfo() == null)
+            && (getCreditor() == null);
+    }
+
+    /**
      * Returns a map of the filter parameters, keyed on the names used in the WHERE clause
      * selection.
      * Only those parameters with a non-null value are included.

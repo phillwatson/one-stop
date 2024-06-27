@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel } from '@mui/x-data-grid';
+import Table from "@mui/material/Table";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import { TableContainer } from "@mui/material";
 
 import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionDetail } from "../../model/account.model";
 import CurrencyService from '../../services/currency.service';
 import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate, toISODate } from "../../util/date-util";
-import { PaginatedTransactions, EMPTY_PAGINATED_TRANSACTIONS } from "../../model/account.model";
-import Table from "@mui/material/Table";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
-import { TableContainer } from "@mui/material";
+import { PaginatedTransactions } from "../../model/account.model";
+import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
 
 interface Props {
   account: AccountDetail;
@@ -78,7 +79,7 @@ const DEFAULT_PAGE_SIZE: number = 30;
 export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
   const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_LIST);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -136,14 +137,14 @@ export default function TransactionList(props: Props) {
         paginationMode="server" onPaginationModelChange={setPaginationModel}
         filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}/>
 
-      { transactionFilter &&
+      { transactionFilter && transactions.currencyTotals &&
         <TableContainer>
           <Table style={{width: "250px"}}>
             {
               Object.keys(transactions.currencyTotals).map(currency =>
                 <TableRow>
                   <TableCell align="right" width={"50px"}>{currency}</TableCell>
-                  <TableCell align="right">{CurrencyService.format(transactions.currencyTotals[currency], currency)}</TableCell>
+                  <TableCell align="right">{CurrencyService.format(transactions.currencyTotals![currency], currency)}</TableCell>
                 </TableRow>
               )
             }

@@ -7,6 +7,7 @@ import { useMessageDispatch } from "../contexts/messages/context";
 import TransactionList from "../components/account/transaction-list";
 import AccountHeader from "../components/account/account-header";
 import PageHeader from "../components/page-header/page-header";
+import Balances from "../components/account/balances";
 
 export default function Transactions() {
   const { accountId } = useParams();
@@ -26,7 +27,8 @@ export default function Transactions() {
     <PageHeader title="Account Transactions" >
       { account &&
         <AccountHeader account={ account }>
-            <TransactionList account={account} />
+          <Balances account={ account } />
+          <TransactionList account={account} />
         </AccountHeader>
       }
     </PageHeader>
