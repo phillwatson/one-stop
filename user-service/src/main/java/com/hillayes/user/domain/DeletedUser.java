@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 @Entity
-@Table(name = "deleted_user")
+@Table(schema = "users", name = "deleted_user")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
