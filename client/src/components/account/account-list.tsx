@@ -8,8 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import Collapse from '@mui/material/Collapse';
 import { SxProps } from '@mui/material/styles';
 
-import './account-list.css';
-
 import CurrencyService from '../../services/currency.service';
 import { AccountDetail, AccountBalance } from '../../model/account.model';
 import AccountRow from './account-row';

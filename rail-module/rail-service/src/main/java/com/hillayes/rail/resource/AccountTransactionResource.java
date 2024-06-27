@@ -67,12 +67,16 @@ public class AccountTransactionResource {
             .total(transactionsPage.getTotalCount())
             .totalPages(transactionsPage.getTotalPages())
             .items(transactionsPage.getContent().stream().map(this::marshal).toList())
-            .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage))
-            .currencyTotals(
+            .links(PaginationUtils.buildPageLinks(uriInfo, transactionsPage));
+
+        // if a filter is applied, then calculate the totals
+        if (! filter.isEmpty()) {
+            response.currencyTotals(
                 accountTransactionService.getTransactionTotals(filter)
                     .stream()
                     .collect(Collectors.toMap(t -> t.getCurrency().getCurrencyCode(), MonetaryAmount::toDecimal))
             );
+        }
 
         log.debug("Listing account transactions [userId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
             userId, accountId, page, pageSize, response.getCount(), response.getTotal());
