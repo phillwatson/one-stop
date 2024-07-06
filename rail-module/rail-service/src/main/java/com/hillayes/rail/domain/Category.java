@@ -6,7 +6,13 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
+/**
+ * A category is a way to group a user's transactions within and across multiple
+ * accounts. Each category has selectors that are used to match an account's
+ * transactions to the category.
+ */
 @Entity
 @Getter
 @Builder(builderClassName = "Builder")
@@ -24,58 +30,61 @@ public class Category {
     @Column(name = "version")
     private long version;
 
+    /**
+     * The user to whom this category belongs.
+     */
     @EqualsAndHashCode.Include
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    @lombok.Builder.Default
-    private Set<Category> subcategories = new HashSet<>();
-
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
+    /**
+     * The name of the category. This is unique for each user.
+     */
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(nullable = false)
     private String name;
 
+    /**
+     * A description of the category.
+     */
     private String description;
 
+    /**
+     * The colour that is used to represent the category in the UI.
+     */
     private String colour;
 
+    /**
+     * The selectors that are used to match transactions to this category.
+     * Each selector is associated with an account that belongs to the user
+     * who owns the category. The same account can have multiple selectors
+     * for the same category but the selection criteria, on which they match
+     * transactions, must be different.
+     */
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @lombok.Builder.Default
     private Set<CategorySelector> selectors = new HashSet<>();
 
-    public Category addSubcategory(Category subcategory) {
-        if (subcategory == null) throw new IllegalArgumentException("Subcategory cannot be null");
-        if (subcategory == this) throw new IllegalArgumentException("Subcategory cannot be the same as the parent");
-
-        subcategory.parent = this;
-        subcategory.userId = userId;
-        subcategories.add(subcategory);
-        return subcategory;
-    }
-
-    public boolean removeSubcategory(Category subcategory) {
-        if (subcategories.remove(subcategory)) {
-            subcategory.parent = null;
-            return true;
-        }
-        return false;
-    }
-
-    public CategorySelector addSelector(Account account, String regex) {
-        CategorySelector selector = CategorySelector.builder()
+    /**
+     * Adds a selector to the category; ensuring that the selector is associated
+     * with the category and account.
+     *
+     * @param accountId The account that the selector is associated with.
+     * @param modifier A consumer that can be used to modify the selector as it is added.
+     * @return
+     */
+    public CategorySelector addSelector(UUID accountId,
+                                        Consumer<CategorySelector.Builder> modifier) {
+        CategorySelector.Builder builder = CategorySelector.builder()
             .category(this)
-            .account(account)
-            .regex(regex)
-            .build();
+            .accountId(accountId);
 
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+
+        CategorySelector selector = builder.build();
         selectors.add(selector);
         return selector;
     }

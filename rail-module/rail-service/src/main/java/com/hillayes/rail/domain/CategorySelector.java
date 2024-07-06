@@ -5,6 +5,22 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * A category selector is a rule that is used to match transactions to a category.
+ * Each category can have multiple selectors. Each of which is associated with an
+ * account belonging to the user who owns the category.
+ * <p>
+ * Each selector has three optional fields that are used to match transactions:
+ * infoContains, refContains and creditorContains. If a field is not specified, it
+ * is ignored.
+ * <p>
+ * If specified, a transaction must contain the specified text in the corresponding
+ * field to be matched. This results in an AND operation between the fields.
+ * <p>
+ * If the same account has multiple selectors for the same category, the transaction
+ * must match at least one of the selectors to be matched to the category. Resulting
+ * in an OR operation between the selectors.
+ */
 @Entity
 @Table(name = "category_selector")
 @Getter
@@ -23,15 +39,44 @@ public class CategorySelector {
     @Column(name = "version")
     private long version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    private Account account;
-
+    /**
+     * The category that this selector is associated with.
+     */
     @ManyToOne
     private Category category;
 
+    /**
+     * The account that this selector is associated with. The account must belong
+     * to the user to whom the category belongs.
+     */
+    @EqualsAndHashCode.Include
+    @Column(name = "account_id", nullable = false)
+    private UUID accountId;
+
+    /**
+     * If specified, the transaction must contain this text in the additionalInfo
+     * field to be matched.
+     */
     @EqualsAndHashCode.Include
     @ToString.Include
-    @Column(name = "regex", nullable = false)
-    private String regex;
+    @Column(name = "info_contains")
+    private String infoContains;
+
+    /**
+     * If specified, the transaction must contain this text in the reference field
+     * to be matched.
+     */
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    @Column(name = "ref_contains")
+    private String refContains;
+
+    /**
+     * If specified, the transaction must contain this text in the creditorName
+     * field to be matched.
+     */
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    @Column(name = "creditor_contains")
+    private String creditorContains;
 }

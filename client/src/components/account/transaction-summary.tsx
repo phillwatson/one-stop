@@ -50,7 +50,7 @@ export default function TransactionSummaryList(props: Props) {
         <TableHead>
           <TableRow>
             <TableCell sx={colhead}>Date</TableCell>
-            <TableCell sx={colhead}>Description</TableCell>
+            <TableCell sx={colhead}>Additional Info</TableCell>
             <TableCell sx={colhead} align="right">Debit</TableCell>
             <TableCell sx={colhead} align="right">Credit</TableCell>
           </TableRow>
