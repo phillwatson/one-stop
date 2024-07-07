@@ -12,7 +12,6 @@ CREATE UNIQUE INDEX idx_category_user_id ON ${flyway:defaultSchema}.category (us
 
 CREATE TABLE ${flyway:defaultSchema}.category_selector (
     id uuid NOT NULL CONSTRAINT category_selector_pkey PRIMARY KEY,
-    version bigint NOT NULL DEFAULT 0,
     category_id uuid NOT NULL CONSTRAINT fk_category REFERENCES ${flyway:defaultSchema}.category (id) ON DELETE CASCADE,
     account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
     info_contains varchar(256) NULL,

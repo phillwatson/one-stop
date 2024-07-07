@@ -35,10 +35,6 @@ public class CategorySelector {
     @Setter
     private UUID id;
 
-    @Version
-    @Column(name = "version")
-    private long version;
-
     /**
      * The category that this selector is associated with.
      */
