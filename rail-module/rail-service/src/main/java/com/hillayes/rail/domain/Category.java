@@ -42,17 +42,20 @@ public class Category {
      */
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Setter
     @Column(nullable = false)
     private String name;
 
     /**
      * A description of the category.
      */
+    @Setter
     private String description;
 
     /**
      * The colour that is used to represent the category in the UI.
      */
+    @Setter
     private String colour;
 
     /**

@@ -5,6 +5,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,14 @@ public class CategoryServiceTest {
     @BeforeEach
     public void clearCaches() {
         openMocks(this);
+
+        // mock the save method to return a new UUID
+        when(categoryRepository.save(any())).then(invocation -> {
+            Category result = invocation.getArgument(0);
+            if (result.getId() == null)
+                result.setId(UUID.randomUUID());
+            return result;
+        });
     }
 
     @Test
@@ -53,6 +62,234 @@ public class CategoryServiceTest {
 
         // then: the categories are retrieved from the repository
         verify(categoryRepository).findByUserId(userId, 0, 20);
+    }
+
+    @Test
+    public void testGetCategory() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an existing category
+        Category category = Category.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .build();
+        when(categoryRepository.findByIdOptional(category.getId()))
+            .thenReturn(Optional.of(category));
+
+        // when: the category is requested
+        Category actualCategory = fixture.getCategory(userId, category.getId());
+
+        // then: the category is retrieved from the repository
+        verify(categoryRepository).findByIdOptional(category.getId());
+
+        // and: the category is returned
+        assertEquals(category.getId(), actualCategory.getId());
+    }
+
+    @Test
+    public void testGetCategory_WrongUser() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: a category belonging to another user
+        Category category = Category.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .build();
+        when(categoryRepository.findByIdOptional(category.getId()))
+            .thenReturn(Optional.of(category));
+
+        // when: the category is requested
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+            // then: an exception is thrown
+            fixture.getCategory(userId, category.getId())
+        );
+
+        // and: the exception identifies the category
+        assertEquals("Category", exception.getParameter("entity-type"));
+        assertEquals(category.getId(), exception.getParameter("entity-id"));
+    }
+
+    @Test
+    public void testGetCategory_InvalidCategoryId() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an unknown category id
+        UUID categoryId = UUID.randomUUID();
+        when(categoryRepository.findByIdOptional(categoryId))
+            .thenReturn(Optional.empty());
+
+        // when: the category is requested
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+            // then: an exception is thrown
+            fixture.getCategory(userId, categoryId)
+        );
+
+        // and: the exception identifies the category
+        assertEquals("Category", exception.getParameter("entity-type"));
+        assertEquals(categoryId, exception.getParameter("entity-id"));
+    }
+
+    @Test
+    public void testCreateCategory() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: a new category details
+        String name = randomAlphanumeric(10);
+        String description = randomAlphanumeric(10);
+        String colour = randomAlphanumeric(10);
+
+        // and: no existing category with the same name
+        when(categoryRepository.findByUserAndName(userId, name))
+            .thenReturn(Optional.empty());
+
+        // when: the category is created
+        Category result = fixture.createCategory(userId, name, description, colour);
+
+        // then: the category is saved to the repository
+        ArgumentCaptor<Category> categoryCaptor = ArgumentCaptor.forClass(Category.class);
+        verify(categoryRepository).save(categoryCaptor.capture());
+
+        // and: the category is returned
+        assertEquals(categoryCaptor.getValue(), result);
+    }
+
+    @Test
+    public void testCreateCategory_AlreadyExists() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: a new category details
+        String name = randomAlphanumeric(10);
+        String description = randomAlphanumeric(10);
+        String colour = randomAlphanumeric(10);
+
+        // and: an existing category with the same name
+        Category existing = Category.builder()
+            .userId(userId)
+            .name(name)
+            .build();
+        when(categoryRepository.findByUserAndName(userId, name))
+            .thenReturn(Optional.of(existing));
+
+        // when: the category is created
+        CategoryAlreadyExistsException exception = assertThrows(CategoryAlreadyExistsException.class, () ->
+            // then: an exception is thrown
+            fixture.createCategory(userId, name, description, colour)
+        );
+
+        // and: the exception identifies the category
+        assertEquals(existing.getId(), exception.getParameter("id"));
+        assertEquals(existing.getName(), exception.getParameter("name"));
+
+        // and: the category is not created
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    public void testUpdateCategory() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an existing category
+        Category category = Category.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .build();
+        when(categoryRepository.findByIdOptional(category.getId()))
+            .thenReturn(Optional.of(category));
+
+        // and: the new category details
+        String name = randomAlphanumeric(10);
+        String description = randomAlphanumeric(10);
+        String colour = randomAlphanumeric(10);
+
+        // when: the category is updated
+        Category result = fixture.updateCategory(userId, category.getId(), name, description, colour);
+
+        // then: the category is retrieved from the repository
+        verify(categoryRepository).findByIdOptional(category.getId());
+
+        // and: the category is saved to the repository
+        ArgumentCaptor<Category> categoryCaptor = ArgumentCaptor.forClass(Category.class);
+        verify(categoryRepository).save(categoryCaptor.capture());
+
+        // and: the updated category is as requested
+        Category updatedCategory = categoryCaptor.getValue();
+        assertEquals(category.getId(), updatedCategory.getId());
+        assertEquals(name, updatedCategory.getName());
+        assertEquals(description, updatedCategory.getDescription());
+        assertEquals(colour, updatedCategory.getColour());
+
+        // and: the response matches the updated category
+        assertEquals(category.getId(), result.getId());
+        assertEquals(name, result.getName());
+        assertEquals(description, result.getDescription());
+        assertEquals(colour, result.getColour());
+    }
+
+    @Test
+    public void testUpdateCategory_WrongUser() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an existing category belonging to another user
+        Category category = Category.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .build();
+        when(categoryRepository.findByIdOptional(category.getId()))
+            .thenReturn(Optional.of(category));
+
+        // and: the new category details
+        String name = randomAlphanumeric(10);
+        String description = randomAlphanumeric(10);
+        String colour = randomAlphanumeric(10);
+
+        // when: the category is updated
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+            // then: an exception is thrown
+            fixture.updateCategory(userId, category.getId(), name, description, colour)
+        );
+
+        // and: the exception identifies the category
+        assertEquals("Category", exception.getParameter("entity-type"));
+        assertEquals(category.getId(), exception.getParameter("entity-id"));
+
+        // and: the category is not updated
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    public void testUpdateCategory_InvalidCategoryId() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an unknown category id
+        UUID categoryId = UUID.randomUUID();
+        when(categoryRepository.findByIdOptional(categoryId))
+            .thenReturn(Optional.empty());
+
+        // and: the new category details
+        String name = randomAlphanumeric(10);
+        String description = randomAlphanumeric(10);
+        String colour = randomAlphanumeric(10);
+
+        // when: the category is updated
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+            // then: an exception is thrown
+            fixture.updateCategory(userId, categoryId, name, description, colour)
+        );
+
+        // and: the exception identifies the category
+        assertEquals("Category", exception.getParameter("entity-type"));
+        assertEquals(categoryId, exception.getParameter("entity-id"));
+
+        // and: the category is not updated
+        verify(categoryRepository, never()).save(any());
     }
 
     @Test

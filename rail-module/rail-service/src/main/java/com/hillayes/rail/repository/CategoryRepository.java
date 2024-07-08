@@ -7,6 +7,7 @@ import com.hillayes.rail.domain.Category;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -18,6 +19,11 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
     public Page<Category> findByUserId(UUID userId, int page, int pageSize) {
         return pageAll("userId = :userId", page, pageSize,
             OrderBy.by("name"), Map.of("userId", userId));
+    }
+
+    public Optional<Category> findByUserAndName(UUID userId, String name) {
+        return findFirst("userId = :userId and name = :name",
+            Map.of("userId", userId, "name", name));
     }
 
     /**

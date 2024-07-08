@@ -12,6 +12,7 @@ import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,48 @@ public class CategoryResource {
         log.debug("Listing categories [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
                 userId, page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/{categoryId}")
+    public Response getCategory(@Context SecurityContext ctx,
+                                @PathParam("categoryId") UUID categoryId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Get category [userId: {}, category: {}]", userId, categoryId);
+
+        CategoryResponse category = marshal(categoryService.getCategory(userId, categoryId));
+        return Response.ok(category).build();
+    }
+
+    @POST
+    public Response createCategory(@Context SecurityContext ctx,
+                                   @Context UriInfo uriInfo,
+                                   CategoryRequest newCategory) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Creating category [userId: {}, category: {}]", userId, newCategory.getName());
+
+        Category category = categoryService.createCategory(AuthUtils.getUserId(ctx),
+            newCategory.getName(), newCategory.getDescription(), newCategory.getColour());
+
+        URI location = uriInfo.getBaseUriBuilder()
+            .path(CategoryResource.class)
+            .path(category.getId().toString())
+            .build();
+        return Response.created(location).build();
+    }
+
+    @PUT
+    @Path("/{categoryId}")
+    public Response updateCategory(@Context SecurityContext ctx,
+                                   @PathParam("categoryId") UUID categoryId,
+                                   CategoryRequest details) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, details.getName());
+
+        categoryService.updateCategory(AuthUtils.getUserId(ctx), categoryId,
+            details.getName(), details.getDescription(), details.getColour());
+
+        return Response.noContent().build();
     }
 
     @GET

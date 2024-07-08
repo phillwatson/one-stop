@@ -10,10 +10,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -216,6 +213,34 @@ public class CategoryRepositoryTest {
             assertEquals(pageSize, categories.size());
             assertEquals(userCategories.subList(page * pageSize, (page + 1) * pageSize), categories);
         }
+    }
+
+    @Test
+    public void testFindByUserAndName() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: several categories
+        List<Category> categories = IntStream.range(0, 5).mapToObj(index ->
+            fixture.save(Category.builder()
+                .userId(consent.getUserId())
+                .name(randomAlphanumeric(30))
+                .description(randomAlphanumeric(30))
+                .colour("#FF0000")
+                .build())
+        ).toList();
+
+        fixture.flush();
+        fixture.getEntityManager().clear();
+
+        // when: retrieving each category by user and name
+        categories.forEach(category -> {
+            Optional<Category> result = fixture.findByUserAndName(consent.getUserId(), category.getName());
+
+            // then: the named category is retrieved
+            assertTrue(result.isPresent());
+            assertEquals(category.getId(), result.get().getId());
+        });
     }
 
     @Test

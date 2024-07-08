@@ -4,6 +4,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.CategoryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,7 +13,6 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -40,6 +40,40 @@ public class CategoryService {
         log.debug("Listing categories [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
             userId, page, pageSize, result.getContentSize(), result.getTotalCount());
         return result;
+    }
+
+    public Category getCategory(UUID userId, UUID categoryId) {
+        log.info("Getting category [userId: {}, categoryId: {}]", userId, categoryId);
+        return categoryRepository.findByIdOptional(categoryId)
+            .filter(category -> category.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("Category", categoryId));
+    }
+
+    public Category createCategory(UUID userId, String name, String description, String colour) {
+        log.info("Creating category [userId: {}, category: {}]", userId, name);
+
+        String newName = name.trim();
+        categoryRepository.findByUserAndName(userId, newName)
+            .ifPresent(category -> { throw new CategoryAlreadyExistsException(category); });
+
+        Category category = Category.builder()
+            .userId(userId)
+            .name(newName)
+            .description(description)
+            .colour(colour)
+            .build();
+        return categoryRepository.save(category);
+    }
+
+    public Category updateCategory(UUID userId, UUID categoryId,
+                                   String name, String description, String colour) {
+        log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, name);
+        Category category = getCategory(userId, categoryId);
+
+        category.setName(name);
+        category.setDescription(description);
+        category.setColour(colour);
+        return categoryRepository.save(category);
     }
 
     /**
@@ -101,9 +135,7 @@ public class CategoryService {
      * @return The identified category.
      */
     private Category validate(UUID userId, UUID categoryId, UUID accountId) {
-        Category category = categoryRepository.findByIdOptional(categoryId)
-            .filter(c -> c.getUserId().equals(userId))
-            .orElseThrow(() -> new NotFoundException("Category", categoryId));
+        Category category = getCategory(userId, categoryId);
 
         accountRepository.findByIdOptional(accountId)
             .filter(account -> account.getUserId().equals(userId))
