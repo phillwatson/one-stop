@@ -1709,11 +1709,11 @@ components:
       properties:
         name:
           type: string
-          description: The category's name
+          description: The category's name (unique to the user's categories).
           example: Groceries
         description:
           type: string
-          description: The category's description
+          description: The category's description.
           example: Food and household items
         colour:
           type: string
