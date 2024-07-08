@@ -1,5 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
-
 CREATE TABLE ${flyway:defaultSchema}.category (
     id uuid NOT NULL CONSTRAINT category_pkey PRIMARY KEY,
     version bigint NOT NULL DEFAULT 0,
@@ -18,4 +16,5 @@ CREATE TABLE ${flyway:defaultSchema}.category_selector (
     ref_contains varchar(256) NULL,
     creditor_contains varchar(256) NULL
 );
+CREATE INDEX idx_category_selector_category_id ON ${flyway:defaultSchema}.category_selector (category_id);
 CREATE INDEX idx_category_selector_account_id ON ${flyway:defaultSchema}.category_selector (account_id);

@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/rails/categories")
+@Path("/api/v1/rails/categories")
 @RolesAllowed("user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -29,7 +29,7 @@ public class CategoryResource {
     public Response getCategories(@Context SecurityContext ctx,
                                   @Context UriInfo uriInfo,
                                   @QueryParam("page") @DefaultValue("0") int page,
-                                  @QueryParam("pageSize") @DefaultValue("20") int pageSize) {
+                                  @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting categories [userId: {}]", userId);
 

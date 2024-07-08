@@ -67,16 +67,18 @@ public class CategoryService {
      * @param selectors The category selectors to be set.
      */
     public void setCategorySelectors(UUID userId, UUID categoryId, UUID accountId,
-                                     List<CategorySelector> selectors) {
+                                     Collection<CategorySelector> selectors) {
         log.info("Setting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
         Category category = validate(userId, categoryId, accountId);
 
         category.getSelectors().removeIf(selector -> selector.getAccountId().equals(accountId));
-        selectors.forEach(newSelector -> category.addSelector(accountId, selector -> selector
-            .infoContains(newSelector.getInfoContains())
-            .refContains(newSelector.getRefContains())
-            .creditorContains(newSelector.getCreditorContains())
-        ));
+        if (selectors != null) {
+            selectors.forEach(newSelector -> category.addSelector(accountId, selector -> selector
+                .infoContains(newSelector.getInfoContains())
+                .refContains(newSelector.getRefContains())
+                .creditorContains(newSelector.getCreditorContains())
+            ));
+        }
 
         categoryRepository.save(category);
     }
