@@ -305,7 +305,7 @@ public class CategoryResourceTest extends TestBase {
         assertEquals(expectedResult.size(), response.size());
         expectedResult.forEach(expected -> {
             CategoryStatisticsResponse actual = response.stream()
-                .filter(s -> s.getCategoryId().equals(expected.getCategoryId()))
+                .filter(s -> expected.getCategoryId().equals(s.getCategoryId()))
                 .findFirst().orElse(null);
 
             assertNotNull(actual);
