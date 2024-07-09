@@ -79,6 +79,14 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    public Category deleteCategory(UUID userId, UUID categoryId) {
+        log.info("Deleting category [userId: {}, categoryId: {}]", userId, categoryId);
+        Category category = getCategory(userId, categoryId);
+
+        categoryRepository.delete(category);
+        return category;
+    }
+
     /**
      * Returns the selectors for the identified category and account.
      *
@@ -102,9 +110,10 @@ public class CategoryService {
      * @param categoryId The category ID.
      * @param accountId The account ID to which the selectors are to be associated.
      * @param selectors The category selectors to be set.
+     * @return the updated category selectors.
      */
-    public void setCategorySelectors(UUID userId, UUID categoryId, UUID accountId,
-                                     Collection<CategorySelector> selectors) {
+    public Collection<CategorySelector> setCategorySelectors(UUID userId, UUID categoryId, UUID accountId,
+                                                             Collection<CategorySelector> selectors) {
         log.info("Setting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
         Category category = validate(userId, categoryId, accountId);
 
@@ -118,6 +127,7 @@ public class CategoryService {
         }
 
         categoryRepository.save(category);
+        return category.getSelectors();
     }
 
     /**

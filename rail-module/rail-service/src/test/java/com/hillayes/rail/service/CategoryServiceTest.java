@@ -540,9 +540,18 @@ public class CategoryServiceTest {
         );
 
         // when: the category selectors are set
-        fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
+        Collection<CategorySelector> updatedSelectors = fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
 
-        // then: the category is retrieved from the repository
+        // then: the response contains the updated selectors
+        assertEquals(newSelectors.size(), updatedSelectors.size());
+        newSelectors.forEach(newSelector ->
+            assertTrue(updatedSelectors.stream()
+                .anyMatch(s -> Objects.equals(s.getInfoContains(), newSelector.getInfoContains())
+                    || Objects.equals(s.getRefContains(), newSelector.getRefContains())
+                    || Objects.equals(s.getCreditorContains(), newSelector.getCreditorContains())))
+        );
+
+        // and: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
 
         // and: the updated category is saved
@@ -595,9 +604,18 @@ public class CategoryServiceTest {
             .getSelectors());
 
         // when: the category selectors are set to an empty collection
-        fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
+        Collection<CategorySelector> updatedSelectors = fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
 
-        // then: the category is retrieved from the repository
+        // then: the response contains the updated selectors
+        assertEquals(newSelectors.size(), updatedSelectors.size());
+        newSelectors.forEach(newSelector ->
+            assertTrue(updatedSelectors.stream()
+                .anyMatch(s -> Objects.equals(s.getInfoContains(), newSelector.getInfoContains())
+                    || Objects.equals(s.getRefContains(), newSelector.getRefContains())
+                    || Objects.equals(s.getCreditorContains(), newSelector.getCreditorContains())))
+        );
+
+        // and: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
 
         // and: the updated category is saved
@@ -642,9 +660,18 @@ public class CategoryServiceTest {
         );
 
         // when: the category selectors are set
-        fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
+        Collection<CategorySelector> updatedSelectors = fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
 
-        // then: the category is retrieved from the repository
+        // then: the response contains the updated selectors
+        assertEquals(newSelectors.size(), updatedSelectors.size());
+        newSelectors.forEach(newSelector ->
+            assertTrue(updatedSelectors.stream()
+                .anyMatch(s -> Objects.equals(s.getInfoContains(), newSelector.getInfoContains())
+                    || Objects.equals(s.getRefContains(), newSelector.getRefContains())
+                    || Objects.equals(s.getCreditorContains(), newSelector.getCreditorContains())))
+        );
+
+        // and: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
 
         // and: the updated category is saved

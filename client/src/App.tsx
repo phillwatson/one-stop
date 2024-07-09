@@ -11,6 +11,7 @@ import NewUser from "./pages/new-user";
 import OnboardUser from "./pages/onboard-user";
 import Transactions from "./pages/transactions";
 import Graph from "./pages/graphs";
+import Categories from "./pages/categories";
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: "accounts/:accountId/graph",
         element: <Graph />
+      },
+      {
+        path: "categories",
+        element: <Categories />
       },
       {
         path: "profile",

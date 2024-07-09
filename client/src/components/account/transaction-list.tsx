@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel, GridRowSelectionModel } from '@mui/x-data-grid';
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
@@ -13,6 +13,7 @@ import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate, toISODate } from "../../util/date-util";
 import { PaginatedTransactions } from "../../model/account.model";
 import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
+import AddSelector from "../categories/add-selector";
 
 interface Props {
   account: AccountDetail;
@@ -80,6 +81,8 @@ export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_LIST);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail>();
+  const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -119,6 +122,17 @@ export default function TransactionList(props: Props) {
     setTransactionFilter(filter);
   }, []);
 
+  function addToCategory(selection: GridRowSelectionModel) {
+    if (selection.length === 0) return;
+
+    const transactionId = selection[0] as string;
+    const transaction = transactions.items.find(t => t.id === transactionId);
+    setSelectedTransaction(transaction);
+    if (transaction !== undefined) {
+      setShowAddCategory(true);
+    }
+  }
+
   useEffect(() => {
     setLoading(true);
     AccountService.getTransactions(props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter)
@@ -135,7 +149,9 @@ export default function TransactionList(props: Props) {
         pagination paginationModel={paginationModel}
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={setPaginationModel}
-        filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}/>
+        filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}
+        onRowSelectionModelChange={(newRowSelectionModel) => addToCategory(newRowSelectionModel) }
+        />
 
       { transactionFilter && transactions.currencyTotals &&
         <TableContainer>
@@ -151,6 +167,11 @@ export default function TransactionList(props: Props) {
           </Table>
         </TableContainer>
       }
-    </>
+ 
+    <AddSelector open={ showAddCategory }
+        transaction={ selectedTransaction }
+        onCancel={ () => setShowAddCategory(false) }
+        onConfirm={() => setShowAddCategory(false) }/>
+   </>
   )
 }

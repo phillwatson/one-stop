@@ -8,7 +8,6 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 
-import "./user-consents.css";
 import { useMessageDispatch } from "../../contexts/messages/context";
 import UserConsentService from "../../services/consent.service"
 import InstitutionService from "../../services/institution.service";

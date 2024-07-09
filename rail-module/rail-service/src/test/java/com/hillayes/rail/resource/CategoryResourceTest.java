@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -241,8 +240,14 @@ public class CategoryResourceTest extends TestBase {
             new AccountCategorySelector().creditorContains(randomAlphanumeric(20))
         );
 
+        // and: the service is primed with data
+        List<CategorySelector> updatedSelectors = mockCategorySelectors(selectors.size(), accountId, categoryId);
+        when(categoryService.setCategorySelectors(eq(userId), eq(categoryId), eq(accountId), anyList()))
+            .thenReturn(updatedSelectors);
+
         // when: the category selectors are updated
-        given()
+        TypeRef<Collection<AccountCategorySelector>> typeRef = new TypeRef<>() {};
+        Collection<AccountCategorySelector> response = given()
             .request()
             .pathParam("categoryId", categoryId)
             .pathParam("accountId", accountId)
@@ -251,9 +256,15 @@ public class CategoryResourceTest extends TestBase {
             .when()
             .put("/api/v1/rails/categories/{categoryId}/selectors/{accountId}")
             .then()
-            .statusCode(204);
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(typeRef);
 
-        // then: the category-service is called with the authenticated user-id, category-id, account-id, and new category-selectors
+        // then: the response contains the list of updated category-selectors
+        assertEquals(updatedSelectors.size(), response.size());
+
+        // and: the category-service is called with the authenticated user-id, category-id, account-id, and new category-selectors
         ArgumentCaptor<List<CategorySelector>> captor = ArgumentCaptor.forClass(List.class);
         verify(categoryService).setCategorySelectors(eq(userId), eq(categoryId), eq(accountId), captor.capture());
 

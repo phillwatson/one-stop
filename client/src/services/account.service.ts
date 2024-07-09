@@ -4,7 +4,7 @@ import { AccountDetail, TransactionDetail, PaginatedTransactions } from '../mode
 
 class AccountService {
   getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AccountDetail>> {
-    console.log(`Retrieving account [page: ${page}, pageSize: ${pageSize}]`);
+    console.log(`Retrieving accounts [page: ${page}, pageSize: ${pageSize}]`);
     return http.get<PaginatedList<AccountDetail>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
     }

@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Logout from '@mui/icons-material/Logout';
 import Person from '@mui/icons-material/Person';
 import Savings from '@mui/icons-material/Savings';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
@@ -57,6 +58,7 @@ export default function MainPage() {
 
     return [
       { label: 'Accounts', route: 'accounts', icon: <Savings/> },
+      { label: 'Categories', route: 'categories', icon: <CategoryIcon/> },
       { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
     ];

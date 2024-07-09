@@ -97,6 +97,17 @@ public class CategoryResource {
         return Response.noContent().build();
     }
 
+    @DELETE
+    @Path("/{categoryId}")
+    public Response deleteCategory(@Context SecurityContext ctx,
+                                   @PathParam("categoryId") UUID categoryId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting category [userId: {}, categoryId: {}]", userId, categoryId);
+
+        Category category = categoryService.deleteCategory(AuthUtils.getUserId(ctx), categoryId);
+        return Response.ok(marshal(category)).build();
+    }
+
     @GET
     @Path("/{categoryId}/selectors/{accountId}")
     public Response getCategorySelectors(@Context SecurityContext ctx,
@@ -131,9 +142,13 @@ public class CategoryResource {
                 .infoContains(selector.getInfoContains())
                 .build())
             .toList();
-        categoryService.setCategorySelectors(userId, categoryId, accountId, newSelectors);
 
-        return Response.noContent().build();
+        Collection<AccountCategorySelector> result =
+            categoryService.setCategorySelectors(userId, categoryId, accountId, newSelectors).stream()
+                .map(this::marshal)
+                .toList();
+
+        return Response.ok(result).build();
     }
 
     @GET
