@@ -3,6 +3,7 @@ package com.hillayes.rail.service;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Category;
+import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.domain.CategorySelector;
 import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
@@ -12,7 +13,9 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -125,6 +128,17 @@ public class CategoryService {
     public void deleteAllCategories(UUID userId) {
         log.info("Deleting all categories for user [userId: {}]", userId);
         categoryRepository.deleteByUserId(userId);
+    }
+
+    /**
+     * Generates the category statistics for the specified user and date range.
+     * @param userId The user ID.
+     * @param startDate The start date (inclusive).
+     * @param endDate The end date (exclusive).
+     * @return The list of category statistics.
+     */
+    public List<CategoryStatistics> getStatistics(UUID userId, Instant startDate, Instant endDate) {
+        return categoryRepository.getStatistics(userId, startDate, endDate);
     }
 
     /**

@@ -75,10 +75,10 @@ public class Category {
      *
      * @param accountId The account that the selector is associated with.
      * @param modifier A consumer that can be used to modify the selector as it is added.
-     * @return
+     * @return The category, to allow method chaining.
      */
-    public CategorySelector addSelector(UUID accountId,
-                                        Consumer<CategorySelector.Builder> modifier) {
+    public Category addSelector(UUID accountId,
+                                Consumer<CategorySelector.Builder> modifier) {
         CategorySelector.Builder builder = CategorySelector.builder()
             .category(this)
             .accountId(accountId);
@@ -89,7 +89,7 @@ public class Category {
 
         CategorySelector selector = builder.build();
         selectors.add(selector);
-        return selector;
+        return this;
     }
 
     public boolean removeSelector(CategorySelector selector) {

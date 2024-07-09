@@ -4,6 +4,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.service.CategoryService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -12,6 +13,11 @@ import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -254,6 +260,59 @@ public class CategoryResourceTest extends TestBase {
         // and: the new category-selectors are passed to the category-service
         List<CategorySelector> actual = captor.getValue();
         assertEquals(selectors.size(), actual.size());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetStatistics() {
+        // given: an authenticated user
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a date range
+        LocalDate fromDate = LocalDate.now().minusDays(7);
+        LocalDate toDate = LocalDate.now();
+
+        // and: the service is primed with data
+        Instant startDate = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endDate = toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        List<CategoryStatistics> expectedResult = List.of(
+            new CategoryStatistics("cat-1", UUID.randomUUID(), 20, BigDecimal.valueOf(123.44)),
+            new CategoryStatistics("cat-2", UUID.randomUUID(), 10, BigDecimal.valueOf(456.44)),
+            new CategoryStatistics("cat-3", UUID.randomUUID(), 6, BigDecimal.valueOf(34.44))
+        );
+        when(categoryService.getStatistics(userId, startDate, endDate))
+            .thenReturn(expectedResult);
+
+        // when: the statistics are requested
+        TypeRef<List<CategoryStatisticsResponse>> typeRef = new TypeRef<>() {};
+        Collection<CategoryStatisticsResponse> response = given()
+            .request()
+            .queryParam("from-date", fromDate.toString())
+            .queryParam("to-date", toDate.toString())
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/categories/statistics")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(typeRef);
+
+        // then: the request is passed to the service
+        verify(categoryService).getStatistics(userId, startDate, endDate);
+
+        // and: the result is as expected
+        assertEquals(expectedResult.size(), response.size());
+        expectedResult.forEach(expected -> {
+            CategoryStatisticsResponse actual = response.stream()
+                .filter(s -> s.getCategoryId().equals(expected.getCategoryId()))
+                .findFirst().orElse(null);
+
+            assertNotNull(actual);
+            assertEquals(expected.getCategory(), actual.getCategory());
+            assertEquals(expected.getCount(), actual.getCount());
+            assertEquals(expected.getTotal().doubleValue(), actual.getTotal());
+        });
     }
 
     private List<Category> mockCategories(int size) {

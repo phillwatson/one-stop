@@ -35,6 +35,13 @@ public interface ServiceConfiguration {
     Duration consentTimeout();
 
     /**
+     * The name of the category that is used for transactions that do not match any
+     * category selector.
+     */
+    @WithDefault("UNCATEGORISED")
+    String uncategorisedName();
+
+    /**
      * The detail that describes a country supported by the rail service.
      */
     interface Country {

@@ -121,37 +121,37 @@ public class TransactionFilter {
      * placeholders match those used in the parameter map (see {@link #toParams()}).
      */
     public String toQuery() {
-        List<String> projection = new ArrayList<>();
+        List<String> query = new ArrayList<>();
 
         if (getUserId() != null) {
-            projection.add("userId = :userId");
+            query.add("userId = :userId");
         }
         if (getAccountId() != null) {
-            projection.add("accountId = :accountId");
+            query.add("accountId = :accountId");
         }
         if (getFromDate() != null) {
-            projection.add("bookingDateTime >= :fromDate");
+            query.add("bookingDateTime >= :fromDate");
         }
         if (getToDate() != null) {
-            projection.add("bookingDateTime < :toDate");
+            query.add("bookingDateTime < :toDate");
         }
         if (getMinAmount() != null) {
-            projection.add("amount >= :minAmount");
+            query.add("amount >= :minAmount");
         }
         if (getMaxAmount() != null) {
-            projection.add("amount <= :maxAmount");
+            query.add("amount <= :maxAmount");
         }
         if (getReference() != null) {
-            projection.add("reference like :reference");
+            query.add("reference like :reference");
         }
         if (getInfo() != null) {
-            projection.add("additionalInformation like :info");
+            query.add("additionalInformation like :info");
         }
         if (getCreditor() != null) {
-            projection.add("creditorName like :creditor");
+            query.add("creditorName like :creditor");
         }
 
-        return String.join(" AND ", projection);
+        return String.join(" AND ", query);
     }
 
     public Predicate toPredicate(CriteriaBuilder builder, Root<AccountTransaction> root) {

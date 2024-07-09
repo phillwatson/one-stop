@@ -79,9 +79,17 @@ public class TestData {
     }
 
     public static AccountTransaction mockAccountTransaction(Account account) {
+        return mockAccountTransaction(account, null);
+    }
+
+    public static AccountTransaction mockAccountTransaction(Account account,
+                                                            Consumer<AccountTransaction.Builder> modifier) {
         return mockAccountTransaction(c -> {
             c.accountId(account.getId());
             c.userId(account.getUserId());
+            if (modifier != null) {
+                modifier.accept(c);
+            }
         });
     }
 

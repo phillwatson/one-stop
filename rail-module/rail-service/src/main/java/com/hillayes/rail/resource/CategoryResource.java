@@ -5,6 +5,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.service.CategoryService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -13,6 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -131,6 +136,28 @@ public class CategoryResource {
         return Response.noContent().build();
     }
 
+    @GET
+    @Path("/statistics")
+    public Response getCategoryStatistics(@Context SecurityContext ctx,
+                                          @QueryParam("from-date") LocalDate fromDate,
+                                          @QueryParam("to-date") LocalDate toDate) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting category statistics [userId: {}, fromDate: {}, toDate: {}]", userId, fromDate, toDate);
+
+        // convert dates to instant
+        Instant startDate = (fromDate == null)
+            ? Instant.EPOCH.truncatedTo(ChronoUnit.DAYS)
+            : fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endDate = (toDate == null)
+            ? Instant.now().truncatedTo(ChronoUnit.DAYS)
+            : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        List<CategoryStatisticsResponse> result = categoryService.getStatistics(userId, startDate, endDate).stream()
+            .map(this::marshal)
+            .toList();
+        return Response.ok(result).build();
+    }
+
     private CategoryResponse marshal(Category category) {
         return new CategoryResponse()
             .id(category.getId())
@@ -144,5 +171,13 @@ public class CategoryResource {
             .creditorContains(selector.getCreditorContains())
             .refContains(selector.getRefContains())
             .infoContains(selector.getInfoContains());
+    }
+
+    private CategoryStatisticsResponse marshal(CategoryStatistics statistics) {
+        return new CategoryStatisticsResponse()
+            .category(statistics.getCategory())
+            .categoryId(statistics.getCategoryId())
+            .count(statistics.getCount())
+            .total(statistics.getTotal().doubleValue());
     }
 }

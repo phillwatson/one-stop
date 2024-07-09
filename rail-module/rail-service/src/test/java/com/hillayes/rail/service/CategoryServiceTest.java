@@ -5,6 +5,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.CategoryRepository;
@@ -16,6 +17,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -314,16 +318,17 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(category));
 
         // and: the category has selectors associated with the account
-        List<CategorySelector> expectedSelectors = List.of(
-            category.addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
-        );
+        Set<CategorySelector> expectedSelectors = new HashSet(category
+            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .getSelectors());
 
         // and: the category has selectors associated with other accounts
-        category.addSelector(UUID.randomUUID(), selector -> selector.infoContains(randomAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.refContains(randomAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.creditorContains(randomAlphanumeric(10)));
+        category
+            .addSelector(UUID.randomUUID(), selector -> selector.infoContains(randomAlphanumeric(10)))
+            .addSelector(UUID.randomUUID(), selector -> selector.refContains(randomAlphanumeric(10)))
+            .addSelector(UUID.randomUUID(), selector -> selector.creditorContains(randomAlphanumeric(10)));
 
         // when: the category selectors are requested
         Collection<CategorySelector> actualSelectors =
@@ -520,12 +525,12 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(category));
 
         // and: the category has selectors associated with the account
-        List<CategorySelector> oldSelectors = List.of(
-            category.addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
-        );
+        Set<CategorySelector> oldSelectors = new HashSet(category
+            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .getSelectors());
 
         // and: the new selectors to replace the old ones
         List<CategorySelector> newSelectors = List.of(
@@ -582,12 +587,12 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(category));
 
         // and: the category has selectors associated with the account
-        List<CategorySelector> oldSelectors = List.of(
-            category.addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10))),
-            category.addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
-        );
+        Set<CategorySelector> oldSelectors = new HashSet(category
+            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .getSelectors());
 
         // when: the category selectors are set to an empty collection
         fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
@@ -801,5 +806,33 @@ public class CategoryServiceTest {
 
         // then: the categories are deleted from the repository
         verify(categoryRepository).deleteByUserId(userId);
+    }
+
+    @Test
+    public void testGetStatistics() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: a date range
+        Instant startDate = Instant.now().minus(Duration.ofDays(7));
+        Instant endDate = Instant.now();
+
+        // and: the repository is primed with data
+        List<CategoryStatistics> expected = List.of(
+            new CategoryStatistics("cat-1", UUID.randomUUID(), 20, BigDecimal.valueOf(123.44)),
+            new CategoryStatistics("cat-2", UUID.randomUUID(), 10, BigDecimal.valueOf(456.44)),
+            new CategoryStatistics("cat-3", UUID.randomUUID(), 6, BigDecimal.valueOf(34.44))
+        );
+        when(categoryRepository.getStatistics(userId, startDate, endDate))
+            .thenReturn(expected);
+
+        // when: the service is called to retrieve the statistics
+        List<CategoryStatistics> result = fixture.getStatistics(userId, startDate, endDate);
+
+        // then: the request is passed to the repository
+        verify(categoryRepository).getStatistics(userId, startDate, endDate);
+
+        // and: the result is as expected
+        assertEquals(expected, result);
     }
 }
