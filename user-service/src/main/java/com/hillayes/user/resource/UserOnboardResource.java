@@ -65,8 +65,7 @@ public class UserOnboardResource {
                 .path(UserProfileResource.class)
                 .path(newUser.getId().toString())
                 .build();
-            Response response = authTokens.authResponse(Response.created(location), newUser.getId(), newUser.getRoles());
-            return response;
+            return authTokens.authResponse(Response.created(location), newUser.getId(), newUser.getRoles());
         } catch (ParseException e) {
             log.error("Onboarding JWT is invalid [token: {}]", request.getToken());
             throw new NotAuthorizedException("token");

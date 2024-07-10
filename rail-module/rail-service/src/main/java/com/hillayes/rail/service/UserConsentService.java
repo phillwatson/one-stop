@@ -318,7 +318,7 @@ public class UserConsentService {
                 userConsent.setDateCancelled(Instant.now());
 
                 if (purge) {
-                    // will cascade delete accounts, balances and transactions
+                    // will cascade delete accounts, balances, transactions and category selectors
                     userConsentRepository.delete(userConsent);
                 } else {
                     userConsent = userConsentRepository.save(userConsent);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import "./auth-provider-list.css";
 import DeleteIcon from '@mui/icons-material/LinkOffOutlined';
 import { SxProps } from '@mui/material/styles';
 import Table from '@mui/material/Table';

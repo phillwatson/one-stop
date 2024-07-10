@@ -5,6 +5,7 @@ import com.hillayes.events.annotation.TopicObserver;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.rail.service.CategoryService;
 import com.hillayes.rail.service.UserConsentService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserTopicConsumer {
     private final UserConsentService userConsentService;
+    private final CategoryService categoryService;
 
     // May require @Observes(during = TransactionPhase.AFTER_SUCCESS) if the
     // event is triggered in the same transaction as it is consumed.
@@ -33,6 +35,7 @@ public class UserTopicConsumer {
         if (UserDeleted.class.getName().equals(payloadClass)) {
             UserDeleted payload = eventPacket.getPayloadContent();
             userConsentService.deleteAllConsents(payload.getUserId());
+            categoryService.deleteAllCategories(payload.getUserId());
         }
     }
 }

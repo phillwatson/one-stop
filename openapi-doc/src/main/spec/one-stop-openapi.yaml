@@ -2,7 +2,7 @@ openapi: "3.0.2"
 info:
   version: "1.0.0"
   title: "One Stop API"
-  description: "One Stop API"
+  description: One Stop API
 
 servers:
   - url: http://hillayes.com/api/v1
@@ -12,646 +12,652 @@ servers:
 
 tags:
   - name: "auth"
-    description: "Operations related to authentication"
+    description: Operations related to authentication
   - name: "users"
-    description: "Operations related to users"
+    description: Operations related to users
   - name: "rails"
-    description: "Operations related to rails"
+    description: Operations related to rails
   - name: "accounts"
-    description: "Operations related to accounts"
+    description: Operations related to accounts
   - name: "transactions"
-    description: "Operations related to account transactions"
+    description: Operations related to account transactions
+  - name: "categories"
+    description: Operations related to transaction categories
   - name: "notifications"
-    description: "Operations related to user notifications"
+    description: Operations related to user notifications
 
 paths:
   /auth/login:
     post:
       tags: [ "auth"]
-      summary: "Username password login."
-      description: "Authenticate user by username and password credentials."
-      operationId: "login"
+      summary: Username password login.
+      description: Authenticate user by username and password credentials.
+      operationId: login
       security: [ ]
       requestBody:
-        description: "The user's credentials"
+        description: The user's credentials
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         204:
-          description: "successful login"
+          description: successful login
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /auth/logout:
     get:
       tags: [ "auth" ]
-      summary: "Close the user's session"
-      description: "Revoke all authentication tokens for the current session"
-      operationId: "logout"
+      summary: Close the user's session
+      description: Revoke all authentication tokens for the current session
+      operationId: logout
       security: []
       responses:
         204:
-          description: "successful logout"
+          description: successful logout
 
   /auth/refresh:
     get:
       tags: [ "auth" ]
-      summary: "Refresh auth tokens"
-      description: "Generate new authentication tokens for the current session"
-      operationId: "refresh"
+      summary: Refresh auth tokens
+      description: Generate new authentication tokens for the current session
+      operationId: refresh
       security:
         - cookieAuth: [ ]
       responses:
         204:
-          description: "successful refresh"
+          description: successful refresh
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /users:
     get:
       tags: [ "users" ]
-      summary: "Get all users"
-      description: "Get a paginated list of all users."
-      operationId: "getAllUsers"
+      summary: Get all users
+      description: Get a paginated list of all users.
+      operationId: getAllUsers
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedUsers"
+                $ref: '#/components/schemas/PaginatedUsers'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /users/{id}:
     get:
       tags: [ "users" ]
-      summary: "Get user by id"
-      description: "Returns the details of the identified user"
-      operationId: "getUserById"
+      summary: Get user by id
+      description: Returns the details of the identified user
+      operationId: getUserById
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of user to return"
+          description: ID of user to return
           required: true
           schema:
             type: string
             format: uuid
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: '#/components/schemas/UserResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "User not found"
+          description: User not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
     put:
       tags: [ "users" ]
-      summary: "Update user"
+      summary: Update user
       description: |
-        Updates the user with the given id. Used by adminstrator to update
-        a user's details.
-      operationId: "updateUser"
+        Updates the user with the given id. Used by adminstrator to update a user's details.
+      operationId: updateUser
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of user to update"
+          description: ID of user to update
           required: true
           schema:
             type: string
             format: uuid
       requestBody:
-        description: "Updated user object"
+        description: Updated user object
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserUpdateRequest"
+              $ref: '#/components/schemas/UserUpdateRequest'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: '#/components/schemas/UserResponse'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "User not found"
+          description: User not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
     delete:
       tags: [ "users" ]
-      summary: "Delete user"
-      description: "Deletes the identified user. Admin only."
-      operationId: "deleteUser"
+      summary: Delete user
+      description: Deletes the identified user. Admin only.
+      operationId: deleteUser
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of user to delete"
+          description: ID of user to delete
           required: true
           schema:
             type: string
             format: uuid
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "User not found"
+          description: User not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /users/onboard/register:
     post:
       tags: [ "users" ]
-      summary: "Register new user"
-      description: "Registers a user's email, starting the onboarding process."
-      operationId: "registerUser"
+      summary: Register new user
+      description: Registers a user's email, starting the onboarding process.
+      operationId: registerUser
       security: []
       requestBody:
-        description: "Updated profile object"
+        description: Updated profile object
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserRegisterRequest"
+              $ref: '#/components/schemas/UserRegisterRequest'
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         409:
-          description: "Email already in use."
+          description: Email already in use.
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /users/onboard/complete:
     post:
       tags: [ "users" ]
-      summary: "Completes the user's onboarding"
-      description: |
-        Sets a user's username and password, completing the onboarding process.
-      operationId: "onboardUser"
+      summary: Completes the user's onboarding
+      description: Sets a user's username and password, completing the onboarding process.
+      operationId: onboardUser
       security:
         - cookieAuth: [ ]
       requestBody:
-        description: "Updated profile object"
+        description: Updated profile object
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserCompleteRequest"
+              $ref: '#/components/schemas/UserCompleteRequest'
       responses:
         201:
-          description: "Onboarding complete"
+          description: Onboarding complete
+          headers:
+            Location:
+              description: The location of the created user
+              schema:
+                type: string
+                format: uri
         401:
-          description: "Token not valid or has expired"
+          description: Token not valid or has expired
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /profiles:
     get:
       tags: [ "profiles" ]
-      summary: "Get the caller's profile"
-      description: "Get the profile information for the authenticated user."
-      operationId: "getProfile"
+      summary: Get the caller's profile
+      description: Get the profile information for the authenticated user.
+      operationId: getProfile
       security:
         - cookieAuth: [ ]
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfileResponse'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
     put:
       tags: [ "profiles" ]
-      summary: "Update the caller's profile"
-      description: "Update the profile information for the authenticated user."
-      operationId: "updateProfile"
+      summary: Update the caller's profile
+      description: Update the profile information for the authenticated user.
+      operationId: updateProfile
       security:
         - cookieAuth: [ ]
       requestBody:
-        description: "Updated profile object"
+        description: Updated profile object
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserProfileRequest"
+              $ref: '#/components/schemas/UserProfileRequest'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProfileResponse"
+                $ref: '#/components/schemas/UserProfileResponse'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
   /profiles/authproviders:
     get:
       tags: [ "profiles" ]
-      summary: "Get the caller's auth-providers"
-      description: "Get the auth-provider information for the authenticated user."
-      operationId: "getUserAuthProviders"
+      summary: Get the caller's auth-providers
+      description: Get the auth-provider information for the authenticated user.
+      operationId: getUserAuthProviders
       security:
         - cookieAuth: [ ]
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserAuthProvidersResponse'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
     delete:
       tags: [ "profiles" ]
-      summary: "Delete the identified auth-provider from the caller's auth-providers"
-      description: "Delete the identified auth-provider information for the authenticated user."
-      operationId: "deleteUserAuthProvider"
+      summary: Delete the identified auth-provider from the caller's auth-providers
+      description: Delete the identified auth-provider information for the authenticated user.
+      operationId: deleteUserAuthProvider
       security:
         - cookieAuth: [ ]
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "User or AuthProvider not found"
+          description: User or AuthProvider not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /profiles/password:
     put:
       tags: [ "profiles" ]
-      summary: "Update the caller's password"
-      description: "Update the password for the authenticated user."
-      operationId: "updatePassword"
+      summary: Update the caller's password
+      description: Update the password for the authenticated user.
+      operationId: updatePassword
       security:
         - cookieAuth: [ ]
       requestBody:
-        description: "Updated password object"
+        description: Updated password object
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PasswordUpdateRequest"
+              $ref: '#/components/schemas/PasswordUpdateRequest'
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/countries:
     get:
       tags: [ "rails" ]
-      summary: "Get all countries"
-      description: "Returns the supported countries."
-      operationId: "getAllCountries"
+      summary: Get all countries
+      description: Returns the supported countries.
+      operationId: getAllCountries
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedCountries"
+                $ref: '#/components/schemas/PaginatedCountries'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/countries/{id}:
     get:
       tags: [ "rails" ]
-      summary: "Get country by id"
-      description: "Returns the details of the identified country."
-      operationId: "getCountryById"
+      summary: Get country by id
+      description: Returns the details of the identified country.
+      operationId: getCountryById
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of country to return"
+          description: ID of country to return
           required: true
           schema:
             type: string
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CountryResponse"
+                $ref: '#/components/schemas/CountryResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Institution not found"
+          description: Country not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/institutions:
     get:
       tags: [ "rails" ]
-      summary: "Get all institutions for identified country"
-      description: "Returns the supported institutions within the identified country."
-      operationId: "getAllInstitutions"
+      summary: Get all institutions for identified country
+      description: Returns the supported institutions within the identified country.
+      operationId: getAllInstitutions
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/RailProviderParam"
+        - $ref: '#/components/parameters/RailProviderParam'
         - name: "countryCode"
           in: "query"
           required: true
           schema:
             type: string
             default: "GB"
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedInstitutions"
+                $ref: '#/components/schemas/PaginatedInstitutions'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/institutions/{id}:
     get:
       tags: [ "rails" ]
-      summary: "Get institution by id"
-      description: "Returns the details of the identified institution."
-      operationId: "getInstitutionById"
+      summary: Get institution by id
+      description: Returns the details of the identified institution.
+      operationId: getInstitutionById
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of institution to return"
+          description: ID of institution to return
           required: true
           schema:
             type: string
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InstitutionResponse"
+                $ref: '#/components/schemas/InstitutionResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Institution not found"
+          description: Institution not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/consents:
     get:
       tags: [ "accounts" ]
-      summary: "Get all consents"
-      description: "Get all consents for the authenticated user"
-      operationId: "getAllConsents"
+      summary: Get all consents
+      description: Get all consents for the authenticated user
+      operationId: getAllConsents
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedUserConsents"
+                $ref: '#/components/schemas/PaginatedUserConsents'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/consents/{institutionId}:
     get:
       tags: [ "accounts" ]
-      summary: "Get consent for the identified institution"
-      description: "Get the consent held for the identified institution for the authenticated user"
-      operationId: "getConsentByInstitution"
+      summary: Get consent for the identified institution
+      description: Get the consent held for the identified institution for the authenticated user
+      operationId: getConsentByInstitution
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
-          description: "ID of institution to which the consent belongs"
+          description: ID of institution to which the consent belongs
           required: true
           example: 07061d7674f3
           schema:
             type: string
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserConsentResponse"
+                $ref: '#/components/schemas/UserConsentResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Institution or Consent not found"
+          description: Institution or Consent not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
     post:
       tags: [ "accounts" ]
-      summary: "Register for consent with the identified institution"
+      summary: Register for consent with the identified institution
       description: |
         Initiates the registration for the application to gain the user's
         consent to access the identified institution
-      operationId: "registerConsent"
+      operationId: registerConsent
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
-          description: "ID of institution to which the consent belongs"
+          description: ID of institution to which the consent belongs
           required: true
           example: 07061d7674f3
           schema:
             type: string
       requestBody:
-        description: "The callback URI"
+        description: The callback URI
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserConsentRequest"
+              $ref: '#/components/schemas/UserConsentRequest'
       responses:
         307:
-          description: "successful operation and redirection to consent form"
+          description: successful operation and redirection to consent form
         400:
-          description: "Invalid request"
+          description: Invalid request
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Institution not found"
+          description: Institution not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
     delete:
       tags: [ "accounts" ]
-      summary: "Delete the identified consent"
+      summary: Delete the identified consent
       description: |
-        Deletes the consent held for the identified institution for the authenticated user; revoking
-        any related agreements.
-      operationId: "deleteConsentByInstitution"
+        Deletes the consent held for the identified institution for the authenticated
+        user; revoking any related agreements.
+      operationId: deleteConsentByInstitution
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "institutionId"
           in: "path"
-          description: "ID of institution to which the consent belongs"
+          description: ID of institution to which the consent belongs
           required: true
           example: 07061d7674f3
           schema:
             type: string
         - name: "purge"
           in: "query"
-          description: "Indicates that the accounts and transaction records are to be purged"
+          description: Indicates that the accounts and transaction records are to be purged
           required: false
           example: "true"
           schema:
             type: boolean
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Institution or Consent not found"
+          description: Institution or Consent not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/accounts:
     get:
       tags: [ "accounts" ]
-      summary: "Get all accounts"
-      description: "Get summary of all accounts for the authenticated user"
-      operationId: "getAllAccounts"
+      summary: Get all accounts
+      description: Get summary of all accounts for the authenticated user
+      operationId: getAllAccounts
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedAccounts"
+                $ref: '#/components/schemas/PaginatedAccounts'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/accounts/{id}:
     get:
       tags: [ "accounts" ]
-      summary: "Get account by id"
-      description: "Get account by id for the authenticated user"
-      operationId: "getAccountById"
+      summary: Get account by id
+      description: Get account by id for the authenticated user
+      operationId: getAccountById
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of account to return"
+          description: ID of account to return
           required: true
           schema:
             type: string
             format: uuid
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccountResponse"
+                $ref: '#/components/schemas/AccountResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Account not found"
+          description: Account not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/transactions:
     get:
       tags: [ "transactions" ]
-      summary: "Get the calling user's transactions"
+      summary: Get the calling user's transactions
       description: |
         Get the transactions for the authenticated user, filtered by the given values.
         The results will be returned in descending booking date order.
-      operationId: "getTransactions"
+      operationId: getTransactions
       security:
         - cookieAuth: [ ]
       parameters:
-        - $ref: "#/components/parameters/PageIndexParam"
-        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
         - name: "account-id"
           in: "query"
           description: ID of account to filter transactions.
@@ -712,64 +718,331 @@ paths:
             type: string
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedTransactions"
+                $ref: '#/components/schemas/PaginatedTransactions'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Account not found"
+          description: Account not found
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /rails/transactions/{id}:
     get:
       tags: [ "transactions" ]
-      summary: "Get transaction by id"
-      description: "Get transaction by id for the authenticated user"
-      operationId: "getTransactionById"
+      summary: Get transaction by id
+      description: Get transaction by id for the authenticated user
+      operationId: getTransactionById
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of transaction to return"
+          description: ID of transaction to return
           required: true
           schema:
             type: string
             format: uuid
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionResponse"
+                $ref: '#/components/schemas/TransactionResponse'
         400:
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         404:
-          description: "Transaction not found"
+          description: Transaction not found
         500:
-          description: "Internal server error"
+          description: Internal server error
+
+  /rails/categories:
+    get:
+      tags: [ "categories" ]
+      summary: Get all categories
+      description: Get all categories for the authenticated user
+      operationId: getCategories
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategories'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+    post:
+      tags: [ "categories" ]
+      summary: Create category
+      description: Creates a new category for the authenticated user.
+      operationId: createCategory
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        description: The details of the new category.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        201:
+          description: successful operation
+          headers:
+            Location:
+              description: The location of the created category
+              schema:
+                type: string
+                format: uri
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /rails/categories/{categoryId}:
+    get:
+      tags: [ "categories" ]
+      summary: Get category
+      description: Get the authenticated user's identified category.
+      operationId: getCategory
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+    put:
+      tags: [ "categories" ]
+      summary: Update category
+      description: Updates the authenticated user's identified category.
+      operationId: updateCategory
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The updated details of the category.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        204:
+          description: successful operation
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+    delete:
+      tags: [ "categories" ]
+      summary: Delete category
+      description: Deletes the authenticated user's identified category.
+      operationId: deleteCategory
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /rails/categories/{categoryId}/selectors/{accountId}:
+    get:
+      tags: [ "categories" ]
+      summary: Get category selectors
+      description: Get selectors for identified category and account.
+      operationId: getCategorySelectors
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category whose selectors are to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "accountId"
+          in: "path"
+          description: ID of account whose selectors are to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountCategorySelector'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Category or account not found
+        500:
+          description: Internal server error
+    put:
+      tags: [ "categories" ]
+      summary: Set category selectors
+      description: Set selectors for identified category and account.
+      operationId: setCategorySelectors
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category whose selectors are to be set
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "accountId"
+          in: "path"
+          description: ID of account whose selectors are to be set
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The category/account selectors to be set
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountCategorySelector'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountCategorySelector'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Category or account not found
+        500:
+          description: Internal server error
+
+  /rails/categories/statistics:
+    get:
+      tags: [ "categories" ]
+      summary: Get category statistics
+      description: Get the category statistics for the authenticated user, across all their accounts.
+      operationId: getCategoryStatistics
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "from-date"
+          in: "query"
+          description: The date, inclusive, from which the transaction should start.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "to-date"
+          in: "query"
+          description: The date, inclusive, to which the transaction should end.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryStatisticsResponse'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Category or account not found
+        500:
+          description: Internal server error
 
   /notifications:
     get:
       tags: [ "notifications" ]
-      summary: "Get recent notifications"
-      description: "Get notifications for the authenticated user dated after a given date-time"
-      operationId: "getNotifications"
+      summary: Get recent notifications
+      description: Get notifications for the authenticated user dated after a given date-time
+      operationId: getNotifications
       security:
         - cookieAuth: [ ]
       parameters:
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
         - name: "after"
           in: "query"
-          description: "ID of account to filter transactions"
+          description: ID of account to filter transactions
           example: 2019-01-01T14:25:32.201Z
           required: false
           schema:
@@ -778,41 +1051,39 @@ paths:
             default: 1970-01-01T00:00:00Z
       responses:
         200:
-          description: "successful operation"
+          description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PaginatedNotifications"
+                $ref: '#/components/schemas/PaginatedNotifications'
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
   /notifications/{id}:
     delete:
       tags: [ "notifications" ]
-      summary: "Delete notification"
-      description: "Delete the identified notifications"
-      operationId: "deleteNotification"
+      summary: Delete notification
+      description: Delete the identified notifications
+      operationId: deleteNotification
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "id"
           in: "path"
-          description: "ID of notification to be deleted"
+          description: ID of notification to be deleted
           required: true
           schema:
             type: string
             format: uuid
       responses:
         204:
-          description: "successful operation"
+          description: successful operation
         401:
-          description: "Unauthorized"
+          description: Unauthorized
         500:
-          description: "Internal server error"
+          description: Internal server error
 
 components:
   securitySchemes:
@@ -831,7 +1102,7 @@ components:
       schema:
         type: integer
         format: int32
-        default: 25
+        default: 0
         minimum: 0
       example: 10
 
@@ -843,7 +1114,7 @@ components:
       schema:
         type: integer
         format: int32
-        default: 25
+        default: 20
         minimum: 1
       example: 30
 
@@ -897,7 +1168,7 @@ components:
         errors:
           type: array
           items:
-            $ref: "#/components/schemas/ServiceError"
+            $ref: '#/components/schemas/ServiceError'
 
     ServiceError:
       type: object
@@ -989,7 +1260,7 @@ components:
 
     UserUpdateRequest:
       allOf:
-        - $ref: "#/components/schemas/UserProfileRequest"
+        - $ref: '#/components/schemas/UserProfileRequest'
         - type: object
           required:
             - username
@@ -1000,7 +1271,7 @@ components:
             roles:
               type: array
               items:
-                $ref: "#/components/schemas/UserRole"
+                $ref: '#/components/schemas/UserRole'
 
     UserCompleteRequest:
       type: object
@@ -1095,7 +1366,7 @@ components:
           type: array
           description: The list of Open-ID Connect Providers with which the user has authenticated.
           items:
-            $ref: "#/components/schemas/UserAuthProvider"
+            $ref: '#/components/schemas/UserAuthProvider'
 
     UserProfileResponse:
       type: object
@@ -1144,17 +1415,14 @@ components:
           type: string
           format: date-time
           description: The date the user was created
-          example: 2019-01-01T00:00:00.000Z
         dateOnboarded:
           type: string
           format: date-time
           description: The date the user was onboarded
-          example: 2019-01-01T00:00:00.000Z
         dateBlocked:
           type: string
           format: date-time
           description: The date the user account was blocked
-          example: 2019-01-01T00:00:00.000Z
         roles:
           type: array
           items:
@@ -1164,7 +1432,7 @@ components:
 
     UserResponse:
       allOf:
-        - $ref: "#/components/schemas/UserProfileResponse"
+        - $ref: '#/components/schemas/UserProfileResponse'
         - type: object
           required:
             - id
@@ -1415,9 +1683,9 @@ components:
             types, the response includes a list of balances for the same date.
           type: array
           items:
-            $ref: "#/components/schemas/AccountBalanceResponse"
+            $ref: '#/components/schemas/AccountBalanceResponse'
         institution:
-          $ref: "#/components/schemas/InstitutionResponse"
+          $ref: '#/components/schemas/InstitutionResponse'
 
     TransactionResponse:
       type: object
@@ -1507,6 +1775,98 @@ components:
           description: The notification message to be displayed.
           type: string
 
+    CategoryRequest:
+      description: A named category by which transactions can be grouped.
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The category's name (unique to the user's categories).
+          example: Groceries
+        description:
+          type: string
+          description: The category's description.
+          example: Food and household items
+        colour:
+          type: string
+          description: The colour to be used to represent the category in the UI.
+          example: '#0A8855'
+
+    CategoryResponse:
+      description: A named category by which transactions can be grouped.
+      allOf:
+        - $ref: '#/components/schemas/CategoryRequest'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The category Id
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
+
+    AccountCategorySelector:
+      description: |
+        A selector to match an account's transactions to a category. Multiple selectors may
+        exist for the same category/account pair. In which case, a transaction can match any
+        of the selectors to be categorised.
+      type: object
+      properties:
+        infoContains:
+          type: string
+          description: |
+            Any occurrence of the value within the additional info will match. The comparison is case-sensitive.
+          example: Tesco
+        refContains:
+          type: string
+          description: |
+            Any occurrence of the value within the transaction reference will match. The comparison is case-sensitive.
+          example: 1234567890
+        creditorContains:
+          type: string
+          description: |
+            Any occurrence of the value within the creditor name will match. The comparison is case-sensitive.
+          example: John Doe
+
+    CategoryStatisticsResponse:
+      description: A summary of the transactions in a category.
+      type: object
+      required:
+        - category
+        - total
+        - count
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: The category Id. This will be null for uncategorised transactions.
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        category:
+          type: string
+          description: The category's name
+          example: Groceries
+        description:
+          type: string
+          description: The category's description
+          example: Food and Drink
+        colour:
+          type: string
+          description: The category's colour
+          example: '#0A8855'
+        total:
+          type: number
+          format: double
+          description: The total amount of transactions in the category
+          example: 123.45
+        count:
+          type: integer
+          format: int64
+          description: The number of transactions in the category
+          example: 5
+
     PageLinks:
       type: object
       required:
@@ -1570,66 +1930,66 @@ components:
           description: The requested number of items per page
           example: 25
         links:
-          $ref: "#/components/schemas/PageLinks"
+          $ref: '#/components/schemas/PageLinks'
 
     PaginatedCountries:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of countries
               items:
-                $ref: "#/components/schemas/CountryResponse"
+                $ref: '#/components/schemas/CountryResponse'
 
     PaginatedInstitutions:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of institutions
               items:
-                $ref: "#/components/schemas/InstitutionResponse"
+                $ref: '#/components/schemas/InstitutionResponse'
 
     PaginatedUsers:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of users
               items:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: '#/components/schemas/UserResponse'
 
     PaginatedUserConsents:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of consents
               items:
-                $ref: "#/components/schemas/UserConsentResponse"
+                $ref: '#/components/schemas/UserConsentResponse'
 
     PaginatedAccounts:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of accounts
               items:
-                $ref: "#/components/schemas/AccountResponse"
+                $ref: '#/components/schemas/AccountResponse'
 
     PaginatedTransactions:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             currencyTotals:
@@ -1645,15 +2005,26 @@ components:
               type: array
               description: The list of transactions
               items:
-                $ref: "#/components/schemas/TransactionResponse"
+                $ref: '#/components/schemas/TransactionResponse'
 
     PaginatedNotifications:
       allOf:
-        - $ref: "#/components/schemas/PaginatedItems"
+        - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
               description: The list of notifications
               items:
-                $ref: "#/components/schemas/NotificationResponse"
+                $ref: '#/components/schemas/NotificationResponse'
+
+    PaginatedCategories:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of categories
+              items:
+                $ref: '#/components/schemas/CategoryResponse'

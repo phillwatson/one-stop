@@ -40,3 +40,4 @@ build/
 
 **/docker-compose.override.*
 *.p8
+/one-stop_db-data.tar.gz

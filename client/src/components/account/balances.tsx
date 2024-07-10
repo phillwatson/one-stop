@@ -16,7 +16,7 @@ export default function Balances(props: Props) {
       <Grid spacing={1} container direction={"column"}>
         {
         props.account.balance.map(balance => 
-          <Grid container>
+          <Grid container key={ balance.id }>
             <Grid>{formatDate(balance.referenceDate)}</Grid>
             <Grid>{balance.type}</Grid>
             <Grid>{CurrencyService.format(balance.amount, balance.currency)}</Grid>

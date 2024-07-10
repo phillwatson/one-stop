@@ -4,7 +4,7 @@ import { AccountDetail, TransactionDetail, PaginatedTransactions } from '../mode
 
 class AccountService {
   getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AccountDetail>> {
-    console.log(`Retrieving account [page: ${page}, pageSize: ${pageSize}]`);
+    console.log(`Retrieving accounts [page: ${page}, pageSize: ${pageSize}]`);
     return http.get<PaginatedList<AccountDetail>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
     }
@@ -23,12 +23,12 @@ class AccountService {
   }
 
   getTransactionsForDateRange(accountId: string, fromDate: Date, toDate: Date, page: number = 0, pageSize = 25): Promise<PaginatedTransactions> {
-    const from = fromDate.toISOString().substring(0, 10);
-    const to = toDate.toISOString().substring(0, 10);
-    console.log(`Retrieving account transactions [id: ${accountId}, from-date: ${from}, to-date: ${to}, page: ${page}, pageSize: ${pageSize}]`);
+    const fromDateStr = fromDate.toISOString().substring(0, 10);
+    const toDateStr = toDate.toISOString().substring(0, 10);
+    console.log(`Retrieving account transactions [id: ${accountId}, from-date: ${fromDateStr}, to-date: ${toDateStr}, page: ${page}, pageSize: ${pageSize}]`);
 
     return http.get<PaginatedTransactions>('/rails/transactions',
-     { params: { "account-id": accountId, "from-date": from, "to-date": to, "page": page, "page-size": pageSize }})
+     { params: { "account-id": accountId, "from-date": fromDateStr, "to-date": toDateStr, "page": page, "page-size": pageSize }})
      .then(response => response.data);
   }
 
@@ -40,8 +40,7 @@ class AccountService {
       transactions = transactions.concat(response.items);
     }
     return transactions.reverse();
-  }
-  
+  }  
 }
 
 const instance = new AccountService();
