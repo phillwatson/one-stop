@@ -101,7 +101,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"watson.phill@gmail.com\",\n    \"password\": \"password\"\n}",
+							"raw": "{\n    \"username\": \"snoopy\",\n    \"password\": \"password\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -685,6 +685,38 @@
 			]
 		},
 		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/notifications?after={{today}}T00:00:00Z",
+							"protocol": "{{scheme}}",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "after",
+									"value": "{{today}}T00:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Rails",
 			"item": [
 				{
@@ -747,7 +779,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?account-id=65f51527-ac99-4d13-9816-4fa1953881e8&page=0&page-size=25",
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions?account-id=9edbb8be-0b66-4e88-8499-bfb7cd088e0b&page=0&page-size=25&reference=SAINSBURYS",
 									"protocol": "{{scheme}}",
 									"host": [
 										"{{hostname}}"
@@ -762,7 +794,7 @@
 									"query": [
 										{
 											"key": "account-id",
-											"value": "65f51527-ac99-4d13-9816-4fa1953881e8"
+											"value": "9edbb8be-0b66-4e88-8499-bfb7cd088e0b"
 										},
 										{
 											"key": "page",
@@ -771,6 +803,10 @@
 										{
 											"key": "page-size",
 											"value": "25"
+										},
+										{
+											"key": "reference",
+											"value": "SAINSBURYS"
 										}
 									]
 								}
@@ -803,6 +839,244 @@
 										{
 											"key": "page-size",
 											"value": "25"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories?page=0&page-size=25",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "page-size",
+											"value": "25"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Category Statistics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories/statistics?from-date={{todayMinus20}}&to-date={{today}}",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories",
+										"statistics"
+									],
+									"query": [
+										{
+											"key": "from-date",
+											"value": "{{todayMinus20}}"
+										},
+										{
+											"key": "to-date",
+											"value": "{{today}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Category",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Groceries\",\n    \"description\": \"Household Groceries\",\n    \"colour\": \"#002721\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Groceries\",\n    \"description\": \"Household Groceries\",\n    \"colour\": \"#002721\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories/:categoryId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories",
+										":categoryId"
+									],
+									"variable": [
+										{
+											"key": "categoryId",
+											"value": "9dd57172-974d-42fd-92ec-038a7eb69780"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Category",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories/:categoryId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories",
+										":categoryId"
+									],
+									"variable": [
+										{
+											"key": "categoryId",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Category Selectors",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories/:categoryId/selectors/:accountId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories",
+										":categoryId",
+										"selectors",
+										":accountId"
+									],
+									"variable": [
+										{
+											"key": "categoryId",
+											"value": "9dd57172-974d-42fd-92ec-038a7eb69780"
+										},
+										{
+											"key": "accountId",
+											"value": "9edbb8be-0b66-4e88-8499-bfb7cd088e0b"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Set Category Selectors",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/categories/:categoryId/selectors/:accountId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"categories",
+										":categoryId",
+										"selectors",
+										":accountId"
+									],
+									"variable": [
+										{
+											"key": "categoryId",
+											"value": "9dd57172-974d-42fd-92ec-038a7eb69780"
+										},
+										{
+											"key": "accountId",
+											"value": "9edbb8be-0b66-4e88-8499-bfb7cd088e0b"
 										}
 									]
 								}
@@ -1103,7 +1377,7 @@
 									"variable": [
 										{
 											"key": "institutionId",
-											"value": "modelo-sandbox"
+											"value": "SANDBOXFINANCE_SFIN0000"
 										}
 									]
 								}
@@ -1449,7 +1723,7 @@
 											"variable": [
 												{
 													"key": "railAccountId",
-													"value": "629fe84d-9e6c-4709-97ec-cc3dd4470972"
+													"value": "d6b4ff42-8969-4089-8243-7dbd3d9be4dd"
 												}
 											]
 										}
@@ -1524,7 +1798,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId/transactions?date_from=2023-12-01&date_to=2024-01-13",
+											"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/nordigen/accounts/:railAccountId/transactions?date_from=2024-06-01&date_to=2024-06-10",
 											"protocol": "{{scheme}}",
 											"host": [
 												"{{hostname}}"
@@ -1542,17 +1816,17 @@
 											"query": [
 												{
 													"key": "date_from",
-													"value": "2023-12-01"
+													"value": "2024-06-01"
 												},
 												{
 													"key": "date_to",
-													"value": "2024-01-13"
+													"value": "2024-06-10"
 												}
 											],
 											"variable": [
 												{
 													"key": "railAccountId",
-													"value": "b7eaa584-50a5-4fc7-b3ac-5b2108b4eac1"
+													"value": "d6b4ff42-8969-4089-8243-7dbd3d9be4dd"
 												}
 											]
 										}
@@ -1650,12 +1924,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/beans",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/beans",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"beans"
 							]
@@ -1669,12 +1943,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/stop",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/stop",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"stop"
 							]
@@ -1688,13 +1962,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/health",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:9002/q/health",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9002",
 							"path": [
+								"q",
 								"health"
 							]
 						}
@@ -1707,13 +1982,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/info",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:9002/q/info",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9002",
 							"path": [
+								"q",
 								"info"
 							]
 						}
@@ -1726,12 +2002,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/loggers",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:9002/loggers",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9002",
 							"path": [
 								"loggers"
 							]
@@ -1745,13 +2021,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/metrics",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:9002/q/metrics",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9002",
 							"path": [
+								"q",
 								"metrics"
 							]
 						}
@@ -1764,12 +2041,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/refresh",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/refresh",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"refresh"
 							]
@@ -1783,13 +2060,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/routes",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:9002/q/routes",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9002",
 							"path": [
+								"q",
 								"routes"
 							]
 						}
@@ -1802,12 +2080,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/token_info",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/token_info",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"token_info"
 							]
@@ -1821,12 +2099,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/env",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/env",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"env"
 							]
@@ -1840,12 +2118,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/threaddump",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/threaddump",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"threaddump"
 							]
@@ -1859,12 +2137,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/caches",
-							"protocol": "{{scheme}}",
+							"raw": "http://localhost:8082/caches",
+							"protocol": "http",
 							"host": [
-								"{{hostname}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "8082",
 							"path": [
 								"caches"
 							]
@@ -1878,37 +2156,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{scheme}}://{{hostname}}:{{port}}/flyway",
-							"protocol": "{{scheme}}",
-							"host": [
-								"{{hostname}}"
-							],
-							"port": "{{port}}",
-							"path": [
-								"flyway"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "New Request",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:9090/nordigen-sim/api/v2/institutions/",
+							"raw": "http://localhost:8082/flyway",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "9090",
+							"port": "8082",
 							"path": [
-								"nordigen-sim",
-								"api",
-								"v2",
-								"institutions",
-								""
+								"flyway"
 							]
 						}
 					},

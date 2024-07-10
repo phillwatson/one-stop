@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
 import EditCategory from './edit-category';
+import { Avatar } from '@mui/material';
 
 const colhead: SxProps = {
   fontWeight: 'bold'
@@ -36,7 +37,7 @@ export default function CategoryEditor() {
   useEffect(() => { refresh(); }, []);
 
   function refresh() {
-    CategoryService.getAll().then( response => setCategories(response.items));
+    CategoryService.fetchAllCategories().then( response => setCategories(response));
   }
 
   function confirmDelete(category: Category) {
@@ -89,6 +90,7 @@ export default function CategoryEditor() {
         <Table size='small'>
           <TableHead>
             <TableRow>
+              <TableCell sx={colhead} width={"32px"}></TableCell>
               <TableCell sx={colhead}>Name</TableCell>
               <TableCell sx={colhead}>Description</TableCell>
               <TableCell sx={colhead} width={"32px"}></TableCell>
@@ -100,6 +102,9 @@ export default function CategoryEditor() {
               .sort((a, b) => a.name < b.name ? -1 : 1)
               .map(category =>
                 <TableRow key={ category.id } hover>
+                  <TableCell onClick={() => updateCategory(category)}>
+                    <Avatar sx={{ backgroundColor: category.colour, width: 24, height: 24 }}>&nbsp;</Avatar>
+                  </TableCell>
                   <TableCell onClick={() => updateCategory(category)}>{ category.name }</TableCell>
                   <TableCell onClick={() => updateCategory(category)}>{ category.description }</TableCell>
                   <TableCell onClick={() => confirmDelete(category)}>

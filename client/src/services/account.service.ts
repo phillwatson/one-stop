@@ -40,8 +40,7 @@ class AccountService {
       transactions = transactions.concat(response.items);
     }
     return transactions.reverse();
-  }
-  
+  }  
 }
 
 const instance = new AccountService();

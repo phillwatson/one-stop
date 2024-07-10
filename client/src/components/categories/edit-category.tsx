@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { MuiColorInput } from 'mui-color-input'
 
 import { Category } from "../../model/category.model";
 
@@ -28,8 +29,9 @@ export default function EditCategory(props: Props) {
 
   return (
     <Dialog open={ props.open } onClose={ handleCancel } fullWidth>
-      <DialogTitle>{ props.category ? "Edit Category" : "Add Category" }</DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>{ props.category ? "Edit Category" : "Add Category" }</DialogTitle>
       <DialogContent>
+        <p/>
         <TextField
           id="name" label="Category Name" autoFocus required
           margin="normal" fullWidth variant="standard"
@@ -44,12 +46,11 @@ export default function EditCategory(props: Props) {
           onChange={(e) => setCategory({ ...category, description: e.target.value })}
         />
 
-        <TextField
-          id="name" label="Colour"
-          margin="normal" fullWidth variant="standard"
-          value={category.colour}
-          onChange={(e) => setCategory({ ...category, colour: e.target.value })}
-        />
+        <MuiColorInput
+          id="colour" label="Colour" format="hex" isAlphaHidden
+          margin="normal" fullWidth
+          value={category.colour || '#ffffff'}
+          onChange={(value) => setCategory({ ...category, colour: value })} />
       </DialogContent>
 
       <DialogActions>

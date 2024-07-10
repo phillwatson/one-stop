@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select, SxProps, TextField } from "@mui/material";
+import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import DeleteIcon from '@mui/icons-material/Clear';
 
-import AccountService from "../../services/account.service";
 import CategoryService from "../../services/category.service";
 import { Category, CategorySelector } from "../../model/category.model";
-import { AccountDetail, TransactionDetail } from "../../model/account.model";
+import { TransactionDetail } from "../../model/account.model";
 import { useMessageDispatch } from "../../contexts/messages/context";
 
 const colhead: SxProps = {
   fontWeight: 'bold'
 };
+
+const NULL_CATEGORY: Category = { name: '', description: '', colour: '' };
+const NULL_SELECTOR: CategorySelector = { infoContains: '', refContains: '', creditorContains: '' };
 
 interface Props {
   open: boolean;
@@ -26,19 +29,18 @@ interface Props {
 
 export default function AddSelector(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ account, setAccount ] = useState<AccountDetail>();
-  const [ category, setCategory ] = useState<Category>();
+  const [ category, setCategory ] = useState<Category>(NULL_CATEGORY);
   const [ categories, setCategories ] = useState<Array<Category>>([]);
+  const [ selector, setSelector ] = useState<CategorySelector>(NULL_SELECTOR);
   const [ selectors, setSelectors ] = useState<Array<CategorySelector>>([]);
-  const [ selector, setSelector ] = useState<CategorySelector>({ });
+
+  const accountId = props.transaction?.accountId;
 
   useEffect(() => {
-    if (props.open && props.transaction !== undefined) {
-      AccountService.get(props.transaction.accountId).then(response => setAccount(response));
-    } else {
-      setAccount(undefined);
+    if (props.open) {
+      CategoryService.fetchAllCategories().then( response => setCategories(response));
     }
-  }, [ props.open, props.transaction?.accountId ]);
+  }, [ props.open ]);
 
   useEffect(() => {
     if (props.open && props.transaction !== undefined) {
@@ -47,34 +49,30 @@ export default function AddSelector(props: Props) {
         refContains: props.transaction.reference,
         creditorContains: props.transaction.creditorName
       });
+    } else {
+      setSelector(NULL_SELECTOR);
     }
   }, [ props.open, props.transaction ]);
 
   useEffect(() => {
-    if (account && category) {
-      CategoryService.getCategorySelectors(category.id!!, account.id)
-        .then( response => { setSelectors(response); })
+    if (props.open && accountId && category.id) {
+      CategoryService.getCategorySelectors(category.id!!, accountId)
+        .then(response => { setSelectors(response); })
     } else {
       setSelectors([]);
     }
-  }, [ account, category ]);
-
-  useEffect(() => {
-    if (props.open) {
-      CategoryService.getAll().then( response => setCategories(response.items));
-    }
-  }, [ props.open ]);
-
-  function select(s: CategorySelector) {
-    setSelector(s);
-  }
+  }, [ props.open, accountId, category.id ]);
 
   function selectCategory(categoryId: string) {
     if (categories !== undefined && categoryId !== undefined && categoryId.length > 0) {
-      setCategory(categories.find(cat => cat.id === categoryId));
+      setCategory(categories.find(cat => cat.id === categoryId) || NULL_CATEGORY);
     } else {
-      setCategory(undefined);
+      setCategory(NULL_CATEGORY);
     }
+  }
+
+  function removeSelector(selector: CategorySelector) {
+    setSelectors(selectors.filter(sel => sel !== selector));
   }
 
   const handleCancel = () => {
@@ -82,15 +80,17 @@ export default function AddSelector(props: Props) {
   };
 
   function handleConfirm() {
-    if (category) {
-      CategoryService.setCategorySelectors(category.id!!, account!.id, [ ...selectors, selector ]);
-      showMessage({ type: 'add', level: 'success', text: `Successfully added to Category "${category.name}"` });
-      props.onConfirm(category, selector);
+    if (accountId && category.id) {
+      CategoryService.setCategorySelectors(category.id!!, accountId, [ ...selectors, selector ])
+      .then(() => {
+        showMessage({ type: 'add', level: 'success', text: `Successfully added to Category "${category.name}"` });
+        props.onConfirm(category, selector);
+      });
     }
   };
 
   function validateForm(): boolean {
-    return category !== undefined && selector !== undefined && 
+    return category.id !== undefined && selector !== undefined && 
       ((selector.infoContains !== undefined && selector.infoContains.trim().length > 0) ||
        (selector.refContains !== undefined && selector.refContains.trim().length > 0) ||
        (selector.creditorContains !== undefined && selector.creditorContains.trim().length > 0));
@@ -98,39 +98,47 @@ export default function AddSelector(props: Props) {
 
   return (
     <Dialog open={ props.open } onClose={ handleCancel } fullWidth>
-      <DialogTitle>Add To Category</DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>Add To Category</DialogTitle>
       <DialogContent>
-        <Select fullWidth value={ category ? category?.id : ""}
-          onChange={(e) => selectCategory(e.target.value as string)}>
+        <p></p>
+        <Select fullWidth value={ category.id || ''}
+          onChange={(e) => selectCategory(e.target.value as string)}
+          renderValue={() => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
+              <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
+            </Box>
+          )}>
           { categories && categories.map(cat =>
-            <MenuItem value={ cat.id }>{ cat.name }</MenuItem>
+            <MenuItem value={ cat.id } key={ cat.id }>
+              <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
+            </MenuItem>
           )}
         </Select>
       </DialogContent>
-      <DialogContent dividers>
+
+      <DialogContent>
+        <Divider textAlign="left" sx={{fontWeight: 'light'}}>Enter selector criteria (case-sensitive):</Divider>
         <TextField
-          id="name" label="Info Contains" autoFocus
-          margin="dense" fullWidth variant="standard"
-          value={selector.infoContains}
+          id="name" label="Additional Info Contains" margin="dense" fullWidth variant="standard" autoFocus 
+          value={selector.infoContains || ''}
           onChange={(e) => setSelector({ ...selector, infoContains: e.target.value })}
         />
 
         <TextField
-          id="ref" label="Reference Contains"
-          margin="dense" fullWidth variant="standard"
-          value={selector.refContains}
+          id="ref" label="Reference Contains" margin="dense" fullWidth variant="standard"
+          value={selector.refContains || ''}
           onChange={(e) => setSelector({ ...selector, refContains: e.target.value })}
         />
 
         <TextField
-          id="creditor" label="Creditor Contains"
-          margin="dense" fullWidth variant="standard"
-          value={selector.creditorContains}
+          id="creditor" label="Creditor Contains" margin="dense" fullWidth variant="standard"
+          value={selector.creditorContains || ''}
           onChange={(e) => setSelector({ ...selector, creditorContains: e.target.value })}
         />
       </DialogContent>
 
       <DialogContent>
+        <Divider textAlign="left" sx={{fontWeight: 'light'}}>Or choose from existing selectors:</Divider>
         <TableContainer>
           <Table size='small'>
             <TableHead>
@@ -138,15 +146,19 @@ export default function AddSelector(props: Props) {
                 <TableCell sx={colhead}>Info</TableCell>
                 <TableCell sx={colhead}>Reference</TableCell>
                 <TableCell sx={colhead}>Creditor</TableCell>
+                <TableCell sx={colhead}></TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
               { selectors && selectors.map((entry, index) =>
-                  <TableRow key={ index } hover onClick={() => select(entry)}>
+                  <TableRow key={ index } hover onClick={() => setSelector(entry)}>
                     <TableCell>{ entry.infoContains }</TableCell>
                     <TableCell>{ entry.refContains }</TableCell>
                     <TableCell>{ entry.creditorContains }</TableCell>
+                    <TableCell width={"22px"} onClick={(e) => { removeSelector(entry); e.stopPropagation();}}>
+                      <Tooltip title="Delete selector"><DeleteIcon/></Tooltip>
+                  </TableCell>
                   </TableRow>
                 )
               }
