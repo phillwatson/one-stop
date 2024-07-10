@@ -192,6 +192,8 @@ public class CategoryResource {
         return new CategoryStatisticsResponse()
             .category(statistics.getCategory())
             .categoryId(statistics.getCategoryId())
+            .description(statistics.getDescription())
+            .colour(statistics.getColour())
             .count(statistics.getCount())
             .total(statistics.getTotal().doubleValue());
     }

@@ -846,9 +846,9 @@ public class CategoryServiceTest {
 
         // and: the repository is primed with data
         List<CategoryStatistics> expected = List.of(
-            new CategoryStatistics("cat-1", UUID.randomUUID(), 20, BigDecimal.valueOf(123.44)),
-            new CategoryStatistics("cat-2", UUID.randomUUID(), 10, BigDecimal.valueOf(456.44)),
-            new CategoryStatistics("cat-3", UUID.randomUUID(), 6, BigDecimal.valueOf(34.44))
+            new CategoryStatistics("cat-1", UUID.randomUUID(),"", "", 20, BigDecimal.valueOf(123.44)),
+            new CategoryStatistics("cat-2", UUID.randomUUID(),"", "", 10, BigDecimal.valueOf(456.44)),
+            new CategoryStatistics("cat-3", UUID.randomUUID(),"", "", 6, BigDecimal.valueOf(34.44))
         );
         when(categoryRepository.getStatistics(userId, startDate, endDate))
             .thenReturn(expected);

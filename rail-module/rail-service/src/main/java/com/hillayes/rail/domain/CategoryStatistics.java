@@ -20,10 +20,20 @@ public class CategoryStatistics {
     private String category;
 
     /**
-     * The category id. This will be null for uncategorised transactions.
+     * The category id. This will be null for un-categorised transactions.
      */
     @EqualsAndHashCode.Include
     private UUID categoryId;
+
+    /**
+     * The category description. This will be null for un-categorised transactions.
+     */
+    private String description;
+
+    /**
+     * The category colour. This will be null for un-categorised transactions.
+     */
+    private String colour;
 
     /**
      * The number of transactions in this category.

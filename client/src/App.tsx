@@ -12,6 +12,7 @@ import OnboardUser from "./pages/onboard-user";
 import Transactions from "./pages/transactions";
 import Graph from "./pages/graphs";
 import Categories from "./pages/categories";
+import StatisticsPage from "./pages/statistics";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "categories",
         element: <Categories />
+      },
+      {
+        path: "statistics",
+        element: <StatisticsPage />
       },
       {
         path: "profile",

@@ -12,8 +12,10 @@ export interface CategorySelector {
 }
 
 export interface CategoryStatistics {
-  category: string;
   categoryId?: string
+  category: string;
+  description?: string;
+  colour?: string;
   count: number;
   total: number;
 }

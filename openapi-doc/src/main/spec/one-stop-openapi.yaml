@@ -1839,15 +1839,23 @@ components:
         - total
         - count
       properties:
-        category:
-          type: string
-          description: The category's name
-          example: Groceries
         categoryId:
           type: string
           format: uuid
           description: The category Id. This will be null for uncategorised transactions.
           example: 07061d76-74f3-4163-aa07-fb6909681f81
+        category:
+          type: string
+          description: The category's name
+          example: Groceries
+        description:
+          type: string
+          description: The category's description
+          example: Food and Drink
+        colour:
+          type: string
+          description: The category's colour
+          example: '#0A8855'
         total:
           type: number
           format: double

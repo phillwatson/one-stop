@@ -48,7 +48,7 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
     public List<CategoryStatistics> getStatistics(UUID userId, Instant startDate, Instant endDate) {
         List<CategoryStatistics> result = getEntityManager().createNativeQuery("select " +
                 "coalesce (c.name, '" + serviceConfiguration.uncategorisedName() + "') as category, " +
-                "c.id, count(*) as count, sum(t.amount) / 100 as total " +
+                "c.id, c.description, c.colour, count(*) as count, sum(t.amount) / 100 as total " +
                 "from rails.account_transaction t " +
                 "left join rails.category_selector cs on cs.account_id = t.account_id and " +
                 "  (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) and " +
@@ -58,7 +58,7 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
                 "where t.user_id = :userId " +
                 "and t.booking_datetime >= :startDate " +
                 "and t.booking_datetime < :endDate " +
-                "group by 1, 2 order by 1", CategoryStatistics.class)
+                "group by 1, 2, 3, 4 order by 1", CategoryStatistics.class)
             .setParameter("userId", userId)
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)

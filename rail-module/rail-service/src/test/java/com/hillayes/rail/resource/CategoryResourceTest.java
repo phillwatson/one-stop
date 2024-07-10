@@ -287,9 +287,9 @@ public class CategoryResourceTest extends TestBase {
         Instant startDate = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         Instant endDate = toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         List<CategoryStatistics> expectedResult = List.of(
-            new CategoryStatistics("cat-1", UUID.randomUUID(), 20, BigDecimal.valueOf(123.44)),
-            new CategoryStatistics("cat-2", UUID.randomUUID(), 10, BigDecimal.valueOf(456.44)),
-            new CategoryStatistics("cat-3", UUID.randomUUID(), 6, BigDecimal.valueOf(34.44))
+            new CategoryStatistics("cat-1", UUID.randomUUID(), "", "", 20, BigDecimal.valueOf(123.44)),
+            new CategoryStatistics("cat-2", UUID.randomUUID(), "", "", 10, BigDecimal.valueOf(456.44)),
+            new CategoryStatistics("cat-3", UUID.randomUUID(), "", "", 6, BigDecimal.valueOf(34.44))
         );
         when(categoryService.getStatistics(userId, startDate, endDate))
             .thenReturn(expectedResult);

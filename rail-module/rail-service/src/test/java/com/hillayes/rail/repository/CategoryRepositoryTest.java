@@ -300,13 +300,13 @@ public class CategoryRepositoryTest {
 
         // and: a collection of categories with selectors for the account's transactions
         List<Category> categories = List.of(
-            Category.builder().userId(consent.getUserId()).name("category 1").build()
+            Category.builder().userId(consent.getUserId()).name("category 1").description("desc 1").colour("#111111").build()
                 .addSelector(account.getId(), builder -> builder.infoContains("info 1").build()),
-            Category.builder().userId(consent.getUserId()).name("category 2").build()
+            Category.builder().userId(consent.getUserId()).name("category 2").description("desc 2").colour("#222222").build()
                 .addSelector(account.getId(), builder -> builder.refContains("info 2").build()),
-            Category.builder().userId(consent.getUserId()).name("category 3").build()
+            Category.builder().userId(consent.getUserId()).name("category 3").description("desc 3").colour("#333333").build()
                 .addSelector(account.getId(), builder -> builder.creditorContains("info 3").build()),
-            Category.builder().userId(consent.getUserId()).name("category 4").build()
+            Category.builder().userId(consent.getUserId()).name("category 4").description("desc 4").colour("#444444").build()
                 .addSelector(account.getId(), builder -> builder.infoContains("info 4").build())
         );
         fixture.saveAll(categories);

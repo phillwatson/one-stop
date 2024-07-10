@@ -119,19 +119,19 @@ export default function AddSelector(props: Props) {
       <DialogContent>
         <Divider textAlign="left" sx={{fontWeight: 'light'}}>Enter selector criteria (case-sensitive):</Divider>
         <TextField
-          id="name" label="Additional Info Contains" margin="dense" fullWidth variant="standard" autoFocus 
+          id="name" label="Additional Info Contains (optional)" margin="dense" fullWidth variant="standard" autoFocus 
           value={selector.infoContains || ''}
           onChange={(e) => setSelector({ ...selector, infoContains: e.target.value })}
         />
 
         <TextField
-          id="ref" label="Reference Contains" margin="dense" fullWidth variant="standard"
+          id="ref" label="Reference Contains (optional)" margin="dense" fullWidth variant="standard"
           value={selector.refContains || ''}
           onChange={(e) => setSelector({ ...selector, refContains: e.target.value })}
         />
 
         <TextField
-          id="creditor" label="Creditor Contains" margin="dense" fullWidth variant="standard"
+          id="creditor" label="Creditor Contains (optional)" margin="dense" fullWidth variant="standard"
           value={selector.creditorContains || ''}
           onChange={(e) => setSelector({ ...selector, creditorContains: e.target.value })}
         />

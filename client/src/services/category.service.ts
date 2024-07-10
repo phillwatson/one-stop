@@ -55,6 +55,15 @@ class CategoryService {
     return http.put<Array<CategorySelector>>(`/rails/categories/${categoryId}/selectors/${accountId}`, selectors)
       .then(response => response.data);
   }
+
+  getCategoryStatistics(fromDate: Date, toDate: Date): Promise<Array<CategoryStatistics>> {
+    const fromDateStr = fromDate.toISOString().substring(0, 10);
+    const toDateStr = toDate.toISOString().substring(0, 10);
+    console.log(`Retrieving category statistics [from: ${fromDateStr}, to: ${toDateStr}]`);
+    return http.get<Array<CategoryStatistics>>('/rails/categories/statistics',
+      { params: { "from-date": fromDateStr, "to-date": toDateStr }})
+      .then(response => response.data);
+  }
 }
 
 const instance = new CategoryService();
