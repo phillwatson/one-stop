@@ -607,13 +607,17 @@ public class CategoryServiceTest {
         Collection<CategorySelector> updatedSelectors = fixture.setCategorySelectors(userId, category.getId(), account.getId(), newSelectors);
 
         // then: the response contains the updated selectors
-        assertEquals(newSelectors.size(), updatedSelectors.size());
-        newSelectors.forEach(newSelector ->
-            assertTrue(updatedSelectors.stream()
-                .anyMatch(s -> Objects.equals(s.getInfoContains(), newSelector.getInfoContains())
-                    || Objects.equals(s.getRefContains(), newSelector.getRefContains())
-                    || Objects.equals(s.getCreditorContains(), newSelector.getCreditorContains())))
-        );
+        if (newSelectors != null) {
+            assertEquals(newSelectors.size(), updatedSelectors.size());
+            newSelectors.forEach(newSelector ->
+                assertTrue(updatedSelectors.stream()
+                    .anyMatch(s -> Objects.equals(s.getInfoContains(), newSelector.getInfoContains())
+                        || Objects.equals(s.getRefContains(), newSelector.getRefContains())
+                        || Objects.equals(s.getCreditorContains(), newSelector.getCreditorContains())))
+            );
+        } else {
+            assertTrue(updatedSelectors.isEmpty());
+        }
 
         // and: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
