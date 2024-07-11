@@ -41,6 +41,13 @@ public class Strings {
     }
 
     /**
+     * Returns the given String trimmed, or null if the trimmed value is blank.
+     */
+    static public String trimOrNull(String value) {
+        return isBlank(value) ? null : value.trim();
+    }
+
+    /**
      * Masks the email address by replacing the characters before the '@' with
      * a single character followed by '****'. This is intended for including
      * email addresses in log messages.

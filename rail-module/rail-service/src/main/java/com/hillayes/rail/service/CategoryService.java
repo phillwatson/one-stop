@@ -1,5 +1,6 @@
 package com.hillayes.rail.service;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Category;
@@ -120,9 +121,9 @@ public class CategoryService {
         category.getSelectors().removeIf(selector -> selector.getAccountId().equals(accountId));
         if (selectors != null) {
             selectors.forEach(newSelector -> category.addSelector(accountId, selector -> selector
-                .infoContains(newSelector.getInfoContains())
-                .refContains(newSelector.getRefContains())
-                .creditorContains(newSelector.getCreditorContains())
+                .infoContains(Strings.trimOrNull(newSelector.getInfoContains()))
+                .refContains(Strings.trimOrNull(newSelector.getRefContains()))
+                .creditorContains(Strings.trimOrNull(newSelector.getCreditorContains()))
             ));
         }
 

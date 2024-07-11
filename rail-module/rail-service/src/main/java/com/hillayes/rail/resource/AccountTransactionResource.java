@@ -16,7 +16,11 @@ import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -93,6 +97,30 @@ public class AccountTransactionResource {
             .filter(t -> t.getUserId().equals(userId))
             .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
         return Response.ok(marshal(transaction)).build();
+    }
+
+    @GET
+    @Path("/category/{categoryId}")
+    public Response getTransactionsByCategory(@Context SecurityContext ctx,
+                                              @PathParam("categoryId") UUID categoryId,
+                                              @QueryParam("from-date") LocalDate fromDate,
+                                              @QueryParam("to-date") LocalDate toDate) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting transactions by category [userId: {}, categoryId: {}, from: {}, to: {}]",
+            userId, categoryId, fromDate, toDate);
+
+        // convert dates to instant
+        Instant startDate = (fromDate == null)
+            ? Instant.EPOCH.truncatedTo(ChronoUnit.DAYS)
+            : fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endDate = (toDate == null)
+            ? Instant.now().truncatedTo(ChronoUnit.DAYS)
+            : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        List<TransactionResponse> result = accountTransactionService.findByCategory(userId, categoryId, startDate, endDate).stream()
+            .map(this::marshal)
+            .toList();
+        return Response.ok(result).build();
     }
 
     private TransactionResponse marshal(AccountTransaction transaction) {

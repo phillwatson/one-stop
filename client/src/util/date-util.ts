@@ -13,6 +13,11 @@ export function formatDateTime(dateStr?: string): string {
   return formatDate(dateStr) + ' ' + formatTime(dateStr);
 }
 
+export function toLocaleDate(date: Date): string {
+  if (!date) return "";
+  return date.toLocaleDateString("en-GB");
+}
+
 export function toISODate(date: Date): string {
   return date.toISOString().substring(0, 10);
 }
