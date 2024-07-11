@@ -57,7 +57,9 @@ one-stop:
         name: Portugal
         flag-uri: /country-logos/pt.png
 
-    uncategorised-name: UNCATEGORISED
+    categories:
+      uncategorised-name: Uncategorised
+      default-colour: "#dee0da"
 
     caches: # the duration of various caches - specified as Duration string
       institutions: PT6H

@@ -8,6 +8,7 @@ import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategoryStatistics;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
 import java.util.List;
@@ -46,9 +47,14 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
      * @return The list of category statistics.
      */
     public List<CategoryStatistics> getStatistics(UUID userId, Instant startDate, Instant endDate) {
+        String defaultName = serviceConfiguration.categories().uncategorisedName();
+        String defaultColour = serviceConfiguration.categories().defaultColour();
+
         List<CategoryStatistics> result = getEntityManager().createNativeQuery("select " +
-                "coalesce (c.name, '" + serviceConfiguration.uncategorisedName() + "') as category, " +
-                "c.id, c.description, c.colour, count(*) as count, sum(t.amount) / 100 as total " +
+                "coalesce (c.name, '" + defaultName + "') as category, " +
+                "c.id, c.description, " +
+                "coalesce (c.colour, '" + defaultColour + "') as colour, " +
+                "count(*) as count, sum(t.amount) / 100 as total " +
                 "from rails.account_transaction t " +
                 "left join rails.category_selector cs on cs.account_id = t.account_id and " +
                 "  (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) and " +

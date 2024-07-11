@@ -34,12 +34,7 @@ public interface ServiceConfiguration {
     @WithDefault("PT10M")
     Duration consentTimeout();
 
-    /**
-     * The name of the category that is used for transactions that do not match any
-     * category selector.
-     */
-    @WithDefault("UNCATEGORISED")
-    String uncategorisedName();
+    Categories categories();
 
     /**
      * The detail that describes a country supported by the rail service.
@@ -60,5 +55,20 @@ public interface ServiceConfiguration {
          * The duration for which the account details are cached.
          */
         Duration accountDetails();
+    }
+
+    interface Categories {
+        /**
+         * The name of the category that is used for transactions that do not match any
+         * category selector.
+         */
+        @WithDefault("Uncategorised")
+        String uncategorisedName();
+
+        /**
+         * The default colour for a category.
+         */
+        @WithDefault("#dee0da")
+        String defaultColour();
     }
 }
