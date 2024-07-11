@@ -1,4 +1,4 @@
-CREATE TABLE ${flyway:defaultSchema}.category (
+CREATE TABLE rails.category (
     id uuid NOT NULL CONSTRAINT category_pkey PRIMARY KEY,
     version bigint NOT NULL DEFAULT 0,
     user_id UUID NOT NULL,
@@ -6,15 +6,15 @@ CREATE TABLE ${flyway:defaultSchema}.category (
     description varchar(256) NULL,
     colour varchar(256) NULL
 );
-CREATE UNIQUE INDEX idx_category_user_id ON ${flyway:defaultSchema}.category (user_id, name);
+CREATE UNIQUE INDEX idx_category_user_id ON rails.category (user_id, name);
 
-CREATE TABLE ${flyway:defaultSchema}.category_selector (
+CREATE TABLE rails.category_selector (
     id uuid NOT NULL CONSTRAINT category_selector_pkey PRIMARY KEY,
-    category_id uuid NOT NULL CONSTRAINT fk_category REFERENCES ${flyway:defaultSchema}.category (id) ON DELETE CASCADE,
-    account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES ${flyway:defaultSchema}.account (id) ON DELETE CASCADE,
+    category_id uuid NOT NULL CONSTRAINT fk_category REFERENCES rails.category (id) ON DELETE CASCADE,
+    account_id uuid NOT NULL CONSTRAINT fk_account REFERENCES rails.account (id) ON DELETE CASCADE,
     info_contains varchar(256) NULL,
     ref_contains varchar(256) NULL,
     creditor_contains varchar(256) NULL
 );
-CREATE INDEX idx_category_selector_category_id ON ${flyway:defaultSchema}.category_selector (category_id);
-CREATE INDEX idx_category_selector_account_id ON ${flyway:defaultSchema}.category_selector (account_id);
+CREATE INDEX idx_category_selector_category_id ON rails.category_selector (category_id);
+CREATE INDEX idx_category_selector_account_id ON rails.category_selector (account_id);
