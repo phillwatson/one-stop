@@ -1,10 +1,9 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.domain.UserConsent;
+import com.hillayes.rail.domain.*;
 import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -15,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -30,6 +30,9 @@ public class AccountTransactionRepositoryTest {
 
     @Inject
     AccountRepository accountRepository;
+
+    @Inject
+    CategoryRepository categoryRepository;
 
     @Inject
     AccountTransactionRepository fixture;
@@ -371,6 +374,64 @@ public class AccountTransactionRepositoryTest {
                 .reduce(Long::sum)
                 .orElse(0L);
             assertEquals(expected, totals.get(0).getAmount());
+        });
+    }
+
+    @Test
+    public void testGetStatistics() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.DAYS);
+
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: a linked account
+        Account account = accountRepository.save(mockAccount(consent));
+
+        // and: a collection of categories with selectors for the account's transactions
+        Map<Category, List<AccountTransaction>> categoryTransactions = Map.of(
+            Category.builder().userId(consent.getUserId()).name("category 1").build()
+                .addSelector(account.getId(), builder -> builder.infoContains("info 1").build()), new ArrayList<>(),
+            Category.builder().userId(consent.getUserId()).name("category 2").build()
+                .addSelector(account.getId(), builder -> builder.refContains("ref 2").build()), new ArrayList<>(),
+            Category.builder().userId(consent.getUserId()).name("category 3").build()
+                .addSelector(account.getId(), builder -> builder.creditorContains("info 3").build()), new ArrayList<>(),
+            Category.builder().userId(consent.getUserId()).name("category 4").build()
+                .addSelector(account.getId(), builder -> builder.infoContains("creditor 4").build()), new ArrayList<>()
+        );
+        categoryRepository.saveAll(categoryTransactions.keySet());
+
+        // and: a collection of transactions for the account
+        // and: a match for each selector in each category
+        categoryTransactions.keySet().forEach(category -> {
+            category.getSelectors().stream().findFirst().ifPresent(selector ->
+                categoryTransactions.get(category).add(
+                    fixture.save(TestData.mockAccountTransaction(account, transaction -> {
+                        transaction.id(null)
+                            .bookingDateTime(now.minus(Duration.ofDays(5)))
+                            .amount(MonetaryAmount.of("GBP", 100));
+                        if (Strings.isNotBlank(selector.getCreditorContains())) {
+                            transaction.creditorName("contains " + selector.getCreditorContains() + " text");
+                        } else if (Strings.isNotBlank(selector.getRefContains())) {
+                            transaction.reference("contains " + selector.getRefContains() + " text");
+                        } else if (Strings.isNotBlank(selector.getInfoContains())) {
+                            transaction.additionalInformation("contains " + selector.getInfoContains() + " text");
+                        }
+                    }))
+                )
+            );
+        });
+        fixture.flush();
+
+        // when: the statistics are retrieved for each category
+        categoryTransactions.keySet().forEach(category -> {
+            List<AccountTransaction> expected = categoryTransactions.get(category);
+            List<AccountTransaction> actual =
+                    fixture.findByCategory(consent.getUserId(), category.getId(), now.minus(Duration.ofDays(7)), now);
+
+            // then: the expected transactions are returned
+            assertNotNull(actual, "Category: " + category.getName());
+            assertEquals(expected.size(), actual.size(), "Category: " + category.getName());
+            assertTrue(expected.containsAll(actual), "Category: " + category.getName());
         });
     }
 

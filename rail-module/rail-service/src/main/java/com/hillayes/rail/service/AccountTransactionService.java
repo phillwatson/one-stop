@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,9 @@ import java.util.UUID;
 public class AccountTransactionService {
     @Inject
     AccountService accountService;
+
+    @Inject
+    CategoryService categoryService;
 
     @Inject
     AccountTransactionRepository accountTransactionRepository;
@@ -67,6 +71,21 @@ public class AccountTransactionService {
         }
 
         return accountTransactionRepository.findTotals(filter);
+    }
+
+    public List<AccountTransaction> findByCategory(UUID userId, UUID categoryId,
+                                                   Instant startDate, Instant endDate) {
+        log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}]",
+            userId, categoryId, startDate, endDate);
+
+        // ensure the category belongs to the user
+        categoryService.getCategory(userId, categoryId);
+
+        List<AccountTransaction> result = accountTransactionRepository.findByCategory(userId, categoryId, startDate, endDate);
+
+        log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}, total: {}]",
+            userId, categoryId, startDate, endDate, result.size());
+        return result;
     }
 
     /**

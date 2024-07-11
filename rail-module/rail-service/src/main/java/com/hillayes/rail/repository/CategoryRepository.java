@@ -8,7 +8,6 @@ import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategoryStatistics;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
 import java.util.List;

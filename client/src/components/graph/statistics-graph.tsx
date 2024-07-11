@@ -12,43 +12,54 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { useMessageDispatch } from "../../contexts/messages/context";
 import CategoryService from '../../services/category.service';
+import { CategoryStatistics } from "../../model/category.model";
 
-export default function StatisticsGraph() {
+interface Props {
+  onCategorySelected: (category: CategoryStatistics, fromDate: Date, toDate: Date) => void;
+}
+
+export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
+  const [ statistics, setStatistics ] = useState<CategoryStatistics[]>([]);
   const [ data, setData ] = useState<Array<PieValueType>>([]);
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
 
   useEffect(() => {
+    setData(statistics.map(stat => {
+        const p: PieValueType = {
+          id: stat.categoryId || "1",
+          value: Math.abs(stat.total),
+          label: stat.category,
+          color: stat.colour
+        };
+        return p;
+      }));
+  }, [ statistics ]);
+
+  useEffect(() => {
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(dateRange[0].toDate(), dateRange[1].toDate())
-        .then( statistics => {
-          setData(statistics.map(stat => {
-              const p: PieValueType = {
-                id: stat.categoryId || "1",
-                value: Math.abs(stat.total),
-                label: stat.category,
-                color: stat.colour
-              };
-              return p;
-            })
-          )
-        })
+        .then( response => setStatistics(response) )
         .catch(err => showMessage(err));
     } else {
       showMessage({ type: 'add', level: 'info', text: 'The "from" date must be before the "to" date.' });
     }
   }, [ showMessage, dateRange ]);
 
+  function selectCategory(selectedIndex: number) {
+    props.onCategorySelected(statistics[selectedIndex], dateRange[0].toDate(), dateRange[1].toDate());
+  }
+
   return (
     <>
       <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
-        <Paper elevation={3} sx={{ padding: 2 }}>
-          <Grid container columnSpacing={7} justifyContent={"center"}>
+        <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+          <Grid container columnSpacing={7} rowSpacing={3} justifyContent={"center"}>
             <Grid key={1} item>
               <DatePicker disableFuture
                 label="From Date (inclusive)"
                 value={ dayjs(dateRange[0]) }
-                onChange={ (value, context) => {
+                onChange={ (value: any, context: any) => {
                   if (value != null && context.validationError == null)
                     setDateRange([ value, dateRange[1]])
                   }}/>
@@ -58,30 +69,33 @@ export default function StatisticsGraph() {
               <DatePicker maxDate={ dayjs().add(1, 'day') }
                 label="To Date (exclusive)"
                 value={ dayjs(dateRange[1]) }
-                onChange={ (value, context) => {
+                onChange={ (value: any, context: any) => {
                   if (value != null && context.validationError == null)
                     setDateRange([dateRange[0], value])
                   }}/>
             </Grid>
           </Grid>
         </Paper>
-        <PieChart
-          series={[
-            {
-              data: data,
-              innerRadius: 20,
-              outerRadius: 200,
-              paddingAngle: 5,
-              cornerRadius: 5,
-              highlightScope: { faded: 'global', highlighted: 'item' },
-              faded: { innerRadius: 15, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 },
-              cx: 150,
-              cy: 200
-            }
-          ]}
-          height={ 450 }
-          margin={{ top: 50, right: 10, bottom: 70, left: 120 }}
-        />
+        <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+          <PieChart
+            series={[
+              {
+                data: data,
+                innerRadius: 20,
+                outerRadius: 200,
+                paddingAngle: 5,
+                cornerRadius: 5,
+                highlightScope: { faded: 'global', highlighted: 'item' },
+                faded: { innerRadius: 15, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 },
+                cx: 150,
+                cy: 200
+              }
+            ]}
+            height={ 500 }
+            margin={{ top: 50, right: 10, bottom: 70, left: 120 }}
+            onClick={(event: any, data: any) => { selectCategory(data.dataIndex) }}
+          />
+        </Paper>
       </LocalizationProvider>
     </>
   );
