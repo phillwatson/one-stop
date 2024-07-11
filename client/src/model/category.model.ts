@@ -15,7 +15,7 @@ export interface CategoryStatistics {
   categoryId?: string
   category: string;
   description?: string;
-  colour?: string;
+  colour: string;
   count: number;
   total: number;
 }

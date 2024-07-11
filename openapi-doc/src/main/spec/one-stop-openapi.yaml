@@ -674,7 +674,7 @@ paths:
             format: date
         - name: "to-date"
           in: "query"
-          description: The date, inclusive, to which the transaction list should end.
+          description: The date, exclusive, to which the transaction list should end.
           required: false
           schema:
             type: string
@@ -1006,7 +1006,7 @@ paths:
             format: date
         - name: "to-date"
           in: "query"
-          description: The date, inclusive, to which the transaction should end.
+          description: The date, exclusive, to which the transaction should end.
           required: false
           schema:
             type: string
