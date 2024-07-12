@@ -844,6 +844,46 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Get Transactions By Category",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/transactions/category/:categoryId?from-date=2024-01-01&to-date=2024-07-12",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"transactions",
+										"category",
+										":categoryId"
+									],
+									"query": [
+										{
+											"key": "from-date",
+											"value": "2024-01-01"
+										},
+										{
+											"key": "to-date",
+											"value": "2024-07-12"
+										}
+									],
+									"variable": [
+										{
+											"key": "categoryId",
+											"value": "34698456-a7ca-41f2-92ad-13ddf64f2baa"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
