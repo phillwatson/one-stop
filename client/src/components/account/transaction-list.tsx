@@ -101,7 +101,7 @@ export default function TransactionList(props: Props) {
           filter = { "reference": item.value as string, ...filter };
         }
         if (item.field === 'creditorName') {
-          filter = { "creditorName": item.value as string, ...filter };
+          filter = { "creditor": item.value as string, ...filter };
         }
         if (item.field === 'bookingDateTime') {
           const dateStr = toISODate(item.value);
