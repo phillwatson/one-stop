@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PageHeader from "../components/page-header/page-header";
 import StatisticsGraph from "../components/graph/statistics-graph";
-import CategoryTransactions, { Props } from "../components/graph/category-transactions";
+import CategoryTransactions, { Props } from "../components/categories/category-transactions";
 import { CategoryStatistics } from "../model/category.model";
 
 export default function StatisticsPage() {

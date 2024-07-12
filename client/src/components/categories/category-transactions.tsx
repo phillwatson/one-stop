@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Paper } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,10 +11,10 @@ import { SxProps } from '@mui/material/styles';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import AccountService from '../../services/account.service';
 import CurrencyService from '../../services/currency.service';
+import { CategoryStatistics } from '../../model/category.model';
 import { TransactionDetail } from '../../model/account.model';
 import { toLocaleDate, formatDate } from '../../util/date-util';
-import AddSelector from '../categories/add-selector';
-import { CategoryStatistics } from '../../model/category.model';
+import AddSelector from './add-selector';
 
 const colhead: SxProps = {
   fontWeight: 'bold'
@@ -47,6 +47,7 @@ export default function CategoryTransactions(props: Props) {
   return(
     <>
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+        <Box sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>{ props.category.category }</Box>
         <Table size="small" aria-label="transactions">
           <caption><i>
             { noTransactions ? 'there are no' : transactions.length } {' '}
