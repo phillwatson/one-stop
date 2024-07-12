@@ -53,14 +53,14 @@
 
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
-        <surefire-plugin.version>3.3.0</surefire-plugin.version>
+        <surefire-plugin.version>3.3.1</surefire-plugin.version>
 
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.12.1</quarkus.platform.version>
+        <quarkus.platform.version>3.12.2</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -70,7 +70,7 @@
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:1f152b70f833d4a0028f3da0a1b8122cdceb49728f41ec93660371aa73de2344</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.6.0</openapi-generator.version>
+        <openapi-generator.version>7.7.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.32</version>
+                <version>1.18.34</version>
             </dependency>
             <dependency>
                 <groupId>org.openapitools</groupId>
@@ -130,7 +130,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>5.4.0</version>
+                <version>5.5.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hsqldb</groupId>
@@ -140,7 +140,7 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sendinblue</groupId>
@@ -161,7 +161,7 @@
             <dependency>
                 <groupId>com.github.kagkarlsson</groupId>
                 <artifactId>db-scheduler</artifactId>
-                <version>14.0.1</version>
+                <version>14.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
@@ -452,7 +452,7 @@
                     <!-- use mvn versions:update-properties -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.16.2</version>
+                    <version>2.17.0</version>
                 </plugin>
 
                 <plugin>
