@@ -22,6 +22,7 @@ const NULL_SELECTOR: CategorySelector = { infoContains: '', refContains: '', cre
 
 interface Props {
   open: boolean;
+  catagoryId?: string; // optional current category
   transaction?: TransactionDetail;
   onConfirm: (category: Category, selector: CategorySelector) => void;
   onCancel: () => void;
@@ -38,9 +39,16 @@ export default function AddSelector(props: Props) {
 
   useEffect(() => {
     if (props.open) {
-      CategoryService.fetchAllCategories().then( response => setCategories(response));
+      CategoryService.fetchAllCategories().then( response => {
+        setCategories(response);
+
+        if (props.catagoryId) {
+          const cat = response.find(cat => cat.id === props.catagoryId);
+          setCategory(cat || NULL_CATEGORY);
+        }
+      });
     }
-  }, [ props.open ]);
+  }, [ props.open, props.catagoryId ]);
 
   useEffect(() => {
     if (props.open && props.transaction !== undefined) {

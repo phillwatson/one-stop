@@ -76,6 +76,7 @@ export default function CategoryTransactions(props: Props) {
       </Paper>
 
       <AddSelector open={ showAddCategory }
+          catagoryId={ props.category.categoryId }
           transaction={ selectedTransaction }
           onCancel={ () => setShowAddCategory(false) }
           onConfirm={() => setShowAddCategory(false) }/>

@@ -1,18 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import Paper from "@mui/material/Paper/Paper";
-import Grid from "@mui/material/Grid";
-import { PieChart } from "@mui/x-charts/PieChart";
-import { PieValueType } from "@mui/x-charts/models/seriesType/pie";
+import Paper from '@mui/material/Paper/Paper';
+import Grid from '@mui/material/Grid';
+import { PieChart } from '@mui/x-charts/PieChart';
+import { PieValueType } from '@mui/x-charts/models/seriesType/pie';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-import { useMessageDispatch } from "../../contexts/messages/context";
+import { useMessageDispatch } from '../../contexts/messages/context';
 import CategoryService from '../../services/category.service';
-import { CategoryStatistics } from "../../model/category.model";
+import { CategoryStatistics } from '../../model/category.model';
+
+var debounce = require('lodash/debounce');
 
 interface Props {
   onCategorySelected: (category: CategoryStatistics, fromDate: Date, toDate: Date) => void;
@@ -23,6 +25,7 @@ export default function StatisticsGraph(props: Props) {
   const [ statistics, setStatistics ] = useState<CategoryStatistics[]>([]);
   const [ data, setData ] = useState<Array<PieValueType>>([]);
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
+  const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 500);
 
   useEffect(() => {
     setData(statistics.map(stat => {
@@ -61,7 +64,7 @@ export default function StatisticsGraph(props: Props) {
                 value={ dayjs(dateRange[0]) }
                 onChange={ (value: any, context: any) => {
                   if (value != null && context.validationError == null)
-                    setDateRange([ value, dateRange[1]])
+                    debouncedSetDateRange([ value, dateRange[1]])
                   }}/>
             </Grid>
 
@@ -71,7 +74,7 @@ export default function StatisticsGraph(props: Props) {
                 value={ dayjs(dateRange[1]) }
                 onChange={ (value: any, context: any) => {
                   if (value != null && context.validationError == null)
-                    setDateRange([dateRange[0], value])
+                    debouncedSetDateRange([dateRange[0], value])
                   }}/>
             </Grid>
           </Grid>
