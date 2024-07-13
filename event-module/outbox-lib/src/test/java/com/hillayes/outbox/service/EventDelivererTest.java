@@ -103,6 +103,7 @@ public class EventDelivererTest {
                     Thread.sleep(500);
                     return mockRecordMetadata();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
             }
