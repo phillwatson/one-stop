@@ -68,6 +68,7 @@ public class CacheTest {
             try {
                 wait(milliseconds);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
         }
