@@ -16,7 +16,6 @@
         <module>rail-api</module>
         <module>yapily-lib</module>
         <module>nordigen-lib</module>
-        <module>currency-cloud</module>
         <module>rail-service</module>
     </modules>
 </project>
