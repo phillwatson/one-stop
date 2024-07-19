@@ -171,6 +171,11 @@ public class NordigenRailProvider implements RailProviderApi {
     @Override
     public Optional<RailAccount> getAccount(RailAgreement agreement, String id) {
         log.debug("Getting account [id: {}]", id);
+        if (agreement.getStatus() != AgreementStatus.GIVEN) {
+            log.warn("Agreement not given [agreementId: {}, status: {}]", agreement.getId(), agreement.getStatus());
+            return Optional.empty();
+        }
+
         return accountService.get(id)
             .map(account -> RailAccount.builder()
                 .id(account.id)
