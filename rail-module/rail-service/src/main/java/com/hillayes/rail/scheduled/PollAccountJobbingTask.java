@@ -5,10 +5,7 @@ import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.RailAccountStatus;
-import com.hillayes.rail.api.domain.RailAccount;
-import com.hillayes.rail.api.domain.RailAgreement;
-import com.hillayes.rail.api.domain.RailTransaction;
+import com.hillayes.rail.api.domain.*;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
@@ -112,6 +109,16 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             return TaskConclusion.COMPLETE;
         }
 
+        if (railAgreement.getStatus() == AgreementStatus.SUSPENDED) {
+            userConsentService.consentSuspended(userConsent.getId());
+            return TaskConclusion.COMPLETE;
+        }
+
+        if (railAgreement.getStatus() == AgreementStatus.EXPIRED) {
+            userConsentService.consentExpired(userConsent.getId());
+            return TaskConclusion.COMPLETE;
+        }
+
         RailAccount railAccount = railProviderApi.getAccount(railAgreement, railAccountId).orElse(null);
         if (railAccount == null) {
             log.info("Unable to find rail-account [consentId: {}, railAccountId: {}]", consentId, railAccountId);
@@ -120,13 +127,9 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
         if (railAccount.getStatus() == RailAccountStatus.SUSPENDED) {
             userConsentService.consentSuspended(userConsent.getId());
-        }
-
-        else if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
+        } else if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
             userConsentService.consentExpired(userConsent.getId());
-        }
-
-        else if (railAccount.getStatus() == RailAccountStatus.READY) {
+        } else if (railAccount.getStatus() == RailAccountStatus.READY) {
             Account account = getOrCreateAccount(userConsent, railAccount);
 
             // only process if not already polled within grace period

@@ -506,6 +506,63 @@ public class PollAccountJobbingTaskTest {
     }
 
     @Test
+    public void testAgreementExpired() {
+        // given: an identified user-consent of status GIVEN
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .reference(UUID.randomUUID().toString())
+            .agreementId(UUID.randomUUID().toString())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: an EXPIRED rail-agreement associated with that consent
+        RailAgreement railAgreement = RailAgreement.builder()
+            .status(AgreementStatus.EXPIRED)
+            .build();
+        when(railProviderApi.getAgreement(userConsent.getAgreementId()))
+            .thenReturn(Optional.of(railAgreement));
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), UUID.randomUUID().toString());
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the user-consent is retrieved
+        verify(userConsentService).lockUserConsent(userConsent.getId());
+
+        // and: the rail-agreement is retrieved
+        verify(railProviderApi).getAgreement(userConsent.getAgreementId());
+
+        // and: the rail-account is NOT retrieved
+        verify(railProviderApi, never()).getAccount(any(), any());
+
+        // and: the local account is NOT retrieved
+        verify(accountRepository, never()).findByRailAccountId(any());
+
+        // and: the balances are NOT updated
+        verify(accountBalanceRepository, never()).save(any());
+
+        // and: the account transactions are NOT retrieved
+        verify(railProviderApi, never()).listTransactions(any(), any(), any());
+
+        // and: NO transactions are saved
+        verify(accountTransactionRepository, never()).saveAll(any());
+
+        // and: the local account is NOT updated
+        verify(accountRepository, never()).save(any());
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is called to process expired requisition
+        verify(userConsentService).consentExpired(userConsent.getId());
+
+        // and: the task's result is COMPLETE
+        assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
     public void testNoRailAccountFound() {
         // given: an identified user-consent ready to be polled
         UserConsent userConsent = UserConsent.builder()
