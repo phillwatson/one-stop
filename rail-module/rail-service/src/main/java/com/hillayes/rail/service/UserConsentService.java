@@ -129,7 +129,7 @@ public class UserConsentService {
                 .path(UserConsentResource.class, "consentResponse")
                 .buildFromMap(Map.of("railProvider", institution.getProvider()));
 
-            // generate a random reference
+            // generate a random reference - for later consent look-up
             String reference = UUID.randomUUID().toString();
 
             // register the agreement with the rail
@@ -272,7 +272,7 @@ public class UserConsentService {
         userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.SUSPENDED)
             .ifPresent(userConsent -> {
-                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                log.debug("Suspending consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.SUSPENDED);
                 userConsent = userConsentRepository.save(userConsent);
@@ -289,7 +289,7 @@ public class UserConsentService {
         userConsentRepository.findByIdOptional(userConsentId)
             .filter(userConsent -> userConsent.getStatus() != ConsentStatus.EXPIRED)
             .ifPresent(userConsent -> {
-                log.debug("Updating consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
+                log.debug("Expiring consent [userId: {}, userConsentId: {}, institutionId: {}, expires: {}]",
                     userConsent.getUserId(), userConsentId, userConsent.getInstitutionId(), userConsent.getAgreementExpires());
                 userConsent.setStatus(ConsentStatus.EXPIRED);
                 userConsent = userConsentRepository.save(userConsent);
