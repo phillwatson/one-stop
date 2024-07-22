@@ -84,12 +84,12 @@ export default function StatisticsGraph(props: Props) {
             series={[
               {
                 data: data,
-                innerRadius: 20,
+                innerRadius: 50,
                 outerRadius: 200,
                 paddingAngle: 5,
                 cornerRadius: 5,
                 highlightScope: { faded: 'global', highlighted: 'item' },
-                faded: { innerRadius: 15, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 },
+                faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 },
                 cx: 150,
                 cy: 200
               }
