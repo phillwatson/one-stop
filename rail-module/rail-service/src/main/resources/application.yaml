@@ -55,6 +55,10 @@ one-stop:
 
       # jobbing tasks to refresh the identified account details
       poll-account:
+        on-incomplete: # gives a max of 16 minutes
+          max-retry: 4
+          retry-interval: PT2M
+          retry-exponent: 1.5
         on-failure: # gives a max of 16 minutes
           max-retry: 4
           retry-interval: PT2M

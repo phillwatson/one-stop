@@ -101,12 +101,14 @@ public class NordigenRailProvider implements RailProviderApi {
         log.debug("Requesting requisition [reference: {}, institutionId: {}: agreementId: {}, callbackUri: {}]",
             reference, institution.getId(), agreement.id, callbackUri);
 
+        // see https://bankaccountdata.zendesk.com/hc/en-gb/articles/11529611180700-Immediate-end-user-redirect-from-bank-after-consent
+        // for more information on the redirectImmediate parameter
         Requisition requisition = requisitionService.create(RequisitionRequest.builder()
             .institutionId(agreement.institutionId)
             .agreement(agreement.id)
             .accountSelection(Boolean.FALSE)
             .userLanguage("EN")
-            .redirectImmediate(Boolean.FALSE)
+            .redirectImmediate(Boolean.TRUE)
             .redirect(callbackUri.toString())
             // reference is returned in callback
             // - allows us to identify the consent record

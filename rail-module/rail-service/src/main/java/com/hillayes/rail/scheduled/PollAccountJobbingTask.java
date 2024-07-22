@@ -129,6 +129,9 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             userConsentService.consentSuspended(userConsent.getId());
         } else if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
             userConsentService.consentExpired(userConsent.getId());
+        } else if (railAccount.getStatus() == RailAccountStatus.PROCESSING) {
+            // account not ready yet, try again later
+            return TaskConclusion.INCOMPLETE;
         } else if (railAccount.getStatus() == RailAccountStatus.READY) {
             Account account = getOrCreateAccount(userConsent, railAccount);
 

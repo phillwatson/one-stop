@@ -235,7 +235,7 @@ public class PollAccountJobbingTaskTest {
         // and: NO local account is linked to that rail-account
         when(accountRepository.findByRailAccountId(railAccount.getId())).thenReturn(Optional.empty());
 
-        // and: NO existing transactions
+        // and: NO local existing transactions
         when(accountTransactionRepository.findByFilter(any(), anyInt(), anyInt()))
             .thenReturn(Page.empty());
 
@@ -294,6 +294,79 @@ public class PollAccountJobbingTaskTest {
 
         // and: the task's result is COMPLETE
         assertEquals(TaskConclusion.COMPLETE, result);
+    }
+
+    @Test
+    public void testHappyPath_NewAccount_StillProcessing() {
+        // given: an identified user-consent ready to be polled
+        UserConsent userConsent = UserConsent.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .institutionId(randomAlphanumeric(20))
+            .agreementId(UUID.randomUUID().toString())
+            .reference(UUID.randomUUID().toString())
+            .status(ConsentStatus.GIVEN)
+            .build();
+        when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
+
+        // and: a rail-agreement associated with that consent
+        RailAgreement railAgreement = RailAgreement.builder().build();
+        when(railProviderApi.getAgreement(userConsent.getAgreementId()))
+            .thenReturn(Optional.of(railAgreement));
+
+        // and: a rail-account associated with that consent - still being processed
+        RailAccount railAccount = TestApiData.mockAccount(RailAccountStatus.PROCESSING);
+        when(railProviderApi.getAccount(railAgreement, railAccount.getId()))
+            .thenReturn(Optional.of(railAccount));
+
+        // and: NO local account is linked to that rail-account
+        when(accountRepository.findByRailAccountId(railAccount.getId())).thenReturn(Optional.empty());
+
+        // and: NO local existing transactions
+        when(accountTransactionRepository.findByFilter(any(), anyInt(), anyInt()))
+            .thenReturn(Page.empty());
+
+        // and: NO rail-transactions records are available
+        List<RailTransaction> transactions = List.of();
+        when(railProviderApi.listTransactions(eq(railAgreement), eq(railAccount.getId()), any())).thenReturn(transactions);
+
+        // when: the fixture is called to process the user-consent and account
+        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        TaskConclusion result = fixture.apply(context);
+
+        // then: the task's result is INCOMPLETE
+        assertEquals(TaskConclusion.INCOMPLETE, result);
+
+        // and: the user-consent is retrieved
+        verify(userConsentService).lockUserConsent(userConsent.getId());
+
+        // and: the rail-agreement is retrieved
+        verify(railProviderApi).getAgreement(userConsent.getAgreementId());
+
+        // and: the rail-account is retrieved
+        verify(railProviderApi).getAccount(railAgreement, railAccount.getId());
+
+        // and: NO local account is retrieved
+        verify(accountRepository, never()).findByRailAccountId(any());
+
+        // and: NO balances are saved
+        verify(accountBalanceRepository, never()).save(any());
+
+        // and: NO account transactions are retrieved
+        verify(railProviderApi, never()).listTransactions(any(), any(), any());
+
+        // and: NO transactions are saved
+        verify(accountTransactionRepository, never()).saveAll(any());
+
+        // and: NO local account is inserted or updated
+        verify(accountRepository, never()).save(any());
+
+        // and: the consent service is NOT called to process suspended requisition
+        verify(userConsentService, never()).consentSuspended(any());
+
+        // and: the consent service is NOT called to process expired requisition
+        verify(userConsentService, never()).consentExpired(any());
     }
 
     @Test
@@ -734,7 +807,7 @@ public class PollAccountJobbingTaskTest {
     }
 
     @ParameterizedTest
-    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "READY", "EXPIRED", "SUSPENDED" })
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = { "PROCESSING", "READY", "EXPIRED", "SUSPENDED" })
     public void testNoRailAccountStatusNotCorrect(RailAccountStatus accountStatus) {
         // given: an identified user-consent ready to be polled
         UserConsent userConsent = UserConsent.builder()
