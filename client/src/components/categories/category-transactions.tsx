@@ -35,12 +35,20 @@ export default function CategoryTransactions(props: Props) {
   useEffect(() => {
     AccountService.getTransactionsByCategory(props.category.categoryId!!, props.fromDate, props.toDate)
       .then(response => setTransactions(response))
-      .catch(err => showMessage(err))
+      .catch(err => {
+        setTransactions([]);
+        showMessage(err);
+      })
   }, [props, showMessage]);
 
   function addToCategory(transaction: TransactionDetail) {
     setSelectedTransaction(transaction);
     setShowAddCategory(true);
+  }
+
+  function closeAddToCategory() {
+    setShowAddCategory(false);
+    setSelectedTransaction(undefined);
   }
 
   const noTransactions = (transactions.length === 0);
@@ -79,8 +87,8 @@ export default function CategoryTransactions(props: Props) {
       <AddSelector open={ showAddCategory }
           catagoryId={ props.category.categoryId }
           transaction={ selectedTransaction }
-          onCancel={ () => setShowAddCategory(false) }
-          onConfirm={() => setShowAddCategory(false) }/>
+          onCancel={ () => closeAddToCategory() }
+          onConfirm={() => closeAddToCategory() }/>
     </>
   );
 };
