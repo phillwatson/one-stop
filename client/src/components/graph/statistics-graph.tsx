@@ -88,7 +88,7 @@ export default function StatisticsGraph(props: Props) {
   return (
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-        <Grid container columnSpacing={7} rowSpacing={3} justifyContent={"center"}>
+        <Grid container spacing={7} alignItems={"center"} justifyContent={"center"}>
           <Grid key={1} item>
             <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
               onChange={ (value: any, context: any) => {
@@ -107,7 +107,7 @@ export default function StatisticsGraph(props: Props) {
         </Grid>
       </Paper>
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-        <Grid container columnGap={ 4 } alignItems={"center"} justifyContent={"center"}>
+        <Grid container spacing={4} alignItems={"center"} justifyContent={"center"}>
           <Grid item>
             <PieChart height={ 500 } width={ 400 } margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
               slotProps={{ legend: { hidden: true } }}
