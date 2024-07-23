@@ -860,7 +860,18 @@ public class PollAccountJobbingTaskTest {
         // and: the consent service is NOT called to process expired requisition
         verify(userConsentService, never()).consentExpired(any());
 
-        // and: the task's result is COMPLETE
-        assertEquals(TaskConclusion.COMPLETE, result);
+        if (accountStatus == RailAccountStatus.ERROR) {
+            // and: the task's result is COMPLETE
+            assertEquals(TaskConclusion.COMPLETE, result);
+
+            // and: the consent service is called to process error
+            verify(userConsentService).consentDenied(eq(railProviderApi), any());
+        } else {
+            // and: the task's result is INCOMPLETE
+            assertEquals(TaskConclusion.INCOMPLETE, result);
+
+            // and: the consent service is NOT called to process an error
+            verify(userConsentService, never()).consentDenied(any(), any());
+        }
     }
 }

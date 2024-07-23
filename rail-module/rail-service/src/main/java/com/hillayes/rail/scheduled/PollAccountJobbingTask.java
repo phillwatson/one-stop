@@ -125,31 +125,47 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
             return TaskConclusion.COMPLETE;
         }
 
+        if (railAccount.getStatus() == RailAccountStatus.ERROR) {
+            userConsentService.consentDenied(railProviderApi, ConsentResponse.builder()
+                .consentReference(userConsent.getReference())
+                .errorCode("RAIL-ERROR")
+                .errorDescription("Account access denied")
+                .build());
+            return TaskConclusion.COMPLETE;
+        }
+
         if (railAccount.getStatus() == RailAccountStatus.SUSPENDED) {
             userConsentService.consentSuspended(userConsent.getId());
-        } else if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
-            userConsentService.consentExpired(userConsent.getId());
-        } else if (railAccount.getStatus() == RailAccountStatus.PROCESSING) {
-            // account not ready yet, try again later
-            return TaskConclusion.INCOMPLETE;
-        } else if (railAccount.getStatus() == RailAccountStatus.READY) {
-            Account account = getOrCreateAccount(userConsent, railAccount);
-
-            // only process if not already polled within grace period
-            Instant grace = Instant.now().minus(configuration.accountPollingInterval());
-            if ((account.getDateLastPolled() != null) && (account.getDateLastPolled().isAfter(grace))) {
-                log.debug("Skipping account polling [accountId: {}, lastPolled: {}]",
-                    account.getId(), account.getDateLastPolled());
-                return TaskConclusion.COMPLETE;
-            }
-
-            log.debug("Polling account [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
-            updateBalances(account, railAccount);
-            updateTransactions(railProviderApi, railAgreement, account);
-
-            account.setDateLastPolled(Instant.now());
-            accountRepository.save(account);
+            return TaskConclusion.COMPLETE;
         }
+
+        if (railAccount.getStatus() == RailAccountStatus.EXPIRED) {
+            userConsentService.consentExpired(userConsent.getId());
+            return TaskConclusion.COMPLETE;
+        }
+
+        if (railAccount.getStatus() != RailAccountStatus.READY) {
+            log.debug("Retrying account as it's not ready [accountId: {}, railAccountId: {}, status: {}]",
+                userConsent.getId(), railAccount.getId(), railAccount.getStatus());
+            return TaskConclusion.INCOMPLETE;
+        }
+
+        Account account = getOrCreateAccount(userConsent, railAccount);
+
+        // only process if not already polled within grace period
+        Instant grace = Instant.now().minus(configuration.accountPollingInterval());
+        if ((account.getDateLastPolled() != null) && (account.getDateLastPolled().isAfter(grace))) {
+            log.debug("Skipping account polling [accountId: {}, lastPolled: {}]",
+                account.getId(), account.getDateLastPolled());
+            return TaskConclusion.COMPLETE;
+        }
+
+        log.debug("Polling account [accountId: {}, railAccountId: {}]", account.getId(), account.getRailAccountId());
+        updateBalances(account, railAccount);
+        updateTransactions(railProviderApi, railAgreement, account);
+
+        account.setDateLastPolled(Instant.now());
+        accountRepository.save(account);
 
         return TaskConclusion.COMPLETE;
     }

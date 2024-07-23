@@ -67,6 +67,7 @@ end
 rail-service->database:Account.persist
 rbox over rail-service,database#bee7ff:dateLastPolled = now()
 
+scheduler<--rail-service:COMPLETE
 else#lightblue account status = SUSPENDED
 rail-service->database:UserConsent.findById(consentId)
 activate database
@@ -92,6 +93,7 @@ activate broker
 deactivateafter broker
 rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
 
+scheduler<--rail-service:COMPLETE
 else#lightblue account status = EXPIRED
 rail-service->database:UserConsent.findById(consentId)
 activate database
@@ -115,6 +117,11 @@ rail-service->broker:CONSENT_EXPIRED
 activate broker
 deactivateafter broker
 rbox over nordigen#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n}
+scheduler<--rail-service:COMPLETE
+else#lightblue account status = PROCESSING
+
+scheduler<--rail-service:INCOMPLETE
+note over rail-service:re-schedule for retry
 end
 
 deactivateafter rail-service
