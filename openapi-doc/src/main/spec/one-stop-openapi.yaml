@@ -732,6 +732,58 @@ paths:
         500:
           description: Internal server error
 
+  /rails/transactions/category:
+    get:
+      tags: [ "transactions" ]
+      summary: Get the calling user's transactions by category
+      description: |
+        Get the transactions for the authenticated user, filtered by the given values.
+        The results will be returned in descending booking date order.
+      operationId: getTransactionsByCategory
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "category-id"
+          in: "query"
+          description: |
+            ID of category to be returned. If not specified, all un-categorised transactions
+            will be returned.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: "from-date"
+          in: "query"
+          description: The date, inclusive, from which the transaction should start.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "to-date"
+          in: "query"
+          description: The date, exclusive, to which the transaction should end.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionResponse'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Transaction not found
+        500:
+          description: Internal server error
+
   /rails/transactions/{id}:
     get:
       tags: [ "transactions" ]

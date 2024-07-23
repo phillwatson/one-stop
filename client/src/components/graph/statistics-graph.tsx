@@ -69,7 +69,9 @@ export default function StatisticsGraph(props: Props) {
   }, [ showMessage, dateRange ]);
 
   function selectCategory(selectedIndex: number) {
-    const categoryId = data[selectedIndex].id;
+    var categoryId: string | undefined = data[selectedIndex].id as string;
+    if (categoryId === '') categoryId = undefined;
+
     const stat = statistics.find(stat => stat.categoryId === categoryId);
     if (stat !== undefined) {
       props.onCategorySelected(stat, dateRange[0].toDate(), dateRange[1].toDate());
