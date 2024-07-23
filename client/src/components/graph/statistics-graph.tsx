@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Paper from '@mui/material/Paper/Paper';
 import Grid from '@mui/material/Grid';
@@ -30,12 +30,16 @@ interface CategoryStatisticsUI extends CategoryStatistics {
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
   const [ statistics, setStatistics ] = useState<CategoryStatisticsUI[]>([]);
-  const [ data, setData ] = useState<Array<PieValueType>>([]);
+
+  // allows the previous statistics to be accessed in the useEffect hook
+  const statisticsRef = useRef<CategoryStatisticsUI[]>([]);
+  statisticsRef.current = statistics;
+
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
   const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 500);
 
-  useEffect(() => {
-    setData(statistics
+  const data = useMemo<Array<PieValueType>>(() =>
+    statistics
       .filter(stat => stat.selected)
       .map(stat => {
         const p: PieValueType = {
@@ -45,15 +49,14 @@ export default function StatisticsGraph(props: Props) {
           color: stat.colour
         };
         return p;
-      }));
-  }, [ statistics ]);
+      }), [ statistics ]);
 
   useEffect(() => {
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(dateRange[0].toDate(), dateRange[1].toDate())
         .then(response => {
           const newStats = response.map(s => {
-            const oldStat = statistics.find(stat => stat.categoryId === s.categoryId);
+            const oldStat = statisticsRef.current.find(stat => stat.categoryId === s.categoryId);
             const ui: CategoryStatisticsUI = {...s, selected: oldStat === undefined || oldStat.selected }
             return ui;
           });
@@ -87,9 +90,7 @@ export default function StatisticsGraph(props: Props) {
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
         <Grid container columnSpacing={7} rowSpacing={3} justifyContent={"center"}>
           <Grid key={1} item>
-            <DatePicker disableFuture
-              label="From Date (inclusive)"
-              value={ dayjs(dateRange[0]) }
+            <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
               onChange={ (value: any, context: any) => {
                 if (value != null && context.validationError == null)
                   debouncedSetDateRange([ value, dateRange[1]])
@@ -97,9 +98,7 @@ export default function StatisticsGraph(props: Props) {
           </Grid>
 
           <Grid key={2} item>
-            <DatePicker maxDate={ dayjs().add(1, 'day') }
-              label="To Date (exclusive)"
-              value={ dayjs(dateRange[1]) }
+            <DatePicker maxDate={ dayjs().add(1, 'day') } label="To Date (exclusive)" value={ dayjs(dateRange[1]) }
               onChange={ (value: any, context: any) => {
                 if (value != null && context.validationError == null)
                   debouncedSetDateRange([dateRange[0], value])
@@ -119,9 +118,7 @@ export default function StatisticsGraph(props: Props) {
                 faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 }
               }
             ]}              
-            onClick={(event: any, data: any) => {
-              selectCategory(data.dataIndex)
-            }}
+            onClick={(event: any, slice: any) => selectCategory(slice.dataIndex) }
           />
           <Stack margin={ 2 }>
             { statistics.map(stat =>
