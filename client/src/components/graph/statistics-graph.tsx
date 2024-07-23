@@ -107,31 +107,35 @@ export default function StatisticsGraph(props: Props) {
         </Grid>
       </Paper>
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-        <Grid container wrap='nowrap'>
-          <PieChart height={ 500 } width={ 400 } margin={{ top: 50, right: 10, bottom: 50, left: 50 }}
-            slotProps={{ legend: { hidden: true } }}
-            series={[
-              {
-                data: data,
-                cx: 150, cy: 200, innerRadius: 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 5,
-                highlightScope: { faded: 'global', highlighted: 'item' },
-                faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 }
-              }
-            ]}              
-            onClick={(event: any, slice: any) => selectCategory(slice.dataIndex) }
-          />
-          <Stack margin={ 2 }>
-            { statistics.map(stat =>
-              <FormControlLabel key={ stat.category } label={ stat.category }
-                control= {
-                  <Switch key={ stat.category } name={ stat.category } checked={ stat.selected }
-                    style={{ color: stat.selected ? stat.colour : undefined }}
-                    onChange={ e => toggleCategory(stat.categoryId, e.target.checked) }/>
+        <Grid container columnGap={ 4 } alignItems={"center"} justifyContent={"center"}>
+          <Grid item>
+            <PieChart height={ 500 } width={ 400 } margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+              slotProps={{ legend: { hidden: true } }}
+              series={[
+                {
+                  data: data,
+                  cx: 150, cy: 200, innerRadius: 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 5,
+                  highlightScope: { faded: 'global', highlighted: 'item' },
+                  faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 }
                 }
-              />
-              )
-            }
-          </Stack>
+              ]}              
+              onClick={(event: any, slice: any) => selectCategory(slice.dataIndex) }
+            />
+          </Grid>
+          <Grid item>
+            <Stack margin={ 2 }>
+              { statistics.map(stat =>
+                <FormControlLabel key={ stat.category } label={ stat.category }
+                  control= {
+                    <Switch key={ stat.category } name={ stat.category } checked={ stat.selected }
+                      style={{ color: stat.selected ? stat.colour : undefined }}
+                      onChange={ e => toggleCategory(stat.categoryId, e.target.checked) }/>
+                  }
+                />
+                )
+              }
+            </Stack>
+          </Grid>
         </Grid>
       </Paper>
     </LocalizationProvider>
