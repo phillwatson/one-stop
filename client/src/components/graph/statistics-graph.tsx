@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 
 import Paper from '@mui/material/Paper/Paper';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { PieValueType } from '@mui/x-charts/models/seriesType/pie';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -20,17 +23,23 @@ interface Props {
   onCategorySelected: (category: CategoryStatistics, fromDate: Date, toDate: Date) => void;
 }
 
+interface CategoryStatisticsUI extends CategoryStatistics {
+  selected: boolean;
+};
+
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ statistics, setStatistics ] = useState<CategoryStatistics[]>([]);
+  const [ statistics, setStatistics ] = useState<CategoryStatisticsUI[]>([]);
   const [ data, setData ] = useState<Array<PieValueType>>([]);
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
   const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 500);
 
   useEffect(() => {
-    setData(statistics.map(stat => {
+    setData(statistics
+      .filter(stat => stat.selected)
+      .map(stat => {
         const p: PieValueType = {
-          id: stat.categoryId || "1",
+          id: stat.categoryId || '',
           value: Math.abs(stat.total),
           label: stat.category,
           color: stat.colour
@@ -42,7 +51,14 @@ export default function StatisticsGraph(props: Props) {
   useEffect(() => {
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(dateRange[0].toDate(), dateRange[1].toDate())
-        .then( response => setStatistics(response) )
+        .then(response => {
+          const newStats = response.map(s => {
+            const oldStat = statistics.find(stat => stat.categoryId === s.categoryId);
+            const ui: CategoryStatisticsUI = {...s, selected: oldStat === undefined || oldStat.selected }
+            return ui;
+          });
+          setStatistics(newStats);
+        })
         .catch(err => showMessage(err));
     } else {
       showMessage({ type: 'add', level: 'info', text: 'The "from" date must be before the "to" date.' });
@@ -50,56 +66,77 @@ export default function StatisticsGraph(props: Props) {
   }, [ showMessage, dateRange ]);
 
   function selectCategory(selectedIndex: number) {
-    props.onCategorySelected(statistics[selectedIndex], dateRange[0].toDate(), dateRange[1].toDate());
+    const categoryId = data[selectedIndex].id;
+    const stat = statistics.find(stat => stat.categoryId === categoryId);
+    if (stat !== undefined) {
+      props.onCategorySelected(stat, dateRange[0].toDate(), dateRange[1].toDate());
+    }
+  }
+
+  function toggleCategory(categoryId: string | undefined, selected: boolean) {
+    setStatistics(statistics.map(stat => {
+      if (stat.categoryId === categoryId) {
+        stat.selected = selected;
+      }
+      return stat;
+    }));
   }
 
   return (
-    <>
-      <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
-        <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-          <Grid container columnSpacing={7} rowSpacing={3} justifyContent={"center"}>
-            <Grid key={1} item>
-              <DatePicker disableFuture
-                label="From Date (inclusive)"
-                value={ dayjs(dateRange[0]) }
-                onChange={ (value: any, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([ value, dateRange[1]])
-                  }}/>
-            </Grid>
-
-            <Grid key={2} item>
-              <DatePicker maxDate={ dayjs().add(1, 'day') }
-                label="To Date (exclusive)"
-                value={ dayjs(dateRange[1]) }
-                onChange={ (value: any, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([dateRange[0], value])
-                  }}/>
-            </Grid>
+    <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
+      <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+        <Grid container columnSpacing={7} rowSpacing={3} justifyContent={"center"}>
+          <Grid key={1} item>
+            <DatePicker disableFuture
+              label="From Date (inclusive)"
+              value={ dayjs(dateRange[0]) }
+              onChange={ (value: any, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([ value, dateRange[1]])
+                }}/>
           </Grid>
-        </Paper>
-        <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-          <PieChart
+
+          <Grid key={2} item>
+            <DatePicker maxDate={ dayjs().add(1, 'day') }
+              label="To Date (exclusive)"
+              value={ dayjs(dateRange[1]) }
+              onChange={ (value: any, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([dateRange[0], value])
+                }}/>
+          </Grid>
+        </Grid>
+      </Paper>
+      <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+        <Grid container wrap='nowrap'>
+          <PieChart height={ 500 } width={ 400 } margin={{ top: 50, right: 10, bottom: 50, left: 50 }}
+            slotProps={{ legend: { hidden: true } }}
             series={[
               {
                 data: data,
-                innerRadius: 50,
-                outerRadius: 200,
-                paddingAngle: 5,
-                cornerRadius: 5,
+                cx: 150, cy: 200, innerRadius: 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 5,
                 highlightScope: { faded: 'global', highlighted: 'item' },
-                faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 },
-                cx: 150,
-                cy: 200
+                faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 }
               }
-            ]}
-            height={ 500 }
-            margin={{ top: 50, right: 10, bottom: 70, left: 120 }}
-            onClick={(event: any, data: any) => { selectCategory(data.dataIndex) }}
+            ]}              
+            onClick={(event: any, data: any) => {
+              selectCategory(data.dataIndex)
+            }}
           />
-        </Paper>
-      </LocalizationProvider>
-    </>
+          <Stack margin={ 2 }>
+            { statistics.map(stat =>
+              <FormControlLabel key={ stat.category } label={ stat.category }
+                control= {
+                  <Switch key={ stat.category } name={ stat.category } checked={ stat.selected }
+                    style={{ color: stat.selected ? stat.colour : undefined }}
+                    onChange={ e => toggleCategory(stat.categoryId, e.target.checked) }/>
+                }
+              />
+              )
+            }
+          </Stack>
+        </Grid>
+      </Paper>
+    </LocalizationProvider>
   );
 }
