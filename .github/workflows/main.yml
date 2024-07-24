@@ -12,9 +12,8 @@ name: Build and Deploy CI with Maven
 # This will create an auth entry in the ~/.docker/config.json/
 
 on:
-  push:
-    branches: [ "main" ]
-    paths-ignore: [ 'docs/**', 'client/**', '**/README.md' ]
+  release:
+    types: [created]
 
 env:
   REGISTRY: ghcr.io
