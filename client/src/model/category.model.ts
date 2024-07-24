@@ -18,4 +18,6 @@ export interface CategoryStatistics {
   colour: string;
   count: number;
   total: number;
+  credit: number;
+  debit: number;
 }
