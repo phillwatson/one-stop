@@ -89,13 +89,12 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
 
     public List<AccountTransaction> findByCategory(UUID userId, UUID categoryId,
                                                    Instant startDate, Instant endDate) {
-        List<AccountTransaction> result = getEntityManager().createNativeQuery(SELECT_BY_CATEGORY, AccountTransaction.class)
+        return getEntityManager().createNativeQuery(SELECT_BY_CATEGORY, AccountTransaction.class)
             .setParameter("userId", userId)
             .setParameter("categoryId", categoryId)
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)
             .getResultList();
-        return result;
     }
 
     public List<AccountTransaction> findUncategorised(UUID userId,

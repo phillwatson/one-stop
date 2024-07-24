@@ -38,19 +38,34 @@ export default function StatisticsGraph(props: Props) {
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
   const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 500);
 
-  const data = useMemo<Array<PieValueType>>(() =>
+  const debitData = useMemo<Array<PieValueType>>(() =>
     statistics
       .filter(stat => stat.selected)
+      .filter(stat => stat.debit > 0)
       .map(stat => {
         const p: PieValueType = {
           id: stat.categoryId || '',
-          value: Math.abs(stat.total),
+          value: stat.debit,
           label: stat.category,
           color: stat.colour
         };
         return p;
       }), [ statistics ]);
 
+  const creditData = useMemo<Array<PieValueType>>(() =>
+    statistics
+      .filter(stat => stat.selected)
+      .filter(stat => stat.credit > 0)
+      .map(stat => {
+        const p: PieValueType = {
+          id: stat.categoryId || '',
+          value: stat.credit,
+          label: stat.category,
+          color: stat.colour
+        };
+        return p;
+      }), [ statistics ]);
+    
   useEffect(() => {
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(dateRange[0].toDate(), dateRange[1].toDate())
@@ -68,8 +83,10 @@ export default function StatisticsGraph(props: Props) {
     }
   }, [ showMessage, dateRange ]);
 
-  function selectCategory(selectedIndex: number) {
-    var categoryId: string | undefined = data[selectedIndex].id as string;
+  function selectCategory(selectedSeries: string, selectedIndex: number) {
+    var categoryId: string | undefined = selectedSeries === 'credit'
+      ? creditData[selectedIndex].id as string
+      : debitData[selectedIndex].id as string;
     if (categoryId === '') categoryId = undefined;
 
     const stat = statistics.find(stat => stat.categoryId === categoryId);
@@ -115,13 +132,21 @@ export default function StatisticsGraph(props: Props) {
               slotProps={{ legend: { hidden: true } }}
               series={[
                 {
-                  data: data,
-                  cx: 150, cy: 200, innerRadius: 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 5,
+                  id: 'credit',
+                  data: creditData,
+                  innerRadius: 10, outerRadius: 100, cornerRadius: 5, paddingAngle: 5,
                   highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: 55, additionalRadius: -10, color: 'gray', arcLabelRadius: 130 }
+                  faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
+                },
+                {
+                  id: 'debit',
+                  data: debitData,
+                  innerRadius: 110, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
+                  highlightScope: { faded: 'global', highlighted: 'item' },
+                  faded: { innerRadius: 108, additionalRadius: -8, color: 'gray' }
                 }
               ]}              
-              onClick={(event: any, slice: any) => selectCategory(slice.dataIndex) }
+              onClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
             />
           </Grid>
           <Grid item>

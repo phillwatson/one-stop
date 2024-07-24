@@ -195,6 +195,8 @@ public class CategoryResource {
             .description(statistics.getDescription())
             .colour(statistics.getColour())
             .count(statistics.getCount())
-            .total(statistics.getTotal().doubleValue());
+            .total(statistics.getTotal().doubleValue())
+            .credit(statistics.getCredit().doubleValue())
+            .debit(statistics.getDebit().doubleValue());
     }
 }

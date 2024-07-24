@@ -49,11 +49,13 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
         String defaultName = serviceConfiguration.categories().uncategorisedName();
         String defaultColour = serviceConfiguration.categories().defaultColour();
 
-        List<CategoryStatistics> result = getEntityManager().createNativeQuery("select " +
+        return getEntityManager().createNativeQuery("select " +
                 "coalesce (c.name, '" + defaultName + "') as category, " +
                 "c.id, c.description, " +
                 "coalesce (c.colour, '" + defaultColour + "') as colour, " +
-                "count(*) as count, sum(t.amount) / 100 as total " +
+                "count(*) as count, sum(t.amount) / 100 as total, " +
+                "sum(case when t.amount > 0 then t.amount else 0 end) / 100 as credit, " +
+                "sum(case when t.amount < 0 then abs(t.amount) else 0 end) / 100 as debit " +
                 "from rails.account_transaction t " +
                 "left join rails.category_selector cs on cs.account_id = t.account_id and " +
                 "  (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) and " +
@@ -68,6 +70,5 @@ public class CategoryRepository extends RepositoryBase<Category, UUID> {
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)
             .getResultList();
-        return result;
     }
 }

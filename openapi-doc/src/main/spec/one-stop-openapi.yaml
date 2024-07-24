@@ -1888,8 +1888,10 @@ components:
       type: object
       required:
         - category
-        - total
         - count
+        - total
+        - credit
+        - debit
       properties:
         categoryId:
           type: string
@@ -1908,16 +1910,28 @@ components:
           type: string
           description: The category's colour
           example: '#0A8855'
-        total:
-          type: number
-          format: double
-          description: The total amount of transactions in the category
-          example: 123.45
         count:
           type: integer
           format: int64
           description: The number of transactions in the category
           example: 5
+        total:
+          type: number
+          format: double
+          description: The sum total of transactions in the category, both debit and credit.
+          example: -123.45
+        credit:
+          type: number
+          format: double
+          description: |
+            The total credit value of transactions in the category; shown as a positive value.
+          example: 123.45
+        debit:
+          type: number
+          format: double
+          description: |
+            The total debit value of transactions in the category; shown as a positive value.
+          example: 123.45
 
     PageLinks:
       type: object

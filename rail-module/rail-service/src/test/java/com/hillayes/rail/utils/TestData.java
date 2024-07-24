@@ -4,6 +4,7 @@ import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.*;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.Currency;
 import java.util.UUID;
@@ -111,5 +112,12 @@ public class TestData {
             modifier.accept(builder);
         }
         return builder.build();
+    }
+
+    public static CategoryStatistics mockCategoryStatistics(String categoryName,
+                                                            int count, double total, double credit, double debit) {
+        return new CategoryStatistics(categoryName, UUID.randomUUID(),
+            randomAlphanumeric(30), "#345678",
+            count, BigDecimal.valueOf(total), BigDecimal.valueOf(credit), BigDecimal.valueOf(debit));
     }
 }
