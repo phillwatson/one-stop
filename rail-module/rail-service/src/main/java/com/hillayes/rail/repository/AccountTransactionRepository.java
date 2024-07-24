@@ -7,7 +7,6 @@ import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AccountTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
@@ -20,6 +19,36 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class AccountTransactionRepository extends RepositoryBase<AccountTransaction, UUID> {
+    private static final String SELECT_BY_CATEGORY =
+        "select t.* from rails.account_transaction t " +
+        "where t.user_id = :userId " +
+        "and t.booking_datetime >= :startDate " +
+        "and t.booking_datetime < :endDate " +
+        "and exists ( " +
+        "  select 1 from rails.category_selector cs where " +
+        "    cs.category_id = :categoryId " +
+        "    and cs.account_id = t.account_id " +
+        "    and (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) " +
+        "    and (cs.ref_contains is null or t.reference like concat('%', cs.ref_contains, '%')) " +
+        "    and (cs.creditor_contains is null or t.creditor_name like concat('%', cs.creditor_contains, '%')) " +
+        ") " +
+        "order by t.booking_datetime desc";
+
+    private static final String SELECT_BY_NON_CATEGORY =
+        "select * from rails.account_transaction t " +
+        "where t.user_id = :userId " +
+        "and t.booking_datetime >= :startDate " +
+        "and t.booking_datetime < :endDate " +
+        "and not exists ( " +
+        "  select 1 from rails.category_selector cs where " +
+        "    cs.account_id = t.account_id " +
+        "    and (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) " +
+        "    and (cs.ref_contains is null or t.reference like concat('%', cs.ref_contains, '%')) " +
+        "    and (cs.creditor_contains is null or t.creditor_name like concat('%', cs.creditor_contains, '%')) " +
+        ") " +
+        "order by t.booking_datetime desc";
+
+
     /**
      * Locates the transactions whose internal ID is in the given list. The internal
      * transaction ID is assigned by the rail service.
@@ -60,23 +89,21 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
 
     public List<AccountTransaction> findByCategory(UUID userId, UUID categoryId,
                                                    Instant startDate, Instant endDate) {
-        List<AccountTransaction> result = getEntityManager().createNativeQuery(
-            "select t.* from rails.account_transaction t " +
-                "inner join rails.category_selector cs " +
-                "on cs.account_id = t.account_id and " +
-                "  (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) and " +
-                "  (cs.ref_contains is null or t.reference like concat('%', cs.ref_contains, '%')) and " +
-                "  (cs.creditor_contains is null or t.creditor_name like concat('%', cs.creditor_contains, '%')) " +
-                "where t.user_id = :userId " +
-                "and t.booking_datetime >= :startDate " +
-                "and t.booking_datetime < :endDate " +
-                "and cs.category_id = :categoryId " +
-                "order by t.booking_datetime desc", AccountTransaction.class)
+        List<AccountTransaction> result = getEntityManager().createNativeQuery(SELECT_BY_CATEGORY, AccountTransaction.class)
             .setParameter("userId", userId)
             .setParameter("categoryId", categoryId)
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)
             .getResultList();
         return result;
+    }
+
+    public List<AccountTransaction> findUncategorised(UUID userId,
+                                                      Instant startDate, Instant endDate) {
+        return getEntityManager().createNativeQuery(SELECT_BY_NON_CATEGORY, AccountTransaction.class)
+            .setParameter("userId", userId)
+            .setParameter("startDate", startDate)
+            .setParameter("endDate", endDate)
+            .getResultList();
     }
 }

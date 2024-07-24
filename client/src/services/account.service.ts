@@ -42,13 +42,13 @@ class AccountService {
     return transactions.reverse();
   }
 
-  getTransactionsByCategory(categoryId: string, fromDate: Date, toDate: Date): Promise<Array<TransactionDetail>> {
+  getTransactionsByCategory(categoryId: string | undefined, fromDate: Date, toDate: Date): Promise<Array<TransactionDetail>> {
     const fromDateStr = fromDate.toISOString().substring(0, 10);
     const toDateStr = toDate.toISOString().substring(0, 10);
     console.log(`Retrieving transactions by category [categoryId: ${categoryId}, from-date: ${fromDateStr}, to-date: ${toDateStr}]`);
 
-    return http.get<Array<TransactionDetail>>(`/rails/transactions/category/${categoryId}`,
-      { params: { "from-date": fromDateStr, "to-date": toDateStr }})
+    return http.get<Array<TransactionDetail>>(`/rails/transactions/category`,
+      { params: { "category-id": categoryId, "from-date": fromDateStr, "to-date": toDateStr }})
       .then(response => response.data);
   }
 }

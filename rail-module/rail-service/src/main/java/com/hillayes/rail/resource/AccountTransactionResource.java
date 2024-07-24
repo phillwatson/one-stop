@@ -100,9 +100,9 @@ public class AccountTransactionResource {
     }
 
     @GET
-    @Path("/category/{categoryId}")
+    @Path("/category")
     public Response getTransactionsByCategory(@Context SecurityContext ctx,
-                                              @PathParam("categoryId") UUID categoryId,
+                                              @QueryParam("category-id") UUID categoryId,
                                               @QueryParam("from-date") LocalDate fromDate,
                                               @QueryParam("to-date") LocalDate toDate) {
         UUID userId = AuthUtils.getUserId(ctx);

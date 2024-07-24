@@ -78,10 +78,15 @@ public class AccountTransactionService {
         log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}]",
             userId, categoryId, startDate, endDate);
 
-        // ensure the category belongs to the user
-        categoryService.getCategory(userId, categoryId);
+        List<AccountTransaction> result;
+        if (categoryId == null) {
+            result = accountTransactionRepository.findUncategorised(userId, startDate, endDate);
+        } else {
+            // ensure the category belongs to the user
+            categoryService.getCategory(userId, categoryId);
 
-        List<AccountTransaction> result = accountTransactionRepository.findByCategory(userId, categoryId, startDate, endDate);
+            result = accountTransactionRepository.findByCategory(userId, categoryId, startDate, endDate);
+        }
 
         log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}, total: {}]",
             userId, categoryId, startDate, endDate, result.size());
