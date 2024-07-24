@@ -9,6 +9,7 @@ import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.CategoryRepository;
+import com.hillayes.rail.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -850,9 +850,9 @@ public class CategoryServiceTest {
 
         // and: the repository is primed with data
         List<CategoryStatistics> expected = List.of(
-            new CategoryStatistics("cat-1", UUID.randomUUID(),"", "", 20, BigDecimal.valueOf(123.44)),
-            new CategoryStatistics("cat-2", UUID.randomUUID(),"", "", 10, BigDecimal.valueOf(456.44)),
-            new CategoryStatistics("cat-3", UUID.randomUUID(),"", "", 6, BigDecimal.valueOf(34.44))
+            TestData.mockCategoryStatistics("cat-1", 20, 123.44, 282.93,11.25),
+            TestData.mockCategoryStatistics("cat-2", 10, 456.44, 222.73,21.225),
+            TestData.mockCategoryStatistics("cat-3", 6, 34.44, 82.73,177.25)
         );
         when(categoryRepository.getStatistics(userId, startDate, endDate))
             .thenReturn(expected);

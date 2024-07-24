@@ -6,6 +6,7 @@ import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategorySelector;
 import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.service.CategoryService;
+import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -13,7 +14,6 @@ import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -287,9 +287,9 @@ public class CategoryResourceTest extends TestBase {
         Instant startDate = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         Instant endDate = toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         List<CategoryStatistics> expectedResult = List.of(
-            new CategoryStatistics("cat-1", UUID.randomUUID(), "", "", 20, BigDecimal.valueOf(123.44)),
-            new CategoryStatistics("cat-2", UUID.randomUUID(), "", "", 10, BigDecimal.valueOf(456.44)),
-            new CategoryStatistics("cat-3", UUID.randomUUID(), "", "", 6, BigDecimal.valueOf(34.44))
+            TestData.mockCategoryStatistics("cat-1", 20, 123.44, 282.93,11.25),
+            TestData.mockCategoryStatistics("cat-2", 10, 456.44, 222.73,21.225),
+            TestData.mockCategoryStatistics("cat-3", 6, 34.44, 82.73,177.25)
         );
         when(categoryService.getStatistics(userId, startDate, endDate))
             .thenReturn(expectedResult);
@@ -323,6 +323,8 @@ public class CategoryResourceTest extends TestBase {
             assertEquals(expected.getCategory(), actual.getCategory());
             assertEquals(expected.getCount(), actual.getCount());
             assertEquals(expected.getTotal().doubleValue(), actual.getTotal());
+            assertEquals(expected.getCredit().doubleValue(), actual.getCredit());
+            assertEquals(expected.getDebit().doubleValue(), actual.getDebit());
         });
     }
 

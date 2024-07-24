@@ -41,7 +41,18 @@ public class CategoryStatistics {
     private long count;
 
     /**
-     * The total value of transactions in this category.
+     * The total value of debit and credit transactions in this category.
      */
     private BigDecimal total;
+
+    /**
+     * The total credit value of transactions in this category.
+     */
+    private BigDecimal credit;
+
+    /**
+     * The total debit value of transactions in this category; shown as a positive
+     * value.
+     */
+    private BigDecimal debit;
 }
