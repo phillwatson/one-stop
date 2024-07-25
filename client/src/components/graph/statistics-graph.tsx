@@ -9,9 +9,9 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import { PieValueType } from '@mui/x-charts/models/seriesType/pie';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import CategoryService from '../../services/category.service';
@@ -27,6 +27,16 @@ interface CategoryStatisticsUI extends CategoryStatistics {
   selected: boolean;
 };
 
+function toPieSlice(stat: CategoryStatistics, value: number): PieValueType {
+  const p: PieValueType = {
+    id: stat.categoryId || '',
+    value: value,
+    label: stat.category,
+    color: stat.colour
+  };
+  return p;
+}
+
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
   const [ statistics, setStatistics ] = useState<CategoryStatisticsUI[]>([]);
@@ -36,41 +46,14 @@ export default function StatisticsGraph(props: Props) {
   statisticsRef.current = statistics;
 
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
-  const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 500);
-
-  const debitData = useMemo<Array<PieValueType>>(() =>
-    statistics
-      .filter(stat => stat.selected)
-      .filter(stat => stat.debit > 0)
-      .map(stat => {
-        const p: PieValueType = {
-          id: stat.categoryId || '',
-          value: stat.debit,
-          label: stat.category,
-          color: stat.colour
-        };
-        return p;
-      }), [ statistics ]);
-
-  const creditData = useMemo<Array<PieValueType>>(() =>
-    statistics
-      .filter(stat => stat.selected)
-      .filter(stat => stat.credit > 0)
-      .map(stat => {
-        const p: PieValueType = {
-          id: stat.categoryId || '',
-          value: stat.credit,
-          label: stat.category,
-          color: stat.colour
-        };
-        return p;
-      }), [ statistics ]);
+  const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 600);
     
   useEffect(() => {
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(dateRange[0].toDate(), dateRange[1].toDate())
         .then(response => {
           const newStats = response.map(s => {
+            // reflect the previous selection state in the new statistics
             const oldStat = statisticsRef.current.find(stat => stat.categoryId === s.categoryId);
             const ui: CategoryStatisticsUI = {...s, selected: oldStat === undefined || oldStat.selected }
             return ui;
@@ -83,11 +66,21 @@ export default function StatisticsGraph(props: Props) {
     }
   }, [ showMessage, dateRange ]);
 
-  function selectCategory(selectedSeries: string, selectedIndex: number) {
-    var categoryId: string | undefined = selectedSeries === 'credit'
-      ? creditData[selectedIndex].id as string
-      : debitData[selectedIndex].id as string;
-    if (categoryId === '') categoryId = undefined;
+  // seriesData is an array of two arrays, the first for credit totals and the second for debit.
+  const seriesData = useMemo<Array<Array<PieValueType>>>(() => statistics
+    .filter(stat => stat.selected)
+    .map(stat => toPieSlice(stat, stat.total))
+    .reduce((acc, slice) => {
+      const index = slice.value > 0 ? 0 : 1;
+      slice.value = Math.abs(slice.value);
+      acc[index].push(slice);
+
+      return acc;
+    }, Array.of([], []) as Array<Array<PieValueType>>), [ statistics ]);
+
+  function selectCategory(selectedSeries: number, selectedIndex: number) {
+    var categoryId: string | undefined = seriesData[selectedSeries][selectedIndex].id as string;
+    if (categoryId === '') categoryId = undefined; // uncategorised transactions
 
     const stat = statistics.find(stat => stat.categoryId === categoryId);
     if (stat !== undefined) {
@@ -112,7 +105,7 @@ export default function StatisticsGraph(props: Props) {
             <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
               onChange={ (value: any, context: any) => {
                 if (value != null && context.validationError == null)
-                  debouncedSetDateRange([ value, dateRange[1]])
+                  debouncedSetDateRange([ value, dateRange[1] ])
                 }}/>
           </Grid>
 
@@ -120,11 +113,12 @@ export default function StatisticsGraph(props: Props) {
             <DatePicker maxDate={ dayjs().add(1, 'day') } label="To Date (exclusive)" value={ dayjs(dateRange[1]) }
               onChange={ (value: any, context: any) => {
                 if (value != null && context.validationError == null)
-                  debouncedSetDateRange([dateRange[0], value])
+                  debouncedSetDateRange([ dateRange[0], value ])
                 }}/>
           </Grid>
         </Grid>
       </Paper>
+
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
         <Grid container spacing={4} alignItems={"center"} justifyContent={"center"}>
           <Grid item>
@@ -132,23 +126,22 @@ export default function StatisticsGraph(props: Props) {
               slotProps={{ legend: { hidden: true } }}
               series={[
                 {
-                  id: 'credit',
-                  data: creditData,
-                  innerRadius: 10, outerRadius: 100, cornerRadius: 5, paddingAngle: 5,
+                  id: 0, data: seriesData[0],
+                  innerRadius: 10, outerRadius: seriesData[1].length > 0 ? 100 : 200, cornerRadius: 5, paddingAngle: 5,
                   highlightScope: { faded: 'global', highlighted: 'item' },
                   faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
                 },
                 {
-                  id: 'debit',
-                  data: debitData,
-                  innerRadius: 110, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
+                  id: 1, data: seriesData[1],
+                  innerRadius: seriesData[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
                   highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: 108, additionalRadius: -8, color: 'gray' }
+                  faded: { innerRadius: seriesData[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' }
                 }
-              ]}              
+              ]}
               onClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
             />
           </Grid>
+
           <Grid item>
             <Stack margin={ 2 }>
               { statistics.map(stat =>
