@@ -30,6 +30,13 @@ jobs:
       contents: read
 
     steps:
+    - name: Derive the version from the tag
+      id: getRevision
+      run: |
+        id=$(echo ${{github.ref_name}} | cut -dv -f2)
+        echo "id=$id" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Checkout the code
       uses: actions/checkout@v4
 
@@ -50,7 +57,7 @@ jobs:
     - name: Build with Maven
       # skips the tests due to lack of "test" profile
       run: |
-        mvn -B deploy -Pclient -Drevision=1.0.${{ github.run_number }}
+        mvn -B deploy -Pclient -Drevision=${{ steps.getRevision.outputs.id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,5 +72,5 @@ jobs:
       with:
         context: client/
         push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:1.0.${{ github.run_number }}
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/client:${{ steps.getRevision.outputs.id }}
         labels: ${{ steps.meta.outputs.labels }}
