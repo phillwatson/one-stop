@@ -108,7 +108,7 @@ public class UserConsentResource {
         URI consentLink = userConsentService.register(userId, institutionId, consentRequest.getCallbackUri());
 
         log.debug("Redirecting user to bank consent [link: {}]", consentLink.toASCIIString());
-        return Response.ok(consentLink).build();
+        return Response.created(consentLink).build();
     }
 
     /**

@@ -4,6 +4,7 @@ import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Category;
+import com.hillayes.rail.domain.CategoryGroup;
 import com.hillayes.rail.domain.CategorySelector;
 import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.service.CategoryService;
@@ -20,9 +21,10 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-@Path("/api/v1/rails/categories")
+@Path("/api/v1/rails")
 @RolesAllowed("user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,14 +34,98 @@ public class CategoryResource {
     private final CategoryService categoryService;
 
     @GET
+    @Path("/category-groups")
+    public Response getCategoryGroups(@Context SecurityContext ctx,
+                                      @Context UriInfo uriInfo,
+                                      @QueryParam("page") @DefaultValue("0") int page,
+                                      @QueryParam("page-size") @DefaultValue("20") int pageSize) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting category groups [userId: {}]", userId);
+
+        Page<CategoryGroup> groups = categoryService.getCategoryGroups(userId, page, pageSize);
+
+        PaginatedCategoryGroups response = new PaginatedCategoryGroups()
+            .page(groups.getPageIndex())
+            .pageSize(groups.getPageSize())
+            .count(groups.getContentSize())
+            .total(groups.getTotalCount())
+            .totalPages(groups.getTotalPages())
+            .items(groups.getContent().stream().map(this::marshal).toList())
+            .links(PaginationUtils.buildPageLinks(uriInfo, groups));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category groups [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, page, pageSize, response.getCount(), response.getTotal());
+        }
+        return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/category-groups/{groupId}")
+    public Response getCategoryGroup(@Context SecurityContext ctx,
+                                     @PathParam("groupId") UUID groupId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting category group [userId: {}, groupId: {}]", userId, groupId);
+
+        CategoryGroup group = categoryService.getCategoryGroup(userId, groupId);
+        return Response.ok(marshal(group)).build();
+    }
+
+    @POST
+    @Path("/category-groups")
+    public Response createCategoryGroup(@Context SecurityContext ctx,
+                                        @Context UriInfo uriInfo,
+                                        CategoryGroupRequest newGroup) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Creating category group [userId: {}, group: {}]", userId, newGroup.getName());
+
+        CategoryGroup group = categoryService.createCategoryGroup(userId,
+            newGroup.getName(), newGroup.getDescription());
+
+        URI location = uriInfo.getBaseUriBuilder()
+            .path(CategoryResource.class)
+            .path(CategoryResource.class, "getCategoryGroup")
+            .buildFromMap(Map.of("groupId", group.getId()));
+        return Response.created(location).build();
+    }
+
+    @PUT
+    @Path("/category-groups/{groupId}")
+    public Response updateCategoryGroup(@Context SecurityContext ctx,
+                                        @PathParam("groupId") UUID groupId,
+                                        CategoryGroupRequest details) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating category group [userId: {}, groupId: {}, group: {}]",
+            userId, groupId, details.getName());
+
+        categoryService.updateCategoryGroup(userId, groupId,
+            details.getName(), details.getDescription());
+
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/category-groups/{groupId}")
+    public Response deleteCategoryGroup(@Context SecurityContext ctx,
+                                        @PathParam("groupId") UUID groupId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting category group [userId: {}, groupId: {}]", userId, groupId);
+
+        categoryService.deleteCategoryGroup(userId, groupId);
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/category-groups/{groupId}/categories")
     public Response getCategories(@Context SecurityContext ctx,
                                   @Context UriInfo uriInfo,
+                                  @PathParam("groupId") UUID groupId,
                                   @QueryParam("page") @DefaultValue("0") int page,
                                   @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting categories [userId: {}]", userId);
+        log.info("Getting categories [userId: {}, groupId: {}]", userId, groupId);
 
-        Page<Category> categories = categoryService.getCategories(userId, page, pageSize);
+        Page<Category> categories = categoryService.getCategories(userId, groupId, page, pageSize);
 
         PaginatedCategories response = new PaginatedCategories()
             .page(categories.getPageIndex())
@@ -50,66 +136,71 @@ public class CategoryResource {
             .items(categories.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, categories));
 
-        log.debug("Listing categories [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
-                userId, page, pageSize, response.getCount(), response.getTotal());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing categories [userId: {}, groupId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, groupId, page, pageSize, response.getCount(), response.getTotal());
+        }
         return Response.ok(response).build();
     }
 
+    @POST
+    @Path("/category-groups/{groupId}/categories")
+    public Response createCategory(@Context SecurityContext ctx,
+                                   @Context UriInfo uriInfo,
+                                   @PathParam("groupId") UUID groupId,
+                                   CategoryRequest newCategory) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Creating category [userId: {}, groupId: {}, category: {}]",
+            userId, groupId, newCategory.getName());
+
+        Category category = categoryService.createCategory(userId, groupId,
+            newCategory.getName(), newCategory.getDescription(), newCategory.getColour());
+
+        URI location = uriInfo.getBaseUriBuilder()
+            .path(CategoryResource.class)
+            .path(CategoryResource.class, "getCategory")
+            .buildFromMap(Map.of("categoryId", category.getId()));
+        return Response.created(location).build();
+    }
+
     @GET
-    @Path("/{categoryId}")
+    @Path("/categories/{categoryId}")
     public Response getCategory(@Context SecurityContext ctx,
                                 @PathParam("categoryId") UUID categoryId) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Get category [userId: {}, category: {}]", userId, categoryId);
 
-        CategoryResponse category = marshal(categoryService.getCategory(userId, categoryId));
-        return Response.ok(category).build();
-    }
-
-    @POST
-    public Response createCategory(@Context SecurityContext ctx,
-                                   @Context UriInfo uriInfo,
-                                   CategoryRequest newCategory) {
-        UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Creating category [userId: {}, category: {}]", userId, newCategory.getName());
-
-        Category category = categoryService.createCategory(AuthUtils.getUserId(ctx),
-            newCategory.getName(), newCategory.getDescription(), newCategory.getColour());
-
-        URI location = uriInfo.getBaseUriBuilder()
-            .path(CategoryResource.class)
-            .path(category.getId().toString())
-            .build();
-        return Response.created(location).build();
+        Category category = categoryService.getCategory(userId, categoryId);
+        return Response.ok(marshal(category)).build();
     }
 
     @PUT
-    @Path("/{categoryId}")
+    @Path("/categories/{categoryId}")
     public Response updateCategory(@Context SecurityContext ctx,
                                    @PathParam("categoryId") UUID categoryId,
                                    CategoryRequest details) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, details.getName());
 
-        categoryService.updateCategory(AuthUtils.getUserId(ctx), categoryId,
+        categoryService.updateCategory(userId, categoryId,
             details.getName(), details.getDescription(), details.getColour());
 
         return Response.noContent().build();
     }
 
     @DELETE
-    @Path("/{categoryId}")
+    @Path("/categories/{categoryId}")
     public Response deleteCategory(@Context SecurityContext ctx,
                                    @PathParam("categoryId") UUID categoryId) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Deleting category [userId: {}, categoryId: {}]", userId, categoryId);
 
-        Category category = categoryService.deleteCategory(AuthUtils.getUserId(ctx), categoryId);
-        return Response.ok(marshal(category)).build();
+        categoryService.deleteCategory(userId, categoryId);
+        return Response.noContent().build();
     }
 
     @GET
-    @Path("/{categoryId}/selectors/{accountId}")
+    @Path("/categories/{categoryId}/selectors/{accountId}")
     public Response getCategorySelectors(@Context SecurityContext ctx,
                                          @PathParam("categoryId") UUID categoryId,
                                          @PathParam("accountId") UUID accountId) {
@@ -127,7 +218,7 @@ public class CategoryResource {
     }
 
     @PUT
-    @Path("/{categoryId}/selectors/{accountId}")
+    @Path("/categories/{categoryId}/selectors/{accountId}")
     public Response setCategorySelectors(@Context SecurityContext ctx,
                                          @PathParam("categoryId") UUID categoryId,
                                          @PathParam("accountId") UUID accountId,
@@ -152,12 +243,14 @@ public class CategoryResource {
     }
 
     @GET
-    @Path("/statistics")
+    @Path("/category-groups/{groupId}/statistics")
     public Response getCategoryStatistics(@Context SecurityContext ctx,
+                                          @PathParam("groupId") UUID groupId,
                                           @QueryParam("from-date") LocalDate fromDate,
                                           @QueryParam("to-date") LocalDate toDate) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting category statistics [userId: {}, fromDate: {}, toDate: {}]", userId, fromDate, toDate);
+        log.info("Getting category statistics [userId: {}, groupId: {}, fromDate: {}, toDate: {}]",
+            userId, groupId, fromDate, toDate);
 
         // convert dates to instant
         Instant startDate = (fromDate == null)
@@ -167,15 +260,24 @@ public class CategoryResource {
             ? Instant.now().truncatedTo(ChronoUnit.DAYS)
             : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
 
-        List<CategoryStatisticsResponse> result = categoryService.getStatistics(userId, startDate, endDate).stream()
+        List<CategoryStatisticsResponse> result = categoryService.getStatistics(userId, groupId, startDate, endDate)
+            .stream()
             .map(this::marshal)
             .toList();
         return Response.ok(result).build();
     }
 
+    private CategoryGroupResponse marshal(CategoryGroup group) {
+        return new CategoryGroupResponse()
+            .id(group.getId())
+            .name(group.getName())
+            .description(group.getDescription());
+    }
+
     private CategoryResponse marshal(Category category) {
         return new CategoryResponse()
             .id(category.getId())
+            .groupId(category.getGroup().getId())
             .name(category.getName())
             .description(category.getDescription())
             .colour(category.getColour());

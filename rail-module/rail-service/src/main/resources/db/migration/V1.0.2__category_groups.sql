@@ -8,9 +8,9 @@ CREATE TABLE ${flyway:defaultSchema}.category_group (
 );
 CREATE UNIQUE INDEX idx_category_group_name ON ${flyway:defaultSchema}.category_group (user_id, name);
 
--- add a default group for each user
+-- add a default group for each user - use user_id as the group id
 INSERT INTO ${flyway:defaultSchema}.category_group (id, version, name, description, user_id)
-  VALUES(uuid_in(md5(random()::text || random()::text)::cstring), 0, 'Default', 'Default group', (SELECT DISTINCT c.user_id FROM ${flyway:defaultSchema}.category c));
+  select distinct c.user_id, 0, 'Default', 'Default group', c.user_id FROM ${flyway:defaultSchema}.category c;
 
 -- add a group_id column to the category table
 ALTER TABLE ${flyway:defaultSchema}.category ADD COLUMN group_id UUID NULL;
@@ -28,3 +28,8 @@ ALTER TABLE ${flyway:defaultSchema}.category
   ADD CONSTRAINT fk_category_group
   FOREIGN KEY (group_id)
   REFERENCES ${flyway:defaultSchema}.category_group (id) ON DELETE CASCADE;
+
+-- make category names unique within its group rather than the user
+DROP INDEX idx_category_user_id CASCADE;
+ALTER TABLE ${flyway:defaultSchema}.category DROP COLUMN user_id;
+CREATE UNIQUE INDEX idx_category_group_id ON ${flyway:defaultSchema}.category (group_id, name);
