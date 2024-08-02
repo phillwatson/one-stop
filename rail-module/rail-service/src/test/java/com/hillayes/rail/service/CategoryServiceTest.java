@@ -1152,9 +1152,9 @@ public class CategoryServiceTest {
 
         // and: the repository is primed with data
         List<CategoryStatistics> expected = List.of(
-            TestData.mockCategoryStatistics("cat-1", 20, 123.44, 282.93,11.25),
-            TestData.mockCategoryStatistics("cat-2", 10, 456.44, 222.73,21.225),
-            TestData.mockCategoryStatistics("cat-3", 6, 34.44, 82.73,177.25)
+            TestData.mockCategoryStatistics(group, "cat-1", 20, 123.44, 282.93,11.25),
+            TestData.mockCategoryStatistics(group, "cat-2", 10, 456.44, 222.73,21.225),
+            TestData.mockCategoryStatistics(group, "cat-3", 6, 34.44, 82.73,177.25)
         );
         when(categoryGroupRepository.getStatistics(group, startDate, endDate))
             .thenReturn(expected);

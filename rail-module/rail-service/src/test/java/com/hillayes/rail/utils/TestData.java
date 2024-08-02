@@ -114,9 +114,10 @@ public class TestData {
         return builder.build();
     }
 
-    public static CategoryStatistics mockCategoryStatistics(String categoryName,
+    public static CategoryStatistics mockCategoryStatistics(CategoryGroup group,
+                                                            String categoryName,
                                                             int count, double total, double credit, double debit) {
-        return new CategoryStatistics(categoryName, UUID.randomUUID(),
+        return new CategoryStatistics(group.getId(), group.getName(), categoryName, UUID.randomUUID(),
             randomAlphanumeric(30), "#345678",
             count, BigDecimal.valueOf(total), BigDecimal.valueOf(credit), BigDecimal.valueOf(debit));
     }

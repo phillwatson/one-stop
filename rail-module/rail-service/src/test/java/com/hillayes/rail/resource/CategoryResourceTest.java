@@ -12,6 +12,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.common.mapper.TypeRef;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -128,7 +129,7 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(group);
 
         // when: a new category is created
-        String location = given()
+        Response response = given()
             .request()
             .contentType(JSON)
             .body(request)
@@ -136,13 +137,20 @@ public class CategoryResourceTest extends TestBase {
             .post("/api/v1/rails/category-groups")
             .then()
             .statusCode(201)
-            .extract().header("Location");
+            .extract().response();
 
         // then: the category-service is called with the authenticated user-id and new category group details
         verify(categoryService).createCategoryGroup(userId, request.getName(), request.getDescription());
 
         // and: the new category group locator is returned
+        String location = response.header("Location");
         assertTrue(location.contains("/api/v1/rails/category-groups/" + group.getId().toString()));
+
+        // and: the response contains the new category group
+        CategoryGroupResponse responseBody = response.as(CategoryGroupResponse.class);
+        assertEquals(group.getId(), responseBody.getId());
+        assertEquals(group.getName(), responseBody.getName());
+        assertEquals(group.getDescription(), responseBody.getDescription());
     }
 
     @Test
@@ -165,7 +173,7 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(group);
 
         // when: the category is updated
-        given()
+        CategoryGroupResponse response = given()
             .request()
             .pathParam("groupId", group.getId())
             .contentType(JSON)
@@ -173,11 +181,17 @@ public class CategoryResourceTest extends TestBase {
             .when()
             .put("/api/v1/rails/category-groups/{groupId}")
             .then()
-            .statusCode(204);
+            .statusCode(200)
+            .extract().as(CategoryGroupResponse.class);
 
         // then: the category-service is called with the authenticated user-id and updated category group details
         verify(categoryService).updateCategoryGroup(userId, group.getId(),
             request.getName(), request.getDescription());
+
+        // and: the response contains the updated category group
+        assertEquals(group.getId(), response.getId());
+        assertEquals(group.getName(), response.getName());
+        assertEquals(group.getDescription(), response.getDescription());
     }
 
     @Test
@@ -296,8 +310,8 @@ public class CategoryResourceTest extends TestBase {
         // given: an authenticated user
         UUID userId = UUID.fromString(userIdStr);
 
-        // and: a category group ID
-        UUID groupId = UUID.randomUUID();
+        // and: the user has a category group
+        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
 
         // and: a new category request
         CategoryRequest request = new CategoryRequest()
@@ -308,29 +322,39 @@ public class CategoryResourceTest extends TestBase {
         // and: the service is mocked to return the new category
         Category category = Category.builder()
             .id(UUID.randomUUID())
+            .group(group)
             .name(request.getName())
             .description(request.getDescription())
             .colour(request.getColour()).build();
-        when(categoryService.createCategory(userId, groupId, request.getName(), request.getDescription(), request.getColour()))
+        when(categoryService.createCategory(userId, group.getId(), request.getName(), request.getDescription(), request.getColour()))
             .thenReturn(category);
 
         // when: a new category is created
-        String location = given()
+        Response response = given()
             .request()
             .contentType(JSON)
             .body(request)
-            .pathParam("groupId", groupId)
+            .pathParam("groupId", group.getId())
             .when()
             .post("/api/v1/rails/category-groups/{groupId}/categories")
             .then()
             .statusCode(201)
-            .extract().header("Location");
+            .extract().response();
 
         // then: the category-service is called with the authenticated user-id, group-id and new category details
-        verify(categoryService).createCategory(userId, groupId, request.getName(), request.getDescription(), request.getColour());
+        verify(categoryService).createCategory(userId, group.getId(), request.getName(), request.getDescription(), request.getColour());
 
         // and: the new category locator is returned
+        String location = response.header("Location");
         assertTrue(location.contains("/api/v1/rails/categories/" + category.getId().toString()));
+
+        // and: the response contains the new category
+        CategoryResponse responseBody = response.as(CategoryResponse.class);
+        assertEquals(category.getId(), responseBody.getId());
+        assertEquals(category.getGroup().getId(), responseBody.getGroupId());
+        assertEquals(category.getName(), responseBody.getName());
+        assertEquals(category.getDescription(), responseBody.getDescription());
+        assertEquals(category.getColour(), responseBody.getColour());
     }
 
     @Test
@@ -338,6 +362,9 @@ public class CategoryResourceTest extends TestBase {
     public void testUpdateCategory() {
         // given: an authenticated user
         UUID userId = UUID.fromString(userIdStr);
+
+        // and: the user has a category group
+        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
 
         // and: a category update request
         CategoryRequest request = new CategoryRequest()
@@ -348,6 +375,7 @@ public class CategoryResourceTest extends TestBase {
         // and: a category to be updated
         Category category = Category.builder()
             .id(UUID.randomUUID())
+            .group(group)
             .name(request.getName())
             .description(request.getDescription())
             .colour(request.getColour()).build();
@@ -355,7 +383,7 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(category);
 
         // when: the category is updated
-        given()
+        CategoryResponse response = given()
             .request()
             .pathParam("categoryId", category.getId())
             .contentType(JSON)
@@ -363,11 +391,19 @@ public class CategoryResourceTest extends TestBase {
             .when()
             .put("/api/v1/rails/categories/{categoryId}")
             .then()
-            .statusCode(204);
+            .statusCode(200)
+            .extract().as(CategoryResponse.class);
 
         // then: the category-service is called with the authenticated user-id and updated category details
         verify(categoryService).updateCategory(userId, category.getId(),
             request.getName(), request.getDescription(), request.getColour());
+
+        // and: the response contains the updated category
+        assertEquals(category.getId(), response.getId());
+        assertEquals(category.getGroup().getId(), response.getGroupId());
+        assertEquals(category.getName(), response.getName());
+        assertEquals(category.getDescription(), response.getDescription());
+        assertEquals(category.getColour(), response.getColour());
     }
 
     @Test
@@ -492,7 +528,7 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: a category group ID
-        UUID groupId = UUID.randomUUID();
+        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
 
         // and: a date range
         LocalDate fromDate = LocalDate.now().minusDays(7);
@@ -502,18 +538,18 @@ public class CategoryResourceTest extends TestBase {
         Instant startDate = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         Instant endDate = toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         List<CategoryStatistics> expectedResult = List.of(
-            TestData.mockCategoryStatistics("cat-1", 20, 123.44, 282.93,11.25),
-            TestData.mockCategoryStatistics("cat-2", 10, 456.44, 222.73,21.225),
-            TestData.mockCategoryStatistics("cat-3", 6, 34.44, 82.73,177.25)
+            TestData.mockCategoryStatistics(group, "cat-1", 20, 123.44, 282.93,11.25),
+            TestData.mockCategoryStatistics(group, "cat-2", 10, 456.44, 222.73,21.225),
+            TestData.mockCategoryStatistics(group, "cat-3", 6, 34.44, 82.73,177.25)
         );
-        when(categoryService.getStatistics(userId, groupId, startDate, endDate))
+        when(categoryService.getStatistics(userId, group.getId(), startDate, endDate))
             .thenReturn(expectedResult);
 
         // when: the statistics are requested
         TypeRef<List<CategoryStatisticsResponse>> typeRef = new TypeRef<>() {};
         Collection<CategoryStatisticsResponse> response = given()
             .request()
-            .pathParam("groupId", groupId)
+            .pathParam("groupId", group.getId())
             .queryParam("from-date", fromDate.toString())
             .queryParam("to-date", toDate.toString())
             .contentType(JSON)
@@ -526,7 +562,7 @@ public class CategoryResourceTest extends TestBase {
             .as(typeRef);
 
         // then: the request is passed to the service
-        verify(categoryService).getStatistics(userId, groupId, startDate, endDate);
+        verify(categoryService).getStatistics(userId, group.getId(), startDate, endDate);
 
         // and: the result is as expected
         assertEquals(expectedResult.size(), response.size());
@@ -536,7 +572,9 @@ public class CategoryResourceTest extends TestBase {
                 .findFirst().orElse(null);
 
             assertNotNull(actual);
-            assertEquals(expected.getCategory(), actual.getCategory());
+            assertEquals(expected.getGroupId(), actual.getGroupId());
+            assertEquals(expected.getGroupName(), actual.getGroupName());
+            assertEquals(expected.getCategory(), actual.getCategoryName());
             assertEquals(expected.getCount(), actual.getCount());
             assertEquals(expected.getTotal().doubleValue(), actual.getTotal());
             assertEquals(expected.getCredit().doubleValue(), actual.getCredit());

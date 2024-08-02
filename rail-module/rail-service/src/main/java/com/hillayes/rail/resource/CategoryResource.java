@@ -86,7 +86,8 @@ public class CategoryResource {
             .path(CategoryResource.class)
             .path(CategoryResource.class, "getCategoryGroup")
             .buildFromMap(Map.of("groupId", group.getId()));
-        return Response.created(location).build();
+        return Response.created(location)
+            .entity(marshal(group)).build();
     }
 
     @PUT
@@ -98,10 +99,10 @@ public class CategoryResource {
         log.info("Updating category group [userId: {}, groupId: {}, group: {}]",
             userId, groupId, details.getName());
 
-        categoryService.updateCategoryGroup(userId, groupId,
+        CategoryGroup group = categoryService.updateCategoryGroup(userId, groupId,
             details.getName(), details.getDescription());
 
-        return Response.noContent().build();
+        return Response.ok(marshal(group)).build();
     }
 
     @DELETE
@@ -160,7 +161,8 @@ public class CategoryResource {
             .path(CategoryResource.class)
             .path(CategoryResource.class, "getCategory")
             .buildFromMap(Map.of("categoryId", category.getId()));
-        return Response.created(location).build();
+        return Response.created(location)
+            .entity(marshal(category)).build();
     }
 
     @GET
@@ -182,10 +184,10 @@ public class CategoryResource {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, details.getName());
 
-        categoryService.updateCategory(userId, categoryId,
+        Category category = categoryService.updateCategory(userId, categoryId,
             details.getName(), details.getDescription(), details.getColour());
 
-        return Response.noContent().build();
+        return Response.ok(marshal(category)).build();
     }
 
     @DELETE
@@ -292,7 +294,9 @@ public class CategoryResource {
 
     private CategoryStatisticsResponse marshal(CategoryStatistics statistics) {
         return new CategoryStatisticsResponse()
-            .category(statistics.getCategory())
+            .groupId(statistics.getGroupId())
+            .groupName(statistics.getGroupName())
+            .categoryName(statistics.getCategory())
             .categoryId(statistics.getCategoryId())
             .description(statistics.getDescription())
             .colour(statistics.getColour())

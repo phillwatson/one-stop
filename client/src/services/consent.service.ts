@@ -20,10 +20,7 @@ class UserConsentService {
       callbackUri: window.location.origin + "/accounts"
     }
     return http.post(`/rails/consents/${institutionId}`, body)
-      .then(response => {
-        const location = response.headers["location"];
-        return location as Location;
-    });
+      .then(response => response.headers["location"] as Location);
   }
 
   cancelConsent(institutionId: string, purge: boolean = false) {

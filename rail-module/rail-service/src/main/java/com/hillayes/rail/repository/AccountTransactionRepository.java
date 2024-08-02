@@ -40,8 +40,9 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         "and t.booking_datetime >= :startDate " +
         "and t.booking_datetime < :endDate " +
         "and not exists ( " +
-        "  select 1 from rails.category_selector cs where " +
-        "    cs.account_id = t.account_id " +
+        "  select 1 from rails.category_selector cs " +
+        "  join rails.category c on c.id = cs.category_id and c.group_id = :groupId " +
+        "  where cs.account_id = t.account_id " +
         "    and (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) " +
         "    and (cs.ref_contains is null or t.reference like concat('%', cs.ref_contains, '%')) " +
         "    and (cs.creditor_contains is null or t.creditor_name like concat('%', cs.creditor_contains, '%')) " +
@@ -97,10 +98,11 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
             .getResultList();
     }
 
-    public List<AccountTransaction> findUncategorised(UUID userId,
+    public List<AccountTransaction> findUncategorised(UUID userId, UUID groupId,
                                                       Instant startDate, Instant endDate) {
         return getEntityManager().createNativeQuery(SELECT_BY_NON_CATEGORY, AccountTransaction.class)
             .setParameter("userId", userId)
+            .setParameter("groupId", groupId)
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)
             .getResultList();

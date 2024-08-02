@@ -29,13 +29,12 @@ public class CategoryTestIT extends ApiTestBase {
     @Test
     public void testCategoryGroups() {
         // given: a user
-        UserEntity user = UserEntity.builder()
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
             .username(randomAlphanumeric(20))
             .givenName(randomAlphanumeric(10))
             .password(randomAlphanumeric(30))
             .email(randomAlphanumeric(30))
-            .build();
-        user = UserUtils.createUser(getWiremockPort(), user);
+            .build());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
@@ -43,42 +42,37 @@ public class CategoryTestIT extends ApiTestBase {
         CategoryGroupRequest createGroupRequest = new CategoryGroupRequest()
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50));
-        UUID groupId = categoryApi.createCategoryGroup(createGroupRequest);
+        CategoryGroupResponse group = categoryApi.createCategoryGroup(createGroupRequest);
 
-        // then: the ID of the new group is returned
-        assertNotNull(groupId);
-
-        // when: the category group is retrieved
-        CategoryGroupResponse categoryGroup = categoryApi.getCategoryGroup(groupId);
-
-        // then: the category group is returned
-        assertEquals(groupId, categoryGroup.getId());
-        assertEquals(createGroupRequest.getName(), categoryGroup.getName());
-        assertEquals(createGroupRequest.getDescription(), categoryGroup.getDescription());
+        // then: the new group is returned
+        assertNotNull(group);
+        assertNotNull(group.getId());
+        assertEquals(createGroupRequest.getName(), group.getName());
+        assertEquals(createGroupRequest.getDescription(), group.getDescription());
 
         // when: the category group is updated
         CategoryGroupRequest updateGroupRequest = new CategoryGroupRequest()
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50));
-        categoryApi.updateCategoryGroup(groupId, updateGroupRequest);
+        categoryApi.updateCategoryGroup(group.getId(), updateGroupRequest);
 
         // and: the updated category group is retrieved
-        CategoryGroupResponse updatedGroup = categoryApi.getCategoryGroup(groupId);
+        CategoryGroupResponse updatedGroup = categoryApi.getCategoryGroup(group.getId());
 
         // then: the category group is returned
-        assertEquals(groupId, updatedGroup.getId());
+        assertEquals(group.getId(), updatedGroup.getId());
         assertEquals(updateGroupRequest.getName(), updatedGroup.getName());
         assertEquals(updateGroupRequest.getDescription(), updatedGroup.getDescription());
 
         // when: 19 more category groups are created
         List<UUID> allGroupIds = new ArrayList<>();
-        allGroupIds.add(groupId);
+        allGroupIds.add(group.getId());
         allGroupIds.addAll(IntStream.range(0, 19)
             .mapToObj(i -> new CategoryGroupRequest()
                 .name(randomAlphanumeric(20))
                 .description(randomAlphanumeric(50))
             )
-            .map(categoryApi::createCategoryGroup)
+            .map(request -> categoryApi.createCategoryGroup(request).getId())
             .toList()
         );
 
@@ -96,44 +90,37 @@ public class CategoryTestIT extends ApiTestBase {
         assertNotNull(categoryGroups.getItems());
         assertEquals(20, categoryGroups.getItems().size());
         allGroupIds.forEach(id ->
-            assertTrue(categoryGroups.getItems().stream().anyMatch(group -> group.getId().equals(id)))
+            assertTrue(categoryGroups.getItems().stream().anyMatch(g -> g.getId().equals(id)))
         );
     }
 
     @Test
     public void testCategories() {
         // given: a user
-        UserEntity user = UserEntity.builder()
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
             .username(randomAlphanumeric(20))
             .givenName(randomAlphanumeric(10))
             .password(randomAlphanumeric(30))
             .email(randomAlphanumeric(30))
-            .build();
-        user = UserUtils.createUser(getWiremockPort(), user);
+            .build());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
         // and: the user creates a category group
-        CategoryGroupRequest createGroupRequest = new CategoryGroupRequest()
+        CategoryGroupResponse group = categoryApi.createCategoryGroup(new CategoryGroupRequest()
             .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50));
-        UUID groupId = categoryApi.createCategoryGroup(createGroupRequest);
-        assertNotNull(groupId);
+            .description(randomAlphanumeric(50)));
+        assertNotNull(group);
 
         // when: the user creates a category within the group
         CategoryRequest createCategoryRequest = new CategoryRequest()
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50))
             .colour("#112233");
+        CategoryResponse category = categoryApi.createCategory(group.getId(), createCategoryRequest);
 
-        // then: the ID of the new category is returned
-        UUID categoryId = categoryApi.createCategory(groupId, createCategoryRequest);
-
-        // when: the category is retrieved
-        CategoryResponse category = categoryApi.getCategory(categoryId);
-
-        // then: the category is returned
-        assertEquals(categoryId, category.getId());
+        // then: the new category is returned
+        assertNotNull(category.getId());
         assertEquals(createCategoryRequest.getName(), category.getName());
         assertEquals(createCategoryRequest.getDescription(), category.getDescription());
         assertEquals(createCategoryRequest.getColour(), category.getColour());
@@ -143,33 +130,33 @@ public class CategoryTestIT extends ApiTestBase {
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50))
             .colour("#445566");
-        categoryApi.updateCategory(categoryId, updateCategoryRequest);
+        categoryApi.updateCategory(category.getId(), updateCategoryRequest);
 
         // and: the updated category is retrieved
-        CategoryResponse updatedCategory = categoryApi.getCategory(categoryId);
+        CategoryResponse updatedCategory = categoryApi.getCategory(category.getId());
 
         // then: the category is returned
-        assertEquals(categoryId, updatedCategory.getId());
-        assertEquals(groupId, updatedCategory.getGroupId());
+        assertEquals(category.getId(), updatedCategory.getId());
+        assertEquals(group.getId(), updatedCategory.getGroupId());
         assertEquals(updateCategoryRequest.getName(), updatedCategory.getName());
         assertEquals(updateCategoryRequest.getDescription(), updatedCategory.getDescription());
         assertEquals(updateCategoryRequest.getColour(), updatedCategory.getColour());
 
         // when: 19 more categories are created
         List<UUID> allCategoryIds = new ArrayList<>();
-        allCategoryIds.add(categoryId);
+        allCategoryIds.add(category.getId());
         allCategoryIds.addAll(IntStream.range(0, 19)
             .mapToObj(i -> new CategoryRequest()
                 .name(randomAlphanumeric(20))
                 .description(randomAlphanumeric(50))
                 .colour("#778899")
             )
-            .map(request -> categoryApi.createCategory(groupId, request))
+            .map(request -> categoryApi.createCategory(group.getId(), request).getId())
             .toList()
         );
 
         // and: a page of ALL category are retrieved for the group
-        PaginatedCategories categories = categoryApi.getCategories(groupId, 0, 20);
+        PaginatedCategories categories = categoryApi.getCategories(group.getId(), 0, 20);
 
         // then: the page counts are correct
         assertEquals(0, categories.getPage());
@@ -186,31 +173,31 @@ public class CategoryTestIT extends ApiTestBase {
         );
 
         // when: the category is deleted
-        categoryApi.deleteCategory(categoryId);
+        categoryApi.deleteCategory(category.getId());
 
         // then: the category can no longer be retrieved
-        withServiceError(categoryApi.getCategory(categoryId, 404), errorResponse -> {
+        withServiceError(categoryApi.getCategory(category.getId(), 404), errorResponse -> {
             ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
             assertEquals("Category", error.getContextAttributes().get("entity-type"));
-            assertEquals(categoryId.toString(), error.getContextAttributes().get("entity-id"));
+            assertEquals(category.getId().toString(), error.getContextAttributes().get("entity-id"));
         });
 
         // when: the category group is deleted
-        categoryApi.deleteCategoryGroup(groupId);
+        categoryApi.deleteCategoryGroup(group.getId());
 
         // then: the category group can no longer be retrieved
-        withServiceError(categoryApi.getCategoryGroup(groupId, 404), errorResponse -> {
+        withServiceError(categoryApi.getCategoryGroup(group.getId(), 404), errorResponse -> {
             ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
             assertEquals("CategoryGroup", error.getContextAttributes().get("entity-type"));
-            assertEquals(groupId.toString(), error.getContextAttributes().get("entity-id"));
+            assertEquals(group.getId().toString(), error.getContextAttributes().get("entity-id"));
         });
 
         // and: none of its categories can be retrieved
@@ -228,13 +215,12 @@ public class CategoryTestIT extends ApiTestBase {
         assertEquals(3, adminAuthTokens.size());
 
         // and: a user is created
-        UserEntity user = UserEntity.builder()
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
             .username(randomAlphanumeric(20))
             .givenName(randomAlphanumeric(10))
             .password(randomAlphanumeric(30))
             .email(randomAlphanumeric(30))
-            .build();
-        user = UserUtils.createUser(getWiremockPort(), user);
+            .build());
 
         // and: the user creates accounts - and the first account is selected
         UUID accountId = createAccounts(adminAuthTokens, user).get(0);
@@ -242,14 +228,14 @@ public class CategoryTestIT extends ApiTestBase {
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
         // and: the user creates a category group
-        UUID groupId = categoryApi.createCategoryGroup(new CategoryGroupRequest()
+        CategoryGroupResponse group = categoryApi.createCategoryGroup(new CategoryGroupRequest()
             .name(randomAlphanumeric(20)));
-        assertNotNull(groupId);
+        assertNotNull(group);
 
         // and: the user creates a category within the group
-        UUID categoryId = categoryApi.createCategory(groupId, new CategoryRequest()
+        CategoryResponse category = categoryApi.createCategory(group.getId(), new CategoryRequest()
             .name(randomAlphanumeric(20)));
-        assertNotNull(categoryId);
+        assertNotNull(category);
 
         // when: the user creates category selectors
         List<AccountCategorySelector> setSelectorsRequest = IntStream.range(0, 10)
@@ -258,13 +244,14 @@ public class CategoryTestIT extends ApiTestBase {
                 .refContains(randomAlphanumeric(10))
                 .infoContains(randomAlphanumeric(10))
             ).toList();
-        List<AccountCategorySelector> selectors = categoryApi.setAccountCategorySelectors(categoryId, accountId, setSelectorsRequest);
+        List<AccountCategorySelector> selectors =
+            categoryApi.setAccountCategorySelectors(category.getId(), accountId, setSelectorsRequest);
 
         // then: the new selectors are returned
         compare(setSelectorsRequest, selectors);
 
         // when: the selectors are retrieved
-        selectors = categoryApi.getAccountCategorySelectors(categoryId, accountId);
+        selectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId);
 
         // then: the selectors are returned
         compare(setSelectorsRequest, selectors);
@@ -281,40 +268,40 @@ public class CategoryTestIT extends ApiTestBase {
             )
             .toList();
 
-        selectors = categoryApi.setAccountCategorySelectors(categoryId, accountId, updateSelectorsRequest);
+        selectors = categoryApi.setAccountCategorySelectors(category.getId(), accountId, updateSelectorsRequest);
 
         // then: the updated selectors are returned
         compare(updateSelectorsRequest, selectors);
 
         // when: the updated selectors are retrieved
-        selectors = categoryApi.getAccountCategorySelectors(categoryId, accountId);
+        selectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId);
 
         // then: the updated selectors are returned
         compare(updateSelectorsRequest, selectors);
 
         // when: the category is deleted
-        categoryApi.deleteCategory(categoryId);
+        categoryApi.deleteCategory(category.getId());
 
         // then: the category can no longer be retrieved
-        withServiceError(categoryApi.getCategory(categoryId, 404), errorResponse -> {
+        withServiceError(categoryApi.getCategory(category.getId(), 404), errorResponse -> {
             ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
             assertEquals("Category", error.getContextAttributes().get("entity-type"));
-            assertEquals(categoryId.toString(), error.getContextAttributes().get("entity-id"));
+            assertEquals(category.getId().toString(), error.getContextAttributes().get("entity-id"));
         });
 
         // and: the selectors can no longer be retrieved
-        withServiceError(categoryApi.getAccountCategorySelectors(categoryId, accountId, 404), errorResponse -> {
+        withServiceError(categoryApi.getAccountCategorySelectors(category.getId(), accountId, 404), errorResponse -> {
             ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
             assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
             assertNotNull(error.getContextAttributes());
             assertEquals("Category", error.getContextAttributes().get("entity-type"));
-            assertEquals(categoryId.toString(), error.getContextAttributes().get("entity-id"));
+            assertEquals(category.getId().toString(), error.getContextAttributes().get("entity-id"));
         });
     }
 
@@ -324,9 +311,9 @@ public class CategoryTestIT extends ApiTestBase {
         assertEquals(expected.size(), actual.size());
         expected.forEach(request ->
             assertTrue(actual.stream().anyMatch(selector ->
-                request.getCreditorContains().equals(selector.getCreditorContains()) &&
-                    request.getRefContains().equals(selector.getRefContains()) &&
-                    request.getInfoContains().equals(selector.getInfoContains())
+                Objects.equals(request.getCreditorContains(), selector.getCreditorContains()) &&
+                Objects.equals(request.getRefContains(), selector.getRefContains()) &&
+                Objects.equals(request.getInfoContains(), selector.getInfoContains())
             ))
         );
     }
@@ -344,9 +331,9 @@ public class CategoryTestIT extends ApiTestBase {
         assertNotNull(institution);
 
         // when: the user initiates a consent request for the institution
-        UserConsentRequest consentRequest = new UserConsentRequest()
-            .callbackUri(URI.create("http://mock/callback/uri"));
-        userConsentApi.register(institution.getId(), consentRequest);
+        URI callbackUri = URI.create("http://mock/callback/uri");
+        userConsentApi.register(institution.getId(), new UserConsentRequest()
+            .callbackUri(callbackUri));
 
         // and: a user-consent record is waiting to be given
         UserConsentResponse userConsent = userConsentApi.getConsentForInstitution(institution.getId());
@@ -356,7 +343,6 @@ public class CategoryTestIT extends ApiTestBase {
         PaginatedList<EndUserAgreement> agreements = agreementAdminApi.list(0, 100);
         assertNotNull(agreements);
         assertEquals(1, agreements.count); // only one as we clear data on each test
-        EndUserAgreement agreement = agreements.results.get(0);
 
         // and: a requisition record is created - only one as we clear data on each test
         PaginatedList<Requisition> requisitions = requisitionAdminApi.list(0, 100);
@@ -376,7 +362,7 @@ public class CategoryTestIT extends ApiTestBase {
             Response response = userConsentApi.consentResponse(institution.getProvider(), requisition.reference, null, null);
 
             // then: the redirect response is the original callback URI
-            assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));
+            assertEquals(callbackUri.toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),

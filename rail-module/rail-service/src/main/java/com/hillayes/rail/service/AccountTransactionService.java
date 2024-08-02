@@ -73,14 +73,14 @@ public class AccountTransactionService {
         return accountTransactionRepository.findTotals(filter);
     }
 
-    public List<AccountTransaction> findByCategory(UUID userId, UUID categoryId,
+    public List<AccountTransaction> findByCategory(UUID userId, UUID groupId, UUID categoryId,
                                                    Instant startDate, Instant endDate) {
         log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}]",
             userId, categoryId, startDate, endDate);
 
         List<AccountTransaction> result;
         if (categoryId == null) {
-            result = accountTransactionRepository.findUncategorised(userId, startDate, endDate);
+            result = accountTransactionRepository.findUncategorised(userId, groupId, startDate, endDate);
         } else {
             // ensure the category belongs to the user
             categoryService.getCategory(userId, categoryId);

@@ -1,12 +1,9 @@
 package com.hillayes.integration.api;
 
-import com.hillayes.nordigen.model.EndUserAgreement;
-import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.onestop.api.*;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +43,9 @@ public class CategoryApi extends ApiBase {
             .extract().response();
     }
 
-    public UUID createCategoryGroup(CategoryGroupRequest request) {
-        URI location = URI.create(
-            // http://localhost/api/v1/rails/category-groups/0d4794f8-105b-45c3-8907-2b5afa692af2
-            createCategoryGroup(request, 201).header("Location")
-        );
-        return Utils.getIdFromLocation(location);
+    public CategoryGroupResponse createCategoryGroup(CategoryGroupRequest request) {
+        return createCategoryGroup(request, 201)
+            .as(CategoryGroupResponse.class);
     }
 
     public Response createCategoryGroup(CategoryGroupRequest request, int expectedStatus) {
@@ -61,11 +55,13 @@ public class CategoryApi extends ApiBase {
             .post("/api/v1/rails/category-groups")
             .then()
             .statusCode(expectedStatus)
+            .contentType(JSON)
             .extract().response();
     }
 
-    public Response updateCategoryGroup(UUID groupId, CategoryGroupRequest request) {
-        return updateCategoryGroup(groupId, request, 204);
+    public CategoryGroupResponse updateCategoryGroup(UUID groupId, CategoryGroupRequest request) {
+        return updateCategoryGroup(groupId, request, 200)
+            .as(CategoryGroupResponse.class);
     }
 
     public Response updateCategoryGroup(UUID groupId, CategoryGroupRequest request, int expectedStatus) {
@@ -75,6 +71,7 @@ public class CategoryApi extends ApiBase {
             .put("/api/v1/rails/category-groups/{groupId}", groupId)
             .then()
             .statusCode(expectedStatus)
+            .contentType(JSON)
             .extract().response();
     }
 
@@ -115,11 +112,9 @@ public class CategoryApi extends ApiBase {
             .extract().response();
     }
 
-    public UUID createCategory(UUID groupId, CategoryRequest request) {
-        URI location = URI.create(
-            createCategory(groupId, request, 201).header("Location")
-        );
-        return Utils.getIdFromLocation(location);
+    public CategoryResponse createCategory(UUID groupId, CategoryRequest request) {
+        return createCategory(groupId, request, 201)
+            .as(CategoryResponse.class);
     }
 
     public Response createCategory(UUID groupId, CategoryRequest request, int expectedStatus) {
@@ -129,11 +124,13 @@ public class CategoryApi extends ApiBase {
             .post("/api/v1/rails/category-groups/{groupId}/categories", groupId)
             .then()
             .statusCode(expectedStatus)
+            .contentType(JSON)
             .extract().response();
     }
 
-    public Response updateCategory(UUID categoryId, CategoryRequest request) {
-        return updateCategory(categoryId, request, 204);
+    public CategoryResponse updateCategory(UUID categoryId, CategoryRequest request) {
+        return updateCategory(categoryId, request, 200)
+            .as(CategoryResponse.class);
     }
 
     public Response updateCategory(UUID categoryId, CategoryRequest request, int expectedStatus) {
@@ -143,6 +140,7 @@ public class CategoryApi extends ApiBase {
             .put("/api/v1/rails/categories/{categoryId}", categoryId)
             .then()
             .statusCode(expectedStatus)
+            .contentType(JSON)
             .extract().response();
     }
 

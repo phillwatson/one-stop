@@ -33,7 +33,7 @@ export default function CategoryTransactions(props: Props) {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
 
   useEffect(() => {
-    AccountService.getTransactionsByCategory(props.category.categoryId!!, props.fromDate, props.toDate)
+    AccountService.getTransactionsByCategory(props.category.groupId, props.category.categoryId!!, props.fromDate, props.toDate)
       .then(response => setTransactions(response))
       .catch(err => {
         setTransactions([]);
@@ -55,11 +55,11 @@ export default function CategoryTransactions(props: Props) {
   return(
     <>
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-        <Box sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>{ props.category.category }</Box>
+        <Box sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>{ props.category.categoryName }</Box>
         <Table size="small" aria-label="transactions">
           <caption><i>
             { noTransactions ? 'there are no' : transactions.length } {' '}
-             transaction(s) matching "{props.category.category}"
+             transaction(s) matching "{props.category.categoryName}"
              from {toLocaleDate(props.fromDate)} (inclusive)
              to {toLocaleDate(props.toDate)} (exclusive)
           </i></caption>
@@ -85,6 +85,7 @@ export default function CategoryTransactions(props: Props) {
       </Paper>
 
       <AddSelector open={ showAddCategory }
+          groupId={ props.category.groupId }
           catagoryId={ props.category.categoryId }
           transaction={ selectedTransaction }
           onCancel={ () => closeAddToCategory() }

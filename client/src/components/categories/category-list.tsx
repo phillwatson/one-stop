@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,41 +8,59 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import { SxProps } from '@mui/material/styles';
-import Fab from '@mui/material/Fab';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
-import AddIcon from '@mui/icons-material/Add';
+import { Avatar, Paper } from '@mui/material';
 
 import CategoryService from '../../services/category.service';
-import { Category } from "../../model/category.model";
-import { useEffect, useState } from 'react';
+import { CategoryGroup, Category } from "../../model/category.model";
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
 import EditCategory from './edit-category';
-import { Avatar } from '@mui/material';
 
 const colhead: SxProps = {
   fontWeight: 'bold'
 };
 
-const bottomFabStyle: SxProps = {
-  position: 'fixed',
-  bottom: 16,
-  right: 16,
+const compactCell = {
+  paddingLeft: 0.5,
+  paddingRight: 0
 };
 
-export default function CategoryEditor() {
+interface Props {
+  elevation?: number;
+  group?: CategoryGroup;
+  categories: Array<Category>;
+  onSelected?: (category: Category) => void;
+  onDelete?: (category: Category) => void;
+  onEdit?: (category: Category) => void;
+  onAdd?: (category: Category) => void;
+}
+
+export default function CategoryList(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ categories, setCategories ] = useState<Array<Category>>([]);
   const [ selectedCategory, setSelectedCategory ] = useState<Category|undefined>(undefined);
   const [ deleteDialogOpen, setDeleteDialogOpen ] = useState<boolean>(false);
   const [ editDialogOpen, setEditDialogOpen ] = useState<boolean>(false);
-  useEffect(() => { refresh(); }, []);
 
-  function refresh() {
-    CategoryService.fetchAllCategories().then( response => setCategories(response));
+  function handleSelectClick(category: Category) {
+    if (props.onSelected) {
+      props.onSelected(category);
+    } else {
+      handleEditClick(category);
+    }
   }
 
-  function confirmDelete(category: Category) {
+  function handleEditClick(category: Category) {
+    setSelectedCategory(category);
+    setEditDialogOpen(true);
+  }
+
+  function handleAddClick() {
+    setSelectedCategory(undefined);
+    setEditDialogOpen(true);
+  }
+
+  function handleDeleteClick(category: Category) {
     setSelectedCategory(category);
     setDeleteDialogOpen(true);
   }
@@ -48,86 +68,95 @@ export default function CategoryEditor() {
   function onDeleteConfirmed() {
     setDeleteDialogOpen(false);
 
-    var category = selectedCategory!
+    var category: Category = selectedCategory!
     CategoryService.deleteCategory(category.id!!)
-      .then(() => setCategories(categories.filter(c => c.id !== category.id)))
+      .then(() => props.onDelete && props.onDelete(category))
       .catch(err => showMessage(err))
-  }
-
-  function updateCategory(category: Category) {
-    setSelectedCategory(category);
-    setEditDialogOpen(true);
-  }
-
-  function addCategory() {
-    setSelectedCategory(undefined);
-    setEditDialogOpen(true);
   }
 
   function editCategoryConfirmed(category: Category) {
     if (category.id) {
       CategoryService.updateCategory(category)
-        .then(() => {
+        .then(category => {
           showMessage({ type: 'add', level: 'success', text: `Category "${category.name}" updated successfully` });
           setEditDialogOpen(false);
-          refresh();
+
+          props.onEdit && props.onEdit(category);
         })
         .catch(err => showMessage(err))
     } else {
-      CategoryService.createCategory(category)
-        .then(() => {
+      CategoryService.createCategory(props.group!.id!!, category)
+        .then(category => {
           showMessage({ type: 'add', level: 'success', text: `Category "${category.name}" added successfully`});
           setEditDialogOpen(false);
-          refresh();
+
+          props.onAdd && props.onAdd(category);
         })
         .catch(err => showMessage(err))
     }
   }
 
   return (
-    <>
+    <Paper elevation={props.elevation || 0} sx={{ padding: 1}}>
       <TableContainer>
         <Table size='small'>
           <TableHead>
             <TableRow>
-              <TableCell sx={colhead} width={"32px"}></TableCell>
-              <TableCell sx={colhead}>Name</TableCell>
+              <TableCell sx={{...colhead, ...compactCell}} width="24px"></TableCell>
+              <TableCell sx={colhead}>Category</TableCell>
               <TableCell sx={colhead}>Description</TableCell>
-              <TableCell sx={colhead} width={"32px"}></TableCell>
+              { props.onDelete &&
+                <TableCell sx={{...colhead, ...compactCell}} width="24px"></TableCell>
+              }
             </TableRow>
           </TableHead>
 
           <TableBody>
-            { categories && categories
+            { props.categories && props.categories
               .sort((a, b) => a.name < b.name ? -1 : 1)
               .map(category =>
                 <TableRow key={ category.id } hover>
-                  <TableCell onClick={() => updateCategory(category)}>
+                  <TableCell sx={ compactCell } onClick={() => handleSelectClick(category)}>
                     <Avatar sx={{ backgroundColor: category.colour, width: 24, height: 24 }}>&nbsp;</Avatar>
                   </TableCell>
-                  <TableCell onClick={() => updateCategory(category)}>{ category.name }</TableCell>
-                  <TableCell onClick={() => updateCategory(category)}>{ category.description }</TableCell>
-                  <TableCell onClick={() => confirmDelete(category)}>
-                    <Tooltip title="Delete category..."><DeleteIcon/></Tooltip>
-                  </TableCell>
+                  <TableCell onClick={() => handleSelectClick(category)}>{ category.name }</TableCell>
+                  <TableCell onClick={() => handleSelectClick(category)}>{ category.description }</TableCell>
+                  { props.onDelete &&
+                    <TableCell onClick={() => handleDeleteClick(category)} sx={ compactCell } width="24px">
+                      <Tooltip title="Delete category..."><DeleteIcon/></Tooltip>
+                    </TableCell>
+                  }
                 </TableRow>
               )
+            }
+            { props.onAdd && props.group &&
+            <>
+              <TableRow key={ "add1" }>
+                <TableCell align="center" colSpan={ 3 + (props.onDelete ? 1 : 0) } />
+              </TableRow>
+              <TableRow key="add2" hover>
+                <TableCell align="center" colSpan={ 3 + (props.onDelete ? 1 : 0) }
+                  onClick={() => handleAddClick()}><b>Add Category...</b></TableCell>
+              </TableRow>
+            </>
             }
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Fab color="primary" aria-label="add" sx={bottomFabStyle} onClick={() => addCategory()}><AddIcon /></Fab>
-      <EditCategory open={editDialogOpen}
+      { props.group &&
+        <EditCategory open={editDialogOpen}
+        group={props.group!!}
         category={selectedCategory}
-        onCancel={() => setEditDialogOpen(false)}
-        onConfirm={editCategoryConfirmed}/>
+        onConfirm={ editCategoryConfirmed }
+        onCancel={() => setEditDialogOpen(false)}/>
+      }
 
       <ConfirmationDialog open={deleteDialogOpen}
         title={"Delete Category \""+ selectedCategory?.name + "\""}
         content="Are you sure you want to delete this category?"
-        onConfirm={onDeleteConfirmed}
+        onConfirm={ onDeleteConfirmed }
         onCancel={() => setDeleteDialogOpen(false)} />
-    </>
+    </Paper>
   );
 }

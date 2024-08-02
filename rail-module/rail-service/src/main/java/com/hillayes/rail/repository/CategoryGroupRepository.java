@@ -51,6 +51,8 @@ public class CategoryGroupRepository extends RepositoryBase<CategoryGroup, UUID>
         String defaultColour = serviceConfiguration.categories().defaultColour();
 
         return getEntityManager().createNativeQuery("select " +
+                ":groupId as group_id, " +
+                ":groupName as group_name, " +
                 "coalesce (c.name, '" + defaultName + "') as category, " +
                 "c.id, c.description, " +
                 "coalesce (c.colour, '" + defaultColour + "') as colour, " +
@@ -69,6 +71,7 @@ public class CategoryGroupRepository extends RepositoryBase<CategoryGroup, UUID>
                 "group by 1, 2, 3, 4 order by 1", CategoryStatistics.class)
             .setParameter("userId", group.getUserId())
             .setParameter("groupId", group.getId())
+            .setParameter("groupName", group.getName())
             .setParameter("startDate", startDate)
             .setParameter("endDate", endDate)
             .getResultList();

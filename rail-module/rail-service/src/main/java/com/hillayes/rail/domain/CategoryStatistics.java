@@ -14,6 +14,17 @@ import java.util.UUID;
 @RegisterForReflection
 public class CategoryStatistics {
     /**
+     * The category group id.
+     */
+    @EqualsAndHashCode.Include
+    private UUID groupId;
+
+    /**
+     * The category group name.
+     */
+    private String groupName;
+
+    /**
      * The category name.
      */
     @EqualsAndHashCode.Include

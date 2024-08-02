@@ -169,6 +169,7 @@ export default function TransactionList(props: Props) {
       }
  
     <AddSelector open={ showAddCategory }
+        groupId='{ props.account.groupId }'
         transaction={ selectedTransaction }
         onCancel={ () => setShowAddCategory(false) }
         onConfirm={() => setShowAddCategory(false) }/>

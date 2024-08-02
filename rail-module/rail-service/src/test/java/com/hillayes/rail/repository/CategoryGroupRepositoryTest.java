@@ -353,6 +353,8 @@ public class CategoryGroupRepositoryTest {
                 .findFirst()
                 .orElseThrow();
 
+            assertEquals(categoryGroup.getId(), projection.getGroupId());
+            assertEquals(categoryGroup.getName(), projection.getGroupName());
             assertEquals(category.getId(), projection.getCategoryId());
             assertEquals(1, projection.getCount());
         });
