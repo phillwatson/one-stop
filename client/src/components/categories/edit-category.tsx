@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { MuiColorInput } from 'mui-color-input'
 
-import { Category } from "../../model/category.model";
+import { CategoryGroup, Category } from "../../model/category.model";
 
 interface Props {
   open: boolean;
+  group: CategoryGroup;
   category: Category | undefined;
   onConfirm: (category: Category) => void;
   onCancel: () => void;
@@ -32,6 +33,12 @@ export default function EditCategory(props: Props) {
       <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>{ props.category ? "Edit Category" : "Add Category" }</DialogTitle>
       <DialogContent>
         <p/>
+        <TextField
+          id="group" label="Group"
+          margin="normal" fullWidth variant="standard"
+          value={props.group.name} disabled
+        />
+
         <TextField
           id="name" label="Category Name" autoFocus required
           margin="normal" fullWidth variant="standard"

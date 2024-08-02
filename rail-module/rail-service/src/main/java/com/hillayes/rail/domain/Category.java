@@ -31,11 +31,10 @@ public class Category {
     private long version;
 
     /**
-     * The user to whom this category belongs.
+     * The category group to which this category is belongs.
      */
-    @EqualsAndHashCode.Include
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private CategoryGroup group;
 
     /**
      * The name of the category. This is unique for each user.

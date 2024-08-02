@@ -2,12 +2,16 @@ package com.hillayes.rail.service;
 
 import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Category;
+import com.hillayes.rail.domain.CategoryGroup;
 import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.domain.CategorySelector;
 import com.hillayes.rail.errors.CategoryAlreadyExistsException;
+import com.hillayes.rail.errors.CategoryGroupAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
+import com.hillayes.rail.repository.CategoryGroupRepository;
 import com.hillayes.rail.repository.CategoryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,66 +28,173 @@ import java.util.UUID;
 @Slf4j
 public class CategoryService {
     @Inject
+    CategoryGroupRepository categoryGroupRepository;
+
+    @Inject
     CategoryRepository categoryRepository;
 
     @Inject
     AccountRepository accountRepository;
 
     /**
-     * Returns the selected page of categories for the specified user; in category name order.
+     * Returns the selected page of category groups for the specified user; in name order.
      *
      * @param userId The user ID.
      * @param page The zero-based, page number.
-     * @param pageSize The max number of categories per page.
-     * @return The selected page of categories.
+     * @param pageSize The max number of groups per page.
+     * @return The selected page of category groups.
      */
-    public Page<Category> getCategories(UUID userId, int page, int pageSize) {
-        log.info("Listing categories [userId: {}]", userId);
-        Page<Category> result = categoryRepository.findByUserId(userId, page, pageSize);
+    public Page<CategoryGroup> getCategoryGroups(UUID userId, int page, int pageSize) {
+        log.info("Listing category groups [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
+        Page<CategoryGroup> result = categoryGroupRepository.findByUserId(userId, page, pageSize);
 
-        log.debug("Listing categories [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
-            userId, page, pageSize, result.getContentSize(), result.getTotalCount());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category groups [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                userId, page, pageSize, result.getContentSize(), result.getTotalCount());
+        }
         return result;
     }
 
-    public Category getCategory(UUID userId, UUID categoryId) {
-        log.info("Getting category [userId: {}, categoryId: {}]", userId, categoryId);
-        return categoryRepository.findByIdOptional(categoryId)
+    public CategoryGroup getCategoryGroup(UUID userId, UUID groupId) {
+        log.info("Getting category group [userId: {}, groupId: {}]", userId, groupId);
+        return categoryGroupRepository.findByIdOptional(groupId)
             .filter(category -> category.getUserId().equals(userId))
-            .orElseThrow(() -> new NotFoundException("Category", categoryId));
+            .orElseThrow(() -> new NotFoundException("CategoryGroup", groupId));
     }
 
-    public Category createCategory(UUID userId, String name, String description, String colour) {
-        log.info("Creating category [userId: {}, category: {}]", userId, name);
+    public CategoryGroup createCategoryGroup(UUID userId, String name, String description) {
+        log.info("Creating category group [userId: {}, name: {}]", userId, name);
 
-        String newName = name.trim();
-        categoryRepository.findByUserAndName(userId, newName)
-            .ifPresent(category -> { throw new CategoryAlreadyExistsException(category); });
+        String newName = Strings.trimOrNull(name);
+        if (newName == null) {
+            throw new MissingParameterException("CategoryGroup.name");
+        }
 
-        Category category = Category.builder()
+        categoryGroupRepository.findByUserAndName(userId, newName)
+            .ifPresent(group -> { throw new CategoryGroupAlreadyExistsException(group); });
+
+        CategoryGroup group = CategoryGroup.builder()
             .userId(userId)
             .name(newName)
-            .description(description)
-            .colour(colour)
+            .description(Strings.trimOrNull(description))
             .build();
-        return categoryRepository.save(category);
+        return categoryGroupRepository.save(group);
+    }
+
+    public CategoryGroup updateCategoryGroup(UUID userId, UUID groupId,
+                                             String name, String description) {
+        log.info("Updating category group [userId: {}, groupId: {}, name: {}]", userId, groupId, name);
+        String newName = Strings.trimOrNull(name);
+        if (newName == null) {
+            throw new MissingParameterException("CategoryGroup.name");
+        }
+
+        CategoryGroup group = getCategoryGroup(userId, groupId);
+
+        categoryGroupRepository.findByUserAndName(userId, newName)
+            .filter(existing -> !existing.getId().equals(groupId))
+            .ifPresent(existing -> { throw new CategoryGroupAlreadyExistsException(existing); });
+
+        group.setName(newName);
+        group.setDescription(Strings.trimOrNull(description));
+        return categoryGroupRepository.save(group);
+    }
+
+    public CategoryGroup deleteCategoryGroup(UUID userId, UUID groupId) {
+        log.info("Deleting category group [userId: {}, groupId: {}]", userId, groupId);
+        CategoryGroup group = getCategoryGroup(userId, groupId);
+
+        categoryGroupRepository.delete(group);
+        return group;
+    }
+
+    /**
+     * Deletes all category groups (and their categories and selectors) for the specified user.
+     *
+     * @param userId The user ID.
+     */
+    public void deleteAllCategoryGroups(UUID userId) {
+        log.info("Deleting all category groups for user [userId: {}]", userId);
+        categoryGroupRepository.deleteByUserId(userId);
+    }
+
+    /**
+     * Returns the selected page of categories for the identified category group; in name order.
+     *
+     * @param groupId The category group ID.
+     * @param page The zero-based, page number.
+     * @param pageSize The max number of groups per page.
+     * @return The selected page of category groups.
+     */
+    public Page<Category> getCategories(UUID userId, UUID groupId, int page, int pageSize) {
+        log.info("Listing categories for group [userId: {}, groupId: {}, page: {}, pageSize: {}]",
+            userId, groupId, page, pageSize);
+        getCategoryGroup(userId, groupId);
+        Page<Category> result = categoryRepository.findByGroupId(groupId, page, pageSize);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing categories for group [groupId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                groupId, page, pageSize, result.getContentSize(), result.getTotalCount());
+        }
+        return result;
+    }
+
+    /**
+     * Returns the identified category. Ensures the category belongs to the specified user.
+     * @param userId The user ID.
+     * @param categoryId The category ID.
+     * @return The identified category.
+     */
+    public Category getCategory(UUID userId, UUID categoryId) {
+        log.info("Getting category [userId: {}, categoryId: {}]", userId, categoryId);
+        return validate(userId, categoryId);
+    }
+
+    public Category createCategory(UUID userId, UUID groupId, String name, String description, String colour) {
+        log.info("Creating category [userId: {}, groupId: {}, name: {}]",
+            userId, groupId, name);
+
+        CategoryGroup group = getCategoryGroup(userId, groupId);
+
+        Category category = group.addCategory(name, cat -> cat
+            .description(Strings.trimOrNull(description))
+            .colour(Strings.trimOrNull(colour))
+        );
+
+        categoryRepository.save(category);
+        return category;
     }
 
     public Category updateCategory(UUID userId, UUID categoryId,
                                    String name, String description, String colour) {
-        log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, name);
-        Category category = getCategory(userId, categoryId);
+        log.info("Updating category [userId: {}, categoryId: {}, name: {}]",
+            userId, categoryId, name);
 
-        category.setName(name);
-        category.setDescription(description);
-        category.setColour(colour);
-        return categoryRepository.save(category);
+        String newName = Strings.trimOrNull(name);
+        if (newName == null) {
+            throw new MissingParameterException("Category.name");
+        }
+
+        Category category = validate(userId, categoryId);
+
+        CategoryGroup group = category.getGroup();
+        group.getCategory(newName)
+            .filter(c -> !c.getId().equals(categoryId))
+            .ifPresent(c -> { throw new CategoryAlreadyExistsException(c); });
+
+        category.setName(newName);
+        category.setDescription(Strings.trimOrNull(description));
+        category.setColour(Strings.trimOrNull(colour));
+
+        categoryRepository.save(category);
+        return category;
     }
 
     public Category deleteCategory(UUID userId, UUID categoryId) {
-        log.info("Deleting category [userId: {}, categoryId: {}]", userId, categoryId);
-        Category category = getCategory(userId, categoryId);
+        log.info("Deleting category [userId: {}, categoryId: {}]",
+            userId, categoryId);
 
+        Category category = validate(userId, categoryId);
         categoryRepository.delete(category);
         return category;
     }
@@ -91,12 +202,17 @@ public class CategoryService {
     /**
      * Returns the selectors for the identified category and account.
      *
+     * @param userId The user ID to whom the category group and account must belong.
      * @param categoryId The category ID.
+     * @param accountId The account ID to which the selectors are associated.
      * @return The category selectors.
      */
     public Collection<CategorySelector> getCategorySelectors(UUID userId, UUID categoryId, UUID accountId) {
-        log.info("Listing category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
-        Category category = validate(userId, categoryId, accountId);
+        log.info("Listing category selectors [userId: {}, categoryId: {}, accountId: {}]",
+            userId, categoryId, accountId);
+
+        Category category = validate(userId, categoryId);
+        validateAccount(category.getGroup(), accountId);
 
         return category.getSelectors().stream()
             .filter(selector -> selector.getAccountId().equals(accountId))
@@ -113,10 +229,15 @@ public class CategoryService {
      * @param selectors The category selectors to be set.
      * @return the updated category selectors.
      */
-    public Collection<CategorySelector> setCategorySelectors(UUID userId, UUID categoryId, UUID accountId,
+    public Collection<CategorySelector> setCategorySelectors(UUID userId,
+                                                             UUID categoryId,
+                                                             UUID accountId,
                                                              Collection<CategorySelector> selectors) {
-        log.info("Setting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
-        Category category = validate(userId, categoryId, accountId);
+        log.info("Setting category selectors [userId: {}, categoryId: {}, accountId: {}]",
+            userId, categoryId, accountId);
+
+        Category category = validate(userId, categoryId);
+        validateAccount(category.getGroup(), accountId);
 
         category.getSelectors().removeIf(selector -> selector.getAccountId().equals(accountId));
         if (selectors != null) {
@@ -132,40 +253,59 @@ public class CategoryService {
     }
 
     /**
-     * Deletes all categories for the specified user.
-     *
+     * Generates the category statistics for the specified user, group and date range.
      * @param userId The user ID.
-     */
-    public void deleteAllCategories(UUID userId) {
-        log.info("Deleting all categories for user [userId: {}]", userId);
-        categoryRepository.deleteByUserId(userId);
-    }
-
-    /**
-     * Generates the category statistics for the specified user and date range.
-     * @param userId The user ID.
+     * @param groupId The group ID.
      * @param startDate The start date (inclusive).
      * @param endDate The end date (exclusive).
      * @return The list of category statistics.
      */
-    public List<CategoryStatistics> getStatistics(UUID userId, Instant startDate, Instant endDate) {
-        return categoryRepository.getStatistics(userId, startDate, endDate);
+    public List<CategoryStatistics> getStatistics(UUID userId, UUID groupId, Instant startDate, Instant endDate) {
+        CategoryGroup group = getCategoryGroup(userId, groupId);
+        return categoryGroupRepository.getStatistics(group, startDate, endDate);
     }
 
     /**
-     * Ensures that both the category and account exist and belong to the specified user.
+     * Ensures that both the category group and account exist and belong to the specified user.
+     * @param userId The user ID.
+     * @param accountId The account ID.
+     * @return The identified category group.
+     * @throws NotFoundException if the group or account does not exist or does not belong to the user.
+     */
+    private CategoryGroup validate(UUID userId, UUID groupId, UUID accountId) {
+        CategoryGroup group = getCategoryGroup(userId, groupId);
+        validateAccount(group, accountId);
+        return group;
+    }
+
+    /**
+     * Ensures that the category exists and belongs to the specified user.
      * @param userId The user ID.
      * @param categoryId The category ID.
-     * @param accountId The account ID.
      * @return The identified category.
+     * @throws NotFoundException if the category does not exist or does not belong to the user.
      */
-    private Category validate(UUID userId, UUID categoryId, UUID accountId) {
-        Category category = getCategory(userId, categoryId);
+    private Category validate(UUID userId, UUID categoryId) {
+        Category category = categoryRepository.findByIdOptional(categoryId)
+            .orElseThrow(() -> new NotFoundException("Category", categoryId));
 
-        accountRepository.findByIdOptional(accountId)
-            .filter(account -> account.getUserId().equals(userId))
-            .orElseThrow(() -> new NotFoundException("Account", accountId));
+        CategoryGroup group = category.getGroup();
+        if (!group.getUserId().equals(userId)) {
+            throw new NotFoundException("Category", categoryId);
+        }
 
         return category;
+    }
+
+    /**
+     * Ensures that the identified account exists and belongs to the same user as the given group.
+     * @param group The category group.
+     * @param accountId The account ID.
+     * @throws NotFoundException if the account does not exist or does not belong to the group's user.
+     */
+    private void validateAccount(CategoryGroup group, UUID accountId) {
+        accountRepository.findByIdOptional(accountId)
+            .filter(account -> account.getUserId().equals(group.getUserId()))
+            .orElseThrow(() -> new NotFoundException("Account", accountId));
     }
 }

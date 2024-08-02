@@ -54,8 +54,9 @@ public class UserConsentApi extends ApiBase {
     }
 
     public URI register(String institutionId, UserConsentRequest consentRequest) {
-        return register(institutionId, consentRequest, 200)
-            .as(URI.class);
+        return URI.create(
+            register(institutionId, consentRequest, 201).header("Location")
+        );
     }
 
     public Response register(String institutionId, UserConsentRequest consentRequest, int expectedStatus) {
@@ -65,7 +66,6 @@ public class UserConsentApi extends ApiBase {
             .post("/api/v1/rails/consents/{institutionId}", institutionId)
             .then()
             .statusCode(expectedStatus)
-            .contentType(JSON)
             .extract().response();
     }
 

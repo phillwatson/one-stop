@@ -28,7 +28,7 @@ public class UserTopicConsumer implements EventConsumer {
         if (UserDeleted.class.getName().equals(payloadClass)) {
             UserDeleted payload = eventPacket.getPayloadContent();
             userConsentService.deleteAllConsents(payload.getUserId());
-            categoryService.deleteAllCategories(payload.getUserId());
+            categoryService.deleteAllCategoryGroups(payload.getUserId());
         }
     }
 }

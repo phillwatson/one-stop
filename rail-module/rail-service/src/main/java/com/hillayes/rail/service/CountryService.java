@@ -36,7 +36,7 @@ public class CountryService {
 
     public Optional<InputStream> getLogo(String id) {
         log.info("Get country logo [id: {}]", id);
-        Country country = get(id).orElseThrow(() -> new NotFoundException("country", id));
+        Country country = get(id).orElseThrow(() -> new NotFoundException("Country", id));
         if (country.getFlagUri() == null) {
             return Optional.empty();
         }

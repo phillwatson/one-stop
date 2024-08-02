@@ -1,5 +1,12 @@
+export interface CategoryGroup {
+  id?: string;
+  name: string;
+  description?: string;
+}
+
 export interface Category {
   id?: string;
+  groupId?: string;
   name: string;
   description?: string;
   colour?: string;
@@ -12,8 +19,10 @@ export interface CategorySelector {
 }
 
 export interface CategoryStatistics {
-  categoryId?: string
-  category: string;
+  groupId: string;
+  groupName: string;
+  categoryId?: string;
+  categoryName: string;
   description?: string;
   colour: string;
   count: number;

@@ -308,17 +308,18 @@ public class UserConsentResourceTest extends TestBase {
             .thenReturn(expectedConsentLink);
 
         // when: client calls the endpoint
-        URI response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("institutionId", institutionId)
-            .body(consentRequest)
-            .post("/api/v1/rails/consents/{institutionId}")
-            .then()
-            .statusCode(200)
-            .extract()
-            .as(URI.class);
+        URI response = URI.create(
+            given().request()
+                .contentType(JSON)
+                .when()
+                .pathParam("institutionId", institutionId)
+                .body(consentRequest)
+                .post("/api/v1/rails/consents/{institutionId}")
+                .then()
+                .statusCode(201)
+                .extract()
+                .header("Location")
+        );
 
         // then: a response is returned
         assertNotNull(response);
