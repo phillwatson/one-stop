@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
+import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import DeleteIcon from '@mui/icons-material/Clear';
 
 import CategoryService from "../../services/category.service";
-import { Category, CategorySelector } from "../../model/category.model";
+import { CategoryGroup, Category, CategorySelector } from "../../model/category.model";
 import { TransactionDetail } from "../../model/account.model";
 import { useMessageDispatch } from "../../contexts/messages/context";
 
@@ -17,11 +17,13 @@ const colhead: SxProps = {
   fontWeight: 'bold'
 };
 
+const NULL_GROUP: CategoryGroup = { name: '', description: '' };
 const NULL_CATEGORY: Category = { name: '', description: '', colour: '' };
 const NULL_SELECTOR: CategorySelector = { infoContains: '', refContains: '', creditorContains: '' };
 
 interface Props {
   open: boolean;
+  groupId: string;
   catagoryId?: string; // optional current category
   transaction?: TransactionDetail;
   onConfirm: (category: Category, selector: CategorySelector) => void;
@@ -30,25 +32,44 @@ interface Props {
 
 export default function AddSelector(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ category, setCategory ] = useState<Category>(NULL_CATEGORY);
+  const [ groups, setGroups ] = useState<Array<CategoryGroup>>([]);
+  const [ group, setGroup ] = useState<CategoryGroup>(NULL_GROUP);
   const [ categories, setCategories ] = useState<Array<Category>>([]);
-  const [ selector, setSelector ] = useState<CategorySelector>(NULL_SELECTOR);
+  const [ category, setCategory ] = useState<Category>(NULL_CATEGORY);
   const [ selectors, setSelectors ] = useState<Array<CategorySelector>>([]);
+  const [ selector, setSelector ] = useState<CategorySelector>(NULL_SELECTOR);
 
   const accountId = props.transaction?.accountId;
 
   useEffect(() => {
     if (props.open) {
-      CategoryService.fetchAllCategories().then( response => {
-        setCategories(response);
-
-        if (props.catagoryId) {
-          const cat = response.find(cat => cat.id === props.catagoryId);
-          setCategory(cat || NULL_CATEGORY);
-        }
-      });
+      CategoryService.fetchAllGroups().then( response => setGroups(response) );
     }
-  }, [ props.open, props.catagoryId ]);
+  }, [ props.open ]);
+
+  useEffect(() => {
+    if (props.groupId) {
+      setGroup(groups.find(group => group.id === props.groupId) || NULL_GROUP);
+    } else {
+      setGroup(NULL_GROUP);
+    }
+  }, [ groups, props.groupId ]);
+
+  useEffect(() => {
+    if (group && group.id) {
+      CategoryService.fetchAllCategories(group.id).then( response => setCategories(response) );
+    } else {
+      setCategories([]);
+    }
+  }, [ group, props.catagoryId ]);
+
+  useEffect(() => {
+    if (props.catagoryId) {
+      setCategory(categories.find(category => category.id === props.catagoryId) || NULL_CATEGORY);
+    } else {
+      setCategory(NULL_CATEGORY);
+    }
+  }, [ categories, props.catagoryId ]);
 
   useEffect(() => {
     if (props.open && props.transaction !== undefined) {
@@ -63,13 +84,23 @@ export default function AddSelector(props: Props) {
   }, [ props.open, props.transaction ]);
 
   useEffect(() => {
-    if (props.open && accountId && category.id) {
+    if (accountId && category.id) {
       CategoryService.getCategorySelectors(category.id!!, accountId)
         .then(response => { setSelectors(response); })
     } else {
       setSelectors([]);
     }
-  }, [ props.open, accountId, category.id ]);
+  }, [ accountId, category.id ]);
+
+  function selectGroup(groupId: string) {
+    if (groups !== undefined && groupId !== undefined && groupId.length > 0) {
+      setGroup(groups.find(grp => grp.id === groupId) || NULL_GROUP);
+    } else {
+      setGroup(NULL_GROUP);
+    }
+
+    setCategory(NULL_CATEGORY);
+  }
 
   function selectCategory(categoryId: string) {
     if (categories !== undefined && categoryId !== undefined && categoryId.length > 0) {
@@ -105,23 +136,40 @@ export default function AddSelector(props: Props) {
   }
 
   return (
-    <Dialog open={ props.open } onClose={ handleCancel } fullWidth>
+    <Dialog open={ props.open } onClose={ handleCancel }>
       <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>Add To Category</DialogTitle>
+      <br/>
       <DialogContent>
-        <p></p>
-        <Select fullWidth value={ category.id || ''}
-          onChange={(e) => selectCategory(e.target.value as string)}
-          renderValue={() => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
-              <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
-            </Box>
-          )}>
-          { categories && categories.map(cat =>
-            <MenuItem value={ cat.id } key={ cat.id }>
-              <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
-            </MenuItem>
-          )}
-        </Select>
+        <Grid container direction="column" spacing={2}>
+          <Grid item>
+            <FormControl fullWidth>
+              <InputLabel id="select-group">Category Group</InputLabel>
+              <Select labelId="select-group" label="Category Group" value={ group.id || ''}
+                onChange={(e) => selectGroup(e.target.value as string)} >
+                { groups && groups.map(group =>
+                  <MenuItem value={ group.id } key={ group.id }>{ group.name }</MenuItem>
+                )}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item>
+            <FormControl fullWidth>
+              <InputLabel id="select-category">Category</InputLabel>
+              <Select labelId="select-category" label="Category" value={ category.id || ''}
+                onChange={(e) => selectCategory(e.target.value as string)} renderValue={() => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
+                    <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
+                  </Box>
+                )}>
+                { categories && categories.map(cat =>
+                  <MenuItem value={ cat.id } key={ cat.id }>
+                    <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
       </DialogContent>
 
       <DialogContent>
@@ -166,7 +214,7 @@ export default function AddSelector(props: Props) {
                     <TableCell>{ entry.creditorContains }</TableCell>
                     <TableCell width={"22px"} onClick={(e) => { removeSelector(entry); e.stopPropagation();}}>
                       <Tooltip title="Delete selector"><DeleteIcon/></Tooltip>
-                  </TableCell>
+                    </TableCell>
                   </TableRow>
                 )
               }

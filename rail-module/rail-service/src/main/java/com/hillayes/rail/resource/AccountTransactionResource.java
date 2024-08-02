@@ -100,14 +100,15 @@ public class AccountTransactionResource {
     }
 
     @GET
-    @Path("/category")
+    @Path("/{groupId}/category")
     public Response getTransactionsByCategory(@Context SecurityContext ctx,
+                                              @PathParam("groupId") UUID groupId,
                                               @QueryParam("category-id") UUID categoryId,
                                               @QueryParam("from-date") LocalDate fromDate,
                                               @QueryParam("to-date") LocalDate toDate) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting transactions by category [userId: {}, categoryId: {}, from: {}, to: {}]",
-            userId, categoryId, fromDate, toDate);
+        log.info("Getting transactions by category [userId: {}, groupId: {}, categoryId: {}, from: {}, to: {}]",
+            userId, groupId, categoryId, fromDate, toDate);
 
         // convert dates to instant
         Instant startDate = (fromDate == null)
@@ -117,7 +118,8 @@ public class AccountTransactionResource {
             ? Instant.now().truncatedTo(ChronoUnit.DAYS)
             : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
 
-        List<TransactionResponse> result = accountTransactionService.findByCategory(userId, categoryId, startDate, endDate).stream()
+        List<TransactionResponse> result = accountTransactionService
+            .findByCategory(userId, groupId, categoryId, startDate, endDate).stream()
             .map(this::marshal)
             .toList();
         return Response.ok(result).build();

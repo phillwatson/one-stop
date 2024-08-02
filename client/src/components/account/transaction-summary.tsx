@@ -78,9 +78,10 @@ export default function TransactionSummaryList(props: Props) {
       </Paper>
 
       <AddSelector open={ showAddCategory }
-          transaction={ selectedTransaction }
-          onCancel={ () => setShowAddCategory(false) }
-          onConfirm={() => setShowAddCategory(false) }/>
+        groupId='{ props.account.groupId }'
+        transaction={ selectedTransaction }
+        onCancel={ () => setShowAddCategory(false) }
+        onConfirm={() => setShowAddCategory(false) }/>
     </>
   );
 };

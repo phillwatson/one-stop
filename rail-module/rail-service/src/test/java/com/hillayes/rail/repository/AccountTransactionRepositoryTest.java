@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -32,7 +33,7 @@ public class AccountTransactionRepositoryTest {
     AccountRepository accountRepository;
 
     @Inject
-    CategoryRepository categoryRepository;
+    CategoryGroupRepository categoryGroupRepository;
 
     @Inject
     AccountTransactionRepository fixture;
@@ -387,18 +388,25 @@ public class AccountTransactionRepositoryTest {
         // and: a linked account
         Account account = accountRepository.save(mockAccount(consent));
 
+        // and: a category group for the user
+        CategoryGroup categoryGroup = CategoryGroup.builder()
+            .userId(consent.getUserId())
+            .name(randomAlphanumeric(30))
+            .description(randomAlphanumeric(30))
+            .build();
+
         // and: a collection of categories with selectors for the account's transactions
         Map<Category, List<AccountTransaction>> categoryTransactions = Map.of(
-            Category.builder().userId(consent.getUserId()).name("category 1").build()
+            categoryGroup.addCategory("category 1", b -> {})
                 .addSelector(account.getId(), builder -> builder.infoContains("info 1").build()), new ArrayList<>(),
-            Category.builder().userId(consent.getUserId()).name("category 2").build()
+            categoryGroup.addCategory("category 2", b -> {})
                 .addSelector(account.getId(), builder -> builder.refContains("ref 2").build()), new ArrayList<>(),
-            Category.builder().userId(consent.getUserId()).name("category 3").build()
+            categoryGroup.addCategory("category 3", b -> {})
                 .addSelector(account.getId(), builder -> builder.creditorContains("info 3").build()), new ArrayList<>(),
-            Category.builder().userId(consent.getUserId()).name("category 4").build()
+            categoryGroup.addCategory("category 4", b -> {})
                 .addSelector(account.getId(), builder -> builder.infoContains("creditor 4").build()), new ArrayList<>()
         );
-        categoryRepository.saveAll(categoryTransactions.keySet());
+        categoryGroupRepository.save(categoryGroup);
 
         // and: a collection of transactions for the account
         // and: a match for each selector in each category

@@ -52,7 +52,7 @@ public class UserTopicConsumerTest {
         // then: the consents for the deleted user are deleted
         verify(userConsentService).deleteAllConsents(userDeleted.getUserId());
 
-        // and: the categories for the deleted user are deleted
-        verify(categoryService).deleteAllCategories(userDeleted.getUserId());
+        // and: the category groups (and their categories) for the deleted user are deleted
+        verify(categoryService).deleteAllCategoryGroups(userDeleted.getUserId());
     }
 }
