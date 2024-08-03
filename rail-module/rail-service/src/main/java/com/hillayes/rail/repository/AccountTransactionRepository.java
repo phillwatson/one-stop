@@ -41,7 +41,7 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         "and t.booking_datetime < :endDate " +
         "and not exists ( " +
         "  select 1 from rails.category_selector cs " +
-        "  join rails.category c on c.id = cs.category_id and c.group_id = :groupId " +
+        "  inner join rails.category c on c.group_id = :groupId and c.id = cs.category_id " +
         "  where cs.account_id = t.account_id " +
         "    and (cs.info_contains is null or t.additional_information like concat('%', cs.info_contains, '%')) " +
         "    and (cs.ref_contains is null or t.reference like concat('%', cs.ref_contains, '%')) " +

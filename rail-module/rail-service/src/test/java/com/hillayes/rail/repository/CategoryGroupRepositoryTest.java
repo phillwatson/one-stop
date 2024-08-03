@@ -1,6 +1,7 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
 import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.TestTransaction;
@@ -21,6 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestTransaction
 public class CategoryGroupRepositoryTest {
+    @Inject
+    ServiceConfiguration serviceConfiguration;
+
     @Inject
     UserConsentRepository userConsentRepository;
 
@@ -360,9 +364,17 @@ public class CategoryGroupRepositoryTest {
         });
 
         // and: the uncategorised statistic is correct
-        statistics.stream().filter(stat -> stat.getCategoryId() == null).findFirst().ifPresent(stat ->
-            assertEquals(5.00, stat.getTotal().doubleValue())
-        );
+        String defaultName = serviceConfiguration.categories().uncategorisedName();
+        String defaultColour = serviceConfiguration.categories().defaultColour();
+        statistics.stream()
+            .filter(stat -> stat.getCategoryId() == null)
+            .findFirst()
+            .ifPresent(stat -> {
+                assertEquals(defaultName, stat.getCategory());
+                assertEquals(defaultColour, stat.getColour());
+                assertEquals(5.00, stat.getTotal().doubleValue());
+                assertEquals(1, stat.getCount());
+            });
     }
 
     private UserConsent mockUserConsent() {
