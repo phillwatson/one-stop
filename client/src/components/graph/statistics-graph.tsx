@@ -177,7 +177,7 @@ export default function StatisticsGraph(props: Props) {
             <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}
               slotProps={{ legend: { hidden: true } }}
               series={ seriesData }
-              onClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
+              onItemClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
             />
           </Grid>
 
