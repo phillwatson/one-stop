@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
+import CurrencyService from '../../services/currency.service';
 import CategoryService from '../../services/category.service';
 import { CategoryGroup, CategoryStatistics } from '../../model/category.model';
 
@@ -84,9 +85,9 @@ export default function StatisticsGraph(props: Props) {
     setSelectedGroup(categoryGroups.find(group => group.id === groupId));
   }
 
-  // seriesData is an array of two arrays, the first for credit totals and the second for debit.
-  const seriesData = useMemo<Array<Array<PieValueType>>>(() =>
-    statistics
+  const seriesData = useMemo<any>(() => {
+    // an array of two arrays, the first for credit totals and the second for debit.
+    const series = statistics
       .filter(stat => stat.selected)
       .map(stat => toPieSlice(stat, stat.total))
       .reduce((acc, slice) => {
@@ -95,18 +96,21 @@ export default function StatisticsGraph(props: Props) {
         acc[index].push(slice);
 
         return acc;
-      }, Array.of([], []) as Array<Array<PieValueType>>
-  ), [ statistics ]);
+      }, Array.of([], []) as Array<Array<PieValueType>>);
 
-  function selectCategory(selectedSeries: number, selectedIndex: number) {
-    var categoryId: string | undefined = seriesData[selectedSeries][selectedIndex].id as string;
-    if (categoryId === '') categoryId = undefined; // uncategorised transactions
-
-    const stat = statistics.find(stat => stat.categoryId === categoryId);
-    if (stat !== undefined) {
-      props.onCategorySelected(stat, dateRange[0].toDate(), dateRange[1].toDate());
-    }
-  }
+      return [
+        {
+          id: 0, data: series[0], highlightScope: { faded: 'global', highlighted: 'item' },
+          outerRadius: series[1].length > 0 ? 100 : 200, innerRadius: 10, cornerRadius: 5, paddingAngle: 5,
+          faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
+        },
+        {
+          id: 1, data: series[1], highlightScope: { faded: 'global', highlighted: 'item' },
+          innerRadius: series[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
+          faded: { innerRadius: series[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' }
+        }
+      ]
+  }, [ statistics ]);
 
   function toggleCategory(categoryId: string | undefined, selected: boolean) {
     setStatistics(statistics.map(stat => {
@@ -115,6 +119,22 @@ export default function StatisticsGraph(props: Props) {
       }
       return stat;
     }));
+  }
+
+  // record the selected category so we can tell when the selection changes
+  const selectedStat = useRef<CategoryStatisticsUI | undefined>();
+
+  function selectCategory(selectedSeries: number, selectedIndex: number) {
+    var categoryId: string | undefined = seriesData[selectedSeries].data[selectedIndex].id as string;
+    if (categoryId === '') categoryId = undefined; // uncategorised transactions
+
+    const stat = statistics.find(stat => stat.categoryId === categoryId);
+    if (stat !== selectedStat.current) {
+      selectedStat.current = stat;
+      if (stat !== undefined) {
+        props.onCategorySelected(stat, dateRange[0].toDate(), dateRange[1].toDate());
+      }
+    }
   }
 
   return (
@@ -132,7 +152,7 @@ export default function StatisticsGraph(props: Props) {
             </FormControl>
           </Grid>
 
-          <Grid container direction="row" columnGap={7} justifyContent={"center"}>
+          <Grid container direction="row" columnGap={7} rowGap={3} justifyContent={"center"}>
             <Grid key={2} item>
               <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
                 onChange={ (value: any, context: any) => {
@@ -152,32 +172,21 @@ export default function StatisticsGraph(props: Props) {
       </Paper>
 
       <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
-        <Grid container spacing={4} alignItems={"center"} justifyContent={"center"}>
+        <Grid container spacing={2} alignItems={"center"} justifyContent={"center"}>
           <Grid item>
-            <PieChart height={ 500 } width={ 400 } margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+            <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}
               slotProps={{ legend: { hidden: true } }}
-              series={[
-                {
-                  id: 0, data: seriesData[0],
-                  innerRadius: 10, outerRadius: seriesData[1].length > 0 ? 100 : 200, cornerRadius: 5, paddingAngle: 5,
-                  highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
-                },
-                {
-                  id: 1, data: seriesData[1],
-                  innerRadius: seriesData[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
-                  highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: seriesData[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' }
-                }
-              ]}
+              series={ seriesData }
               onClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
             />
           </Grid>
 
           <Grid item>
-            <Stack margin={ 2 }>
+            <Stack margin={ 0 } marginLeft={ 2 } marginTop={ 0 }>
               { statistics.map(stat =>
-                <FormControlLabel key={ stat.categoryName } label={ stat.categoryName }
+                <FormControlLabel key={ stat.categoryName }
+                  label={ `${stat.categoryName} (${ CurrencyService.format(stat.total, 'GBP')})` }
+                  style={{ padding: 0, margin: 0 }}
                   control= {
                     <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }
                       style={{ color: stat.selected ? stat.colour : undefined }}
