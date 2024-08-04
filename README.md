@@ -7,14 +7,14 @@ their bank accounts and view the transactions from multiple accounts in an
 aggregated fashion.
 
 ## Architecture
-One-Stop has been designed using an event-driven, microservice architecture,
+One-Stop has been designed using an event-driven, modulith service architecture,
 where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
 adopted; with each module adopting the same version as the parent.
 
-An alternative implementation is presented in the branch "modulith". That
-implementation demonstrates how the same application can be built, and maintained,
-as a single module.
+An alternative implementation is presented in the "main" branch. That implementation
+demonstrates how the same application can be built, and maintained, as a collection
+of independent microservices.
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
@@ -72,7 +72,10 @@ a good source of information on how the application is intended to be used.
 The following must be added to `environment:` section of the docker-compose.yaml
 services. This can be also be achieved by creating a docker-compose-override.yaml.
 
-### User Services
+### User Service
+The application currently supports OpenID Connect Authentication provided by Google,
+GitHub, GitLab and Apple. To use these services, you will need to obtain the client
+secrets from the respective providers.
 ```yaml
 # the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
@@ -101,9 +104,6 @@ https://gocardless.com/bank-account-data/
 The application also supports Yapily. Sandbox sign-up and access is free:
 https://docs.yapily.com/
 ```yaml
-# the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
-
 # the Nordigen/GoCardless authentication keys
 ONE_STOP_RAILS_SECRET_ID: "<the secret ID issued by Nordigen>"
 ONE_STOP_RAILS_SECRET_KEY: "<the secret issue by Nordigen>"
@@ -118,9 +118,6 @@ In order to use the notification service, you will need to obtain an API key fro
 Brevo (previously known as Send-With-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
-# the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
-
 # the Brevo (SendInBlue) Email-Service key
 ONE_STOP_EMAIL_API_KEY: "<the secret issue by Brevo (previously Send-With-Blue)>"
 
@@ -189,8 +186,8 @@ All non-native docker images are built with remote JVM debugging enabled. In
 order to connect to the images the debug port 5005 must be exposed. Each
 container should expose that internal port on a unique port - to avoid clashes.
 ```yaml
-  user-service:
-    image: one-stop/user-service:1.0.0-SNAPSHOT
+  one-stop-service:
+    image: one-stop/one-stop-main:1.0.0-SNAPSHOT
     ports:
       - "8181:8080"
       - "5001:5005"
