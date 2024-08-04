@@ -98,15 +98,32 @@ export default function StatisticsGraph(props: Props) {
         return acc;
       }, Array.of([], []) as Array<Array<PieValueType>>);
 
+      // find totals for both credit and debit
+      const totalCredit = series[0].reduce((acc, slice) => acc + slice.value, 0);
+      const totalDebit = series[1].reduce((acc, slice) => acc + slice.value, 0);
+
+      var percentage = 0;
+      var angle = 360;
+      if (totalCredit > 0 && totalDebit > 0) {
+        // find percentage difference between the two totals
+        percentage = (totalCredit - totalDebit) * 100 / ((totalDebit > totalCredit) ? totalDebit : totalCredit);
+
+        // find percentage of 360 degrees
+        angle = 360 - (Math.abs(percentage) * 3.6);
+        //console.log(`debit: ${totalDebit}, credit: ${totalCredit}, percentage: ${percentage}, angle: ${angle}`);
+      }
+
       return [
         {
           id: 0, data: series[0], highlightScope: { faded: 'global', highlighted: 'item' },
           outerRadius: series[1].length > 0 ? 100 : 200, innerRadius: 10, cornerRadius: 5, paddingAngle: 5,
+          endAngle: (percentage < 0) ? angle : 360,
           faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
         },
         {
           id: 1, data: series[1], highlightScope: { faded: 'global', highlighted: 'item' },
           innerRadius: series[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
+          endAngle: (percentage > 0) ? angle : 360,
           faded: { innerRadius: series[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' }
         }
       ]
