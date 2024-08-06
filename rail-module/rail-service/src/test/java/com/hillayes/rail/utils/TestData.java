@@ -121,4 +121,26 @@ public class TestData {
             randomAlphanumeric(30), "#345678",
             count, BigDecimal.valueOf(total), BigDecimal.valueOf(credit), BigDecimal.valueOf(debit));
     }
+
+    public static AuditReportConfig mockAuditReportConfig(UUID userId) {
+        return mockAuditReportConfig(userId, (b) -> {});
+    }
+
+    public static AuditReportConfig mockAuditReportConfig(UUID userId,
+                                                          Consumer<AuditReportConfig.Builder> modifier) {
+        AuditReportConfig.Builder builder = AuditReportConfig.builder()
+            .disabled(false)
+            .userId(userId)
+            .name(randomAlphanumeric(30))
+            .description(randomAlphanumeric(30))
+            .reportSource(AuditReportConfig.ReportSource.CATEGORY_GROUP)
+            .reportSourceId(UUID.randomUUID())
+            .uncategorisedIncluded(true)
+            .templateId(randomAlphanumeric(30));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
+    }
 }

@@ -40,7 +40,7 @@ public class CategoryResource {
                                       @QueryParam("page") @DefaultValue("0") int page,
                                       @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting category groups [userId: {}]", userId);
+        log.info("Getting category groups [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
 
         Page<CategoryGroup> groups = categoryService.getCategoryGroups(userId, page, pageSize);
 

@@ -432,7 +432,7 @@ paths:
         500:
           description: Internal server error
 
-  /rails/institutions/{id}:
+  /rails/institutions/{institutionId}:
     get:
       tags: [ "rails" ]
       summary: Get institution by id
@@ -441,7 +441,7 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "id"
+        - name: "institutionId"
           in: "path"
           description: ID of institution to return
           required: true
@@ -784,7 +784,7 @@ paths:
         500:
           description: Internal server error
 
-  /rails/transactions/{id}:
+  /rails/transactions/{transactionId}:
     get:
       tags: [ "transactions" ]
       summary: Get transaction by id
@@ -793,7 +793,7 @@ paths:
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "id"
+        - name: "transactionId"
           in: "path"
           description: ID of transaction to return
           required: true
@@ -1266,6 +1266,175 @@ paths:
           description: Unauthorized
         404:
           description: Category or account not found
+        500:
+          description: Internal server error
+
+  /rails/audit/templates:
+    get:
+      tags: [ "audit" ]
+      summary: Get all audit templates
+      description: Get all templates from which the user can create audit reports
+      operationId: getAuditTemplates
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditTemplates'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /rails/audit/configs:
+    get:
+      tags: [ "audit" ]
+      summary: Get all audit configurations
+      description: Get the audit report configurations for the authenticated user
+      operationId: getAuditConfigs
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditConfigs'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+    post:
+      tags: [ "audit" ]
+      summary: Create audit configuration
+      description: Create a new audit report configuration for the authenticated user
+      operationId: createAuditConfig
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        description: The details of the new audit configuration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditReportConfigRequest'
+      responses:
+        201:
+          description: successful operation
+          headers:
+            Location:
+              description: The location of the created audit configuration
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditReportConfigRequest'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /rails/audit/configs/{configId}:
+    get:
+      tags: [ "audit" ]
+      summary: Get audit configuration
+      description: Get the identified audit report configuration for the authenticated user
+      operationId: getAuditConfig
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "configId"
+          in: "path"
+          description: ID of audit report configuration to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditReportConfigResponse'
+        401:
+          description: Unauthorized
+        404:
+          description: Audit report configuration not found
+        500:
+          description: Internal server error
+
+    put:
+      tags: [ "audit" ]
+      summary: Update audit configuration
+      description: Update the identified audit report configuration for the authenticated user
+      operationId: updateAuditConfig
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "configId"
+          in: "path"
+          description: ID of audit report configuration to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The updated details of the audit configuration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditReportConfigRequest'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditReportConfigResponse'
+        401:
+          description: Unauthorized
+        404:
+          description: Audit report configuration not found
+        500:
+          description: Internal server error
+
+    delete:
+      tags: [ "audit" ]
+      summary: Delete audit configuration
+      description: Delete the identified audit report configuration for the authenticated user
+      operationId: deleteAuditConfig
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "configId"
+          in: "path"
+          description: ID of audit report configuration to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: successful operation
+        401:
+          description: Unauthorized
+        404:
+          description: Audit report configuration not found
         500:
           description: Internal server error
 
@@ -2167,6 +2336,127 @@ components:
             The total debit value of transactions in the category; shown as a positive value.
           example: 123.45
 
+    AuditReportParamType:
+      type: string
+      description: A parameter's data type
+      enum: [STRING, LONG, DOUBLE, BOOLEAN]
+      example: LONG
+
+    AuditReportSource:
+      type: string
+      description: The source of the transactions to be analysed by the report
+      enum: [ACCOUNT, CATEGORY_GROUP, CATEGORY]
+      example: CATEGORY_GROUP
+
+    AuditReportParam:
+      type: object
+      required:
+        - name
+        - description
+        - type
+      properties:
+        name:
+          type: string
+          description: The parameter's name
+          example: averageDays
+        type:
+          type: string
+          description: The parameter's data type
+          $ref: '#/components/schemas/AuditReportParamType'
+          example: LONG
+        description:
+          type: string
+          description: The parameter's description
+          example: The number of days over which an average is to be taken
+        defaultValue:
+          type: string
+          description: The parameter's default value
+          example: '12'
+
+    AuditReportResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The audit report template descriptive identity
+          example: 'outgoing-value-limits'
+        parameters:
+          description: The list of configurable parameters for the audit report
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditReportParam'
+
+    AuditReportConfigRequest:
+      type: object
+      required:
+        - name
+        - reportId
+        - source
+        - parameters
+      properties:
+        version:
+          type: integer
+          format: int64
+          default: 0
+          description: The version of the audit report config. Used to avoid concurrency issues.
+          example: 1
+        disabled:
+          type: boolean
+          description: The flag to disable the audit report
+          example: false
+        reportId:
+          type: string
+          description: The audit report template descriptive identity
+          example: 'outgoing-value-limits'
+        name:
+          type: string
+          description: The name of the audit report
+          example: 'Outgoing Value Limits'
+        description:
+          type: string
+          description: The description of the audit report
+          example: 'The report identifies outgoing transactions that exceed the average value'
+        source:
+          type: string
+          description: The source of the transactions to be analysed by the report
+          $ref: '#/components/schemas/AuditReportSource'
+          example: CATEGORY_GROUP
+        sourceId:
+          type: string
+          format: uuid
+          description: |
+            When the source of the transactions relies on a specific entity, this is
+            the entity's Id.
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        uncategorisedIncluded:
+          type: boolean
+          default: false
+          description: |
+            When the source of the transactions is CATEGORY_GROUP, this flag indicates
+            whether transactions that are not categorised should be included in the report.
+            The default is false.
+          example: false
+        parameters:
+          description: The list of configurable parameters for the audit report
+          type: object
+          additionalProperties:
+            type: string
+          example: { "averageDays": "12" }
+
+    AuditReportConfigResponse:
+      description: A named category group by which categories can be arranged.
+      allOf:
+        - $ref: '#/components/schemas/AuditReportConfigRequest'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The audit report config Id
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
+
     PageLinks:
       type: object
       required:
@@ -2339,3 +2629,25 @@ components:
               description: The list of categories
               items:
                 $ref: '#/components/schemas/CategoryResponse'
+
+    PaginatedAuditTemplates:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of audit report templates
+              items:
+                $ref: '#/components/schemas/AuditReportResponse'
+
+    PaginatedAuditConfigs:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of audit report configurations
+              items:
+                $ref: '#/components/schemas/AuditReportConfigResponse'

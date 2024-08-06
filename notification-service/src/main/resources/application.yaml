@@ -92,6 +92,11 @@ one-stop:
           subject: "Activity on your One-Stop account"
           template: "account-activity/en.html"
 
+      audit-issue-found:
+        en:
+          subject: "An issue has been found with transactions your account"
+          template: "audit-issue-found/en.html"
+
       new-oidc-login:
         en:
           subject: "New authentication on your One-Stop account"
@@ -138,6 +143,8 @@ one-stop:
         en: "Your consent registration for $event.institutionName$ has timed out.\nYou can try to register again."
       account-activity:
         en: "$activity$"
+      audit-issue-found:
+        en: "An issue has been found with transactions your account.\nPlease contact us."
 
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}

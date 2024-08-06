@@ -10,8 +10,9 @@ public enum RailsErrorCodes implements ErrorCode {
     REGISTRATION_NOT_FOUND(Severity.info, "Unable to identify registration consent record.", INTERNAL_SERVER_ERROR_STATUS),
     RAIL_NOT_FOUND(Severity.error, "Unable to identify rail.", INTERNAL_SERVER_ERROR_STATUS),
     FAILED_TO_DELETE_RAIL_CONSENT(Severity.error, "Failed to delete consent.", INTERNAL_SERVER_ERROR_STATUS),
-    CATEGORY_GROUP_ALREADY_EXISTS(Severity.info, "You have already category group of that name.", CONFLICT_STATUS),
-    CATEGORY_ALREADY_EXISTS(Severity.info, "You have already category of that name within the group.", CONFLICT_STATUS);
+    CATEGORY_GROUP_ALREADY_EXISTS(Severity.info, "You have already have a category group of that name.", CONFLICT_STATUS),
+    CATEGORY_ALREADY_EXISTS(Severity.info, "You have already have a category of that name within the group.", CONFLICT_STATUS),
+    AUDIT_REPORT_CONFIG_ALREADY_EXISTS(Severity.info, "You have already have an audit report of that name.", CONFLICT_STATUS);
 
     private final Severity severity;
     private final String message;
