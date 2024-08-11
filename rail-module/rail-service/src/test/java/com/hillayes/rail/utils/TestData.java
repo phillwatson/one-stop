@@ -136,7 +136,7 @@ public class TestData {
             .reportSource(AuditReportConfig.ReportSource.CATEGORY_GROUP)
             .reportSourceId(UUID.randomUUID())
             .uncategorisedIncluded(true)
-            .templateId(randomAlphanumeric(30));
+            .templateName(randomAlphanumeric(30));
 
         if (modifier != null) {
             modifier.accept(builder);

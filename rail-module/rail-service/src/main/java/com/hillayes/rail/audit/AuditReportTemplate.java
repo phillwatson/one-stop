@@ -1,7 +1,6 @@
 package com.hillayes.rail.audit;
 
-import com.hillayes.events.events.audit.AuditIssue;
-import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public interface AuditReportTemplate {
     /**
      * The unique, descriptive identifier of this report template.
      */
-    public String getId();
+    public String getName();
 
     /**
      * Runs the report using the user's parameters declared in the given
@@ -28,7 +27,7 @@ public interface AuditReportTemplate {
      * @param reportConfig the configuration to be applied to this report.
      * @return a list of descriptive strings that detail each issue found in the report.
      */
-    public List<String> run(AuditReportConfig reportConfig);
+    public List<AuditIssue> run(AuditReportConfig reportConfig);
 
     /**
      * Returns an ordered list of parameters that the user can set when

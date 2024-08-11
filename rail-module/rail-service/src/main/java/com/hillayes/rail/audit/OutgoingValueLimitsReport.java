@@ -1,8 +1,10 @@
 package com.hillayes.rail.audit;
 
 import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.repository.AccountTransactionRepository;
+import com.hillayes.rail.repository.AuditIssueRepository;
 import com.hillayes.rail.repository.CategoryGroupRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,11 +15,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.function.UnaryOperator.identity;
 
 @ApplicationScoped
-@Transactional
 @Slf4j
 public class OutgoingValueLimitsReport implements AuditReportTemplate {
     // the number of days over which the average outgoing transaction amount is calculated
@@ -49,8 +52,11 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
     @Inject
     CategoryGroupRepository categoryGroupRepository;
 
+    @Inject
+    AuditIssueRepository auditIssueRepository;
+
     @Override
-    public String getId() {
+    public String getName() {
         return "outgoing-value-limits";
     }
 
@@ -58,8 +64,9 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         return PARAMETERS;
     }
 
+    @Transactional
     @Override
-    public List<String> run(AuditReportConfig reportConfig) {
+    public List<AuditIssue> run(AuditReportConfig reportConfig) {
         log.info("Running Outgoing Value Limits Report [userId: {}, reportName: {}]",
             reportConfig.getUserId(), reportConfig.getName());
 
@@ -84,8 +91,11 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
                 reportConfig.getUserId(), reportConfig.getReportSourceId(), startDate, endDate);
         };
 
+        // get the IDs for existing transactions with issues for this report
+        Set<UUID> existingIssues = auditIssueRepository.listTransactionIds(reportConfig.getId());
+
         // calculate the average outgoing transaction amount
-        List<String> issues = transactions.stream()
+        List<AuditIssue> issues = transactions.stream()
             .filter(t -> t.getAmount().getAmount() < 0)
             .mapToDouble(t -> t.getAmount().getAmount())
             .average()
@@ -100,12 +110,10 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
                     .filter(t -> t.getAmount().getAmount() < 0)
                     .filter(t -> t.getBookingDateTime().compareTo(inclDate) >= 0)
                     .filter(t -> t.getAmount().getAmount() <= threshold)
-                    .peek(t -> log.debug("Outgoing Value Limits Report Issue Found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
+                    .filter(t -> !existingIssues.contains(t.getId()))
+                    .peek(t -> log.debug("New Outgoing Value Limits Report Issue found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
                         reportConfig.getUserId(), reportConfig.getName(), t.getId(), t.getAmount().getAmount()))
-                    .map(t ->
-                        String.format("Transaction %s has an outgoing value of %s, which exceeds the threshold of %s",
-                            t.getId(), t.getAmount().getAmount(), threshold)
-                    );
+                    .map(t -> auditIssueRepository.save(AuditIssue.issueFor(reportConfig, t)));
             }).flatMap(identity()).toList();
 
         log.info("Completed Outgoing Value Limits Report [userId: {}, reportName: {}, issuesFound: {}]",

@@ -3,6 +3,7 @@ package com.hillayes.rail.event.consumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.rail.service.AuditReportService;
 import com.hillayes.rail.service.CategoryService;
 import com.hillayes.rail.service.UserConsentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.verify;
 public class UserTopicConsumerTest {
     private UserConsentService userConsentService;
     private CategoryService categoryService;
+    private AuditReportService auditReportService;
 
     private UserTopicConsumer fixture;
 
@@ -24,8 +26,9 @@ public class UserTopicConsumerTest {
     public void init() {
         userConsentService = mock();
         categoryService = mock();
+        auditReportService = mock();
 
-        fixture = new UserTopicConsumer(userConsentService, categoryService);
+        fixture = new UserTopicConsumer(userConsentService, categoryService, auditReportService);
     }
 
 
@@ -54,5 +57,8 @@ public class UserTopicConsumerTest {
 
         // and: the category groups (and their categories) for the deleted user are deleted
         verify(categoryService).deleteAllCategoryGroups(userDeleted.getUserId());
+
+        // and: the audit report configs for the deleted user are deleted
+        verify(auditReportService).deleteAllAuditConfigs(userDeleted.getUserId());
     }
 }

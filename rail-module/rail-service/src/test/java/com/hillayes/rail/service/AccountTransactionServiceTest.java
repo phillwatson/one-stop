@@ -33,7 +33,7 @@ public class AccountTransactionServiceTest {
     AccountTransactionService fixture;
 
     @BeforeEach
-    public void clearCaches() {
+    public void init() {
         openMocks(this);
     }
 

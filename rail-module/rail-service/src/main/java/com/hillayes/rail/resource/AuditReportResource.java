@@ -3,10 +3,14 @@ package com.hillayes.rail.resource;
 import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.audit.AuditReportTemplate;
+import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.domain.AuditReportParameter;
+import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -16,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuditReportResource {
     private final AuditReportService auditReportService;
+    private final AccountTransactionService accountTransactionService;
 
     @GET
     @Path("/templates")
@@ -129,9 +135,86 @@ public class AuditReportResource {
         return Response.noContent().build();
     }
 
-    private AuditReportResponse marshal(AuditReportTemplate template) {
-        return new AuditReportResponse()
-            .id(template.getId())
+    @GET
+    @Path("/configs/{configId}/issues")
+    public Response getAuditIssues(@Context SecurityContext ctx,
+                                   @Context UriInfo uriInfo,
+                                   @PathParam("configId") UUID configId,
+                                   @QueryParam("acknowledged") Boolean acknowledged,
+                                   @QueryParam("page") @DefaultValue("0") int page,
+                                   @QueryParam("page-size") @DefaultValue("20") int pageSize) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting audit issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}]",
+            userId, configId, acknowledged, page, pageSize);
+
+        Page<AuditIssue> issues = auditReportService.getAuditIssues(userId, configId, acknowledged, page, pageSize);
+
+        // find the transactions referenced by the issues - key on their IDs
+        Set<UUID> transactionIds = issues.stream().map(AuditIssue::getTransactionId).collect(Collectors.toSet());
+        Map<UUID, AccountTransaction> accountTransactions =
+            accountTransactionService.listAll(transactionIds).stream()
+                .collect(Collectors.toMap(AccountTransaction::getId, t -> t));
+
+        PaginatedAuditIssues response = new PaginatedAuditIssues()
+            .page(issues.getPageIndex())
+            .pageSize(issues.getPageSize())
+            .count(issues.getContentSize())
+            .total(issues.getTotalCount())
+            .totalPages(issues.getTotalPages())
+            .items(issues.getContent().stream()
+                .map(issue -> marshal(issue, accountTransactions.get(issue.getTransactionId())))
+                .toList())
+            .links(PaginationUtils.buildPageLinks(uriInfo, issues));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing audit issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, configId, acknowledged, page, pageSize, response.getCount(), response.getTotal());
+        }
+        return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/issues/{issueId}")
+    public Response getAuditIssue(@Context SecurityContext ctx,
+                                  @PathParam("issueId") UUID issueId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting audit issue [userId: {}, issueId: {}]", userId, issueId);
+
+        AuditIssue auditIssue = auditReportService.getAuditIssue(userId, issueId);
+        AccountTransaction transaction = accountTransactionService.getTransaction(auditIssue.getTransactionId())
+            .orElseThrow(() -> new NotFoundException("AccountTransaction", auditIssue.getTransactionId()));
+        return Response.ok(marshal(auditIssue, transaction)).build();
+    }
+
+    @PUT
+    @Path("/issues/{issueId}")
+    public Response updateAuditIssue(@Context SecurityContext ctx,
+                                     @PathParam("issueId") UUID issueId,
+                                     AuditIssueRequest request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating audit issue [userId: {}, issueId: {}, acknowledged: {}]",
+            userId, issueId, request.getAcknowledged());
+
+        AuditIssue auditIssue = auditReportService.updateIssue(userId, issueId, request.getAcknowledged());
+        AccountTransaction transaction = accountTransactionService.getTransaction(auditIssue.getTransactionId())
+            .orElseThrow(() -> new NotFoundException("AccountTransaction", auditIssue.getTransactionId()));
+        return Response.ok(marshal(auditIssue, transaction)).build();
+    }
+
+    @DELETE
+    @Path("/issues/{issueId}")
+    public Response deleteAuditIssue(@Context SecurityContext ctx,
+                                     @PathParam("issueId") UUID issueId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting audit issue [userId: {}, issueId: {}]", userId, issueId);
+
+        auditReportService.deleteIssue(userId, issueId);
+        return Response.noContent().build();
+    }
+
+    private AuditReportTemplateResponse marshal(AuditReportTemplate template) {
+        return new AuditReportTemplateResponse()
+            .name(template.getName())
             .parameters(template.getParameters().stream()
                 .map(p -> new AuditReportParam()
                     .name(p.name())
@@ -146,7 +229,7 @@ public class AuditReportResource {
             .id(config.getId())
             .version(config.getVersion())
             .disabled(config.isDisabled())
-            .reportId(config.getTemplateId())
+            .templateName(config.getTemplateName())
             .name(config.getName())
             .description(config.getDescription())
             .source(AuditReportSource.fromValue(config.getReportSource().name()))
@@ -162,7 +245,7 @@ public class AuditReportResource {
             .disabled(request.getDisabled() != null && request.getDisabled())
             .name(request.getName())
             .description(request.getDescription())
-            .templateId(request.getReportId())
+            .templateName(request.getTemplateName())
             .reportSource(AuditReportConfig.ReportSource.valueOf(request.getSource().name()))
             .reportSourceId(request.getSourceId())
             .uncategorisedIncluded(request.getUncategorisedIncluded() != null && request.getUncategorisedIncluded())
@@ -172,5 +255,21 @@ public class AuditReportResource {
         request.getParameters().forEach(result::addParameter);
 
         return result;
+    }
+
+    private AuditIssueResponse marshal(AuditIssue issue, AccountTransaction transaction) {
+        return new AuditIssueResponse()
+            .id(transaction.getId())
+            .auditConfigId(issue.getReportConfigId())
+            .acknowledged(issue.isAcknowledged())
+            .accountId(transaction.getAccountId())
+            .transactionId(transaction.getTransactionId())
+            .amount(transaction.getAmount().toDecimal())
+            .currency(transaction.getAmount().getCurrencyCode())
+            .bookingDateTime(transaction.getBookingDateTime())
+            .valueDateTime(transaction.getValueDateTime())
+            .reference(transaction.getReference())
+            .additionalInformation(transaction.getAdditionalInformation())
+            .creditorName(transaction.getCreditorName());
     }
 }

@@ -5,8 +5,11 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.audit.AuditReportTemplate;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.errors.AuditReportConfigAlreadyExistsException;
+import com.hillayes.rail.repository.AccountTransactionRepository;
+import com.hillayes.rail.repository.AuditIssueRepository;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -30,14 +33,22 @@ public class AuditReportService {
     @Inject
     AuditReportConfigRepository auditReportConfigRepository;
 
+    @Inject
+    AuditIssueRepository auditIssueRepository;
+
+    @Inject
+    AccountTransactionRepository accountTransactionRepository;
+
     public Page<AuditReportTemplate> getAuditTemplates(int page, int pageSize) {
+        log.info("Listing audit report templates [page: {}, pageSize: {}]", page, pageSize);
         List<AuditReportTemplate> templates = reportTemplates.stream()
-            .sorted(Comparator.comparing(AuditReportTemplate::getId, String::compareToIgnoreCase))
+            .sorted(Comparator.comparing(AuditReportTemplate::getName, String::compareToIgnoreCase))
             .toList();
         return Page.of(templates, page, pageSize);
     }
 
     public Page<AuditReportConfig> getAuditConfigs(UUID userId, int page, int pageSize) {
+        log.info("Listing audit report configs [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         return auditReportConfigRepository.findByUserId(userId, page, pageSize);
     }
 
@@ -81,7 +92,7 @@ public class AuditReportService {
         original.setDisabled(update.isDisabled());
         original.setName(update.getName());
         original.setDescription(update.getDescription());
-        original.setTemplateId(update.getTemplateId());
+        original.setTemplateName(update.getTemplateName());
         original.setReportSource(update.getReportSource());
         original.setReportSourceId(update.getReportSourceId());
         original.setUncategorisedIncluded(update.isUncategorisedIncluded());
@@ -106,5 +117,41 @@ public class AuditReportService {
     public void deleteAuditConfig(UUID userId, UUID configId) {
         log.info("Deleting audit report config [userId: {}, configId: {}]", userId, configId);
         auditReportConfigRepository.delete(getAuditConfig(userId, configId));
+    }
+
+    public void deleteAllAuditConfigs(UUID userId) {
+        log.info("Deleting audit report configs for user [userId: {}]", userId);
+        auditReportConfigRepository.deleteByUserId(userId);
+    }
+
+    public AuditIssue getAuditIssue(UUID userId, UUID issueId) {
+        log.info("Get audit report issue [userId: {}, issueId: {}]", userId, issueId);
+        return auditIssueRepository.findByIdOptional(issueId)
+            .filter(issue -> issue.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("AuditIssue", issueId));
+    }
+
+    public Page<AuditIssue> getAuditIssues(UUID userId, UUID configId, Boolean acknowledged,
+                                           int page, int pageSize) {
+        log.info("Listing audit report issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}]",
+            userId, configId, acknowledged, page, pageSize);
+        getAuditConfig(userId, configId);
+        return auditIssueRepository.findByConfigId(configId, acknowledged, page, pageSize);
+    }
+
+    public AuditIssue updateIssue(UUID userId, UUID issueId, boolean acknowledged) {
+        log.info("Updating audit issue [issueId: {}, acknowledged: {}]", issueId, acknowledged);
+        AuditIssue issue = auditIssueRepository.findByIdOptional(issueId)
+            .filter(i -> i.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("AuditIssue", issueId));
+        issue.setAcknowledged(acknowledged);
+        return auditIssueRepository.save(issue);
+    }
+
+    public void deleteIssue(UUID userId, UUID issueId) {
+        log.info("Deleting audit issue [issueId: {}]", issueId);
+        auditIssueRepository.delete(auditIssueRepository.findByIdOptional(issueId)
+            .filter(i -> i.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("AuditIssue", issueId)));
     }
 }

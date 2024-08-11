@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -27,7 +27,8 @@ public class AuditIssuesFound {
     private Instant dateDetected;
 
     /**
-     * The issues detected in the user's audit report.
+     * A map of the names of the user's audit report configurations and the number
+     * of issues found for each configuration.
      */
-    private List<AuditIssue> issues;
+    private Map<String, Integer> issueCounts;
 }

@@ -5,6 +5,7 @@ import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
+import com.hillayes.rail.service.AuditReportService;
 import com.hillayes.rail.service.CategoryService;
 import com.hillayes.rail.service.UserConsentService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserTopicConsumer implements EventConsumer {
     private final UserConsentService userConsentService;
     private final CategoryService categoryService;
+    private final AuditReportService auditReportService;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -29,6 +31,7 @@ public class UserTopicConsumer implements EventConsumer {
             UserDeleted payload = eventPacket.getPayloadContent();
             userConsentService.deleteAllConsents(payload.getUserId());
             categoryService.deleteAllCategoryGroups(payload.getUserId());
+            auditReportService.deleteAllAuditConfigs(payload.getUserId());
         }
     }
 }

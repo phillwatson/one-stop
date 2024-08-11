@@ -4,7 +4,6 @@ import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AuditReportConfig;
-import com.hillayes.rail.domain.CategoryGroup;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
@@ -25,9 +24,17 @@ public class AuditReportConfigRepository extends RepositoryBase<AuditReportConfi
     }
 
     /**
+     * Deletes all audit reports for the identified user.
+     * @param userId the user identity.
+     */
+    public void deleteByUserId(UUID userId) {
+        delete("userId", userId);
+    }
+
+    /**
      * Deletes all reports that use the identified entity as their transaction source.
      * The source identity can be for an account, category group or category.
-     * @param reportSourceId the identified transaction source.
+     * @param reportSourceId the identified report source.
      */
     public void deleteByReportSource(UUID reportSourceId) {
         find("reportSourceId", reportSourceId)

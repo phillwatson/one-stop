@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -47,7 +46,7 @@ public class AuditReportConfigRepositoryTest {
         assertEquals(auditReport.getReportSource(), savedReport.getReportSource());
         assertEquals(auditReport.getReportSourceId(), savedReport.getReportSourceId());
         assertEquals(auditReport.isUncategorisedIncluded(), savedReport.isUncategorisedIncluded());
-        assertEquals(auditReport.getTemplateId(), savedReport.getTemplateId());
+        assertEquals(auditReport.getTemplateName(), savedReport.getTemplateName());
     }
 
     @Test
@@ -107,7 +106,7 @@ public class AuditReportConfigRepositoryTest {
         assertEquals(auditReport.getUserId(), savedReport.getUserId());
         assertEquals(auditReport.getName(), savedReport.getName());
         assertEquals(auditReport.getDescription(), savedReport.getDescription());
-        assertEquals(auditReport.getTemplateId(), savedReport.getTemplateId());
+        assertEquals(auditReport.getTemplateName(), savedReport.getTemplateName());
 
         // and: the parameters are saved
         assertEquals(auditReport.getParameters().size(), savedReport.getParameters().size());

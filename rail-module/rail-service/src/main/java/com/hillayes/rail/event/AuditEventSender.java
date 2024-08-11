@@ -1,7 +1,6 @@
 package com.hillayes.rail.event;
 
 import com.hillayes.events.domain.Topic;
-import com.hillayes.events.events.audit.AuditIssue;
 import com.hillayes.events.events.audit.AuditIssuesFound;
 import com.hillayes.outbox.sender.EventSender;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -18,12 +17,13 @@ import java.util.UUID;
 public class AuditEventSender {
     private final EventSender eventSender;
 
-    public void sendAuditIssuesFound(UUID userId, List<AuditIssue> issues) {
-        log.debug("Sending AuditIssuesFound event [userId: {}, issues: {}]", userId, issues.size());
+    public void sendAuditIssuesFound(UUID userId, Map<String, Integer> issueCounts) {
+        log.debug("Sending AuditIssuesFound event [userId: {}, issues: {}]", userId, issueCounts.size());
+
         eventSender.send(Topic.TRANSACTION_AUDIT, AuditIssuesFound.builder()
             .userId(userId)
             .dateDetected(Instant.now())
-            .issues(issues)
+            .issueCounts(issueCounts)
             .build());
     }
 }

@@ -79,13 +79,13 @@ public class AuditReportConfig {
     private boolean uncategorisedIncluded;
 
     /**
-     * The report template that this report is based on. Taken from the ID of the
-     * com.hillayes.rail.audit.AuditReportTemplate instance.
+     * The report template that this report is based on. Taken from the name of
+     * the com.hillayes.rail.audit.AuditReportTemplate instance.
      */
     @EqualsAndHashCode.Include
     @ToString.Include
-    @Column(name = "template_id", nullable = false)
-    private String templateId;
+    @Column(name = "template_name", nullable = false)
+    private String templateName;
 
     /**
      * The config properties for this report.

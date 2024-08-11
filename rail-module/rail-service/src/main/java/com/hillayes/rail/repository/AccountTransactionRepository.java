@@ -8,7 +8,6 @@ import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.CategoryGroup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
@@ -94,6 +93,10 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
             .groupBy(amount.get("currency"))
             .where(filter.toPredicate(builder, root));
         return entityManager.createQuery(query).getResultList();
+    }
+
+    public List<AccountTransaction> listAll(Collection<UUID> transactionIds){
+        return listAll("id in ?1", transactionIds);
     }
 
     public List<AccountTransaction> findByAccount(UUID userId, UUID accountId,

@@ -55,16 +55,16 @@ public class AuditReportTest extends ApiTestBase {
         assertTrue(userReportConfigs.getItems().isEmpty());
         assertEquals(0, userReportConfigs.getTotal());
 
-        // given: the user retrieves an audit report templates
-        AuditReportResponse template = auditReportApi.getAuditReportTemplates(0, 10)
+        // given: the user retrieves an audit report template
+        AuditReportTemplateResponse template = auditReportApi.getAuditReportTemplates(0, 10)
             .getItems().get(0);
 
         // and: the user creates an audit report config for that template
         AuditReportConfigRequest request = new AuditReportConfigRequest()
+            .templateName(template.getName())
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50))
             .disabled(false)
-            .reportId(template.getId())
             .source(AuditReportSource.ACCOUNT)
             .sourceId(UUID.randomUUID()); // this should identify a specific account
 
@@ -90,7 +90,7 @@ public class AuditReportTest extends ApiTestBase {
         assertEquals(request.getName(), config.getName());
         assertEquals(request.getDescription(), config.getDescription());
         assertEquals(request.getDisabled(), config.getDisabled());
-        assertEquals(request.getReportId(), config.getReportId());
+        assertEquals(request.getTemplateName(), config.getTemplateName());
         assertEquals(request.getSource(), config.getSource());
         assertEquals(request.getSourceId(), config.getSourceId());
         assertEquals(request.getParameters(), config.getParameters());
@@ -114,7 +114,7 @@ public class AuditReportTest extends ApiTestBase {
         assertEquals(config.getName(), retrievedConfig.getName());
         assertEquals(config.getDescription(), retrievedConfig.getDescription());
         assertEquals(config.getDisabled(), retrievedConfig.getDisabled());
-        assertEquals(config.getReportId(), retrievedConfig.getReportId());
+        assertEquals(config.getTemplateName(), retrievedConfig.getTemplateName());
         assertEquals(config.getSource(), retrievedConfig.getSource());
         assertEquals(config.getSourceId(), retrievedConfig.getSourceId());
         assertEquals(config.getParameters(), retrievedConfig.getParameters());
@@ -124,7 +124,7 @@ public class AuditReportTest extends ApiTestBase {
             .name(randomAlphanumeric(20))
             .description(randomAlphanumeric(50))
             .disabled(false)
-            .reportId(template.getId())
+            .templateName(template.getName())
             .source(AuditReportSource.ACCOUNT);
         template.getParameters().forEach(param ->
             updateRequest.getParameters().put(param.getName(), switch (param.getType()) {
@@ -147,7 +147,7 @@ public class AuditReportTest extends ApiTestBase {
         assertEquals(updateRequest.getName(), updatedConfig.getName());
         assertEquals(updateRequest.getDescription(), updatedConfig.getDescription());
         assertEquals(updateRequest.getDisabled(), updatedConfig.getDisabled());
-        assertEquals(updateRequest.getReportId(), updatedConfig.getReportId());
+        assertEquals(updateRequest.getTemplateName(), updatedConfig.getTemplateName());
         assertEquals(updateRequest.getSource(), updatedConfig.getSource());
         assertEquals(updateRequest.getSourceId(), updatedConfig.getSourceId());
         assertEquals(updateRequest.getParameters(), updatedConfig.getParameters());

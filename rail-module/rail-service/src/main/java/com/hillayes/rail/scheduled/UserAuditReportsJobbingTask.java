@@ -1,13 +1,13 @@
 package com.hillayes.rail.scheduled;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
-import com.hillayes.events.events.audit.AuditIssue;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.audit.AuditReportTemplate;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
-import com.hillayes.rail.domain.AuditReportParameter;
 import com.hillayes.rail.event.AuditEventSender;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -18,10 +18,10 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * A jobbing task to run the audit reports configured by the identified user.
@@ -42,7 +42,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
     @RegisterForReflection
     public record Payload(
         UUID userId
-    ) {}
+    ) { }
 
     public String getName() {
         return "user-audit-reports";
@@ -65,43 +65,37 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
         UUID userId = context.getPayload().userId();
         log.info("Processing User Audit Reports job [userId: {}]", userId);
 
-        List<AuditIssue> issues = new ArrayList<>();
+        Map<String, Integer> issueCounts = new HashMap<>();
         int page = 0;
         Page<AuditReportConfig> reportConfigs;
         do {
             reportConfigs = auditReportConfigRepository.findByUserId(userId, page, 10);
-            issues.addAll(reportConfigs.stream()
-                .filter(config -> !config.isDisabled())
-                .map(this::runReport)
-                .toList()
-            );
+            reportConfigs.forEach(config -> {
+                if (!config.isDisabled()) {
+                    List<AuditIssue> auditIssues = runReport(config);
+                    if (!auditIssues.isEmpty()) {
+                        issueCounts.put(
+                            Strings.getOrDefault(config.getDescription(), config.getName()),
+                            auditIssues.size()
+                        );
+                    }
+                }
+            });
 
             page++;
         } while (page < reportConfigs.getTotalPages());
 
-        if (!issues.isEmpty()) {
-            auditEventSender.sendAuditIssuesFound(userId, issues);
+        if (!issueCounts.isEmpty()) {
+            auditEventSender.sendAuditIssuesFound(userId, issueCounts);
         }
         return TaskConclusion.COMPLETE;
     }
 
-    private AuditIssue runReport(AuditReportConfig config) {
+    private List<AuditIssue> runReport(AuditReportConfig config) {
         return reportTemplates.stream()
-            .filter(t -> t.getId().equals(config.getTemplateId()))
+            .filter(t -> t.getName().equals(config.getTemplateName()))
             .findFirst()
             .map(template -> template.run(config))
-            .map(issues -> marshal(config, issues))
-            .orElse(null);
-    }
-
-    private AuditIssue marshal(AuditReportConfig config, List<String> issues) {
-        return AuditIssue.builder()
-            .auditReportId(config.getTemplateId())
-            .reportName(config.getName())
-            .reportDescription(config.getDescription())
-            .reportParameters(config.getParameters().values().stream()
-                .collect(Collectors.toMap(AuditReportParameter::getName, AuditReportParameter::getValue)))
-            .issues(issues)
-            .build();
+            .orElse(List.of());
     }
 }
