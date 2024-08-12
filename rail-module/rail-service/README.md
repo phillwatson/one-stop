@@ -10,7 +10,8 @@ giving admin access to the "bare" API.
 The rail service polls each account for new transactions on a nightly basis. When
 doing so, it also checks whether the consent to access those accounts has expired.
 The user will be notified (by email and online notifications) if a consent has expired.
-The user can then decide whether to renew that consent.
+The user can then decide whether to renew that consent. Once renewed the transactions
+for the account will be retrieved from when it was last polled.
 
 ### Transaction Categories
 Transactions can be identified and organised into user-defined categories that
