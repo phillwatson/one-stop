@@ -9,6 +9,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Map;
@@ -20,8 +22,7 @@ import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -245,6 +246,78 @@ public class AuditReportResourceTest extends TestBase {
 
         // then: the auditReportService is called with the user id and config id
         verify(auditReportService).deleteAuditConfig(userId, configId);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetAuditIssues(Boolean acknowledged) {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a report config id
+        UUID configId = UUID.randomUUID();
+
+        // and: a page range
+        int page = 1;
+        int pageSize = 12;
+
+        // and: an empty list of audit issue for the identified config
+        when(auditReportService.getAuditIssues(any(), any(), nullable(Boolean.class), anyInt(), anyInt()))
+            .thenReturn(Page.empty());
+
+        // when: client calls the endpoint
+        given()
+            .request()
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
+            .queryParam("acknowledged", acknowledged)
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/audit/configs/{configId}/issues", configId)
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(PaginatedAuditIssues.class);
+
+        // then: the auditReportService is called with the page range
+        verify(auditReportService).getAuditIssues(userId, configId, acknowledged, page, pageSize);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetAuditIssues_NullAcknowledged() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a report config id
+        UUID configId = UUID.randomUUID();
+
+        // and: a page range
+        int page = 1;
+        int pageSize = 12;
+
+        // and: an empty list of audit issue for the identified config
+        when(auditReportService.getAuditIssues(any(), any(), nullable(Boolean.class), anyInt(), anyInt()))
+            .thenReturn(Page.empty());
+
+        // when: client calls the endpoint
+        given()
+            .request()
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/audit/configs/{configId}/issues", configId)
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(PaginatedAuditIssues.class);
+
+        // then: the auditReportService is called with the page range - and null acknowledged param
+        verify(auditReportService).getAuditIssues(userId, configId, null, page, pageSize);
     }
 
     private AuditReportConfigRequest mockRequest() {

@@ -124,19 +124,19 @@ public class AuditReportService {
         auditReportConfigRepository.deleteByUserId(userId);
     }
 
-    public AuditIssue getAuditIssue(UUID userId, UUID issueId) {
-        log.info("Get audit report issue [userId: {}, issueId: {}]", userId, issueId);
-        return auditIssueRepository.findByIdOptional(issueId)
-            .filter(issue -> issue.getUserId().equals(userId))
-            .orElseThrow(() -> new NotFoundException("AuditIssue", issueId));
-    }
-
     public Page<AuditIssue> getAuditIssues(UUID userId, UUID configId, Boolean acknowledged,
                                            int page, int pageSize) {
         log.info("Listing audit report issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}]",
             userId, configId, acknowledged, page, pageSize);
         getAuditConfig(userId, configId);
         return auditIssueRepository.findByConfigId(configId, acknowledged, page, pageSize);
+    }
+
+    public AuditIssue getAuditIssue(UUID userId, UUID issueId) {
+        log.info("Get audit report issue [userId: {}, issueId: {}]", userId, issueId);
+        return auditIssueRepository.findByIdOptional(issueId)
+            .filter(issue -> issue.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("AuditIssue", issueId));
     }
 
     public AuditIssue updateIssue(UUID userId, UUID issueId, boolean acknowledged) {

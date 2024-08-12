@@ -7,6 +7,7 @@ import com.hillayes.rail.domain.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.Currency;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -137,6 +138,25 @@ public class TestData {
             .reportSourceId(UUID.randomUUID())
             .uncategorisedIncluded(true)
             .templateName(randomAlphanumeric(30));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
+    }
+
+    public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId) {
+        return mockAuditIssue(userId, reportConfigId, (b) -> {});
+    }
+
+    public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId,
+                                            Consumer<AuditIssue.Builder> modifier) {
+        AuditIssue.Builder builder = AuditIssue.builder()
+            .userId(userId)
+            .reportConfigId(reportConfigId)
+            .acknowledged(false)
+            .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
+            .transactionId(UUID.randomUUID());
 
         if (modifier != null) {
             modifier.accept(builder);
