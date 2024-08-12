@@ -257,6 +257,13 @@ public class AuditReportResource {
         return result;
     }
 
+    private AuditIssueResponse marshal(AuditIssue issue) {
+        AccountTransaction transaction = accountTransactionService.getTransaction(issue.getTransactionId())
+            .orElseThrow(() -> new NotFoundException("AccountTransaction", issue.getTransactionId()));
+
+        return marshal(issue, transaction);
+    }
+
     private AuditIssueResponse marshal(AuditIssue issue, AccountTransaction transaction) {
         return new AuditIssueResponse()
             .id(transaction.getId())
