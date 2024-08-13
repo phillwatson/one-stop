@@ -13,6 +13,7 @@ import Transactions from "./pages/transactions";
 import Graph from "./pages/graphs";
 import Categories from "./pages/categories";
 import StatisticsPage from "./pages/statistics";
+import TransactionAuditReports from "./pages/trans-audit-reports";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: "statistics",
         element: <StatisticsPage />
+      },
+      {
+        path: "audit",
+        element: <TransactionAuditReports />
       },
       {
         path: "profile",

@@ -60,6 +60,11 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         return "outgoing-value-limits";
     }
 
+    @Override
+    public String getDescription() {
+        return "Produces a report of outgoing transactions that exceed the average by a certain value threshold";
+    }
+
     public List<Parameter> getParameters() {
         return PARAMETERS;
     }

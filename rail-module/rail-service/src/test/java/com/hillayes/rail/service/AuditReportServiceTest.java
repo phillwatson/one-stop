@@ -793,6 +793,11 @@ public class AuditReportServiceTest {
             }
 
             @Override
+            public String getDescription() {
+                return "";
+            }
+
+            @Override
             public List<AuditIssue> run(AuditReportConfig reportConfig) {
                 return List.of();
             }

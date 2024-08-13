@@ -22,6 +22,11 @@ public interface AuditReportTemplate {
     public String getName();
 
     /**
+     * A brief description of what this report does.
+     */
+    public String getDescription();
+
+    /**
      * Runs the report using the user's parameters declared in the given
      * AuditReportConfig.
      * @param reportConfig the configuration to be applied to this report.

@@ -2540,6 +2540,10 @@ components:
           type: string
           description: The audit report template's unique, descriptive identity
           example: 'outgoing-value-limits'
+        description:
+          type: string
+          description: A short description of the reports purpose
+          example: 'To identify outgoing transactions that exceed the average value'
         parameters:
           description: The list of configurable parameters for the audit report
           type: array

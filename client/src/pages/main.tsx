@@ -8,6 +8,7 @@ import Person from '@mui/icons-material/Person';
 import Savings from '@mui/icons-material/Savings';
 import CategoryIcon from '@mui/icons-material/Category';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import AuditReportIcon from '@mui/icons-material/VerifiedUser';
 
 import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
@@ -61,6 +62,7 @@ export default function MainPage() {
       { label: 'Accounts', route: 'accounts', icon: <Savings/> },
       { label: 'Categories', route: 'categories', icon: <CategoryIcon/> },
       { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/> },
+      { label: 'Audit Reports', route: 'audit', icon: <AuditReportIcon/> },
       { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
     ];

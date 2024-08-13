@@ -181,9 +181,7 @@ public class AuditReportResource {
         log.info("Getting audit issue [userId: {}, issueId: {}]", userId, issueId);
 
         AuditIssue auditIssue = auditReportService.getAuditIssue(userId, issueId);
-        AccountTransaction transaction = accountTransactionService.getTransaction(auditIssue.getTransactionId())
-            .orElseThrow(() -> new NotFoundException("AccountTransaction", auditIssue.getTransactionId()));
-        return Response.ok(marshal(auditIssue, transaction)).build();
+        return Response.ok(marshal(auditIssue)).build();
     }
 
     @PUT
@@ -196,9 +194,7 @@ public class AuditReportResource {
             userId, issueId, request.getAcknowledged());
 
         AuditIssue auditIssue = auditReportService.updateIssue(userId, issueId, request.getAcknowledged());
-        AccountTransaction transaction = accountTransactionService.getTransaction(auditIssue.getTransactionId())
-            .orElseThrow(() -> new NotFoundException("AccountTransaction", auditIssue.getTransactionId()));
-        return Response.ok(marshal(auditIssue, transaction)).build();
+        return Response.ok(marshal(auditIssue)).build();
     }
 
     @DELETE
@@ -215,6 +211,7 @@ public class AuditReportResource {
     private AuditReportTemplateResponse marshal(AuditReportTemplate template) {
         return new AuditReportTemplateResponse()
             .name(template.getName())
+            .description(template.getDescription())
             .parameters(template.getParameters().stream()
                 .map(p -> new AuditReportParam()
                     .name(p.name())
