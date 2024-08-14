@@ -59,7 +59,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.13.0</quarkus.platform.version>
+        <quarkus.platform.version>3.13.2</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -124,7 +124,7 @@
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
-                <version>4.2.1</version>
+                <version>4.2.2</version>
             </dependency>
             <dependency>
                 <groupId>io.rest-assured</groupId>
