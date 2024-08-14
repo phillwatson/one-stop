@@ -162,6 +162,7 @@ public class AuditReportConfig {
      * Identifies the source of the transactions to be analysed by the report.
      */
     public enum ReportSource {
+        ALL,
         ACCOUNT, // an account belonging to the user
         CATEGORY_GROUP, // a group of categories belonging to the user
         CATEGORY; // a single category belonging to the user

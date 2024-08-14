@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
@@ -13,11 +13,19 @@ import { AuditReportTemplate } from "../../model/audit-report.model";
 interface Props {
   required?: boolean;
   templates: Array<AuditReportTemplate>;
+  templateName?: string;
   onSelected?: (template: AuditReportTemplate) => void;
 }
 
 export function AuditReportTemplates(props: Props) {
   const [ selectedTemplate, setSelectedTemplate ] = useState<AuditReportTemplate>();
+
+  useEffect(() => {
+    if (props.templateName) {
+      const template = props.templates.find(template => template.name === props.templateName);
+      setSelectedTemplate(template);
+    }
+  }, [ props.templateName, props.templates ]);
 
   function selectTemplate(event: any) {
     const templateName = event.target.value;

@@ -87,6 +87,9 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
 
         // gather transactions from the report source
         List<AccountTransaction> transactions = switch (reportConfig.getReportSource()) {
+            case ALL -> accountTransactionRepository.findByUser(
+                reportConfig.getUserId(), startDate, endDate);
+
             case ACCOUNT -> accountTransactionRepository.findByAccount(
                 reportConfig.getUserId(), reportConfig.getReportSourceId(), startDate, endDate);
 

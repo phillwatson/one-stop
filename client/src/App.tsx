@@ -13,7 +13,8 @@ import Transactions from "./pages/transactions";
 import Graph from "./pages/graphs";
 import Categories from "./pages/categories";
 import StatisticsPage from "./pages/statistics";
-import TransactionAuditReports from "./pages/trans-audit-reports";
+import TransactionAuditReports from "./pages/trans-audit-config-list";
+import TransactionAuditReportConfig from "./pages/trans-audit-config";
 
 const router = createBrowserRouter([
   {
@@ -62,8 +63,16 @@ const router = createBrowserRouter([
         element: <StatisticsPage />
       },
       {
-        path: "audit",
+        path: "reports/audit/configs",
         element: <TransactionAuditReports />
+      },
+      {
+        path: "reports/audit/configs/:reportConfigId",
+        element: <TransactionAuditReportConfig />
+      },
+      {
+        path: "reports/audit/configs/add",
+        element: <TransactionAuditReportConfig />
       },
       {
         path: "profile",

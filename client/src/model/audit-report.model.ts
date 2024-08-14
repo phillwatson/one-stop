@@ -6,7 +6,7 @@ export interface ReportParameter {
   name: string;
   description: string;
   type: ReportParameterType;
-  defaultValue: string;
+  defaultValue?: string;
 }
 
 export interface AuditReportTemplate {
@@ -27,7 +27,7 @@ export interface AuditReportConfig {
   source: AuditReportSource;
   sourceId?: string;
   uncategorisedIncluded?: boolean;
-  parameters: Map<string, string>;
+  parameters: { [key: string]: string };
 }
 
 export const NULL_REPORT_CONFIG: AuditReportConfig = {
@@ -38,7 +38,7 @@ export const NULL_REPORT_CONFIG: AuditReportConfig = {
   source: 'ALL',
   sourceId: undefined,
   uncategorisedIncluded: false,
-  parameters: new Map()
+  parameters: {}
 };
 
 export interface AuditIssue extends TransactionDetail{

@@ -18,6 +18,13 @@ import java.util.*;
 
 @ApplicationScoped
 public class AccountTransactionRepository extends RepositoryBase<AccountTransaction, UUID> {
+    private static final String SELECT_BY_USER =
+        "SELECT t FROM AccountTransaction t " +
+            "WHERE t.userId = :userId " +
+            "AND t.bookingDateTime >= :startDate " +
+            "AND t.bookingDateTime < :endDate " +
+            "ORDER BY t.bookingDateTime DESC";
+
     private static final String SELECT_BY_ACCOUNT =
         "SELECT t FROM AccountTransaction t " +
             "WHERE t.userId = :userId " +
@@ -97,6 +104,16 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
 
     public List<AccountTransaction> listAll(Collection<UUID> transactionIds){
         return listAll("id in ?1", transactionIds);
+    }
+
+    public List<AccountTransaction> findByUser(UUID userId,
+                                               Instant startDateInclusive,
+                                               Instant endDateExclusive) {
+        return getEntityManager().createQuery(SELECT_BY_USER)
+            .setParameter("userId", userId)
+            .setParameter("startDate", startDateInclusive)
+            .setParameter("endDate", endDateExclusive)
+            .getResultList();
     }
 
     public List<AccountTransaction> findByAccount(UUID userId, UUID accountId,

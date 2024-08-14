@@ -2505,7 +2505,7 @@ components:
     AuditReportSource:
       type: string
       description: The source of the transactions to be analysed by the report
-      enum: [ACCOUNT, CATEGORY_GROUP, CATEGORY]
+      enum: [ALL, ACCOUNT, CATEGORY_GROUP, CATEGORY]
       example: CATEGORY_GROUP
 
     AuditReportParam:

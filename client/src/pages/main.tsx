@@ -62,7 +62,7 @@ export default function MainPage() {
       { label: 'Accounts', route: 'accounts', icon: <Savings/> },
       { label: 'Categories', route: 'categories', icon: <CategoryIcon/> },
       { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/> },
-      { label: 'Audit Reports', route: 'audit', icon: <AuditReportIcon/> },
+      { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/> },
       { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
     ];

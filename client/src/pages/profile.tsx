@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Button from '@mui/material/Button';
+import Paper from "@mui/material/Paper";
 
 import { useMessageDispatch } from "../contexts/messages/context";
 import { useCurrentUser } from "../contexts/user-context";
@@ -12,6 +13,7 @@ import AuthProviderList from "../components/auth-providers/auth-provider-list";
 
 import styles from "./profile.module.css";
 import PageHeader from "../components/page-header/page-header";
+import Grid from "@mui/material/Grid";
 
 const emptyProfile: UserProfile = {
   id: undefined, 
@@ -64,20 +66,25 @@ export default function UpdateProfile() {
 
   return (
     <PageHeader title="Profile information" >
-      <form className={ styles.profile } onSubmit={ handleSubmit }>
-        <div className={ styles.panel }>
-          <div className={ styles.splitpanel }>
-            <div className={ styles.box }>
-            <UserProfileForm profile={ profile } setter={ setProfile }/>
+      <Paper elevation={ 3 } sx={{ padding: 1}}>
+        <form className={ styles.profile } onSubmit={ handleSubmit }>
+          <div className={ styles.panel }>
+            <div className={ styles.splitpanel }>
+              <div className={ styles.box }>
+              <UserProfileForm profile={ profile } setter={ setProfile }/>
+              </div>
+            </div>
+            <div className={ styles.splitpanel }>
+              <div className={ `${styles.box} ${styles.bordered}` }><AuthProviderList/></div>
+              <div className={ `${styles.box} ${styles.bordered}` }><UserConsentList/></div>
             </div>
           </div>
-          <div className={ styles.splitpanel }>
-            <div className={ `${styles.box} ${styles.bordered}` }><AuthProviderList/></div>
-            <div className={ `${styles.box} ${styles.bordered}` }><UserConsentList/></div>
-          </div>
-        </div>
-        <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
-      </form>
+
+          <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 1 }>
+            <Button type="submit" variant="contained" disabled={validateForm().length > 0}>Save</Button>
+          </Grid>
+        </form>
+      </Paper>
     </PageHeader>
   );
 }
