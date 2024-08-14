@@ -13,9 +13,9 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
 
 import { useMessageDispatch } from "../../contexts/messages/context";
 import AuditReportService from "../../services/audit-report.service";
@@ -26,7 +26,6 @@ import { Category } from '../../model/category.model';
 import { AuditReportConfig, AuditReportSource, AuditReportTemplate, NULL_REPORT_CONFIG } from '../../model/audit-report.model';
 import { AuditReportTemplates } from './report-templates';
 import { InfoPopover } from '../info/info-popover';
-import Paper from '@mui/material/Paper';
 
 interface Props {
   reportConfig?: AuditReportConfig;
