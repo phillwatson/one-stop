@@ -240,14 +240,14 @@ export default function EditAuditReportConfig(props: Props) {
         }
       </Paper>
 
-      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 2, marginBottom: 1 }}>
         <legend><Typography>Parameters</Typography></legend>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Default</TableCell>
-              <TableCell>Value</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Default</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Value</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
