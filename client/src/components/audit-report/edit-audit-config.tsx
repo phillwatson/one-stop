@@ -139,8 +139,10 @@ export default function EditAuditReportConfig(props: Props) {
 
   useEffect(() => {
     setReportConfig(config => {
+      // if the template hasn't changed, don't change the parameters
       if (config.templateName === selectedTemplate?.name) return config;
 
+      // if the template is the same as the original, reset the parameters to orginal values
       const params = (props.reportConfig?.templateName === selectedTemplate?.name)
         ? ({ ...props.reportConfig?.parameters })
         : selectedTemplate?.parameters
@@ -149,6 +151,7 @@ export default function EditAuditReportConfig(props: Props) {
             result[p.name] = p.defaultValue!;
             return result;
           }, {} as { [key: string]: string } ) || {};
+
 
       return ({
         ...config,
@@ -188,90 +191,92 @@ export default function EditAuditReportConfig(props: Props) {
   }
 
   return (
-    <form onSubmit={ handleSubmit } style={{ padding: "5px" }}>
-      <FormControl fullWidth margin="normal" sx={{ marginBottom: 3 }}>
-        <FormControlLabel label="Disabled" control={
-          <Switch id="disabled" checked={ reportConfig.disabled || false}
-            onChange={ e => setReportConfig({...reportConfig, disabled: e.target.checked}) }/>
-        } />
-      </FormControl>
-
-      <AuditReportTemplates required templates={ reportTemplates }
-        templateName={ reportConfig.templateName }
-        onSelected={ setSelectedTemplate } />
-
-      <TextField id="name" label="Name" required variant="outlined" fullWidth margin="normal" sx={{ marginTop: 3 }}
-        value={ reportConfig.name } onChange={ e => setReportConfig({...reportConfig, name: e.target.value}) }/>
-
-      <TextField id="description" label="Description" variant="outlined" fullWidth margin="normal" multiline rows={ 4 }
-        value={ reportConfig.description } onChange={ e => setReportConfig({...reportConfig, description: e.target.value}) }/>
-
-      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
-        <legend><Typography>Transaction Source</Typography></legend>
-
-        <FormControl fullWidth margin="normal" required>
-          <InputLabel id="select-source-type">Source</InputLabel>
-          <Select labelId="select-source-type" label="Source" value={ reportConfig.source || ''}
-            onChange={ e => setReportConfig({ ...reportConfig, source: e.target.value as AuditReportSource, sourceId: undefined }) }>
-            { Object.entries(sourceDescriptions).map(entry =>
-              <MenuItem key={ entry[0] } value={ entry[0] }>{ entry[1] }</MenuItem>
-            )}
-          </Select>
+    <Grid container direction="column" paddingLeft={{ sm: 1, md: 5, lg: 25 }} paddingRight={{ sm: 1, md: 5, lg: 25 }}>
+      <form onSubmit={ handleSubmit }>
+        <FormControl fullWidth margin="normal" sx={{ marginBottom: 3 }}>
+          <FormControlLabel label="Disabled" control={
+            <Switch id="disabled" checked={ reportConfig.disabled || false}
+              onChange={ e => setReportConfig({...reportConfig, disabled: e.target.checked}) }/>
+          } />
         </FormControl>
-  
-        { reportConfig.source && reportConfig.source !== 'ALL' && reportSources.length > 0 &&
-          <FormControl fullWidth margin="normal" required={ reportSources.length > 0 } disabled={ reportSources.length === 0 }>
-            <InputLabel id="select-source-id">{ sourceDescriptions[reportConfig.source] }</InputLabel>
-            <Select labelId="select-source-id" label={ sourceDescriptions[reportConfig.source] }
-              value={ reportConfig.sourceId || ''} onChange={ e => setReportConfig({ ...reportConfig, sourceId: e.target.value }) }>
-              { reportSources }
+
+        <AuditReportTemplates required templates={ reportTemplates }
+          templateName={ reportConfig.templateName }
+          onSelected={ setSelectedTemplate } />
+
+        <TextField id="name" label="Name" required variant="outlined" fullWidth margin="normal" sx={{ marginTop: 3 }}
+          value={ reportConfig.name } onChange={ e => setReportConfig({...reportConfig, name: e.target.value}) }/>
+
+        <TextField id="description" label="Description" variant="outlined" fullWidth margin="normal" multiline rows={ 4 }
+          value={ reportConfig.description } onChange={ e => setReportConfig({...reportConfig, description: e.target.value}) }/>
+
+        <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+          <legend><Typography variant="caption">Transaction Source</Typography></legend>
+
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel id="select-source-type">Source</InputLabel>
+            <Select labelId="select-source-type" label="Source" value={ reportConfig.source || ''}
+              onChange={ e => setReportConfig({ ...reportConfig, source: e.target.value as AuditReportSource, sourceId: undefined }) }>
+              { Object.entries(sourceDescriptions).map(entry =>
+                <MenuItem key={ entry[0] } value={ entry[0] }>{ entry[1] }</MenuItem>
+              )}
             </Select>
           </FormControl>
-        }
 
-        { reportConfig.source && reportConfig.source === 'CATEGORY_GROUP' &&
-          <FormControl fullWidth margin="normal">
-            <FormControlLabel label="Include Uncategorised Transactions" control={
-              <Switch id="uncategorisedIncluded" checked={ reportConfig.uncategorisedIncluded }
-                onChange={ e => setReportConfig({...reportConfig, uncategorisedIncluded: e.target.checked}) }/>
-            } />
-          </FormControl>
-        }
-      </Paper>
+          { reportConfig.source && reportConfig.source !== 'ALL' && reportSources.length > 0 &&
+            <FormControl fullWidth margin="normal" required={ reportSources.length > 0 } disabled={ reportSources.length === 0 }>
+              <InputLabel id="select-source-id">{ sourceDescriptions[reportConfig.source] }</InputLabel>
+              <Select labelId="select-source-id" label={ sourceDescriptions[reportConfig.source] }
+                value={ reportConfig.sourceId || ''} onChange={ e => setReportConfig({ ...reportConfig, sourceId: e.target.value }) }>
+                { reportSources }
+              </Select>
+            </FormControl>
+          }
 
-      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 2, marginBottom: 1 }}>
-        <legend><Typography>Parameters</Typography></legend>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Default</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Value</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            { selectedTemplate?.parameters.map(param => 
-              <TableRow key={ param.name }>
-                <TableCell>{ param.name }
-                  <InfoPopover content={ param.description }/>
-                </TableCell>
-                <TableCell>{ param.defaultValue }</TableCell>
-                <TableCell>
-                  <TextField id={ param.name } variant="outlined" fullWidth margin="none"
-                    type={ param.type === 'BOOLEAN' ? 'checkbox' : param.type === 'DOUBLE'|| param.type === 'LONG' ? 'number' : 'text' }
-                    value={ reportConfig.parameters[param.name] || param.defaultValue || '' }
-                    onChange={ e => setParameter(param.name, e.target.value) }/>
-                </TableCell>
+          { reportConfig.source && reportConfig.source === 'CATEGORY_GROUP' &&
+            <FormControl fullWidth margin="normal">
+              <FormControlLabel label="Include Uncategorised Transactions" control={
+                <Switch id="uncategorisedIncluded" checked={ reportConfig.uncategorisedIncluded }
+                  onChange={ e => setReportConfig({...reportConfig, uncategorisedIncluded: e.target.checked}) }/>
+              } />
+            </FormControl>
+          }
+        </Paper>
+
+        <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 2, marginBottom: 1 }}>
+          <legend><Typography variant="caption">Parameters</Typography></legend>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Default</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Value</TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Paper>
+            </TableHead>
+            <TableBody>
+              { selectedTemplate?.parameters.map(param => 
+                <TableRow key={ param.name }>
+                  <TableCell>{ param.name }
+                    <InfoPopover content={ param.description }/>
+                  </TableCell>
+                  <TableCell>{ param.defaultValue }</TableCell>
+                  <TableCell>
+                    <TextField id={ param.name } variant="outlined" fullWidth margin="none"
+                      type={ param.type === 'BOOLEAN' ? 'checkbox' : param.type === 'DOUBLE'|| param.type === 'LONG' ? 'number' : 'text' }
+                      value={ reportConfig.parameters[param.name] || param.defaultValue || '' }
+                      onChange={ e => setParameter(param.name, e.target.value) }/>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Paper>
 
-      <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 1 }>
-        <Button variant="outlined" onClick={ handleCancel }>Cancel</Button>
-        <Button type="submit" variant="contained" disabled={validateForm(reportConfig).length > 0}>Save</Button>
-      </Grid>
-    </form>
+        <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 1 }>
+          <Button variant="outlined" onClick={ handleCancel }>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={validateForm(reportConfig).length > 0}>Save</Button>
+        </Grid>
+      </form>
+    </Grid>
   )
 }

@@ -55,7 +55,9 @@ export default function AuditReportConfigList(props: Props) {
     }
   }
   
-  function handleDeleteClick(config: AuditReportConfig) {
+  function handleDeleteClick(event: any, config: AuditReportConfig) {
+    event.stopPropagation();
+
     setSelectedConfig(config);
     setDeleteDialogOpen(true);
   }
@@ -78,8 +80,9 @@ export default function AuditReportConfigList(props: Props) {
       <Table size='small'>
         <TableHead>
           <TableRow>
-            <TableCell sx={colhead}>Name</TableCell>
+            <TableCell sx={colhead} width="25%">Name</TableCell>
             <TableCell sx={colhead}>Description</TableCell>
+            <TableCell sx={colhead} width="25%">Template</TableCell>
             <TableCell sx={{...colhead, ...compactCell}} width="24px"></TableCell>
           </TableRow>
         </TableHead>
@@ -87,10 +90,11 @@ export default function AuditReportConfigList(props: Props) {
           { reportConfigs && reportConfigs
             .sort((a, b) => a.name < b.name ? -1 : 1)
             .map(config =>
-              <TableRow key={ config.id } hover>
-                <TableCell onClick={() => handleEditClick(config)}>{ config.name }</TableCell>
-                <TableCell onClick={() => handleEditClick(config)}>{ config.description }</TableCell>
-                <TableCell onClick={() => handleDeleteClick(config)} sx={ compactCell } width="24px">
+              <TableRow key={ config.id } hover onClick={() => handleEditClick(config)}>
+                <TableCell>{ config.name }</TableCell>
+                <TableCell>{ config.description }</TableCell>
+                <TableCell>{ config.templateName }</TableCell>
+                <TableCell onClick={ e => handleDeleteClick(e, config)} sx={ compactCell } width="24px">
                   <Tooltip title="Delete report..."><DeleteIcon/></Tooltip>
                 </TableCell>
               </TableRow>
@@ -100,10 +104,10 @@ export default function AuditReportConfigList(props: Props) {
           { props.onAdd &&
           <>
             <TableRow key={ "add1" }>
-              <TableCell align="center" colSpan={ 3 } />
+              <TableCell align="center" colSpan={ 4 } />
             </TableRow>
             <TableRow key="add2" hover>
-              <TableCell align="center" colSpan={ 3 }
+              <TableCell align="center" colSpan={ 4 }
                 onClick={() => handleAddClick()}><b>Add Report...</b></TableCell>
             </TableRow>
           </>

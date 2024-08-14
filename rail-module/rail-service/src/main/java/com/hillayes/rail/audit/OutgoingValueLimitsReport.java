@@ -75,9 +75,9 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         log.info("Running Outgoing Value Limits Report [userId: {}, reportName: {}]",
             reportConfig.getUserId(), reportConfig.getName());
 
-        Long averageDays = reportConfig.getLong(PARAM_AVERAGE_DAYS)
+        long averageDays = reportConfig.getLong(PARAM_AVERAGE_DAYS)
             .orElse(PARAM_AVERAGE_DAYS_DEFAULT);
-        Long reportDays = reportConfig.getLong(PARAM_REPORT_DAYS)
+        long reportDays = reportConfig.getLong(PARAM_REPORT_DAYS)
             .orElse(PARAM_REPORT_DAYS_DEFAULT);
         Double thresholdFactor = reportConfig.getDouble(PARAM_THRESHOLD_FACTOR)
             .orElse(PARAM_THRESHOLD_FACTOR_DEFAULT);
@@ -119,9 +119,9 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
                     .filter(t -> t.getBookingDateTime().compareTo(inclDate) >= 0)
                     .filter(t -> t.getAmount().getAmount() <= threshold)
                     .filter(t -> !existingIssues.contains(t.getId()))
-                    .peek(t -> log.debug("New Outgoing Value Limits Report Issue found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
+                    .peek(t -> log.debug("New issue found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
                         reportConfig.getUserId(), reportConfig.getName(), t.getId(), t.getAmount().getAmount()))
-                    .map(t -> auditIssueRepository.save(AuditIssue.issueFor(reportConfig, t)));
+                    .map(t -> AuditIssue.issueFor(reportConfig, t));
             }).flatMap(identity()).toList();
 
         log.info("Completed Outgoing Value Limits Report [userId: {}, reportName: {}, issuesFound: {}]",

@@ -9,6 +9,7 @@ import com.hillayes.rail.audit.AuditReportTemplate;
 import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.event.AuditEventSender;
+import com.hillayes.rail.repository.AuditIssueRepository;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +36,9 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
     @Inject
     @Any
     Instance<AuditReportTemplate> reportTemplates;
+
+    @Inject
+    AuditIssueRepository auditIssueRepository;
 
     @Inject
     AuditEventSender auditEventSender;
@@ -65,7 +69,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
         UUID userId = context.getPayload().userId();
         log.info("Processing User Audit Reports job [userId: {}]", userId);
 
-        Map<String, Integer> issueCounts = new HashMap<>();
+        Map<AuditReportConfig, List<AuditIssue>> allIssues = new HashMap<>();
         int page = 0;
         Page<AuditReportConfig> reportConfigs;
         do {
@@ -74,10 +78,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
                 if (!config.isDisabled()) {
                     List<AuditIssue> auditIssues = runReport(config);
                     if (!auditIssues.isEmpty()) {
-                        issueCounts.put(
-                            Strings.getOrDefault(config.getDescription(), config.getName()),
-                            auditIssues.size()
-                        );
+                        allIssues.put(config, auditIssues);
                     }
                 }
             });
@@ -85,9 +86,21 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
             page++;
         } while (page < reportConfigs.getTotalPages());
 
-        if (!issueCounts.isEmpty()) {
-            auditEventSender.sendAuditIssuesFound(userId, issueCounts);
+        // if any issues were found
+        if (!allIssues.isEmpty()) {
+            Map<String, Integer> reportCounts = new HashMap<>();
+            allIssues.forEach((config, issues) -> {
+                // collate the issue count for each report
+                reportCounts.put(config.getName(), issues.size());
+
+                // save them in batches
+                auditIssueRepository.saveAll(issues);
+            });
+
+            // send an event summarising the issues found within each report
+            auditEventSender.sendAuditIssuesFound(userId, reportCounts);
         }
+
         return TaskConclusion.COMPLETE;
     }
 

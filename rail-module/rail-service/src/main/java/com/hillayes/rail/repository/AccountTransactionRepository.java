@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.*;
@@ -133,14 +134,9 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
                                                         boolean includeUncategorised) {
         // collate all transactions for each category in the group
         List<AccountTransaction> result = categoryGroup.getCategories().stream()
-            .map(category ->
-                findByCategory(categoryGroup.getUserId(), category.getId(), startDateInclusive, endDateExclusive)
-            )
-            .reduce(new ArrayList<>(), (acc, transactions) -> {
-                    acc.addAll(transactions);
-                    return acc;
-                }
-            );
+            .parallel()
+            .map(category -> findByCategory(categoryGroup.getUserId(), category.getId(), startDateInclusive, endDateExclusive))
+            .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
 
         if (includeUncategorised) {
             // add the uncategorised transactions
