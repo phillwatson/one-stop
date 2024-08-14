@@ -26,6 +26,7 @@ import { Category } from '../../model/category.model';
 import { AuditReportConfig, AuditReportSource, AuditReportTemplate, NULL_REPORT_CONFIG } from '../../model/audit-report.model';
 import { AuditReportTemplates } from './report-templates';
 import { InfoPopover } from '../info/info-popover';
+import Paper from '@mui/material/Paper';
 
 interface Props {
   reportConfig?: AuditReportConfig;
@@ -188,27 +189,25 @@ export default function EditAuditReportConfig(props: Props) {
   }
 
   return (
-    <form onSubmit={ handleSubmit }>
-      <FormControl fullWidth margin="normal">
+    <form onSubmit={ handleSubmit } style={{ padding: "5px" }}>
+      <FormControl fullWidth margin="normal" sx={{ marginBottom: 3 }}>
         <FormControlLabel label="Disabled" control={
           <Switch id="disabled" checked={ reportConfig.disabled || false}
             onChange={ e => setReportConfig({...reportConfig, disabled: e.target.checked}) }/>
         } />
       </FormControl>
 
-      <Box component="fieldset" sx={{ padding: 1, paddingTop: 3, marginBottom: 1, borderRadius: 2, borderColor: 'light' }}>
-        <AuditReportTemplates required templates={ reportTemplates } templateName={ reportConfig.templateName } onSelected={ setSelectedTemplate } />
-      </Box>
+      <AuditReportTemplates required templates={ reportTemplates }
+        templateName={ reportConfig.templateName }
+        onSelected={ setSelectedTemplate } />
 
-      <Box component="fieldset" sx={{ padding: 1, marginBottom: 1, borderRadius: 2, borderColor: 'light' }}>
-        <TextField id="name" label="Name" required variant="outlined" fullWidth margin="normal"
-          value={ reportConfig.name } onChange={ e => setReportConfig({...reportConfig, name: e.target.value}) }/>
+      <TextField id="name" label="Name" required variant="outlined" fullWidth margin="normal" sx={{ marginTop: 3 }}
+        value={ reportConfig.name } onChange={ e => setReportConfig({...reportConfig, name: e.target.value}) }/>
 
-        <TextField id="description" label="Description" variant="outlined" fullWidth margin="normal" multiline rows={ 4 }
-          value={ reportConfig.description } onChange={ e => setReportConfig({...reportConfig, description: e.target.value}) }/>
-      </Box>
+      <TextField id="description" label="Description" variant="outlined" fullWidth margin="normal" multiline rows={ 4 }
+        value={ reportConfig.description } onChange={ e => setReportConfig({...reportConfig, description: e.target.value}) }/>
 
-      <Box component="fieldset" sx={{ padding: 1, marginBottom: 1, borderRadius: 2, borderColor: 'light' }}>
+      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
         <legend><Typography>Transaction Source</Typography></legend>
 
         <FormControl fullWidth margin="normal" required>
@@ -239,9 +238,9 @@ export default function EditAuditReportConfig(props: Props) {
             } />
           </FormControl>
         }
-      </Box>
+      </Paper>
 
-      <Box component="fieldset" sx={{ padding: 1, marginBottom: 1, borderRadius: 2, borderColor: 'light' }}>
+      <Paper component="fieldset" square={ false } variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
         <legend><Typography>Parameters</Typography></legend>
         <Table size="small">
           <TableHead>
@@ -268,7 +267,7 @@ export default function EditAuditReportConfig(props: Props) {
             )}
           </TableBody>
         </Table>
-      </Box>
+      </Paper>
 
       <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 1 }>
         <Button variant="outlined" onClick={ handleCancel }>Cancel</Button>

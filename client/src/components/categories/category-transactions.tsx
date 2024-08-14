@@ -54,7 +54,7 @@ export default function CategoryTransactions(props: Props) {
   const noTransactions = (transactions.length === 0);
   return(
     <>
-      <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+      <Paper sx={{ marginTop: 1, padding: 2 }} elevation={3}>
         <Box sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>{ props.category.categoryName }</Box>
         <Table size="small" aria-label="transactions">
           <caption><i>
