@@ -4,12 +4,15 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AuditIssue;
+import com.hillayes.rail.domain.AuditIssueSummary;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
+import com.hillayes.rail.utils.TestData;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,14 +30,15 @@ import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class AuditReportResourceTest extends TestBase {
+    private static final TypeRef<List<AuditIssueSummaryResponse>> AUDIT_SUMMARIES_RESPONSE_LIST = new TypeRef<>() {};
+
     @InjectMock
     AuditReportService auditReportService;
 
@@ -256,6 +260,56 @@ public class AuditReportResourceTest extends TestBase {
 
         // then: the auditReportService is called with the user id and config id
         verify(auditReportService).deleteAuditConfig(userId, configId);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetIssueSummaries() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a list of audit report configs
+        List<AuditReportConfig> configs = IntStream.range(0, 5)
+            .mapToObj(i -> mockAuditReportConfig(userId, r -> r.id(UUID.randomUUID())))
+            .toList();
+
+        // and: a list of audit issue summaries
+        List<AuditIssueSummary> summaries = configs.stream()
+            .map(TestData::mockAuditIssueSummary)
+            .toList();
+
+        // and: a list of audit issue summaries for the identified user
+        when(auditReportService.getIssueSummaries(userId))
+            .thenReturn(summaries);
+
+        // when: client calls the endpoint
+        List<AuditIssueSummaryResponse> response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/audit/summaries")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(AUDIT_SUMMARIES_RESPONSE_LIST);
+
+        // then: the auditReportService is called with the user id
+        verify(auditReportService).getIssueSummaries(userId);
+
+        // and: the response contains the summaries
+        assertEquals(summaries.size(), response.size());
+        summaries.forEach(expected -> {
+            AuditIssueSummaryResponse actual = response.stream()
+                .filter(r -> expected.getAuditConfigId().equals(r.getAuditConfigId()))
+                .findFirst()
+                .orElse(null);
+
+            assertNotNull(actual);
+            assertEquals(expected.getAuditConfigName(), actual.getAuditConfigName());
+            assertEquals(expected.getTotalCount(), actual.getTotalCount());
+            assertEquals(expected.getAcknowledgedCount(), actual.getAcknowledgedCount());
+        });
     }
 
     @ParameterizedTest

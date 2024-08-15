@@ -6,10 +6,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.audit.AuditReportTemplate;
-import com.hillayes.rail.domain.AccountTransaction;
-import com.hillayes.rail.domain.AuditIssue;
-import com.hillayes.rail.domain.AuditReportConfig;
-import com.hillayes.rail.domain.AuditReportParameter;
+import com.hillayes.rail.domain.*;
 import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
 import jakarta.annotation.security.RolesAllowed;
@@ -19,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -147,7 +145,7 @@ public class AuditReportResource {
         log.info("Getting audit issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}]",
             userId, configId, acknowledgedParam, page, pageSize);
 
-        Boolean acknowledged = acknowledgedParam.asBoolean();
+        Boolean acknowledged = (acknowledgedParam == null) ? null : acknowledgedParam.asBoolean();
         Page<AuditIssue> issues = auditReportService.getAuditIssues(userId, configId, acknowledged, page, pageSize);
 
         // find the transactions referenced by the issues - key on their IDs
@@ -172,6 +170,16 @@ public class AuditReportResource {
                 userId, configId, acknowledged, page, pageSize, response.getCount(), response.getTotal());
         }
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/summaries")
+    public Response getAuditIssueSummaries(@Context SecurityContext ctx) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting audit issue summaries [userId: {}]", userId);
+
+        List<AuditIssueSummary> summaries = auditReportService.getIssueSummaries(userId);
+        return Response.ok(summaries).build();
     }
 
     @GET

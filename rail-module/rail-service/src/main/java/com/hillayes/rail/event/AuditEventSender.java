@@ -18,7 +18,7 @@ public class AuditEventSender {
     private final EventSender eventSender;
 
     public void sendAuditIssuesFound(UUID userId, Map<String, Integer> issueCounts) {
-        log.debug("Sending AuditIssuesFound event [userId: {}, issues: {}]", userId, issueCounts.size());
+        log.debug("Sending AuditIssuesFound event [userId: {}, issues: {}]", userId, issueCounts);
 
         eventSender.send(Topic.TRANSACTION_AUDIT, AuditIssuesFound.builder()
             .userId(userId)

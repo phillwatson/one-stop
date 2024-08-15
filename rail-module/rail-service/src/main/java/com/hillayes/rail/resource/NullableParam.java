@@ -1,6 +1,8 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.commons.Strings;
+import lombok.ToString;
+
 /**
  * A utility class to allow the use of null values in query parameters.
  *
@@ -33,5 +35,9 @@ public class NullableParam {
      */
     public Boolean asBoolean() {
         return isNull() ? null : Boolean.valueOf(value);
+    }
+
+    public String toString() {
+        return asString();
     }
 }

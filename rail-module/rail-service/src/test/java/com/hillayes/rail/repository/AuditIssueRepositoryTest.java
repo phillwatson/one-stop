@@ -47,14 +47,11 @@ public class AuditIssueRepositoryTest {
             .toList();
 
         // and: each report config has a list of audit issues
-        Map<UUID, List<AuditIssue>> reportIssues = new HashMap<>();
-        reportConfigs.forEach(reportConfig ->
-            reportIssues.put(reportConfig.getId(), transactions.stream()
-                .map(transaction -> fixture.save(
-                    mockAuditIssue(userId, reportConfig.getId(), i -> i.transactionId(transaction.getId())))
-                ).toList()
+        Map<UUID, List<AuditIssue>> reportIssues = reportConfigs.stream()
+            .flatMap(reportConfig ->
+                transactions.stream().map(transaction -> fixture.save(mockAuditIssue(reportConfig, i -> i.transactionId(transaction.getId()))))
             )
-        );
+            .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
 
         // make sure that the issues have been saved and cache is cleared
         fixture.flush();
@@ -126,14 +123,11 @@ public class AuditIssueRepositoryTest {
             .toList();
 
         // and: each report config has a list of audit issues
-        Map<UUID, List<AuditIssue>> reportIssues = new HashMap<>();
-        reportConfigs.forEach(reportConfig ->
-            reportIssues.put(reportConfig.getId(), transactions.stream()
-                .map(transaction -> fixture.save(
-                    mockAuditIssue(userId, reportConfig.getId(), i -> i.transactionId(transaction.getId())))
-                ).toList()
+        Map<UUID, List<AuditIssue>> reportIssues = reportConfigs.stream()
+            .flatMap(reportConfig ->
+                transactions.stream().map(transaction -> fixture.save(mockAuditIssue(reportConfig, i -> i.transactionId(transaction.getId()))))
             )
-        );
+            .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
 
         // make sure that the issues have been saved and cache is cleared
         fixture.flush();
@@ -152,6 +146,51 @@ public class AuditIssueRepositoryTest {
     }
 
     @Test
+    public void testGetIssueSummaries() {
+        // given: a collection of user identities
+        List<UUID> userIds = IntStream.range(0, 3).mapToObj(i -> UUID.randomUUID()).toList();
+
+        // and: each user has an account with transactions
+        Map<UUID, List<AccountTransaction>> userTransactions = userIds.stream()
+            .map(this::mockTransactions)
+            .collect(Collectors.toMap(transactions -> transactions.getFirst().getUserId(), transactions -> transactions));
+
+        // and: each user a collection of audit report configs
+        Map<UUID, List<AuditReportConfig>> userReportConfigs = userIds.stream()
+            .flatMap(userId ->
+                IntStream.range(0, 5).mapToObj(i -> auditReportConfigRepository.save(mockAuditReportConfig(userId)))
+            )
+            .collect(Collectors.groupingBy(AuditReportConfig::getUserId));
+
+        // and: each report configs has a list of audit issues
+        Map<UUID, List<AuditIssue>> reportIssues = userReportConfigs.values().stream()
+            .flatMap(List::stream)
+            .flatMap(reportConfig -> userTransactions.get(reportConfig.getUserId()).stream()
+                .map(transaction -> fixture.save(mockAuditIssue(reportConfig, i -> i.transactionId(transaction.getId()))))
+            )
+            .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
+
+        // make sure that the issues have been saved and cache is cleared
+        fixture.flush();
+        fixture.getEntityManager().clear();
+
+        userReportConfigs.forEach((userId, configs) -> {
+            // when: we retrieve the issue summaries for each user
+            List<AuditIssueSummary> result = fixture.getIssueSummaries(userId);
+
+            // then: the result contains all issues for the report config
+            assertEquals(configs.size(), result.size());
+
+            // and: each summary contains the expected counts
+            result.forEach(summary -> {
+                List<AuditIssue> expected = reportIssues.get(summary.getAuditConfigId());
+                assertEquals(expected.size(), summary.getTotalCount());
+                assertEquals(expected.stream().filter(AuditIssue::isAcknowledged).count(), summary.getAcknowledgedCount());
+            });
+        });
+    }
+
+    @Test
     public void testGetByReportAndTransaction() {
         // given: a user identity
         UUID userId = UUID.randomUUID();
@@ -165,14 +204,11 @@ public class AuditIssueRepositoryTest {
             .toList();
 
         // and: each report config has a list of audit issues
-        Map<UUID, List<AuditIssue>> reportIssues = new HashMap<>();
-        reportConfigs.forEach(reportConfig ->
-            reportIssues.put(reportConfig.getId(), transactions.stream()
-                .map(transaction -> fixture.save(
-                    mockAuditIssue(userId, reportConfig.getId(), i -> i.transactionId(transaction.getId())))
-                ).toList()
+        Map<UUID, List<AuditIssue>> reportIssues = reportConfigs.stream()
+            .flatMap(reportConfig ->
+                transactions.stream().map(transaction -> fixture.save(mockAuditIssue(reportConfig, i -> i.transactionId(transaction.getId()))))
             )
-        );
+            .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
 
         // make sure that the issues have been saved and cache is cleared
         fixture.flush();

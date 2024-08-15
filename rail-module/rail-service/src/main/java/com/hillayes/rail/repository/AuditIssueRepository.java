@@ -4,6 +4,7 @@ import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AuditIssue;
+import com.hillayes.rail.domain.AuditIssueSummary;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.*;
@@ -26,6 +27,19 @@ public class AuditIssueRepository extends RepositoryBase<AuditIssue, UUID> {
         return pageAll("reportConfigId = :reportConfigId", page, pageSize,
             OrderBy.by("bookingDateTime", OrderBy.Direction.Descending),
             Map.of("reportConfigId", configId));
+    }
+
+    public List<AuditIssueSummary> getIssueSummaries(UUID userId) {
+        return getEntityManager().createNativeQuery(
+                "select r.id, r.name, " +
+                    "count(ai.id) as total_count, " +
+                    "sum(case when ai.acknowledged = true then 1 else 0 end) as acknowledged_count " +
+                    "from rails.audit_report_config r " +
+                    "join rails.audit_issue ai on ai.report_config_id = r.id " +
+                    "where r.user_id = :userId " +
+                    "group by r.id, r.name;", AuditIssueSummary.class)
+            .setParameter("userId", userId)
+            .getResultList();
     }
 
     /**

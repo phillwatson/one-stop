@@ -7,12 +7,12 @@ import com.hillayes.rail.domain.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.Currency;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 
 public class TestData {
     public static UserConsent mockUserConsent(UUID userId) {
@@ -145,8 +145,23 @@ public class TestData {
         return builder.build();
     }
 
+    public static AuditIssueSummary mockAuditIssueSummary(AuditReportConfig reportConfig) {
+        long count = nextLong(0, 100);
+        return AuditIssueSummary.builder()
+            .auditConfigId(reportConfig.getId())
+            .auditConfigName(reportConfig.getName())
+            .totalCount(count)
+            .acknowledgedCount(nextLong(0, count))
+            .build();
+    }
+
     public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId) {
         return mockAuditIssue(userId, reportConfigId, (b) -> {});
+    }
+
+    public static AuditIssue mockAuditIssue(AuditReportConfig reportConfig,
+                                            Consumer<AuditIssue.Builder> modifier) {
+        return mockAuditIssue(reportConfig.getUserId(), reportConfig.getId(), modifier);
     }
 
     public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId,
@@ -154,7 +169,7 @@ public class TestData {
         AuditIssue.Builder builder = AuditIssue.builder()
             .userId(userId)
             .reportConfigId(reportConfigId)
-            .acknowledged(false)
+            .acknowledged(nextBoolean())
             .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
             .transactionId(UUID.randomUUID());
 

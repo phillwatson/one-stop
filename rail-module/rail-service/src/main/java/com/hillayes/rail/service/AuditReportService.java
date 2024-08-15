@@ -6,6 +6,7 @@ import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.audit.AuditReportTemplate;
 import com.hillayes.rail.domain.AuditIssue;
+import com.hillayes.rail.domain.AuditIssueSummary;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.errors.AuditReportConfigAlreadyExistsException;
 import com.hillayes.rail.repository.AccountTransactionRepository;
@@ -120,8 +121,13 @@ public class AuditReportService {
     }
 
     public void deleteAllAuditConfigs(UUID userId) {
-        log.info("Deleting audit report configs for user [userId: {}]", userId);
+        log.info("Deleting audit report configs [userId: {}]", userId);
         auditReportConfigRepository.deleteByUserId(userId);
+    }
+
+    public List<AuditIssueSummary> getIssueSummaries(UUID userId) {
+        log.info("Get audit issue summaries [userId: {}]", userId);
+        return auditIssueRepository.getIssueSummaries(userId);
     }
 
     public Page<AuditIssue> getAuditIssues(UUID userId, UUID configId, Boolean acknowledged,
