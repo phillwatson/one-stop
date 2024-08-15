@@ -140,13 +140,14 @@ public class AuditReportResource {
     public Response getAuditIssues(@Context SecurityContext ctx,
                                    @Context UriInfo uriInfo,
                                    @PathParam("configId") UUID configId,
-                                   @QueryParam("acknowledged") Boolean acknowledged,
+                                   @QueryParam("acknowledged") NullableParam acknowledgedParam,
                                    @QueryParam("page") @DefaultValue("0") int page,
                                    @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Getting audit issues [userId: {}, configId: {}, acknowledged: {}, page: {}, pageSize: {}]",
-            userId, configId, acknowledged, page, pageSize);
+            userId, configId, acknowledgedParam, page, pageSize);
 
+        Boolean acknowledged = acknowledgedParam.asBoolean();
         Page<AuditIssue> issues = auditReportService.getAuditIssues(userId, configId, acknowledged, page, pageSize);
 
         // find the transactions referenced by the issues - key on their IDs

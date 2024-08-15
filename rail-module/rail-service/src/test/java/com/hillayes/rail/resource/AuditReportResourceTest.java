@@ -2,7 +2,10 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
+import com.hillayes.rail.domain.Account;
+import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
+import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -10,13 +13,17 @@ import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
-import static com.hillayes.rail.utils.TestData.mockAuditReportConfig;
+import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -30,6 +37,9 @@ import static org.mockito.Mockito.when;
 public class AuditReportResourceTest extends TestBase {
     @InjectMock
     AuditReportService auditReportService;
+
+    @InjectMock
+    AccountTransactionService accountTransactionService;
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
@@ -249,6 +259,7 @@ public class AuditReportResourceTest extends TestBase {
     }
 
     @ParameterizedTest
+    @NullSource
     @ValueSource(booleans = { true, false })
     @TestSecurity(user = userIdStr, roles = "user")
     public void testGetAuditIssues(Boolean acknowledged) {
@@ -258,31 +269,61 @@ public class AuditReportResourceTest extends TestBase {
         // and: a report config id
         UUID configId = UUID.randomUUID();
 
-        // and: a page range
-        int page = 1;
-        int pageSize = 12;
+        // and: a collection of audit report issues exist
+        List<AuditIssue> issues = IntStream.range(0, 35)
+            .mapToObj(i -> mockAuditIssue(userId, configId))
+            .toList();
 
-        // and: an empty list of audit issue for the identified config
+        // and: a list of audit issue for the identified config
         when(auditReportService.getAuditIssues(any(), any(), nullable(Boolean.class), anyInt(), anyInt()))
-            .thenReturn(Page.empty());
+            .then(invocation -> {
+                int pageArg = invocation.getArgument(3);
+                int pageSizeArg = invocation.getArgument(4);
+                return Page.of(issues, pageArg, pageSizeArg);
+            });
 
-        // when: client calls the endpoint
-        given()
-            .request()
-            .queryParam("page", page)
-            .queryParam("page-size", pageSize)
-            .queryParam("acknowledged", acknowledged)
-            .contentType(JSON)
-            .when()
-            .get("/api/v1/rails/audit/configs/{configId}/issues", configId)
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract()
-            .as(PaginatedAuditIssues.class);
+        // and: transactions exist for each issue transaction
+        Account account = mockAccount(userId, UUID.randomUUID());
+        when(accountTransactionService.listAll(any())).then(invocation -> {
+            Collection<UUID> transactionIds = invocation.getArgument(0);
+            return transactionIds.stream()
+                .map(id -> mockAccountTransaction(account, t -> t.id(id)))
+                .toList();
+        });
 
-        // then: the auditReportService is called with the page range
-        verify(auditReportService).getAuditIssues(userId, configId, acknowledged, page, pageSize);
+        int page = 0;
+        int pageSize = 10;
+        int maxPages = (issues.size() / pageSize) + (issues.size() % pageSize == 0 ? 0 : 1);
+        while (page < maxPages) {
+            // when: client calls the endpoint
+            PaginatedAuditIssues response = given()
+                .request()
+                .queryParam("page", page)
+                .queryParam("page-size", pageSize)
+                .queryParam("acknowledged", acknowledged)
+                .contentType(JSON)
+                .when()
+                .get("/api/v1/rails/audit/configs/{configId}/issues", configId)
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract()
+                .as(PaginatedAuditIssues.class);
+
+            // then: the auditReportService is called with the page range
+            verify(auditReportService).getAuditIssues(userId, configId, acknowledged, page, pageSize);
+
+            // and: the response contains the issues
+            assertEquals(issues.size(), response.getTotal());
+            assertEquals(page, response.getPage());
+            assertEquals(maxPages, response.getTotalPages());
+
+            // and: the page count is as expected
+            int expectedPageSize = Math.min(pageSize, issues.size() - (page * pageSize));
+            assertEquals(expectedPageSize, response.getCount());
+
+            page++;
+        }
     }
 
     @Test

@@ -62,8 +62,13 @@ class AuditReportService {
 
   getAuditIssues(configId: string, acknowledged?: boolean, page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AuditIssue>> {
     console.log(`Get audit issues [configId: ${configId}, acknowledged: ${acknowledged}, page: ${page}, pageSize: ${pageSize}]`);
-    return http.get<PaginatedList<AuditIssue>>(`/rails/audit/configs/${configId}/issues`,
-       { params: { "page": page, "page-size": pageSize, "acknowledged": acknowledged }})
+
+    var params: any = { "page": page, "page-size": pageSize };
+    if (acknowledged !== undefined) {
+      params = { "acknowledged": acknowledged, ...params };
+    }
+
+    return http.get<PaginatedList<AuditIssue>>(`/rails/audit/configs/${configId}/issues`, { params: params })
       .then(response => response.data);
   }
 
