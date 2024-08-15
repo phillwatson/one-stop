@@ -3,9 +3,7 @@ package com.hillayes.rail.audit;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditReportConfig;
-import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.AuditIssueRepository;
-import com.hillayes.rail.repository.CategoryGroupRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -22,7 +20,7 @@ import static java.util.function.UnaryOperator.identity;
 
 @ApplicationScoped
 @Slf4j
-public class OutgoingValueLimitsReport implements AuditReportTemplate {
+public class OutgoingValueLimitsReport extends AuditReportTemplate {
     // the number of days over which the average outgoing transaction amount is calculated
     private static final String PARAM_AVERAGE_DAYS = "averageDays";
     private static final Long PARAM_AVERAGE_DAYS_DEFAULT = 30L;
@@ -45,12 +43,6 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         new Parameter(PARAM_THRESHOLD_FACTOR, "The factor by which the average outgoing transaction amount is multiplied to calculate the threshold for an outgoing transaction to be considered an issue",
             ParameterType.DOUBLE, PARAM_THRESHOLD_FACTOR_DEFAULT.toString())
     );
-
-    @Inject
-    AccountTransactionRepository accountTransactionRepository;
-
-    @Inject
-    CategoryGroupRepository categoryGroupRepository;
 
     @Inject
     AuditIssueRepository auditIssueRepository;
@@ -86,18 +78,7 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         Instant endDate = Instant.now().plus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS);
 
         // gather transactions from the report source
-        List<AccountTransaction> transactions = switch (reportConfig.getReportSource()) {
-            case ALL -> accountTransactionRepository.findByUser(
-                reportConfig.getUserId(), startDate, endDate);
-
-            case ACCOUNT -> accountTransactionRepository.findByAccount(
-                reportConfig.getUserId(), reportConfig.getReportSourceId(), startDate, endDate);
-
-            case CATEGORY_GROUP -> findByCategoryGroup(reportConfig, startDate, endDate);
-
-            case CATEGORY -> accountTransactionRepository.findByCategory(
-                reportConfig.getUserId(), reportConfig.getReportSourceId(), startDate, endDate);
-        };
+        List<AccountTransaction> transactions = getReportTransactions(reportConfig, startDate, endDate);
 
         // get the IDs for existing transactions with issues for this report
         Set<UUID> existingIssues = auditIssueRepository.listTransactionIds(reportConfig.getId());
@@ -130,13 +111,5 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
         log.info("Completed Outgoing Value Limits Report [userId: {}, reportName: {}, issuesFound: {}]",
             reportConfig.getUserId(), reportConfig.getName(), issues.size());
         return issues;
-    }
-
-    private List<AccountTransaction> findByCategoryGroup(AuditReportConfig reportConfig,
-                                                         Instant startDate, Instant endDate) {
-        return categoryGroupRepository.findByIdOptional(reportConfig.getReportSourceId())
-            .map(categoryGroup -> accountTransactionRepository.findByCategoryGroup(categoryGroup,
-                startDate, endDate, reportConfig.isUncategorisedIncluded()))
-            .orElse(List.of());
     }
 }

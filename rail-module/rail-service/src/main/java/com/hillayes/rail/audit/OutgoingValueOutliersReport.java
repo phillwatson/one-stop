@@ -17,44 +17,52 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * An audit report template that identifies outgoing transactions that exceed the average
- * velocity by a certain threshold.
- * <p>
- * Two averages are calculated:
+ * A report will identify the recent outgoing transactions within selected accounts (or
+ * categories) for which the value exceeds an average, based on the following parameters:
  * <ol>
- * <li>The minor average velocity = the number of outgoing transactions over a short period of time</li>
- * <li>The major average velocity = the number of outgoing transactions over a longer period of time</li>
+ * <li>Minor Average Days - the days over which the recent transactions are averaged</li>
+ * <li>Major Average Days - the days over which the overall transactions are averaged</li>
+ * <li>Outlier Factor (double) - the multiplication factor by which the outliers are identified</li>
  * </ol>
- * A threshold velocity is calculated by multiplying the major average velocity by a factor.
- * If the minor average velocity exceeds the threshold, an issue wil be raised for each
- * outgoing transaction within the minor average period.
+ * With these parameters, the following values are calculated:
+ * <ol>
+ * <li>Minor Count - the number of outgoing transaction within the Minor Average Days</li>
+ * <li>Minor Sum - the sum of outgoing transaction within the Minor Average Days</li>
+ * <li>Major Count - the number of outgoing transaction within the Major Average Days</li>
+ * <li>Major Sum - the sum of outgoing transaction within the Major Average Days</li>
+ * <li>Minor Average Value = Minor Sum / Minor Count</li>
+ * <li>Major Average Value = Major Sum / Major Count</li>
+ * <li>Threshold = Major Average Value * Outlier Factor</li>
+ * </ol>
+ * If the Minor Average Value meets, or exceeds, the Threshold, an issue will be raised
+ * for each outgoing transaction within the Minor Average Days.
  */
 @ApplicationScoped
 @Slf4j
-public class OutgoingVelocityReport extends AuditReportTemplate {
-    // the number of days over which the overall activity is averaged
+public class OutgoingValueOutliersReport extends AuditReportTemplate {
+    // the number of days over which the overall values are averaged
     private static final String PARAM_MAJOR_AVERAGE_DAYS = "majorAverageDays";
     private static final Long PARAM_MAJOR_AVERAGE_DAYS_DEFAULT = 30L;
 
-    // the number of days over which the recent activity is averaged
+    // the number of days over which the recent values are averaged
     private static final String PARAM_MINOR_AVERAGE_DAYS = "minorAverageDays";
     private static final Long PARAM_MINOR_AVERAGE_DAYS_DEFAULT = 5L;
 
-    // the factor by which the average velocity is multiplied to calculate the
+    // the factor by which the average value is multiplied to calculate the
     // threshold for outgoing transactions to be considered an issue
-    private static final String PARAM_VELOCITY_FACTOR = "velocityFactor";
-    private static final Double PARAM_VELOCITY_FACTOR_DEFAULT = 1.5;
+    private static final String PARAM_OUTLIER_FACTOR = "outlierFactor";
+    private static final Double PARAM_OUTLIER_FACTOR_DEFAULT = 1.5;
 
     // a list of parameters that the user can set when running this report
     private static final List<Parameter> PARAMETERS = List.of(
-        new Parameter(PARAM_MAJOR_AVERAGE_DAYS, "The number of days over which the overall velocity is averaged",
+        new Parameter(PARAM_MAJOR_AVERAGE_DAYS, "The number of days over which the major average value is calculated",
             ParameterType.LONG, PARAM_MAJOR_AVERAGE_DAYS_DEFAULT.toString()),
-        new Parameter(PARAM_MINOR_AVERAGE_DAYS, "The number of days over which the recent velocity is averaged",
+        new Parameter(PARAM_MINOR_AVERAGE_DAYS, "The number of days over which the minor average value is calculated",
             ParameterType.LONG, PARAM_MINOR_AVERAGE_DAYS_DEFAULT.toString()),
-        new Parameter(PARAM_VELOCITY_FACTOR,
-            "The factor by which the major average velocity is multiplied to calculate the threshold" +
-                " at which the minor average velocity is considered an issue",
-            ParameterType.DOUBLE, PARAM_VELOCITY_FACTOR_DEFAULT.toString())
+        new Parameter(PARAM_OUTLIER_FACTOR,
+            "The factor by which the major average value is multiplied to calculate the threshold" +
+                " at which the minor average value is considered an issue",
+            ParameterType.DOUBLE, PARAM_OUTLIER_FACTOR_DEFAULT.toString())
     );
 
     @Inject
@@ -62,12 +70,12 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
 
     @Override
     public String getName() {
-        return "outgoing-velocity-limits";
+        return "outgoing-value-outliers";
     }
 
     @Override
     public String getDescription() {
-        return "Produces a report of outgoing transactions whose average velocity exceeds a calculated threshold";
+        return "Produces a report of outgoing transactions whose average value exceeds a calculated threshold";
     }
 
     public List<Parameter> getParameters() {
@@ -84,8 +92,8 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
             .orElse(PARAM_MAJOR_AVERAGE_DAYS_DEFAULT);
         long minorAverageDays = reportConfig.getLong(PARAM_MINOR_AVERAGE_DAYS)
             .orElse(PARAM_MINOR_AVERAGE_DAYS_DEFAULT);
-        Double velocityFactor = reportConfig.getDouble(PARAM_VELOCITY_FACTOR)
-            .orElse(PARAM_VELOCITY_FACTOR_DEFAULT);
+        Double outlierFactor = reportConfig.getDouble(PARAM_OUTLIER_FACTOR)
+            .orElse(PARAM_OUTLIER_FACTOR_DEFAULT);
 
         Instant majorStartDate = Instant.now().minus(Duration.ofDays(majorAverageDays)).truncatedTo(ChronoUnit.DAYS);
         Instant minorStartDate = Instant.now().minus(Duration.ofDays(minorAverageDays)).truncatedTo(ChronoUnit.DAYS);
@@ -97,16 +105,17 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
         // get the IDs for existing transactions with issues for this report
         Set<UUID> existingIssues = auditIssueRepository.listTransactionIds(reportConfig.getId());
 
-        // count the outgoing transactions over the minor and major average periods
-        Long[] counts = transactions.stream()
+        // total the outgoing transactions over the minor and major average periods
+        Long[] totals = transactions.stream()
             .parallel()
             .filter(t -> t.getAmount().getAmount() < 0)
             .collect(
                 () -> new Long[]{0L, 0L},
                 (acc, t) -> {
-                    acc[0]++;
+                    long transactionValue = -t.getAmount().getAmount();
+                    acc[0] += transactionValue;
                     if (t.getBookingDateTime().compareTo(minorStartDate) >= 0) {
-                        acc[1]++;
+                        acc[1] += transactionValue;
                     }
                 },
                 (a, b) -> {
@@ -115,19 +124,19 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
                 }
             );
 
-        // calculate the Major and Minor Average Velocity of outgoing transactions
-        long majorAverage = counts[0] / majorAverageDays;
-        long minorAverage = counts[1] / minorAverageDays;
+        // calculate the Major and Minor Average Value of outgoing transactions
+        long majorAverage = totals[0] / majorAverageDays;
+        long minorAverage = totals[1] / minorAverageDays;
 
-        // calculate the threshold velocity for outgoing transactions to be considered an issue
-        double velocityThreshold = majorAverage * velocityFactor;
+        // calculate the threshold value for outgoing transactions to be considered an issue
+        double valueThreshold = majorAverage * outlierFactor;
 
         log.debug("Report factors [userId: {}, reportName: {}, majorVelocity: {}, minorVelocity: {}, threshold: {}]",
-            reportConfig.getUserId(), reportConfig.getName(), majorAverage, minorAverage, velocityThreshold);
+            reportConfig.getUserId(), reportConfig.getName(), majorAverage, minorAverage, valueThreshold);
 
-        // if the minor average velocity meets, or exceeds, the threshold
+        // if the minor average value meets, or exceeds, the threshold
         List<AuditIssue> issues = List.of();
-        if (minorAverage >= velocityThreshold) {
+        if (minorAverage >= valueThreshold) {
             // report all outgoing transactions within the minor average period that have not already been reported
             issues = transactions.stream()
                 .filter(t -> t.getAmount().getAmount() < 0)
@@ -139,7 +148,7 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
                 .toList();
         }
 
-        log.info("Completed Outgoing Velocity Report [userId: {}, reportName: {}, issuesFound: {}]",
+        log.info("Completed Outgoing Value Report [userId: {}, reportName: {}, issuesFound: {}]",
             reportConfig.getUserId(), reportConfig.getName(), issues.size());
         return issues;
     }
