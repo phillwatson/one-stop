@@ -25,25 +25,29 @@ public class AuditIssue {
     /**
      * The user to which the identified report and transaction belongs.
      */
+    @ToString.Include
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
     /**
      * The report to which that discovered this issue.
      */
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "report_config_id", nullable = false)
     private UUID reportConfigId;
 
     /**
      * The transaction that has been identified as an issue.
      */
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "transaction_id", nullable = false)
     private UUID transactionId;
 
     /**
      * Echoes the booking date and time of the referenced transaction.
      */
-    @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "booking_datetime", nullable = false)
     private Instant bookingDateTime;

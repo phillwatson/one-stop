@@ -29,6 +29,7 @@ CREATE TABLE ${flyway:defaultSchema}.audit_issue (
     user_id UUID NOT NULL,
     report_config_id UUID NOT NULL CONSTRAINT fk_audit_issue_report_config REFERENCES ${flyway:defaultSchema}.audit_report_config (id) ON DELETE CASCADE,
     transaction_id UUID NOT NULL CONSTRAINT fk_audit_issue_transaction REFERENCES ${flyway:defaultSchema}.account_transaction (id) ON DELETE CASCADE,
+    booking_datetime timestamp NOT NULL,
     acknowledged boolean NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_audit_issue_user ON ${flyway:defaultSchema}.audit_issue (user_id);

@@ -21,11 +21,11 @@ import java.util.UUID;
 /**
  * An audit report template that identifies outgoing transactions that exceed the average
  * velocity by a certain threshold.
- *
+ * <p>
  * Two averages are calculated:
  * 1. The minor average velocity = the number of outgoing transactions over a short period of time.
  * 2. The major average velocity = the number of outgoing transactions over a longer period of time.
- *
+ * <p>
  * A threshold velocity is calculated by multiplying the major average velocity by a factor.
  * If the minor average velocity exceeds the threshold, an issue wil be raised for each
  * outgoing transaction within the minor average period.
@@ -127,12 +127,15 @@ public class OutgoingVelocityReport implements AuditReportTemplate {
                         acc[1]++;
                     }
                 },
-                (a, b) -> { a[0] += b[0]; a[1] += b[1]; }
+                (a, b) -> {
+                    a[0] += b[0];
+                    a[1] += b[1];
+                }
             );
 
         // calculate the Major and Minor Average Velocity of outgoing transactions
-        long majorAverage = counts[0] / minorAverageDays;
-        long minorAverage = counts[1] / majorAverageDays;
+        long majorAverage = counts[0] / majorAverageDays;
+        long minorAverage = counts[1] / minorAverageDays;
 
         // calculate the threshold velocity for outgoing transactions to be considered an issue
         double velocityThreshold = majorAverage * velocityFactor;
@@ -140,20 +143,19 @@ public class OutgoingVelocityReport implements AuditReportTemplate {
         log.debug("Report factors [userId: {}, reportName: {}, majorVelocity: {}, minorVelocity: {}, threshold: {}]",
             reportConfig.getUserId(), reportConfig.getName(), majorAverage, minorAverage, velocityThreshold);
 
-        // if the minor average velocity is less than the threshold, no issues are raised
-        if (minorAverage < velocityThreshold) {
-            return List.of();
+        // if the minor average velocity meets, or exceeds, the threshold
+        List<AuditIssue> issues = List.of();
+        if (minorAverage >= velocityThreshold) {
+            // report all outgoing transactions within the minor average period that have not already been reported
+            issues = transactions.stream()
+                .filter(t -> t.getAmount().getAmount() < 0)
+                .filter(t -> t.getBookingDateTime().compareTo(minorStartDate) >= 0)
+                .filter(t -> !existingIssues.contains(t.getId()))
+                .peek(t -> log.debug("New issue found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
+                    reportConfig.getUserId(), reportConfig.getName(), t.getId(), t.getAmount().getAmount()))
+                .map(t -> AuditIssue.issueFor(reportConfig, t))
+                .toList();
         }
-
-        // report all outgoing transactions within the minor average period that have not already been reported
-        List<AuditIssue> issues = transactions.stream()
-            .filter(t -> t.getAmount().getAmount() < 0)
-            .filter(t -> t.getBookingDateTime().compareTo(minorStartDate) >= 0)
-            .filter(t -> !existingIssues.contains(t.getId()))
-            .peek(t -> log.debug("New issue found [userId: {}, reportName: {}, transactionId: {}, value: {}]",
-                reportConfig.getUserId(), reportConfig.getName(), t.getId(), t.getAmount().getAmount()))
-            .map(t -> AuditIssue.issueFor(reportConfig, t))
-            .toList();
 
         log.info("Completed Outgoing Velocity Report [userId: {}, reportName: {}, issuesFound: {}]",
             reportConfig.getUserId(), reportConfig.getName(), issues.size());

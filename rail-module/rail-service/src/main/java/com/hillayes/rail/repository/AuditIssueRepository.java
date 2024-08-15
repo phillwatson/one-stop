@@ -54,8 +54,9 @@ public class AuditIssueRepository extends RepositoryBase<AuditIssue, UUID> {
      */
     public Set<UUID> listTransactionIds(UUID reportConfigId) {
         return new HashSet<>(
-            getEntityManager()
-                .createQuery("SELECT i.transactionId FROM AuditIssue i WHERE i.reportConfigId = :reportConfigId", UUID.class)
+            getEntityManager().createNativeQuery(
+                    "SELECT i.transaction_id FROM rails.audit_issue i" +
+                        " WHERE i.report_config_id = :reportConfigId", UUID.class)
                 .setParameter("reportConfigId", reportConfigId)
                 .getResultList()
         );

@@ -112,6 +112,9 @@ public class OutgoingValueLimitsReport implements AuditReportTemplate {
                 // the value will be negative, as it is outgoing transactions
                 double threshold = average * thresholdFactor;
 
+                log.debug("Report factors [userId: {}, reportName: {}, average: {}, threshold: {}]",
+                    reportConfig.getUserId(), reportConfig.getName(), average, threshold);
+
                 // does any outgoing transaction within the report days exceed the audit threshold
                 Instant inclDate = Instant.now().minus(Duration.ofDays(reportDays)).truncatedTo(ChronoUnit.DAYS);
                 return transactions.stream()

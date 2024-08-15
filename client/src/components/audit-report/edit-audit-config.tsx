@@ -145,6 +145,8 @@ export default function EditAuditReportConfig(props: Props) {
       // if the template is the same as the original, reset the parameters to orginal values
       const params = (props.reportConfig?.templateName === selectedTemplate?.name)
         ? ({ ...props.reportConfig?.parameters })
+
+      // otherwise, set the parameters to the default values
         : selectedTemplate?.parameters
           .filter(p => p.defaultValue !== undefined)
           .reduce((result, p) => {
