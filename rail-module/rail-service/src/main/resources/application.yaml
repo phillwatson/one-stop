@@ -63,3 +63,17 @@ one-stop:
           max-retry: 4
           retry-interval: PT2M
           retry-exponent: 1.5
+
+      # nightly task to run all audit reports
+      audit-reports:
+        frequency:
+          time-of-day: "03:00:00"
+        on-failure:
+          max-retry: 3
+          retry-interval: PT1M
+
+      user-audit-reports:
+        on-failure: # gives a max of 16 minutes
+          max-retry: 4
+          retry-interval: PT2M
+          retry-exponent: 1.5

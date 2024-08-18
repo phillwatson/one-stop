@@ -156,7 +156,7 @@ export default function StatisticsGraph(props: Props) {
 
   return (
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
-      <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+      <Paper sx={{ padding: 2 }} elevation={3}>
         <Grid container direction="column" rowGap={3} alignItems={"stretch"}>
           <Grid container direction="row" justifyContent={"center"}>
             <FormControl fullWidth>
@@ -188,7 +188,7 @@ export default function StatisticsGraph(props: Props) {
         </Grid>
       </Paper>
 
-      <Paper sx={{ margin: 1, padding: 2 }} elevation={3}>
+      <Paper sx={{ marginTop: 1, padding: 2 }} elevation={3}>
         <Grid container spacing={2} alignItems={"center"} justifyContent={"center"}>
           <Grid item>
             <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}

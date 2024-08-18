@@ -26,7 +26,7 @@ public class CountryServiceTest {
     CountryService fixture;
 
     @BeforeEach
-    public void clearCaches() {
+    public void init() {
         openMocks(this);
     }
 

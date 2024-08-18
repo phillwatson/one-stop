@@ -4,7 +4,7 @@ import PaginatedList from "./paginated-list.model";
 export interface TransactionDetail {
   id: string;
   accountId: string;
-  transactionId: string;
+  transactionId: string; // the rail provider's identity of the transaction
   bookingDateTime: string;
   valueDateTime: string;
   amount: number;

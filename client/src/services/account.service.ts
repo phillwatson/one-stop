@@ -7,7 +7,18 @@ class AccountService {
     console.log(`Retrieving accounts [page: ${page}, pageSize: ${pageSize}]`);
     return http.get<PaginatedList<AccountDetail>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
+  }
+
+  async fetchAll(): Promise<Array<AccountDetail>> {
+    console.log('Retrieving ALL accounts');
+    var response = await this.getAll(0, 100);
+    var accounts = response.items as Array<AccountDetail>;
+    while (response.links.next) {
+      response = await this.getAll(response.page + 1, 100);
+      accounts = accounts.concat(response.items);
     }
+    return accounts;
+  }
 
   get(accountId: string): Promise<AccountDetail> {
     console.log(`Retrieving account [id: ${accountId}]`);

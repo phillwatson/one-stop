@@ -7,6 +7,7 @@ public enum Topic {
     USER("User entity related events."),
     USER_AUTH("User authentication related events."),
     CONSENT("Rail consent related events."),
+    TRANSACTION_AUDIT("Transaction audit related events."),
     HOSPITAL_TOPIC("The queue for failed events to be sent to message hospital.");
 
     private final String summary;

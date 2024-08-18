@@ -71,7 +71,7 @@ public class CategoryService {
         }
 
         categoryGroupRepository.findByUserAndName(userId, newName)
-            .ifPresent(group -> { throw new CategoryGroupAlreadyExistsException(group); });
+            .ifPresent(existing -> { throw new CategoryGroupAlreadyExistsException(existing); });
 
         CategoryGroup group = CategoryGroup.builder()
             .userId(userId)

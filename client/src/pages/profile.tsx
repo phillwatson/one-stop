@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import Button from '@mui/material/Button';
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
 
 import { useMessageDispatch } from "../contexts/messages/context";
 import { useCurrentUser } from "../contexts/user-context";
@@ -10,7 +12,6 @@ import UserProfile from "../model/user-profile.model";
 import UserConsentList from "../components/consents/user-consents";
 import AuthProviderList from "../components/auth-providers/auth-provider-list";
 
-import styles from "./profile.module.css";
 import PageHeader from "../components/page-header/page-header";
 
 const emptyProfile: UserProfile = {
@@ -64,20 +65,32 @@ export default function UpdateProfile() {
 
   return (
     <PageHeader title="Profile information" >
-      <form className={ styles.profile } onSubmit={ handleSubmit }>
-        <div className={ styles.panel }>
-          <div className={ styles.splitpanel }>
-            <div className={ styles.box }>
-            <UserProfileForm profile={ profile } setter={ setProfile }/>
-            </div>
-          </div>
-          <div className={ styles.splitpanel }>
-            <div className={ `${styles.box} ${styles.bordered}` }><AuthProviderList/></div>
-            <div className={ `${styles.box} ${styles.bordered}` }><UserConsentList/></div>
-          </div>
-        </div>
-        <Button type="submit" variant="outlined" disabled={validateForm().length > 0}>Save</Button>
-      </form>
+      <Paper elevation={ 3 } sx={{ padding: 1}}>
+        <form  onSubmit={ handleSubmit }>
+          <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
+            <Grid item padding={ 5 }>
+              <UserProfileForm profile={ profile } setter={ setProfile }/>
+            </Grid>
+
+            <Grid container direction="row" justifyContent="center" columns={ 2 } columnGap={ 2 } rowGap={ 2 }>
+              <Grid item>
+                <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+                  <AuthProviderList/>
+                </Paper>
+              </Grid>
+              <Grid item>
+                <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+                  <UserConsentList/>
+                </Paper>
+              </Grid>
+            </Grid>
+
+            <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 2 }>
+              <Button type="submit" variant="contained" disabled={validateForm().length > 0}>Save</Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Paper>
     </PageHeader>
   );
 }

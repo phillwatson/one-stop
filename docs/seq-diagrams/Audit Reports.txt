@@ -1,0 +1,77 @@
+title Audit Reports
+
+participant scheduler
+participant AuditReportsScheduledTask
+participant UserAuditReportsJobbingTask
+participant AuditReportConfigRepository
+
+participant AuditReportTemplate
+participant NotificationService
+
+participant broker
+
+note over scheduler,AuditReportsScheduledTask#b7d6ff :The task is scheduled to run overnight.
+
+scheduler->AuditReportsScheduledTask:run()
+activate AuditReportsScheduledTask
+AuditReportsScheduledTask->AuditReportConfigRepository:listUserIds()
+
+activate AuditReportConfigRepository
+note left of AuditReportConfigRepository:list the IDs of those user that hold\n at least one report configuration.
+AuditReportsScheduledTask<--AuditReportConfigRepository:UUID[]
+deactivate AuditReportConfigRepository
+
+loop#ffd4d4 AuditReportsScheduledTask:for each user ID
+
+AuditReportsScheduledTask->UserAuditReportsJobbingTask:queueJob(userId)
+activate UserAuditReportsJobbingTask
+UserAuditReportsJobbingTask->scheduler:USER_AUDIT_REPORTS(userId)
+activate scheduler
+deactivateafter scheduler
+deactivateafter UserAuditReportsJobbingTask
+end
+deactivateafter AuditReportsScheduledTask
+
+
+scheduler->UserAuditReportsJobbingTask:apply(userId)
+activate UserAuditReportsJobbingTask
+
+UserAuditReportsJobbingTask->AuditReportConfigRepository:listAuditReportConfigs(userId)
+activate AuditReportConfigRepository
+UserAuditReportsJobbingTask<--AuditReportConfigRepository:AuditReportConfig[]
+deactivate AuditReportConfigRepository
+
+loop#ffd4d4 AuditReportsScheduledTask:for each report config
+UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:findAuditReportTemplate(config.templateId)
+activate UserAuditReportsJobbingTask
+UserAuditReportsJobbingTask-->UserAuditReportsJobbingTask:template
+deactivate UserAuditReportsJobbingTask
+
+alt#lightblue template found
+UserAuditReportsJobbingTask->AuditReportTemplate:template.run(config)
+activate AuditReportTemplate
+UserAuditReportsJobbingTask<--AuditReportTemplate:AuditReportIssue[]
+deactivate AuditReportTemplate
+
+UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:addToIssues()
+activate UserAuditReportsJobbingTask
+space
+deactivate UserAuditReportsJobbingTask
+
+else#lightblue template not found
+UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:logMissingTemplate()
+activate UserAuditReportsJobbingTask
+space
+deactivate UserAuditReportsJobbingTask
+end
+
+end
+UserAuditReportsJobbingTask->broker:TRANSACTION_AUDIT(issues)
+deactivate UserAuditReportsJobbingTask
+
+space
+NotificationService<-broker:TRANSACTION_AUDIT(issues)
+activate NotificationService
+NotificationService->NotificationService:sendEmail()
+NotificationService->NotificationService:createNotification()
+deactivateafter NotificationService

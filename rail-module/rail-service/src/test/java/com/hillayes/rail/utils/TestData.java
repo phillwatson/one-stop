@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 
 public class TestData {
     public static UserConsent mockUserConsent(UUID userId) {
@@ -120,5 +121,61 @@ public class TestData {
         return new CategoryStatistics(group.getId(), group.getName(), categoryName, UUID.randomUUID(),
             randomAlphanumeric(30), "#345678",
             count, BigDecimal.valueOf(total), BigDecimal.valueOf(credit), BigDecimal.valueOf(debit));
+    }
+
+    public static AuditReportConfig mockAuditReportConfig(UUID userId) {
+        return mockAuditReportConfig(userId, (b) -> {});
+    }
+
+    public static AuditReportConfig mockAuditReportConfig(UUID userId,
+                                                          Consumer<AuditReportConfig.Builder> modifier) {
+        AuditReportConfig.Builder builder = AuditReportConfig.builder()
+            .disabled(false)
+            .userId(userId)
+            .name(randomAlphanumeric(30))
+            .description(randomAlphanumeric(30))
+            .reportSource(AuditReportConfig.ReportSource.CATEGORY_GROUP)
+            .reportSourceId(UUID.randomUUID())
+            .uncategorisedIncluded(true)
+            .templateName(randomAlphanumeric(30));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
+    }
+
+    public static AuditIssueSummary mockAuditIssueSummary(AuditReportConfig reportConfig) {
+        long count = nextLong(0, 100);
+        return AuditIssueSummary.builder()
+            .auditConfigId(reportConfig.getId())
+            .auditConfigName(reportConfig.getName())
+            .totalCount(count)
+            .acknowledgedCount(nextLong(0, count))
+            .build();
+    }
+
+    public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId) {
+        return mockAuditIssue(userId, reportConfigId, (b) -> {});
+    }
+
+    public static AuditIssue mockAuditIssue(AuditReportConfig reportConfig,
+                                            Consumer<AuditIssue.Builder> modifier) {
+        return mockAuditIssue(reportConfig.getUserId(), reportConfig.getId(), modifier);
+    }
+
+    public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId,
+                                            Consumer<AuditIssue.Builder> modifier) {
+        AuditIssue.Builder builder = AuditIssue.builder()
+            .userId(userId)
+            .reportConfigId(reportConfigId)
+            .acknowledged(nextBoolean())
+            .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
+            .transactionId(UUID.randomUUID());
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+        return builder.build();
     }
 }
