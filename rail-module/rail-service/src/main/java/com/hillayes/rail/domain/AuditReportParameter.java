@@ -10,7 +10,8 @@ import java.util.UUID;
  * and configured by the user. These properties are used to customize the factors on
  * which the report's algorithm is based.
  */
-@Entity(name = "audit_report_parameter")
+@Entity
+@Table(name = "audit_report_parameter")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
