@@ -41,7 +41,7 @@ export default function AuditReportResults(props: Props) {
     } else {
       return undefined;
     }
-  }, [ selectedReportConfigId ]);
+  }, [ selectedReportConfigId, reportConfigs ]);
 
   return (
     <>
