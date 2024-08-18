@@ -273,6 +273,7 @@ public class AuditReportResource {
     private AuditIssueResponse marshal(AuditIssue issue, AccountTransaction transaction) {
         return new AuditIssueResponse()
             .id(transaction.getId())
+            .issueId(issue.getId())
             .auditConfigId(issue.getReportConfigId())
             .acknowledged(issue.isAcknowledged())
             .accountId(transaction.getAccountId())

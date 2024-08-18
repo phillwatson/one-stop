@@ -42,6 +42,14 @@ export const NULL_REPORT_CONFIG: AuditReportConfig = {
 };
 
 export interface AuditIssue extends TransactionDetail{
+  issueId: string,
   auditConfigId: string;
   acknowledged: boolean;
+}
+
+export interface AuditIssueSummary {
+  auditConfigId: string;
+  auditConfigName: string;
+  totalCount: number;
+  acknowledgedCount: number;
 }

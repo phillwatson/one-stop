@@ -75,7 +75,9 @@ public class OutgoingValueOutliersReport extends AuditReportTemplate {
 
     @Override
     public String getDescription() {
-        return "Produces a report of outgoing transactions whose average value exceeds a calculated threshold";
+        return "Detects outgoing transactions whose total average value over the past '" + PARAM_MINOR_AVERAGE_DAYS + "' days" +
+            " exceeds the average over the past '" + PARAM_MAJOR_AVERAGE_DAYS + "' days " +
+            " by a factor of '" + PARAM_OUTLIER_FACTOR + "'";
     }
 
     public List<Parameter> getParameters() {

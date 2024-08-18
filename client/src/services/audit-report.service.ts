@@ -1,6 +1,6 @@
 import http from './http-common';
 import PaginatedList from '../model/paginated-list.model';
-import { AuditIssue, AuditReportConfig, AuditReportTemplate } from '../model/audit-report.model';
+import { AuditIssue, AuditIssueSummary, AuditReportConfig, AuditReportTemplate } from '../model/audit-report.model';
 
 class AuditReportService {
   getReportTemplates(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AuditReportTemplate>> {
@@ -60,11 +60,17 @@ class AuditReportService {
     return http.delete<any>(`/rails/audit/configs/${configId}`);
   }
 
+  getAuditIssueSummaries(): Promise<Array<AuditIssueSummary>> {
+    console.log('Get audit issue summaries');
+    return http.get<Array<AuditIssueSummary>>('/rails/audit/summaries')
+      .then(response => response.data);
+  }
+
   getAuditIssues(configId: string, acknowledged?: boolean, page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AuditIssue>> {
     console.log(`Get audit issues [configId: ${configId}, acknowledged: ${acknowledged}, page: ${page}, pageSize: ${pageSize}]`);
 
     var params: any = { "page": page, "page-size": pageSize };
-    if (acknowledged !== undefined) {
+    if ((acknowledged !== undefined) && (acknowledged !== null)) {
       params = { "acknowledged": acknowledged, ...params };
     }
 

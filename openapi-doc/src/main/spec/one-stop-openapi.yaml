@@ -2621,9 +2621,15 @@ components:
         - $ref: '#/components/schemas/TransactionResponse'
         - type: object
           required:
+            - issueId
             - auditConfigId
             - acknowledged
           properties:
+            issueId:
+              type: string
+              format: uuid
+              description: The issue Id
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
             auditConfigId:
               type: string
               format: uuid

@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AuditReportTest extends ApiTestBase {
+public class AuditReportTestIT extends ApiTestBase {
     @Test
     public void testGetAuditReportTemplates() {
         // given: a user

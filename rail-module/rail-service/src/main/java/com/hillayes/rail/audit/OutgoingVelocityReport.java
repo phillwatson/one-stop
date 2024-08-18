@@ -67,7 +67,10 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
 
     @Override
     public String getDescription() {
-        return "Produces a report of outgoing transactions whose average velocity exceeds a calculated threshold";
+        return "Detects outgoing transactions whose average velocity over the past '" + PARAM_MINOR_AVERAGE_DAYS + "' days" +
+            " exceeds the average velocity over the past '" + PARAM_MAJOR_AVERAGE_DAYS + "' days " +
+            " by a factor of '" + PARAM_VELOCITY_FACTOR + "'";
+
     }
 
     public List<Parameter> getParameters() {
