@@ -277,6 +277,42 @@ public class AccountTransactionRepositoryTest {
     }
 
     @Test
+    public void testFindByAccount() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: a linked account
+        Account account = accountRepository.save(mockAccount(consent));
+
+        // and: a list of transactions
+        List<AccountTransaction> transactions = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        LocalDate bookingDate = now.minusDays(20);
+        while (bookingDate.isBefore(now)) {
+            transactions.add(mockTransaction(account, bookingDate));
+            bookingDate = bookingDate.plusDays(1);
+        }
+        fixture.saveAll(transactions);
+        fixture.flush();
+
+        fixture.getEntityManager().clear();
+
+        // when: the transactions are retrieved by account and date range
+        Instant startDate = Instant.now().truncatedTo(ChronoUnit.DAYS).minus(Duration.ofDays(10));
+        Instant endDate = Instant.now().truncatedTo(ChronoUnit.DAYS).minus(Duration.ofDays(5));
+        List<AccountTransaction> results =
+            fixture.findByAccount(account.getUserId(), account.getId(), startDate, endDate);
+
+        // then: transactions are returned
+        assertFalse(results.isEmpty());
+
+        // and: the result contains no transactions outside of that date range
+        assertFalse(results.stream().anyMatch(t ->
+            t.getBookingDateTime().isBefore(startDate) || t.getBookingDateTime().compareTo(endDate) >= 0)
+        );
+    }
+
+    @Test
     public void testFindTotals() {
         // given: a user-consent
         UserConsent consent = userConsentRepository.save(mockUserConsent());

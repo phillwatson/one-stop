@@ -33,6 +33,9 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class CategoryResourceTest extends TestBase {
+    private static final TypeRef<Collection<AccountCategorySelector>> ACCOUNT_CATEGORY_SELECTOR_LIST = new TypeRef<>() {};
+    private static final TypeRef<List<CategoryStatisticsResponse>> CATEGORY_STATISTICS_RESPONSE_LIST = new TypeRef<>() {};
+
     @InjectMock
     CategoryService categoryService;
 
@@ -450,7 +453,6 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(categorySelectors);
 
         // when: the category selectors are requested
-        TypeRef<Collection<AccountCategorySelector>> typeRef = new TypeRef<>() {};
         Collection<AccountCategorySelector> response = given()
             .request()
             .pathParam("categoryId", categoryId)
@@ -462,7 +464,7 @@ public class CategoryResourceTest extends TestBase {
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(typeRef);
+            .as(ACCOUNT_CATEGORY_SELECTOR_LIST);
 
         // then: the category-service is called with the authenticated user-id, category-id, and account-id
         verify(categoryService).getCategorySelectors(userId, categoryId, accountId);
@@ -494,7 +496,6 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(updatedSelectors);
 
         // when: the category selectors are updated
-        TypeRef<Collection<AccountCategorySelector>> typeRef = new TypeRef<>() {};
         Collection<AccountCategorySelector> response = given()
             .request()
             .pathParam("categoryId", categoryId)
@@ -507,7 +508,7 @@ public class CategoryResourceTest extends TestBase {
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(typeRef);
+            .as(ACCOUNT_CATEGORY_SELECTOR_LIST);
 
         // then: the response contains the list of updated category-selectors
         assertEquals(updatedSelectors.size(), response.size());
@@ -546,7 +547,6 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(expectedResult);
 
         // when: the statistics are requested
-        TypeRef<List<CategoryStatisticsResponse>> typeRef = new TypeRef<>() {};
         Collection<CategoryStatisticsResponse> response = given()
             .request()
             .pathParam("groupId", group.getId())
@@ -559,7 +559,7 @@ public class CategoryResourceTest extends TestBase {
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(typeRef);
+            .as(CATEGORY_STATISTICS_RESPONSE_LIST);
 
         // then: the request is passed to the service
         verify(categoryService).getStatistics(userId, group.getId(), startDate, endDate);

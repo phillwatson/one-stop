@@ -139,7 +139,7 @@ export default function TransactionList(props: Props) {
       .then( response => setTransactions(response))
       .catch(err => showMessage(err))
       .finally(() => setLoading(false));
-    }, [props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter, showMessage]);
+  }, [props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter, showMessage]);
 
   return (
     <>
@@ -148,10 +148,10 @@ export default function TransactionList(props: Props) {
         loading={loading} slots={{ toolbar: GridToolbar }}
         pagination paginationModel={paginationModel}
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
-        paginationMode="server" onPaginationModelChange={setPaginationModel}
-        filterMode="server" filterDebounceMs={500} onFilterModelChange={onFilterChange}
-        onRowSelectionModelChange={(newRowSelectionModel) => addToCategory(newRowSelectionModel) }
-        />
+        paginationMode="server" onPaginationModelChange={ setPaginationModel }
+        filterMode="server" filterDebounceMs={ 500 } onFilterModelChange={ onFilterChange }
+        onRowSelectionModelChange={ newRowSelectionModel => addToCategory(newRowSelectionModel) }
+      />
 
       { transactionFilter && transactions.currencyTotals &&
         <TableContainer>

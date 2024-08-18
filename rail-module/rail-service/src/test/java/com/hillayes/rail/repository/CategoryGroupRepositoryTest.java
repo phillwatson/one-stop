@@ -177,7 +177,7 @@ public class CategoryGroupRepositoryTest {
         // given: a user identity
         UUID userId = UUID.randomUUID();
 
-        // and: the user has a collection of categories
+        // and: the user has a collection of category groups
         List<CategoryGroup> userCategoryGroups = IntStream.range(0, 30)
             .mapToObj(index ->
                 CategoryGroup.builder()
@@ -189,12 +189,12 @@ public class CategoryGroupRepositoryTest {
             .sorted(Comparator.comparing(CategoryGroup::getName, String::compareToIgnoreCase))
             .toList();
 
-        // and: the categories are persisted
+        // and: the category groups are persisted
         fixture.saveAll(userCategoryGroups);
         fixture.flush();
         fixture.getEntityManager().clear();
 
-        // when: retrieving categories by page
+        // when: retrieving category group by page
         int pageSize = 10;
         int pageCount = 3;
         for (int page = 0; page < pageCount; page++) {

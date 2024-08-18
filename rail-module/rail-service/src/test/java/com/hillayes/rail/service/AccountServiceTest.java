@@ -34,7 +34,7 @@ public class AccountServiceTest {
     AccountService fixture;
 
     @BeforeEach
-    public void clearCaches() {
+    public void init() {
         openMocks(this);
     }
 

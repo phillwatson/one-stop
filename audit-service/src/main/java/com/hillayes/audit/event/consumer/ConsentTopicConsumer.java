@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-@TopicConsumer(Topic.CONSENT)
 @Slf4j
 public class ConsentTopicConsumer implements EventConsumer {
     public void consume(EventPacket eventPacket) {

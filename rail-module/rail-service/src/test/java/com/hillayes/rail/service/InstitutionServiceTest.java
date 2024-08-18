@@ -37,7 +37,7 @@ public class InstitutionServiceTest {
     InstitutionService fixture;
 
     @BeforeEach
-    public void clearCaches() {
+    public void init() {
         openMocks(this);
 
         ServiceConfiguration.Caches caches = mock(ServiceConfiguration.Caches.class);

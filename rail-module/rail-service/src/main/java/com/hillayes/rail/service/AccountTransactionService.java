@@ -12,9 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 @Transactional
@@ -91,6 +89,11 @@ public class AccountTransactionService {
         log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}, total: {}]",
             userId, categoryId, startDate, endDate, result.size());
         return result;
+    }
+
+    public Collection<AccountTransaction> listAll(Collection<UUID> transactionIds) {
+        log.info("Listing transactions [count: {}]", transactionIds.size());
+        return accountTransactionRepository.listAll(transactionIds);
     }
 
     /**
