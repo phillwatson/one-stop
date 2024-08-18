@@ -47,7 +47,7 @@ public class AuditReportConfigRepository extends RepositoryBase<AuditReportConfi
      */
     public List<UUID> listUserIds() {
         return getEntityManager()
-            .createQuery("SELECT DISTINCT userId FROM audit_report_config", UUID.class)
+            .createQuery("SELECT DISTINCT userId FROM AuditReportConfig", UUID.class)
             .getResultList();
     }
 }
