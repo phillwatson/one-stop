@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import AuditReportService from '../../services/audit-report.service';
 import { AuditIssue, AuditReportConfig } from '../../model/audit-report.model';
-import CurrencyService from '../../services/currency.service';
 import { formatDate } from "../../util/date-util";
 
 import Switch from '@mui/material/Switch';
@@ -24,6 +24,8 @@ interface IssueUpdate {
 
 export default function AuditIssuesList(props: Props) {
   const showMessage = useMessageDispatch();
+  const [ formatMoney ] = useMonetaryContext();
+
   const [loading, setLoading] = useState(false);
   const [ paginationModel, setPaginationModel ] = useState({ page: 0, pageSize: DEFAULT_PAGE_SIZE });
   const [ issues, setIssues ] = useState<PaginatedList<AuditIssue>>(EMPTY_PAGINATED_LIST);
@@ -55,7 +57,7 @@ export default function AuditIssuesList(props: Props) {
     setIssueUpdate({ issue: issue, acknowledged: value});
   };
 
-  const columns = useRef<GridColDef<AuditIssue>[]>([
+  const getColumnDefs = useCallback(() => { return [
     { field: 'acknowledged',
       type: 'boolean',
       headerName: 'Ack',
@@ -104,7 +106,7 @@ export default function AuditIssuesList(props: Props) {
       align: 'right',
       width: 130,
       filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
-      valueFormatter: (value: any, row: AuditIssue) => row.amount < 0 ? CurrencyService.format(0 - row.amount, row.currency) : '',
+      valueFormatter: (value: any, row: AuditIssue) => row.amount < 0 ? formatMoney(0 - row.amount, row.currency) : '',
       valueGetter: (value: any, row: AuditIssue) => 0 - row.amount
     },
     {
@@ -115,13 +117,13 @@ export default function AuditIssuesList(props: Props) {
       align: 'right',
       width: 130,
       filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
-      valueFormatter: (value: any, row: AuditIssue) => row.amount >= 0 ? CurrencyService.format(row.amount, row.currency) : '',
+      valueFormatter: (value: any, row: AuditIssue) => row.amount >= 0 ? formatMoney(row.amount, row.currency) : '',
       valueGetter: (value: any, row: AuditIssue) => row.amount
     },
-  ]);
+  ] as GridColDef<AuditIssue>[]}, [ formatMoney ]);
 
   return (
-    <DataGrid rows={ issues.items } rowCount={ issues.total } columns={ columns.current } 
+    <DataGrid rows={ issues.items } rowCount={ issues.total } columns={ getColumnDefs() } 
       density="compact" disableDensitySelector disableRowSelectionOnClick
       loading={ loading } slots={{ toolbar: GridToolbar }}
       pagination paginationModel={ paginationModel }

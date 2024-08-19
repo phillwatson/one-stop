@@ -10,7 +10,7 @@ import { SxProps } from '@mui/material/styles';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import AccountService from '../../services/account.service';
-import CurrencyService from '../../services/currency.service';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { CategoryStatistics } from '../../model/category.model';
 import { TransactionDetail } from '../../model/account.model';
 import { toLocaleDate, formatDate } from '../../util/date-util';
@@ -28,6 +28,8 @@ export interface Props {
 
 export default function CategoryTransactions(props: Props) {
   const showMessage = useMessageDispatch();
+  const [ formatMoney ] = useMonetaryContext();
+
   const [transactions, setTransactions] = useState<Array<TransactionDetail>>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail>();
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
@@ -76,8 +78,8 @@ export default function CategoryTransactions(props: Props) {
               <TableRow key={transaction.id} onClick={() => addToCategory(transaction)}>
                 <TableCell>{formatDate(transaction.bookingDateTime)}</TableCell>
                 <TableCell>{transaction.additionalInformation}</TableCell>
-                <TableCell align="right">{transaction.amount < 0 ? CurrencyService.format(0 - transaction.amount, transaction.currency) : ''}</TableCell>
-                <TableCell align="right">{transaction.amount > 0 ? CurrencyService.format(transaction.amount, transaction.currency) : ''}</TableCell>
+                <TableCell align="right">{transaction.amount < 0 ? formatMoney(0 - transaction.amount, transaction.currency) : ''}</TableCell>
+                <TableCell align="right">{transaction.amount > 0 ? formatMoney(transaction.amount, transaction.currency) : ''}</TableCell>
               </TableRow>
             ))}
           </TableBody>
