@@ -12,7 +12,7 @@ import GraphIcon from '@mui/icons-material/Equalizer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 
-import CurrencyService from '../../services/currency.service';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { AccountDetail } from '../../model/account.model';
 import Avatar from '@mui/material/Avatar';
 
@@ -23,6 +23,7 @@ interface Props extends PropsWithChildren {
 
 export default function AccountList(props: Props) {
   const navigation = useNavigate();
+  const [ formatMoney ] = useMonetaryContext();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
@@ -99,13 +100,13 @@ export default function AccountList(props: Props) {
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.iban}</TableCell>
         <TableCell size="small">{props.account.balance[0].type}</TableCell>
-        <TableCell size="small" >{CurrencyService.format(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
+        <TableCell size="small" >{formatMoney(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
       </TableRow>
 
       { props.account.balance.length > 1 && props.account.balance.slice(1).map( balance =>
         <TableRow key={balance.id}>
           <TableCell size="small">{balance.type}</TableCell>
-          <TableCell size="small">{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
+          <TableCell size="small">{formatMoney(balance.amount, balance.currency)}</TableCell>
         </TableRow>
       )}
 

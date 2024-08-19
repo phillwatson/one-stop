@@ -8,6 +8,7 @@ import NotificationsOnIcon from '@mui/icons-material/NotificationsActive';
 import NotificationsOffIcon from '@mui/icons-material/Notifications';
 import { useCurrentUser } from '../../contexts/user-context';
 import { useNotificationDispatch, useNotifications } from '../../contexts/notifications/context';
+import MonetarySwitch from '../../contexts/monetary/monetary-switch';
 
 interface AppHeaderProps extends MuiAppBarProps {
   drawerWidth: number;
@@ -75,7 +76,10 @@ export default function AppHeader(props: AppHeaderProps) {
           <Typography variant="h6" noWrap component="div">
             { props.title }
           </Typography>
-          <span style={{ marginLeft: "auto" }}>{getName()}</span>
+          <span style={{ marginLeft: "auto" }}>
+            {getName()}
+          </span>
+          <MonetarySwitch></MonetarySwitch>
           { notificationsBell(userNotifications.length === 0) }
       </Toolbar>
     </AppBar>

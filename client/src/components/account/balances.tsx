@@ -3,7 +3,7 @@ import { Paper } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 
 import { AccountDetail } from "../../model/account.model";
-import CurrencyService from '../../services/currency.service';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { formatDate } from '../../util/date-util';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function Balances(props: Props) {
+  const [ formatMoney ] = useMonetaryContext();
   return (
     <Paper sx={{ padding: 2, marginBottom: 1 }}>
       <Grid spacing={1} container direction={"column"}>
@@ -19,7 +20,7 @@ export default function Balances(props: Props) {
           <Grid container key={ balance.id }>
             <Grid>{formatDate(balance.referenceDate)}</Grid>
             <Grid>{balance.type}</Grid>
-            <Grid>{CurrencyService.format(balance.amount, balance.currency)}</Grid>
+            <Grid>{formatMoney(balance.amount, balance.currency)}</Grid>
           </Grid>
         )}
       </Grid>

@@ -1,5 +1,6 @@
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 
+import { MonetaryFormatProvider } from "./contexts/monetary/monetary-context";
 import MessageProvider from "./contexts/messages/context";
 import NotificationProvider from "./contexts/notifications/context";
 import UserProfileProvider from "./contexts/user-context";
@@ -89,12 +90,14 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <MessageProvider>
-      <UserProfileProvider>
-        <NotificationProvider>
-          <RouterProvider router={router} />
-        </NotificationProvider>
-      </UserProfileProvider>
-    </MessageProvider>
+    <MonetaryFormatProvider>
+      <MessageProvider>
+        <UserProfileProvider>
+          <NotificationProvider>
+            <RouterProvider router={router} />
+          </NotificationProvider>
+        </UserProfileProvider>
+      </MessageProvider>
+    </MonetaryFormatProvider>
   );
 }

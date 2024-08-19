@@ -15,7 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
-import CurrencyService from '../../services/currency.service';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import CategoryService from '../../services/category.service';
 import { CategoryGroup, CategoryStatistics } from '../../model/category.model';
 
@@ -41,6 +41,8 @@ function toPieSlice(stat: CategoryStatistics, value: number): PieValueType {
 
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
+  const [ formatMoney ] = useMonetaryContext();
+
   const [ categoryGroups, setCategoryGroups ] = useState<CategoryGroup[]>([]);
   const [ selectedGroup, setSelectedGroup ] = useState<CategoryGroup>();
   const [ statistics, setStatistics ] = useState<CategoryStatisticsUI[]>([]);
@@ -202,7 +204,7 @@ export default function StatisticsGraph(props: Props) {
             <Stack margin={ 0 } marginLeft={ 2 } marginTop={ 0 }>
               { statistics.map(stat =>
                 <FormControlLabel key={ stat.categoryName }
-                  label={ `${stat.categoryName} (${ CurrencyService.format(stat.total, 'GBP')})` }
+                  label={ `${stat.categoryName} (${ formatMoney(stat.total, 'GBP')})` }
                   style={{ padding: 0, margin: 0 }}
                   control= {
                     <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }

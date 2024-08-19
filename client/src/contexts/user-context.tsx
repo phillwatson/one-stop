@@ -2,9 +2,9 @@ import { PropsWithChildren, createContext, useContext, useEffect, useState } fro
 import UserProfile from "../model/user-profile.model";
 import ProfileService from '../services/profile.service'
 
-// /**
-//  * An interface to describe the state that we will pass in the provider.
-//  */
+/**
+ * An interface to describe the state that we will pass in the provider.
+*/
 interface UserProfileContextValue {
   user: UserProfile | undefined;
   setUser: (user: UserProfile | undefined) => void;
@@ -32,7 +32,7 @@ export default function UserProfileProvider(props: PropsWithChildren) {
 
   return (
     <UserContext.Provider value={ { user, setUser }}>
-        { props.children }
+      { props.children }
     </UserContext.Provider>
   );
 }
