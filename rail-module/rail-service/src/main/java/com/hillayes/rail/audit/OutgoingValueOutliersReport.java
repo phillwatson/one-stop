@@ -99,9 +99,11 @@ public class OutgoingValueOutliersReport extends AuditReportTemplate {
 
         Instant majorStartDate = Instant.now().minus(Duration.ofDays(majorAverageDays)).truncatedTo(ChronoUnit.DAYS);
         Instant minorStartDate = Instant.now().minus(Duration.ofDays(minorAverageDays)).truncatedTo(ChronoUnit.DAYS);
-        Instant endDate = Instant.now().plus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS);
+        log.debug("Report parameters [userId: {}, reportName: {}, majorVelocity: {}, minorVelocity: {}, factor: {}]",
+            reportConfig.getUserId(), reportConfig.getName(), majorAverageDays, minorAverageDays, outlierFactor);
 
         // gather transactions from the report source
+        Instant endDate = Instant.now().plus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS);
         List<AccountTransaction> transactions = getReportTransactions(reportConfig, majorStartDate, endDate);
 
         // get the IDs for existing transactions with issues for this report
