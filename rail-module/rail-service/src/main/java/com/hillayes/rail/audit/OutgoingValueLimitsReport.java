@@ -78,6 +78,8 @@ public class OutgoingValueLimitsReport extends AuditReportTemplate {
 
         Instant startDate = Instant.now().minus(Duration.ofDays(averageDays)).truncatedTo(ChronoUnit.DAYS);
         Instant endDate = Instant.now().plus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS);
+        log.debug("Report parameters [userId: {}, reportDays: {}, averageDays: {}, factor: {}]",
+            reportConfig.getUserId(), reportConfig.getName(), reportDays, averageDays, thresholdFactor);
 
         // gather transactions from the report source
         List<AccountTransaction> transactions = getReportTransactions(reportConfig, startDate, endDate);
