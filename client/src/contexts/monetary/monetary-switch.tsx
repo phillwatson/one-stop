@@ -24,6 +24,7 @@ function getTooltip(hidden: boolean) {
 }
 
 export default function MonetarySwitch() {
+  // eslint-disable-next-line
   const [ _, hidden, setHidden ] = useMonetaryContext();
   
   return (

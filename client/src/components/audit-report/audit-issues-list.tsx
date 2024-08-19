@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
@@ -24,7 +24,7 @@ interface IssueUpdate {
 
 export default function AuditIssuesList(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ formatMoney, hidden ] = useMonetaryContext();
+  const [ formatMoney ] = useMonetaryContext();
 
   const [loading, setLoading] = useState(false);
   const [ paginationModel, setPaginationModel ] = useState({ page: 0, pageSize: DEFAULT_PAGE_SIZE });
@@ -120,7 +120,7 @@ export default function AuditIssuesList(props: Props) {
       valueFormatter: (value: any, row: AuditIssue) => row.amount >= 0 ? formatMoney(row.amount, row.currency) : '',
       valueGetter: (value: any, row: AuditIssue) => row.amount
     },
-  ] as GridColDef<AuditIssue>[]}, [ formatMoney, hidden ]);
+  ] as GridColDef<AuditIssue>[]}, [ formatMoney ]);
 
   return (
     <DataGrid rows={ issues.items } rowCount={ issues.total } columns={ getColumnDefs() } 
