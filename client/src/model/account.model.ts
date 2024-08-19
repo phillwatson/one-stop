@@ -1,6 +1,8 @@
 import Institution from "./institution.model"
 import PaginatedList from "./paginated-list.model";
 
+export type Currency = 'EUR' | 'GBP' | 'USD';
+
 export interface TransactionDetail {
   id: string;
   accountId: string;
@@ -8,7 +10,7 @@ export interface TransactionDetail {
   bookingDateTime: string;
   valueDateTime: string;
   amount: number;
-  currency: string;
+  currency: Currency;
   reference: string;
   additionalInformation: string;
   creditorName: string;
@@ -20,14 +22,14 @@ export interface AccountBalance {
   referenceDate: string;
   dateRecorded: string;
   amount: number;
-  currency: string;
+  currency: Currency;
 }
 
 export interface AccountDetail {
   id: string;
   name: string;
   ownerName: string;
-  currency: string;
+  currency: Currency;
   iban: string;
   balance: Array<AccountBalance>;
   institution: Institution;
@@ -37,14 +39,14 @@ export default interface Account {
   id: string;
   name: string;
   ownerName: string;
-  currency: string;
+  currency: Currency;
   iban: string;
   institutionId: string;
   institutionName: string;
 }
 
 export type CurrencyTotal = {
-  [currency: string]: number
+  [currency: Currency | string]: number
 };
 
 export interface PaginatedTransactions extends PaginatedList<TransactionDetail> {

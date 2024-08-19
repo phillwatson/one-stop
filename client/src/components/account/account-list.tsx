@@ -8,7 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import Collapse from '@mui/material/Collapse';
 import { SxProps } from '@mui/material/styles';
 
-import CurrencyService from '../../services/currency.service';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { AccountDetail, AccountBalance } from '../../model/account.model';
 import AccountRow from './account-row';
 import TransactionSummaryList from './transaction-summary';
@@ -26,6 +26,7 @@ const balanceRow: SxProps = {
 };
 
 export default function AccountList(props: Props) {
+  const [ formatMoney ] = useMonetaryContext();
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
   function isSelected(accountId: string) {
@@ -97,7 +98,7 @@ export default function AccountList(props: Props) {
             <TableRow key={balance.id}>
               <TableCell colSpan={6} sx={balanceRow}></TableCell>
               <TableCell>{balance.type}</TableCell>
-              <TableCell>{CurrencyService.format(balance.amount, balance.currency)}</TableCell>
+              <TableCell>{formatMoney(balance.amount, balance.currency)}</TableCell>
             </TableRow>
           )}
         </TableBody>
