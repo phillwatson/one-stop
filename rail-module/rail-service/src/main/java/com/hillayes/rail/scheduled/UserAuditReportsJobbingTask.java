@@ -18,11 +18,10 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Duration;
+import java.util.*;
 
 /**
  * A jobbing task to run the audit reports configured by the identified user.
@@ -42,6 +41,9 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
 
     @Inject
     AuditEventSender auditEventSender;
+
+    @ConfigProperty(name = "one-stop.rail.audit.issues.ack-timeout")
+    Optional<Duration> ackTimeout;
 
     @RegisterForReflection
     public record Payload(
@@ -75,6 +77,11 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
         do {
             reportConfigs = auditReportConfigRepository.findByUserId(userId, page, 10);
             reportConfigs.forEach(config -> {
+                // delete any old acknowledged issues
+                ackTimeout.ifPresent(timeout ->
+                    auditIssueRepository.deleteAcknowledged(config.getId(), timeout)
+                );
+
                 if (!config.isDisabled()) {
                     List<AuditIssue> auditIssues = runReport(config);
                     if (!auditIssues.isEmpty()) {

@@ -7,6 +7,8 @@ import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditIssueSummary;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @ApplicationScoped
@@ -19,9 +21,10 @@ public class AuditIssueRepository extends RepositoryBase<AuditIssue, UUID> {
 
     public Page<AuditIssue> findByConfigId(UUID configId, Boolean acknowledged, int page, int pageSize) {
         if (acknowledged != null) {
-            return pageAll("reportConfigId = :reportConfigId and acknowledged = :acknowledged", page, pageSize,
+            String nullPredicate = (acknowledged == Boolean.TRUE) ? "is not null" : "is null";
+            return pageAll("reportConfigId = :reportConfigId and acknowledgedDateTime " + nullPredicate, page, pageSize,
                 OrderBy.by("bookingDateTime", OrderBy.Direction.Descending),
-                Map.of("reportConfigId", configId, "acknowledged", acknowledged));
+                Map.of("reportConfigId", configId));
         }
 
         return pageAll("reportConfigId = :reportConfigId", page, pageSize,
@@ -33,7 +36,7 @@ public class AuditIssueRepository extends RepositoryBase<AuditIssue, UUID> {
         return getEntityManager().createNativeQuery(
                 "select r.id, r.name, " +
                     "count(ai.id) as total_count, " +
-                    "sum(case when ai.acknowledged = true then 1 else 0 end) as acknowledged_count " +
+                    "sum(case when ai.acknowledged_datetime is null then 0 else 1 end) as acknowledged_count " +
                     "from rails.audit_report_config r " +
                     "join rails.audit_issue ai on ai.report_config_id = r.id " +
                     "where r.user_id = :userId " +
@@ -55,9 +58,20 @@ public class AuditIssueRepository extends RepositoryBase<AuditIssue, UUID> {
      * @param reportConfigId the identified user audit report configuration.
      */
     public void deleteByReportConfig(UUID reportConfigId) {
-        find("reportConfigId", reportConfigId)
-            .stream()
-            .forEach(this::delete);
+        delete("reportConfigId", reportConfigId);
+    }
+
+    /**
+     * Deletes all issues for the identified user audit report configuration that
+     * have been acknowledged for longer than the given duration.
+     * @param reportConfigId the identified user audit report configuration.
+     * @param ackDuration the duration after which acknowledged issues will be deleted.
+     */
+    public void deleteAcknowledged(UUID reportConfigId,
+                                   Duration ackDuration) {
+        Instant timeout = Instant.now().minus(ackDuration);
+        delete("reportConfigId = :reportConfigId AND acknowledgedDateTime < :timeout",
+            Map.of("reportConfigId", reportConfigId, "timeout", timeout));
     }
 
     /**

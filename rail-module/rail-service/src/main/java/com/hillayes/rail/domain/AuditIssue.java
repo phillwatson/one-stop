@@ -54,11 +54,16 @@ public class AuditIssue {
     private Instant bookingDateTime;
 
     /**
-     * Indicates whether the issue has been acknowledged by the user.
+     * Indicates if, and when, the issue was acknowledged by the user.
      */
     @Setter
-    @Column(name = "acknowledged", nullable = false)
-    private boolean acknowledged;
+    @Column(name = "acknowledged_datetime")
+    private Instant acknowledgedDateTime;
+
+    @Transient
+    public boolean isAcknowledged() {
+        return acknowledgedDateTime != null;
+    }
 
     /**
      * A convenience factor method to create a new issue for the identified report and transaction.
@@ -72,7 +77,7 @@ public class AuditIssue {
             .reportConfigId(reportConfig.getId())
             .transactionId(transaction.getId())
             .bookingDateTime(transaction.getBookingDateTime())
-            .acknowledged(false)
+            .acknowledgedDateTime(null)
             .build();
     }
 }

@@ -169,9 +169,9 @@ public class TestData {
         AuditIssue.Builder builder = AuditIssue.builder()
             .userId(userId)
             .reportConfigId(reportConfigId)
-            .acknowledged(nextBoolean())
-            .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
-            .transactionId(UUID.randomUUID());
+            .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))
+            .transactionId(UUID.randomUUID())
+            .acknowledgedDateTime(nextBoolean() ? null : Instant.now().minus(Duration.ofDays(1)));
 
         if (modifier != null) {
             modifier.accept(builder);
