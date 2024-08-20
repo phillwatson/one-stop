@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -243,14 +244,22 @@ public class AuditIssueRepositoryTest {
             .toList();
 
         // and: each report config has a list of audit issues - some of which were acknowledged a day ago
+        AtomicInteger count = new AtomicInteger();
         Map<UUID, List<AuditIssue>> reportIssues = reportConfigs.stream()
-            .flatMap(reportConfig -> transactions.stream()
-                .map(transaction -> fixture.save(
-                    mockAuditIssue(reportConfig, i -> i
+            .flatMap(reportConfig -> transactions.stream().map(transaction -> {
+                if (count.incrementAndGet() >= transactions.size()) {
+                    count.set(0);
+                }
+                Instant ackDateTime = (count.get() < transactions.size() / 2)
+                    ? Instant.now().minus(Duration.ofDays(1))
+                    : null;
+
+                return fixture.save(
+                    mockAuditIssue(reportConfig, issue -> issue
                         .transactionId(transaction.getId())
-                        .acknowledgedDateTime(nextBoolean() ? null : Instant.now().minus(Duration.ofDays(1)))
-                    )
-                ))
+                        .acknowledgedDateTime(ackDateTime)
+                    ));
+                })
             )
             .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
 
