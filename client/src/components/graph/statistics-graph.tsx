@@ -5,12 +5,16 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { PieValueType } from '@mui/x-charts/models/seriesType/pie';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
 
@@ -29,12 +33,18 @@ interface CategoryStatisticsUI extends CategoryStatistics {
   selected: boolean;
 };
 
-function toPieSlice(stat: CategoryStatistics, value: number): PieValueType {
-  const p: PieValueType = {
+// include statistic in each pie slice data
+interface StatisticsPieValueType extends PieValueType {
+  stat: CategoryStatistics
+}
+
+function toPieSlice(stat: CategoryStatistics, value: number): StatisticsPieValueType {
+  const p: StatisticsPieValueType = {
     id: stat.categoryId || '',
     value: value,
     label: stat.categoryName,
-    color: stat.colour
+    color: stat.colour,
+    stat: stat
   };
   return p;
 }
@@ -87,49 +97,60 @@ export default function StatisticsGraph(props: Props) {
     setSelectedGroup(categoryGroups.find(group => group.id === groupId));
   }
 
-  const seriesData = useMemo<any>(() => {
-    // an array of two arrays, the first for credit totals and the second for debit.
-    const series = statistics
+  /**
+   * Construct pie slice data from the statistics. Recreate when money format changes.
+   * @return an array of two arrays, the first for credit totals and the second for debit.
+   */
+  const pieSlices = useMemo<Array<Array<StatisticsPieValueType>>>(() => {
+    return statistics
       .filter(stat => stat.selected)
       .map(stat => toPieSlice(stat, stat.total))
       .reduce((acc, slice) => {
         const index = slice.value > 0 ? 0 : 1;
         slice.value = Math.abs(slice.value);
+        slice.label = `${slice.stat.categoryName} (${formatMoney(slice.stat.total, 'GBP')})`;
         acc[index].push(slice);
 
         return acc;
-      }, Array.of([], []) as Array<Array<PieValueType>>);
+      }, Array.of([], []) as Array<Array<StatisticsPieValueType>>);
+  }, [ statistics, formatMoney ])
 
-      // find totals for both credit and debit
-      const totalCredit = series[0].reduce((acc, slice) => acc + slice.value, 0);
-      const totalDebit = series[1].reduce((acc, slice) => acc + slice.value, 0);
+  /**
+   * Constructs the data for the pie series. Takes the current 'pieSlices' and calculates
+   * the percentage of the chart that each series consumes.
+   */
+  const seriesData = useMemo<any>(() => {
+    // find totals for both credit and debit
+    const totalCredit = pieSlices[0].reduce((acc, slice) => acc + slice.value, 0);
+    const totalDebit = pieSlices[1].reduce((acc, slice) => acc + slice.value, 0);
 
-      var percentage = 0;
-      var angle = 360;
-      if (totalCredit > 0 && totalDebit > 0) {
-        // find percentage difference between the two totals
-        percentage = (totalCredit - totalDebit) * 100 / ((totalDebit > totalCredit) ? totalDebit : totalCredit);
+    var percentage = 0;
+    var angle = 360;
+    if (totalCredit > 0 && totalDebit > 0) {
+      // find percentage difference between the two totals
+      percentage = (totalCredit - totalDebit) * 100 / ((totalDebit > totalCredit) ? totalDebit : totalCredit);
 
-        // find percentage of 360 degrees
-        angle = 360 - (Math.abs(percentage) * 3.6);
-        //console.log(`debit: ${totalDebit}, credit: ${totalCredit}, percentage: ${percentage}, angle: ${angle}`);
+      // find percentage of 360 degrees
+      angle = 360 - (Math.abs(percentage) * 3.6);
+    }
+
+    return [
+      {
+        id: 0, data: pieSlices[0], highlightScope: { faded: 'global', highlighted: 'item' },
+        outerRadius: pieSlices[1].length > 0 ? 100 : 200, innerRadius: 10, cornerRadius: 5, paddingAngle: 5,
+        endAngle: (percentage < 0) ? angle : 360,
+        faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' },
+        valueFormatter: (slice: StatisticsPieValueType) => ''
+      },
+      {
+        id: 1, data: pieSlices[1], highlightScope: { faded: 'global', highlighted: 'item' },
+        innerRadius: pieSlices[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
+        endAngle: (percentage > 0) ? angle : 360,
+        faded: { innerRadius: pieSlices[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' },
+        valueFormatter: (slice: StatisticsPieValueType) => ''
       }
-
-      return [
-        {
-          id: 0, data: series[0], highlightScope: { faded: 'global', highlighted: 'item' },
-          outerRadius: series[1].length > 0 ? 100 : 200, innerRadius: 10, cornerRadius: 5, paddingAngle: 5,
-          endAngle: (percentage < 0) ? angle : 360,
-          faded: { innerRadius: 8, additionalRadius: -8, color: 'gray' }
-        },
-        {
-          id: 1, data: series[1], highlightScope: { faded: 'global', highlighted: 'item' },
-          innerRadius: series[0].length > 0 ? 110 : 50, outerRadius: 200, cornerRadius: 5, paddingAngle: 2,
-          endAngle: (percentage > 0) ? angle : 360,
-          faded: { innerRadius: series[0].length > 0 ? 108 : 48, additionalRadius: -8, color: 'gray' }
-        }
-      ]
-  }, [ statistics ]);
+    ]
+  }, [ pieSlices ]);
 
   function toggleCategory(categoryId: string | undefined, selected: boolean) {
     setStatistics(statistics.map(stat => {
@@ -144,10 +165,9 @@ export default function StatisticsGraph(props: Props) {
   const selectedStat = useRef<CategoryStatisticsUI | undefined>();
 
   function selectCategory(selectedSeries: number, selectedIndex: number) {
-    var categoryId: string | undefined = seriesData[selectedSeries].data[selectedIndex].id as string;
-    if (categoryId === '') categoryId = undefined; // uncategorised transactions
+    const data = seriesData[selectedSeries].data[selectedIndex];
 
-    const stat = statistics.find(stat => stat.categoryId === categoryId);
+    const stat = data.stat;
     if (stat !== selectedStat.current) {
       selectedStat.current = stat;
       if (stat !== undefined) {
