@@ -61,6 +61,11 @@ one-stop:
       uncategorised-name: Uncategorised
       default-colour: "#dee0da"
 
+    audit:
+      issues:
+        # delete acknowledged audit issues after 2 days
+        ack-timeout: P2D
+
     caches: # the duration of various caches - specified as Duration string
       institutions: PT6H
       account-details: PT5H
