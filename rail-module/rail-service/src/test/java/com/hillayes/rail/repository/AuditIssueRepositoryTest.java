@@ -7,11 +7,14 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.*;
+import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -223,6 +226,49 @@ public class AuditIssueRepositoryTest {
                 assertTrue(result.isPresent());
                 assertEquals(issue, result.get());
             });
+        });
+    }
+
+    @Test
+    public void testDeleteAcknowledged() {
+        // given: a user identity
+        UUID userId = UUID.randomUUID();
+
+        // and: the user has an account with transactions
+        List<AccountTransaction> transactions = mockTransactions(userId);
+
+        // and: a collection audit report configs
+        List<AuditReportConfig> reportConfigs = IntStream.range(0, 5)
+            .mapToObj(i -> auditReportConfigRepository.save(mockAuditReportConfig(userId)))
+            .toList();
+
+        // and: each report config has a list of audit issues - some of which were acknowledged a day ago
+        Map<UUID, List<AuditIssue>> reportIssues = reportConfigs.stream()
+            .flatMap(reportConfig -> transactions.stream()
+                .map(transaction -> fixture.save(
+                    mockAuditIssue(reportConfig, i -> i
+                        .transactionId(transaction.getId())
+                        .acknowledgedDateTime(nextBoolean() ? null : Instant.now().minus(Duration.ofDays(1)))
+                    )
+                ))
+            )
+            .collect(Collectors.groupingBy(AuditIssue::getReportConfigId));
+
+        // make sure that the issues have been saved and cache is cleared
+        fixture.flush();
+        fixture.getEntityManager().clear();
+
+        Duration duration = Duration.ofHours(5);
+        reportIssues.forEach((configId, issues) -> {
+            // and: the acknowledged issues CAN be retrieved
+            assertTrue(fixture.findByConfigId(configId, true, 0, 10).getTotalCount() > 0);
+
+            // when: we delete the acknowledged issues for each report config
+            fixture.deleteAcknowledged(configId, duration);
+
+            // then: the acknowledged issues can no longer be retrieved
+            Page<AuditIssue> acknowledgedIssues = fixture.findByConfigId(configId, true, 0, 10);
+            assertEquals(0, acknowledgedIssues.getTotalCount());
         });
     }
 

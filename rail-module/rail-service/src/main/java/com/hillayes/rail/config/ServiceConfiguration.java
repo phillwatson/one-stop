@@ -36,6 +36,8 @@ public interface ServiceConfiguration {
 
     Categories categories();
 
+    Audit audit();
+
     /**
      * The detail that describes a country supported by the rail service.
      */
@@ -70,5 +72,13 @@ public interface ServiceConfiguration {
          */
         @WithDefault("#dee0da")
         String defaultColour();
+    }
+
+    interface Audit {
+        Issues issues();
+    }
+
+    interface Issues {
+        Optional<Duration> ackTimeout();
     }
 }

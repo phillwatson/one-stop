@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -150,7 +151,7 @@ public class AuditReportService {
         AuditIssue issue = auditIssueRepository.findByIdOptional(issueId)
             .filter(i -> i.getUserId().equals(userId))
             .orElseThrow(() -> new NotFoundException("AuditIssue", issueId));
-        issue.setAcknowledged(acknowledged);
+        issue.setAcknowledgedDateTime(acknowledged ? Instant.now() : null);
         return auditIssueRepository.save(issue);
     }
 
