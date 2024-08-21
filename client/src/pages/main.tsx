@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 
 import Box from '@mui/material/Box';
@@ -13,15 +13,16 @@ import AuditIssuesIcon from '@mui/icons-material/GppMaybe';
 import { useCurrentUser } from "../contexts/user-context";
 import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
-import { AppMenu, AppMenuItem } from "../components/app-menu";
-import { MenuItem } from "../components/app-menu/app-menu-item";
+import { AppMenu } from "../components/app-menu";
+import MenuItemDef from "../components/app-menu/menu-item-def";
 import ProfileService from "../services/profile.service";
 import SignIn from "./sign-in";
 
 const appTitle = "One Stop";
 
 export default function MainPage() {
-  const [menuOpen, setMenuOpen] = React.useState(true);
+  const [user, setUser] = useCurrentUser();
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
     setMenuOpen(true);
@@ -31,24 +32,29 @@ export default function MainPage() {
     setMenuOpen(false);
   };
 
-  const [user, setUser] = useCurrentUser();
+  const logout = useCallback(() => {
+    handleDrawerClose();
+    ProfileService.logout()
+      .finally(() => setUser(undefined) );
+  }, [ setUser ]);
 
-  const menuItems: MenuItem[] = useMemo(() => {
-    function logout() {
-      ProfileService.logout().finally(() => setUser(undefined) );
-    };
-
+  const mainMenuItems: MenuItemDef[] = useMemo(() => {
     return [
       { label: 'Accounts', route: 'accounts', icon: <Savings/>, action: handleDrawerClose },
       { label: 'Categories', route: 'categories', icon: <CategoryIcon/>, action: handleDrawerClose },
       { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/>, action: handleDrawerClose },
       { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: handleDrawerClose },
       { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: handleDrawerClose },
-      { label: 'Profile', route: 'profile', icon: <Person/>, action: handleDrawerClose },
-      { label: 'Logout', route: '', icon: <Logout/>, action: logout }
+      { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
     ];
-  }, [setUser]);
-   
+  }, [ logout ]);
+
+  const profileMenuItems: MenuItemDef[] = useMemo(() => {
+    return [
+      { label: 'Profile', route: 'profile', icon: <Person/> },
+      { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
+    ];
+  }, [ logout ]);
 
   if (!user) {
     return (<SignIn/>);
@@ -56,13 +62,9 @@ export default function MainPage() {
 
   return (
     <Box padding={{ xs: 1, sm: 2 }}>
-      <AppHeader onClick={ handleDrawerOpen } title={ appTitle }/>
+      <AppHeader onClick={ handleDrawerOpen } title={ appTitle } menuItems={ profileMenuItems }/>
       <SideBar open={ menuOpen } onClose={ handleDrawerClose }>
-        <AppMenu>
-          {menuItems && menuItems.map((item, index) => 
-            <AppMenuItem key={ index } { ...item }/>
-          )}
-        </AppMenu>
+        <AppMenu menuItems={ mainMenuItems } />
       </SideBar>
       <Box style={{ paddingTop: "60px" }}>
         <Outlet />
