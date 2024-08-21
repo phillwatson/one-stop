@@ -16,6 +16,8 @@ An alternative implementation is presented in the branch "modulith". That
 implementation demonstrates how the same application can be built, and maintained,
 as a single module.
 
+![Architecture](./docs/one-stop-arch.png)
+
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
 consist of services (that provide client functionality) and libraries (that provide
