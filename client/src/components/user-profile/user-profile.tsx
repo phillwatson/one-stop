@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
 import UserProfile from "../../model/user-profile.model";
@@ -11,7 +12,7 @@ export default function UserProfileForm(props: Props) {
   const [profile, setProfile] = [ props.profile, props.setter ];
 
   return (
-    <>
+    <Box paddingLeft={{ xs: 0, sm: 1, md: 8, lg: 21 }} paddingRight={{ xs: 0, sm: 1, md: 8, lg: 21 }}>
       <TextField id="username" label="Username" required variant="outlined" fullWidth margin="normal"
         value={profile.username} onChange={e => setProfile({...profile, username: e.target.value})}/>
 
@@ -32,6 +33,6 @@ export default function UserProfileForm(props: Props) {
 
       <TextField id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
-    </>
+    </Box>
   );
 }

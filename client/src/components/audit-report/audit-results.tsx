@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 
-import Paper from '@mui/material/Paper';
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
@@ -9,10 +12,7 @@ import AuditReportService from "../../services/audit-report.service";
 import { AuditIssueSummary, AuditReportConfig } from '../../model/audit-report.model';
 import AuditIssuesList from './audit-issues-list';
 
-interface Props {
-}
-
-export default function AuditReportResults(props: Props) {
+export default function AuditReportResults() {
   const showMessage = useMessageDispatch();
 
   const [ issueSummaries, setIssueSummaries ] = useState<Array<AuditIssueSummary>>([]);
@@ -57,9 +57,9 @@ export default function AuditReportResults(props: Props) {
             { selectedReportConfigId && selectedReportConfig &&
               <>
                 <Typography variant='caption' >{ selectedReportConfig.description }</Typography>
-                <Paper elevation={ 2 } sx={{ padding: 1}}>
+                <Box padding= { 1 }>
                   <AuditIssuesList reportConfig={ selectedReportConfig } />
-                </Paper>
+                </Box>
               </>
             }
             </AccordionDetails>

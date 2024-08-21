@@ -193,7 +193,7 @@ export default function EditAuditReportConfig(props: Props) {
   }
 
   return (
-    <Grid container direction="column" paddingLeft={{ sm: 1, md: 5, lg: 25 }} paddingRight={{ sm: 1, md: 5, lg: 25 }}>
+    <Grid container direction="column" paddingLeft={{ xs: 0, sm: 1, md: 9, lg: 17 }} paddingRight={{ xs: 0, sm: 1, md: 9, lg: 17 }}>
       <form onSubmit={ handleSubmit }>
         <FormControl fullWidth margin="normal" sx={{ marginBottom: 3 }}>
           <FormControlLabel label="Disabled" control={

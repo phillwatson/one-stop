@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
 
-import Paper from '@mui/material/Paper';
-
 import PageHeader from "../components/page-header/page-header";
 import AuditReportConfigList from "../components/audit-report/audit-config-list";
 import { AuditReportConfig } from '../model/audit-report.model';
@@ -19,11 +17,9 @@ export default function TransactionAuditReports() {
 
   return (
     <PageHeader title="Transaction Audit Reports">
-      <Paper elevation={ 3 } sx={{ padding: 1}}>
-        <AuditReportConfigList
-          onAdd={ handleAddConfig }
-          onEdit={ handleEditConfig } />
-      </Paper>
+      <AuditReportConfigList
+        onAdd={ handleAddConfig }
+        onEdit={ handleEditConfig } />
     </PageHeader>
   );
 }

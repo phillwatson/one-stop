@@ -11,6 +11,19 @@ export default interface UserProfile {
   dateOnboarded: Date | undefined;
 }
 
+export const NULL_PROFILE: UserProfile = {
+  id: undefined, 
+  username: '',
+  preferredName: '',
+  title: '',
+  givenName: '',
+  familyName: '',
+  email: '',
+  phone: '',
+  dateCreated: undefined,
+  dateOnboarded: undefined
+};
+
 export interface UserAuthProvidersResponse {
   authProviders: Array<UserAuthProvider>;
 }
