@@ -4,12 +4,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsOnIcon from '@mui/icons-material/NotificationsActive';
+import NotificationsOffIcon from '@mui/icons-material/Notifications';
 
 import { useCurrentUser } from '../../contexts/user-context';
 import MonetarySwitch from '../../contexts/monetary/monetary-switch';
 import { useNotificationDispatch, useNotifications } from '../../contexts/notifications/context';
-import NotificationsOnIcon from '@mui/icons-material/NotificationsActive';
-import NotificationsOffIcon from '@mui/icons-material/Notifications';
 
 interface AppHeaderProps extends MuiAppBarProps {
   title?: string;

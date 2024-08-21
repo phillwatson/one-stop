@@ -13,10 +13,10 @@ export default function StatisticsPage() {
 
   return (
     <PageHeader title="Transaction Statistics" >
-      <StatisticsGraph onCategorySelected={ showTransactions }/>
+      <StatisticsGraph onCategorySelected={ showTransactions } elevation={ 1 }/>
 
       { transactionProps &&
-        <CategoryTransactions
+        <CategoryTransactions elevation={ 1 }
           category={ transactionProps.category }
           fromDate={ transactionProps.fromDate }
           toDate={ transactionProps.toDate } />

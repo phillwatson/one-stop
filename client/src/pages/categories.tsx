@@ -68,7 +68,7 @@ export default function Categories() {
     <PageHeader title="Transaction Category Groups">
       <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
         <Grid item width="49%">
-          <CategoryGroupList elevation={ 3 }
+          <CategoryGroupList elevation={ 1 }
             groups={ groups }
             onSelected={ selectGroup }
             onAdd={ addGroup }
@@ -76,7 +76,7 @@ export default function Categories() {
             onDelete={ deleteGroup }/>
         </Grid>
         <Grid item width="49%">
-          <CategoryList elevation={ 3 } group={ selectedGroup } categories={ categories }
+          <CategoryList elevation={ 1 } group={ selectedGroup } categories={ categories }
             onAdd={ addCategory }
             onEdit={ editCategory }
             onDelete={ deleteCategory }/>

@@ -55,7 +55,7 @@ export default function MainPage() {
   }
 
   return (
-    <Box padding={ 2 }>
+    <Box padding={{ xs: 1, sm: 2 }}>
       <AppHeader onClick={ handleDrawerOpen } title={ appTitle }/>
       <SideBar open={ menuOpen } onClose={ handleDrawerClose }>
         <AppMenu>

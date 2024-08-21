@@ -65,32 +65,30 @@ export default function UpdateProfile() {
 
   return (
     <PageHeader title="Profile information" >
-      <Paper elevation={ 3 } sx={{ padding: 1}}>
-        <form  onSubmit={ handleSubmit }>
-          <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
-            <Grid item padding={ 5 }>
-              <UserProfileForm profile={ profile } setter={ setProfile }/>
-            </Grid>
+      <form onSubmit={ handleSubmit }>
+        <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
+          <Grid item padding={ 5 }>
+            <UserProfileForm profile={ profile } setter={ setProfile }/>
+          </Grid>
 
-            <Grid container direction="row" justifyContent="center" columns={ 2 } columnGap={ 2 } rowGap={ 2 }>
-              <Grid item>
-                <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
-                  <AuthProviderList/>
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
-                  <UserConsentList/>
-                </Paper>
-              </Grid>
+          <Grid container direction="row" justifyContent="center" columns={ 2 } columnGap={ 2 } rowGap={ 2 }>
+            <Grid item>
+              <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+                <AuthProviderList/>
+              </Paper>
             </Grid>
-
-            <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 2 }>
-              <Button type="submit" variant="contained" disabled={validateForm().length > 0}>Save</Button>
+            <Grid item>
+              <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+                <UserConsentList/>
+              </Paper>
             </Grid>
           </Grid>
-        </form>
-      </Paper>
+
+          <Grid container direction="row" justifyContent="flex-end" columnGap={ 2 } padding={ 2 }>
+            <Button type="submit" variant="contained" disabled={validateForm().length > 0}>Save</Button>
+          </Grid>
+        </Grid>
+      </form>
     </PageHeader>
   );
 }
