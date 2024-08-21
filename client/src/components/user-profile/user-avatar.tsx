@@ -1,16 +1,14 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
-import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Avatar from '@mui/material/Avatar';
-import MenuList from '@mui/material/MenuList';
-import Popper from '@mui/material/Popper';
-import Grow from '@mui/material/Grow';
-import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 
 import UserProfile from '../../model/user-profile.model';
 import AppMenuItem from '../app-menu/app-menu-item';
 import MenuItemDef from '../app-menu/menu-item-def';
+import Menu from '@mui/material/Menu';
+import Paper from '@mui/material/Paper';
+import { SlotComponentProps } from '@mui/material/utils/types';
 
 function getName(user?: UserProfile): string | undefined {
   if (!user) {
@@ -46,14 +44,35 @@ function stringToColor(value: string) {
   return color;
 }
 
-function stringAvatar(name?: string) {
+const MenuContainer: SlotComponentProps<typeof Paper, {}, {}> = {
+  elevation: 0,
+  sx: {
+    overflow: 'visible',
+    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+    mt: 1.5,
+    '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1, },
+    '&::before': {
+      content: '""',
+      display: 'block',
+      position: 'absolute',
+      top: 0,
+      right: 14,
+      width: 10,
+      height: 10,
+      bgcolor: 'background.paper',
+      transform: 'translateY(-50%) rotate(45deg)',
+      zIndex: 0
+    }
+  }
+}
+
+function avaterProps(name?: string) {
   if (! name) {
     return {};
   }
-  const nameParts = name.split(' ', 2);
   return {
     sx: { bgcolor: stringToColor(name), width: 38, height: 38 },
-    children: `${ nameParts.map(p => p[0]) }`
+    children: `${ name[0] }`
   };
 }
 
@@ -63,38 +82,32 @@ interface Props {
 }
 
 export default function UserAvatar(props: Props) {
-  const anchorRef = useRef<null | HTMLElement>(null);
-  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-  function toggleMenu() {
-    setOpen(! open);
-  }
+  function openMenu(event: React.MouseEvent<HTMLElement>) {
+    setAnchorEl(event.currentTarget);
+  };
 
   function closeMenu() {
-    setOpen(false);
+    setAnchorEl(null);
   }
 
   return (
-    <Box ref={ anchorRef }>
-      <Avatar {...stringAvatar(getName(props.user))} role={ getName(props.user) } onClick={ toggleMenu }/>
+    <Box>
+      <Avatar {...avaterProps(getName(props.user))} role={ getName(props.user) } onClick={ openMenu }/>
  
       { props.menuItems && props.menuItems.length > 0 &&
-        <Popper placement="bottom-end" transition disablePortal
-          open={open} anchorEl={anchorRef.current}>
-          {({ TransitionProps }) => (
-            <Grow {...TransitionProps} style={{ transformOrigin: 'left top' }} >
-              <Paper>
-                <ClickAwayListener onClickAway={ closeMenu }>
-                  <MenuList id="user-menu" autoFocusItem={ open }>
-                    { props.menuItems && props.menuItems.map((item, index) => 
-                      <AppMenuItem key={ index } menuDef={ item } onClick={ closeMenu }/>
-                    )}
-                  </MenuList>
-                </ClickAwayListener>
-              </Paper>
-            </Grow>
-          )}
-        </Popper>
+        <Menu id="profile-menu"
+          anchorEl={anchorEl} open={open} onClose={ closeMenu } onClick={ closeMenu }
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          slotProps={{ paper: MenuContainer }}
+        >
+        { props.menuItems && props.menuItems.map((item, index) => 
+          <AppMenuItem key={ index } menuDef={ item } onClick={ closeMenu }/>
+        )}
+      </Menu>
       }
     </Box>
   );

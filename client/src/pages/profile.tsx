@@ -8,30 +8,17 @@ import { useMessageDispatch } from "../contexts/messages/context";
 import { useCurrentUser } from "../contexts/user-context";
 import UserProfileForm from "../components/user-profile/user-profile";
 import ProfileService from '../services/profile.service'
-import UserProfile from "../model/user-profile.model";
+import UserProfile, { NULL_PROFILE } from "../model/user-profile.model";
 import UserConsentList from "../components/consents/user-consents";
 import AuthProviderList from "../components/auth-providers/auth-provider-list";
 
 import PageHeader from "../components/page-header/page-header";
 
-const emptyProfile: UserProfile = {
-  id: undefined, 
-  username: '',
-  preferredName: '',
-  title: '',
-  givenName: '',
-  familyName: '',
-  email: '',
-  phone: '',
-  dateCreated: undefined,
-  dateOnboarded: undefined
-};
-
 export default function UpdateProfile() {
   const showMessage = useMessageDispatch();
   const [ currentUser, setCurrentUser ] = useCurrentUser();
 
-  const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : emptyProfile);
+  const [profile, setProfile] = useState<UserProfile>(currentUser ? currentUser : NULL_PROFILE);
 
   function validateForm(): Array<string> {
     const errors = Array<string>();
@@ -64,7 +51,7 @@ export default function UpdateProfile() {
   }
 
   return (
-    <PageHeader title="Profile information" >
+    <PageHeader title="Profile Information" >
       <form onSubmit={ handleSubmit }>
         <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
           <Grid item padding={ 5 }>
