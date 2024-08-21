@@ -4,32 +4,23 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+
+import { useCurrentUser } from '../../contexts/user-context';
+import MonetarySwitch from '../../contexts/monetary/monetary-switch';
+import { useNotificationDispatch, useNotifications } from '../../contexts/notifications/context';
 import NotificationsOnIcon from '@mui/icons-material/NotificationsActive';
 import NotificationsOffIcon from '@mui/icons-material/Notifications';
-import { useCurrentUser } from '../../contexts/user-context';
-import { useNotificationDispatch, useNotifications } from '../../contexts/notifications/context';
-import MonetarySwitch from '../../contexts/monetary/monetary-switch';
 
 interface AppHeaderProps extends MuiAppBarProps {
-  drawerWidth: number;
-  open?: boolean;
   title?: string;
   onClick?: React.MouseEventHandler | undefined;
 }
 
-const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth' })
-<AppHeaderProps>(({ theme, open, drawerWidth }) => ({
+const AppBar = styled(MuiAppBar)
+<AppHeaderProps>(({ theme }) => ({
   transition: theme.transitions.create(['margin', 'width'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
   }),
 }));
 
@@ -66,10 +57,10 @@ export default function AppHeader(props: AppHeaderProps) {
   }
 
   return (
-    <AppBar position="fixed" open={ props.open } drawerWidth={ props.drawerWidth }>
+    <AppBar position="fixed">
       <Toolbar>
           <IconButton color="inherit" aria-label="open drawer" onClick={ props.onClick }
-           edge="start" sx={{ mr: 2, ...(props.open && { display: 'none' }) }}>
+           edge="start">
             <MenuIcon />
           </IconButton>
 
@@ -77,7 +68,7 @@ export default function AppHeader(props: AppHeaderProps) {
             { props.title }
           </Typography>
           <span style={{ marginLeft: "auto" }}>
-            {getName()}
+            { getName() }
           </span>
           <MonetarySwitch></MonetarySwitch>
           { notificationsBell(userNotifications.length === 0) }

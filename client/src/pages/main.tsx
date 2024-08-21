@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Outlet } from "react-router-dom";
 
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Logout from '@mui/icons-material/Logout';
 import Person from '@mui/icons-material/Person';
@@ -11,45 +10,25 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import AuditReportIcon from '@mui/icons-material/VerifiedUser';
 import AuditIssuesIcon from '@mui/icons-material/GppMaybe';
 
+import { useCurrentUser } from "../contexts/user-context";
 import AppHeader from "../components/app-header/app-header";
 import SideBar from '../components/side-bar/side-bar';
 import { AppMenu, AppMenuItem } from "../components/app-menu";
 import { MenuItem } from "../components/app-menu/app-menu-item";
-import { useCurrentUser } from "../contexts/user-context";
 import ProfileService from "../services/profile.service";
 import SignIn from "./sign-in";
 
 const appTitle = "One Stop";
-const drawerWidth = 240;
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth' })
-  <{ open?: boolean, drawerWidth: number; }>
-(({ theme, open }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create('margin', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginLeft: `-${drawerWidth}px`,
-  ...(open && {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-  }),
-}));
 
 export default function MainPage() {
-  const [open, setOpen] = React.useState(true);
+  const [menuOpen, setMenuOpen] = React.useState(true);
 
   const handleDrawerOpen = () => {
-    setOpen(true);
+    setMenuOpen(true);
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    setMenuOpen(false);
   };
 
   const [user, setUser] = useCurrentUser();
@@ -60,13 +39,13 @@ export default function MainPage() {
     };
 
     return [
-      { label: 'Accounts', route: 'accounts', icon: <Savings/> },
-      { label: 'Categories', route: 'categories', icon: <CategoryIcon/> },
-      { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/> },
-      { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/> },
-      { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/> },
-      { label: 'Profile', route: 'profile', icon: <Person/> },
-      { label: 'Logout', route: '', icon: <Logout/>, action: () => { logout() } }
+      { label: 'Accounts', route: 'accounts', icon: <Savings/>, action: handleDrawerClose },
+      { label: 'Categories', route: 'categories', icon: <CategoryIcon/>, action: handleDrawerClose },
+      { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/>, action: handleDrawerClose },
+      { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: handleDrawerClose },
+      { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: handleDrawerClose },
+      { label: 'Profile', route: 'profile', icon: <Person/>, action: handleDrawerClose },
+      { label: 'Logout', route: '', icon: <Logout/>, action: logout }
     ];
   }, [setUser]);
    
@@ -76,18 +55,18 @@ export default function MainPage() {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppHeader drawerWidth={ drawerWidth } open={ open } onClick={ handleDrawerOpen } title={ appTitle }/>
-      <SideBar drawerWidth={ drawerWidth } open={open} onClose={ handleDrawerClose }>
+    <Box padding={ 2 }>
+      <AppHeader onClick={ handleDrawerOpen } title={ appTitle }/>
+      <SideBar open={ menuOpen } onClose={ handleDrawerClose }>
         <AppMenu>
           {menuItems && menuItems.map((item, index) => 
             <AppMenuItem key={ index } { ...item }/>
           )}
         </AppMenu>
       </SideBar>
-      <Main open={ open } drawerWidth={ drawerWidth } style={{ paddingTop: "90px" }}>
+      <Box style={{ paddingTop: "60px" }}>
         <Outlet />
-      </Main>
+      </Box>
     </Box>
   );
 }
