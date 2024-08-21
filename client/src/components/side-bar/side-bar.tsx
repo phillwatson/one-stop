@@ -16,34 +16,33 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 interface SizeBarProps extends React.PropsWithChildren {
     open?: boolean;
-    drawerWidth: number;
     onClose?: React.MouseEventHandler | undefined;
 }
 
 export default function SizeBar(props: SizeBarProps) {
   return (
     <Drawer
-        sx={{
-            width: props.drawerWidth,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: props.drawerWidth,
-              boxSizing: 'border-box',
-            },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={ props.open }
-        >
+      sx={{
+          width: 240,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: 240,
+            boxSizing: 'border-box',
+          }
+      }}
+      anchor="left"
+      open={ props.open }
+      onClose={ props.onClose }
+      >
 
-        <DrawerHeader>
-          <IconButton onClick={ props.onClose }>
-            <ChevronLeftIcon />
-          </IconButton>
-        </DrawerHeader>
+      <DrawerHeader onClick={ props.onClose }>
+        <IconButton>
+          <ChevronLeftIcon />
+        </IconButton>
+      </DrawerHeader>
 
-        <Divider />
-        { props.children }
+      <Divider />
+      { props.children }
     </Drawer>
   );
 }

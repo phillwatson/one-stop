@@ -1,15 +1,18 @@
-import List from '@mui/material/List';
-import { PropsWithChildren } from 'react';
+import MenuList from '@mui/material/MenuList';
 
-interface AppMenuProps extends PropsWithChildren {
+import AppMenuItem from './app-menu-item';
+import MenuItemDef from './menu-item-def';
+
+interface Props  {
+  menuItems?: MenuItemDef[]
 }
 
-export default function AppMenu(props: AppMenuProps) {
+export default function AppMenu(props: Props) {
   return (
-    <>
-      <List>
-        { props.children }
-      </List>
-    </>
+    <MenuList>
+      { props.menuItems && props.menuItems.map((item, index) => 
+        <AppMenuItem key={ index } sx={{ padding: 2 }} menuDef={ item }/>
+      )}
+    </MenuList>
   );
 }

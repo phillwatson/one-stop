@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import Paper from '@mui/material/Paper';
-
 import { useMessageDispatch } from '../contexts/messages/context';
 import AuditReportService from "../services/audit-report.service";
 import { AuditReportConfig } from '../model/audit-report.model';
@@ -35,9 +33,7 @@ export default function TransactionAuditReportConfig() {
 
   return (
     <PageHeader title="Transaction Audit Report Configuration" >
-      <Paper elevation={ 3 } sx={{ padding: 1}}>
-        <EditAuditReportConfig reportConfig={ reportConfig } onSubmit={ handleSubmit } onCancel={ handleCancel } />
-      </Paper>
+      <EditAuditReportConfig reportConfig={ reportConfig } onSubmit={ handleSubmit } onCancel={ handleCancel } />
     </PageHeader>
   )
 }
