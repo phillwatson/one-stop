@@ -6,15 +6,18 @@ import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.audit.AuditReportTemplate;
 import com.hillayes.rail.domain.AuditIssue;
+import com.hillayes.rail.domain.AuditIssueSummary;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.errors.AuditReportConfigAlreadyExistsException;
 import com.hillayes.rail.repository.AuditIssueRepository;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
+import com.hillayes.rail.utils.TestData;
 import jakarta.enterprise.inject.Instance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -24,8 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static com.hillayes.rail.utils.TestData.mockAuditIssue;
-import static com.hillayes.rail.utils.TestData.mockAuditReportConfig;
+import static com.hillayes.rail.utils.TestData.*;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -468,6 +470,38 @@ public class AuditReportServiceTest {
     }
 
     @Test
+    public void testGetIssueSummaries() {
+        // given: a user identity
+        UUID userId = UUID.randomUUID();
+
+        // and: existing report configs
+        List<AuditReportConfig> configs = IntStream.range(0, 5)
+            .mapToObj(i -> mockAuditReportConfig(userId, b -> b.id(UUID.randomUUID())))
+            .toList();
+
+        // and: issues summaries for each report
+        List<AuditIssueSummary> issueSummaries = configs.stream()
+            .map(TestData::mockAuditIssueSummary)
+            .toList();
+        when(auditIssueRepository.getIssueSummaries(userId))
+            .thenReturn(issueSummaries);
+
+        // when: the service is called
+        List<AuditIssueSummary> result = fixture.getIssueSummaries(userId);
+
+        // then: the repository is asked to get the summaries
+        verify(auditIssueRepository).getIssueSummaries(userId);
+
+        // and: the summaries are returned
+        assertEquals(issueSummaries.size(), result.size());
+        issueSummaries.forEach(expected ->
+            assertTrue(result.stream().anyMatch(actual ->
+                expected.getAuditConfigId().equals(actual.getAuditConfigId()))
+            )
+        );
+    }
+
+    @Test
     public void testGetAuditIssues() {
         // given: a user identity
         UUID userId = UUID.randomUUID();
@@ -479,21 +513,33 @@ public class AuditReportServiceTest {
         when(auditReportConfigRepository.findByIdOptional(config.getId()))
             .thenReturn(Optional.of(config));
 
-        // and: no issues exist
+        // and: a collection issues exist
+        List<AuditIssue> allIssues = IntStream.range(0, 35)
+            .mapToObj(i -> mockAuditIssue(config, issue -> issue.id(UUID.randomUUID())))
+            .toList();
         when(auditIssueRepository.findByConfigId(eq(config.getId()), nullable(Boolean.class), anyInt(), anyInt()))
-            .thenReturn(Page.empty());
+            .then(invocation -> {
+                int pageIndex = invocation.getArgument(2);
+                int pageSize = invocation.getArgument(3);
+                return Page.of(allIssues, pageIndex, pageSize);
+            });
 
-        // when: the issues are requested
-        Page<AuditIssue> issues = fixture.getAuditIssues(userId, config.getId(), null, 0, 10);
+        // when: each page of issues is requested
+        int pageIndex = 0;
+        do {
+            Page<AuditIssue> issuesPage = fixture.getAuditIssues(userId, config.getId(), null, pageIndex, 10);
 
-        // then: the config identity and ownership is verified
-        verify(auditReportConfigRepository).findByIdOptional(config.getId());
+            // then: the config identity and ownership is verified
+            verify(auditReportConfigRepository, times(pageIndex + 1)).findByIdOptional(config.getId());
 
-        // and: the issues repository is invoked with the given parameters
-        verify(auditIssueRepository).findByConfigId(config.getId(), null, 0, 10);
+            // and: the issues repository is invoked with the given parameters
+            ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
+            verify(auditIssueRepository, times(pageIndex + 1)).findByConfigId(eq(config.getId()), isNull(), captor.capture(), eq(10));
+            assertEquals(pageIndex, captor.getValue());
 
-        // and: the issues are returned by the config
-        assertEquals(0, issues.getContent().size());
+            // and: the issues are returned
+            assertEquals((pageIndex < 3) ? 10 : 5, issuesPage.getContent().size());
+        } while (++pageIndex < 4);
     }
 
     @Test
