@@ -2,10 +2,8 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
-import com.hillayes.rail.domain.Account;
-import com.hillayes.rail.domain.AuditIssue;
-import com.hillayes.rail.domain.AuditIssueSummary;
-import com.hillayes.rail.domain.AuditReportConfig;
+import com.hillayes.rail.audit.AuditReportTemplate;
+import com.hillayes.rail.domain.*;
 import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
 import com.hillayes.rail.utils.TestData;
@@ -14,16 +12,14 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
+import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.*;
@@ -32,8 +28,7 @@ import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class AuditReportResourceTest extends TestBase {
@@ -49,15 +44,18 @@ public class AuditReportResourceTest extends TestBase {
     @TestSecurity(user = userIdStr, roles = "user")
     public void getAuditTemplates() {
         // given: a page range
-        int page = 1;
+        int page = 0;
         int pageSize = 12;
 
         // and: a list of audit report templates
+        List<AuditReportTemplate> templates = IntStream.range(0, 10)
+            .mapToObj(i -> mockTemplate())
+            .toList();
         when(auditReportService.getAuditTemplates(eq(page), eq(pageSize)))
-            .thenReturn(Page.empty());
+            .thenReturn(Page.of(templates, page, pageSize));
 
         // when: client calls the endpoint
-        given()
+        PaginatedAuditTemplates response = given()
             .request()
             .queryParam("page", page)
             .queryParam("page-size", pageSize)
@@ -72,6 +70,31 @@ public class AuditReportResourceTest extends TestBase {
 
         // then: the auditReportService is called with the page range
         verify(auditReportService).getAuditTemplates(page, pageSize);
+
+        // and: the page of templates is returned
+        assertEquals(page, response.getPage());
+        assertEquals(pageSize, response.getPageSize());
+        assertEquals(templates.size(), response.getCount());
+        assertNotNull(response.getItems());
+        templates.forEach(expected -> {
+            AuditReportTemplateResponse actual = response.getItems().stream()
+                .filter(t -> t.getName() != null && t.getName().equals(expected.getName()))
+                .findFirst().orElse(null);
+            assertNotNull(actual);
+            assertEquals(expected.getDescription(), actual.getDescription());
+
+            assertNotNull(actual.getParameters());
+            assertEquals(expected.getParameters().size(), actual.getParameters().size());
+            expected.getParameters().forEach(expectedParam -> {
+                AuditReportParam actualParam = actual.getParameters().stream()
+                    .filter(p -> p.getName().equals(expectedParam.name()))
+                    .findFirst().orElse(null);
+                assertNotNull(actualParam);
+                assertEquals(expectedParam.description(), actualParam.getDescription());
+                assertEquals(expectedParam.type().name(), actualParam.getType().name());
+                assertEquals(expectedParam.defaultValue(), actualParam.getDefaultValue());
+            });
+        });
     }
 
     @Test
@@ -415,6 +438,196 @@ public class AuditReportResourceTest extends TestBase {
         verify(auditReportService).getAuditIssues(userId, configId, null, page, pageSize);
     }
 
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetAuditIssue() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a transaction
+        AccountTransaction transaction = mockAccountTransaction(
+            mockAccount(userId, UUID.randomUUID())
+        );
+        when(accountTransactionService.getTransaction(transaction.getId()))
+            .thenReturn(Optional.of(transaction));
+
+        // and: an audit report issues exist for the transaction
+        AuditReportConfig reportConfig = mockAuditReportConfig(userId);
+        AuditIssue issue = mockAuditIssue(reportConfig, i -> i
+            .id(UUID.randomUUID())
+            .transactionId(transaction.getId())
+        );
+        when(auditReportService.getAuditIssue(userId, issue.getId()))
+            .thenReturn(issue);
+
+        // when: client calls the endpoint
+        AuditIssueResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/audit/issues/{issueId}", issue.getId())
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(AuditIssueResponse.class);
+
+        // then: the audit report service was called
+        verify(auditReportService).getAuditIssue(userId, issue.getId());
+
+        // and: the identified issue is returned
+        assertEquals(issue.getId(), response.getIssueId());
+        assertEquals(reportConfig.getId(), response.getAuditConfigId());
+        assertEquals(issue.isAcknowledged(), response.getAcknowledged());
+        assertEquals(transaction.getId(), response.getId());
+        assertEquals(transaction.getAccountId(), response.getAccountId());
+        assertEquals(transaction.getTransactionId(), response.getTransactionId());
+        assertEquals(transaction.getAmount().toDecimal(), response.getAmount());
+        assertEquals(transaction.getAmount().getCurrencyCode(), response.getCurrency());
+        assertEquals(transaction.getBookingDateTime(), response.getBookingDateTime());
+        assertEquals(transaction.getValueDateTime(), response.getValueDateTime());
+        assertEquals(transaction.getReference(), response.getReference());
+        assertEquals(transaction.getAdditionalInformation(), response.getAdditionalInformation());
+        assertEquals(transaction.getCreditorName(), response.getCreditorName());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetAuditIssue_TransactionNotFound() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: an audit report issues exist
+        AuditReportConfig reportConfig = mockAuditReportConfig(userId);
+        AuditIssue issue = mockAuditIssue(reportConfig, i -> i
+            .id(UUID.randomUUID())
+            .transactionId(UUID.randomUUID())
+        );
+        when(auditReportService.getAuditIssue(userId, issue.getId()))
+            .thenReturn(issue);
+
+        // and: no transaction can be found
+        when(accountTransactionService.getTransaction(issue.getTransactionId()))
+            .thenReturn(Optional.empty());
+
+        // when: client calls the endpoint
+        ServiceErrorResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .get("/api/v1/rails/audit/issues/{issueId}", issue.getId())
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        // then: the audit report service was called
+        verify(auditReportService).getAuditIssue(userId, issue.getId());
+
+        // and: the response contains the expected error message
+        assertNotNull(response);
+
+        // and: the response contains an error message
+        assertNotFoundError(response, (contextAttributes) -> {
+            assertEquals("AccountTransaction", contextAttributes.get("entity-type"));
+            assertEquals(issue.getTransactionId().toString(), contextAttributes.get("entity-id"));
+        });
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testUpdateAuditIssue() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a transaction
+        AccountTransaction transaction = mockAccountTransaction(
+            mockAccount(userId, UUID.randomUUID())
+        );
+        when(accountTransactionService.getTransaction(transaction.getId()))
+            .thenReturn(Optional.of(transaction));
+
+        // and: an audit report issues exist for the transaction
+        AuditReportConfig reportConfig = mockAuditReportConfig(userId);
+        AuditIssue issue = mockAuditIssue(reportConfig, i -> i
+            .id(UUID.randomUUID())
+            .transactionId(transaction.getId())
+        );
+        when(auditReportService.updateIssue(eq(userId), eq(issue.getId()), anyBoolean()))
+            .thenReturn(issue);
+
+        // and: an update issue request
+        AuditIssueRequest request = new AuditIssueRequest()
+            .acknowledged(true);
+
+        // when: client calls the endpoint
+        AuditIssueResponse response = given()
+            .request()
+            .contentType(JSON)
+            .body(request)
+            .when()
+            .put("/api/v1/rails/audit/issues/{issueId}", issue.getId())
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(AuditIssueResponse.class);
+
+        // then: the audit report service was called to update the issue
+        verify(auditReportService).updateIssue(userId, issue.getId(), request.getAcknowledged());
+
+        // and: the identified issue is returned
+        assertEquals(issue.getId(), response.getIssueId());
+        assertEquals(reportConfig.getId(), response.getAuditConfigId());
+        assertEquals(issue.isAcknowledged(), response.getAcknowledged());
+        assertEquals(transaction.getId(), response.getId());
+        assertEquals(transaction.getAccountId(), response.getAccountId());
+        assertEquals(transaction.getTransactionId(), response.getTransactionId());
+        assertEquals(transaction.getAmount().toDecimal(), response.getAmount());
+        assertEquals(transaction.getAmount().getCurrencyCode(), response.getCurrency());
+        assertEquals(transaction.getBookingDateTime(), response.getBookingDateTime());
+        assertEquals(transaction.getValueDateTime(), response.getValueDateTime());
+        assertEquals(transaction.getReference(), response.getReference());
+        assertEquals(transaction.getAdditionalInformation(), response.getAdditionalInformation());
+        assertEquals(transaction.getCreditorName(), response.getCreditorName());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testDeleteAuditIssue() {
+        // given: a user id
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a transaction
+        AccountTransaction transaction = mockAccountTransaction(
+            mockAccount(userId, UUID.randomUUID())
+        );
+        when(accountTransactionService.getTransaction(transaction.getId()))
+            .thenReturn(Optional.of(transaction));
+
+        // and: an audit report issues exist for the transaction
+        AuditReportConfig reportConfig = mockAuditReportConfig(userId);
+        AuditIssue issue = mockAuditIssue(reportConfig, i -> i
+            .id(UUID.randomUUID())
+            .transactionId(transaction.getId())
+        );
+        when(auditReportService.getAuditIssue(userId, issue.getId()))
+            .thenReturn(issue);
+
+        // when: client calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .delete("/api/v1/rails/audit/issues/{issueId}", issue.getId())
+            .then()
+            .statusCode(204);
+
+        // then: the audit report service was called
+        verify(auditReportService).deleteIssue(userId, issue.getId());
+    }
+
     private AuditReportConfigRequest mockRequest() {
         return new AuditReportConfigRequest()
             .disabled(false)
@@ -445,5 +658,23 @@ public class AuditReportResourceTest extends TestBase {
 
         request.getParameters().forEach(result::addParameter);
         return result;
+    }
+
+    private AuditReportTemplate mockTemplate() {
+        AuditReportTemplate mock = mock(AuditReportTemplate.class);
+        when(mock.getName()).thenReturn(randomAlphanumeric(20));
+        when(mock.getDescription()).thenReturn(randomAlphanumeric(30));
+
+        List<AuditReportTemplate.Parameter> parameters = List.of(
+            new AuditReportTemplate.Parameter(
+                randomAlphanumeric(20),
+                randomAlphanumeric(20),
+                AuditReportTemplate.ParameterType.STRING,
+                randomAlphanumeric(20)
+            )
+        );
+        when(mock.getParameters()).thenReturn(parameters);
+
+        return mock;
     }
 }
