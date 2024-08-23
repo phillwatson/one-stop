@@ -50,11 +50,32 @@ function toPieSlice(stat: CategoryStatistics, value: number): StatisticsPieValue
   return p;
 }
 
+const now = dayjs();
+const tomorrow =  now.add(1, 'day');
+
+interface StaticRange {
+  name: string;
+  range: Dayjs[];
+}
+const StaticRanges: Array<StaticRange> = [
+  { name: 'This Month',     range: [ now.date(1), tomorrow ] },
+  { name: 'Last Month',     range: [ now.date(1).subtract(1, 'month'), now.date(1) ] },
+  { name: 'This Year',      range: [ now.month(0).date(1), tomorrow ] },
+  { name: 'Last Year',      range: [ now.month(0).date(1).subtract(1, 'year'), now.month(0).date(1) ] },
+  { name: 'Past 30 Days',   range: [ now.subtract(30, 'day'), tomorrow ] },
+  { name: 'Past 6 Months',  range: [ now.subtract(6, 'month'), tomorrow ] },
+  { name: 'Past 12 Months', range: [ now.subtract(12, 'month'), tomorrow ] }
+]
+
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
   const [ formatMoney ] = useMonetaryContext();
 
   const [ categoryGroups, setCategoryGroups ] = useState<CategoryGroup[]>([]);
+  useEffect(() => {
+    CategoryService.fetchAllGroups().then(response => setCategoryGroups(response))
+  }, []);
+
   const [ selectedGroup, setSelectedGroup ] = useState<CategoryGroup>();
   const [ statistics, setStatistics ] = useState<CategoryStatisticsUI[]>([]);
 
@@ -65,9 +86,10 @@ export default function StatisticsGraph(props: Props) {
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
   const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 600);
 
+  const [ selectedRange, setSelectedRange ]  = useState<number>(0);
   useEffect(() => {
-    CategoryService.fetchAllGroups().then(response => setCategoryGroups(response))
-  }, []);
+    setDateRange(StaticRanges[selectedRange].range);
+  }, [ selectedRange ]);
 
   useEffect(() => {
     if (selectedGroup === undefined) {
@@ -180,8 +202,8 @@ export default function StatisticsGraph(props: Props) {
   return (
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
       <Paper sx={{ padding: 2 }} elevation={ props.elevation || 3 }>
-        <Grid container direction="column" rowGap={3} alignItems={"stretch"}>
-          <Grid container direction="row" justifyContent={"center"}>
+        <Grid container direction="column" rowGap={ 3 } justifyContent="space-evenly">
+          <Grid key={1} item>
             <FormControl fullWidth>
               <InputLabel id="select-group">Category Group</InputLabel>
               <Select labelId="select-group" label="Category Group" value={ selectedGroup?.id || "" } onChange={ selectGroup }>
@@ -192,7 +214,18 @@ export default function StatisticsGraph(props: Props) {
             </FormControl>
           </Grid>
 
-          <Grid container direction="row" columnGap={7} rowGap={3} justifyContent={"center"}>
+          <Grid key={2} container direction="row" rowGap={ 3 } columnGap={ 3 } justifyContent="space-evenly">
+            <Grid key={1} item>
+              <FormControl  sx={{ width: { xs: 180, md: 220 }}}>
+                <InputLabel id="range-label">Range</InputLabel>
+                <Select labelId="select-range" id="select-range" label="Range"
+                  value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
+                  { StaticRanges.map((range, index) =>
+                    <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+            </Grid>
             <Grid key={2} item>
               <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
                 onChange={ (value: any, context: any) => {
