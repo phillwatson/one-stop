@@ -234,7 +234,7 @@ export default function StatisticsGraph(props: Props) {
                   }}/>
             </Grid>
             <Grid key={3} item>
-              <DatePicker maxDate={ dayjs().add(1, 'day') } label="To Date (exclusive)" value={ dayjs(dateRange[1]) }
+              <DatePicker maxDate={ tomorrow } label="To Date (exclusive)" value={ dayjs(dateRange[1]) }
                 onChange={ (value: any, context: any) => {
                   if (value != null && context.validationError == null)
                     debouncedSetDateRange([ dateRange[0], value ])

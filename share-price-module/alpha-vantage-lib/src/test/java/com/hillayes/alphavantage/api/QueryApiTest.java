@@ -14,8 +14,8 @@ public class QueryApiTest {
     QueryApi fixture;
 
     @Test
-    public void testGetMonthly() {
-        Object response = fixture.getPriceHistory(TimeSeries.TIME_SERIES_MONTHLY, "TW.LON");
+    public void testGetDaily() {
+        Object response = fixture.getPriceHistory(TimeSeries.TIME_SERIES_DAILY, "TW.LON");
 
         assertNotNull(response);
     }

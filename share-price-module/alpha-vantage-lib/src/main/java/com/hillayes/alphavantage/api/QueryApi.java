@@ -19,7 +19,7 @@ public interface QueryApi {
     /**
      *
      * Example:
-     * https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=TW.LON&apikey=4XP48SVIXAMR9JMU
+     * https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=TW.LON&apikey=4XXXXXVIXXXRXXXU
      *
      * @param timeSeries The time series function to be applied.
      * @param stockSymbol The stock symbol to be queried.
