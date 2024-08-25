@@ -88,7 +88,7 @@ export default function AuditReportConfigList(props: Props) {
         </TableHead>
         <TableBody>
           { reportConfigs && reportConfigs
-            .sort((a, b) => a.name < b.name ? -1 : 1)
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map(config =>
               <TableRow key={ config.id } hover onClick={() => handleEditClick(config)}>
                 <TableCell>{ config.name }</TableCell>

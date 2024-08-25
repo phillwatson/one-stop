@@ -27,7 +27,7 @@ export default function BankCard(props: Props) {
   }
 
   return (
-    <Card className={`${styles.card} (enabled ? "enabled" : "disabled")`} elevation={enabled ? 7 : 1}>
+    <Card className={`${styles.card} ${ (enabled ? styles.enabled : styles.disabled ) }`} elevation={ enabled ? 7 : 1} >
       <CardHeader 
         avatar={ <Avatar aria-label={ props.institution.name } src={ props.institution.logo } /> }
         title={ props.institution.name } subheader={ label }
