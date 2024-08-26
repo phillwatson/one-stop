@@ -1,8 +1,9 @@
-import Country from '../../model/country.model';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
-import { FormControl } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+
+import Country from '../../model/country.model';
 
 interface Props {
     countries: Array<Country>;
@@ -21,27 +22,24 @@ export default function CountrySelector(props: Props) {
   }
 
   return (
-    <>
-      <FormControl required size="small" sx={{ m: 1, minWidth: 220 }}>
+    <FormControl required fullWidth>
+      <InputLabel id="institution-select-country-label">Country</InputLabel>
+      <Select className="country-list" labelId="institution-select-country-label" label="Country"
+        value={(props.activeCountry === undefined ? "" : props.activeCountry.id)} onChange={handleSelect}>
 
-        <InputLabel id="institution-select-country-label">Country</InputLabel>
-        <Select className="country-list" labelId="institution-select-country-label" label="Country"
-          value={(props.activeCountry === undefined ? "" : props.activeCountry.id)} onChange={handleSelect}>
+        <MenuItem className="country-list-item" aria-label="None" value="" disabled>
+          <em>None</em>
+        </MenuItem>
 
-          <MenuItem className="country-list-item" aria-label="None" value="" disabled>
-            <em>None</em>
-          </MenuItem>
-
-          { props.countries && props.countries
-            .sort((a, b) => { return a.name < b.name ? -1 : 1; } )
-            .map((country: Country) =>
-              <MenuItem key={ country.id } value={country.id} selected={props.activeCountry === country}>
-                { country.name }
-              </MenuItem>
-            )
-          }
-        </Select>
-      </FormControl>
-    </>
+        { props.countries && props.countries
+          .sort((a, b) => a.name.localeCompare(b.name) )
+          .map((country: Country) =>
+            <MenuItem key={ country.id } value={country.id} selected={props.activeCountry === country}>
+              { country.name }
+            </MenuItem>
+          )
+        }
+      </Select>
+    </FormControl>
   );
 }

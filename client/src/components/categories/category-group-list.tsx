@@ -123,7 +123,7 @@ export default function CategoryGroupList(props: Props) {
 
           <TableBody>
             { props.groups && props.groups
-              .sort((a, b) => a.name < b.name ? -1 : 1)
+              .sort((a, b) => a.name.localeCompare(b.name))
               .map(group =>
                 <TableRow key={ group.id } hover selected={ selectedGroup && group.id === selectedGroup.id }>
                   <TableCell onClick={() => handleSelectClick(group)}>{ group.name }</TableCell>

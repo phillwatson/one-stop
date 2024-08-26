@@ -1,6 +1,6 @@
 package com.hillayes.alphavantage.api;
 
-public enum TimeSeries {
+public enum ApiFunction {
     TIME_SERIES_INTRADAY,
     TIME_SERIES_DAILY,
     TIME_SERIES_DAILY_ADJUSTED, // Premium account required
