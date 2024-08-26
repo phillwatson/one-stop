@@ -144,7 +144,10 @@ one-stop:
       account-activity:
         en: "$activity$"
       audit-issue-found:
-        en: "An issue has been found with transactions your account.\nPlease contact us."
+        en: |
+          New issues have been found with transactions in your account.
+          $event.issueCounts.keys: { key | - "$key$" has $event.issueCounts.(key)$ new issue(s) }; separator="\n"$
+          View them in the Audit Issues page.
 
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}

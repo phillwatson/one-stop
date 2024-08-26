@@ -3,6 +3,7 @@ package com.hillayes.notification.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.events.events.audit.AuditIssuesFound;
 import com.hillayes.events.events.consent.ConsentExpired;
 import com.hillayes.events.events.consent.ConsentSuspended;
 import com.hillayes.notification.config.NotificationConfiguration;
@@ -268,6 +269,68 @@ public class NotificationServiceTest {
 
         // and: NO notification is deleted
         verify(notificationRepository, never()).delete(any());
+    }
+
+    @Test
+    public void testAuditIssueFound() throws JsonProcessingException {
+        // given: a user
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .givenName(randomAlphanumeric(30))
+            .email(randomAlphanumeric(30))
+            .build();
+        when(userService.getUser(user.getId()))
+            .thenReturn(Optional.of(user));
+
+        // and: an available list of notifications for consent events
+        AuditIssuesFound event = AuditIssuesFound.builder()
+            .userId(user.getId())
+            .dateDetected(Instant.now())
+            .issueCounts(Map.of(
+                "report 1", 100,
+                "report 2", 200,
+                "report 3", 300
+            )).build();
+        List<Notification> notifications = List.of(
+            mockNotification(NotificationId.AUDIT_ISSUE_FOUND, Map.of("event", event))
+        );
+        when(notificationRepository.listByUserAndTime(eq(user.getId()), any(), anyInt(), anyInt()))
+            .thenReturn(Page.of(notifications));
+
+        // and: a date-time from which to start
+        Instant after = Instant.now();
+
+        // and: a NotificationMapper implementation - to assert results and return rendered messages
+        NotificationService.NotificationMapper<String> mapper = mockNotificationMapper(notifications);
+
+        // and: a configured notification message
+        Map<NotificationId, NotificationConfiguration.MessageConfig> messageConfigs = Map.of(
+            NotificationId.AUDIT_ISSUE_FOUND, mockMessageConfig(
+                "An issue has been found with transactions your account.\n" +
+                "$event.issueCounts.keys: { key | $key$:  $event.issueCounts.(key)$ new issues found }; separator=\"\n\"$" +
+                "\nPlease contact us."
+            )
+        );
+        when(configuration.templates()).thenReturn(messageConfigs);
+
+        // when: the service is called
+        Page<String> messages = fixture.listNotifications(user.getId(), after, 0, 1000, mapper);
+
+        // then: the user is read from repository
+        verify(userService).getUser(user.getId());
+
+        // and: the notifications are read from repository
+        verify(notificationRepository).listByUserAndTime(user.getId(), after, 0, 1000);
+
+        // and: the messages are rendered
+        assertNotNull(messages);
+        assertEquals(notifications.size(), messages.getContentSize());
+
+        // and: the messages passed through the template parameters
+        String content = messages.getContent().get(0);
+        assertTrue(content.contains("report 1:  100 new issues found"));
+        assertTrue(content.contains("report 2:  200 new issues found"));
+        assertTrue(content.contains("report 3:  300 new issues found"));
     }
 
     /**

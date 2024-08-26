@@ -1,16 +1,20 @@
 package com.hillayes.notification.repository;
 
+import com.hillayes.events.events.audit.AuditIssuesFound;
 import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 public class TemplateRepositoryTest {
@@ -66,5 +70,33 @@ public class TemplateRepositoryTest {
 
         // then: the subject is rendered in the default locale (English)
         assertEquals("Hi Jack, please complete your One-Stop registration", subject);
+    }
+
+    @Test
+    public void testAuditIssuesFound() {
+        // given: a user has been created
+        User user = User.builder()
+            .id(UUID.randomUUID())
+            .preferredName("Jack")
+            .build();
+
+        // and: a collection of template parameters
+        AuditIssuesFound event = AuditIssuesFound.builder()
+            .userId(user.getId())
+            .dateDetected(Instant.now())
+            .issueCounts(Map.of(
+                "report 1", 100,
+                "report 2", 200,
+                "report 3", 300
+            )).build();
+        Map<String, Object> params = Map.of("event", event);
+
+        // when: renderTemplate is called
+        String content = fixture.renderTemplate(TemplateName.AUDIT_ISSUE_FOUND, params, Optional.empty());
+
+        // then: the report list is rendered
+        assertTrue(content.contains("<li>\"report 1\" has 100 new issue(s)</li>"));
+        assertTrue(content.contains("<li>\"report 2\" has 200 new issue(s)</li>"));
+        assertTrue(content.contains("<li>\"report 3\" has 300 new issue(s)</li>"));
     }
 }
