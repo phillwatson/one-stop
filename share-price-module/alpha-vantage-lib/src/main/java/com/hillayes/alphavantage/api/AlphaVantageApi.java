@@ -25,7 +25,7 @@ public class AlphaVantageApi {
             .queryParam("function", function);
     }
 
-    public DailyTimeSeries getDailySeries(String stockSymbol) {
+    public DailyTimeSeries getDailySeries(String stockSymbol) throws AssertionError {
         return givenAuth(ApiFunction.TIME_SERIES_DAILY)
             .queryParam("symbol", stockSymbol)
             .get("query")

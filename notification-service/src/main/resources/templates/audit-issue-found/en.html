@@ -1,5 +1,8 @@
 We have seen some unusual activity regarding the transactions on your account.
-<br/>$event.reportDescription$
+<br/>
+<ul>
+  $event.issueCounts.keys: { key | <li>"$key$" has $event.issueCounts.(key)$ new issue(s)</li> }; separator="\n"$
+</ul>
 
 <br/><br/>
 If this was you, please ignore this email.<br/>

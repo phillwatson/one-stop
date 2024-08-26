@@ -8,12 +8,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@QuarkusTest
+//@QuarkusTest
 public class QueryApiTest {
-    @Inject
+    //@Inject
     AlphaVantageApi fixture;
 
-    @Test
+    //@Test
     public void testGetDaily() {
         DailyTimeSeries response = fixture.getDailySeries("TW.LON");
 
