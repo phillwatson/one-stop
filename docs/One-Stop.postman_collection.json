@@ -1126,6 +1126,309 @@
 					]
 				},
 				{
+					"name": "Audits",
+					"item": [
+						{
+							"name": "Get Audit Templates",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/templates",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"templates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Audit Summaries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/summaries",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"summaries"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User's Audit Configurations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/configs",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"configs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User's Audit Configuration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/configs/:configId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"configs",
+										":configId"
+									],
+									"variable": [
+										{
+											"key": "configId",
+											"value": "dfee5447-60ae-4cf6-9ed5-68e8d71bfe97"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update User's Audit Configuration",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"version\": 0,\n    \"disabled\": false,\n    \"templateName\": \"outgoing-value-limits\",\n    \"name\": \"Credit Card Values\",\n    \"description\": \"Detect credit card transactions, over the past 5 days, that exceed the average value, over the past 30 days, by a threshold of 1.5 times.\",\n    \"source\": \"ACCOUNT\",\n    \"sourceId\": \"79e0649b-f80c-4a71-a292-f07e04af732e\",\n    \"uncategorisedIncluded\": false,\n    \"parameters\": {\n        \"thresholdFactor\": \"1.5\",\n        \"averageDays\": \"30\",\n        \"reportDays\": \"5\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/configs/:configId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"configs",
+										":configId"
+									],
+									"variable": [
+										{
+											"key": "configId",
+											"value": "dfee5447-60ae-4cf6-9ed5-68e8d71bfe97"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User's Audit Configuration",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/configs/:configId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"configs",
+										":configId"
+									],
+									"variable": [
+										{
+											"key": "configId",
+											"value": "dfee5447-60ae-4cf6-9ed5-68e8d71bfe97"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User's Audit Issues",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/configs/:configId/issues",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"configs",
+										":configId",
+										"issues"
+									],
+									"variable": [
+										{
+											"key": "configId",
+											"value": "dfee5447-60ae-4cf6-9ed5-68e8d71bfe97"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User's Audit Issue",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/issues/:issueId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"issues",
+										":issueId"
+									],
+									"variable": [
+										{
+											"key": "issueId",
+											"value": "b5b903f1-f5b6-489f-8fe6-584a1a2ce05f"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update User's Audit Issue",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"acknowledged\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/issues/:issueId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"issues",
+										":issueId"
+									],
+									"variable": [
+										{
+											"key": "issueId",
+											"value": "b5b903f1-f5b6-489f-8fe6-584a1a2ce05f"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User's Audit Issue",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{scheme}}://{{hostname}}:{{port}}/api/v1/rails/audit/issues/:issueId",
+									"protocol": "{{scheme}}",
+									"host": [
+										"{{hostname}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"v1",
+										"rails",
+										"audit",
+										"issues",
+										":issueId"
+									],
+									"variable": [
+										{
+											"key": "issueId",
+											"value": "b5b903f1-f5b6-489f-8fe6-584a1a2ce05f"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Countries",
 					"item": [
 						{
