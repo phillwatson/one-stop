@@ -83,16 +83,20 @@ secrets from the respective providers.
 ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
 
 # authenticate with Google Open-ID Connect
-ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_ID: "<the Oid client id issued by Google>"
+ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_ID: "<the client id issued by Google>"
 ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: "<the secret issued by Google>"
 
 # authenticate with GitHub Open-ID Connect
-ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_ID: "<the Oid client id issued by GitHub>"
+ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_ID: "<the client id issued by GitHub>"
 ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_SECRET: "<the secret issued by GitHub>"
 
 # authenticate with GitLab Open-ID Connect
-ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_ID: "<the Oid client id issued by GitLab>"
+ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_ID: "<the client id issued by GitLab>"
 ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_SECRET: "<the secret issued by GitLab>"
+
+# authenticate with LinkedIn Open-ID Connect
+ONE_STOP_AUTH_OPENID_LINKEDIN_CLIENT_ID: "<the client id issued by LinkedIn>"
+ONE_STOP_AUTH_OPENID_LINKEDIN_CLIENT_SECRET: "<the secret issued by LinkedIn>"
 
 # authenticate with Apple Open-ID Connect
 ONE_STOP_AUTH_OPENID_APPLE_TEAM_ID: "<Team id issued by Apple>"
