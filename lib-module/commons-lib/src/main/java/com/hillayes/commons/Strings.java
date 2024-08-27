@@ -60,6 +60,6 @@ public class Strings {
         if (at < 0) {
             return email;
         }
-        return email.substring(0, 1) + "****" + email.substring(at);
+        return email.charAt(0) + "****" + email.substring(at);
     }
 }

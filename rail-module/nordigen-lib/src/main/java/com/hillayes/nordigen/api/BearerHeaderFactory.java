@@ -37,7 +37,7 @@ public class BearerHeaderFactory implements ClientHeadersFactory {
     @RestClient
     AuthApi authApi;
 
-    private Token accessToken;
+    private volatile Token accessToken;
     private Token refreshToken;
 
     @Override

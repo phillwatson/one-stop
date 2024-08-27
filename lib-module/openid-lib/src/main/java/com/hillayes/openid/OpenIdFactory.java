@@ -63,7 +63,7 @@ public abstract class OpenIdFactory {
     protected OpenIdConfigResponse openApiConfig(OpenIdConfiguration.AuthConfig config) throws IOException {
         log.debug("Retrieving OpenId Config [url: {}]", config.configUri());
 
-        URL url = new URL(config.configUri());
+        URL url = URI.create(config.configUri()).toURL();
         OpenIdConfigResponse result = mapper.readValue(url, OpenIdConfigResponse.class);
 
         // fill in any blank from the app config

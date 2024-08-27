@@ -390,11 +390,6 @@ public class NotificationServiceTest {
     }
 
     private NotificationConfiguration.MessageConfig mockMessageConfig(String message) {
-        return new NotificationConfiguration.MessageConfig() {
-            @Override
-            public Map<Locale, String> locales() {
-                return Map.of(Locale.ENGLISH, message);
-            }
-        };
+        return () -> Map.of(Locale.ENGLISH, message);
     }
 }

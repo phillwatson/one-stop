@@ -24,7 +24,7 @@ public class ClientSecretGeneratorTest {
     private static final String KEY_ID = "69V4Q9N572";
     private static final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
 
-    private ClientSecretGenerator fixture = new ClientSecretGenerator();
+    private final ClientSecretGenerator fixture = new ClientSecretGenerator();
 
     @Test
     public void test() throws GeneralSecurityException, InvalidJwtException, MalformedClaimException {
