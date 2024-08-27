@@ -11,7 +11,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class RepositoryBaseTest {
-    private RepositoryBase<Object, Object> fixture = new RepositoryBase<>() { };
+    private final RepositoryBase<Object, Object> fixture = new RepositoryBase<>() { };
 
     @Test
     public void testPageZero() {

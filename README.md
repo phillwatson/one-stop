@@ -79,16 +79,21 @@ services. This can be also be achieved by creating a docker-compose-override.yam
 # the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
 
-# the secret used to authenticate with Google Open-ID Connect
+# authenticate with Google Open-ID Connect
+ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_ID: "<the Oid client id issued by Google>"
 ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: "<the secret issued by Google>"
 
-# the secret used to authenticate with GitHub Open-ID Connect
+# authenticate with GitHub Open-ID Connect
+ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_ID: "<the Oid client id issued by GitHub>"
 ONE_STOP_AUTH_OPENID_GITHUB_CLIENT_SECRET: "<the secret issued by GitHub>"
 
-# the secret used to authenticate with GitLab Open-ID Connect
+# authenticate with GitLab Open-ID Connect
+ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_ID: "<the Oid client id issued by GitLab>"
 ONE_STOP_AUTH_OPENID_GITLAB_CLIENT_SECRET: "<the secret issued by GitLab>"
 
-# the App Key-ID used to authenticate with Apple Open-ID Connect
+# authenticate with Apple Open-ID Connect
+ONE_STOP_AUTH_OPENID_APPLE_TEAM_ID: "<Team id issued by Apple>"
+ONE_STOP_AUTH_OPENID_APPLE_CLIENT_ID: "<App client id issued by Apple>"
 ONE_STOP_AUTH_OPENID_APPLE_KEY_ID: "<App key id issued by Apple>"
 
 # the Private Key PEM used to sign data sent to Apple Open-ID Connect

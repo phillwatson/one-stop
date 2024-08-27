@@ -19,9 +19,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class HospitalConsumerTest {
-    private HospitalRepository hospitalRepository = mock(HospitalRepository.class);
+    private final HospitalRepository hospitalRepository = mock(HospitalRepository.class);
 
-    private HospitalTopicConsumer fixture = new HospitalTopicConsumer(hospitalRepository);
+    private final HospitalTopicConsumer fixture = new HospitalTopicConsumer(hospitalRepository);
 
     @Test
     public void testConsume() {

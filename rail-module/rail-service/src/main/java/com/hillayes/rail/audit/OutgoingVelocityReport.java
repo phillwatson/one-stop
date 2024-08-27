@@ -43,7 +43,7 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
     // the factor by which the average velocity is multiplied to calculate the
     // threshold for outgoing transactions to be considered an issue
     private static final String PARAM_VELOCITY_FACTOR = "velocityFactor";
-    private static final Double PARAM_VELOCITY_FACTOR_DEFAULT = 1.5;
+    private static final Double PARAM_VELOCITY_FACTOR_DEFAULT = 0.5;
 
     // a list of parameters that the user can set when running this report
     private static final List<Parameter> PARAMETERS = List.of(

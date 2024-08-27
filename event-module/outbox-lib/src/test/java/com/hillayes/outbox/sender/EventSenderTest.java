@@ -15,9 +15,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class EventSenderTest {
-    private EventRepository eventRepository = mock(EventRepository.class);
+    private final EventRepository eventRepository = mock(EventRepository.class);
 
-    private EventSender fixture = new EventSender(eventRepository);
+    private final EventSender fixture = new EventSender(eventRepository);
 
     @Test
     public void testSend() {

@@ -683,7 +683,7 @@ public class AuditReportServiceTest {
 
         // and: the updated issue is returned
         assertEquals(issue, updated);
-        assertEquals(true, updated.isAcknowledged());
+        assertTrue(updated.isAcknowledged());
     }
 
     @Test

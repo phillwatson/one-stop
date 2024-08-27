@@ -8,9 +8,13 @@ public enum AccountStatus {
     READY("Account has been successfully processed"),
     SUSPENDED("Account has been suspended (more than 10 consecutive failed attempts to access the account");
 
-    private String value;
+    private final String value;
 
     AccountStatus(String value) {
         this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

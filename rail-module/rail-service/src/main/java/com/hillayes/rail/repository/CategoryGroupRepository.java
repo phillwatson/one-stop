@@ -107,7 +107,7 @@ public class CategoryGroupRepository extends RepositoryBase<CategoryGroup, UUID>
         ")" +
         "group by 1, 2, 3, 4 order by 1";
 
-    private List<String> STATS_QUERIES = List.of(
+    private static final List<String> STATS_QUERIES = List.of(
         SQL_CATEGORISED_STATS,
         SQL_UNCATEGORISED_STATS
     );

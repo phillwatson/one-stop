@@ -52,8 +52,7 @@ public class OpenIdAuthentication {
     public URI oauthLogin(AuthProvider authProvider, String state) {
         log.info("OAuth login [authProvider: {}, state: {}]", authProvider, state);
 
-        URI redirect = getOpenIdAuth(authProvider).initiateLogin(state);
-        return redirect;
+        return getOpenIdAuth(authProvider).initiateLogin(state);
     }
 
     /**
