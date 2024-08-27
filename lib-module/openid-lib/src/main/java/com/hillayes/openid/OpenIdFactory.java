@@ -57,7 +57,9 @@ public abstract class OpenIdFactory {
                                                 OpenIdConfiguration.AuthConfig config,
                                                 OpenIdConfigResponse openIdConfig) {
         log.debug("Creating token validator [issuer: {}]", openIdConfig.issuer);
-        return new IdTokenValidator(verificationKeys, openIdConfig.issuer, config.clientId());
+        return config.clientId()
+            .map(clientId -> new IdTokenValidator(verificationKeys, openIdConfig.issuer, clientId))
+            .orElse(null);
     }
 
     protected OpenIdConfigResponse openApiConfig(OpenIdConfiguration.AuthConfig config) throws IOException {

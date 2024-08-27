@@ -36,6 +36,13 @@ public interface OpenIdAuth {
     boolean isFor(AuthProvider authProvider);
 
     /**
+     * Tests whether the AuthProvider has been fully configured, and is available for
+     * use.
+     * @return true if the AuthProvider is available for use.
+     */
+    boolean isEnabled();
+
+    /**
      * Constructs the redirect URI used to initiate the auth-code flow with the
      * auth-provider. The given state value will be returned by the auth-provider
      * on completion of the login flow. The value can be used for verification and/or

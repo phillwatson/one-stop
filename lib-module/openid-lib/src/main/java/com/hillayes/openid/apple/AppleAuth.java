@@ -61,25 +61,37 @@ public class AppleAuth implements OpenIdAuth {
         return authProvider == APPLE;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return config.clientId().isPresent()
+            && config.teamId().isPresent()
+            && config.keyId().isPresent();
+    }
+
     public URI initiateLogin(String clientState) {
-        return UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
-            .queryParam("response_type", "code")
-            .queryParam("client_id", config.clientId())
-            .queryParam("scope", "openid profile email")
-            .queryParam("redirect_uri", config.redirectUri())
-            .queryParam("state", clientState)
-            .build();
+        return config.clientId()
+            .map(clientId -> UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
+                .queryParam("response_type", "code")
+                .queryParam("client_id", clientId)
+                .queryParam("scope", "openid profile email")
+                .queryParam("redirect_uri", config.redirectUri())
+                .queryParam("state", clientState)
+                .build())
+            .orElse(null);
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException, GeneralSecurityException {
         log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
+        if (config.clientId().isEmpty()) {
+            return null;
+        }
+
         Form tokenExchangeRequest = new Form()
             .param("grant_type", "authorization_code")
-            .param("client_id", config.clientId())
+            .param("client_id", config.clientId().get())
             .param("client_secret", getClientSecret())
             .param("code", authCode)
             .param("redirect_uri", config.redirectUri());
-
         TokenExchangeResponse response = openIdTokenApi.exchangeToken(tokenExchangeRequest);
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
@@ -98,11 +110,11 @@ public class AppleAuth implements OpenIdAuth {
 
             String kid = config.keyId().orElseThrow(() -> new NullPointerException("Apple keyId is required"));
             String teamId = config.teamId().orElseThrow(() -> new NullPointerException("Apple teamId is required"));
+            String clientId = config.clientId().orElseThrow(() -> new NullPointerException("Apple clientId is required"));
 
             clientSecret = clientSecretGenerator.createClientSecret(
-                getPrivateKey(), kid,
-                teamId, config.clientId(), authConfig.issuer,
-                expires, SignatureAlgorithm.ES256
+                getPrivateKey(), kid, teamId, clientId,
+                authConfig.issuer, expires, SignatureAlgorithm.ES256
             );
         }
         return clientSecret;

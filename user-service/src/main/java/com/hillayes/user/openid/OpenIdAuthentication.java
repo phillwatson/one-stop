@@ -45,6 +45,7 @@ public class OpenIdAuthentication {
     private OpenIdAuth getOpenIdAuth(AuthProvider authProvider) {
         return openIdAuths.stream()
             .filter(instance -> instance.isFor(authProvider))
+            .filter(OpenIdAuth::isEnabled)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("AuthProvider not implemented:  " + authProvider));
     }

@@ -85,7 +85,7 @@ public class AppleAuthTest {
         MultivaluedMap<String, String> paramMap = request.asMap();
         assertEquals("authorization_code", paramMap.get("grant_type").get(0));
         assertEquals("mock-auth-code", paramMap.get("code").get(0));
-        assertEquals(config.clientId(), paramMap.get("client_id").get(0));
+        assertEquals(config.clientId().get(), paramMap.get("client_id").get(0));
         assertEquals("mock-client-secret", paramMap.get("client_secret").get(0));
         assertEquals(config.redirectUri(), paramMap.get("redirect_uri").get(0));
 
@@ -95,7 +95,7 @@ public class AppleAuthTest {
             eq(privateKey),
             eq(config.keyId().get()),
             eq(config.teamId().get()),
-            eq(config.clientId()),
+            eq(config.clientId().get()),
             eq(providerConfig.issuer),
             any(), eq(SignatureAlgorithm.ES256)
         );

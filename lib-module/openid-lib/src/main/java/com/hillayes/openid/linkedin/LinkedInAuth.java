@@ -48,20 +48,31 @@ public class LinkedInAuth implements OpenIdAuth {
         return authProvider == LINKEDIN;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return config.clientId().isPresent() && config.clientSecret().isPresent();
+    }
+
     public URI initiateLogin(String clientState) {
-        return UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
-            .queryParam("response_type", "code")
-            .queryParam("client_id", config.clientId())
-            .queryParam("scope", "openid profile email")
-            .queryParam("redirect_uri", config.redirectUri())
-            .queryParam("state", clientState)
-            .build();
+        return config.clientId()
+            .map(clientId -> UriBuilder.fromUri(openIdConfig.authorizationEndpoint)
+                .queryParam("response_type", "code")
+                .queryParam("client_id", clientId)
+                .queryParam("scope", "openid profile email")
+                .queryParam("redirect_uri", config.redirectUri())
+                .queryParam("state", clientState)
+                .build())
+            .orElse(null);
     }
 
     public JwtClaims exchangeAuthToken(String authCode) throws InvalidJwtException {
         log.debug("Exchanging auth code for tokens [authCode: {}]", authCode);
+        if ((config.clientId().isEmpty()) || (config.clientSecret().isEmpty())) {
+            return null;
+        }
+
         TokenExchangeResponse response = openIdTokenApi.exchangeToken("authorization_code",
-            config.clientId(), config.clientSecret().get(), authCode, config.redirectUri());
+            config.clientId().get(), config.clientSecret().get(), authCode, config.redirectUri());
         log.trace("OAuth [idToken: {}, accessToken: {}]", response.idToken, response.accessToken);
 
         return idTokenValidator.verify(response.idToken);

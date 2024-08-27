@@ -44,6 +44,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: the auth-provider
         URI openIdUri = URI.create("http://mock-uri");
@@ -61,6 +62,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -97,6 +99,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -127,6 +130,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -160,6 +164,7 @@ public class OpenIdAuthenticationTest {
         // and: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -206,6 +211,7 @@ public class OpenIdAuthenticationTest {
         // and: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -242,6 +248,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);
@@ -294,6 +301,7 @@ public class OpenIdAuthenticationTest {
         // given: and auth-provider identifier
         AuthProvider authProvider = AuthProvider.GOOGLE;
         when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
         String authCode = randomAlphanumeric(12);

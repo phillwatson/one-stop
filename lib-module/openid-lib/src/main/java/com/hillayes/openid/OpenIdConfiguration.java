@@ -56,7 +56,7 @@ public interface OpenIdConfiguration {
          * The unique identifier assigned to our application by the Auth-Provider.
          * Used to verify communications with that Auth-Provider.
          */
-        String clientId();
+        Optional<String> clientId();
 
         /**
          * The unique secret assigned to our application by the Auth-Provider.
