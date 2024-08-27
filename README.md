@@ -74,14 +74,30 @@ a good source of information on how the application is intended to be used.
 The following must be added to `environment:` section of the docker-compose.yaml
 services. This can be also be achieved by creating a docker-compose-override.yaml.
 
-### User Service
-The application currently supports OpenID Connect Authentication provided by Google,
-GitHub, GitLab and Apple. To use these services, you will need to obtain the client
-secrets from the respective providers.
+### User Services
+#### Cross-Site Request Forgery
+Cross-Site Request Forgery (XSRF) is avoided by the transfer of a random token
+generated using the configured XSRF secret (shared by all services).
 ```yaml
 # the secret used to generate and verify the XSRF token
 ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars>"
+```
 
+#### OpenID Connect Auth Providers
+The following OpenID Connect Auth Providers are supported, if fully configured:
+- Google
+- GitLab
+- GitHub
+- LinkedIn
+- Apple
+
+Their configuration consists, generally, of the client ID and secret you obtain
+from them. This requires the registration of an "application"; which is often no
+more than a configuration with your account.
+
+Those Auth Providers for which the configuration properties are not provided cannot
+be used for Open ID Connect authentication.
+```yaml
 # authenticate with Google Open-ID Connect
 ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_ID: "<the client id issued by Google>"
 ONE_STOP_AUTH_OPENID_GOOGLE_CLIENT_SECRET: "<the secret issued by Google>"

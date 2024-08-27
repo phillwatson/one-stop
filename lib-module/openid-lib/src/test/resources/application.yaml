@@ -11,27 +11,27 @@ one-stop:
         config-uri: 'https://token.actions.githubusercontent.com/.well-known/openid-configuration'
         authorization-endpoint: 'https://github.com/login/oauth/authorize'
         token-endpoint: 'https://github.com/login/oauth/access_token'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/github'
         client-id: 'my-github-registered-client-id'
         client-secret: 'a-github-generated-secret'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/github'
 
       gitlab:
         config-uri: 'https://gitlab.com/.well-known/openid-configuration'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
         client-id: 'my-gitlab-registered-client-id'
         client-secret: 'a-gitlab-generated-secret'
-        redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
 
       linkedin:
         config-uri: 'https://www.linkedin.com/oauth/.well-known/openid-configuration'
-        client-id: 'my-linkedin-registered-client-id'
         redirect-uri: 'http://localhost/api/v1/auth/validate/linkedin'
+        client-id: 'my-linkedin-registered-client-id'
         client-secret: 'a-linkedin-generated-secret'
 
       apple:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
+        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
         team-id: 'my-apple-team-id'
         client-id: 'my-apple-registered-client-id'
         key-id: 'my-apple-key-id'
-        redirect-uri: 'http://hibanapay/api/v1/auth/validate/apple'
         # not a real private key, just for testing
         private-key: "-----BEGIN PRIVATE KEY-----\nMEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCA6nm1eLiBDy75X8MVo\ncS9FmrW/F0Aivh5YGZQ0MpZkAQ==\n-----END PRIVATE KEY-----"

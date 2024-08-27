@@ -67,7 +67,7 @@ public class GoogleAuthTest {
         TokenExchangeRequest response = tokenExchangeCaptor.getValue();
         assertEquals("authorization_code", response.grantType);
         assertEquals("mock-auth-code", response.code);
-        assertEquals(config.clientId(), response.clientId);
+        assertEquals(config.clientId().get(), response.clientId);
         assertEquals(config.clientSecret().get(), response.clientSecret);
         assertEquals(config.redirectUri(), response.redirectUri);
     }

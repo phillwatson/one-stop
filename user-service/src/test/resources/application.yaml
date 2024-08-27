@@ -36,9 +36,11 @@ one-stop:
       secret: this is a secret for xsrf tokens
     openid:
       google:
+        client-id: "a-google-client-id"
         client-secret: 'a-google-generated-secret'
       apple:
         key-id: 'my-apple-key-id'
+        client-id: "an-apple-client-id"
         client-secret: 'an-apple-generated-secret'
 
   nordigen:
