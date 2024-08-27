@@ -99,13 +99,14 @@ public class AuthResource {
                                   @QueryParam("state") String state,
                                   @QueryParam("scope") String scope,
                                   @QueryParam("error") String error,
+                                  @QueryParam("error_description") String errorDesc,
                                   @QueryParam("error_uri") String errorUri) {
         log.info("OAuth validate [scope: {}, state: {}, error: {}]", scope, state, error);
 
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         if (error != null) {
             URI redirect = uriBuilder.queryParam("error", error).build();
-            log.debug("OAuth login fail [redirect: {}, errorUri: {}]", redirect, errorUri);
+            log.debug("OAuth login fail [redirect: {}, errorDesc: {}, errorUri: {}]", redirect, errorDesc, errorUri);
             return authTokens.deleteCookies(Response.temporaryRedirect(redirect));
         }
 

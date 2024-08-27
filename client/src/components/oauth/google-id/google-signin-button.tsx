@@ -8,7 +8,7 @@ export default function GoogleSignInButton() {
 
   return (
     <button className="google-sign-in-button" onClick= { buttonClick }>
-      <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Logo" />
+      <img src="/openid/google.png" alt="Google Logo" />
       <span>Sign in with Google</span>
     </button>
   );

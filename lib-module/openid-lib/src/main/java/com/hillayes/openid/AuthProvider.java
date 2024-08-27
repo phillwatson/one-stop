@@ -7,9 +7,10 @@ import java.net.URI;
  * been registered.
  */
 public enum AuthProvider {
-    GOOGLE("Google", URI.create("https://img.icons8.com/color/48/000000/google-logo.png")),
-    GITHUB("GitHub", URI.create("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")),
-    GITLAB("GitLab", URI.create("https://about.gitlab.com/images/press/press-kit-icon.svg")),
+    GOOGLE("Google", URI.create("/openid/google.png")),
+    GITHUB("GitHub", URI.create("/openid/github.png")),
+    GITLAB("GitLab", URI.create("/openid/gitlab.svg")),
+    LINKEDIN("LinkedIn", URI.create("/openid/linkedin.png")),
     APPLE("Apple", URI.create(""));
 
     private final String provider;
