@@ -8,7 +8,7 @@ export default function GitHubSignInButton() {
 
   return (
     <button className="gitlab-sign-in-button" onClick= { buttonClick }>
-      <img src="https://about.gitlab.com/images/press/press-kit-icon.svg" alt="GitLab Logo" />
+      <img src="/openid/gitlab.png" alt="GitLab Logo"/>
       <span>Sign in with GitLab</span>
     </button>
   );

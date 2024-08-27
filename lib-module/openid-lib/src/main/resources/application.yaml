@@ -21,6 +21,12 @@ one-stop:
         redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
         # client-secret: 'this will be passed in via docker env'
 
+      linkedin:
+        config-uri: 'https://www.linkedin.com/oauth/.well-known/openid-configuration'
+        client-id: '78eytv07h5x10i'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/linkedin'
+        # client-secret: 'this will be passed in via docker env'
+
       apple:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'

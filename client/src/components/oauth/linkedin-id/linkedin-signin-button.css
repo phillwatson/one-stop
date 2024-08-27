@@ -1,4 +1,4 @@
-.github-sign-in-button {
+.linkedin-sign-in-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7,23 +7,23 @@
   padding: 0px 15px;
   border: none;
   border-radius: 6px;
-  background-color: #3f3f3f;
+  background-color: #ffffff;
   box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }
 
-.github-sign-in-button:hover {
-  background-color: #222222;
+.linkedin-sign-in-button:hover {
+  opacity: 0.8;
 }
 
-.github-sign-in-button img {
+.linkedin-sign-in-button img {
   width: 25px;
   height: 25px;
   margin-right: 10px;
 }
 
-.github-sign-in-button span {
+.linkedin-sign-in-button span {
   font-size: 16px;
   font-weight: bold;
-  color: #f0f0f0;
+  color: #757575;
 }

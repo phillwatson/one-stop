@@ -8,7 +8,7 @@ export default function GitHubSignInButton() {
 
   return (
     <button className="github-sign-in-button" onClick= { buttonClick }>
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" />
+      <img src="/openid/github.png" alt="GitHub Logo" />
       <span>Sign in with GitHub</span>
     </button>
   );

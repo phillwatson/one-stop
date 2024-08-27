@@ -10,6 +10,7 @@ import ProfileService from "../../services/profile.service";
 import GoogleSignInButton from "../oauth/google-id/google-signin-button";
 import GitLabSignInButton from "../oauth/gitlab-id/gitlab-signin-button";
 import GitHubSignInButton from "../oauth/github-id/github-signin-button";
+import LinkedInSignInButton from "../oauth/linkedin-id/linkedin-signin-button";
 
 interface Credentials {
   username: string,
@@ -67,6 +68,10 @@ export default function LoginForm() {
 
       <div className="panel">
         <GoogleSignInButton/>
+      </div>
+
+      <div className="panel">
+        <LinkedInSignInButton/>
       </div>
 
       <div className="panel">

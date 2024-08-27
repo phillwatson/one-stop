@@ -21,6 +21,12 @@ one-stop:
         client-secret: 'a-gitlab-generated-secret'
         redirect-uri: 'http://localhost/api/v1/auth/validate/gitlab'
 
+      linkedin:
+        config-uri: 'https://www.linkedin.com/oauth/.well-known/openid-configuration'
+        client-id: 'my-linkedin-registered-client-id'
+        redirect-uri: 'http://localhost/api/v1/auth/validate/linkedin'
+        client-secret: 'a-linkedin-generated-secret'
+
       apple:
         config-uri: 'https://appleid.apple.com/.well-known/openid-configuration'
         team-id: 'my-apple-team-id'

@@ -7,6 +7,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -26,9 +28,10 @@ public class OpenIdAuthTest {
 
     @Test
     public void testAllInstances() {
-        assertFalse(instances.stream().toList().isEmpty());
-
-        assertTrue(instances.stream()
-            .anyMatch(instance -> instance.isFor(AuthProvider.GOOGLE)));
+        assertEquals(AuthProvider.values().length, instances.stream().count());
+        Arrays.stream(AuthProvider.values()).forEach(provider ->
+            assertTrue(instances.stream()
+                .anyMatch(instance -> instance.isFor(provider)))
+        );
     }
 }
