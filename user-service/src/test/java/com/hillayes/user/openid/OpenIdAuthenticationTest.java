@@ -86,6 +86,40 @@ public class OpenIdAuthenticationTest {
         // then: the identified user is returned
         assertEquals(user, result);
 
+        // and: no events are issued
+        verifyNoMoreInteractions(userEventSender);
+    }
+
+    @Test
+    public void testOauthLogin_ExistingUser_SetEmail() throws Exception {
+        // given: and auth-provider identifier
+        AuthProvider authProvider = AuthProvider.GOOGLE;
+        when(openIdAuth.isFor(authProvider)).thenReturn(true);
+        when(openIdAuth.isEnabled()).thenReturn(true);
+
+        // and: an Open-ID auth-code
+        String authCode = randomAlphanumeric(12);
+
+        // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
+        JwtClaims idToken = new JwtClaims();
+        idToken.setIssuer("https://accounts.google.com/");
+        idToken.setSubject(randomAlphanumeric(30));
+        idToken.setStringClaim("email", randomAlphanumeric(30));
+        when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
+
+        // and: the auth-provider ID identifies a user - without an email address
+        User user = TestData.mockUser(UUID.randomUUID());
+        user.setEmail(null);
+        user.addOidcIdentity(authProvider, idToken.getIssuer(), idToken.getSubject());
+        when(userRepository.findByIssuerAndSubject(idToken.getIssuer(), idToken.getSubject()))
+            .thenReturn(Optional.of(user));
+
+        // when: the service is called
+        User result = fixture.oauthExchange(authProvider, authCode);
+
+        // then: the identified user is returned
+        assertEquals(user, result);
+
         // and: the user's email address has been updated
         assertEquals(idToken.getClaimValueAsString("email").toLowerCase(), user.getEmail());
         verify(userEventSender).sendUserUpdated(user);
