@@ -4,6 +4,7 @@ import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.domain.TransactionMovement;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.TransactionFilter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -71,6 +72,17 @@ public class AccountTransactionService {
         return accountTransactionRepository.findTotals(filter);
     }
 
+    public List<TransactionMovement> getMovements(UUID userId, UUID accountId,
+                                                  Instant startDate, Instant endDate) {
+        log.info("Get transaction movements [userId: {}, accountId: {}, startDate: {}, endDate: {}]",
+            userId, accountId, startDate, endDate);
+
+        return accountTransactionRepository.getMovementStats(userId, accountId, startDate, endDate)
+            .stream()
+            .map(this::marshal)
+            .toList();
+    }
+
     public List<AccountTransaction> findByCategory(UUID userId, UUID groupId, UUID categoryId,
                                                    Instant startDate, Instant endDate) {
         log.info("Get transactions by category [userId: {}, categoryId: {}, startDate: {}, endDate: {}]",
@@ -108,5 +120,18 @@ public class AccountTransactionService {
             accountService.getAccount(userId, accountId)
                 .orElseThrow(() -> new NotFoundException("Account", accountId));
         }
+    }
+
+    private TransactionMovement marshal(AccountTransactionRepository.MovementProjection movement) {
+        return TransactionMovement.builder()
+            .fromDate(movement.fromDate.toLocalDate())
+            .toDate(movement.toDate.toLocalDate())
+            .debits(new TransactionMovement.MovementSummary(
+                movement.debitCount, MonetaryAmount.of(movement.currencyCode, movement.debitValue.longValue())
+            ))
+            .credits(new TransactionMovement.MovementSummary(
+                movement.creditCount, MonetaryAmount.of(movement.currencyCode, movement.creditValue.longValue())
+            ))
+            .build();
     }
 }

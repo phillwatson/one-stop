@@ -6,14 +6,17 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.domain.CategoryGroup;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
-import lombok.extern.slf4j.Slf4j;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
@@ -64,6 +67,38 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         ") " +
         "order by t.booking_datetime desc";
 
+    private static final String SELECT_USERS_MOVEMENTS =
+        "select " +
+            "  CAST(DATE_TRUNC('day', t.booking_datetime) as DATE) as from_date, " +
+            "  CAST(DATE_TRUNC('day', t.booking_datetime + interval '1 day') as DATE) as to_date, " +
+            "  t.currency_code, " +
+            "  sum(case when t.amount > 0 then 1 else 0 end) as credit_count, " +
+            "  sum(case when t.amount > 0 then t.amount else 0 end) as credit_value, " +
+            "  sum(case when t.amount < 0 then 1 else 0 end) as debit_count, " +
+            "  sum(case when t.amount < 0 then t.amount else 0 end) as debit_value " +
+            "from rails.account_transaction t " +
+            "where t.user_id = :userId " +
+            "and t.booking_datetime >= :startDate " +
+            "and t.booking_datetime < :endDate " +
+            "group by 1, 2, 3 " +
+            "order by 1 asc";
+
+    private static final String SELECT_ACCOUNTS_MOVEMENTS =
+        "select " +
+        "  CAST(DATE_TRUNC('day', t.booking_datetime) as DATE) as from_date, " +
+        "  CAST(DATE_TRUNC('day', t.booking_datetime + interval '1 day') as DATE) as to_date, " +
+        "  t.currency_code, " +
+        "  sum(case when t.amount > 0 then 1 else 0 end) as credit_count, " +
+        "  sum(case when t.amount > 0 then t.amount else 0 end) as credit_value, " +
+        "  sum(case when t.amount < 0 then 1 else 0 end) as debit_count, " +
+        "  sum(case when t.amount < 0 then t.amount else 0 end) as debit_value " +
+        "from rails.account_transaction t " +
+        "where t.user_id = :userId " +
+        "and t.account_id = :accountId " +
+        "and t.booking_datetime >= :startDate " +
+        "and t.booking_datetime < :endDate " +
+        "group by 1, 2, 3 " +
+        "order by 1 asc";
 
     /**
      * Locates the transactions whose internal ID is in the given list. The internal
@@ -128,6 +163,17 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
             .getResultList();
     }
 
+    public List<MovementProjection> getMovementStats(UUID userId, UUID accountId,
+                                                     Instant startDateInclusive, Instant endDateExclusive) {
+        String query = (accountId == null) ? SELECT_USERS_MOVEMENTS : SELECT_ACCOUNTS_MOVEMENTS;
+        return getEntityManager().createNativeQuery(query, MovementProjection.class)
+            .setParameter("userId", userId)
+            .setParameter("accountId", accountId)
+            .setParameter("startDate", startDateInclusive)
+            .setParameter("endDate", endDateExclusive)
+            .getResultList();
+    }
+
     public List<AccountTransaction> findByCategoryGroup(CategoryGroup categoryGroup,
                                                         Instant startDateInclusive,
                                                         Instant endDateExclusive,
@@ -170,5 +216,33 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
             .setParameter("startDate", startDateInclusive)
             .setParameter("endDate", endDateExclusive)
             .getResultList();
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    @RegisterForReflection
+    public static class MovementProjection {
+        @Column(name = "from_date", nullable = false)
+        public java.sql.Date fromDate;
+
+        @Column(name = "to_date", nullable = false)
+        public java.sql.Date toDate;
+
+        @Column(name = "currency_code", nullable = false)
+        public String currencyCode;
+
+        @Column(name = "credit_count", nullable = false)
+        public long creditCount;
+
+        @Column(name = "credit_value", nullable = false)
+        public BigDecimal creditValue;
+
+        @Column(name = "debit_count", nullable = false)
+        public long debitCount;
+
+        @Column(name = "debit_value", nullable = false)
+        public BigDecimal debitValue;
     }
 }

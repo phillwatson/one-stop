@@ -70,7 +70,7 @@ public class TestData {
             .id(UUID.randomUUID())
             .accountId(account.getId())
             .balanceType(randomAlphanumeric(30))
-            .amount(MonetaryAmount.of("GBP", nextLong(0, 20000)))
+            .amount(MonetaryAmount.of("GBP", nextLong(0, 20000) - 10000))
             .referenceDate(Instant.now().minus(Duration.ofDays(1)))
             .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
 
@@ -102,7 +102,7 @@ public class TestData {
             .accountId(UUID.randomUUID())
             .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
             .valueDateTime(Instant.now().minus(Duration.ofDays(1)))
-            .amount(MonetaryAmount.of("GBP", nextLong(0, 200000)))
+            .amount(MonetaryAmount.of("GBP", nextLong(0, 200000) - 100000))
             .reference(randomAlphanumeric(30))
             .additionalInformation(randomAlphanumeric(30))
             .creditorName(randomAlphanumeric(30))

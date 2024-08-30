@@ -18,9 +18,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -411,6 +413,60 @@ public class AccountTransactionRepositoryTest {
                 .reduce(Long::sum)
                 .orElse(0L);
             assertEquals(expected, totals.get(0).getAmount());
+        });
+    }
+
+    @Test
+    public void testGetMovementStats() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: a linked account
+        Account account = accountRepository.save(mockAccount(consent));
+
+        // and: a list of transactions
+        List<AccountTransaction> transactions = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        LocalDate bookingDate = now.minusDays(30);
+        while (bookingDate.isBefore(now)) {
+            // add 2 transactions for each day
+            transactions.add(mockTransaction(account, bookingDate));
+            transactions.add(mockTransaction(account, bookingDate));
+            bookingDate = bookingDate.plusDays(1);
+        }
+        fixture.saveAll(transactions);
+        fixture.flush();
+
+        // group the transactions by their booking date
+        Map<LocalDate, List<AccountTransaction>> groupByDate = transactions.stream()
+            .collect(Collectors.groupingBy(t -> LocalDate.ofInstant(t.getBookingDateTime(), ZoneOffset.UTC)));
+
+        // when: the transaction movements are requested
+        List<AccountTransactionRepository.MovementProjection> stats =
+            fixture.getMovementStats(consent.getUserId(), account.getId(),
+                LocalDate.now().minusDays(30).atStartOfDay(ZoneOffset.UTC).toInstant(),
+                LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant());
+
+        // then: the stats are returned for the period requested
+        assertNotNull(stats);
+        assertEquals(groupByDate.size(), stats.size());
+
+        // and: the figures match the transactions
+        stats.forEach(stat -> {
+            List<AccountTransaction> expected = groupByDate.get(stat.getFromDate().toLocalDate());
+            assertNotNull(expected);
+            assertEquals(expected.size(), stat.creditCount + stat.debitCount);
+
+            long totalDebits = expected.stream()
+                .mapToLong(t -> t.getAmount().getAmount())
+                .filter(amount -> amount < 0)
+                .sum();
+            long totalCredits = expected.stream()
+                .mapToLong(t -> t.getAmount().getAmount())
+                .filter(amount -> amount > 0)
+                .sum();
+            assertEquals(totalDebits, stat.debitValue.longValue());
+            assertEquals(totalCredits, stat.creditValue.longValue());
         });
     }
 
