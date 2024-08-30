@@ -25,7 +25,7 @@ const colhead: SxProps = {
   fontWeight: 'bold'
 };
 
-const VISIBLE_CONSENTS = ["GIVEN", "DENIED", "SUSPENDED", "EXPIRED"];
+const VISIBLE_CONSENTS = ["GIVEN", "DENIED", "SUSPENDED", "EXPIRED", "TIMEOUT"];
 
 export default function UserConsentList(props: Props) {
   const showMessage = useMessageDispatch();
