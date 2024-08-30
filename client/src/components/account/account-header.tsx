@@ -16,7 +16,7 @@ interface Props extends PropsWithChildren {
 
 export default function AccountHeader(props: Props) {
   return (
-    <div>
+    <>
       { props.account &&
         <TableContainer>
           <Table size="small">
@@ -33,7 +33,7 @@ export default function AccountHeader(props: Props) {
             </TableHead>
             <TableBody>
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={5} padding="none" sx={{ padding: "2px" }}>
                   {props.children}
                 </TableCell>
               </TableRow>
@@ -41,6 +41,6 @@ export default function AccountHeader(props: Props) {
         </Table>
         </TableContainer>
       }
-    </div>
+    </>
   );
 }

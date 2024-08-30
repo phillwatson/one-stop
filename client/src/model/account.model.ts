@@ -52,3 +52,16 @@ export type CurrencyTotal = {
 export interface PaginatedTransactions extends PaginatedList<TransactionDetail> {
   currencyTotals?: CurrencyTotal;
 }
+
+export interface MovementEntry {
+  count: number;
+  amount: number;
+  currency: Currency;
+}
+
+export interface TransactionMovement {
+  fromDate: string;
+  toDate: string;
+  credits: MovementEntry;
+  debits: MovementEntry;
+}

@@ -4,10 +4,9 @@ import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.onestop.api.PaginatedTransactions;
-import com.hillayes.onestop.api.PaginationUtils;
-import com.hillayes.onestop.api.TransactionResponse;
+import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.AccountTransaction;
+import com.hillayes.rail.domain.TransactionMovement;
 import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.AccountTransactionService;
 import jakarta.annotation.security.RolesAllowed;
@@ -16,6 +15,7 @@ import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -100,6 +100,32 @@ public class AccountTransactionResource {
     }
 
     @GET
+    @Path("/movements")
+    public Response getTransactionMovements(@Context SecurityContext ctx,
+                                            @QueryParam("account-id") UUID accountId,
+                                            @QueryParam("from-date") LocalDate fromDate,
+                                            @QueryParam("to-date") LocalDate toDate) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting transaction movements [userId: {}, accountId: {}, from: {}, to: {}]",
+            userId, accountId, fromDate, toDate);
+
+        // convert dates to instant
+        Instant startDate = (fromDate == null)
+            ? Instant.EPOCH.truncatedTo(ChronoUnit.DAYS)
+            : fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endDate = (toDate == null)
+            ? Instant.now().truncatedTo(ChronoUnit.DAYS).plus(Duration.ofDays(1))
+            : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        List<TransactionMovementResponse> result =
+            accountTransactionService.getMovements(userId, accountId, startDate, endDate)
+                .stream()
+                .map(this::marshal)
+                .toList();
+        return Response.ok(result).build();
+    }
+
+    @GET
     @Path("/{groupId}/category")
     public Response getTransactionsByCategory(@Context SecurityContext ctx,
                                               @PathParam("groupId") UUID groupId,
@@ -115,7 +141,7 @@ public class AccountTransactionResource {
             ? Instant.EPOCH.truncatedTo(ChronoUnit.DAYS)
             : fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         Instant endDate = (toDate == null)
-            ? Instant.now().truncatedTo(ChronoUnit.DAYS)
+            ? Instant.now().truncatedTo(ChronoUnit.DAYS).plus(Duration.ofDays(1))
             : toDate.atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<TransactionResponse> result = accountTransactionService
@@ -137,5 +163,21 @@ public class AccountTransactionResource {
             .reference(transaction.getReference())
             .additionalInformation(transaction.getAdditionalInformation())
             .creditorName(transaction.getCreditorName());
+    }
+
+    private TransactionMovementResponse marshal(TransactionMovement movement) {
+        return new TransactionMovementResponse()
+            .fromDate(movement.getFromDate())
+            .toDate(movement.getToDate())
+            .credits(new MovementEntry()
+                .count(movement.getCredits().count())
+                .amount(movement.getCredits().amount().toDecimal())
+                .currency(movement.getCredits().amount().getCurrencyCode())
+            )
+            .debits(new MovementEntry()
+                .count(movement.getDebits().count())
+                .amount(movement.getDebits().amount().toDecimal())
+                .currency(movement.getDebits().amount().getCurrencyCode())
+            );
     }
 }

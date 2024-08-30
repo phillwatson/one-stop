@@ -1,81 +1,127 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import Paper from '@mui/material/Paper/Paper';
 import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
-import { BarChart } from "@mui/x-charts/BarChart";
+import { BarChart } from '@mui/x-charts/BarChart';
+import { BarSeriesType } from '@mui/x-charts/models/seriesType/bar';
+import { MakeOptional } from '@mui/x-charts/models/helpers';
+import { AxisConfig, ChartsYAxisProps, ScaleName } from '@mui/x-charts/models/axis';
 
-import { useMessageDispatch } from "../../contexts/messages/context";
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
+import { useMessageDispatch } from '../../contexts/messages/context';
 import AccountService from '../../services/account.service';
-import { AccountDetail } from "../../model/account.model";
-import { formatDate } from "../../util/date-util";
+import { AccountDetail } from '../../model/account.model';
+import DateRangeSelector from './date-range-selector';
+
+import dayjs, { Dayjs, ManipulateType } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 interface Props {
   account: AccountDetail
-  fromDate: Date;
-  toDate: Date;
+  elevation?: number;
+}
+
+interface Data {
+  credits: number;
+  debits: number;
 }
 
 export default function BarGraph(props: Props) {
   const showMessage = useMessageDispatch();
-  const [xAxis, setXAxis] = useState<Array<string>>([]);
-  const [yAxis, setYAxis] = useState<Array<{
-    credits: number;
-    debits: number;
-  }>>([]);
+  const [ formatMoney ] = useMonetaryContext();
+
+  const formatValue = useCallback((value: number | null) => {
+    return value === null ? "" : formatMoney(value, 'GBP');
+  }, [ formatMoney ])
+
+  const series = useMemo<MakeOptional<BarSeriesType, 'type'>[]>(() => {
+    return [
+      { dataKey: 'credits', stack: 'a', color: '#00BF00', label: 'credits', valueFormatter: formatValue },
+      { dataKey: 'debits',  stack: 'a', color: '#BF0000', label: 'debits',  valueFormatter: formatValue }
+    ];
+  }, [ formatValue ]);
+
+  const yAxisConfig = useMemo<AxisConfig<ScaleName, any, ChartsYAxisProps>[]>(() => {
+    return [{
+      id: 'amount',
+      scaleType: 'linear',
+      valueFormatter: formatValue
+    }]
+  }, [ formatValue ]);
+
+  const [xAxis, setXAxis] = useState<Array<number>>([]);
+  const [yAxis, setYAxis] = useState<Array<any>>([]);
+
+  const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs(), dayjs() ]);
 
   useEffect(() => {
     // fetch transactions and group the amounts by date
-    AccountService.fetchTransactions(props.account.id, props.fromDate, props.toDate)
-      .then( transactions => {
-        // create an initial range of dates with 0 values
-        const range = new Map<string, any>();
-        var date = new Date(props.fromDate);
-        while (date <= props.toDate) {
-          range.set(date.toLocaleDateString(), { credits: 0, debits: 0 });
-          date.setDate(date.getDate() + 1);
+    const fromDate = dateRange[0].toDate();
+    const toDate = dateRange[1].toDate()
+
+    AccountService.getTransactionMovements(props.account.id, fromDate, toDate)
+      .then( movements => {
+        const units: ManipulateType = (dateRange[1].diff(dateRange[0], 'day') <= 65)
+          ? 'day' : 'week';
+
+        const range = new Map<number, Data>();
+        let date = dateRange[0];
+        while (date < dateRange[1]) {
+          range.set(date.unix(), { credits: 0, debits: 0 });
+          date = date.add(1, units);
         }
 
-        transactions.forEach(transaction => {
-          const date = formatDate(transaction.bookingDateTime);
-          const entry = range.get(date);
-          (transaction.amount < 0) ? entry.debits += transaction.amount : entry.credits += transaction.amount;
-        })
+        const keys = Array.from(range.keys()).sort();
 
-        setXAxis(Array.from(range.keys()));
+        movements.reverse().forEach(movement => {
+          const from = dayjs.utc(movement.fromDate).unix();
+          let key = keys.find(k => k >= from) || keys[keys.length - 1];
+          let entry = range.get(key)!;
+          entry.debits  += movement.debits.amount;
+          entry.credits += movement.credits.amount;
+        });
+
+        setXAxis(keys);
         setYAxis(Array.from(range.values()));
       })
       .catch(err => showMessage(err));
-  }, [props, showMessage]);
-
-  if ((xAxis.length === 0) || (yAxis.length === 0))
-    return <>Loading...</>;
+  }, [ props, showMessage, dateRange ]);
 
   return (
     <>
-      <BarChart
-          dataset={ yAxis }
-          series={[
-            { dataKey: 'credits', stack: 'a', color: '#00BF00', label: 'credits' },
-            { dataKey: 'debits',  stack: 'a', color: '#BF0000', label: 'debits' }
-          ]}
-          yAxis={[{ id: 'amount', scaleType: 'linear' }]}
-          xAxis={[{ id: 'dates', data: xAxis, scaleType: 'band', tickLabelInterval: (_, index) => index % 2 === 0 }]}
-          height={ 450 }
-          margin={{ top: 50, right: 10, bottom: 70, left: 120 }}
-          bottomAxis={{
-            axisId: 'dates',
-            tickLabelStyle: {
-              angle: -40,
-              textAnchor: 'end',
-              fontSize: 12,
-            }
-          }}
-      >
-        <ChartsReferenceLine
-            y={ 0 }
-            lineStyle={{ strokeDasharray: '6 10' }}
-            labelAlign="start"
-          />
-      </BarChart>
+      <Paper sx={{ marginTop: 1, padding: 2 }} elevation={ props.elevation || 3 }>
+        <DateRangeSelector dateRange={ dateRange } onSelect={ setDateRange } />
+      </Paper>
+    
+      <Paper sx={{ marginTop: 1 }} elevation={ props.elevation || 3 }>
+        <BarChart
+            dataset={ yAxis }
+            series={ series }
+            yAxis={ yAxisConfig }
+            xAxis={ [{
+              id: 'dates', data: xAxis, scaleType: 'band',
+              valueFormatter: (v: number) => dayjs.unix(v).format('DD/MM/YYYY'),
+              tickLabelInterval: (_, index) => index % 2 === 0
+            }] }
+            height={ 450 }
+            margin={{ top: 50, right: 10, bottom: 70, left: 100 }}
+            bottomAxis={{
+              axisId: 'dates',
+              tickLabelStyle: {
+                angle: -40,
+                textAnchor: 'end',
+                fontSize: 12,
+              }
+            }}
+        >
+          <ChartsReferenceLine
+              y={ 0 }
+              lineStyle={{ strokeDasharray: '6 10' }}
+              labelAlign="start"
+            />
+        </BarChart>
+      </Paper>
     </>
   );
 }

@@ -14,8 +14,6 @@ class UserConsentService {
   }
 
   registerConsent(institutionId: string): Promise<Location> {
-    console.log(`Registering institution [id: ${institutionId}]`);
-    
     const body = {
       callbackUri: window.location.origin + "/accounts"
     }
@@ -24,7 +22,6 @@ class UserConsentService {
   }
 
   cancelConsent(institutionId: string, purge: boolean = false) {
-    console.log(`Closing institution [id: ${institutionId}]`);
     return http.delete(`/rails/consents/${institutionId}?purge=${purge}`);
   }
 }

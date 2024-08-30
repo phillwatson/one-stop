@@ -22,15 +22,11 @@ export default function Graph() {
     }
   }, [accountId, showMessage]);
 
-  // fetch transactions for the last 30 days
-  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 30);
-  const toDate = new Date();
-
   return (
     <PageHeader title="Account Graphs" >
       { account &&
         <AccountHeader account={ account }>
-          <BarGraph account={ account } fromDate={ fromDate } toDate={ toDate }/>
+          <BarGraph account={ account }/>
         </AccountHeader>
       }
     </PageHeader>

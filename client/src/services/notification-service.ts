@@ -9,7 +9,6 @@ class NotificationService {
   }
 
   deleteNotification(notificationId: string) {
-    console.log(`Deleting notification [id: ${notificationId}]`);
     return http.delete(`/notifications/${notificationId}`);
   }
 }

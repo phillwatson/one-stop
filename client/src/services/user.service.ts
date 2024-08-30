@@ -18,8 +18,6 @@ class UserService {
   }
 
   registerNewUser(email: string): Promise<void> {
-    console.log(`Initiating user registration "${email}"`);
-
     const body = {
       email: email
     }
@@ -28,8 +26,6 @@ class UserService {
   }
 
   completeRegistration(credentials: RegistrationCredentials): Promise<void> {
-    console.log(`Completing user registration for "${credentials.givenName}"`);
-
     const body = {
       username: credentials.username,
       password: credentials.password,

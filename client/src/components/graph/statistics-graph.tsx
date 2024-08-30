@@ -11,19 +11,14 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { PieValueType } from '@mui/x-charts/models/seriesType/pie';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/locale/en-gb';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import CategoryService from '../../services/category.service';
 import { CategoryGroup, CategoryStatistics } from '../../model/category.model';
-
-var debounce = require('lodash/debounce');
+import DateRangeSelector from './date-range-selector';
 
 interface Props {
   elevation?: number;
@@ -50,23 +45,6 @@ function toPieSlice(stat: CategoryStatistics, value: number): StatisticsPieValue
   return p;
 }
 
-const now = dayjs();
-const tomorrow =  now.add(1, 'day');
-
-interface StaticRange {
-  name: string;
-  range: Dayjs[];
-}
-const StaticRanges: Array<StaticRange> = [
-  { name: 'This Month',     range: [ now.date(1), tomorrow ] },
-  { name: 'Last Month',     range: [ now.date(1).subtract(1, 'month'), now.date(1) ] },
-  { name: 'This Year',      range: [ now.month(0).date(1), tomorrow ] },
-  { name: 'Last Year',      range: [ now.month(0).date(1).subtract(1, 'year'), now.month(0).date(1) ] },
-  { name: 'Past 30 Days',   range: [ now.subtract(30, 'day'), tomorrow ] },
-  { name: 'Past 6 Months',  range: [ now.subtract(6, 'month'), tomorrow ] },
-  { name: 'Past 12 Months', range: [ now.subtract(12, 'month'), tomorrow ] }
-]
-
 export default function StatisticsGraph(props: Props) {
   const showMessage = useMessageDispatch();
   const [ formatMoney ] = useMonetaryContext();
@@ -83,13 +61,7 @@ export default function StatisticsGraph(props: Props) {
   const statisticsRef = useRef<CategoryStatisticsUI[]>([]);
   statisticsRef.current = statistics;
 
-  const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs().subtract(1, 'month'), dayjs().add(1, 'day') ]);
-  const debouncedSetDateRange = debounce((value: Dayjs[]) => { setDateRange(value) }, 600);
-
-  const [ selectedRange, setSelectedRange ]  = useState<number>(0);
-  useEffect(() => {
-    setDateRange(StaticRanges[selectedRange].range);
-  }, [ selectedRange ]);
+  const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs(), dayjs() ]);
 
   useEffect(() => {
     if (selectedGroup === undefined) {
@@ -200,7 +172,7 @@ export default function StatisticsGraph(props: Props) {
   }
 
   return (
-    <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ 'en-gb' }>
+    <>
       <Paper sx={{ padding: 2 }} elevation={ props.elevation || 3 }>
         <Grid container direction="column" rowGap={ 3 } justifyContent="space-evenly">
           <Grid key={1} item>
@@ -214,32 +186,8 @@ export default function StatisticsGraph(props: Props) {
             </FormControl>
           </Grid>
 
-          <Grid key={2} container direction="row" rowGap={ 3 } columnGap={ 3 } justifyContent="space-evenly">
-            <Grid key={1} item>
-              <FormControl  sx={{ width: { xs: 180, md: 220 }}}>
-                <InputLabel id="range-label">Range</InputLabel>
-                <Select labelId="select-range" id="select-range" label="Range"
-                  value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
-                  { StaticRanges.map((range, index) =>
-                    <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid key={2} item>
-              <DatePicker disableFuture label="From Date (inclusive)" value={ dayjs(dateRange[0]) }
-                onChange={ (value: any, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([ value, dateRange[1] ])
-                  }}/>
-            </Grid>
-            <Grid key={3} item>
-              <DatePicker maxDate={ tomorrow } label="To Date (exclusive)" value={ dayjs(dateRange[1]) }
-                onChange={ (value: any, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([ dateRange[0], value ])
-                  }}/>
-            </Grid>
+          <Grid key={2} item>
+            <DateRangeSelector dateRange={ dateRange } onSelect={ setDateRange } />
           </Grid>
         </Grid>
       </Paper>
@@ -272,6 +220,6 @@ export default function StatisticsGraph(props: Props) {
           </Grid>
         </Grid>
       </Paper>
-    </LocalizationProvider>
+    </>
   );
 }

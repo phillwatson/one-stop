@@ -116,8 +116,8 @@ public class OpenIdAuthentication {
                     // otherwise, record the login timestamp
                     .setDateLastUsed(Instant.now());
 
-                // take opportunity to update user's email address
-                if ((email != null) && (! email.equals(user.getEmail()))) {
+                // take opportunity to set user's email address
+                if ((email != null) && (Strings.isBlank(user.getEmail()))) {
                     user.setEmail(email);
                     userEventSender.sendUserUpdated(user);
                 }
