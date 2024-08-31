@@ -66,7 +66,10 @@ public class DeletedUser {
     @Column(name = "blocked_reason")
     private Instant blockedReason;
 
-    @Version
+    /**
+     * This is used to copy the version of the original user, but should not
+     * be used for optimistic locking of this deleted user entity.
+     */
     private Integer version;
 
     public String getPasswordHash() {
