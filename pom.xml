@@ -59,7 +59,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.13.3</quarkus.platform.version>
+        <quarkus.platform.version>3.14.1</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -89,6 +89,7 @@
                 </property>
             </activation>
             <properties>
+                <quarkus.native.enabled>true</quarkus.native.enabled>
                 <quarkus.package.type>native</quarkus.package.type>
                 <quarkus.native.container-build>true</quarkus.native.container-build>
             </properties>
