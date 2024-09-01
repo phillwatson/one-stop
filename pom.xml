@@ -82,9 +82,10 @@
             </properties>
         </profile>
         <profile>
+            <!-- For building native images on Apple M1 -->
             <id>arm64</id>
             <activation>
-                <os><arch>arm64</arch></os>
+                <os><arch>aarch64</arch></os>
             </activation>
             <properties>
                 <quarkus.native.builder.image>graalvm</quarkus.native.builder.image>
