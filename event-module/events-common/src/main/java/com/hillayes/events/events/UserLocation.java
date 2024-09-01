@@ -1,5 +1,6 @@
 package com.hillayes.events.events;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.*;
 
@@ -13,6 +14,7 @@ import lombok.*;
 @Builder
 @Getter
 @ToString
+@RegisterForReflection
 public class UserLocation {
     private String ip;
     private String city;

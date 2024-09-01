@@ -82,6 +82,17 @@
             </properties>
         </profile>
         <profile>
+            <id>arm64</id>
+            <activation>
+                <os><arch>arm64</arch></os>
+            </activation>
+            <properties>
+                <quarkus.native.builder.image>graalvm</quarkus.native.builder.image>
+                <quarkus.jib.base-native-image>quay.io/quarkus/quarkus-micro-image:2.0-arm64</quarkus.jib.base-native-image>
+                <quarkus.container-image.tag>1.0.0-arm64</quarkus.container-image.tag>
+            </properties>
+        </profile>
+        <profile>
             <id>native</id>
             <activation>
                 <property>
@@ -90,8 +101,8 @@
             </activation>
             <properties>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
-                <quarkus.package.type>native</quarkus.package.type>
                 <quarkus.native.container-build>true</quarkus.native.container-build>
+                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
             </properties>
         </profile>
     </profiles>
