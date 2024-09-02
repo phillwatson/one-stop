@@ -208,6 +208,25 @@ mvn clean package -Dnative
 ```
 Combinations of these can be used.
 
+#### Notes on Native Build for Arm64 / Aarch64
+Building native images on Linux Intel (x86_64) is just a matter of using the
+`-Dnative` build arg. Building native images for Arm64 or Aarch64 architectures
+requires a little more effort. Here are the steps I've taken to achieve this:
+
+Firstly, I'm using an Apple Mac M1 pro (a gift from a previous employer).
+1. Install GraalVM JVM. I use `sdkman` to manage my Java installations:
+   1. `sdk install java 21.0.2-graalce`
+   2. Select the new installation as "default"
+2. Set the environment property `GRAALVM_HOME` to locate the VM installation:
+   1. `export GRAALVM_HOME=$HOME/.sdkman/candidates/java/21.0.2-graalce` 
+3. You should now be able to build the native images using the command line:
+   1. `mvn clean package -Dnative`
+
+The POMs have been configured to set additional environment variables when
+performing a native build on Aarch64 architecture. See the "arm64" profile in
+the root `pom.xml`. Note, it is in this profile that the tag for the generated
+container image is set.
+
 ## Debugging Docker Images
 All non-native docker images are built with remote JVM debugging enabled. In
 order to connect to the images the debug port 5005 must be exposed. Each
@@ -219,3 +238,26 @@ container should expose that internal port on a unique port - to avoid clashes.
       - "8181:8080"
       - "5001:5005"
 ```
+
+## Manually Pushing Docker Images to GitHub Repo
+### login to GitHub repo
+We need to login to our GitHub account using a Personal Access Token (classic). That
+token can be created in
+1. Go to your GitHub account settings
+2. Navigate to Developer settings > Personal access tokens (https://github.com/settings/tokens)
+3. Click on "Generate new token" and select "Generate new token (classic)"
+4. Give the new token a "note" describing what it will be for
+5. In the scopes, select the following
+   1. write:packages
+   2. delete:packages - if you will later want to use the token to delete
+6. Click "Generate token"
+7. Note the token ID - do it now, you won't be able to see it again 
+```bash
+docker login --username <username> --password <access-token-id> ghcr.io
+```
+### push image
+```bash
+docker push <fully-qualified-image-name>
+```
+The fully-qualified image name consists of the repo, username, image-name and tag.
+For example; `ghcr.io/phillwatson/one-stop-user-service:1.0.0-SNAPSHOT`.
