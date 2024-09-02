@@ -11,6 +11,26 @@
 
     <artifactId>one-stop-main</artifactId>
 
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <!--
+                 see https://quarkus.io/guides/writing-native-applications-tips
+                 This resource is actually located in the user-service resources folder,
+                 but referenced here for the modulith build. In the microservice build
+                 this entry would be in the user-service/pom.xml.
+                -->
+                <quarkus.native.additional-build-args>-H:DynamicProxyConfigurationResources=proxy-config.json</quarkus.native.additional-build-args>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <!-- causes build of docker images on package -->
