@@ -173,22 +173,6 @@ ONE_STOP_GATEWAY_OPEN_PORT: "9876"
 ```
 
 ## To Build and Start Docker Images
-```shell
-mvn clean package
-docker compose up -d
-```
-### Building Client Docker Image
-The client docker image is not built by the maven POM. To build the client create
-a docker-compose-override.yaml and include the following - any existing docker
-image should be deleted first:
-```yaml
-services:
-  client:
-    image: one-stop/client:1.0.0-SNAPSHOT
-    build:
-      context: ./client
-```
-
 ### Build Parameters
 By default, the build does not run unit-tests. To run the unit-tests, add
 the following parameter to the build command:
@@ -207,6 +191,23 @@ images, add the following parameter to the build command:
 mvn clean package -Dnative
 ```
 Combinations of these can be used.
+
+### Building Client Docker Image
+The client docker image is not built by the maven POM. To build the client create
+a docker-compose-override.yaml and include the following - any existing docker
+image should be deleted first:
+```yaml
+services:
+  client:
+    image: one-stop/client:1.0.0-SNAPSHOT
+    build:
+      context: ./client
+```
+Then run the build and start the docker images (with client image build):
+```shell
+mvn clean package -Pclient
+docker compose up -d --build
+```
 
 #### Notes on Native Build for Arm64 / Aarch64
 Building native images on Linux Intel (x86_64) is just a matter of using the
