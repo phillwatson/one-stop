@@ -8,16 +8,14 @@ aggregated fashion.
 
 ## Architecture
 One-Stop has been designed using an event-driven, modulith service architecture,
-where each service has a specific area of responsibility. However, to keep the
-PoC build simple, the Maven model of parent POM and sub-modules has been
-adopted; with each module adopting the same version as the parent. Each service
-module will generate its own Docker Image.
+where each service has a specific area of responsibility; and deployed as a
+single Docker image.
 
 ![Architecture](./docs/one-stop-arch.png)
 
 An alternative implementation is presented in the "main" branch. That implementation
 demonstrates how the same application can be built, and maintained, as a collection
-of independent microservices.
+of independent microservices; each deployed as a separate Docker image.
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
