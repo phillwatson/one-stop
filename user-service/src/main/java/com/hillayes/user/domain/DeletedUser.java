@@ -72,10 +72,6 @@ public class DeletedUser {
      */
     private Integer version;
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public static DeletedUser fromUser(User user) {
         return DeletedUser.builder()
             .dateDeleted(Instant.now())
