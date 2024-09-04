@@ -91,7 +91,7 @@
             <properties>
                 <quarkus.native.builder.image>graalvm</quarkus.native.builder.image>
                 <quarkus.jib.base-native-image>quay.io/quarkus/quarkus-micro-image:2.0-arm64</quarkus.jib.base-native-image>
-                <quarkus.container-image.tag>${revision}-arm64}</quarkus.container-image.tag>
+                <quarkus.container-image.tag>${revision}-arm64</quarkus.container-image.tag>
             </properties>
         </profile>
         <profile>
