@@ -10,13 +10,14 @@ aggregated fashion.
 One-Stop has been designed using an event-driven, modulith service architecture,
 where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
-adopted; with each module adopting the same version as the parent.
+adopted; with each module adopting the same version as the parent. Each service
+module will generate its own Docker Image.
+
+![Architecture](./docs/one-stop-arch.png)
 
 An alternative implementation is presented in the "main" branch. That implementation
 demonstrates how the same application can be built, and maintained, as a collection
 of independent microservices.
-
-![Architecture](./docs/one-stop-arch.png)
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
@@ -142,11 +143,11 @@ ONE_STOP_YAPILY_SECRET_KEY: "<the secret issue by Yapily>"
 
 ### Notification Service
 In order to use the notification service, you will need to obtain an API key from
-Brevo (previously known as Send-With-Blue). Sign-up and access is free:
+Brevo (previously known as Send-In-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
 # the Brevo (SendInBlue) Email-Service key
-ONE_STOP_EMAIL_API_KEY: "<the secret issue by Brevo (previously Send-With-Blue)>"
+ONE_STOP_EMAIL_API_KEY: "<the secret issue by Brevo (previously Send-In-Blue)>"
 
 # to disable the sending of emails - default false
 ONE_STOP_EMAIL_DISABLED: "true"
