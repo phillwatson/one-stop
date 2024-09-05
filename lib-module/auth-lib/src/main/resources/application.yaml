@@ -5,6 +5,7 @@ mp:
       issuer: ${one-stop.auth.access-token.issuer}
       publickey:
         location: http://one-stop-service:8080/api/v1/auth/jwks.json
+        algorithm: ES256
     token:
       header: Cookie
       cookie: ${one-stop.auth.access-token.cookie}
@@ -12,8 +13,8 @@ mp:
 smallrye:
   jwt:
     jwks:
-      refresh-interval: 15
-      forced-refresh-interval: 5
+      refresh-interval: 15 # minutes
+      forced-refresh-interval: 5 # minutes
 
 one-stop:
   auth:
