@@ -63,7 +63,7 @@ public class AuthResourceTest extends TestBase {
             .statusCode(200)
             .contentType(JSON)
             .assertThat()
-            .body("keys[0].kty", is("RSA"));
+            .body("keys[0].kty", is("EC"));
     }
 
     @ParameterizedTest

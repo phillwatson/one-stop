@@ -3,6 +3,7 @@ mp:
     verify:
       publickey:
         location: http://localhost:8081/api/v1/auth/jwks.json
+        algorithm: ES256
 
 quarkus:
   hibernate-orm:

@@ -9,9 +9,8 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jose4j.jwk.JsonWebKeySet;
-import org.jose4j.jwk.RsaJsonWebKey;
-import org.jose4j.jwk.RsaJwkGenerator;
+import org.jose4j.jwk.*;
+import org.jose4j.keys.EllipticCurves;
 import org.jose4j.lang.JoseException;
 
 import javax.security.auth.DestroyFailedException;
@@ -39,6 +38,12 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 @Slf4j
 public class RotatedJwkSet {
+    public static final String EC_ALGORITHM = "ES256";
+    public static final int RSA_KEYSIZE = 2048;
+
+    @ConfigProperty(name = "mp.jwt.verify.publickey.algorithm")
+    String algorithm;
+
     /**
      * Determines the frequency at which new key-pairs are generated and added
      * to the set.
@@ -56,7 +61,7 @@ public class RotatedJwkSet {
     /**
      * The lifo stack of key-pairs. Access to this is synchronized.
      */
-    private final Deque<RsaJsonWebKey> stack = new LinkedList<>();
+    private final Deque<PublicJsonWebKey> stack = new LinkedList<>();
 
     private ScheduledExecutorService executor;
 
@@ -117,10 +122,12 @@ public class RotatedJwkSet {
      * @return the generated key-pair.
      * @throws JoseException if the key cannot be created.
      */
-    private RsaJsonWebKey newJWK(String kid) throws JoseException {
-        RsaJsonWebKey result = RsaJwkGenerator.generateJwk(2048);
-        result.setKeyId(kid);
+    private PublicJsonWebKey newJWK(String kid) throws JoseException {
+        PublicJsonWebKey result = EC_ALGORITHM.equals(algorithm)
+            ? EcJwkGenerator.generateJwk(EllipticCurves.P256)
+            : RsaJwkGenerator.generateJwk(RSA_KEYSIZE);
 
+        result.setKeyId(kid);
         return result;
     }
 
@@ -130,7 +137,7 @@ public class RotatedJwkSet {
      *
      * @param jwk the key-pair to be disposed.
      */
-    private void disposeOf(RsaJsonWebKey jwk) {
+    private void disposeOf(PublicJsonWebKey jwk) {
         try {
             jwk.getPrivateKey().destroy();
         } catch (DestroyFailedException ignore) {
@@ -140,7 +147,7 @@ public class RotatedJwkSet {
     /**
      * Returns the most recently generated key-pair.
      */
-    private RsaJsonWebKey getCurrentWebKey() {
+    private PublicJsonWebKey getCurrentWebKey() {
         synchronized (stack) {
             return stack.getLast();
         }
@@ -150,7 +157,7 @@ public class RotatedJwkSet {
      * Returns the most recently generated private key.
      */
     public PrivateKey getCurrentPrivateKey() {
-        return getCurrentWebKey().getRsaPrivateKey();
+        return getCurrentWebKey().getPrivateKey();
     }
 
     /**
@@ -173,7 +180,7 @@ public class RotatedJwkSet {
      * @return the signed JWT token.
      */
     public String signClaims(JwtClaimsBuilder jwtClaimsBuilder) {
-        RsaJsonWebKey webKey = getCurrentWebKey();
+        PublicJsonWebKey webKey = getCurrentWebKey();
         return jwtClaimsBuilder
             .jws()
             .keyId(webKey.getKeyId())
