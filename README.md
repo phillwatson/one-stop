@@ -92,7 +92,7 @@ The following OpenID Connect Auth Providers are supported, if fully configured:
 
 Their configuration consists, generally, of the client ID and secret you obtain
 from them. This requires the registration of an "application"; which is often no
-more than a configuration with your account.
+more than a configuration within your account held with the provider.
 
 Those Auth Providers for which the configuration properties are not provided cannot
 be used for Open ID Connect authentication.
@@ -242,7 +242,7 @@ container should expose that internal port on a unique port - to avoid clashes.
 ## Manually Pushing Docker Images to GitHub Repo
 ### login to GitHub repo
 We need to login to our GitHub account using a Personal Access Token (classic). That
-token can be created in
+token needs to be created in your GitHub account:
 1. Go to your GitHub account settings
 2. Navigate to Developer settings > Personal access tokens (https://github.com/settings/tokens)
 3. Click on "Generate new token" and select "Generate new token (classic)"
