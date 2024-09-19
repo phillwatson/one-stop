@@ -10,14 +10,14 @@ aggregated fashion.
 One-Stop has been designed using an event-driven, microservice architecture,
 where each service has a specific area of responsibility. However, to keep the
 PoC build simple, the Maven model of parent POM and sub-modules has been
-adopted; with each module adopting the same version as the parent. Each service
+adopted; with each module having the same version as the parent. Each service
 module will generate its own Docker Image.
 
 ![Architecture](./docs/one-stop-arch.png)
 
 An alternative implementation is presented in the branch "modulith". That
 implementation demonstrates how the same application can be built, and maintained,
-as a single module.
+as a monolith application.
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
@@ -94,7 +94,7 @@ The following OpenID Connect Auth Providers are supported, if fully configured:
 
 Their configuration consists, generally, of the client ID and secret you obtain
 from them. This requires the registration of an "application"; which is often no
-more than a configuration with your account.
+more than a configuration within your account held with the provider.
 
 Those Auth Providers for which the configuration properties are not provided cannot
 be used for Open ID Connect authentication.
@@ -250,7 +250,7 @@ container should expose that internal port on a unique port - to avoid clashes.
 ## Manually Pushing Docker Images to GitHub Repo
 ### login to GitHub repo
 We need to login to our GitHub account using a Personal Access Token (classic). That
-token can be created in
+token needs to be created in your GitHub account:
 1. Go to your GitHub account settings
 2. Navigate to Developer settings > Personal access tokens (https://github.com/settings/tokens)
 3. Click on "Generate new token" and select "Generate new token (classic)"
