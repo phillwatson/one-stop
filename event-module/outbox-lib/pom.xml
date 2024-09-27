@@ -24,6 +24,10 @@
 
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>commons-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>events-lib</artifactId>
         </dependency>
     </dependencies>

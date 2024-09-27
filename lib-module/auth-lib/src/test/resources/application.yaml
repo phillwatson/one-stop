@@ -1,0 +1,4 @@
+one-stop:
+  crypto:
+    keystore:
+      password: testing

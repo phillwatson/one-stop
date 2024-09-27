@@ -3,7 +3,6 @@ package com.hillayes.outbox.repository;
 import com.hillayes.commons.jpa.RepositoryBase;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.UUID;
 
