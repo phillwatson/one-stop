@@ -17,7 +17,7 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class ApiTestBase {
+public abstract class ApiTestBase {
     /**
      * The port exposed by the wiremock container.
      */
