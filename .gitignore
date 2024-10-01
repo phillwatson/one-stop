@@ -5,10 +5,7 @@ target/
 **/.flattened-pom.xml
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -41,3 +38,4 @@ build/
 **/docker-compose.override.*
 *.p8
 /one-stop_db-data.tar.gz
+/settings.xml
