@@ -20,6 +20,7 @@ import com.hillayes.rail.scheduled.PollConsentJobbingTask;
 import com.hillayes.rail.utils.TestApiData;
 import com.hillayes.rail.utils.TestData;
 import jakarta.ws.rs.core.UriBuilder;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -495,7 +496,7 @@ public class UserConsentServiceTest {
 
     @Test
     public void testRegistrationTimeout_HappyPath() {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
             builder.status(ConsentStatus.INITIATED);
@@ -504,7 +505,7 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        fixture.registrationTimeout(consent.getId());
+        fixture.registrationTimeout(consent.getId(), consent.getReference());
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -524,7 +525,7 @@ public class UserConsentServiceTest {
 
     @Test
     public void testRegistrationTimeout_RailException() {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
             builder.status(ConsentStatus.INITIATED);
@@ -537,7 +538,7 @@ public class UserConsentServiceTest {
         when(railProviderApi.deleteAgreement(any())).thenThrow(new RuntimeException("Mock Exception"));
 
         // when: the service is called
-        fixture.registrationTimeout(consent.getId());
+        fixture.registrationTimeout(consent.getId(), consent.getReference());
 
         // then: the consent is updated
         ArgumentCaptor<UserConsent> captor = ArgumentCaptor.forClass(UserConsent.class);
@@ -558,12 +559,12 @@ public class UserConsentServiceTest {
     @ParameterizedTest
     @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"INITIATED"})
     public void testRegistrationTimeout_NoLongerWaiting(ConsentStatus status) {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> builder.status(status));
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called
-        fixture.registrationTimeout(consent.getId());
+        fixture.registrationTimeout(consent.getId(), consent.getReference());
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -582,7 +583,30 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
-        fixture.registrationTimeout(consentId);
+        fixture.registrationTimeout(consentId, RandomStringUtils.randomAlphanumeric(30));
+
+        // then: NO consent is updated
+        verify(userConsentRepository, never()).save(any());
+
+        // and: NO consent event is issued
+        verifyNoInteractions(consentEventSender);
+
+        // and: NO agreement is deleted
+        verifyNoInteractions(railProviderApi);
+    }
+
+    @Test
+    public void testRegistrationTimeout_OutOfDateReference() {
+        // given: a consent that is waiting to be accepted
+        URI clientCallbackUri = URI.create("http://mock-uri");
+        UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
+            builder.status(ConsentStatus.INITIATED);
+            builder.callbackUri(clientCallbackUri.toString());
+        });
+        when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
+
+        // when: the service is called - with a difference reference
+        fixture.registrationTimeout(consent.getId(), RandomStringUtils.randomAlphanumeric(30));
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -596,7 +620,7 @@ public class UserConsentServiceTest {
 
     @Test
     public void testConsentGiven_HappyPath() {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID(), builder -> {
             builder.status(ConsentStatus.INITIATED);
@@ -667,7 +691,7 @@ public class UserConsentServiceTest {
 
     @Test
     public void testConsentDenied_HappyPath() {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         URI clientCallbackUri = URI.create("http://mock-uri");
         UserConsent consent = TestData.mockUserConsent(UUID.randomUUID());
         consent.setStatus(ConsentStatus.INITIATED);
@@ -713,7 +737,7 @@ public class UserConsentServiceTest {
 
     @Test
     public void testConsentDenied_ConsentNotFound() {
-        // given: a consent that has is waiting to be accepted
+        // given: a consent that is waiting to be accepted
         String consentReference = UUID.randomUUID().toString();
         when(userConsentRepository.findByReference(consentReference)).thenReturn(Optional.empty());
 
@@ -1035,7 +1059,7 @@ public class UserConsentServiceTest {
     private RailAgreement returnEndUserAgreement(RailInstitution institution) {
         return RailAgreement.builder()
             .id(UUID.randomUUID().toString())
-            .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))    
+            .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))
             .status(AgreementStatus.INITIATED)
             .dateCreated(Instant.now())
             .dateGiven(Instant.now())

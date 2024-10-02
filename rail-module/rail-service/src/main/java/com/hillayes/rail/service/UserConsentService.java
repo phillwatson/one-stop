@@ -129,7 +129,7 @@ public class UserConsentService {
                 .path(UserConsentResource.class, "consentResponse")
                 .buildFromMap(Map.of("railProvider", institution.getProvider()));
 
-            // generate a random reference - for later consent look-up
+            // generate a random reference - for later consent look-up and verification
             String reference = UUID.randomUUID().toString();
 
             // register the agreement with the rail
@@ -181,15 +181,27 @@ public class UserConsentService {
      * registration is still pending and, if so, mark it as timed out. It will also
      * delete the rail agreement, and issue a consent-timed-out event.
      *
+     * A unique reference is assigned to the consent when it was initiated. If the
+     * consent fails before it times-out and the user retries the same consent, a
+     * new reference would be assigned to that consent. So, the timeout will only be
+     * performed if the identified consent carries the same reference.
+     *
      * @param consentId the identifier of the consent to be checked.
+     * @param reference the reference assigned to the consent when the registration was initiated.
      * @return true if the consent was found and marked as timed out.
      */
-    public boolean registrationTimeout(UUID consentId) {
+    public boolean registrationTimeout(UUID consentId, String reference) {
         log.info("Checking consent timeout [consentId: {}]", consentId);
         UserConsent userConsent = userConsentRepository.findByIdOptional(consentId).orElse(null);
 
         // if consent not found - or is no longer in INITIATED state
         if ((userConsent == null) || (userConsent.getStatus() != ConsentStatus.INITIATED)) {
+            return false;
+        }
+
+        // if the consent reference doesn't match, then this is a new consent registration
+        if (! Objects.equals(reference, userConsent.getReference())) {
+            // ignore this timeout - it must be out-of-date
             return false;
         }
 
