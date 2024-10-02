@@ -3,6 +3,7 @@ package com.hillayes.rail.scheduled;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.service.UserConsentService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,9 @@ public class ConsentTimeoutJobbingTaskTest {
         UUID consentId = UUID.randomUUID();
 
         // and: the consent ID is passed as the payload of a task context
-        TaskContext<UUID> context = new TaskContext<>(consentId);
+        ConsentTimeoutJobbingTask.Payload payload =
+            new ConsentTimeoutJobbingTask.Payload(consentId, RandomStringUtils.randomAlphanumeric(30));
+        TaskContext<ConsentTimeoutJobbingTask.Payload> context = new TaskContext<>(payload);
 
         // when: the apply method is called
         TaskConclusion result = consentTimeoutJobbingTask.apply(context);
@@ -37,6 +40,6 @@ public class ConsentTimeoutJobbingTaskTest {
         assertEquals(TaskConclusion.COMPLETE, result);
 
         // and: the consent service is called to mark the consent as timed out
-        verify(userConsentService).registrationTimeout(consentId);
+        verify(userConsentService).registrationTimeout(payload.consentId(), payload.reference());
     }
 }
