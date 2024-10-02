@@ -16,12 +16,12 @@ import java.util.UUID;
 /**
  * A jobbing task that will be queued when a user consent registration is initiated,
  * and scheduled to run when a user consent registration times out. It will call the
- * {@link UserConsentService#registrationTimeout(UUID)} method to check if the
+ * {@link UserConsentService#registrationTimeout(UUID, String)} method to check if the
  * registration is still pending and if so, mark it as timed out.
  */
 @ApplicationScoped
 @Slf4j
-public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<UUID> {
+public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<ConsentTimeoutJobbingTask.Payload> {
     private final UserConsentService userConsentService;
 
     public ConsentTimeoutJobbingTask(UserConsentService userConsentService) {
@@ -31,14 +31,28 @@ public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<UUID> {
 
     public String queueJob(UserConsent userConsent, Duration timeout) {
         log.info("Queuing job [consentId: {}]", userConsent.getId());
-        return scheduler.addJob(this, userConsent.getId(), Instant.now().plus(timeout));
+        return scheduler.addJob(this,
+            new Payload(userConsent.getId(), userConsent.getReference()),
+            Instant.now().plus(timeout));
     }
 
     @Override
     @Transactional
-    public TaskConclusion apply(TaskContext<UUID> context) {
-        UUID consentId = context.getPayload();
-        userConsentService.registrationTimeout(consentId);
+    public TaskConclusion apply(TaskContext<Payload> context) {
+        Payload payload = context.getPayload();
+        userConsentService.registrationTimeout(payload.consentId, payload.reference);
         return TaskConclusion.COMPLETE;
     }
+
+    /**
+     * The task's payload. Identifies the consent that was initiated. It also carries
+     * the unique reference that was assigned to the consent when it was initiated. If
+     * the consent fails before it times-out and the user retries the same consent, a
+     * new reference would be assigned to that consent. So, the timeout will only be
+     * performed if the identified consent carries the same reference.
+     *
+     * @param consentId the identity of the consent that was initiated.
+     * @param reference the unique reference assigned to that consent when it was initiated.
+     */
+    record Payload(UUID consentId, String reference) {}
 }
