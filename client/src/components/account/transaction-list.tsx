@@ -164,7 +164,7 @@ export default function TransactionList(props: Props) {
               Object.keys(transactions.currencyTotals).map(currency =>
                 <TableRow>
                   <TableCell align="right" width={"50px"}>{currency}</TableCell>
-                  <TableCell align="right">{formatMoney(transactions.currencyTotals![currency], currency as Currency)}</TableCell>
+                  <TableCell align="right" style={{ whiteSpace: 'nowrap' }}>{formatMoney(transactions.currencyTotals![currency], currency as Currency)}</TableCell>
                 </TableRow>
               )
             }
