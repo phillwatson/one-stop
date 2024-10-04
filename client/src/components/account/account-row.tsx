@@ -81,7 +81,7 @@ export default function AccountList(props: Props) {
 
   return(
     <>
-      <TableRow key={props.account.id} >
+      <TableRow key={props.account.id}>
         <TableCell size="small" padding='none' rowSpan={props.account.balance.length}
           id="account-button" onClick={toggleMenu}
           aria-haspopup="true"
@@ -99,8 +99,8 @@ export default function AccountList(props: Props) {
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
         <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.iban}</TableCell>
-        <TableCell size="small">{props.account.balance[0].type}</TableCell>
-        <TableCell size="small" >{formatMoney(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
+        <TableCell size="small" onClick={handleSelectAccount}>{props.account.balance[0].type}</TableCell>
+        <TableCell size="small" align='right' style={{ whiteSpace: 'nowrap' }} onClick={handleSelectAccount}>{formatMoney(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
       </TableRow>
 
       { props.account.balance.length > 1 && props.account.balance.slice(1).map( balance =>

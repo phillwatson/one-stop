@@ -75,7 +75,7 @@ export default function AccountList(props: Props) {
             <TableCell sx={colhead}>Name</TableCell>
             <TableCell sx={colhead}>IBAN</TableCell>
             <TableCell sx={colhead}>Type</TableCell>
-            <TableCell sx={colhead}>Amount</TableCell>
+            <TableCell sx={colhead} align='right'>Amount</TableCell>
           </TableRow>
         </TableHead>
 
@@ -101,7 +101,7 @@ export default function AccountList(props: Props) {
             <TableRow key={balance.id}>
               <TableCell colSpan={6} sx={balanceRow}></TableCell>
               <TableCell>{balance.type}</TableCell>
-              <TableCell>{formatMoney(balance.amount, balance.currency)}</TableCell>
+              <TableCell align='right' style={{ whiteSpace: 'nowrap' }}>{ formatMoney(balance.amount, balance.currency) }</TableCell>
             </TableRow>
           )}
         </TableBody>
