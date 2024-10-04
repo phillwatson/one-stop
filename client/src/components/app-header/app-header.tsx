@@ -34,9 +34,9 @@ export default function AppHeader(props: Props) {
   return (
     <AppBar position="fixed">
       <Toolbar>
-        <Grid container direction="row" alignItems="flex-end" wrap='nowrap'>
+        <Grid container direction="row" alignItems="center" wrap='nowrap'>
 
-          <Grid item alignSelf="flex-start">
+          <Grid item>
             <IconButton color="inherit" aria-label="open drawer" onClick={ props.onClick } edge="start">
               <MenuIcon />
             </IconButton>
@@ -50,13 +50,13 @@ export default function AppHeader(props: Props) {
 
           <Grid container direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={ 1 }>
             <Grid item>
-                <UserAvatar user={ currentUser } menuItems={ props.menuItems } />
+              <NotificationBell />
             </Grid>
             <Grid item>
               <MonetarySwitch />
             </Grid>
             <Grid item>
-              <NotificationBell />
+              <UserAvatar user={ currentUser } menuItems={ props.menuItems } />
             </Grid>
           </Grid>
         </Grid>
