@@ -54,5 +54,5 @@ public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<ConsentT
      * @param consentId the identity of the consent that was initiated.
      * @param reference the unique reference assigned to that consent when it was initiated.
      */
-    record Payload(UUID consentId, String reference) {}
+    public record Payload(UUID consentId, String reference) {}
 }
