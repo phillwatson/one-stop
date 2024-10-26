@@ -22,7 +22,7 @@ import java.util.UUID;
  * in an OR operation between the selectors.
  */
 @Entity
-@Table(name = "category_selector")
+@Table(schema = "rails", name = "category_selector")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
