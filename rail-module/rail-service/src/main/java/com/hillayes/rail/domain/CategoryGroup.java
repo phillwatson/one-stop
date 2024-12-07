@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * "Expenses".
  */
 @Entity
-@Table(name = "category_group")
+@Table(schema = "rails", name = "category_group")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor

@@ -13,7 +13,7 @@ import java.util.UUID;
  * rendering the message.
  */
 @Entity
-@Table(name = "notification")
+@Table(schema = "notifications", name = "notification")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
