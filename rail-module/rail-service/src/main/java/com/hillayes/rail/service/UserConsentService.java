@@ -238,6 +238,8 @@ public class UserConsentService {
         userConsent.setAgreementExpires(agreement == null ? null : agreement.getDateExpires());
         userConsent.setDateGiven(Instant.now());
         userConsent.setCallbackUri(null);
+        userConsent.setErrorCode(null);
+        userConsent.setErrorDetail(null);
         userConsent = userConsentRepository.save(userConsent);
 
         // queue a job to verify the consent and poll account for data
