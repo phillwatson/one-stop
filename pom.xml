@@ -59,7 +59,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.17.7</quarkus.platform.version>
+        <quarkus.platform.version>3.18.3</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -69,7 +69,7 @@
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:ff0f1a3ffca8b6924f1292282b857fd07faed3a18d3a5feb4f2bfe4e1807d0d6</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.10.0</openapi-generator.version>
+        <openapi-generator.version>7.11.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -152,7 +152,7 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
-                <version>3.10.0</version>
+                <version>3.11.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sendinblue</groupId>
@@ -173,7 +173,7 @@
             <dependency>
                 <groupId>com.github.kagkarlsson</groupId>
                 <artifactId>db-scheduler</artifactId>
-                <version>15.1.2</version>
+                <version>15.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
@@ -533,7 +533,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.2.3</version>
+                    <version>3.2.6</version>
                     <executions>
                         <execution>
                             <id>make-index</id>
