@@ -4,9 +4,8 @@ mp:
       audiences: ${one-stop.auth.access-token.audiences}
       issuer: ${one-stop.auth.access-token.issuer}
       publickey:
-        location: http://user-service:8080/api/v1/auth/jwks.json
+        location: http://one-stop-service:8080/api/v1/auth/jwks.json
         algorithm: ES256
-
     token:
       header: Cookie
       cookie: ${one-stop.auth.access-token.cookie}
