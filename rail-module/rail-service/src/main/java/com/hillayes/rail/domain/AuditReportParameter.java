@@ -11,7 +11,7 @@ import java.util.UUID;
  * which the report's algorithm is based.
  */
 @Entity
-@Table(name = "audit_report_parameter")
+@Table(schema = "rails", name = "audit_report_parameter")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
