@@ -44,7 +44,6 @@ public class TestData {
         institution.bic = randomAlphanumeric(10);
         institution.countries = List.of("GB", "FR");
         institution.logo = "https://sandboxfinance.com/logo.png";
-        institution.paymentsEnabled = true;
         return institution;
     }
 
