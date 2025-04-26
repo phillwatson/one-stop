@@ -63,10 +63,7 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
 
     private ResponseDefinition list(Request request,
                                     ResponseDefinition responseDefinition) {
-        String filename = getQueryBoolean(request, "payments_enabled")
-            .filter(b -> b)
-            .map(b -> "institutions-payments-enabled.json")
-            .orElse("institutions-payments-disabled.json");
+        String filename = "institutions-payments-enabled.json";
 
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)

@@ -18,8 +18,8 @@ import java.util.List;
 @ApplicationScoped
 public interface InstitutionApi {
     @GET
-    public List<Institution> list(@QueryParam("country") String countryCode,
-                                  @QueryParam("payments_enabled") Boolean paymentsEnabled);
+    public List<Institution> list(@QueryParam("country") String countryCode);
+
     @GET
     @Path("{id}/")
     public InstitutionDetail get(@PathParam("id") String id);
