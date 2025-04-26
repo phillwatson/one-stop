@@ -25,11 +25,15 @@ public class Institution implements Comparable<Institution> {
     @JsonProperty("transaction_total_days")
     public int transactionTotalDays;
 
+    @JsonProperty("max_access_valid_for_days")
+    public int maxAccessValidForDays;
+
     public List<String> countries;
 
     public String logo;
 
-    public boolean paymentsEnabled;
+    @JsonProperty("supported_features")
+    public List<String> supportedFeatures;
 
     @Override
     public int compareTo(Institution other) {
