@@ -6,10 +6,10 @@ import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.InstitutionService;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.time.Instant;
 
 @ApplicationScoped
