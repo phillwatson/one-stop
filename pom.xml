@@ -60,7 +60,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.21.1</quarkus.platform.version>
+        <quarkus.platform.version>3.22.2</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -70,7 +70,7 @@
         <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:ff0f1a3ffca8b6924f1292282b857fd07faed3a18d3a5feb4f2bfe4e1807d0d6</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
-        <openapi-generator.version>7.12.0</openapi-generator.version>
+        <openapi-generator.version>7.13.0</openapi-generator.version>
     </properties>
 
     <profiles>
@@ -132,7 +132,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.29</version>
+                <version>2.2.30</version>
             </dependency>
 
             <dependency>
@@ -153,7 +153,7 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sendinblue</groupId>
@@ -174,7 +174,7 @@
             <dependency>
                 <groupId>com.github.kagkarlsson</groupId>
                 <artifactId>db-scheduler</artifactId>
-                <version>15.3.0</version>
+                <version>15.6.0</version>
             </dependency>
             <dependency>
                 <groupId>org.bitbucket.b_c</groupId>
@@ -524,7 +524,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.2.7</version>
+                    <version>3.3.0</version>
                     <executions>
                         <execution>
                             <id>make-index</id>
