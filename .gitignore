@@ -35,7 +35,8 @@ build/
 ### Mac OS ###
 .DS_Store
 
+/settings.xml
 **/docker-compose.override.*
 *.p8
 /one-stop_db-data.tar.gz
-/settings.xml
+/one-stop_db-data-*.tar.gz
