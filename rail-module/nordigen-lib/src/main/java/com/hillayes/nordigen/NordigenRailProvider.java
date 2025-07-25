@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 @Slf4j
@@ -230,9 +231,13 @@ public class NordigenRailProvider implements RailProviderApi {
 
     private Optional<RailBalance> getBalance(String accountId) {
         log.debug("Listing balances [accountId: {}]", accountId);
+
+        // return the interim-booked balance or the most recent - or an empty optional
         return accountService.balances(accountId)
             .flatMap(balances -> balances.stream()
-                .max((a, b) -> b.referenceDate.compareTo(a.referenceDate))
+                .filter(balance -> "interimBooked".equals(balance.balanceType))
+                .findFirst()
+                .or(() -> balances.stream().max((a, b) -> b.referenceDate.compareTo(a.referenceDate)))
                 .map(balance -> RailBalance.builder()
                     .type(balance.balanceType)
                     .dateTime(balance.referenceDate.atStartOfDay().toInstant(ZoneOffset.UTC))
