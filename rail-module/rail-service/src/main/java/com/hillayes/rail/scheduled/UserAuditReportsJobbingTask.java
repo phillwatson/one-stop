@@ -56,8 +56,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
 
     public String queueJob(UUID userId) {
         log.info("Queuing job [userId: {}]", userId);
-        Payload payload = new Payload(userId);
-        return scheduler.addJob(this, payload);
+        return queueJob(new Payload(userId));
     }
 
     /**
