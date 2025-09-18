@@ -31,7 +31,7 @@ public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<ConsentT
 
     public String queueJob(UserConsent userConsent, Duration timeout) {
         log.info("Queuing job [consentId: {}]", userConsent.getId());
-        return queueJob(
+        return queueTask(
             new Payload(userConsent.getId(), userConsent.getReference()),
             Instant.now().plus(timeout));
     }

@@ -651,7 +651,7 @@ public class UserConsentServiceTest {
         assertNull(updatedConsent.getCallbackUri());
 
         // and: a job is queued to poll the consented account(s)
-        verify(pollConsentJobbingTask).queueJob(updatedConsent.getId());
+        verify(pollConsentJobbingTask).queueTask(updatedConsent.getId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentGiven(updatedConsent);

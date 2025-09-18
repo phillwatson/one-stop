@@ -124,8 +124,8 @@ public class AccountTransactionService {
 
     private TransactionMovement marshal(AccountTransactionRepository.MovementProjection movement) {
         return TransactionMovement.builder()
-            .fromDate(movement.fromDate.toLocalDate())
-            .toDate(movement.toDate.toLocalDate())
+            .fromDate(movement.fromDate)
+            .toDate(movement.toDate)
             .debits(new TransactionMovement.MovementSummary(
                 movement.debitCount, MonetaryAmount.of(movement.currencyCode, movement.debitValue.longValue())
             ))

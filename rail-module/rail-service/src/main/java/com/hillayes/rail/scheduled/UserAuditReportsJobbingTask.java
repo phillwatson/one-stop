@@ -1,6 +1,5 @@
 package com.hillayes.rail.scheduled;
 
-import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
@@ -56,7 +55,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
 
     public String queueJob(UUID userId) {
         log.info("Queuing job [userId: {}]", userId);
-        return queueJob(new Payload(userId));
+        return queueTask(new Payload(userId));
     }
 
     /**

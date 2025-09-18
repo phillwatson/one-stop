@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -453,7 +452,7 @@ public class AccountTransactionRepositoryTest {
 
         // and: the figures match the transactions
         stats.forEach(stat -> {
-            List<AccountTransaction> expected = groupByDate.get(stat.getFromDate().toLocalDate());
+            List<AccountTransaction> expected = groupByDate.get(stat.getFromDate());
             assertNotNull(expected);
             assertEquals(expected.size(), stat.creditCount + stat.debitCount);
 

@@ -243,7 +243,7 @@ public class UserConsentService {
         userConsent = userConsentRepository.save(userConsent);
 
         // queue a job to verify the consent and poll account for data
-        pollConsentJobbingTask.queueJob(userConsent.getId());
+        pollConsentJobbingTask.queueTask(userConsent.getId());
 
         // send consent-given event notification
         consentEventSender.sendConsentGiven(userConsent);

@@ -12,7 +12,7 @@ volumes:
 services:
   broker:
     restart: unless-stopped
-    image: redpandadata/redpanda:v24.1.2
+    image: redpandadata/redpanda:v24.3.18
     networks:
       - onestop-event-network
     hostname: redpanda
@@ -54,7 +54,7 @@ services:
 
   db:
     restart: unless-stopped
-    image: postgres:15.7-alpine3.20
+    image: postgres:17.6-alpine3.21
     environment:
       POSTGRES_DB: one-stop
       POSTGRES_USER: one-stop
