@@ -25,6 +25,12 @@ interface Props {
   onCategorySelected: (category: CategoryStatistics, fromDate: Date, toDate: Date) => void;
 }
 
+interface Totals {
+  debits: number;
+  credits: number;
+  total: number;
+}
+
 interface CategoryStatisticsUI extends CategoryStatistics {
   selected: boolean;
 };
@@ -67,7 +73,7 @@ export default function StatisticsGraph(props: Props) {
     if (selectedGroup === undefined) {
       return;
     }
-    
+
     if (dateRange[0] < dateRange[1]) {
       CategoryService.getCategoryStatistics(selectedGroup.id!!, dateRange[0].toDate(), dateRange[1].toDate())
         .then(response => {
@@ -79,7 +85,7 @@ export default function StatisticsGraph(props: Props) {
           });
           setStatistics(newStats);
         })
-        .catch(err => 
+        .catch(err =>
           showMessage(err)
         );
     } else {
@@ -91,6 +97,21 @@ export default function StatisticsGraph(props: Props) {
     const groupId = event.target.value;
     setSelectedGroup(categoryGroups.find(group => group.id === groupId));
   }
+
+  const grandTotals = useMemo<Totals>(() => {
+    return statistics
+      .reduce((acc, stat ) => {
+        if (stat.selected) {
+          if (stat.total < 0)
+            acc.debits -= stat.total;
+          else
+            acc.credits += stat.total;
+          acc.total += stat.total;
+        }
+        return acc;
+      }, { debits: 0, credits: 0, total: 0 } as Totals
+    );
+  }, [ statistics ]);
 
   /**
    * Construct pie slice data from the statistics. Recreate when money format changes.
@@ -162,7 +183,10 @@ export default function StatisticsGraph(props: Props) {
   function selectCategory(selectedSeries: number, selectedIndex: number) {
     const data = seriesData[selectedSeries].data[selectedIndex];
 
-    const stat = data.stat;
+    selectStat(data.stat);
+  }
+
+  function selectStat(stat: any) {
     if (stat !== selectedStat.current) {
       selectedStat.current = stat;
       if (stat !== undefined) {
@@ -211,12 +235,27 @@ export default function StatisticsGraph(props: Props) {
                   control= {
                     <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }
                       style={{ color: stat.selected ? stat.colour : undefined }}
-                      onChange={ e => toggleCategory(stat.categoryId, e.target.checked) }/>
+                      onChange={ e => {
+                        toggleCategory(stat.categoryId, e.target.checked);
+                        selectStat(stat);
+                      }}/>
                   }
                 />
                 )
               }
             </Stack>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={4} alignItems={"center"} justifyContent={"center"} marginTop={ 1 }>
+          <Grid item>
+             Debits: { formatMoney(grandTotals.debits, 'GBP')}
+          </Grid>
+          <Grid item>
+             Credits: { formatMoney(grandTotals.credits, 'GBP')}
+          </Grid>
+          <Grid item>
+             Total: { formatMoney(grandTotals.total, 'GBP')}
           </Grid>
         </Grid>
       </Paper>
