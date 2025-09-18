@@ -34,7 +34,7 @@ public class ConsumerFactory {
     @Produces
     @ApplicationScoped
     @Identifier("event-consumer-config")
-    public Properties consumerConfig(@ConfigProperty(name = "kafka.bootstrap.servers", defaultValue = "kafka:9092") String bootstrapServers,
+    public Properties consumerConfig(@ConfigProperty(name = "kafka.bootstrap.servers", defaultValue = "localhost:9092") String bootstrapServers,
                                      @ConfigProperty(name = "kafka.group.id") Optional<String> groupId,
                                      @ConfigProperty(name = "quarkus.application.name") String applicationName) {
         Properties config = new Properties();
