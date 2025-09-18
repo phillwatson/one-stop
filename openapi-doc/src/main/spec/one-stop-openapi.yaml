@@ -1719,7 +1719,7 @@ components:
       example: 10
 
     PageSizeParam:
-      name: pageSize
+      name: "page-size"
       in: query
       description: The maximum number of results to return in a page.
       required: false
