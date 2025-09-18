@@ -22,12 +22,12 @@ public abstract class AbstractNamedJobbingTask<T>
      * @return the job identifier.
      */
     @Override
-    public String queueJob(T payload) {
+    public String queueTask(T payload) {
         log.info("Queuing {} job [payload: {}]", getName(), payload);
         return scheduler.addJob(this, payload);
     }
 
-    public String queueJob(T payload, Instant when) {
+    public String queueTask(T payload, Instant when) {
         log.info("Queuing {} job [payload: {}, when: {}]", getName(), payload, when.toString());
         return scheduler.addJob(this, payload, when);
     }

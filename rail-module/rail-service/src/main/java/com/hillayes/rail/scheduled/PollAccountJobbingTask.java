@@ -64,7 +64,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
 
     public String queueJob(UUID consentId, String railAccountId) {
         log.info("Queuing job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
-        return queueJob(new Payload(consentId, railAccountId));
+        return queueTask(new Payload(consentId, railAccountId));
     }
 
     /**

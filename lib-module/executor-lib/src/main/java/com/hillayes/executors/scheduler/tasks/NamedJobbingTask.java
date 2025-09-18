@@ -13,5 +13,5 @@ public interface NamedJobbingTask<T>
      * @param payload the data to be processed.
      * @return the job identifier.
      */
-    public String queueJob(T payload);
+    public String queueTask(T payload);
 }

@@ -55,10 +55,10 @@ public class PollAllConsentsScheduledTaskTest {
         // then: a poll-consent task is queued for each GIVEN consent
         consents.forEach(consent -> {
             if (consent.getStatus() == ConsentStatus.GIVEN) {
-                verify(pollConsentJobbingTask).queueJob(consent.getId());
+                verify(pollConsentJobbingTask).queueTask(consent.getId());
             }
             else {
-                verify(pollConsentJobbingTask, never()).queueJob(consent.getId());
+                verify(pollConsentJobbingTask, never()).queueTask(consent.getId());
             }
         });
     }
@@ -75,6 +75,6 @@ public class PollAllConsentsScheduledTaskTest {
         fixture.run();
 
         // then: NO poll-consent task is queued for any consent
-        verify(pollConsentJobbingTask, never()).queueJob(any());
+        verify(pollConsentJobbingTask, never()).queueTask(any());
     }
 }

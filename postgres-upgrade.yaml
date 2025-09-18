@@ -1,0 +1,32 @@
+volumes:
+  db-data:
+  db-17-data:
+
+services:
+  db-15:
+    image: postgres:15.7-alpine3.20
+    environment:
+      POSTGRES_DB: one-stop
+      POSTGRES_USER: one-stop
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backup:/backup # important to have the same folder with psql 17
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
+
+  db-17:
+    image: postgres:17.6-alpine3.21
+    environment:
+      POSTGRES_DB: one-stop
+      POSTGRES_USER: one-stop
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backup:/backup # important to have the same folder with psql 17
+      - type: volume
+        source: db-17-data
+        target: /var/lib/postgresql/data
