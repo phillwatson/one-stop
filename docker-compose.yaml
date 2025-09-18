@@ -12,7 +12,7 @@ volumes:
 services:
   broker:
     restart: unless-stopped
-    image: redpandadata/redpanda:v24.1.2
+    image: redpandadata/redpanda:v24.3.18
     networks:
       - onestop-event-network
     hostname: redpanda

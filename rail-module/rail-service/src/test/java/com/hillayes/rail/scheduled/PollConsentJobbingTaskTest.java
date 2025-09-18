@@ -62,7 +62,7 @@ public class PollConsentJobbingTaskTest {
 
         // when: a user-consent ID is queued for processing
         UUID consentId = UUID.randomUUID();
-        fixture.queueJob(consentId);
+        fixture.queueTask(consentId);
 
         // then: the job is passed to the scheduler for queuing
         verify(scheduler).addJob(fixture, consentId);

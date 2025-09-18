@@ -18,6 +18,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 @ApplicationScoped
@@ -225,10 +226,10 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
     @RegisterForReflection
     public static class MovementProjection {
         @Column(name = "from_date", nullable = false)
-        public java.sql.Date fromDate;
+        public LocalDate fromDate;
 
         @Column(name = "to_date", nullable = false)
-        public java.sql.Date toDate;
+        public LocalDate toDate;
 
         @Column(name = "currency_code", nullable = false)
         public String currencyCode;
