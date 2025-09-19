@@ -103,7 +103,7 @@ public class PollAccountAdhocTaskTest {
         // then: the task is passed to the scheduler for queuing
         ArgumentCaptor<PollAccountAdhocTask.Payload> captor =
             ArgumentCaptor.forClass(PollAccountAdhocTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), captor.capture());
+        verify(scheduler).addTask(eq(fixture), captor.capture());
 
         // and: the payload is correct
         assertEquals(consentId, captor.getValue().consentId());

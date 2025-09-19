@@ -65,7 +65,7 @@ public class PollConsentAdhocTaskTest {
         fixture.queueTask(consentId);
 
         // then: the task is passed to the scheduler for queuing
-        verify(scheduler).addJob(fixture, consentId);
+        verify(scheduler).addTask(fixture, consentId);
     }
 
     @Test

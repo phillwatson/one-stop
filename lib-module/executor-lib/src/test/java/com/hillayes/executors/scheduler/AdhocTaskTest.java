@@ -42,9 +42,9 @@ public class AdhocTaskTest extends TestBase {
                 .build(), List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
-        fixture.addJob(task, "two");
-        fixture.addJob(task, "three");
+        fixture.addTask(task, "one");
+        fixture.addTask(task, "two");
+        fixture.addTask(task, "three");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -53,8 +53,8 @@ public class AdhocTaskTest extends TestBase {
             .until(() -> signal.get() == 3);
 
         // queue some more tasks
-        fixture.addJob(task, "four");
-        fixture.addJob(task, "five");
+        fixture.addTask(task, "four");
+        fixture.addTask(task, "five");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -88,7 +88,7 @@ public class AdhocTaskTest extends TestBase {
                 .build(), List.of(task));
 
         // queue a task with a UUID payload
-        fixture.addJob(task, payload);
+        fixture.addTask(task, payload);
 
         // wait for task to complete
         Awaitility.await()
@@ -117,7 +117,7 @@ public class AdhocTaskTest extends TestBase {
                 .build(), List.of(task));
 
         // queue a task with a null payload
-        fixture.addJob(task, null);
+        fixture.addTask(task, null);
 
         // wait for task to complete
         Awaitility.await()
@@ -158,7 +158,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -199,7 +199,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -263,7 +263,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task, onMaxRetryTask));
 
         // queue some tasks
-        fixture.addJob(task, payload);
+        fixture.addTask(task, payload);
 
         // wait for tasks to complete
         Awaitility.await()
@@ -316,7 +316,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -356,7 +356,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -402,7 +402,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -460,7 +460,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task));
 
         // queue some tasks
-        fixture.addJob(task, "one");
+        fixture.addTask(task, "one");
 
         // wait for tasks to complete
         Awaitility.await()
@@ -524,7 +524,7 @@ public class AdhocTaskTest extends TestBase {
             List.of(task, onMaxRetryTask));
 
         // queue some tasks
-        fixture.addJob(task, payload);
+        fixture.addTask(task, payload);
 
         // wait for tasks to complete
         Awaitility.await()

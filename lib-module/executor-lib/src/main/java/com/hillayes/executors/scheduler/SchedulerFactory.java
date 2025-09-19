@@ -82,23 +82,23 @@ public class SchedulerFactory {
     }
 
     /**
-     * Schedules a job of work for the named Adhoc task, to process the given payload.
+     * Schedules an instance of the named Adhoc task, to process the given payload.
      *
      * @param adhocTaskName the name of the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
-     * @param when the date-time at which the job is to be run.
-     * @return the unique identifier for the scheduled job.
+     * @param when the date-time at which the task is to be run.
+     * @return the unique identifier of the queued task instance.
      */
-    protected String addJob(String adhocTaskName, Object payload, Instant when) {
+    protected String addTask(String adhocTaskName, Object payload, Instant when) {
         Task<AdhocTaskData> task = adhocTasks.get(adhocTaskName);
         if (task == null) {
             throw new IllegalArgumentException("No Adhoc Task found named \"" + adhocTaskName + "\"");
         }
 
         String id = UUID.randomUUID().toString();
-        log.debug("Scheduling job [name: {}, id: {}, when: {}]", task.getName(), id, when);
+        log.debug("Scheduling task [name: {}, id: {}, when: {}]", task.getName(), id, when);
 
-        // schedule the job's payload - with the caller's correlation ID
+        // schedule the task's payload - with the caller's correlation ID
         String correlationId = Correlation.getCorrelationId().orElse(id);
         scheduler.schedule(task.instance(id, new AdhocTaskData(correlationId, payload)), when);
 
@@ -106,28 +106,28 @@ public class SchedulerFactory {
     }
 
     /**
-     * Schedules a job of work for the Adhoc task, to process the given payload.
+     * Schedules an instance of the given Adhoc task, to process the given payload.
      * The task is scheduled to run at the given Instant.
      *
      * @param adhocTask the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
-     * @param when the date-time at which the job is to be run.
-     * @return the unique identifier for the scheduled job.
+     * @param when the date-time at which the task is to be run.
+     * @return the unique identifier of the queued task instance.
      */
-    public String addJob(NamedAdhocTask<?> adhocTask, Object payload, Instant when) {
-        return addJob(adhocTask.getName(), payload, when);
+    public String addTask(NamedAdhocTask<?> adhocTask, Object payload, Instant when) {
+        return addTask(adhocTask.getName(), payload, when);
     }
 
     /**
-     * Schedules a job of work for the Adhoc task, to process the given payload.
+     * Schedules an instance of the given Adhoc task, to process the given payload.
      * The task is scheduled to run at the earliest opportunity.
      *
      * @param adhocTask the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
-     * @return the unique identifier for the scheduled job.
+     * @return the unique identifier of the queued task instance.
      */
-    public String addJob(NamedAdhocTask<?> adhocTask, Object payload) {
-        return addJob(adhocTask, payload, Instant.now());
+    public String addTask(NamedAdhocTask<?> adhocTask, Object payload) {
+        return addTask(adhocTask, payload, Instant.now());
     }
 
     /**
@@ -209,13 +209,13 @@ public class SchedulerFactory {
 
                 // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
-                    // construct the context for the task to run in - including the job payload
+                    // construct the context for the task to run in - including the task payload
                     TaskContext<Object> taskContext = new TaskContext<>(
                         inst.getData().getPayloadContent(),
                         ctx.getExecution().consecutiveFailures,
                         inst.getData().repeatCount);
 
-                    // call the task using the correlation ID used when job was queued
+                    // call the task using the correlation ID used when task was queued
                     final NamedAdhocTask<Object> function = (NamedAdhocTask<Object>) task;
                     TaskConclusion conclusion = Correlation.call(inst.getData().correlationId, function, taskContext);
 
@@ -253,7 +253,7 @@ public class SchedulerFactory {
                             try {
                                 log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                                 Correlation.run(inst.getData().correlationId, () ->
-                                    addJob(onMaxRetryTaskName, inst.getData().getPayloadContent(), Instant.now())
+                                    addTask(onMaxRetryTaskName, inst.getData().getPayloadContent(), Instant.now())
                                 );
                             } catch (Exception e) {
                                 log.error("Failed to queue on-max-retry task", e);
@@ -436,7 +436,7 @@ public class SchedulerFactory {
                         log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                         AdhocTaskData taskData = (AdhocTaskData) executionComplete.getExecution().taskInstance.getData();
                         Correlation.run(taskData.correlationId, () ->
-                            SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.getPayloadContent(), Instant.now())
+                            SchedulerFactory.this.addTask(onMaxRetryTaskName, taskData.getPayloadContent(), Instant.now())
                         );
                     } catch (Exception e) {
                         log.error("Failed to queue on-max-retry task", e);

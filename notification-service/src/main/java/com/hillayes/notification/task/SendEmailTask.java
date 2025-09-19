@@ -66,7 +66,7 @@ public class SendEmailTask extends AbstractNamedAdhocTask<SendEmailTask.Payload>
             .templateName(templateName)
             .params(params)
             .build();
-        return scheduler.addJob(this, payload);
+        return scheduler.addTask(this, payload);
     }
 
     /**
@@ -86,7 +86,7 @@ public class SendEmailTask extends AbstractNamedAdhocTask<SendEmailTask.Payload>
             .templateName(templateName)
             .params(params)
             .build();
-        return scheduler.addJob(this, payload);
+        return scheduler.addTask(this, payload);
     }
 
     @Transactional

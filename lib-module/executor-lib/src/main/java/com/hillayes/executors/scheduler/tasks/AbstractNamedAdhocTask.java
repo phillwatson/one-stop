@@ -24,11 +24,11 @@ public abstract class AbstractNamedAdhocTask<T>
     @Override
     public String queueTask(T payload) {
         log.info("Queuing {} task [payload: {}]", getName(), payload);
-        return scheduler.addJob(this, payload);
+        return scheduler.addTask(this, payload);
     }
 
     public String queueTask(T payload, Instant when) {
         log.info("Queuing {} task [payload: {}, when: {}]", getName(), payload, when.toString());
-        return scheduler.addJob(this, payload, when);
+        return scheduler.addTask(this, payload, when);
     }
 }

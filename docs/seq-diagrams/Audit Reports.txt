@@ -23,7 +23,7 @@ deactivate AuditReportConfigRepository
 
 loop#ffd4d4 AuditReportsScheduledTask:for each user ID
 
-AuditReportsScheduledTask->UserAuditReportsAdhocTask:queueJob(userId)
+AuditReportsScheduledTask->UserAuditReportsAdhocTask:queueTask(userId)
 activate UserAuditReportsAdhocTask
 UserAuditReportsAdhocTask->scheduler:USER_AUDIT_REPORTS(userId)
 activate scheduler

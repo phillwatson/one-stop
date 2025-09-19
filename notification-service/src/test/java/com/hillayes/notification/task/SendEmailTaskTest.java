@@ -59,7 +59,7 @@ public class SendEmailTaskTest {
 
         // then: the task is queued
         ArgumentCaptor<SendEmailTask.Payload> paramCaptor = ArgumentCaptor.forClass(SendEmailTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), paramCaptor.capture());
+        verify(scheduler).addTask(eq(fixture), paramCaptor.capture());
         SendEmailTask.Payload payload = paramCaptor.getValue();
 
         // and: the user id is passed
@@ -91,7 +91,7 @@ public class SendEmailTaskTest {
 
         // then: the task is queued
         ArgumentCaptor<SendEmailTask.Payload> paramCaptor = ArgumentCaptor.forClass(SendEmailTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), paramCaptor.capture());
+        verify(scheduler).addTask(eq(fixture), paramCaptor.capture());
         SendEmailTask.Payload payload = paramCaptor.getValue();
 
         // and: the recipient is passed
