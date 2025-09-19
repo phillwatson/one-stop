@@ -67,7 +67,7 @@ public class UserService_UserCreatedTest {
         // and: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_CREATED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_CREATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
@@ -148,6 +148,6 @@ public class UserService_UserCreatedTest {
         verify(userRepository).save(existingUser);
 
         // and: an email is sent to the user
-        verify(sendEmailTask).queueJob(any(EmailConfiguration.Corresponder.class), eq(TemplateName.USER_CREATED), any());
+        verify(sendEmailTask).queueTask(any(EmailConfiguration.Corresponder.class), eq(TemplateName.USER_CREATED), any());
     }
 }

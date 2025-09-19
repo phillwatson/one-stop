@@ -11,7 +11,7 @@ import com.hillayes.executors.scheduler.config.FrequencyConfig;
 import com.hillayes.executors.scheduler.config.NamedTaskConfig;
 import com.hillayes.executors.scheduler.config.RetryConfig;
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
-import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.NamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
@@ -45,7 +45,7 @@ public class SchedulerFactory {
 
     private final Scheduler scheduler;
 
-    private final Map<String, Task<JobbingTaskData>> jobbingTasks;
+    private final Map<String, Task<AdhocTaskData>> adhocTasks;
 
     public SchedulerFactory(DataSource dataSource,
                             SchedulerConfig configuration,
@@ -61,10 +61,10 @@ public class SchedulerFactory {
 
         this.dataSource = dataSource;
 
-        jobbingTasks = createJobbingTasks(namedTasks, configuration);
+        adhocTasks = createAdhocTasks(namedTasks, configuration);
         List<RecurringTask<?>> recurringTasks = createScheduledTasks(namedTasks, configuration);
 
-        scheduler = scheduleTasks(configuration, jobbingTasks.values(), recurringTasks);
+        scheduler = scheduleTasks(configuration, adhocTasks.values(), recurringTasks);
         if (scheduler != null) {
             // inform all tasks that they have been started
             namedTasks.forEach(task -> task.taskInitialised(this));
@@ -82,17 +82,17 @@ public class SchedulerFactory {
     }
 
     /**
-     * Schedules a job of work for the named Jobbing task, to process the given payload.
+     * Schedules a job of work for the named Adhoc task, to process the given payload.
      *
-     * @param jobbingTaskName the name of the Jobbing task to pass the payload to for processing.
+     * @param adhocTaskName the name of the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @param when the date-time at which the job is to be run.
      * @return the unique identifier for the scheduled job.
      */
-    protected String addJob(String jobbingTaskName, Object payload, Instant when) {
-        Task<JobbingTaskData> task = jobbingTasks.get(jobbingTaskName);
+    protected String addJob(String adhocTaskName, Object payload, Instant when) {
+        Task<AdhocTaskData> task = adhocTasks.get(adhocTaskName);
         if (task == null) {
-            throw new IllegalArgumentException("No Jobbing Task found named \"" + jobbingTaskName + "\"");
+            throw new IllegalArgumentException("No Adhoc Task found named \"" + adhocTaskName + "\"");
         }
 
         String id = UUID.randomUUID().toString();
@@ -100,34 +100,34 @@ public class SchedulerFactory {
 
         // schedule the job's payload - with the caller's correlation ID
         String correlationId = Correlation.getCorrelationId().orElse(id);
-        scheduler.schedule(task.instance(id, new JobbingTaskData(correlationId, payload)), when);
+        scheduler.schedule(task.instance(id, new AdhocTaskData(correlationId, payload)), when);
 
         return id;
     }
 
     /**
-     * Schedules a job of work for the Jobbing task, to process the given payload.
+     * Schedules a job of work for the Adhoc task, to process the given payload.
      * The task is scheduled to run at the given Instant.
      *
-     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param adhocTask the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @param when the date-time at which the job is to be run.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(NamedJobbingTask<?> jobbingTask, Object payload, Instant when) {
-        return addJob(jobbingTask.getName(), payload, when);
+    public String addJob(NamedAdhocTask<?> adhocTask, Object payload, Instant when) {
+        return addJob(adhocTask.getName(), payload, when);
     }
 
     /**
-     * Schedules a job of work for the Jobbing task, to process the given payload.
+     * Schedules a job of work for the Adhoc task, to process the given payload.
      * The task is scheduled to run at the earliest opportunity.
      *
-     * @param jobbingTask the Jobbing task to pass the payload to for processing.
+     * @param adhocTask the Adhoc task to pass the payload to for processing.
      * @param payload the payload to be processed.
      * @return the unique identifier for the scheduled job.
      */
-    public String addJob(NamedJobbingTask<?> jobbingTask, Object payload) {
-        return addJob(jobbingTask, payload, Instant.now());
+    public String addJob(NamedAdhocTask<?> adhocTask, Object payload) {
+        return addJob(adhocTask, payload, Instant.now());
     }
 
     /**
@@ -174,36 +174,36 @@ public class SchedulerFactory {
     }
 
     /**
-     * Configures jobbing tasks from the given collection NamedTasks.
+     * Configures adhoc tasks from the given collection NamedTasks.
      * <p>
-     * The given SchedulerConfig MAY contain configurations for the named jobbing tasks, but
+     * The given SchedulerConfig MAY contain configurations for the named adhoc tasks, but
      * defaults will be applied if no config entry is found.
      *
      * @param namedTasks the collection of NamedTasks to be configured.
      * @param configuration the configurations from which the tasks', optional, config is taken.
-     * @return the configured collection of jobbing tasks.
+     * @return the configured collection of adhoc tasks.
      */
-    private Map<String, Task<JobbingTaskData>> createJobbingTasks(Iterable<NamedTask> namedTasks,
-                                                                  SchedulerConfig configuration) {
+    private Map<String, Task<AdhocTaskData>> createAdhocTasks(Iterable<NamedTask> namedTasks,
+                                                                SchedulerConfig configuration) {
         if (namedTasks == null) {
             return Collections.emptyMap();
         }
 
-        Map<String, Task<JobbingTaskData>> result = new HashMap<>();
+        Map<String, Task<AdhocTaskData>> result = new HashMap<>();
         namedTasks.forEach(task -> {
             Optional<NamedTaskConfig> taskConfig = Optional.ofNullable(configuration.tasks().get(task.getName()));
-            if (task instanceof NamedJobbingTask<?>) {
-                log.debug("Adding Jobbing Task [name: {}]", task.getName());
+            if (task instanceof NamedAdhocTask<?>) {
+                log.debug("Adding Adhoc Task [name: {}]", task.getName());
 
                 // create a custom task
-                Tasks.TaskBuilder<JobbingTaskData> builder = Tasks.custom(task.getName(), JobbingTaskData.class);
+                Tasks.TaskBuilder<AdhocTaskData> builder = Tasks.custom(task.getName(), AdhocTaskData.class);
 
                 // find any, optional, configuration related to the named task
                 taskConfig.ifPresent(config -> {
-                    log.debug("Jobbing Task configuration found [task: {}]", task.getName());
+                    log.debug("Adhoc Task configuration found [task: {}]", task.getName());
 
                     // use the configured failure handler
-                    Optional<FailureHandler<JobbingTaskData>> handler = configureFailureHandler(config);
+                    Optional<FailureHandler<AdhocTaskData>> handler = configureFailureHandler(config);
                     handler.ifPresent(builder::onFailure);
                 });
 
@@ -216,7 +216,7 @@ public class SchedulerFactory {
                         inst.getData().repeatCount);
 
                     // call the task using the correlation ID used when job was queued
-                    final NamedJobbingTask<Object> function = (NamedJobbingTask<Object>) task;
+                    final NamedAdhocTask<Object> function = (NamedAdhocTask<Object>) task;
                     TaskConclusion conclusion = Correlation.call(inst.getData().correlationId, function, taskContext);
 
                     // if task has completed
@@ -271,17 +271,17 @@ public class SchedulerFactory {
 
     /**
      * Creates a new Scheduler of the given configuration. The given collections of
-     * jobbing and recurring tasks are started.
+     * adhoc and recurring tasks are started.
      *
      * @param configuration the scheduler configuration.
-     * @param jobbingTasks the collection of Jobbing tasks to be started.
+     * @param adhocTasks the collection of Adhoc tasks to be started.
      * @param recurringTasks the collection of recurring tasks to be started.
      * @return the new scheduler. Will be null if no tasks are given.
      */
     private Scheduler scheduleTasks(SchedulerConfig configuration,
-                                    Collection<Task<JobbingTaskData>> jobbingTasks,
+                                    Collection<Task<AdhocTaskData>> adhocTasks,
                                     Collection<RecurringTask<?>> recurringTasks) {
-        if ((jobbingTasks.isEmpty()) && (recurringTasks.isEmpty())) {
+        if ((adhocTasks.isEmpty()) && (recurringTasks.isEmpty())) {
             log.info("No scheduler tasks to configure.");
             return null;
         }
@@ -290,10 +290,10 @@ public class SchedulerFactory {
             .map(schema -> schema + "." + "scheduled_tasks")
             .orElse("scheduled_tasks");
 
-        log.info("Scheduling named scheduled tasks [tableName: {}, jobbingSize: {}, recurringSize: {}]",
-            tableName, jobbingTasks.size(), recurringTasks.size());
+        log.info("Scheduling named scheduled tasks [tableName: {}, adhocSize: {}, recurringSize: {}]",
+            tableName, adhocTasks.size(), recurringTasks.size());
 
-        Scheduler result = Scheduler.create(dataSource, new ArrayList<>(jobbingTasks))
+        Scheduler result = Scheduler.create(dataSource, new ArrayList<>(adhocTasks))
             .tableName(tableName)
             .serializer(new TaskDataSerializer())
             .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
@@ -376,11 +376,11 @@ public class SchedulerFactory {
     }
 
     /**
-     * Calculates the delay before an INCOMPLETE NamedJobbingTask will be repeated.
+     * Calculates the delay before an INCOMPLETE NamedAdhocTask will be repeated.
      * If no repeat configuration is given, or the max-retries has been reached,
      * the return value will be empty.
      *
-     * @param config the NamedJobbingTask's configuration.
+     * @param config the NamedAdhocTask's configuration.
      * @param repeatCount the count of the task's repeats
      * @return the delay after which the task will be run.
      */
@@ -406,7 +406,7 @@ public class SchedulerFactory {
     }
 
     /**
-     * Augments a given FailureHandler to add the queuing of another Jobbing Task
+     * Augments a given FailureHandler to add the queuing of another Adhoc Task
      * when the maximum number of retries is exceeded.
      * @param <T>
      */
@@ -434,7 +434,7 @@ public class SchedulerFactory {
                 if (onMaxRetryTaskName != null) {
                     try {
                         log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
-                        JobbingTaskData taskData = (JobbingTaskData) executionComplete.getExecution().taskInstance.getData();
+                        AdhocTaskData taskData = (AdhocTaskData) executionComplete.getExecution().taskInstance.getData();
                         Correlation.run(taskData.correlationId, () ->
                             SchedulerFactory.this.addJob(onMaxRetryTaskName, taskData.getPayloadContent(), Instant.now())
                         );

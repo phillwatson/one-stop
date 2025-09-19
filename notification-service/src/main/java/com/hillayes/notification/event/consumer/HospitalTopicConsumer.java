@@ -50,6 +50,6 @@ public class HospitalTopicConsumer implements EventConsumer {
         params.put("consumer", consumer);
         params.put("reason", reason);
         params.put("cause", cause);
-        sendEmailTask.queueJob(TemplateName.EVENT_HOSPITAL, params);
+        sendEmailTask.queueTask(TemplateName.EVENT_HOSPITAL, params);
     }
 }

@@ -1,7 +1,7 @@
 package com.hillayes.notification.task;
 
 import com.hillayes.executors.scheduler.TaskContext;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.notification.config.EmailConfiguration;
 import com.hillayes.notification.config.TemplateName;
@@ -26,13 +26,13 @@ import java.util.*;
  */
 @ApplicationScoped
 @Slf4j
-public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payload> {
+public class SendEmailTask extends AbstractNamedAdhocTask<SendEmailTask.Payload> {
     private final UserService userService;
     private final SendEmailService sendEmailService;
 
     public SendEmailTask(UserService userService,
                          SendEmailService sendEmailService) {
-        super("queue-email");
+        super("send-email");
         this.userService = userService;
         this.sendEmailService = sendEmailService;
     }
@@ -42,11 +42,11 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
      * is provided, the template configuration is assumed to provide a default recipient.
      * @param templateName the email template to use
      * @param params the parameters to use in the template.
-     * @return the id of the queued job that will send the email.
+     * @return the id of the queued task instance that will send the email.
      */
-    public String queueJob(TemplateName templateName,
-                           Map<String, Object> params) {
-        return queueJob((UUID) null, templateName, params);
+    public String queueTask(TemplateName templateName,
+                            Map<String, Object> params) {
+        return queueTask((UUID) null, templateName, params);
     }
 
     /**
@@ -55,12 +55,12 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
      * @param userId the id of the user to send the email to.
      * @param templateName the email template to use
      * @param params the parameters to use in the template.
-     * @return the id of the queued job that will send the email.
+     * @return the id of the queued task instance that will send the email.
      */
-    public String queueJob(UUID userId,
-                           TemplateName templateName,
-                           Map<String, Object> params) {
-        log.info("Queuing email job [template: {}]", templateName);
+    public String queueTask(UUID userId,
+                            TemplateName templateName,
+                            Map<String, Object> params) {
+        log.info("Queuing email task [template: {}]", templateName);
         Payload payload = Payload.builder()
             .userId(userId)
             .templateName(templateName)
@@ -75,12 +75,12 @@ public class SendEmailTask extends AbstractNamedJobbingTask<SendEmailTask.Payloa
      * @param recipient the recipient of the email.
      * @param templateName the email template to use
      * @param params the parameters to use in the template.
-     * @return the id of the queued job that will send the email.
+     * @return the id of the queued task instance that will send the email.
      */
-    public String queueJob(EmailConfiguration.Corresponder recipient,
-                           TemplateName templateName,
-                           Map<String, Object> params) {
-        log.info("Queuing email job [template: {}]", templateName);
+    public String queueTask(EmailConfiguration.Corresponder recipient,
+                            TemplateName templateName,
+                            Map<String, Object> params) {
+        log.info("Queuing email task [template: {}]", templateName);
         Payload payload = Payload.builder()
             .recipient(new EmailRecipient(recipient))
             .templateName(templateName)

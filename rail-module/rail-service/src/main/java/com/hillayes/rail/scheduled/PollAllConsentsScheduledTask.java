@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * A scheduled task to verify the status of all User Consent records whose status
- * is currently "GIVEN". To share the load, it will queue a POLL_CONSENT jobbing
+ * is currently "GIVEN". To share the load, it will queue a POLL_CONSENT adhoc
  * task for each consent record it finds.
  */
 @ApplicationScoped
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PollAllConsentsScheduledTask implements NamedScheduledTask {
     private final UserConsentRepository userConsentRepository;
 
-    private final PollConsentJobbingTask pollConsentJobbingTask;
+    private final PollConsentAdhocTask pollConsentAdhocTask;
 
     @Override
     public String getName() {
@@ -38,6 +38,6 @@ public class PollAllConsentsScheduledTask implements NamedScheduledTask {
         log.info("PollAllConsentsScheduledTask.run()");
         userConsentRepository.listAll().stream()
             .filter(consent -> consent.getStatus() == ConsentStatus.GIVEN)
-            .forEach(consent -> pollConsentJobbingTask.queueTask(consent.getId()));
+            .forEach(consent -> pollConsentAdhocTask.queueTask(consent.getId()));
     }
 }

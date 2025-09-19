@@ -13,14 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class ConsentTimeoutJobbingTaskTest {
+public class ConsentTimeoutAdhocTaskTest {
     UserConsentService userConsentService = mock();
 
-    ConsentTimeoutJobbingTask consentTimeoutJobbingTask;
+    ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
 
     @BeforeEach
     public void setUp() {
-        consentTimeoutJobbingTask = new ConsentTimeoutJobbingTask(userConsentService);
+        consentTimeoutAdhocTask = new ConsentTimeoutAdhocTask(userConsentService);
     }
 
     @Test
@@ -29,12 +29,12 @@ public class ConsentTimeoutJobbingTaskTest {
         UUID consentId = UUID.randomUUID();
 
         // and: the consent ID is passed as the payload of a task context
-        ConsentTimeoutJobbingTask.Payload payload =
-            new ConsentTimeoutJobbingTask.Payload(consentId, RandomStringUtils.randomAlphanumeric(30));
-        TaskContext<ConsentTimeoutJobbingTask.Payload> context = new TaskContext<>(payload);
+        ConsentTimeoutAdhocTask.Payload payload =
+            new ConsentTimeoutAdhocTask.Payload(consentId, RandomStringUtils.randomAlphanumeric(30));
+        TaskContext<ConsentTimeoutAdhocTask.Payload> context = new TaskContext<>(payload);
 
         // when: the apply method is called
-        TaskConclusion result = consentTimeoutJobbingTask.apply(context);
+        TaskConclusion result = consentTimeoutAdhocTask.apply(context);
 
         // then: the task is completed
         assertEquals(TaskConclusion.COMPLETE, result);

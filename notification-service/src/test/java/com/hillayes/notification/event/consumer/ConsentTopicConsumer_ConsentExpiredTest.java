@@ -60,7 +60,7 @@ public class ConsentTopicConsumer_ConsentExpiredTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.CONSENT_EXPIRED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(eq(event.getUserId()), eq(TemplateName.CONSENT_EXPIRED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         ConsentExpired param = (ConsentExpired) paramsCaptor.getValue().get("event");

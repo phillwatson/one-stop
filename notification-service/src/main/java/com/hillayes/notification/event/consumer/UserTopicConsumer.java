@@ -62,7 +62,7 @@ public class UserTopicConsumer implements EventConsumer {
             "acknowledge_uri", event.getAcknowledgerUri().toString(),
             "expires", format(event.getExpires())
         );
-        sendEmailTask.queueJob(recipient, TemplateName.USER_REGISTERED, params);
+        sendEmailTask.queueTask(recipient, TemplateName.USER_REGISTERED, params);
     }
 
     private void processUserCreated(UserCreated event) {
@@ -105,7 +105,7 @@ public class UserTopicConsumer implements EventConsumer {
         Map<String, Object> params = Map.of(
             "activity", event.getActivity().getMessage()
         );
-        sendEmailTask.queueJob(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
+        sendEmailTask.queueTask(event.getUserId(), TemplateName.ACCOUNT_ACTIVITY, params);
         notificationService.createNotification(event.getUserId(), event.getDateRecorded(),
             NotificationId.ACCOUNT_ACTIVITY, params);
     }

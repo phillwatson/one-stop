@@ -60,7 +60,7 @@ public class ConsentTopicConsumer_ConsentDeniedTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.CONSENT_DENIED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(eq(event.getUserId()), eq(TemplateName.CONSENT_DENIED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         ConsentDenied param = (ConsentDenied)paramsCaptor.getValue().get("event");
