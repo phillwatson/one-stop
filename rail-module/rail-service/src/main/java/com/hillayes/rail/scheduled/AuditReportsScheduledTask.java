@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * A scheduled task to run all the configured audit reports. To share the load,
- * this task queues a UserAuditReportsJobbingTask for each user that has at least
+ * this task queues a UserAuditReportsAdhocTask for each user that has at least
  * one configured audit report.
  */
 @ApplicationScoped
@@ -20,7 +20,7 @@ public class AuditReportsScheduledTask implements NamedScheduledTask {
     AuditReportConfigRepository auditReportRepository;
 
     @Inject
-    UserAuditReportsJobbingTask userAuditReportsJobbingTask;
+    UserAuditReportsAdhocTask userAuditReportsAdhocTask;
 
 
     @Override
@@ -35,15 +35,15 @@ public class AuditReportsScheduledTask implements NamedScheduledTask {
 
     /**
      * Retrieves the list of identifiers of users that have at least one configured
-     * audit report, and queues a job to run the reports for those users.
+     * audit report, and queues a task to run the reports for those users.
      */
     @Override
     @Transactional
     public void run() {
         log.info("AuditReportsScheduledTask.run()");
 
-        // queue a job to run the reports for each user
+        // queue a task to run the reports for each user
         auditReportRepository.listUserIds()
-            .forEach(userId -> userAuditReportsJobbingTask.queueJob(userId));
+            .forEach(userId -> userAuditReportsAdhocTask.queueTask(userId));
     }
 }

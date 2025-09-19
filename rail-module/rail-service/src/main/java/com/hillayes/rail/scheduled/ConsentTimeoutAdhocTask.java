@@ -1,7 +1,7 @@
 package com.hillayes.rail.scheduled;
 
 import com.hillayes.executors.scheduler.TaskContext;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.UserConsentService;
@@ -14,23 +14,23 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A jobbing task that will be queued when a user consent registration is initiated,
+ * An adhoc task that will be queued when a user consent registration is initiated,
  * and scheduled to run when a user consent registration times out. It will call the
  * {@link UserConsentService#registrationTimeout(UUID, String)} method to check if the
  * registration is still pending and if so, mark it as timed out.
  */
 @ApplicationScoped
 @Slf4j
-public class ConsentTimeoutJobbingTask extends AbstractNamedJobbingTask<ConsentTimeoutJobbingTask.Payload> {
+public class ConsentTimeoutAdhocTask extends AbstractNamedAdhocTask<ConsentTimeoutAdhocTask.Payload> {
     private final UserConsentService userConsentService;
 
-    public ConsentTimeoutJobbingTask(UserConsentService userConsentService) {
+    public ConsentTimeoutAdhocTask(UserConsentService userConsentService) {
         super("consent-timeout");
         this.userConsentService = userConsentService;
     }
 
-    public String queueJob(UserConsent userConsent, Duration timeout) {
-        log.info("Queuing job [consentId: {}]", userConsent.getId());
+    public String queueTask(UserConsent userConsent, Duration timeout) {
+        log.info("Queuing task [consentId: {}]", userConsent.getId());
         return queueTask(
             new Payload(userConsent.getId(), userConsent.getReference()),
             Instant.now().plus(timeout));

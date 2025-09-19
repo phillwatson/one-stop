@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class PollConsentJobbingTaskTest {
+public class PollConsentAdhocTaskTest {
     @Mock
     UserConsentService userConsentService;
     @Mock
@@ -36,12 +36,12 @@ public class PollConsentJobbingTaskTest {
     @Mock
     RailProviderApi railProviderApi;
     @Mock
-    PollAccountJobbingTask pollAccountJobbingTask;
+    PollAccountAdhocTask pollAccountAdhocTask;
     @Mock
     SchedulerFactory scheduler;
 
     @InjectMocks
-    PollConsentJobbingTask fixture;
+    PollConsentAdhocTask fixture;
 
     @BeforeEach
     public void init() {
@@ -56,16 +56,16 @@ public class PollConsentJobbingTaskTest {
     }
 
     @Test
-    public void testQueueJob() {
-        // given: the jobbing task has been configured
+    public void testQueueTask() {
+        // given: the adhoc task has been configured
         fixture.taskInitialised(scheduler);
 
         // when: a user-consent ID is queued for processing
         UUID consentId = UUID.randomUUID();
         fixture.queueTask(consentId);
 
-        // then: the job is passed to the scheduler for queuing
-        verify(scheduler).addJob(fixture, consentId);
+        // then: the task is passed to the scheduler for queuing
+        verify(scheduler).addTask(fixture, consentId);
     }
 
     @Test
@@ -92,10 +92,10 @@ public class PollConsentJobbingTaskTest {
         // and: the requisition is retrieved
         verify(railProviderApi).getAgreement(agreement.getId());
 
-        // and: a job is queued to process each rail account in the requisition
+        // and: a task is queued to process each rail account in the requisition
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(pollAccountJobbingTask, times(agreement.getAccountIds().size()))
-            .queueJob(eq(userConsent.getId()), captor.capture());
+        verify(pollAccountAdhocTask, times(agreement.getAccountIds().size()))
+            .queueTask(eq(userConsent.getId()), captor.capture());
 
         // and: the rail-account IDs are correct
         agreement.getAccountIds().forEach(railAccountId ->
@@ -122,8 +122,8 @@ public class PollConsentJobbingTaskTest {
         // and: NO requisition is retrieved
         verifyNoInteractions(railProviderApi);
 
-        // and: NO job is queued to process each rail accounts
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail accounts
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the task's result is COMPLETE
         assertEquals(TaskConclusion.COMPLETE, result);
@@ -150,8 +150,8 @@ public class PollConsentJobbingTaskTest {
         // and: NO requisition is retrieved
         verifyNoInteractions(railProviderApi);
 
-        // and: NO job is queued to process each rail accounts
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail accounts
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the task's result is COMPLETE
         assertEquals(TaskConclusion.COMPLETE, result);
@@ -181,8 +181,8 @@ public class PollConsentJobbingTaskTest {
         // and: the requisition is retrieved
         verify(railProviderApi).getAgreement(agreement.getId());
 
-        // and: NO job is queued to process each rail account in the requisition
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail account in the requisition
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the consent service is called to process expired requisition
         verify(userConsentService).consentExpired(userConsent.getId());
@@ -215,8 +215,8 @@ public class PollConsentJobbingTaskTest {
         // and: the requisition is retrieved
         verify(railProviderApi).getAgreement(agreement.getId());
 
-        // and: NO job is queued to process each rail account in the requisition
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail account in the requisition
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the consent service is called to process suspended requisition
         verify(userConsentService).consentSuspended(userConsent.getId());
@@ -250,8 +250,8 @@ public class PollConsentJobbingTaskTest {
         // and: the requisition is retrieved
         verify(railProviderApi).getAgreement(agreement.getId());
 
-        // and: NO job is queued to process each rail account in the requisition
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail account in the requisition
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the consent service is NOT called to process requisition
         verifyNoMoreInteractions(userConsentService);
@@ -283,8 +283,8 @@ public class PollConsentJobbingTaskTest {
         // and: an attempt to retrieve the requisition is made
         verify(railProviderApi).getAgreement(userConsent.getAgreementId());
 
-        // and: NO job is queued to process each rail account in the requisition
-        verifyNoInteractions(pollAccountJobbingTask);
+        // and: NO task is queued to process each rail account in the requisition
+        verifyNoInteractions(pollAccountAdhocTask);
 
         // and: the consent service is NOT called to process requisition
         verifyNoMoreInteractions(userConsentService);

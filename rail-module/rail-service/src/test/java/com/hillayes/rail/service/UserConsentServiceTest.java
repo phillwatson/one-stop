@@ -15,8 +15,8 @@ import com.hillayes.rail.errors.DeleteRailConsentException;
 import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
-import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
-import com.hillayes.rail.scheduled.PollConsentJobbingTask;
+import com.hillayes.rail.scheduled.ConsentTimeoutAdhocTask;
+import com.hillayes.rail.scheduled.PollConsentAdhocTask;
 import com.hillayes.rail.utils.TestApiData;
 import com.hillayes.rail.utils.TestData;
 import jakarta.ws.rs.core.UriBuilder;
@@ -56,10 +56,10 @@ public class UserConsentServiceTest {
     RailProviderFactory railProviderFactory;
 
     @Mock
-    PollConsentJobbingTask pollConsentJobbingTask;
+    PollConsentAdhocTask pollConsentAdhocTask;
 
     @Mock
-    ConsentTimeoutJobbingTask consentTimeoutJobbingTask;
+    ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
 
     @Mock
     ConsentEventSender consentEventSender;
@@ -263,7 +263,7 @@ public class UserConsentServiceTest {
         verify(consentEventSender).sendConsentInitiated(newConsent);
 
         // and: the consent timeout task was scheduled
-        verify(consentTimeoutJobbingTask).queueJob(newConsent, configuration.consentTimeout());
+        verify(consentTimeoutAdhocTask).queueTask(newConsent, configuration.consentTimeout());
 
         // and: the result is the requisition link URI
         assertEquals(requisitionUri, agreement.get().getAgreementLink());
@@ -325,7 +325,7 @@ public class UserConsentServiceTest {
         verify(consentEventSender).sendConsentInitiated(consent);
 
         // and: the consent timeout task was scheduled
-        verify(consentTimeoutJobbingTask).queueJob(consent, configuration.consentTimeout());
+        verify(consentTimeoutAdhocTask).queueTask(consent, configuration.consentTimeout());
 
         // and: the result is the requisition link URI
         assertEquals(requisitionUri, agreement.get().getAgreementLink());
@@ -405,7 +405,7 @@ public class UserConsentServiceTest {
         verifyNoInteractions(consentEventSender);
 
         // and: NO consent timeout task was scheduled
-        verifyNoInteractions(consentTimeoutJobbingTask);
+        verifyNoInteractions(consentTimeoutAdhocTask);
     }
 
     @Test
@@ -650,8 +650,8 @@ public class UserConsentServiceTest {
         // and: the callback uri is cleared
         assertNull(updatedConsent.getCallbackUri());
 
-        // and: a job is queued to poll the consented account(s)
-        verify(pollConsentJobbingTask).queueTask(updatedConsent.getId());
+        // and: a task is queued to poll the consented account(s)
+        verify(pollConsentAdhocTask).queueTask(updatedConsent.getId());
 
         // and: a consent event is issued
         verify(consentEventSender).sendConsentGiven(updatedConsent);
@@ -682,8 +682,8 @@ public class UserConsentServiceTest {
         // and: NO consent is updated
         verify(userConsentRepository, never()).save(any());
 
-        // and: NO job is queued to poll the consented account(s)
-        verifyNoInteractions(pollConsentJobbingTask);
+        // and: NO task is queued to poll the consented account(s)
+        verifyNoInteractions(pollConsentAdhocTask);
 
         // and: NO consent event is issued
         verifyNoInteractions(consentEventSender);

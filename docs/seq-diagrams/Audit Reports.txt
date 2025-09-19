@@ -2,7 +2,7 @@ title Audit Reports
 
 participant scheduler
 participant AuditReportsScheduledTask
-participant UserAuditReportsJobbingTask
+participant UserAuditReportsAdhocTask
 participant AuditReportConfigRepository
 
 participant AuditReportTemplate
@@ -23,51 +23,51 @@ deactivate AuditReportConfigRepository
 
 loop#ffd4d4 AuditReportsScheduledTask:for each user ID
 
-AuditReportsScheduledTask->UserAuditReportsJobbingTask:queueJob(userId)
-activate UserAuditReportsJobbingTask
-UserAuditReportsJobbingTask->scheduler:USER_AUDIT_REPORTS(userId)
+AuditReportsScheduledTask->UserAuditReportsAdhocTask:queueTask(userId)
+activate UserAuditReportsAdhocTask
+UserAuditReportsAdhocTask->scheduler:USER_AUDIT_REPORTS(userId)
 activate scheduler
 deactivateafter scheduler
-deactivateafter UserAuditReportsJobbingTask
+deactivateafter UserAuditReportsAdhocTask
 end
 deactivateafter AuditReportsScheduledTask
 
 
-scheduler->UserAuditReportsJobbingTask:apply(userId)
-activate UserAuditReportsJobbingTask
+scheduler->UserAuditReportsAdhocTask:apply(userId)
+activate UserAuditReportsAdhocTask
 
-UserAuditReportsJobbingTask->AuditReportConfigRepository:listAuditReportConfigs(userId)
+UserAuditReportsAdhocTask->AuditReportConfigRepository:listAuditReportConfigs(userId)
 activate AuditReportConfigRepository
-UserAuditReportsJobbingTask<--AuditReportConfigRepository:AuditReportConfig[]
+UserAuditReportsAdhocTask<--AuditReportConfigRepository:AuditReportConfig[]
 deactivate AuditReportConfigRepository
 
 loop#ffd4d4 AuditReportsScheduledTask:for each report config
-UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:findAuditReportTemplate(config.templateId)
-activate UserAuditReportsJobbingTask
-UserAuditReportsJobbingTask-->UserAuditReportsJobbingTask:template
-deactivate UserAuditReportsJobbingTask
+UserAuditReportsAdhocTask->UserAuditReportsAdhocTask:findAuditReportTemplate(config.templateId)
+activate UserAuditReportsAdhocTask
+UserAuditReportsAdhocTask-->UserAuditReportsAdhocTask:template
+deactivate UserAuditReportsAdhocTask
 
 alt#lightblue template found
-UserAuditReportsJobbingTask->AuditReportTemplate:template.run(config)
+UserAuditReportsAdhocTask->AuditReportTemplate:template.run(config)
 activate AuditReportTemplate
-UserAuditReportsJobbingTask<--AuditReportTemplate:AuditReportIssue[]
+UserAuditReportsAdhocTask<--AuditReportTemplate:AuditReportIssue[]
 deactivate AuditReportTemplate
 
-UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:addToIssues()
-activate UserAuditReportsJobbingTask
+UserAuditReportsAdhocTask->UserAuditReportsAdhocTask:addToIssues()
+activate UserAuditReportsAdhocTask
 space
-deactivate UserAuditReportsJobbingTask
+deactivate UserAuditReportsAdhocTask
 
 else#lightblue template not found
-UserAuditReportsJobbingTask->UserAuditReportsJobbingTask:logMissingTemplate()
-activate UserAuditReportsJobbingTask
+UserAuditReportsAdhocTask->UserAuditReportsAdhocTask:logMissingTemplate()
+activate UserAuditReportsAdhocTask
 space
-deactivate UserAuditReportsJobbingTask
+deactivate UserAuditReportsAdhocTask
 end
 
 end
-UserAuditReportsJobbingTask->broker:TRANSACTION_AUDIT(issues)
-deactivate UserAuditReportsJobbingTask
+UserAuditReportsAdhocTask->broker:TRANSACTION_AUDIT(issues)
+deactivate UserAuditReportsAdhocTask
 
 space
 NotificationService<-broker:TRANSACTION_AUDIT(issues)

@@ -72,7 +72,7 @@ public class UserTopicConsumer_UserRegisteredTest {
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<SendEmailService.Recipient> recipientCaptor = ArgumentCaptor.forClass(SendEmailService.Recipient.class);
-        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_REGISTERED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_REGISTERED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(event.getEmail(), recipientCaptor.getValue().getName());

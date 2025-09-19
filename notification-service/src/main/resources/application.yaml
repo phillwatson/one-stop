@@ -152,8 +152,8 @@ one-stop:
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}
     tasks:
-      # jobbing tasks to queue emails for sending
-      queue-email:
+      # adhoc task to send an email
+      send-email:
         on-failure: # gives a max of 16 minutes
           max-retry: 4
           retry-interval: PT2M

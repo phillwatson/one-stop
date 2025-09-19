@@ -59,7 +59,7 @@ public class ConsentTopicConsumer_ConsentCancelledTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.CONSENT_CANCELLED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(eq(event.getUserId()), eq(TemplateName.CONSENT_CANCELLED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         ConsentCancelled param = (ConsentCancelled)paramsCaptor.getValue().get("event");

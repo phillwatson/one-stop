@@ -35,6 +35,6 @@ public class UserAuthTopicConsumer implements EventConsumer {
         Map<String, Object> params = Map.of(
             "event", event
         );
-        sendEmailTask.queueJob(event.getUserId(), TemplateName.NEW_OIDC_LOGIN, params);
+        sendEmailTask.queueTask(event.getUserId(), TemplateName.NEW_OIDC_LOGIN, params);
     }
 }

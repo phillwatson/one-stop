@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-public class UserAuditReportsJobbingTaskTest {
+public class UserAuditReportsAdhocTaskTest {
     @Inject
     Instance<AuditReportTemplate> reportTemplates;
 
@@ -47,7 +47,7 @@ public class UserAuditReportsJobbingTaskTest {
     AuditEventSender auditEventSender;
 
     @Inject
-    UserAuditReportsJobbingTask fixture;
+    UserAuditReportsAdhocTask fixture;
 
     @BeforeEach
     public void init() {
@@ -66,8 +66,8 @@ public class UserAuditReportsJobbingTaskTest {
         UUID userId = UUID.randomUUID();
 
         // and: a payload identifying the user
-        TaskContext<UserAuditReportsJobbingTask.Payload> context =
-            new TaskContext<>(new UserAuditReportsJobbingTask.Payload(userId));
+        TaskContext<UserAuditReportsAdhocTask.Payload> context =
+            new TaskContext<>(new UserAuditReportsAdhocTask.Payload(userId));
 
         // and: a collection of report templates exist
         List<AuditReportTemplate> templateList = reportTemplates.stream().toList();
@@ -92,7 +92,7 @@ public class UserAuditReportsJobbingTaskTest {
         Duration expectedTimeout = ackTimeout.orElse(null);
         assertNotNull(expectedTimeout);
 
-        // when: the job is invoked
+        // when: the task is invoked
         fixture.apply(context);
 
         // then: for each of the users report configurations

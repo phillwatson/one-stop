@@ -60,7 +60,7 @@ public class ConsentTopicConsumer_ConsentSuspendedTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.CONSENT_SUSPENDED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(eq(event.getUserId()), eq(TemplateName.CONSENT_SUSPENDED), paramsCaptor.capture());
 
         // and: the parameters contain the event payload
         ConsentSuspended param = (ConsentSuspended) paramsCaptor.getValue().get("event");

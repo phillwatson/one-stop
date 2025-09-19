@@ -54,7 +54,7 @@ public class UserTopicConsumer_UserActivityTest {
 
         // then: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(sendEmailTask).queueJob(eq(event.getUserId()), eq(TemplateName.ACCOUNT_ACTIVITY), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(eq(event.getUserId()), eq(TemplateName.ACCOUNT_ACTIVITY), paramsCaptor.capture());
 
         // and: the email template parameters are taken from the event payload
         assertEquals(event.getActivity().getMessage(), paramsCaptor.getValue().get("activity"));

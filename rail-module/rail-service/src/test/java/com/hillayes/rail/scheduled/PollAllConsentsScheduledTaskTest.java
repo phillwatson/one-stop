@@ -19,7 +19,7 @@ public class PollAllConsentsScheduledTaskTest {
     @Mock
     UserConsentRepository userConsentRepository;
     @Mock
-    PollConsentJobbingTask pollConsentJobbingTask;
+    PollConsentAdhocTask pollConsentAdhocTask;
 
     @InjectMocks
     PollAllConsentsScheduledTask fixture;
@@ -55,10 +55,10 @@ public class PollAllConsentsScheduledTaskTest {
         // then: a poll-consent task is queued for each GIVEN consent
         consents.forEach(consent -> {
             if (consent.getStatus() == ConsentStatus.GIVEN) {
-                verify(pollConsentJobbingTask).queueTask(consent.getId());
+                verify(pollConsentAdhocTask).queueTask(consent.getId());
             }
             else {
-                verify(pollConsentJobbingTask, never()).queueTask(consent.getId());
+                verify(pollConsentAdhocTask, never()).queueTask(consent.getId());
             }
         });
     }
@@ -75,6 +75,6 @@ public class PollAllConsentsScheduledTaskTest {
         fixture.run();
 
         // then: NO poll-consent task is queued for any consent
-        verify(pollConsentJobbingTask, never()).queueTask(any());
+        verify(pollConsentAdhocTask, never()).queueTask(any());
     }
 }

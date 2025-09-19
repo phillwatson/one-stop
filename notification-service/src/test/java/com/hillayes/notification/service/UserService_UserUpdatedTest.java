@@ -84,7 +84,7 @@ public class UserService_UserUpdatedTest {
         // and: two emails are sent
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask, times(2)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
+        verify(sendEmailTask, times(2)).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
@@ -156,7 +156,7 @@ public class UserService_UserUpdatedTest {
         // and: two emails are sent
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask, times(2)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
+        verify(sendEmailTask, times(2)).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: one to the recipient details are taken from the event payload
         recipientCaptor.getAllValues().stream()
@@ -225,7 +225,7 @@ public class UserService_UserUpdatedTest {
         // and: an email is sent to the new email address
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask, times(1)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
+        verify(sendEmailTask, times(1)).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());
@@ -264,7 +264,7 @@ public class UserService_UserUpdatedTest {
         // and: an email is sent to the new email address
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask, times(1)).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
+        verify(sendEmailTask, times(1)).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_UPDATED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(user.getPreferredName(), recipientCaptor.getValue().getName());

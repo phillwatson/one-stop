@@ -59,7 +59,7 @@ public class UserService_UserDeletedTest {
         // and: an email is sent to the user
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
         ArgumentCaptor<EmailConfiguration.Corresponder> recipientCaptor = ArgumentCaptor.forClass(EmailConfiguration.Corresponder.class);
-        verify(sendEmailTask).queueJob(recipientCaptor.capture(), eq(TemplateName.USER_DELETED), paramsCaptor.capture());
+        verify(sendEmailTask).queueTask(recipientCaptor.capture(), eq(TemplateName.USER_DELETED), paramsCaptor.capture());
 
         // and: the recipient details are taken from the event payload
         assertEquals(existingUser.getPreferredName(), recipientCaptor.getValue().getName());

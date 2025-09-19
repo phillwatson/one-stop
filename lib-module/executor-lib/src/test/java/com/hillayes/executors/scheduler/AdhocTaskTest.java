@@ -4,8 +4,8 @@ import com.hillayes.executors.scheduler.helpers.NamedTaskConfigImpl;
 import com.hillayes.executors.scheduler.helpers.RetryConfigImpl;
 import com.hillayes.executors.scheduler.helpers.SchedulerConfigImpl;
 import com.hillayes.executors.scheduler.helpers.TestBase;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
-import com.hillayes.executors.scheduler.tasks.NamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
+import com.hillayes.executors.scheduler.tasks.NamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @Slf4j
-public class JobbingTaskTest extends TestBase {
+public class AdhocTaskTest extends TestBase {
     @Test
-    public void testJobList() {
+    public void testTaskList() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
                 return TaskConclusion.COMPLETE;
@@ -41,22 +41,22 @@ public class JobbingTaskTest extends TestBase {
                 .tasks(Collections.emptyMap())
                 .build(), List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
-        fixture.addJob(task, "two");
-        fixture.addJob(task, "three");
+        // queue some tasks
+        fixture.addTask(task, "one");
+        fixture.addTask(task, "two");
+        fixture.addTask(task, "three");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(3))
             .atMost(Duration.ofSeconds(20))
             .until(() -> signal.get() == 3);
 
-        // queue some more jobs
-        fixture.addJob(task, "four");
-        fixture.addJob(task, "five");
+        // queue some more tasks
+        fixture.addTask(task, "four");
+        fixture.addTask(task, "five");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(20))
@@ -74,7 +74,7 @@ public class JobbingTaskTest extends TestBase {
 
         UUID payload = UUID.randomUUID();
 
-        NamedJobbingTask<UUID> task = new TestJobbingTask<>() {
+        NamedAdhocTask<UUID> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<UUID> context) {
                 log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
                 assertEquals(payload, context.getPayload());
@@ -87,10 +87,10 @@ public class JobbingTaskTest extends TestBase {
                 .tasks(Collections.emptyMap())
                 .build(), List.of(task));
 
-        // queue a job with a UUID payload
-        fixture.addJob(task, payload);
+        // queue a task with a UUID payload
+        fixture.addTask(task, payload);
 
-        // wait for job to complete
+        // wait for task to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(3))
             .atMost(Duration.ofSeconds(20))
@@ -103,7 +103,7 @@ public class JobbingTaskTest extends TestBase {
     public void testVoidPayload() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<Void> task = new TestJobbingTask<>() {
+        NamedAdhocTask<Void> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<Void> context) {
                 log.info("Task {} is running ({})", context.getPayload(), signal.incrementAndGet());
                 assertNull(context.getPayload());
@@ -116,10 +116,10 @@ public class JobbingTaskTest extends TestBase {
                 .tasks(Collections.emptyMap())
                 .build(), List.of(task));
 
-        // queue a job with a null payload
-        fixture.addJob(task, null);
+        // queue a task with a null payload
+        fixture.addTask(task, null);
 
-        // wait for job to complete
+        // wait for task to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(3))
             .atMost(Duration.ofSeconds(20))
@@ -132,7 +132,7 @@ public class JobbingTaskTest extends TestBase {
     public void testOnFailureRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -157,10 +157,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(25))
@@ -173,7 +173,7 @@ public class JobbingTaskTest extends TestBase {
     public void testOnFailureMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             // the task will fail on each run
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
@@ -198,10 +198,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(12))
@@ -211,7 +211,7 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(4)) // timeout
-            .until(() -> signal.get() == 4 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 4 ); // no increment of the signal shows task was not retried
 
         fixture.stop();
     }
@@ -222,7 +222,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
         final String payload = RandomStringUtils.randomAlphanumeric(20);
 
-        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask<>("on-max-retry-task") {
+        NamedAdhocTask<String> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
@@ -232,7 +232,7 @@ public class JobbingTaskTest extends TestBase {
             }
         };
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>("task one") {
+        NamedAdhocTask<String> task = new TestAdhocTask<>("task one") {
             // the task will fail on each run
             public TaskConclusion apply(TaskContext<String> context) {
                 assertEquals(signal.get(), context.getFailureCount());
@@ -262,10 +262,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task, onMaxRetryTask));
 
-        // queue some jobs
-        fixture.addJob(task, payload);
+        // queue some tasks
+        fixture.addTask(task, payload);
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(12))
@@ -275,9 +275,9 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(4)) // timeout
-            .until(() -> signal.get() == 3 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 3 ); // no increment of the signal shows task was not retried
 
-        // wait for on-max-retry job to complete
+        // wait for on-max-retry task to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(12))
@@ -291,7 +291,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean complete = new AtomicBoolean(false);
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -315,10 +315,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(25))
@@ -331,7 +331,7 @@ public class JobbingTaskTest extends TestBase {
     public void testNoRepeating() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -355,10 +355,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(10))
@@ -368,7 +368,7 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(6)) // timeout
-            .until(() -> signal.get() == 1); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 1); // no increment of the signal shows task was not retried
 
         fixture.stop();
     }
@@ -377,7 +377,7 @@ public class JobbingTaskTest extends TestBase {
     public void testRepeatingMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -401,10 +401,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(15))
@@ -414,7 +414,7 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(4)) // timeout
-            .until(() -> signal.get() == 4 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 4 ); // no increment of the signal shows task was not retried
 
         fixture.stop();
     }
@@ -424,7 +424,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean complete = new AtomicBoolean(false);
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {})",
@@ -459,10 +459,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some jobs
-        fixture.addJob(task, "one");
+        // queue some tasks
+        fixture.addTask(task, "one");
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(25))
@@ -472,7 +472,7 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(5)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(6)) // timeout
-            .until(() -> signal.get() == 7 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 7 ); // no increment of the signal shows task was not retried
 
         fixture.stop();
     }
@@ -483,7 +483,7 @@ public class JobbingTaskTest extends TestBase {
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
         final String payload = RandomStringUtils.randomAlphanumeric(20);
 
-        NamedJobbingTask<String> onMaxRetryTask = new TestJobbingTask<>("on-max-retry-task") {
+        NamedAdhocTask<String> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
             public TaskConclusion apply(TaskContext<String> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
@@ -493,7 +493,7 @@ public class JobbingTaskTest extends TestBase {
             }
         };
 
-        NamedJobbingTask<String> task = new TestJobbingTask<>() {
+        NamedAdhocTask<String> task = new TestAdhocTask<>() {
             public TaskConclusion apply(TaskContext<String> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {})",
@@ -523,10 +523,10 @@ public class JobbingTaskTest extends TestBase {
                 .build(),
             List.of(task, onMaxRetryTask));
 
-        // queue some jobs
-        fixture.addJob(task, payload);
+        // queue some tasks
+        fixture.addTask(task, payload);
 
-        // wait for jobs to complete
+        // wait for tasks to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(12))
@@ -536,9 +536,9 @@ public class JobbingTaskTest extends TestBase {
         Awaitility.await()
             .pollDelay(Duration.ofSeconds(3)) // allow time for another retry (which shouldn't happen)
             .atMost(Duration.ofSeconds(4)) // timeout
-            .until(() -> signal.get() == 3 ); // no increment of the signal shows job was not retried
+            .until(() -> signal.get() == 3 ); // no increment of the signal shows task was not retried
 
-        // wait for on-max-retry job to complete
+        // wait for on-max-retry task to complete
         Awaitility.await()
             .pollInterval(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(12))
@@ -547,12 +547,12 @@ public class JobbingTaskTest extends TestBase {
         fixture.stop();
     }
 
-    private static abstract class TestJobbingTask<T> extends AbstractNamedJobbingTask<T> {
-        TestJobbingTask() {
-            this("test-jobs");
+    private static abstract class TestAdhocTask<T> extends AbstractNamedAdhocTask<T> {
+        TestAdhocTask() {
+            this("test-tasks");
         }
 
-        TestJobbingTask(String name) {
+        TestAdhocTask(String name) {
             super(name);
         }
     }

@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class PollAccountJobbingTaskTest {
+public class PollAccountAdhocTaskTest {
     @Mock
     UserConsentService userConsentService;
     @Mock
@@ -52,7 +52,7 @@ public class PollAccountJobbingTaskTest {
     ServiceConfiguration configuration;
 
     @InjectMocks
-    PollAccountJobbingTask fixture;
+    PollAccountAdhocTask fixture;
 
     @BeforeEach
     public void init() {
@@ -91,19 +91,19 @@ public class PollAccountJobbingTaskTest {
     }
 
     @Test
-    public void testQueueJob() {
-        // given: the jobbing task has been configured
+    public void testQueueTask() {
+        // given: the adhoc task has been configured
         fixture.taskInitialised(scheduler);
 
         // when: an account ID is queued for processing
         UUID consentId = UUID.randomUUID();
         String railAccountId = randomAlphanumeric(20);
-        fixture.queueJob(consentId, railAccountId);
+        fixture.queueTask(consentId, railAccountId);
 
-        // then: the job is passed to the scheduler for queuing
-        ArgumentCaptor<PollAccountJobbingTask.Payload> captor =
-            ArgumentCaptor.forClass(PollAccountJobbingTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), captor.capture());
+        // then: the task is passed to the scheduler for queuing
+        ArgumentCaptor<PollAccountAdhocTask.Payload> captor =
+            ArgumentCaptor.forClass(PollAccountAdhocTask.Payload.class);
+        verify(scheduler).addTask(eq(fixture), captor.capture());
 
         // and: the payload is correct
         assertEquals(consentId, captor.getValue().consentId());
@@ -157,8 +157,8 @@ public class PollAccountJobbingTaskTest {
         );
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -244,8 +244,8 @@ public class PollAccountJobbingTaskTest {
         when(railProviderApi.listTransactions(eq(railAgreement), eq(railAccount.getId()), any())).thenReturn(transactions);
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -331,8 +331,8 @@ public class PollAccountJobbingTaskTest {
         when(railProviderApi.listTransactions(eq(railAgreement), eq(railAccount.getId()), any())).thenReturn(transactions);
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the task's result is INCOMPLETE
@@ -396,8 +396,8 @@ public class PollAccountJobbingTaskTest {
         when(accountRepository.findByRailAccountId(railAccount.getId())).thenReturn(Optional.of(account));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -444,8 +444,8 @@ public class PollAccountJobbingTaskTest {
         RailAccount railAccount = TestApiData.mockAccount();
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsentId, railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsentId, railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the fixture attempts to retrieve the user-consent
@@ -492,8 +492,8 @@ public class PollAccountJobbingTaskTest {
         when(userConsentService.lockUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), UUID.randomUUID().toString());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), UUID.randomUUID().toString());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -543,8 +543,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.empty());
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), randomAlphanumeric(20));
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), randomAlphanumeric(20));
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -597,8 +597,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAgreement));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), UUID.randomUUID().toString());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), UUID.randomUUID().toString());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -657,8 +657,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.empty());
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccountId);
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccountId);
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -714,8 +714,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -771,8 +771,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
@@ -829,8 +829,8 @@ public class PollAccountJobbingTaskTest {
             .thenReturn(Optional.of(railAccount));
 
         // when: the fixture is called to process the user-consent and account
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(userConsent.getId(), railAccount.getId());
-        TaskContext<PollAccountJobbingTask.Payload> context = new TaskContext<>(payload);
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(userConsent.getId(), railAccount.getId());
+        TaskContext<PollAccountAdhocTask.Payload> context = new TaskContext<>(payload);
         TaskConclusion result = fixture.apply(context);
 
         // then: the user-consent is retrieved
