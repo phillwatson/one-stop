@@ -41,6 +41,6 @@ public class HospitalTopicConsumer {
         params.put("event", event);
         params.put("reason", event.getReason());
         params.put("cause", event.getCause());
-        sendEmailTask.queueJob(TemplateName.EVENT_HOSPITAL, params);
+        sendEmailTask.queueTask(TemplateName.EVENT_HOSPITAL, params);
     }
 }

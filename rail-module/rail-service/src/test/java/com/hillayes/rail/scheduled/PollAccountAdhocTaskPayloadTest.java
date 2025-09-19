@@ -1,6 +1,6 @@
 package com.hillayes.rail.scheduled;
 
-import com.hillayes.executors.scheduler.JobbingTaskData;
+import com.hillayes.executors.scheduler.AdhocTaskData;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -8,19 +8,19 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PollAccountJobbingTaskPayloadTest {
+public class PollAccountAdhocTaskPayloadTest {
     @Test
     public void testSerialization() {
-        // given: a poll-account jobbing task payload
-        PollAccountJobbingTask.Payload payload = new PollAccountJobbingTask.Payload(
+        // given: a poll-account adhoc task payload
+        PollAccountAdhocTask.Payload payload = new PollAccountAdhocTask.Payload(
             UUID.randomUUID(),
             UUID.randomUUID().toString());
 
         // and: the payload is serialized
-        JobbingTaskData taskData = new JobbingTaskData(UUID.randomUUID().toString(), payload);
+        AdhocTaskData taskData = new AdhocTaskData(UUID.randomUUID().toString(), payload);
 
         // when: the payload is deserialized
-        PollAccountJobbingTask.Payload payloadContent = taskData.getPayloadContent();
+        PollAccountAdhocTask.Payload payloadContent = taskData.getPayloadContent();
 
         // the consent ID is correct
         assertNotNull(payloadContent.consentId());

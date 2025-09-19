@@ -44,7 +44,7 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void testQueueJob_UserId() {
+    public void testQueueTask_UserId() {
         // given: a user id
         UUID userId = UUID.randomUUID();
 
@@ -54,12 +54,12 @@ public class SendEmailTaskTest {
             "param2", "value2"
         );
 
-        // when: queueing a job
-        fixture.queueJob(userId, TemplateName.USER_REGISTERED, params);
+        // when: queueing a task
+        fixture.queueTask(userId, TemplateName.USER_REGISTERED, params);
 
-        // then: the job is queued
+        // then: the task is queued
         ArgumentCaptor<SendEmailTask.Payload> paramCaptor = ArgumentCaptor.forClass(SendEmailTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), paramCaptor.capture());
+        verify(scheduler).addTask(eq(fixture), paramCaptor.capture());
         SendEmailTask.Payload payload = paramCaptor.getValue();
 
         // and: the user id is passed
@@ -76,7 +76,7 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void testQueueJob_Recipient() {
+    public void testQueueTask_Recipient() {
         // given: an email corresponder as recipient
         EmailConfiguration.Corresponder recipient = mockCorresponder("mock-name", "mock-email");
 
@@ -86,12 +86,12 @@ public class SendEmailTaskTest {
             "param2", "value2"
         );
 
-        // when: queueing a job
-        fixture.queueJob(recipient, TemplateName.USER_REGISTERED, params);
+        // when: queueing a task
+        fixture.queueTask(recipient, TemplateName.USER_REGISTERED, params);
 
-        // then: the job is queued
+        // then: the task is queued
         ArgumentCaptor<SendEmailTask.Payload> paramCaptor = ArgumentCaptor.forClass(SendEmailTask.Payload.class);
-        verify(scheduler).addJob(eq(fixture), paramCaptor.capture());
+        verify(scheduler).addTask(eq(fixture), paramCaptor.capture());
         SendEmailTask.Payload payload = paramCaptor.getValue();
 
         // and: the recipient is passed

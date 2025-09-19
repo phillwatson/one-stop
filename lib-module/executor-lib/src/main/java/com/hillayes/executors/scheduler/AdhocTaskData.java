@@ -5,23 +5,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.json.MapperFactory;
-import com.hillayes.executors.exceptions.JobPayloadDeserializationException;
-import com.hillayes.executors.exceptions.JobPayloadSerializationException;
+import com.hillayes.executors.exceptions.TaskPayloadDeserializationException;
+import com.hillayes.executors.exceptions.TaskPayloadSerializationException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * A data-class that is persisted with to NamedJobbingTask's queue. It records
- * the payload to be processed by the NamedJobbingTask, and the correlation ID
- * that was active at the time the job was queued. This allows the correlation
+ * A data-class that is persisted with to NamedAdhocTask's queue. It records
+ * the payload to be processed by the NamedAdhocTask, and the correlation ID
+ * that was active at the time the task was queued. This allows the correlation
  * ID to be re-activated when the task is processed.
  */
 @Getter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @RegisterForReflection
-public class JobbingTaskData {
+public class AdhocTaskData {
     private static final ObjectMapper MAPPER = MapperFactory.defaultMapper();
 
     /**
@@ -31,7 +31,7 @@ public class JobbingTaskData {
     String correlationId;
 
     /**
-     * The number times the job has been repeated due to an INCOMPLETE result.
+     * The number times the task has been repeated due to an INCOMPLETE result.
      */
     int repeatCount;
 
@@ -55,7 +55,7 @@ public class JobbingTaskData {
     @JsonIgnore
     private transient Object payloadContent;
 
-    public JobbingTaskData(String correlationId, Object payload) {
+    public AdhocTaskData(String correlationId, Object payload) {
         this.repeatCount = 0;
         this.correlationId = correlationId;
 
@@ -76,7 +76,7 @@ public class JobbingTaskData {
             try {
                 payloadContent = MAPPER.readValue(payload, Class.forName(payloadClass));
             } catch (JsonProcessingException | ClassNotFoundException e) {
-                throw new JobPayloadDeserializationException(payloadClass, e);
+                throw new TaskPayloadDeserializationException(payloadClass, e);
             }
         }
         return (T) payloadContent;
@@ -86,7 +86,7 @@ public class JobbingTaskData {
         try {
             return MAPPER.writeValueAsString(payloadObject);
         } catch (JsonProcessingException e) {
-            throw new JobPayloadSerializationException(payloadObject.getClass().getName(), e);
+            throw new TaskPayloadSerializationException(payloadObject.getClass().getName(), e);
         }
     }
 }

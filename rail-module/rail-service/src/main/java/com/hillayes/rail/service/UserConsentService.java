@@ -18,8 +18,8 @@ import com.hillayes.rail.errors.RegistrationNotFoundException;
 import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.UserConsentRepository;
 import com.hillayes.rail.resource.UserConsentResource;
-import com.hillayes.rail.scheduled.ConsentTimeoutJobbingTask;
-import com.hillayes.rail.scheduled.PollConsentJobbingTask;
+import com.hillayes.rail.scheduled.ConsentTimeoutAdhocTask;
+import com.hillayes.rail.scheduled.PollConsentAdhocTask;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -57,10 +57,10 @@ public class UserConsentService {
     RailProviderFactory railProviderFactory;
 
     @Inject
-    PollConsentJobbingTask pollConsentJobbingTask;
+    PollConsentAdhocTask pollConsentAdhocTask;
 
     @Inject
-    ConsentTimeoutJobbingTask consentTimeoutJobbingTask;
+    ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
 
     @Inject
     ConsentEventSender consentEventSender;
@@ -158,8 +158,8 @@ public class UserConsentService {
                 // send consent initiated event notification
                 consentEventSender.sendConsentInitiated(userConsent);
 
-                // queue job to check for consent timeout
-                consentTimeoutJobbingTask.queueJob(userConsent, configuration.consentTimeout());
+                // queue task to check for consent timeout
+                consentTimeoutAdhocTask.queueTask(userConsent, configuration.consentTimeout());
 
                 // return link for user consent
                 log.debug("Returning consent link [userId: {}, institutionId: {}, link: {}]",
@@ -242,8 +242,8 @@ public class UserConsentService {
         userConsent.setErrorDetail(null);
         userConsent = userConsentRepository.save(userConsent);
 
-        // queue a job to verify the consent and poll account for data
-        pollConsentJobbingTask.queueTask(userConsent.getId());
+        // queue a task to verify the consent and poll account for data
+        pollConsentAdhocTask.queueTask(userConsent.getId());
 
         // send consent-given event notification
         consentEventSender.sendConsentGiven(userConsent);

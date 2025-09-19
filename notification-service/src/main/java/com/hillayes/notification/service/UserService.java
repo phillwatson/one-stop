@@ -45,7 +45,7 @@ public class UserService {
 
         // send email to notify user of creation
         Map<String, Object> params = Map.of("user", existingUser);
-        sendEmailTask.queueJob(new SendEmailService.Recipient(existingUser), TemplateName.USER_CREATED, params);
+        sendEmailTask.queueTask(new SendEmailService.Recipient(existingUser), TemplateName.USER_CREATED, params);
     }
 
     public Optional<User> getUser(UUID userId) {
@@ -72,7 +72,7 @@ public class UserService {
             }
         } else {
             // out-of-order - user hasn't been created yet
-            // assume given user is 
+            // assume given user is
             existingUser = user;
         }
 
@@ -99,9 +99,9 @@ public class UserService {
 
         // send email to notify user of update to their account
         if (! oldRecipient.getEmail().equalsIgnoreCase(existingUser.getEmail())) {
-            sendEmailTask.queueJob(oldRecipient, TemplateName.USER_UPDATED, params);
+            sendEmailTask.queueTask(oldRecipient, TemplateName.USER_UPDATED, params);
         }
-        sendEmailTask.queueJob(new SendEmailService.Recipient(user), TemplateName.USER_UPDATED, params);
+        sendEmailTask.queueTask(new SendEmailService.Recipient(user), TemplateName.USER_UPDATED, params);
 
         return existingUser;
     }
@@ -113,7 +113,7 @@ public class UserService {
 
             // send email to notify user of deletion
             Map<String, Object> params = Map.of("user", user);
-            sendEmailTask.queueJob(new SendEmailService.Recipient(user), TemplateName.USER_DELETED, params);
+            sendEmailTask.queueTask(new SendEmailService.Recipient(user), TemplateName.USER_DELETED, params);
         });
     }
 }

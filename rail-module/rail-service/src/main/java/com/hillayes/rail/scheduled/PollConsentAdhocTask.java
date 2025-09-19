@@ -1,7 +1,7 @@
 package com.hillayes.rail.scheduled;
 
 import com.hillayes.executors.scheduler.TaskContext;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.AgreementStatus;
@@ -17,15 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 
 /**
- * A jobbing task to verify the status of an identified UserConsent.
+ * An adhoc task to verify the status of an identified UserConsent.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
+public class PollConsentAdhocTask extends AbstractNamedAdhocTask<UUID> {
     private final UserConsentService userConsentService;
     private final RailProviderFactory railProviderFactory;
-    private final PollAccountJobbingTask pollAccountJobbingTask;
+    private final PollAccountAdhocTask pollAccountAdhocTask;
 
     @Override
     public String getName() {
@@ -39,7 +39,7 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
     @Transactional
     public TaskConclusion apply(TaskContext<UUID> context) {
         UUID consentId = context.getPayload();
-        log.info("Processing Poll Consent job [consentId: {}]", consentId);
+        log.info("Processing Poll Consent task [consentId: {}]", consentId);
         UserConsent userConsent = userConsentService.getUserConsent(consentId).orElse(null);
         if (userConsent == null) {
             log.info("Unable to find consent [consentId: {}]", consentId);
@@ -58,7 +58,7 @@ public class PollConsentJobbingTask extends AbstractNamedJobbingTask<UUID> {
                 if (agreement.getStatus() == AgreementStatus.GIVEN) {
                     log.debug("Queuing tasks for account polling [consentId: {}, accountSize: {}]",
                         consentId, agreement.getAccountIds().size());
-                    agreement.getAccountIds().forEach(accountId -> pollAccountJobbingTask.queueJob(userConsent.getId(), accountId));
+                    agreement.getAccountIds().forEach(accountId -> pollAccountAdhocTask.queueTask(userConsent.getId(), accountId));
                 }
 
                 else if (agreement.getStatus() == AgreementStatus.SUSPENDED) {

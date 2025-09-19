@@ -41,7 +41,7 @@ public class TransactionAuditTopicConsumer {
         Map<String, Object> params = new HashMap<>();
         params.put("event", event);
 
-        sendEmailTask.queueJob(event.getUserId(), TemplateName.AUDIT_ISSUE_FOUND, params);
+        sendEmailTask.queueTask(event.getUserId(), TemplateName.AUDIT_ISSUE_FOUND, params);
         notificationService.createNotification(event.getUserId(), event.getDateDetected(),
             NotificationId.AUDIT_ISSUE_FOUND, params);
     }

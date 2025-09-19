@@ -2,7 +2,7 @@ package com.hillayes.rail.scheduled;
 
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.executors.scheduler.TaskContext;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
@@ -28,12 +28,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * A jobbing task to retrieve the balance and transaction data for an identified
+ * An adhoc task to retrieve the balance and transaction data for an identified
  * UserConsent and rail Account.
  */
 @ApplicationScoped
 @Slf4j
-public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccountJobbingTask.Payload> {
+public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdhocTask.Payload> {
     private final ServiceConfiguration configuration;
     private final UserConsentService userConsentService;
     private final AccountRepository accountRepository;
@@ -47,12 +47,12 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         String railAccountId
     ) {}
 
-    public PollAccountJobbingTask(ServiceConfiguration configuration,
-                                  UserConsentService userConsentService,
-                                  AccountRepository accountRepository,
-                                  AccountBalanceRepository accountBalanceRepository,
-                                  AccountTransactionRepository accountTransactionRepository,
-                                  RailProviderFactory railProviderFactory) {
+    public PollAccountAdhocTask(ServiceConfiguration configuration,
+                                UserConsentService userConsentService,
+                                AccountRepository accountRepository,
+                                AccountBalanceRepository accountBalanceRepository,
+                                AccountTransactionRepository accountTransactionRepository,
+                                RailProviderFactory railProviderFactory) {
         super("poll-account");
         this.configuration = configuration;
         this.userConsentService = userConsentService;
@@ -62,8 +62,8 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
         this.railProviderFactory = railProviderFactory;
     }
 
-    public String queueJob(UUID consentId, String railAccountId) {
-        log.info("Queuing job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
+    public String queueTask(UUID consentId, String railAccountId) {
+        log.info("Queuing task [consentId: {}, railAccountId: {}]", consentId, railAccountId);
         return queueTask(new Payload(consentId, railAccountId));
     }
 
@@ -76,7 +76,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
      * This will obtain a lock on the identified consent record. One consent may
      * refer to several accounts, all of which may be being processed at the same
      * time. If we need to suspend or expire the consent, we don't want another
-     * job to repeat that when processing another account of the same consent.
+     * task to repeat that when processing another account of the same consent.
      *
      * @param context the context containing the identifier of the Account to be updated.
      */
@@ -85,7 +85,7 @@ public class PollAccountJobbingTask extends AbstractNamedJobbingTask<PollAccount
     public TaskConclusion apply(TaskContext<Payload> context) {
         UUID consentId = context.getPayload().consentId();
         String railAccountId = context.getPayload().railAccountId();
-        log.info("Processing Poll Account job [consentId: {}, railAccountId: {}]", consentId, railAccountId);
+        log.info("Processing Poll Account task [consentId: {}, railAccountId: {}]", consentId, railAccountId);
 
         // get a lock on the consent to ensure no other updates
         UserConsent userConsent = userConsentService.lockUserConsent(consentId).orElse(null);

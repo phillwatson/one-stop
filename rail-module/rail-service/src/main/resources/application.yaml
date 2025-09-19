@@ -50,7 +50,7 @@ one-stop:
           max-retry: 3
           retry-interval: PT1M
 
-      # jobbing tasks to check the identified consent is still valid
+      # adhoc task to check the identified consent is still valid
       # and refresh the account details
       poll-consent:
         on-failure: # gives a max of 16 minutes
@@ -58,7 +58,7 @@ one-stop:
           retry-interval: PT2M
           retry-exponent: 1.5
 
-      # jobbing tasks to refresh the identified account details
+      # adhoc task to refresh the identified account details
       poll-account:
         on-incomplete: # gives a max of 16 minutes
           max-retry: 4

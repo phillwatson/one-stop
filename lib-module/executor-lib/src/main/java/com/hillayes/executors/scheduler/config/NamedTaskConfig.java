@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface NamedTaskConfig {
     /**
      * Determines how a NamedScheduledTask is scheduled. This is not used by
-     * NamedJobbingTasks, which process tasks in an ad-hoc manner.
+     * NamedAdhocTasks, which process tasks in an ad-hoc manner.
      */
     Optional<FrequencyConfig> frequency();
 

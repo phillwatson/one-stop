@@ -2,7 +2,7 @@ package com.hillayes.rail.scheduled;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.executors.scheduler.TaskContext;
-import com.hillayes.executors.scheduler.tasks.AbstractNamedJobbingTask;
+import com.hillayes.executors.scheduler.tasks.AbstractNamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.audit.AuditReportTemplate;
 import com.hillayes.rail.domain.AuditIssue;
@@ -23,11 +23,11 @@ import java.time.Duration;
 import java.util.*;
 
 /**
- * A jobbing task to run the audit reports configured by the identified user.
+ * An adhoc task to run the audit reports configured by the identified user.
  */
 @ApplicationScoped
 @Slf4j
-public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAuditReportsJobbingTask.Payload> {
+public class UserAuditReportsAdhocTask extends AbstractNamedAdhocTask<UserAuditReportsAdhocTask.Payload> {
     @Inject
     AuditReportConfigRepository auditReportConfigRepository;
 
@@ -53,8 +53,8 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
         return "user-audit-reports";
     }
 
-    public String queueJob(UUID userId) {
-        log.info("Queuing job [userId: {}]", userId);
+    public String queueTask(UUID userId) {
+        log.info("Queuing task [userId: {}]", userId);
         return queueTask(new Payload(userId));
     }
 
@@ -67,7 +67,7 @@ public class UserAuditReportsJobbingTask extends AbstractNamedJobbingTask<UserAu
     @Transactional
     public TaskConclusion apply(TaskContext<Payload> context) {
         UUID userId = context.getPayload().userId();
-        log.info("Processing User Audit Reports job [userId: {}]", userId);
+        log.info("Processing User Audit Reports task [userId: {}]", userId);
 
         Map<AuditReportConfig, List<AuditIssue>> allIssues = new HashMap<>();
         int page = 0;

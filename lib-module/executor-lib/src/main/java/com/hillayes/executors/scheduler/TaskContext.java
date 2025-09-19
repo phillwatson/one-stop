@@ -3,7 +3,7 @@ package com.hillayes.executors.scheduler;
 import lombok.Getter;
 
 /**
- * A context passed to the Jobbing task
+ * A context passed to the Adhoc task
  */
 @Getter
 public class TaskContext<T> {

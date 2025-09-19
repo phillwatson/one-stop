@@ -15,8 +15,8 @@ public class TaskDataSerializer implements Serializer {
     private final ObjectWriter objectWriter;
 
     public TaskDataSerializer() {
-        this.objectReader = MapperFactory.readerFor(JobbingTaskData.class);
-        this.objectWriter = MapperFactory.writerFor(JobbingTaskData.class);
+        this.objectReader = MapperFactory.readerFor(AdhocTaskData.class);
+        this.objectWriter = MapperFactory.writerFor(AdhocTaskData.class);
     }
 
     @Override
