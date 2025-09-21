@@ -3,7 +3,9 @@ package com.hillayes.executors.scheduler;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.executors.exceptions.TaskPayloadDeserializationException;
 import com.hillayes.executors.exceptions.TaskPayloadSerializationException;
@@ -74,8 +76,12 @@ public class AdhocTaskData {
     public <T> T getPayloadContent() {
         if ((payloadContent == null) && (payload != null)) {
             try {
-                payloadContent = MAPPER.readValue(payload, Class.forName(payloadClass));
-            } catch (JsonProcessingException | ClassNotFoundException e) {
+                ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+                TypeFactory typeFactory = MAPPER.getTypeFactory().withClassLoader(tccl);
+                JavaType javaType = typeFactory.constructFromCanonical(payloadClass);
+
+                payloadContent = MAPPER.readValue(payload, javaType);
+            } catch (JsonProcessingException e) {
                 throw new TaskPayloadDeserializationException(payloadClass, e);
             }
         }
