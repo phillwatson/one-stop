@@ -45,12 +45,15 @@ public class Account {
     @Column(name = "institution_id", nullable = false)
     private String institutionId;
 
+    @Setter
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "rail_account_id", nullable = false)
     private String railAccountId;
 
     @Setter
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "iban", nullable = true)
     private String iban;
 

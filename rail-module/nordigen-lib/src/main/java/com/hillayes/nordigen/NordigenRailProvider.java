@@ -197,7 +197,8 @@ public class NordigenRailProvider implements RailProviderApi {
             .map(account -> accountService.details(id)
                 .map(details -> (Map<String, String>) details.get("account"))
                 .map(accountProperties -> account.toBuilder()
-                    .name(accountProperties.getOrDefault("name", account.getName()))
+                    .name(accountProperties.getOrDefault("name",
+                        accountProperties.getOrDefault("details", account.getName())))
                     .accountType(accountProperties.get("cashAccountType"))
                     .currency(currency(accountProperties.get("currency")))
                     .build()

@@ -4,6 +4,7 @@ import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.consent.*;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.rail.api.domain.RailInstitution;
+import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.service.InstitutionService;
 import lombok.RequiredArgsConstructor;
@@ -115,6 +116,20 @@ public class ConsentEventSender {
             .institutionId(userConsent.getInstitutionId())
             .institutionName(getInstitutionName(userConsent))
             .agreementId(userConsent.getAgreementId())
+            .build());
+    }
+
+    public void sendAccountRegistered(UserConsent userConsent,
+                                      Account account) {
+        log.debug("Sending AccountRegistered event [consentId: {}, userId: {}, institutionId: {}, accountId: {}]",
+            userConsent.getId(), userConsent.getUserId(), userConsent.getInstitutionId(), account.getId());
+        eventSender.send(Topic.CONSENT, AccountRegistered.builder()
+            .consentId(userConsent.getId())
+            .dateRegistered(account.getDateCreated())
+            .userId(userConsent.getUserId())
+            .institutionId(userConsent.getInstitutionId())
+            .institutionName(getInstitutionName(userConsent))
+            .accountId(account.getId())
             .build());
     }
 

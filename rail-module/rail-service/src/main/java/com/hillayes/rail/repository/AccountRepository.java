@@ -1,5 +1,6 @@
 package com.hillayes.rail.repository;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
 import com.hillayes.rail.domain.Account;
@@ -13,6 +14,19 @@ import java.util.UUID;
 public class AccountRepository extends RepositoryBase<Account, UUID> {
     public Optional<Account> findByRailAccountId(String railAccountId) {
         return findFirst("railAccountId", railAccountId);
+    }
+
+    /**
+     * Returns the first Account with the given IBAN. If no account is found, or
+     * the given IBAN is null or an empty string, the return value will be empty.
+     *
+     * @param iban the IBAN of the account.
+     * @return the identified account, or an empty result.
+     */
+    public Optional<Account> findByIban(String iban) {
+        return (Strings.isBlank(iban))
+            ? Optional.empty()
+            : findFirst("iban", iban);
     }
 
     public Page<Account> findByUserId(UUID userId, int pageNumber, int pageSize) {
