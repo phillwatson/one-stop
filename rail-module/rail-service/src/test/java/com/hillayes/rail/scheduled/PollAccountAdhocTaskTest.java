@@ -118,6 +118,7 @@ public class PollAccountAdhocTaskTest {
         // given: an identified user-consent ready to be polled
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
             .reference(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())
             .status(ConsentStatus.GIVEN)
@@ -178,7 +179,7 @@ public class PollAccountAdhocTaskTest {
         verify(accountRepository).findByRailAccountId(railAccount.getId());
 
         // and: NO attempt to retrieve the local account by its IBAN
-        verify(accountRepository, never()).findByIban(railAccount.getIban());
+        verify(accountRepository, never()).findByIban(any(), any());
 
         // and: the local account is updated with the consent ID
         assertEquals(userConsent.getId(), account.getUserConsentId());
@@ -230,6 +231,7 @@ public class PollAccountAdhocTaskTest {
         // given: an identified user-consent ready to be polled
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
             .reference(UUID.randomUUID().toString())
             .agreementId(UUID.randomUUID().toString())
             .status(ConsentStatus.GIVEN)
@@ -254,7 +256,7 @@ public class PollAccountAdhocTaskTest {
             .dateLastPolled(Instant.now().minus(Duration.ofHours(2)))
             .build();
         when(accountRepository.findByRailAccountId(railAccount.getId())).thenReturn(Optional.empty());
-        when(accountRepository.findByIban(railAccount.getIban())).thenReturn(Optional.of(account));
+        when(accountRepository.findByIban(userConsent.getUserId(), railAccount.getIban())).thenReturn(Optional.of(account));
 
         // and: the account has existing transactions - from which transaction poll will start
         AccountTransaction transaction = AccountTransaction.builder()
@@ -291,7 +293,7 @@ public class PollAccountAdhocTaskTest {
         verify(accountRepository).findByRailAccountId(railAccount.getId());
 
         // and: the local account is retrieved by its IBAN
-        verify(accountRepository).findByIban(railAccount.getIban());
+        verify(accountRepository).findByIban(userConsent.getUserId(), railAccount.getIban());
 
         // and: the local account is updated with the consent ID
         assertEquals(userConsent.getId(), account.getUserConsentId());
@@ -390,7 +392,7 @@ public class PollAccountAdhocTaskTest {
         verify(accountRepository).findByRailAccountId(railAccount.getId());
 
         // and: the fixture attempts to retrieve the local account by its IBAN
-        verify(accountRepository).findByIban(railAccount.getIban());
+        verify(accountRepository).findByIban(userConsent.getUserId(), railAccount.getIban());
 
         // and: the balances are saved
         verify(accountBalanceRepository).save(any());

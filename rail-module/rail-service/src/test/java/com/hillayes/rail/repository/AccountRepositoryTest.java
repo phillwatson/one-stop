@@ -116,7 +116,7 @@ public class AccountRepositoryTest {
         accounts.forEach((consent, expected) -> {
             expected.forEach(account -> {
                 // when: the accounts are retrieved by IBAN
-                Optional<Account> actual = fixture.findByIban(account.getIban());
+                Optional<Account> actual = fixture.findByIban(consent.getUserId(), account.getIban());
 
                 // then: the result is the expected account
                 assertTrue(actual.isPresent());

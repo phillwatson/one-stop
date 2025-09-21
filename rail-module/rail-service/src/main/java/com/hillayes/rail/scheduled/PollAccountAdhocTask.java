@@ -178,7 +178,7 @@ public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdho
                                        RailAccount railAccount) {
         // retrieve existing account record by rail-id or IBAN
         return accountRepository.findByRailAccountId(railAccount.getId())
-            .or(() -> accountRepository.findByIban(railAccount.getIban()))
+            .or(() -> accountRepository.findByIban(userConsent.getUserId(), railAccount.getIban()))
             .map(account -> {
                 // this may be a new consent record for an expired/suspended consent
                 account.setUserConsentId(userConsent.getId());
