@@ -3,16 +3,17 @@ package com.hillayes.rail.utils;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.api.domain.RailProvider;
 import com.hillayes.rail.domain.*;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Currency;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextLong;
-import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 
 public class TestData {
     public static UserConsent mockUserConsent(UUID userId) {
@@ -49,9 +50,9 @@ public class TestData {
             .userConsentId(UUID.randomUUID())
             .institutionId(UUID.randomUUID().toString())
             .railAccountId(UUID.randomUUID().toString())
-            .accountName(randomAlphanumeric(20))
+            .accountName(RandomStringUtils.insecure().nextAlphanumeric(20))
             .currency(Currency.getInstance("GBP"))
-            .iban(randomAlphanumeric(20))
+            .iban(RandomStringUtils.insecure().nextAlphanumeric(20))
             .accountType("CHEK");
 
         if (modifier != null) {
@@ -69,8 +70,8 @@ public class TestData {
         AccountBalance.Builder builder = AccountBalance.builder()
             .id(UUID.randomUUID())
             .accountId(account.getId())
-            .balanceType(randomAlphanumeric(30))
-            .amount(MonetaryAmount.of("GBP", nextLong(0, 20000) - 10000))
+            .balanceType(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .amount(MonetaryAmount.of("GBP", RandomUtils.insecure().randomLong(0, 20000) - 10000))
             .referenceDate(Instant.now().minus(Duration.ofDays(1)))
             .dateCreated(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
 
@@ -102,12 +103,12 @@ public class TestData {
             .accountId(UUID.randomUUID())
             .bookingDateTime(Instant.now().minus(Duration.ofDays(1)))
             .valueDateTime(Instant.now().minus(Duration.ofDays(1)))
-            .amount(MonetaryAmount.of("GBP", nextLong(0, 200000) - 100000))
-            .reference(randomAlphanumeric(30))
-            .additionalInformation(randomAlphanumeric(30))
-            .creditorName(randomAlphanumeric(30))
-            .transactionId(randomAlphanumeric(30))
-            .internalTransactionId(randomAlphanumeric(30));
+            .amount(MonetaryAmount.of("GBP", RandomUtils.insecure().randomLong(0, 200000) - 100000))
+            .reference(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .additionalInformation(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .creditorName(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .transactionId(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .internalTransactionId(RandomStringUtils.insecure().nextAlphanumeric(30));
 
         if (modifier != null) {
             modifier.accept(builder);
@@ -119,7 +120,7 @@ public class TestData {
                                                             String categoryName,
                                                             int count, double total, double credit, double debit) {
         return new CategoryStatistics(group.getId(), group.getName(), categoryName, UUID.randomUUID(),
-            randomAlphanumeric(30), "#345678",
+            RandomStringUtils.insecure().nextAlphanumeric(30), "#345678",
             count, BigDecimal.valueOf(total), BigDecimal.valueOf(credit), BigDecimal.valueOf(debit));
     }
 
@@ -132,12 +133,12 @@ public class TestData {
         AuditReportConfig.Builder builder = AuditReportConfig.builder()
             .disabled(false)
             .userId(userId)
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(RandomStringUtils.insecure().nextAlphanumeric(30))
+            .description(RandomStringUtils.insecure().nextAlphanumeric(30))
             .reportSource(AuditReportConfig.ReportSource.CATEGORY_GROUP)
             .reportSourceId(UUID.randomUUID())
             .uncategorisedIncluded(true)
-            .templateName(randomAlphanumeric(30));
+            .templateName(RandomStringUtils.insecure().nextAlphanumeric(30));
 
         if (modifier != null) {
             modifier.accept(builder);
@@ -146,12 +147,12 @@ public class TestData {
     }
 
     public static AuditIssueSummary mockAuditIssueSummary(AuditReportConfig reportConfig) {
-        long count = nextLong(0, 100);
+        long count = RandomUtils.insecure().randomLong(0, 100);
         return AuditIssueSummary.builder()
             .auditConfigId(reportConfig.getId())
             .auditConfigName(reportConfig.getName())
             .totalCount(count)
-            .acknowledgedCount(nextLong(0, count))
+            .acknowledgedCount(RandomUtils.insecure().randomLong(0, count))
             .build();
     }
 
@@ -171,7 +172,7 @@ public class TestData {
             .reportConfigId(reportConfigId)
             .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))
             .transactionId(UUID.randomUUID())
-            .acknowledgedDateTime(nextBoolean() ? null : Instant.now().minus(Duration.ofDays(1)));
+            .acknowledgedDateTime(RandomUtils.insecure().randomBoolean() ? null : Instant.now().minus(Duration.ofDays(1)));
 
         if (modifier != null) {
             modifier.accept(builder);

@@ -79,5 +79,12 @@ public class ConsentTopicConsumer {
             notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
                 NotificationId.CONSENT_TIMEOUT, params);
         }
+
+        else if (AccountRegistered.class.getName().equals(payloadClass)) {
+            AccountRegistered event = eventPacket.getPayloadContent();
+            params.put("event", event);
+            notificationService.createNotification(event.getUserId(), eventPacket.getTimestamp(),
+                NotificationId.ACCOUNT_REGISTERED, params);
+        }
     }
 }

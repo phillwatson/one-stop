@@ -99,6 +99,32 @@ public class AccountRepositoryTest {
         });
     }
 
+    @Test
+    public void testFindByIban() {
+        // given: a user-consent
+        List<UserConsent> consents = List.of(
+            createUserConsent(),
+            createUserConsent()
+        );
+
+        // and: linked accounts
+        Map<UserConsent, List<Account>> accounts = new HashMap<>();
+        consents.forEach(consent ->
+            accounts.put(consent, createAccounts(consent, 2))
+        );
+
+        accounts.forEach((consent, expected) -> {
+            expected.forEach(account -> {
+                // when: the accounts are retrieved by IBAN
+                Optional<Account> actual = fixture.findByIban(account.getIban());
+
+                // then: the result is the expected account
+                assertTrue(actual.isPresent());
+                assertEquals(account.getId(), actual.get().getId());
+            });
+        });
+    }
+
     private UserConsent createUserConsent() {
         return userConsentRepository.save(UserConsent.builder()
             .provider(RailProvider.NORDIGEN)
@@ -120,6 +146,7 @@ public class AccountRepositoryTest {
                 .userId(userConsent.getUserId())
                 .institutionId(userConsent.getInstitutionId())
                 .railAccountId(UUID.randomUUID().toString())
+                .iban(UUID.randomUUID().toString())
                 .build()));
         }
         fixture.flush();
