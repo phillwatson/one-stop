@@ -141,6 +141,8 @@ one-stop:
         en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
       consent-timeout:
         en: "Your consent registration for $event.institutionName$ has timed out.\nYou can try to register again."
+      account-registered:
+        en: "An account for $event.institutionName$ has been successfully registered."
       account-activity:
         en: "$activity$"
       audit-issue-found:

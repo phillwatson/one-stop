@@ -9,6 +9,7 @@ import com.hillayes.rail.api.domain.*;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.domain.*;
+import com.hillayes.rail.event.ConsentEventSender;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.AccountTransactionRepository;
@@ -16,6 +17,7 @@ import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.UserConsentService;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdhocTask.Payload> {
     private final ServiceConfiguration configuration;
     private final UserConsentService userConsentService;
+    private final ConsentEventSender consentEventSender;
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
     private final AccountTransactionRepository accountTransactionRepository;
@@ -49,6 +52,7 @@ public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdho
 
     public PollAccountAdhocTask(ServiceConfiguration configuration,
                                 UserConsentService userConsentService,
+                                ConsentEventSender consentEventSender,
                                 AccountRepository accountRepository,
                                 AccountBalanceRepository accountBalanceRepository,
                                 AccountTransactionRepository accountTransactionRepository,
@@ -56,6 +60,7 @@ public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdho
         super("poll-account");
         this.configuration = configuration;
         this.userConsentService = userConsentService;
+        this.consentEventSender = consentEventSender;
         this.accountRepository = accountRepository;
         this.accountBalanceRepository = accountBalanceRepository;
         this.accountTransactionRepository = accountTransactionRepository;
@@ -171,30 +176,37 @@ public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdho
 
     private Account getOrCreateAccount(UserConsent userConsent,
                                        RailAccount railAccount) {
+        // retrieve existing account record by rail-id or IBAN
         return accountRepository.findByRailAccountId(railAccount.getId())
+            .or(() -> accountRepository.findByIban(railAccount.getIban()))
             .map(account -> {
                 // this may be a new consent record for an expired/suspended consent
                 account.setUserConsentId(userConsent.getId());
 
                 // refresh account details
+                account.setRailAccountId(railAccount.getId());
                 account.setAccountName(railAccount.getName());
                 account.setAccountType(railAccount.getAccountType());
                 account.setIban(railAccount.getIban());
                 account.setOwnerName(railAccount.getOwnerName());
                 return account;
             })
-            .orElseGet(() -> accountRepository.save(Account.builder()
-                .userConsentId(userConsent.getId())
-                .userId(userConsent.getUserId())
-                .railAccountId(railAccount.getId())
-                .institutionId(userConsent.getInstitutionId())
-                .accountName(railAccount.getName())
-                .accountType(railAccount.getAccountType())
-                .iban(railAccount.getIban())
-                .ownerName(railAccount.getOwnerName())
-                .currency(railAccount.getCurrency())
-                .build())
-            );
+            .orElseGet(() -> {
+                Account account = accountRepository.save(Account.builder()
+                    .userConsentId(userConsent.getId())
+                        .userId(userConsent.getUserId())
+                        .railAccountId(railAccount.getId())
+                        .institutionId(userConsent.getInstitutionId())
+                        .accountName(railAccount.getName())
+                        .accountType(railAccount.getAccountType())
+                        .iban(railAccount.getIban())
+                        .ownerName(railAccount.getOwnerName())
+                        .currency(railAccount.getCurrency())
+                        .build());
+
+                consentEventSender.sendAccountRegistered(userConsent, account);
+                return account;
+            });
     }
 
     private void updateBalances(Account account, RailAccount railAccount) {
