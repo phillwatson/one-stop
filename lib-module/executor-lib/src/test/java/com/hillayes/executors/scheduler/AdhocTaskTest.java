@@ -220,11 +220,14 @@ public class AdhocTaskTest extends TestBase {
     public void testOnFailureOnMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
-        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        final ComplexPayload payload = new ComplexPayload(
+            UUID.randomUUID(),
+            RandomStringUtils.insecure().nextAlphanumeric(20)
+        );
 
-        NamedAdhocTask<String> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
+        NamedAdhocTask<ComplexPayload> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
-            public TaskConclusion apply(TaskContext<String> context) {
+            public TaskConclusion apply(TaskContext<ComplexPayload> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
                 assertEquals(payload, context.getPayload());
                 maxRetrySignal.set(true);
@@ -232,9 +235,9 @@ public class AdhocTaskTest extends TestBase {
             }
         };
 
-        NamedAdhocTask<String> task = new TestAdhocTask<>("task one") {
+        NamedAdhocTask<ComplexPayload> task = new TestAdhocTask<>("task one") {
             // the task will fail on each run
-            public TaskConclusion apply(TaskContext<String> context) {
+            public TaskConclusion apply(TaskContext<ComplexPayload> context) {
                 assertEquals(signal.get(), context.getFailureCount());
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {}])",
@@ -401,7 +404,7 @@ public class AdhocTaskTest extends TestBase {
                 .build(),
             List.of(task));
 
-        // queue some tasks
+        // queue a task
         fixture.addTask(task, "one");
 
         // wait for tasks to complete
@@ -481,11 +484,14 @@ public class AdhocTaskTest extends TestBase {
     public void testOnRepeatingOnMaxRetry() {
         final AtomicInteger signal = new AtomicInteger();
         final AtomicBoolean maxRetrySignal = new AtomicBoolean();
-        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        final ComplexPayload payload = new ComplexPayload(
+            UUID.randomUUID(),
+            RandomStringUtils.insecure().nextAlphanumeric(20)
+        );
 
-        NamedAdhocTask<String> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
+        NamedAdhocTask<ComplexPayload> onMaxRetryTask = new TestAdhocTask<>("on-max-retry-task") {
             // the task will run when max-retry is reached
-            public TaskConclusion apply(TaskContext<String> context) {
+            public TaskConclusion apply(TaskContext<ComplexPayload> context) {
                 log.info("Running on-max-retry task: {}", context.getPayload());
                 assertEquals(payload, context.getPayload());
                 maxRetrySignal.set(true);
@@ -493,8 +499,8 @@ public class AdhocTaskTest extends TestBase {
             }
         };
 
-        NamedAdhocTask<String> task = new TestAdhocTask<>() {
-            public TaskConclusion apply(TaskContext<String> context) {
+        NamedAdhocTask<ComplexPayload> task = new TestAdhocTask<>() {
+            public TaskConclusion apply(TaskContext<ComplexPayload> context) {
                 int count = signal.incrementAndGet();
                 log.info("Task {} is running [failureCount: {}, repeatCount: {}, signal: {}, payload: {})",
                     context.getPayload(), context.getFailureCount(), context.getRepeatCount(), count, context.getPayload());
@@ -556,4 +562,9 @@ public class AdhocTaskTest extends TestBase {
             super(name);
         }
     }
+
+    private static record ComplexPayload(
+        UUID id,
+        String name
+    ) {}
 }
