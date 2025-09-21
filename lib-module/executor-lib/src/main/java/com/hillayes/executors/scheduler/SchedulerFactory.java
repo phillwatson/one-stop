@@ -210,7 +210,7 @@ public class SchedulerFactory {
                 // add task - with call-back to execute
                 result.put(task.getName(), builder.execute((inst, ctx) -> {
                     // construct the context for the task to run in - including the task payload
-                    TaskContext<Object> taskContext = new TaskContext<>(
+                    final TaskContext<Object> taskContext = new TaskContext<>(
                         inst.getData().getPayloadContent(),
                         ctx.getExecution().consecutiveFailures,
                         inst.getData().repeatCount);
@@ -253,7 +253,7 @@ public class SchedulerFactory {
                             try {
                                 log.debug("Queuing on-max-retry task [name: {}]", onMaxRetryTaskName);
                                 Correlation.run(inst.getData().correlationId, () ->
-                                    addTask(onMaxRetryTaskName, inst.getData().getPayloadContent(), Instant.now())
+                                    addTask(onMaxRetryTaskName, taskContext.getPayload(), Instant.now())
                                 );
                             } catch (Exception e) {
                                 log.error("Failed to queue on-max-retry task", e);
