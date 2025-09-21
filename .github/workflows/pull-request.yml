@@ -45,6 +45,6 @@ jobs:
     - name: Build with Maven
       run: |
         mvn -B verify -Pclient -Ptest \
-          -Dquarkus.hibernate-orm.log.sql=false \
-          -Dquarkus.hibernate-orm.log.bind-parameters=false \
-          -Dquarkus.log.category.\"org.apache.http.wire\".level=ERROR
+          -DQUARKUS_HIBERNATE_ORM_LOG_SQL=false \
+          -DQUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS=false \
+          -DQUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP_WIRE__LEVEL=ERROR
