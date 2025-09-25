@@ -13,6 +13,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,7 +25,6 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.mockAuditReportConfig;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -75,7 +75,7 @@ public class UserAuditReportsAdhocTaskTest {
 
         // and: a collection of the user's report configurations
         List<AuditReportConfig> reportConfigs = IntStream.range(1, 10)
-            .mapToObj(i -> templateList.get(nextInt(0, templateList.size())))
+            .mapToObj(i -> templateList.get(RandomUtils.insecure().randomInt(0, templateList.size())))
             .map(template -> mockAuditReportConfig(userId, c -> c
                 .id(UUID.randomUUID())
                 .templateName(template.getName())

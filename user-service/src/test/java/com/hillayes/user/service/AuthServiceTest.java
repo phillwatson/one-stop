@@ -26,7 +26,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -81,7 +81,7 @@ public class AuthServiceTest {
     @EnumSource(AuthProvider.class)
     public void testInitiateOpenIdLogin(AuthProvider authProvider) {
         // given: some state to pass open-id provider
-        String state = randomAlphanumeric(20);
+        String state = insecure().nextAlphanumeric(20);
 
         // and: the open-id auth-provider will give a redirect URI
         URI redirectUri = URI.create("http://mock-uri");
@@ -100,14 +100,14 @@ public class AuthServiceTest {
     @Test
     public void testLogin_HappyPath() {
         // given: a user signing in with their username and password
-        String username = randomAlphanumeric(20);
-        char[] password = randomAlphanumeric(20).toCharArray();
+        String username = insecure().nextAlphanumeric(20);
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
 
         // and: the user record exists
         User user = User.builder()
             .id(UUID.randomUUID())
             .username(username)
-            .passwordHash(randomAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(20))
             .build();
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
 
@@ -124,8 +124,8 @@ public class AuthServiceTest {
     @Test
     public void testLogin_UserNotFound() {
         // given: a user signing in with their username and password
-        String username = randomAlphanumeric(20);
-        char[] password = randomAlphanumeric(20).toCharArray();
+        String username = insecure().nextAlphanumeric(20);
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
 
         // and: the user record does NOT exist
         when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
@@ -147,13 +147,13 @@ public class AuthServiceTest {
     @Test
     public void testLogin_PasswordInvalid() {
         // given: a user signing in with their username and password
-        String username = randomAlphanumeric(20);
-        char[] password = randomAlphanumeric(20).toCharArray();
+        String username = insecure().nextAlphanumeric(20);
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
 
         // and: the user record exists - but is blocked
         User user = User.builder()
             .username(username)
-            .passwordHash(randomAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(20))
             .build();
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
 
@@ -177,13 +177,13 @@ public class AuthServiceTest {
     @Test
     public void testLogin_UserIsBlocked() {
         // given: a user signing in with their username and password
-        String username = randomAlphanumeric(20);
-        char[] password = randomAlphanumeric(20).toCharArray();
+        String username = insecure().nextAlphanumeric(20);
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
 
         // and: the user record exists - but is blocked
         User user = User.builder()
             .username(username)
-            .passwordHash(randomAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(20))
             .dateBlocked(Instant.now())
             .build();
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
@@ -211,8 +211,8 @@ public class AuthServiceTest {
         AuthProvider authProvider = AuthProvider.GOOGLE;
 
         // and: the auth data provided by that provider
-        String code = randomAlphanumeric(30);
-        String state = randomAlphanumeric(10);
+        String code = insecure().nextAlphanumeric(30);
+        String state = insecure().nextAlphanumeric(10);
         String scope = "openid,profile,email";
 
         // and: an existing user is authenticated
@@ -240,8 +240,8 @@ public class AuthServiceTest {
         AuthProvider authProvider = AuthProvider.GOOGLE;
 
         // and: the auth data provided by that provider
-        String code = randomAlphanumeric(30);
-        String state = randomAlphanumeric(10);
+        String code = insecure().nextAlphanumeric(30);
+        String state = insecure().nextAlphanumeric(10);
         String scope = "openid,profile,email";
 
         // and: a new user is authenticated
@@ -271,8 +271,8 @@ public class AuthServiceTest {
         AuthProvider authProvider = AuthProvider.GOOGLE;
 
         // and: the auth data provided by that provider
-        String code = randomAlphanumeric(30);
-        String state = randomAlphanumeric(10);
+        String code = insecure().nextAlphanumeric(30);
+        String state = insecure().nextAlphanumeric(10);
         String scope = "openid,profile,email";
 
         // and: a new user is authenticated
@@ -303,8 +303,8 @@ public class AuthServiceTest {
         AuthProvider authProvider = AuthProvider.GOOGLE;
 
         // and: the auth data provided by that provider
-        String code = randomAlphanumeric(30);
-        String state = randomAlphanumeric(10);
+        String code = insecure().nextAlphanumeric(30);
+        String state = insecure().nextAlphanumeric(10);
         String scope = "openid,profile,email";
 
         // and: auth provider fails to authenticate
@@ -330,8 +330,8 @@ public class AuthServiceTest {
         // given: a user wishing to refresh their auth tokens
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(20))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(20))
             .build();
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 
@@ -371,8 +371,8 @@ public class AuthServiceTest {
         // given: a user wishing to refresh their auth tokens
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(20))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(20))
             .dateBlocked(Instant.now())
             .build();
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));

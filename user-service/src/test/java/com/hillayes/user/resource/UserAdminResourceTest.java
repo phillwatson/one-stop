@@ -19,8 +19,7 @@ import java.util.stream.IntStream;
 import static com.hillayes.user.utils.TestData.mockUsers;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
@@ -209,14 +208,14 @@ public class UserAdminResourceTest extends TestBase {
 
         // and: a request to update user
         UserUpdateRequest request = new UserUpdateRequest()
-            .username(randomAlphanumeric(20))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(15))
-            .preferredName(randomAlphanumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(5))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(15))
+            .preferredName(insecure().nextAlphanumeric(10))
             .addRolesItem(UserRole.ADMIN)
-            .email(randomAlphanumeric(30))
-            .phone(randomNumeric(10));
+            .email(insecure().nextAlphanumeric(30))
+            .phone(insecure().nextNumeric(10));
 
         // when: the admin makes an update requests
         UserResponse response = given()
@@ -255,14 +254,14 @@ public class UserAdminResourceTest extends TestBase {
 
         // and: a request to update user
         UserUpdateRequest request = new UserUpdateRequest()
-            .username(randomAlphanumeric(20))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(15))
-            .preferredName(randomAlphanumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(5))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(15))
+            .preferredName(insecure().nextAlphanumeric(10))
             .addRolesItem(UserRole.ADMIN)
-            .email(randomAlphanumeric(30))
-            .phone(randomNumeric(10));
+            .email(insecure().nextAlphanumeric(30))
+            .phone(insecure().nextNumeric(10));
 
         // when: the admin makes an update requests
         ServiceErrorResponse response = given()
@@ -288,14 +287,14 @@ public class UserAdminResourceTest extends TestBase {
 
         // and: a request to update user
         UserUpdateRequest request = new UserUpdateRequest()
-            .username(randomAlphanumeric(20))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(15))
-            .preferredName(randomAlphanumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(5))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(15))
+            .preferredName(insecure().nextAlphanumeric(10))
             .addRolesItem(UserRole.ADMIN)
-            .email(randomAlphanumeric(30))
-            .phone(randomNumeric(10));
+            .email(insecure().nextAlphanumeric(30))
+            .phone(insecure().nextNumeric(10));
 
         // when: a user makes a requests
         given()

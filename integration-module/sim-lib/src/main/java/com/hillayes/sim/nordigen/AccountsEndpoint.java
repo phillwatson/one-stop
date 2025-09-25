@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 
 @ApplicationScoped
 @Path(NordigenSimulator.BASE_URI + "/api/v2/accounts/")
@@ -35,8 +35,8 @@ public class AccountsEndpoint extends AbstractEndpoint {
         AccountSummary account = AccountSummary.builder()
             .id(UUID.randomUUID().toString())
             .institutionId(institutionId)
-            .iban(randomAlphanumeric(20))
-            .ownerName(randomAlphanumeric(10))
+            .iban(insecure().nextAlphanumeric(20))
+            .ownerName(insecure().nextAlphanumeric(10))
             .status(AccountStatus.READY)
             .created(OffsetDateTime.now())
             .lastAccessed(OffsetDateTime.now())
@@ -152,8 +152,8 @@ public class AccountsEndpoint extends AbstractEndpoint {
     private List<TransactionDetail> randomTransactions(LocalDate from, LocalDate to) {
         List<TransactionDetail> result = new ArrayList<>();
         LocalDate date = LocalDate.now();
-        for (int day = RandomUtils.nextInt(10, 30); day >= 0; --day) {
-            result.addAll(randomTransactions(date, RandomUtils.nextInt(5, 10)));
+        for (int day = RandomUtils.insecure().randomInt(10, 30); day >= 0; --day) {
+            result.addAll(randomTransactions(date, RandomUtils.insecure().randomInt(5, 10)));
             date = date.minusDays(1);
         }
         return result;
@@ -175,13 +175,13 @@ public class AccountsEndpoint extends AbstractEndpoint {
             .transactionAmount(randomAmount())
             .bookingDate(date)
             .bookingDateTime(date.atTime(hourOfDay, 0).toInstant(ZoneOffset.UTC))
-            .remittanceInformationUnstructured(randomAlphanumeric(30))
+            .remittanceInformationUnstructured(insecure().nextAlphanumeric(30))
             .build();
     }
 
     private CurrencyAmount randomAmount() {
-        float amount = RandomUtils.nextFloat(10f, 100000f);
-        if (RandomUtils.nextBoolean())
+        float amount = RandomUtils.insecure().randomFloat(10f, 100000f);
+        if (RandomUtils.insecure().randomBoolean())
             amount = -amount;
 
         return CurrencyAmount.builder()

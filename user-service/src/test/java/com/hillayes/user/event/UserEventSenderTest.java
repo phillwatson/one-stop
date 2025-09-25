@@ -29,8 +29,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,7 +55,7 @@ public class UserEventSenderTest {
     @Test
     public void testSendUserRegistered() {
         // given: a registered user's email and acknowledgement details
-        String email = randomAlphanumeric(30);
+        String email = insecure().nextAlphanumeric(30);
         Duration expires = Duration.ofMinutes(15);
         URI acknowledgerUri = URI.create("http://onestop/users/onboard");
 
@@ -84,14 +83,14 @@ public class UserEventSenderTest {
         // given: a user that has been created
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(10))
-            .email(randomAlphanumeric(30))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(25))
-            .preferredName(randomAlphanumeric(15))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(10))
+            .email(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(25))
+            .preferredName(insecure().nextAlphanumeric(15))
+            .phoneNumber(insecure().nextNumeric(10))
             .locale(Locale.GERMAN)
             .dateOnboarded(Instant.now())
             .dateCreated(Instant.now())
@@ -127,14 +126,14 @@ public class UserEventSenderTest {
         // given: a user that has been updated
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(10))
-            .email(randomAlphanumeric(30))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(25))
-            .preferredName(randomAlphanumeric(15))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(10))
+            .email(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(25))
+            .preferredName(insecure().nextAlphanumeric(15))
+            .phoneNumber(insecure().nextNumeric(10))
             .locale(Locale.GERMAN)
             .dateOnboarded(Instant.now())
             .dateCreated(Instant.now())
@@ -170,14 +169,14 @@ public class UserEventSenderTest {
         // given: a user that has been deleted
         DeletedUser user = DeletedUser.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(10))
-            .email(randomAlphanumeric(30))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(25))
-            .preferredName(randomAlphanumeric(15))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(10))
+            .email(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(25))
+            .preferredName(insecure().nextAlphanumeric(15))
+            .phoneNumber(insecure().nextNumeric(10))
             .locale(Locale.GERMAN)
             .dateOnboarded(Instant.now())
             .dateCreated(Instant.now())
@@ -205,14 +204,14 @@ public class UserEventSenderTest {
         // given: a user has logged in
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(10))
-            .email(randomAlphanumeric(30))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(25))
-            .preferredName(randomAlphanumeric(15))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(10))
+            .email(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(25))
+            .preferredName(insecure().nextAlphanumeric(15))
+            .phoneNumber(insecure().nextNumeric(10))
             .locale(Locale.GERMAN)
             .dateOnboarded(Instant.now())
             .dateCreated(Instant.now())
@@ -243,8 +242,8 @@ public class UserEventSenderTest {
     @Test
     public void testSendAuthenticationFailed() {
         // given: a user has failed to authenticate - and a reason
-        String username = randomAlphanumeric(20);
-        String reason = randomAlphanumeric(10);
+        String username = insecure().nextAlphanumeric(20);
+        String reason = insecure().nextAlphanumeric(10);
 
         // and: a user-agent is identified by the request headers
         when(requestHeaders.getFirst("User-Agent")).thenReturn("ssssss");
@@ -270,14 +269,14 @@ public class UserEventSenderTest {
         // given: a user that has been created
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(20))
-            .passwordHash(randomAlphanumeric(10))
-            .email(randomAlphanumeric(30))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(25))
-            .preferredName(randomAlphanumeric(15))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .passwordHash(insecure().nextAlphanumeric(10))
+            .email(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(25))
+            .preferredName(insecure().nextAlphanumeric(15))
+            .phoneNumber(insecure().nextNumeric(10))
             .locale(Locale.GERMAN)
             .dateOnboarded(Instant.now())
             .dateCreated(Instant.now())

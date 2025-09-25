@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,10 +46,10 @@ public class ConsentTopicConsumer_ConsentGivenTest {
         ConsentGiven event = ConsentGiven.builder()
             .userId(UUID.randomUUID())
             .consentId(UUID.randomUUID())
-            .institutionId(randomAlphanumeric(30))
-            .institutionName(randomAlphanumeric(30))
+            .institutionId(insecure().nextAlphanumeric(30))
+            .institutionName(insecure().nextAlphanumeric(30))
             .dateGiven(Instant.now())
-            .agreementId(randomAlphanumeric(30))
+            .agreementId(insecure().nextAlphanumeric(30))
             .agreementExpires(Instant.now().plus(Duration.ofDays(30)))
             .build();
         EventPacket eventPacket = mockEventPacket(event);

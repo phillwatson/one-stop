@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.*;
-import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -218,16 +217,14 @@ public class AuditIssueRepositoryTest {
         fixture.flush();
         fixture.getEntityManager().clear();
 
-        reportIssues.forEach((configId, issues) -> {
-            issues.forEach(issue -> {
-                // when: we retrieve an issue by report config and transaction
-                Optional<AuditIssue> result = fixture.getByReportAndTransaction(issue.getReportConfigId(), issue.getTransactionId());
+        reportIssues.forEach((configId, issues) -> issues.forEach(issue -> {
+            // when: we retrieve an issue by report config and transaction
+            Optional<AuditIssue> result = fixture.getByReportAndTransaction(issue.getReportConfigId(), issue.getTransactionId());
 
-                // then: the identified issue is returned
-                assertTrue(result.isPresent());
-                assertEquals(issue, result.get());
-            });
-        });
+            // then: the identified issue is returned
+            assertTrue(result.isPresent());
+            assertEquals(issue, result.get());
+        }));
     }
 
     @Test

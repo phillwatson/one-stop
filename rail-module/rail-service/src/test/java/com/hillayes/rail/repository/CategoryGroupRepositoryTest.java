@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -45,8 +45,8 @@ public class CategoryGroupRepositoryTest {
         // when: persisting the category
         CategoryGroup category = fixture.save(CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build());
 
         fixture.flush();
@@ -63,21 +63,21 @@ public class CategoryGroupRepositoryTest {
         // and: a category
         CategoryGroup categoryGroup = CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build();
 
         // when: selectors are added
-        categoryGroup.addCategory(randomAlphanumeric(10), builder -> {
-            builder.description(randomAlphanumeric(20));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(10), builder -> {
+            builder.description(insecure().nextAlphanumeric(20));
             builder.colour("#FF0000");
         });
-        categoryGroup.addCategory(randomAlphanumeric(10), builder -> {
-            builder.description(randomAlphanumeric(20));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(10), builder -> {
+            builder.description(insecure().nextAlphanumeric(20));
             builder.colour("#FF0001");
         });
-        categoryGroup.addCategory(randomAlphanumeric(10), builder -> {
-            builder.description(randomAlphanumeric(20));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(10), builder -> {
+            builder.description(insecure().nextAlphanumeric(20));
             builder.colour("#FF0002");
         });
 
@@ -109,14 +109,14 @@ public class CategoryGroupRepositoryTest {
         // and: a category
         CategoryGroup categoryGroup = CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build();
 
         // when: categories are added to the category group
-        categoryGroup.addCategory(randomAlphanumeric(20), builder -> builder.description(randomAlphanumeric(20)));
-        categoryGroup.addCategory(randomAlphanumeric(20), builder -> builder.description(randomAlphanumeric(5)));
-        categoryGroup.addCategory(randomAlphanumeric(20), builder -> builder.description(randomAlphanumeric(10)));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(20), builder -> builder.description(insecure().nextAlphanumeric(20)));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(20), builder -> builder.description(insecure().nextAlphanumeric(5)));
+        categoryGroup.addCategory(insecure().nextAlphanumeric(20), builder -> builder.description(insecure().nextAlphanumeric(10)));
         Set<Category> categories = categoryGroup.getCategories();
 
         // when: the category group is saved
@@ -152,8 +152,8 @@ public class CategoryGroupRepositoryTest {
             .flatMap(userId -> IntStream.range(0, 3).mapToObj(index ->
                 fixture.save(CategoryGroup.builder()
                     .userId(userId)
-                    .name(randomAlphanumeric(30))
-                    .description(randomAlphanumeric(30))
+                    .name(insecure().nextAlphanumeric(30))
+                    .description(insecure().nextAlphanumeric(30))
                     .build()))
             )
             .collect(Collectors.groupingBy(CategoryGroup::getUserId));
@@ -182,8 +182,8 @@ public class CategoryGroupRepositoryTest {
             .mapToObj(index ->
                 CategoryGroup.builder()
                     .userId(userId)
-                    .name(randomAlphanumeric(30))
-                    .description(randomAlphanumeric(30))
+                    .name(insecure().nextAlphanumeric(30))
+                    .description(insecure().nextAlphanumeric(30))
                     .build()
             )
             .sorted(Comparator.comparing(CategoryGroup::getName, String::compareToIgnoreCase))
@@ -215,8 +215,8 @@ public class CategoryGroupRepositoryTest {
         List<CategoryGroup> categoryGroups = IntStream.range(0, 5).mapToObj(index ->
             fixture.save(CategoryGroup.builder()
                 .userId(consent.getUserId())
-                .name(randomAlphanumeric(30))
-                .description(randomAlphanumeric(30))
+                .name(insecure().nextAlphanumeric(30))
+                .description(insecure().nextAlphanumeric(30))
                 .build())
         ).toList();
 
@@ -243,8 +243,8 @@ public class CategoryGroupRepositoryTest {
             .flatMap(userId -> IntStream.range(0, 3).mapToObj(index ->
                 fixture.save(CategoryGroup.builder()
                     .userId(userId)
-                    .name(randomAlphanumeric(30))
-                    .description(randomAlphanumeric(30))
+                    .name(insecure().nextAlphanumeric(30))
+                    .description(insecure().nextAlphanumeric(30))
                     .build()))
             )
             .collect(Collectors.groupingBy(CategoryGroup::getUserId));

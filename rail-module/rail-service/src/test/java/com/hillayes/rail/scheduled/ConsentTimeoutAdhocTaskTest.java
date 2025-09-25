@@ -30,7 +30,7 @@ public class ConsentTimeoutAdhocTaskTest {
 
         // and: the consent ID is passed as the payload of a task context
         ConsentTimeoutAdhocTask.Payload payload =
-            new ConsentTimeoutAdhocTask.Payload(consentId, RandomStringUtils.randomAlphanumeric(30));
+            new ConsentTimeoutAdhocTask.Payload(consentId, RandomStringUtils.insecure().nextAlphanumeric(30));
         TaskContext<ConsentTimeoutAdhocTask.Payload> context = new TaskContext<>(payload);
 
         // when: the apply method is called
