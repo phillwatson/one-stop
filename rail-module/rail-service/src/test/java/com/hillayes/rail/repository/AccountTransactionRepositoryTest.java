@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -482,8 +482,8 @@ public class AccountTransactionRepositoryTest {
         // and: a category group for the user
         CategoryGroup categoryGroup = CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build();
 
         // and: a collection of categories with selectors for the account's transactions

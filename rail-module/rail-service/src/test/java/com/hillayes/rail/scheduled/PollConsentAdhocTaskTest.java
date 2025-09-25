@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -74,7 +74,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -136,7 +136,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(consentStatus)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -163,7 +163,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -197,7 +197,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -232,7 +232,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 
@@ -266,7 +266,7 @@ public class PollConsentAdhocTaskTest {
         UserConsent userConsent = UserConsent.builder()
             .id(UUID.randomUUID())
             .status(ConsentStatus.GIVEN)
-            .agreementId(randomAlphanumeric(20))
+            .agreementId(insecure().nextAlphanumeric(20))
             .build();
         when(userConsentService.getUserConsent(userConsent.getId())).thenReturn(Optional.of(userConsent));
 

@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -583,7 +583,7 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consentId)).thenReturn(Optional.empty());
 
         // when: the service is called
-        fixture.registrationTimeout(consentId, RandomStringUtils.randomAlphanumeric(30));
+        fixture.registrationTimeout(consentId, RandomStringUtils.insecure().nextAlphanumeric(30));
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -606,7 +606,7 @@ public class UserConsentServiceTest {
         when(userConsentRepository.findByIdOptional(consent.getId())).thenReturn(Optional.of(consent));
 
         // when: the service is called - with a difference reference
-        fixture.registrationTimeout(consent.getId(), RandomStringUtils.randomAlphanumeric(30));
+        fixture.registrationTimeout(consent.getId(), RandomStringUtils.insecure().nextAlphanumeric(30));
 
         // then: NO consent is updated
         verify(userConsentRepository, never()).save(any());
@@ -1059,7 +1059,7 @@ public class UserConsentServiceTest {
     private RailAgreement returnEndUserAgreement(RailInstitution institution) {
         return RailAgreement.builder()
             .id(UUID.randomUUID().toString())
-            .accountIds(List.of(randomAlphanumeric(30), randomAlphanumeric(30)))
+            .accountIds(List.of(insecure().nextAlphanumeric(30), insecure().nextAlphanumeric(30)))
             .status(AgreementStatus.INITIATED)
             .dateCreated(Instant.now())
             .dateGiven(Instant.now())

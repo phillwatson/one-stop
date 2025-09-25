@@ -22,7 +22,7 @@ import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,8 +45,8 @@ public class NotificationResourceTest extends TestBase {
         // given: a user
         User user = User.builder()
             .id(UUID.fromString(userIdStr))
-            .givenName(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .givenName(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30))
             .build();
         when(userService.getUser(user.getId()))
             .thenReturn(Optional.of(user));
@@ -186,13 +186,13 @@ public class NotificationResourceTest extends TestBase {
                 .userId(userId)
                 .consentId(UUID.randomUUID())
                 .institutionId(UUID.randomUUID().toString())
-                .institutionName(randomAlphanumeric(30))
+                .institutionName(insecure().nextAlphanumeric(30))
                 .build()
         );
         return Notification.builder()
             .id(id)
             .userId(userId)
-            .correlationId(randomAlphanumeric(20))
+            .correlationId(insecure().nextAlphanumeric(20))
             .dateCreated(dateCreated)
             .messageId(NotificationId.CONSENT_EXPIRED)
             .attributes(jsonMapper.writeValueAsString(params))
@@ -208,7 +208,7 @@ public class NotificationResourceTest extends TestBase {
             notifications.add(notification);
             notification = notification.toBuilder()
                 .id(UUID.randomUUID())
-                .correlationId(randomAlphanumeric(20))
+                .correlationId(insecure().nextAlphanumeric(20))
                 .dateCreated(notification.getDateCreated().plus(Duration.ofHours(1)))
                 .build();
         }

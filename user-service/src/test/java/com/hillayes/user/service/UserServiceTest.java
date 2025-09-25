@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import static com.hillayes.user.utils.TestData.mockUser;
 import static com.hillayes.user.utils.TestData.mockUsers;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -66,7 +66,7 @@ public class UserServiceTest {
         openMocks(this);
 
         // simulate a successful password hash
-        when(passwordCrypto.getHash(any())).thenReturn(randomAlphanumeric(20));
+        when(passwordCrypto.getHash(any())).thenReturn(insecure().nextAlphanumeric(20));
 
         // simulate the user repository returns the user with an ID
         when(userRepository.save(any())).thenAnswer(invocation -> {
@@ -81,10 +81,10 @@ public class UserServiceTest {
     @Test
     public void testRegisterUser() {
         // given: an email address
-        String email = randomAlphanumeric(10) + "@example.com";
+        String email = insecure().nextAlphanumeric(10) + "@example.com";
 
         // and: a token is generated
-        String token = randomAlphanumeric(30);
+        String token = insecure().nextAlphanumeric(30);
         when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
 
         // when: we register a user
@@ -105,7 +105,7 @@ public class UserServiceTest {
     @Test
     public void testRegisterUser_DuplicateEmail() {
         // given: an email address
-        String email = randomAlphanumeric(10) + "@example.com";
+        String email = insecure().nextAlphanumeric(10) + "@example.com";
 
         // and: an existing user holds the same email
         User existingUser = mockUser(UUID.randomUUID());
@@ -125,10 +125,10 @@ public class UserServiceTest {
     @Test
     public void testRegisterUser_GatewayError() throws IOException {
         // given: an email address
-        String email = randomAlphanumeric(10) + "@example.com";
+        String email = insecure().nextAlphanumeric(10) + "@example.com";
 
         // and: a token is generated
-        String token = randomAlphanumeric(30);
+        String token = insecure().nextAlphanumeric(30);
         when(authTokens.generateToken(eq(email.toLowerCase()), any())).thenReturn(token);
 
         // and: a gateway error occurs
@@ -147,7 +147,7 @@ public class UserServiceTest {
     public void testCompleteOnboarding() {
         // given: a completed user request
         UUID userId = UUID.randomUUID();
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
 
         // and: the user was previously registered and acknowledged
@@ -192,7 +192,7 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_MissingUsername() {
         // given: a completed user request
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
         user.setUsername(null);
 
@@ -214,7 +214,7 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_MissingEmail() {
         // given: a completed user request
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
         user.setEmail(null);
 
@@ -236,7 +236,7 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_MissingGivenName() {
         // given: a completed user request
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
         user.setGivenName(null);
 
@@ -258,7 +258,7 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_DuplicateUsername() {
         // given: a completed user request
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
 
         // and: an existing user holds the same username
@@ -280,7 +280,7 @@ public class UserServiceTest {
     @Test
     public void testCompleteOnboarding_DuplicateEmail() {
         // given: a completed user request
-        char[] password = randomAlphanumeric(20).toCharArray();
+        char[] password = insecure().nextAlphanumeric(20).toCharArray();
         User user = mockUser();
 
         // and: an existing user holds the same email
@@ -347,7 +347,7 @@ public class UserServiceTest {
         // given: a user with some Open-ID identifiers
         User user = mockUser(UUID.randomUUID());
         for (AuthProvider authProvider : AuthProvider.values()) {
-            user.addOidcIdentity(authProvider, randomAlphanumeric(20), randomAlphanumeric(15));
+            user.addOidcIdentity(authProvider, insecure().nextAlphanumeric(20), insecure().nextAlphanumeric(15));
         }
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
 

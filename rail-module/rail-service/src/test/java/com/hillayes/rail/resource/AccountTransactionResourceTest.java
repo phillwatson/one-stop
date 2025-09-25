@@ -93,9 +93,9 @@ public class AccountTransactionResourceTest extends TestBase {
         LocalDate toDate = LocalDate.now().minusDays(2);
         Float minAmount = 12.45f;
         Float maxAmount = 45.67f;
-        String reference = randomAlphanumeric(10);
-        String info = randomAlphanumeric(10);
-        String creditor =randomAlphanumeric(10);
+        String reference = insecure().nextAlphanumeric(10);
+        String info = insecure().nextAlphanumeric(10);
+        String creditor = insecure().nextAlphanumeric(10);
 
         // when: client calls the endpoint
         PaginatedTransactions response = given()

@@ -4,16 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.nordigen.model.*;
+import org.apache.commons.lang3.RandomUtils;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextFloat;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 
 public class TestData {
     /**
@@ -40,8 +40,8 @@ public class TestData {
     public static InstitutionDetail mockInstitution() {
         InstitutionDetail institution = new InstitutionDetail();
         institution.id = UUID.randomUUID().toString();
-        institution.name = randomAlphanumeric(30);
-        institution.bic = randomAlphanumeric(10);
+        institution.name = insecure().nextAlphanumeric(30);
+        institution.bic = insecure().nextAlphanumeric(10);
         institution.countries = List.of("GB", "FR");
         institution.logo = "https://sandboxfinance.com/logo.png";
         return institution;
@@ -51,8 +51,8 @@ public class TestData {
         return AccountSummary.builder()
             .id(UUID.randomUUID().toString())
             .institutionId(institutionId)
-            .iban(randomAlphanumeric(12))
-            .ownerName(randomAlphanumeric(22))
+            .iban(insecure().nextAlphanumeric(12))
+            .ownerName(insecure().nextAlphanumeric(22))
             .status(AccountStatus.READY)
             .created(OffsetDateTime.now().minusDays(10))
             .lastAccessed(OffsetDateTime.now().minusDays(2))
@@ -70,9 +70,9 @@ public class TestData {
 
     public static Balance mockBalance() {
         return Balance.builder()
-            .balanceAmount(CurrencyAmount.builder().amount(nextFloat()).currency("GBP").build())
-            .referenceDate(LocalDate.now().minusDays(nextInt()))
-            .balanceType(randomAlphanumeric(5))
+            .balanceAmount(CurrencyAmount.builder().amount(RandomUtils.insecure().randomFloat()).currency("GBP").build())
+            .referenceDate(LocalDate.now().minusDays(RandomUtils.insecure().randomInt()))
+            .balanceType(insecure().nextAlphanumeric(5))
             .build();
     }
 
@@ -93,10 +93,10 @@ public class TestData {
 
     public static TransactionDetail mockTransactionDetail() {
         return TransactionDetail.builder()
-            .bookingDate(LocalDate.now().minusDays(nextInt()))
+            .bookingDate(LocalDate.now().minusDays(RandomUtils.insecure().randomInt()))
             .internalTransactionId(UUID.randomUUID().toString())
             .transactionId(UUID.randomUUID().toString())
-            .transactionAmount(CurrencyAmount.builder().amount(nextFloat()).currency("GBP").build())
+            .transactionAmount(CurrencyAmount.builder().amount(RandomUtils.insecure().randomFloat()).currency("GBP").build())
             .build();
     }
 }

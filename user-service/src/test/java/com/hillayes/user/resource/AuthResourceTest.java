@@ -23,7 +23,7 @@ import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -74,7 +74,7 @@ public class AuthResourceTest extends TestBase {
         when(openIdAuth.oauthLogin(eq(authProvider), any())).thenReturn(redirectUri);
 
         // when: the open-id login is initiated
-        String state = randomAlphanumeric(20);
+        String state = insecure().nextAlphanumeric(20);
         URI response = given()
             .contentType(JSON)
             .queryParam("state", state)
@@ -95,7 +95,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -115,7 +115,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -124,7 +124,7 @@ public class AuthResourceTest extends TestBase {
         // given: a login request
         LoginRequest request = new LoginRequest()
             .username(user.getUsername())
-            .password(randomAlphanumeric(30));
+            .password(insecure().nextAlphanumeric(30));
 
         // and: the password is valid
         when(passwordCrypto.verify(request.getPassword().toCharArray(), user.getPasswordHash()))
@@ -155,8 +155,8 @@ public class AuthResourceTest extends TestBase {
         // given: a NEW user wishing to login
         User user = User.builder()
             .id(null)
-            .username(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByIdOptional(user.getId())).thenReturn(Optional.of(user));
@@ -168,7 +168,7 @@ public class AuthResourceTest extends TestBase {
 
         // and: an OpenID auth-provider and auth-code
         AuthProvider authProvider = AuthProvider.GOOGLE;
-        String authCode = randomAlphanumeric(30);
+        String authCode = insecure().nextAlphanumeric(30);
 
         // and: the auth-provider exchanges the auth-code for token and a user record
         when(openIdAuth.oauthExchange(authProvider, authCode)).thenReturn(user);
@@ -178,7 +178,7 @@ public class AuthResourceTest extends TestBase {
             .redirects().follow(false)
             .contentType(JSON)
             .queryParam("code", authCode)
-            .queryParam("state", randomAlphanumeric(10))
+            .queryParam("state", insecure().nextAlphanumeric(10))
             .queryParam("scope", "openid,profile,email")
             .get("/api/v1/auth/validate/" + authProvider.name())
             .then()
@@ -205,7 +205,7 @@ public class AuthResourceTest extends TestBase {
     public void testOauthLogin_OidError() {
         // given: an OpenID auth-provider and auth-code
         AuthProvider authProvider = AuthProvider.GOOGLE;
-        String authCode = randomAlphanumeric(30);
+        String authCode = insecure().nextAlphanumeric(30);
 
         // and: the auth-provider returns an error
         String error = "SOME ERROR";
@@ -216,7 +216,7 @@ public class AuthResourceTest extends TestBase {
             .redirects().follow(false)
             .contentType(JSON)
             .queryParam("code", authCode)
-            .queryParam("state", randomAlphanumeric(10))
+            .queryParam("state", insecure().nextAlphanumeric(10))
             .queryParam("scope", "openid,profile,email")
             .queryParam("error", error)
             .queryParam("error_uri", errorUri)
@@ -259,7 +259,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -292,7 +292,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -322,7 +322,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -338,7 +338,7 @@ public class AuthResourceTest extends TestBase {
         Cookie refreshCookie = loginResponse.detailedCookie(refreshCookieName);
 
         // and: the refresh token is invalid
-        Cookie invalidCookie = new Cookie.Builder(refreshCookieName, randomAlphanumeric(30))
+        Cookie invalidCookie = new Cookie.Builder(refreshCookieName, insecure().nextAlphanumeric(30))
             .setExpiryDate(new Date())
             .setMaxAge(1)
             .setPath(refreshCookie.getPath())
@@ -371,7 +371,7 @@ public class AuthResourceTest extends TestBase {
         // given: a user wishing to login
         User user = User.builder()
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
             .roles(Set.of("user"))
             .build();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
@@ -410,7 +410,7 @@ public class AuthResourceTest extends TestBase {
         // given: a login request
         LoginRequest request = new LoginRequest()
             .username(user.getUsername())
-            .password(randomAlphanumeric(30));
+            .password(insecure().nextAlphanumeric(30));
 
         // and: the password is valid
         when(passwordCrypto.verify(request.getPassword().toCharArray(), user.getPasswordHash()))

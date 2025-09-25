@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -59,7 +59,7 @@ public class UserTopicConsumer_UserRegisteredTest {
     public void testUserRegistered() {
         // given: a UserRegistered event
         UserRegistered event = UserRegistered.builder()
-            .email(randomAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30))
             .locale(Locale.CANADA_FRENCH)
             .expires(LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.UTC))
             .acknowledgerUri(URI.create("https://onestop/onboard?token=1234234"))

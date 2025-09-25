@@ -21,7 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,7 +76,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // when: the category group is requested
         CategoryGroup actualGroup = fixture.getCategoryGroup(userId, group.getId());
@@ -94,8 +94,8 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a new category group details
-        String name = randomAlphanumeric(20);
-        String description = randomAlphanumeric(20);
+        String name = insecure().nextAlphanumeric(20);
+        String description = insecure().nextAlphanumeric(20);
 
         // and: no existing category with the same name
         when(categoryGroupRepository.findByUserAndName(userId, name))
@@ -121,8 +121,8 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a new category group details
-        String name = randomAlphanumeric(20);
-        String description = randomAlphanumeric(20);
+        String name = insecure().nextAlphanumeric(20);
+        String description = insecure().nextAlphanumeric(20);
 
         // and: a group with the same name already exists
         CategoryGroup existingCategory = mockCategoryGroup(userId, name);
@@ -147,11 +147,11 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
 
         // and: no group with the same name
         when(categoryGroupRepository.findByUserAndName(userId, name))
@@ -185,8 +185,8 @@ public class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // and: a new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
 
         // and: no group with the same name
         when(categoryGroupRepository.findByUserAndName(userId, name))
@@ -209,11 +209,11 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
 
         // and: a group with the same name already exists
         CategoryGroup existingCategory = mockCategoryGroup(userId, name);
@@ -238,11 +238,11 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
 
         // when: the category group is updated
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -261,7 +261,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // when: the category group is deleted
         CategoryGroup deletedGroup = fixture.deleteCategoryGroup(userId, group.getId());
@@ -302,7 +302,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // when: the category group is deleted
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -333,7 +333,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: the repository returns a result
         when(categoryRepository.findByGroupId(eq(group.getId()), anyInt(), anyInt()))
@@ -352,10 +352,10 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: the group has a category
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category is requested
         Category actualCategory = fixture.getCategory(userId, category.getId());
@@ -373,10 +373,10 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category is requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -416,12 +416,12 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
-        String colour = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
+        String colour = insecure().nextAlphanumeric(10);
 
         // when: the category is created
         Category result = fixture.createCategory(userId, group.getId(), name, description, colour);
@@ -440,15 +440,15 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: that group has a named category
-        Category existingCategory = group.addCategory(randomAlphanumeric(20), b -> b.id(UUID.randomUUID()));
+        Category existingCategory = group.addCategory(insecure().nextAlphanumeric(20), b -> b.id(UUID.randomUUID()));
 
         // and: a new category details with the same name
         String name = existingCategory.getName();
-        String description = randomAlphanumeric(10);
-        String colour = randomAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
+        String colour = insecure().nextAlphanumeric(10);
 
         // when: the category is created
         CategoryAlreadyExistsException exception = assertThrows(CategoryAlreadyExistsException.class, () ->
@@ -470,15 +470,15 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: that group has a named category
-        Category existingCategory = mockCategory(group, randomAlphanumeric(20));
+        Category existingCategory = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
-        String colour = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
+        String colour = insecure().nextAlphanumeric(10);
 
         // when: the category is updated
         Category result = fixture.updateCategory(userId, existingCategory.getId(), name, description, colour);
@@ -510,15 +510,15 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
-        String colour = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
+        String colour = insecure().nextAlphanumeric(10);
 
         // when: the category is updated
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -545,9 +545,9 @@ public class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // and: the new category details
-        String name = randomAlphanumeric(10);
-        String description = randomAlphanumeric(10);
-        String colour = randomAlphanumeric(10);
+        String name = insecure().nextAlphanumeric(10);
+        String description = insecure().nextAlphanumeric(10);
+        String colour = insecure().nextAlphanumeric(10);
 
         // when: the category is updated
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -577,23 +577,23 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
         Set<CategorySelector> expectedSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
             .getSelectors());
 
         // and: the category has selectors associated with other accounts
         category
-            .addSelector(UUID.randomUUID(), selector -> selector.infoContains(randomAlphanumeric(10)))
-            .addSelector(UUID.randomUUID(), selector -> selector.refContains(randomAlphanumeric(10)))
-            .addSelector(UUID.randomUUID(), selector -> selector.creditorContains(randomAlphanumeric(10)));
+            .addSelector(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .addSelector(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
 
         // when: the category selectors are requested
         Collection<CategorySelector> actualSelectors =
@@ -615,10 +615,10 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category is deleted
         Category deletedCategory = fixture.deleteCategory(userId, category.getId());
@@ -659,10 +659,10 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category is deleted
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -689,15 +689,15 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with other accounts
-        category.addSelector(UUID.randomUUID(), selector -> selector.infoContains(randomAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.refContains(randomAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.creditorContains(randomAlphanumeric(10)));
+        category.addSelector(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)));
+        category.addSelector(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)));
+        category.addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
 
         // when: the category selectors are requested
         Collection<CategorySelector> actualSelectors =
@@ -753,10 +753,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -780,10 +780,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -810,10 +810,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -840,24 +840,24 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
         Set<CategorySelector> oldSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
             .getSelectors());
 
         // and: the new selectors to replace the old ones
         List<CategorySelector> newSelectors = List.of(
-            CategorySelector.builder().infoContains(randomAlphanumeric(10)).build(),
-            CategorySelector.builder().refContains(randomAlphanumeric(10)).build(),
-            CategorySelector.builder().creditorContains(randomAlphanumeric(10)).build()
+            CategorySelector.builder().infoContains(insecure().nextAlphanumeric(10)).build(),
+            CategorySelector.builder().refContains(insecure().nextAlphanumeric(10)).build(),
+            CategorySelector.builder().creditorContains(insecure().nextAlphanumeric(10)).build()
         );
 
         // when: the category selectors are set
@@ -909,17 +909,17 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
         Set<CategorySelector> oldSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(randomAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
             .getSelectors());
 
         // when: the category selectors are set to an empty collection
@@ -968,16 +968,16 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group - with NO selectors
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the new selectors to replace the old ones
         List<CategorySelector> newSelectors = List.of(
-            CategorySelector.builder().infoContains(randomAlphanumeric(10)).build(),
-            CategorySelector.builder().refContains(randomAlphanumeric(10)).build(),
-            CategorySelector.builder().creditorContains(randomAlphanumeric(10)).build()
+            CategorySelector.builder().infoContains(insecure().nextAlphanumeric(10)).build(),
+            CategorySelector.builder().refContains(insecure().nextAlphanumeric(10)).build(),
+            CategorySelector.builder().creditorContains(insecure().nextAlphanumeric(10)).build()
         );
 
         // when: the category selectors are set
@@ -1056,10 +1056,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to another user
-        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are set
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -1086,10 +1086,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are set
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -1119,10 +1119,10 @@ public class CategoryServiceTest {
             .thenReturn(Optional.of(account));
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category belonging to that group
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: the category selectors are set
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -1144,7 +1144,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: a category group belonging to that user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a date range
         Instant startDate = Instant.now().minus(Duration.ofDays(7));

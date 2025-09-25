@@ -16,8 +16,7 @@ import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,13 +34,13 @@ public class UserProfileResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
         User user = User.builder()
             .id(userId)
-            .username(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .email(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .preferredName(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20))
+            .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)
             .dateCreated(Instant.now().minusSeconds(20000))
@@ -108,14 +107,14 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: the user requests an update to their profile
         UserProfileRequest request = new UserProfileRequest()
-            .email(randomAlphanumeric(30))
-            .username(randomAlphanumeric(30))
-            .title(randomAlphanumeric(30))
-            .givenName(randomAlphanumeric(30))
-            .familyName(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(30))
+            .givenName(insecure().nextAlphanumeric(30))
+            .familyName(insecure().nextAlphanumeric(30))
+            .preferredName(insecure().nextAlphanumeric(30))
             .locale(Locale.CHINESE.toLanguageTag())
-            .phone(randomNumeric(12));
+            .phone(insecure().nextNumeric(12));
 
         // when: the user asks for their profile
         UserProfileResponse response = given()
@@ -151,14 +150,14 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: the user requests an update to their profile
         UserProfileRequest request = new UserProfileRequest()
-            .email(randomAlphanumeric(30))
-            .username(randomAlphanumeric(30))
-            .title(randomAlphanumeric(30))
-            .givenName(randomAlphanumeric(30))
-            .familyName(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(30))
+            .title(insecure().nextAlphanumeric(30))
+            .givenName(insecure().nextAlphanumeric(30))
+            .familyName(insecure().nextAlphanumeric(30))
+            .preferredName(insecure().nextAlphanumeric(30))
             .locale(Locale.CHINESE.toLanguageTag())
-            .phone(randomNumeric(12));
+            .phone(insecure().nextNumeric(12));
 
         // when: the user asks for their profile
         ServiceErrorResponse response = given()
@@ -185,13 +184,13 @@ public class UserProfileResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
         User user = User.builder()
             .id(userId)
-            .username(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .email(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .preferredName(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20))
+            .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)
             .dateCreated(Instant.now().minusSeconds(20000))
@@ -206,8 +205,8 @@ public class UserProfileResourceTest extends TestBase {
                 .id(UUID.randomUUID())
                 .user(user)
                 .provider(authProvider)
-                .issuer(randomAlphanumeric(20))
-                .subject(randomAlphanumeric(15))
+                .issuer(insecure().nextAlphanumeric(20))
+                .subject(insecure().nextAlphanumeric(15))
                 .dateCreated(Instant.now())
                 .dateLastUsed(Instant.now())
                 .build()
@@ -239,13 +238,13 @@ public class UserProfileResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
         User user = User.builder()
             .id(userId)
-            .username(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .title(randomAlphanumeric(10))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .email(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(10))
+            .username(insecure().nextAlphanumeric(20))
+            .preferredName(insecure().nextAlphanumeric(20))
+            .title(insecure().nextAlphanumeric(10))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20))
+            .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)
             .dateCreated(Instant.now().minusSeconds(20000))
@@ -255,8 +254,8 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: a request to change password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .oldPassword(randomAlphanumeric(20))
-            .newPassword(randomAlphanumeric(20));
+            .oldPassword(insecure().nextAlphanumeric(20))
+            .newPassword(insecure().nextAlphanumeric(20));
 
         // and: the user can be found
         when(userService.updatePassword(userId,
@@ -286,8 +285,8 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: a request to change password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .oldPassword(randomAlphanumeric(20))
-            .newPassword(randomAlphanumeric(20));
+            .oldPassword(insecure().nextAlphanumeric(20))
+            .newPassword(insecure().nextAlphanumeric(20));
 
         // and: the user cannot be found
         when(userService.updatePassword(userId,
@@ -317,7 +316,7 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: a request to change password - no old password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .oldPassword(randomAlphanumeric(20));
+            .oldPassword(insecure().nextAlphanumeric(20));
 
         // and: the request will be passed to the service
         when(userService.updatePassword(userId, request.getOldPassword().toCharArray(), null))
