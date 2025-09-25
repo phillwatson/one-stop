@@ -1,6 +1,5 @@
 package com.hillayes.outbox.repository;
 
-import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import lombok.*;
 
@@ -17,28 +16,30 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // called by the persistence layer
 public class HospitalEntity {
     /**
-     * A factory method to create a new hospital for the failed event. This is called by
-     * the event dead-letter topic listener.
+     * A factory method to create a new hospital for the failed event.
      *
-     * @param eventPacket the event packet that failed delivery and is to be rescheduled.
-     * @param reason the reason for the failure.
-     * @param cause the cause of the failure.
+     * @param event the event that failed delivery and is to be rescheduled.
+     * @param error the error that caused the event to fail.
      */
-    public static HospitalEntity fromEventPacket(EventPacket eventPacket,
-                                                 String consumer, String reason, String cause) {
+    public static HospitalEntity fromEventEntity(EventEntity event,
+                                                 String consumer,
+                                                 Throwable error) {
         Instant now = Instant.now();
+        String reason = error.getClass().getName();
+        String cause = error.getMessage();
+
         return HospitalEntity.builder()
-            .eventId(eventPacket.getId())
-            .correlationId(eventPacket.getCorrelationId())
-            .retryCount(eventPacket.getRetryCount())
+            .eventId(event.getId())
+            .correlationId(event.getCorrelationId())
+            .retryCount(event.getRetryCount())
             .timestamp(now)
             .reason(reason)
             .cause(cause)
             .consumer(consumer)
-            .topic(eventPacket.getTopic())
-            .key(eventPacket.getKey())
-            .payloadClass(eventPacket.getPayloadClass())
-            .payload(eventPacket.getPayload())
+            .topic(event.getTopic())
+            .key(event.getKey())
+            .payloadClass(event.getPayloadClass())
+            .payload(event.getPayload())
             .build();
     }
 
