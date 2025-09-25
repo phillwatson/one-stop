@@ -4,6 +4,7 @@ import com.hillayes.nordigen.api.AccountApi;
 import com.hillayes.nordigen.model.*;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextFloat;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,9 +37,9 @@ public class AccountServiceTest {
     public void testGet_HappyPath() {
         // given: a rail-account
         AccountSummary accountSummary = AccountSummary.builder()
-            .id(randomAlphanumeric(20))
+            .id(insecure().nextAlphanumeric(20))
             .status(AccountStatus.READY)
-            .institutionId(randomAlphanumeric(20))
+            .institutionId(insecure().nextAlphanumeric(20))
             .build();
         when(accountApi.get(accountSummary.id)).thenReturn(accountSummary);
 
@@ -56,7 +56,7 @@ public class AccountServiceTest {
     @Test
     public void testGet_NotFound() {
         // given: the identified rail-account does not exist
-        String id = randomAlphanumeric(20);
+        String id = insecure().nextAlphanumeric(20);
         when(accountApi.get(id)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
 
         // when: the service is called
@@ -69,7 +69,7 @@ public class AccountServiceTest {
     @Test
     public void testGet_ServerError() {
         // given: the rail-account cannot be retrieved
-        String id = randomAlphanumeric(20);
+        String id = insecure().nextAlphanumeric(20);
         when(accountApi.get(id)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
 
         // when: the service is called
@@ -82,19 +82,19 @@ public class AccountServiceTest {
     @Test
     public void testBalances_HappyPath() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account has available balances
         AccountBalanceList balanceList = new AccountBalanceList();
         balanceList.balances = List.of(
             Balance.builder()
                 .balanceType("expected")
-                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(nextFloat()).build())
+                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(RandomUtils.insecure().randomFloat()).build())
                 .referenceDate(LocalDate.now())
                 .build(),
             Balance.builder()
                 .balanceType("resolved")
-                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(nextFloat()).build())
+                .balanceAmount(CurrencyAmount.builder().currency("GBP").amount(RandomUtils.insecure().randomFloat()).build())
                 .referenceDate(LocalDate.now())
                 .build()
         );
@@ -121,7 +121,7 @@ public class AccountServiceTest {
     @Test
     public void testBalances_NotAvailable() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account has NO available balances
         when(accountApi.balances(accountId)).thenReturn(null);
@@ -139,7 +139,7 @@ public class AccountServiceTest {
     @Test
     public void testBalances_NotAvailable_Empty() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account has NO available balances
         AccountBalanceList balanceList = new AccountBalanceList();
@@ -158,7 +158,7 @@ public class AccountServiceTest {
     @Test
     public void testBalances_NotFound() {
         // given: an unknown rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: no balances are found
         when(accountApi.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
@@ -173,7 +173,7 @@ public class AccountServiceTest {
     @Test
     public void testBalances_ServiceError() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: no balances are found
         when(accountApi.balances(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
@@ -188,7 +188,7 @@ public class AccountServiceTest {
     @Test
     public void testDetails_HappyPath() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account details are available
         Map<String, Object> details = Map.of("key", "value");
@@ -208,7 +208,7 @@ public class AccountServiceTest {
     @Test
     public void testDetails_NotFound() {
         // given: an unknown rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account details are not found
         when(accountApi.details(accountId)).thenThrow(new WebApplicationException(Response.Status.NOT_FOUND));
@@ -223,7 +223,7 @@ public class AccountServiceTest {
     @Test
     public void testDetails_ServiceError() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: the account details are available
         when(accountApi.details(accountId)).thenThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
@@ -238,16 +238,16 @@ public class AccountServiceTest {
     @Test
     public void testTransactions_HappyPath() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: an available collection of transactions
         List<TransactionDetail> booked = List.of(
-            TransactionDetail.builder().transactionId(randomAlphanumeric(20)).build(),
-            TransactionDetail.builder().transactionId(randomAlphanumeric(20)).build()
+            TransactionDetail.builder().transactionId(insecure().nextAlphanumeric(20)).build(),
+            TransactionDetail.builder().transactionId(insecure().nextAlphanumeric(20)).build()
         );
         List<TransactionDetail> pending = List.of(
-            TransactionDetail.builder().transactionId(randomAlphanumeric(20)).build(),
-            TransactionDetail.builder().transactionId(randomAlphanumeric(20)).build()
+            TransactionDetail.builder().transactionId(insecure().nextAlphanumeric(20)).build(),
+            TransactionDetail.builder().transactionId(insecure().nextAlphanumeric(20)).build()
         );
         TransactionsResponse t = new TransactionsResponse();
         t.transactions = TransactionList.builder().booked(booked).pending(pending).build();
@@ -261,22 +261,18 @@ public class AccountServiceTest {
         assertTrue(result.isPresent());
 
         // and: the content is as expected
-        booked.forEach(expected -> {
-            assertNotNull(result.get().booked.stream()
-                .filter(trans -> trans.transactionId.equals(expected.transactionId))
-                .findFirst().orElse(null));
-        });
-        pending.forEach(expected -> {
-            assertNotNull(result.get().pending.stream()
-                .filter(trans -> trans.transactionId.equals(expected.transactionId))
-                .findFirst().orElse(null));
-        });
+        booked.forEach(expected -> assertNotNull(result.get().booked.stream()
+            .filter(trans -> trans.transactionId.equals(expected.transactionId))
+            .findFirst().orElse(null)));
+        pending.forEach(expected -> assertNotNull(result.get().pending.stream()
+            .filter(trans -> trans.transactionId.equals(expected.transactionId))
+            .findFirst().orElse(null)));
     }
 
     @Test
     public void testTransactions_EmptyResponse() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: NO transactions are available
         when(accountApi.transactions(eq(accountId), any(), any())).thenReturn(new TransactionsResponse());
@@ -296,7 +292,7 @@ public class AccountServiceTest {
     @Test
     public void testTransactions_NullResponse() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: NO transactions are available
         when(accountApi.transactions(eq(accountId), any(), any())).thenReturn(null);
@@ -316,7 +312,7 @@ public class AccountServiceTest {
     @Test
     public void testTransactions_NotFound() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: NO transactions are not found
         when(accountApi.transactions(eq(accountId), any(), any()))
@@ -333,7 +329,7 @@ public class AccountServiceTest {
     @Test
     public void testTransactions_ServerError() {
         // given: a rail-account id
-        String accountId = randomAlphanumeric(20);
+        String accountId = insecure().nextAlphanumeric(20);
 
         // and: NO transactions are not found
         when(accountApi.transactions(eq(accountId), any(), any()))

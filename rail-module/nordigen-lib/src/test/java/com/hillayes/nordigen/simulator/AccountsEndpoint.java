@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.nordigen.model.*;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomUtils;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -17,8 +18,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.apache.commons.lang3.RandomStringUtils.*;
-import static org.apache.commons.lang3.RandomUtils.*;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 
 @Singleton
 @Slf4j
@@ -41,8 +41,8 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
         AccountSummary account = AccountSummary.builder()
             .id(UUID.randomUUID().toString())
             .institutionId(institutionId)
-            .iban(randomAlphanumeric(20))
-            .ownerName(randomAlphanumeric(10))
+            .iban(insecure().nextAlphanumeric(20))
+            .ownerName(insecure().nextAlphanumeric(10))
             .status(AccountStatus.READY)
             .created(OffsetDateTime.now())
             .lastAccessed(OffsetDateTime.now())
@@ -178,8 +178,8 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
     private List<TransactionDetail> randomTransactions(LocalDate from, LocalDate to) {
         List<TransactionDetail> result = new ArrayList<>();
         LocalDate date = LocalDate.now();
-        for (int day = nextInt(10, 30); day >= 0; --day) {
-            result.addAll(randomTransactions(date, nextInt(5, 10)));
+        for (int day = RandomUtils.insecure().randomInt(10, 30); day >= 0; --day) {
+            result.addAll(randomTransactions(date, RandomUtils.insecure().randomInt(5, 10)));
             date = date.minusDays(1);
         }
         return result;
@@ -201,13 +201,13 @@ public class AccountsEndpoint extends AbstractResponseTransformer {
             .transactionAmount(randomAmount())
             .bookingDate(date)
             .bookingDateTime(date.atTime(hourOfDay, 0).toInstant(ZoneOffset.UTC))
-            .remittanceInformationUnstructured(randomAlphanumeric(30))
+            .remittanceInformationUnstructured(insecure().nextAlphanumeric(30))
             .build();
     }
 
     private CurrencyAmount randomAmount() {
-        float amount = nextFloat(10f, 100000f);
-        if (nextBoolean())
+        float amount = RandomUtils.insecure().randomFloat(10f, 100000f);
+        if (RandomUtils.insecure().randomBoolean())
             amount = -amount;
 
         return CurrencyAmount.builder()

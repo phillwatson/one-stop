@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -91,7 +91,7 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: an existing category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // when: a category group is requested
         CategoryGroupResponse response = given()
@@ -120,8 +120,8 @@ public class CategoryResourceTest extends TestBase {
 
         // and: a new category group request
         CategoryGroupRequest request = new CategoryGroupRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20));
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20));
 
         // and: the service is mocked to return the new category group
         CategoryGroup group = CategoryGroup.builder()
@@ -164,8 +164,8 @@ public class CategoryResourceTest extends TestBase {
 
         // and: a category group update request
         CategoryGroupRequest request = new CategoryGroupRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20));
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20));
 
         // and: a category group to be updated
         CategoryGroup group = CategoryGroup.builder()
@@ -206,8 +206,8 @@ public class CategoryResourceTest extends TestBase {
         // and: a category group belonging to the user
         CategoryGroup group = CategoryGroup.builder()
             .id(UUID.randomUUID())
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20)).build();
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20)).build();
         when(categoryService.deleteCategoryGroup(userId, group.getId()))
             .thenReturn(group);
 
@@ -232,7 +232,7 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: a category group belonging to the user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a page range
         int page = 2;
@@ -281,10 +281,10 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: a category group belonging to the user
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: an existing category
-        Category category = mockCategory(group, randomAlphanumeric(20));
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // when: a category is requested
         CategoryResponse response = given()
@@ -314,13 +314,13 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a new category request
         CategoryRequest request = new CategoryRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20))
-            .colour(randomAlphanumeric(20));
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20))
+            .colour(insecure().nextAlphanumeric(20));
 
         // and: the service is mocked to return the new category
         Category category = Category.builder()
@@ -367,13 +367,13 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a category update request
         CategoryRequest request = new CategoryRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20))
-            .colour(randomAlphanumeric(20));
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20))
+            .colour(insecure().nextAlphanumeric(20));
 
         // and: a category to be updated
         Category category = Category.builder()
@@ -418,8 +418,8 @@ public class CategoryResourceTest extends TestBase {
         // and: a category belonging to the user
         Category category = Category.builder()
             .id(UUID.randomUUID())
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(20)).build();
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20)).build();
         when(categoryService.deleteCategory(userId, category.getId()))
             .thenReturn(category);
 
@@ -485,9 +485,9 @@ public class CategoryResourceTest extends TestBase {
 
         // and: a collection of new category-selectors
         List<AccountCategorySelector> selectors = List.of(
-            new AccountCategorySelector().infoContains(randomAlphanumeric(20)),
-            new AccountCategorySelector().refContains(randomAlphanumeric(20)),
-            new AccountCategorySelector().creditorContains(randomAlphanumeric(20))
+            new AccountCategorySelector().infoContains(insecure().nextAlphanumeric(20)),
+            new AccountCategorySelector().refContains(insecure().nextAlphanumeric(20)),
+            new AccountCategorySelector().creditorContains(insecure().nextAlphanumeric(20))
         );
 
         // and: the service is primed with data
@@ -529,7 +529,7 @@ public class CategoryResourceTest extends TestBase {
         UUID userId = UUID.fromString(userIdStr);
 
         // and: a category group ID
-        CategoryGroup group = mockCategoryGroup(userId, randomAlphanumeric(20));
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
 
         // and: a date range
         LocalDate fromDate = LocalDate.now().minusDays(7);
@@ -584,13 +584,13 @@ public class CategoryResourceTest extends TestBase {
 
     private List<CategoryGroup> mockCategoryGroups(UUID userId, int size) {
         return IntStream.range(0, size)
-            .mapToObj(i -> mockCategoryGroup(userId, randomAlphanumeric(20)))
+            .mapToObj(i -> mockCategoryGroup(userId, insecure().nextAlphanumeric(20)))
             .toList();
     }
 
     private List<Category> mockCategories(CategoryGroup group, int size) {
         return IntStream.range(0, size)
-            .mapToObj(i -> mockCategory(group, randomAlphanumeric(20)))
+            .mapToObj(i -> mockCategory(group, insecure().nextAlphanumeric(20)))
             .toList();
     }
 
@@ -599,7 +599,7 @@ public class CategoryResourceTest extends TestBase {
             .id(UUID.randomUUID())
             .userId(userId)
             .name(name)
-            .description(randomAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20))
             .build();
         when(categoryService.getCategoryGroup(userId, group.getId()))
             .thenReturn(group);
@@ -611,8 +611,8 @@ public class CategoryResourceTest extends TestBase {
             .id(UUID.randomUUID())
             .group(group)
             .name(name)
-            .description(randomAlphanumeric(20))
-            .colour(randomAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(20))
+            .colour(insecure().nextAlphanumeric(20))
             .build();
         when(categoryService.getCategory(group.getUserId(), category.getId()))
             .thenReturn(category);
@@ -622,7 +622,7 @@ public class CategoryResourceTest extends TestBase {
     private List<CategorySelector> mockCategorySelectors(int size, UUID accountId, UUID categoryId) {
         Category category = Category.builder()
             .id(categoryId)
-            .name(randomAlphanumeric(20))
+            .name(insecure().nextAlphanumeric(20))
             .build();
         return IntStream.range(0, size)
             .mapToObj(i -> mockCategorySelector(accountId, category))
@@ -634,7 +634,7 @@ public class CategoryResourceTest extends TestBase {
             .id(UUID.randomUUID())
             .accountId(accountId)
             .category(category)
-            .infoContains(randomAlphanumeric(20))
+            .infoContains(insecure().nextAlphanumeric(20))
             .build();
     }
 }

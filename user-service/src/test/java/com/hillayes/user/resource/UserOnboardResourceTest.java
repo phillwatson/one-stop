@@ -22,7 +22,7 @@ import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,7 +66,7 @@ public class UserOnboardResourceTest extends TestBase {
     public void testRegisterAndOnboarding() {
         // given: a register-user request
         UserRegisterRequest registerRequest = new UserRegisterRequest()
-            .email(randomAlphanumeric(30));
+            .email(insecure().nextAlphanumeric(30));
 
         // and: no other user has that email address
         when(userRepository.findByEmail(registerRequest.getEmail().toLowerCase()))
@@ -95,13 +95,13 @@ public class UserOnboardResourceTest extends TestBase {
 
         // given: the user acknowledged email - with auth token
         UserCompleteRequest request = new UserCompleteRequest()
-            .username(randomAlphanumeric(12))
-            .password(randomAlphanumeric(15))
-            .givenName(randomAlphanumeric(20))
+            .username(insecure().nextAlphanumeric(12))
+            .password(insecure().nextAlphanumeric(15))
+            .givenName(insecure().nextAlphanumeric(20))
             .token(token);
 
         // and: a password encryption will be performed
-        String passwordHash = randomAlphanumeric(20);
+        String passwordHash = insecure().nextAlphanumeric(20);
         when(passwordCrypto.getHash(request.getPassword().toCharArray()))
             .thenReturn(passwordHash);
 
@@ -149,10 +149,10 @@ public class UserOnboardResourceTest extends TestBase {
     public void testOnboardUser_InvalidToken() {
         // given: a request to complete onboarding - with an invalid auth-token
         UserCompleteRequest request = new UserCompleteRequest()
-            .username(randomAlphanumeric(12))
-            .password(randomAlphanumeric(15))
-            .givenName(randomAlphanumeric(20))
-            .token(randomAlphanumeric(30));
+            .username(insecure().nextAlphanumeric(12))
+            .password(insecure().nextAlphanumeric(15))
+            .givenName(insecure().nextAlphanumeric(20))
+            .token(insecure().nextAlphanumeric(30));
 
         // when: the endpoint is called
         Response response = given()

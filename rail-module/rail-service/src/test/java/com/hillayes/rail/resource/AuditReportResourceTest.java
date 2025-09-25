@@ -12,7 +12,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
-import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -25,7 +24,7 @@ import java.util.stream.IntStream;
 import static com.hillayes.rail.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -631,15 +630,15 @@ public class AuditReportResourceTest extends TestBase {
     private AuditReportConfigRequest mockRequest() {
         return new AuditReportConfigRequest()
             .disabled(false)
-            .templateName(randomAlphanumeric(30))
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(30))
+            .templateName(insecure().nextAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(20))
+            .description(insecure().nextAlphanumeric(30))
             .source(AuditReportSource.CATEGORY_GROUP)
             .sourceId(UUID.randomUUID())
             .uncategorisedIncluded(true)
             .parameters(Map.of(
-                randomAlphanumeric(20), randomAlphanumeric(20),
-                randomAlphanumeric(20), randomAlphanumeric(20)
+                insecure().nextAlphanumeric(20), insecure().nextAlphanumeric(20),
+                insecure().nextAlphanumeric(20), insecure().nextAlphanumeric(20)
             ));
     }
 
@@ -662,15 +661,15 @@ public class AuditReportResourceTest extends TestBase {
 
     private AuditReportTemplate mockTemplate() {
         AuditReportTemplate mock = mock(AuditReportTemplate.class);
-        when(mock.getName()).thenReturn(randomAlphanumeric(20));
-        when(mock.getDescription()).thenReturn(randomAlphanumeric(30));
+        when(mock.getName()).thenReturn(insecure().nextAlphanumeric(20));
+        when(mock.getDescription()).thenReturn(insecure().nextAlphanumeric(30));
 
         List<AuditReportTemplate.Parameter> parameters = List.of(
             new AuditReportTemplate.Parameter(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20),
+                insecure().nextAlphanumeric(20),
+                insecure().nextAlphanumeric(20),
                 AuditReportTemplate.ParameterType.STRING,
-                randomAlphanumeric(20)
+                insecure().nextAlphanumeric(20)
             )
         );
         when(mock.getParameters()).thenReturn(parameters);

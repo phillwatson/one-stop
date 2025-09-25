@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -39,15 +39,15 @@ public class CategoryRepositoryTest {
         // and: a category group for the user
         CategoryGroup categoryGroup = categoryGroupRepository.save(CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build());
 
         // when: persisting the category
         Category category = fixture.save(Category.builder()
             .group(categoryGroup)
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .colour("#FF0000")
             .build());
 
@@ -68,32 +68,32 @@ public class CategoryRepositoryTest {
         // and: a category group for the user
         CategoryGroup categoryGroup = categoryGroupRepository.save(CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build());
 
         // and: a category
         Category category = Category.builder()
             .group(categoryGroup)
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .colour("#FF0000")
             .build();
 
         // when: selectors are added
         category.addSelector(account.getId(), builder -> {
-            builder.infoContains(randomAlphanumeric(10));
-            builder.refContains(randomAlphanumeric(20));
-            builder.creditorContains(randomAlphanumeric(15));
+            builder.infoContains(insecure().nextAlphanumeric(10));
+            builder.refContains(insecure().nextAlphanumeric(20));
+            builder.creditorContains(insecure().nextAlphanumeric(15));
         });
         category.addSelector(account.getId(), builder ->
-            builder.infoContains(randomAlphanumeric(12))
+            builder.infoContains(insecure().nextAlphanumeric(12))
         );
         category.addSelector(account.getId(), builder ->
-            builder.refContains(randomAlphanumeric(25))
+            builder.refContains(insecure().nextAlphanumeric(25))
         );
         category.addSelector(account.getId(), builder ->
-            builder.creditorContains(randomAlphanumeric(10))
+            builder.creditorContains(insecure().nextAlphanumeric(10))
         );
         Set<CategorySelector> selectors = category.getSelectors();
 
@@ -129,22 +129,22 @@ public class CategoryRepositoryTest {
         // and: a category group for the user
         CategoryGroup categoryGroup = categoryGroupRepository.save(CategoryGroup.builder()
             .userId(consent.getUserId())
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build());
 
         // and: a category
         Category category = Category.builder()
             .group(categoryGroup)
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .colour("#FF0000")
             .build();
 
         // when: selectors are added to the category
-        category.addSelector(account.getId(), builder -> builder.infoContains(randomAlphanumeric(20)));
-        category.addSelector(account.getId(), builder -> builder.refContains(randomAlphanumeric(5)));
-        category.addSelector(account.getId(), builder -> builder.creditorContains(randomAlphanumeric(10)));
+        category.addSelector(account.getId(), builder -> builder.infoContains(insecure().nextAlphanumeric(20)));
+        category.addSelector(account.getId(), builder -> builder.refContains(insecure().nextAlphanumeric(5)));
+        category.addSelector(account.getId(), builder -> builder.creditorContains(insecure().nextAlphanumeric(10)));
         Set<CategorySelector> selectors = category.getSelectors();
 
         // when: the parent category is saved
@@ -178,8 +178,8 @@ public class CategoryRepositoryTest {
         // and: a category group for the user
         CategoryGroup categoryGroup = categoryGroupRepository.save(CategoryGroup.builder()
             .userId(userId)
-            .name(randomAlphanumeric(30))
-            .description(randomAlphanumeric(30))
+            .name(insecure().nextAlphanumeric(30))
+            .description(insecure().nextAlphanumeric(30))
             .build());
 
         // and: the group has a collection of categories
@@ -187,8 +187,8 @@ public class CategoryRepositoryTest {
             .mapToObj(index ->
                 Category.builder()
                     .group(categoryGroup)
-                    .name(randomAlphanumeric(30))
-                    .description(randomAlphanumeric(30))
+                    .name(insecure().nextAlphanumeric(30))
+                    .description(insecure().nextAlphanumeric(30))
                     .colour("#FF0000")
                     .build()
             )

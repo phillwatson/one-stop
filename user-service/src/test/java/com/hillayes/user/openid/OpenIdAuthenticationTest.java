@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -65,13 +65,13 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
-        idToken.setStringClaim("email", randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("email", insecure().nextAlphanumeric(30));
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
         // and: the auth-provider ID identifies a user
@@ -98,13 +98,13 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
-        idToken.setStringClaim("email", randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("email", insecure().nextAlphanumeric(30));
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
         // and: the auth-provider ID identifies a user - without an email address
@@ -136,13 +136,13 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
-        idToken.setStringClaim("email", randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("email", insecure().nextAlphanumeric(30));
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
         // and: the auth-provider ID identifies a user - with disabled OID identity
@@ -167,13 +167,13 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
-        idToken.setStringClaim("email", randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("email", insecure().nextAlphanumeric(30));
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
         // and: the auth-provider ID identifies a user - who is blocked
@@ -201,12 +201,12 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
         idToken.setStringClaim("email", user.getEmail()); // same as existing user
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
@@ -248,12 +248,12 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token (and auth-tokens)
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
         idToken.setStringClaim("email", user.getEmail()); // same as existing user
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
 
@@ -285,16 +285,16 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
-        idToken.setStringClaim("email", randomAlphanumeric(30));
-        idToken.setStringClaim("name", randomAlphanumeric(20));
-        idToken.setStringClaim("given_name", randomAlphanumeric(20));
-        idToken.setStringClaim("family_name", randomAlphanumeric(20));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("email", insecure().nextAlphanumeric(30));
+        idToken.setStringClaim("name", insecure().nextAlphanumeric(20));
+        idToken.setStringClaim("given_name", insecure().nextAlphanumeric(20));
+        idToken.setStringClaim("family_name", insecure().nextAlphanumeric(20));
         idToken.setStringClaim("locale", "en");
 
         when(openIdAuth.exchangeAuthToken(authCode)).thenReturn(idToken);
@@ -338,12 +338,12 @@ public class OpenIdAuthenticationTest {
         when(openIdAuth.isEnabled()).thenReturn(true);
 
         // and: an Open-ID auth-code
-        String authCode = randomAlphanumeric(12);
+        String authCode = insecure().nextAlphanumeric(12);
 
         // and: the auth-provider exchanges the auth-code for ID-token
         JwtClaims idToken = new JwtClaims();
         idToken.setIssuer("https://accounts.google.com/");
-        idToken.setSubject(randomAlphanumeric(30));
+        idToken.setSubject(insecure().nextAlphanumeric(30));
         idToken.setStringClaim("email", null);
         idToken.setStringClaim("locale", "en");
 

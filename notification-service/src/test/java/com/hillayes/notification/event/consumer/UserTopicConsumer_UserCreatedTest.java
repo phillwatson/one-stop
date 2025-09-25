@@ -15,8 +15,7 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -39,13 +38,13 @@ public class UserTopicConsumer_UserCreatedTest {
         UserCreated event = UserCreated.builder()
             .dateCreated(Instant.now())
             .userId(UUID.randomUUID())
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
-            .email(randomAlphanumeric(30))
+            .username(insecure().nextAlphanumeric(12))
+            .title(insecure().nextAlphanumeric(5))
+            .givenName(insecure().nextAlphanumeric(20))
+            .familyName(insecure().nextAlphanumeric(20))
+            .preferredName(insecure().nextAlphanumeric(20))
+            .phoneNumber(insecure().nextNumeric(12))
+            .email(insecure().nextAlphanumeric(30))
             .locale(Locale.ENGLISH)
             .build();
         EventPacket eventPacket = mockEventPacket(event);

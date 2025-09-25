@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.*;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -50,7 +50,7 @@ public class AuditReportServiceTest {
     @BeforeEach
     public void init() {
         mockTemplates = IntStream.range(0, 20)
-            .mapToObj(i -> mockAuditReportTemplate(randomAlphanumeric(10)))
+            .mapToObj(i -> mockAuditReportTemplate(insecure().nextAlphanumeric(10)))
             .toList();
 
         reportTemplates = mock(Instance.class);

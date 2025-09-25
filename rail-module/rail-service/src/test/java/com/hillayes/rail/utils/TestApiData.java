@@ -3,6 +3,7 @@ package com.hillayes.rail.utils;
 import com.hillayes.commons.MonetaryAmount;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
+import org.apache.commons.lang3.RandomUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -12,9 +13,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextDouble;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,18 +33,18 @@ public class TestApiData {
         RailInstitution.RailInstitutionBuilder builder = RailInstitution.builder()
             .id(UUID.randomUUID().toString())
             .provider(RailProvider.NORDIGEN)
-            .name(randomAlphanumeric(20))
+            .name(insecure().nextAlphanumeric(20))
             .countries(List.of("GB"))
             .logo("https://example.com/logo.png")
             .paymentsEnabled(true)
-            .transactionTotalDays(nextInt(100, 900));
+            .transactionTotalDays(RandomUtils.insecure().randomInt(100, 900));
 
         if (modifier != null) modifier.accept(builder);
         return builder.build();
     }
 
     public static RailAgreement mockAgreement() {
-        return mockAgreement(randomAlphanumeric(20));
+        return mockAgreement(insecure().nextAlphanumeric(20));
     }
 
     public static RailAgreement mockAgreement(String id) {
@@ -56,14 +55,14 @@ public class TestApiData {
         return RailAgreement.builder()
             .id(id)
             .status(status)
-            .dateExpires(Instant.now().plus(Duration.ofDays(nextInt())))
-            .dateGiven(Instant.now().minus(Duration.ofDays(nextInt())))
-            .dateCreated(Instant.now().minus(Duration.ofDays(nextInt())))
+            .dateExpires(Instant.now().plus(Duration.ofDays(RandomUtils.insecure().randomInt())))
+            .dateGiven(Instant.now().minus(Duration.ofDays(RandomUtils.insecure().randomInt())))
+            .dateCreated(Instant.now().minus(Duration.ofDays(RandomUtils.insecure().randomInt())))
             .maxHistory(270)
-            .institutionId(randomAlphanumeric(20))
+            .institutionId(insecure().nextAlphanumeric(20))
             .accountIds(List.of(
-                randomAlphanumeric(20),
-                randomAlphanumeric(20)
+                insecure().nextAlphanumeric(20),
+                insecure().nextAlphanumeric(20)
             ))
             .build();
     }
@@ -74,16 +73,16 @@ public class TestApiData {
 
     public static RailAccount mockAccount(RailAccountStatus status) {
         return RailAccount.builder()
-            .id(randomAlphanumeric(20))
+            .id(insecure().nextAlphanumeric(20))
             .status(status)
-            .ownerName(randomAlphanumeric(10))
-            .iban(randomAlphanumeric(15))
-            .name(randomAlphanumeric(20))
-            .accountType(randomAlphanumeric(6))
+            .ownerName(insecure().nextAlphanumeric(10))
+            .iban(insecure().nextAlphanumeric(15))
+            .name(insecure().nextAlphanumeric(20))
+            .accountType(insecure().nextAlphanumeric(6))
             .currency(Currency.getInstance("GBP"))
             .balance(RailBalance.builder()
-                .amount(MonetaryAmount.of("GBP", nextDouble()))
-                .type(randomAlphanumeric(5))
+                .amount(MonetaryAmount.of("GBP", RandomUtils.insecure().randomDouble()))
+                .type(insecure().nextAlphanumeric(5))
                 .dateTime(Instant.now())
                 .build())
             .build();
@@ -91,9 +90,9 @@ public class TestApiData {
     }
     public static RailBalance mockBalance() {
         return RailBalance.builder()
-            .amount(MonetaryAmount.of("GBP", nextDouble()))
-            .dateTime(Instant.now().minus(Duration.ofDays(nextInt())))
-            .type(randomAlphanumeric(5))
+            .amount(MonetaryAmount.of("GBP", RandomUtils.insecure().randomDouble()))
+            .dateTime(Instant.now().minus(Duration.ofDays(RandomUtils.insecure().randomInt())))
+            .type(insecure().nextAlphanumeric(5))
             .build();
     }
 
@@ -107,14 +106,14 @@ public class TestApiData {
 
     public static RailTransaction mockTransaction() {
         return RailTransaction.builder()
-            .id(randomAlphanumeric(20))
-            .originalTransactionId(randomAlphanumeric(20))
-            .amount(MonetaryAmount.of("GBP", nextDouble()))
-            .dateBooked(Instant.now().minus(Duration.ofDays(nextInt())))
-            .dateValued(Instant.now().minus(Duration.ofDays(nextInt())))
-            .description(randomAlphanumeric(20))
-            .reference(randomAlphanumeric(15))
-            .creditor(randomAlphanumeric(20))
+            .id(insecure().nextAlphanumeric(20))
+            .originalTransactionId(insecure().nextAlphanumeric(20))
+            .amount(MonetaryAmount.of("GBP", RandomUtils.insecure().randomDouble()))
+            .dateBooked(Instant.now().minus(Duration.ofDays(RandomUtils.insecure().randomInt())))
+            .dateValued(Instant.now().minus(Duration.ofDays(RandomUtils.insecure().randomInt())))
+            .description(insecure().nextAlphanumeric(20))
+            .reference(insecure().nextAlphanumeric(15))
+            .creditor(insecure().nextAlphanumeric(20))
             .build();
     }
 }

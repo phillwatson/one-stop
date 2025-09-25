@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static com.hillayes.rail.utils.TestData.mockAuditReportConfig;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -154,10 +154,10 @@ public class AuditReportConfigRepositoryTest {
             .orElseThrow();
 
         // and: the report is modified
-        retrievedReport.setName(randomAlphanumeric(30));
-        retrievedReport.setDescription(randomAlphanumeric(30));
+        retrievedReport.setName(insecure().nextAlphanumeric(30));
+        retrievedReport.setDescription(insecure().nextAlphanumeric(30));
         assertEquals("value2", retrievedReport.getParameters().remove("key2").getValue());
-        retrievedReport.getParameters().forEach((key, entry) -> entry.setValue(randomAlphanumeric(30)));
+        retrievedReport.getParameters().forEach((key, entry) -> entry.setValue(insecure().nextAlphanumeric(30)));
         retrievedReport.addParameter("key4", "value4");
         retrievedReport.addParameter("key5", "value5");
 
