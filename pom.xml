@@ -40,6 +40,7 @@
         <module>user-service</module>
 
         <module>integration-module</module>
+        <module>share-price-module/ft-finance-lib</module>
     </modules>
 
     <properties>
@@ -184,6 +185,11 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
                 <version>1.82</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.21.2</version>
             </dependency>
 
             <dependency>
