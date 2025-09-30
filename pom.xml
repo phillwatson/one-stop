@@ -40,7 +40,6 @@
         <module>user-service</module>
 
         <module>integration-module</module>
-        <module>share-price-module/ft-finance-lib</module>
     </modules>
 
     <properties>
