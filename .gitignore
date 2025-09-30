@@ -38,5 +38,4 @@ build/
 /settings.xml
 **/docker-compose.override.*
 *.p8
-/one-stop_db-data.tar.gz
-/one-stop_db-data-*.tar.gz
+backup/*
