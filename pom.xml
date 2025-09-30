@@ -190,6 +190,11 @@
                 <artifactId>bcpkix-jdk18on</artifactId>
                 <version>1.78.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.21.2</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.hillayes</groupId>
