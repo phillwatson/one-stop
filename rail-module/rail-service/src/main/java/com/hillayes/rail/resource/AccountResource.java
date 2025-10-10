@@ -13,7 +13,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.NotFound;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Path("/api/v1/rails/accounts")
@@ -63,7 +65,13 @@ public class AccountResource {
 
     private AccountResponse marshal(Account account) {
         RailInstitution institution = institutionService.get(account.getInstitutionId())
-            .orElseThrow(() -> new NotFoundException("Institution", account.getInstitutionId()));
+            .orElseGet(() -> {
+                log.warn("Failed to retrieve Institution record [id: {}]", account.getInstitutionId());
+                return RailInstitution.builder()
+                    .id(account.getInstitutionId())
+                    .name("Unable to find")
+                    .build();
+            });
 
         return new AccountResponse()
             .id(account.getId())
