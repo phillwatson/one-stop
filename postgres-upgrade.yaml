@@ -1,5 +1,6 @@
 volumes:
-  db-data:
+  one-stop_db-data:
+    external: true
   db-17-data:
 
 services:
@@ -14,7 +15,7 @@ services:
     volumes:
       - ./backup:/backup # important to have the same folder with psql 17
       - type: volume
-        source: db-data
+        source: one-stop_db-data
         target: /var/lib/postgresql/data
 
   db-17:

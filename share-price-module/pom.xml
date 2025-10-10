@@ -14,5 +14,6 @@
 
     <modules>
         <module>alpha-vantage-lib</module>
+        <module>ft-finance-lib</module>
     </modules>
 </project>

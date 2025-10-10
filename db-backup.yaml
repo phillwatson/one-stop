@@ -1,0 +1,19 @@
+volumes:
+  one-stop_db-data:
+    external: true
+
+services:
+  db:
+    image: postgres:17.6-alpine3.21
+    environment:
+      POSTGRES_DB: one-stop
+      POSTGRES_USER: one-stop
+      POSTGRES_PASSWORD: password
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backup:/backup # important to have the same folder with psql
+      - type: volume
+        source: one-stop_db-data
+        target: /var/lib/postgresql/data
