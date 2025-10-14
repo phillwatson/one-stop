@@ -1,9 +1,8 @@
-package com.hillayes.shares.ft;
+package com.hillayes.alphavantage.api;
 
 import com.hillayes.shares.api.ShareProviderApi;
-import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.ft.service.PriceLookupService;
+import com.hillayes.shares.api.domain.PriceData;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,28 +12,25 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The bridge that provides access to the FT Market share price data.
+ * The bridge that provides access to the Alpha Vantage share price data.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class FtShareProvider implements ShareProviderApi {
-    private final PriceLookupService priceLookupService;
+public class AlphaVantageProvider implements ShareProviderApi {
 
     @Override
     public ShareProvider getProviderId() {
-        return ShareProvider.FT_MARKET_DATA;
+        return ShareProvider.ALPHA_ADVANTAGE;
     }
 
     @Override
     public int getMaxHistory() {
-        return 364;
+        return 100;
     }
 
     @Override
     public Optional<List<PriceData>> getPrices(String stockIsin, LocalDate startDate, LocalDate endDate) {
-        List<PriceData> result = priceLookupService.getPrices(stockIsin, startDate, endDate);
-        if (result.isEmpty()) result = null;
-        return Optional.ofNullable(result);
+        return Optional.empty();
     }
 }

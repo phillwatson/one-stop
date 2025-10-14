@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
 
-@Entity
+@Entity(name = "isin_issue_lookup")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -24,4 +24,12 @@ public class IsinIssueLookup {
     @ToString.Include
     @Column(name = "issue_id", nullable = false)
     private String issueId;
+
+    @ToString.Include
+    @Column(name = "name")
+    private String name;
+
+    @ToString.Include
+    @Column(name = "currency_code")
+    private String currencyCode;
 }

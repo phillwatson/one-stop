@@ -1,4 +1,4 @@
-package com.hillayes.alphavantage.api;
+package com.hillayes.alphavantage.api.domain;
 
 public enum ApiFunction {
     TIME_SERIES_INTRADAY,
@@ -8,6 +8,8 @@ public enum ApiFunction {
     TIME_SERIES_WEEKLY_ADJUSTED,
     TIME_SERIES_MONTHLY,
     TIME_SERIES_MONTHLY_ADJUSTED,
+    OVERVIEW,
+    SYMBOL_SEARCH,
 
     // returns the latest price and volume information for chosen symbol.
     GLOBAL_QUOTE;

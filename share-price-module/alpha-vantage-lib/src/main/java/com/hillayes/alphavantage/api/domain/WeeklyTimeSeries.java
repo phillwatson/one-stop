@@ -1,4 +1,4 @@
-package com.hillayes.alphavantage.api;
+package com.hillayes.alphavantage.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DailyTimeSeries {
-    @JsonProperty("Time Series (Daily)")
-    Map<LocalDate, DayRecord> series;
+public class WeeklyTimeSeries {
+    @JsonProperty("Weekly Time Series")
+    public Map<LocalDate, DayRecord> series;
 }

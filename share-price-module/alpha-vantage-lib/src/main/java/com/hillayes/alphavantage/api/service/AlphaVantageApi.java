@@ -1,5 +1,9 @@
-package com.hillayes.alphavantage.api;
+package com.hillayes.alphavantage.api.service;
 
+import com.hillayes.alphavantage.api.domain.ApiFunction;
+import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
+import com.hillayes.alphavantage.api.domain.Overview;
+import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
 import io.restassured.specification.RequestSpecification;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -14,7 +18,7 @@ public class AlphaVantageApi {
     @ConfigProperty(name = "quarkus.rest-client.alpha-vantage-api.url")
     String BASE_URI;
 
-    @ConfigProperty(name = "one-stop.alpha-vantage.secret.key", defaultValue = "not-set")
+    @ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
     String API_KEY;
 
     private RequestSpecification givenAuth(ApiFunction function) {
@@ -33,5 +37,25 @@ public class AlphaVantageApi {
             .statusCode(200)
             .contentType(JSON)
             .extract().as(DailyTimeSeries.class);
+    }
+
+    public Overview getOverview(String stockSymbol) {
+        return givenAuth(ApiFunction.OVERVIEW)
+            .queryParam("symbol", stockSymbol)
+            .get("query")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().as(Overview.class);
+    }
+
+    public TickerSearchResponse symbolSearch(String keywords) {
+        return givenAuth(ApiFunction.SYMBOL_SEARCH)
+            .queryParam("keywords", keywords)
+            .get("query")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().as(TickerSearchResponse.class);
     }
 }

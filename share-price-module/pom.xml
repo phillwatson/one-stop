@@ -16,5 +16,6 @@
         <module>share-price-api</module>
         <module>alpha-vantage-lib</module>
         <module>ft-finance-lib</module>
+        <module>share-price-service</module>
     </modules>
 </project>

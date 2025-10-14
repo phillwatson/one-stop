@@ -2,7 +2,7 @@ package com.hillayes.shares.ft.service;
 
 import com.hillayes.shares.api.domain.PriceData;
 import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
@@ -11,16 +11,15 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
+@RequiredArgsConstructor
 public class PriceLookupServiceTest {
-    @Inject
-    private PriceLookupService priceLookupService;
+    private final PriceLookupService priceLookupService;
 
     @Test
     public void testGetPrices() {
-        String stockIsin = "GB00B0CNGT73:GBP";
+        String stockIsin = "GB00B0CNGT73";
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(20);
 

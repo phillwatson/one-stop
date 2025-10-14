@@ -29,18 +29,13 @@ public class IsinLookupService {
         log.info("Looking up company issue-id [isin: {}]", stockIsin);
         // lookup from local cache
         return lookupRepository.findByIsin(stockIsin)
-            .map(IsinIssueLookup::getIssueId)
             .or(() -> {
                 // perform web-site lookup
-                Optional<String> issueId = marketsClient.getIssueID(stockIsin);
+                Optional<IsinIssueLookup> result = marketsClient.getIssueID(stockIsin);
 
                 // if found - persist it for next time
-                issueId.ifPresent(s ->
-                    lookupRepository.save(IsinIssueLookup.builder()
-                        .isin(stockIsin)
-                        .issueId(s)
-                        .build()));
-                return issueId;
-            });
+                return result.map(lookupRepository::save);
+            })
+            .map(IsinIssueLookup::getIssueId);
     }
 }

@@ -4,6 +4,7 @@ import com.hillayes.shares.ft.domain.IsinIssueLookup;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -16,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestTransaction
+@RequiredArgsConstructor
 public class IsinIssueLookupRepositoryTest {
     private static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
 
-    @Inject
-    private IsinIssueLookupRepository isinIssueLookupRepository;
+    private final IsinIssueLookupRepository isinIssueLookupRepository;
 
     @Test
     public void testSave() {
@@ -68,6 +69,7 @@ public class IsinIssueLookupRepositoryTest {
         return IsinIssueLookup.builder()
             .isin(randomStrings.nextAlphanumeric(10))
             .issueId(randomStrings.nextAlphanumeric(10))
+            .name(randomStrings.nextAlphanumeric(30))
             .build();
     }
 }

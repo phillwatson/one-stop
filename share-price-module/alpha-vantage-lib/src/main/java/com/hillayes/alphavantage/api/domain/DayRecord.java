@@ -1,7 +1,9 @@
-package com.hillayes.alphavantage.api;
+package com.hillayes.alphavantage.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DayRecord {
     @JsonProperty("1. open")
     public Double open;

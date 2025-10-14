@@ -1,5 +1,6 @@
 package com.hillayes.shares.ft.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.shares.ft.client.MarketsClient;
 import com.hillayes.shares.ft.domain.IsinIssueLookup;
 import com.hillayes.shares.ft.repository.IsinIssueLookupRepository;
@@ -23,7 +24,7 @@ public class IsinLookupServiceTest {
     @BeforeAll
     public static void beforeAll() {
         isinIssueLookupRepository = mock();
-        marketsClient = spy(new MarketsClient());
+        marketsClient = spy(new MarketsClient(new ObjectMapper()));
 
         isinLookupService = new IsinLookupService(isinIssueLookupRepository, marketsClient);
     }
@@ -31,12 +32,16 @@ public class IsinLookupServiceTest {
     @BeforeEach
     public void beforeEach() {
         Mockito.reset(isinIssueLookupRepository);
+
+        // mock default behaviour
+        when(isinIssueLookupRepository.save(any()))
+            .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
     }
 
     @Test
     public void testIsinNotCached() {
         // Given: a valid ISIN
-        String stockIsin = "GB00B0CNGT73:GBP";
+        String stockIsin = "GB00B0CNGT73";
 
         // And: the ISIN is not cached locally
         when(isinIssueLookupRepository.findByIsin(stockIsin)).thenReturn(Optional.empty());
@@ -65,7 +70,7 @@ public class IsinLookupServiceTest {
     @Test
     public void testIsinIsCached() {
         // Given: a valid ISIN
-        String stockIsin = "GB00B0CNGT73:GBP";
+        String stockIsin = "GB00B0CNGT73";
 
         // And: the ISIN is cached locally
         when(isinIssueLookupRepository.findByIsin(stockIsin)).thenReturn(

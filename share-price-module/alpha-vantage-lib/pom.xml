@@ -24,6 +24,10 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>share-price-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
