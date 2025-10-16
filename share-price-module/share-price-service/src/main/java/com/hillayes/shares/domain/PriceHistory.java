@@ -9,14 +9,14 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "share_price_history")
+@Table(name = "price_history")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
+@Builder(builderClassName = "Builder")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class SharePriceHistory {
+public class PriceHistory {
     @EmbeddedId
     @EqualsAndHashCode.Include
     @ToString.Include
@@ -48,7 +48,7 @@ public class SharePriceHistory {
     private BigDecimal close;
 
     @Data
-    @Builder
+    @lombok.Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Embeddable
@@ -61,7 +61,7 @@ public class SharePriceHistory {
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resolution", nullable = false)
-        private ShareIndexResolution resolution;
+        private SharePriceResolution resolution;
 
         /**
          * The date to which the price data applies.

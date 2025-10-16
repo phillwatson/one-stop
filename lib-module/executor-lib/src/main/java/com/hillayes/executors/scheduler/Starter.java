@@ -2,6 +2,8 @@ package com.hillayes.executors.scheduler;
 
 import com.hillayes.executors.scheduler.config.SchedulerConfig;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
+import io.quarkus.arc.profile.IfBuildProfile;
+import io.quarkus.arc.profile.UnlessBuildProfile;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -13,6 +15,7 @@ public class Starter {
     @Produces
     @ApplicationScoped
     @Startup
+    @UnlessBuildProfile("test")
     public SchedulerFactory startScheduler(DataSource dataSource,
                                            SchedulerConfig configuration,
                                            Instance<NamedTask> tasks) {

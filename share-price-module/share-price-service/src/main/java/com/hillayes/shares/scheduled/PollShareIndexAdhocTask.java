@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 
+/**
+ * An adhoc task to retrieve the latest share prices for the ShareIndex identified
+ * in the payload.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +26,8 @@ public class PollShareIndexAdhocTask extends AbstractNamedAdhocTask<UUID> {
     }
 
     /**
+     * Performs the task.
+     *
      * @param context the context containing the identifier of the ShareIndex to be updated.
      */
     @Override

@@ -1,14 +1,14 @@
 package com.hillayes.shares.repository;
 
-import com.hillayes.shares.domain.SharePriceHistory;
+import com.hillayes.shares.domain.PriceHistory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SharePriceHistorySqlMapper extends SqlEntityMapper<SharePriceHistory> {
+public class PriceHistorySqlMapper extends SqlEntityMapper<PriceHistory> {
     @Override
-    public Map<String, ColMapper<SharePriceHistory>> initColMappings() {
-        LinkedHashMap<String, ColMapper<SharePriceHistory>> result = LinkedHashMap.newLinkedHashMap(7);
+    public Map<String, ColMapper<PriceHistory>> initColMappings() {
+        LinkedHashMap<String, ColMapper<PriceHistory>> result = LinkedHashMap.newLinkedHashMap(7);
         result.put("share_index_id", (s, offset, entity) -> setUuid(s, offset + 1, entity.getId().getShareIndexId()));
         result.put("resolution", (s, offset, entity) -> setString(s, offset + 2, entity.getId().getResolution().name()));
         result.put("market_date", (s, offset, entity) -> setDate(s, offset + 3, entity.getId().getDate()));

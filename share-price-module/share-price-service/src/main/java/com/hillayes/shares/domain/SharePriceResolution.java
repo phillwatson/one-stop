@@ -1,6 +1,6 @@
 package com.hillayes.shares.domain;
 
-public enum ShareIndexResolution {
+public enum SharePriceResolution {
     DAILY,
     WEEKLY,
     MONTHLY;

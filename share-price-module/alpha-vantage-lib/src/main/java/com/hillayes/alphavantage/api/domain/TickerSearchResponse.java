@@ -10,5 +10,5 @@ import java.util.List;
 @ToString
 public class TickerSearchResponse {
     @JsonProperty("bestMatches")
-    public List<TickerSearchRecord> series;
+    public List<TickerSearchRecord> bestMatches;
 }

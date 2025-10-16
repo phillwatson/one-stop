@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.hillayes.shares.utils.TestData.mockShareIndex;
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,15 +21,9 @@ public class ShareIndexRepositoryTest {
 
     @Test
     public void testFindByIsin() {
-        // Given:
-        List<ShareIndex> indexes = List.of(
-            mockShareIndex(null),
-            mockShareIndex(null),
-            mockShareIndex(null),
-            mockShareIndex(null),
-            mockShareIndex(null)
-        );
-
+        // Given: a collection of shares
+        List<ShareIndex> indexes = IntStream.range(0, 5)
+            .mapToObj(index -> mockShareIndex()).toList();
         shareIndexRepository.saveAll(indexes);
 
         // When:
@@ -47,15 +42,30 @@ public class ShareIndexRepositoryTest {
 
     @Test
     public void testListAll() {
-        // When:
-        Page<ShareIndex> page = shareIndexRepository.listAll(2, 20);
+        // Given: a collection of shares
+        List<ShareIndex> indexes = IntStream.range(0, 35)
+            .mapToObj(index -> mockShareIndex()).toList();
+        shareIndexRepository.saveAll(indexes);
 
-        // Then:
-        assertNotNull(page);
-        assertTrue(page.isEmpty());
-        assertEquals(0, page.getContentSize());
-        assertEquals(2, page.getPageIndex());
-        assertEquals(20, page.getPageSize());
-        assertEquals(0, page.getTotalPages());
+        int pageIndex = 0;
+        int pageSize = 8;
+        int totalPages = (int) Math.ceil((double) indexes.size() / (double) pageSize);
+        while (pageIndex < totalPages) {
+            // When: each page is requested
+            Page<ShareIndex> page = shareIndexRepository.listAll(pageIndex, pageSize);
+
+            // Then: a sub-set of shares are returned
+            int expectedSize = (pageIndex < totalPages - 1) ? pageSize : (indexes.size() % pageSize);
+
+            assertNotNull(page);
+            assertFalse(page.isEmpty());
+            assertEquals(indexes.size(), page.getTotalCount());
+            assertEquals(expectedSize, page.getContentSize());
+            assertEquals(pageIndex, page.getPageIndex());
+            assertEquals(pageSize, page.getPageSize());
+            assertEquals(totalPages, page.getTotalPages());
+
+            pageIndex++;
+        }
     }
 }

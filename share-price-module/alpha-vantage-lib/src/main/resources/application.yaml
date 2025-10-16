@@ -2,8 +2,3 @@ quarkus:
   rest-client:
     alpha-vantage-api:
       url: https://www.alphavantage.co
-
-one-stop:
-  alpha-vantage:
-    secret:
-      key: W0DLABCNW2VRBEVZ

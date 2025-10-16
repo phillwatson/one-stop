@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
+@Builder(builderClassName = "Builder")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class DealingHistory {
@@ -21,24 +21,28 @@ public class DealingHistory {
     @Setter
     private UUID id;
 
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    @Column(name = "share_holding_id", nullable = false)
-    private UUID shareHoldingId;
+    @ManyToOne
+    @JoinColumn(name = "share_holding_id")
+    private Holding holding;
 
-    @EqualsAndHashCode.Include
-    @ToString.Include
     @Column(name = "market_date", nullable = false)
     private LocalDate marketDate;
 
-    @Builder.Default
-    @ToString.Include
-    @Column(name = "is_purchase")
-    private boolean purchase = true;
-
+    /**
+     * The number of shares bought or sold. Sold shares are recorded as a negative number.
+     */
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
+
+    /**
+     * Returns the value of this dealing; its price multiplied by its quantity.
+     * If the dealing is a sale, the result will be negative.
+     */
+    @Transient
+    public BigDecimal getValue() {
+        return BigDecimal.valueOf(quantity * price.doubleValue());
+    }
 }

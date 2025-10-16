@@ -33,7 +33,7 @@ public class PollAllShareIndexesTask implements NamedScheduledTask {
     @Transactional
     public void run() {
         log.info("PollAllShareIndexesTask.run()");
-        shareIndexRepository.listAll().stream()
+        shareIndexRepository.listAll()
             .forEach(shareIndex -> pollShareIndexAdhocTask.queueTask(shareIndex.getId()));
     }
 }

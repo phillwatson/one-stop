@@ -5,7 +5,7 @@ import com.hillayes.events.consumer.EventConsumer;
 import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserDeleted;
-import com.hillayes.shares.repository.ShareHoldingRepository;
+import com.hillayes.shares.repository.PortfolioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class UserTopicConsumer implements EventConsumer {
-    private final ShareHoldingRepository shareHoldingRepository;
+    private final PortfolioRepository portfolioRepository;
 
     @Transactional
     public void consume(EventPacket eventPacket) {
@@ -26,7 +26,7 @@ public class UserTopicConsumer implements EventConsumer {
         if (UserDeleted.class.getName().equals(payloadClass)) {
             UserDeleted payload = eventPacket.getPayloadContent();
 
-            shareHoldingRepository.deleteUsersHoldings(payload.getUserId());
+            portfolioRepository.deleteUsersPortfolios(payload.getUserId());
         }
     }
 }

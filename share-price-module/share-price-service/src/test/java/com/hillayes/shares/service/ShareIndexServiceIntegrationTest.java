@@ -1,10 +1,10 @@
 package com.hillayes.shares.service;
 
 import com.hillayes.shares.api.domain.ShareProvider;
+import com.hillayes.shares.domain.PriceHistory;
 import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.domain.SharePriceHistory;
+import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
-import com.hillayes.shares.repository.SharePriceHistoryRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RequiredArgsConstructor
 public class ShareIndexServiceIntegrationTest {
     private final ShareIndexRepository shareIndexRepository;
-    private final SharePriceHistoryRepository sharePriceHistoryRepository;
+    private final PriceHistoryRepository priceHistoryRepository;
     private final ShareIndexService shareIndexService;
 
     @BeforeEach
@@ -47,10 +47,10 @@ public class ShareIndexServiceIntegrationTest {
         Awaitility.await()
             .atMost(Duration.ofSeconds(5))
             .pollInterval(Duration.ofMillis(500))
-            .until(() -> !sharePriceHistoryRepository.isBatchPending());
+            .until(() -> !priceHistoryRepository.isBatchPending());
 
         // And: the prices are persisted
-        List<SharePriceHistory> allPrices = getAllPrices();
+        List<PriceHistory> allPrices = getAllPrices();
         assertEquals(newEntryCount, allPrices.size());
     }
 
@@ -68,7 +68,7 @@ public class ShareIndexServiceIntegrationTest {
     }
 
     @Transactional
-    public List<SharePriceHistory> getAllPrices() {
-        return sharePriceHistoryRepository.findAll().list();
+    public List<PriceHistory> getAllPrices() {
+        return priceHistoryRepository.findAll().list();
     }
 }

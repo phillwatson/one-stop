@@ -35,6 +35,11 @@ quarkus:
         level: DEBUG
 
 one-stop:
+  shares:
+    share-price:
+      # the maximum size of the batches in which PriceHistory records are inserted
+      insert-batch-size: 50
+
   scheduler:
     schema: ${quarkus.hibernate-orm.database.default-schema}
     tasks:
