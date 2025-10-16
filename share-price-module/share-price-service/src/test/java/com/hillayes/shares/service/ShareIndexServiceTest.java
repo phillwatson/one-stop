@@ -8,6 +8,7 @@ import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.domain.SharePriceResolution;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
+import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -68,6 +69,71 @@ public class ShareIndexServiceTest {
 
         // Then: the provider is called to retrieve the share prices over the given dates
         verify(shareProviderApi).getPrices(shareIndex.getIsin(), mostRecent.getId().getDate(), yesterday);
+
+        // And: the repository is called to save the prices as a batch
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<PriceHistory>> captor = ArgumentCaptor.forClass(List.class);
+        verify(priceHistoryRepository).saveBatch(captor.capture());
+
+        // And: each record reflects the data retrieved from the provider
+        captor.getValue().forEach(priceHistory -> {
+            PriceData expected = prices.stream().filter(p -> p.date() == priceHistory.getId().getDate())
+                .findFirst().orElse(null);
+            assertNotNull(expected);
+
+            assertEquals(shareIndex.getId(), priceHistory.getId().getShareIndexId());
+            assertEquals(SharePriceResolution.DAILY, priceHistory.getId().getResolution());
+            assertEquals(expected.date(), priceHistory.getId().getDate());
+            assertEquals(expected.open(), priceHistory.getOpen());
+            assertEquals(expected.high(), priceHistory.getHigh());
+            assertEquals(expected.low(), priceHistory.getLow());
+            assertEquals(expected.close(), priceHistory.getClose());
+        });
+
+        // And: the result count equals the share prices retrieved
+        assertEquals(prices.size(), recordCount);
+    }
+
+    @Test
+    public void testRefreshSharePrices_NoPriorHistory() {
+        // Given: a Share Index to be refreshed
+        ShareIndex shareIndex = mockShareIndex(b -> b.id(UUID.randomUUID()));
+        when(shareIndexRepository.findByIdOptional(shareIndex.getId()))
+            .thenReturn(Optional.of(shareIndex));
+
+        // And: NO historic prices currently exist
+        when(priceHistoryRepository.getMostRecent(shareIndex))
+            .thenReturn(Optional.empty());
+
+        // And: the share provider is available
+        ShareProviderApi shareProviderApi = mock();
+        int providerMaxHistory = 90;
+        when(shareProviderApi.getMaxHistory()).thenReturn(providerMaxHistory);
+        when(providerFactory.get(shareIndex.getProvider()))
+            .thenReturn(shareProviderApi);
+
+        // And: the provider has prices available
+        AtomicReference<LocalDate> marketDate = new AtomicReference<>(LocalDate.now().minusDays(providerMaxHistory));
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        List<PriceData> prices = IntStream.range(0, providerMaxHistory).mapToObj(index -> {
+            PriceData priceData = mockPriceData(marketDate.get());
+            marketDate.set(marketDate.get().plusDays(1));
+            return priceData;
+        }).toList();
+        when(shareProviderApi.getPrices(eq(shareIndex.getIsin()), any(), eq(yesterday)))
+            .thenReturn(Optional.of(prices));
+
+        // When: the service is called
+        int recordCount = fixture.refreshSharePrices(shareIndex.getId());
+
+        // Then: the provider is called to retrieve the share prices over the given dates
+        ArgumentCaptor<LocalDate> fromDateCaptor = ArgumentCaptor.forClass(LocalDate.class);
+        verify(shareProviderApi).getPrices(eq(shareIndex.getIsin()), fromDateCaptor.capture(), eq(yesterday));
+
+        // And: the from-date is calculated from the provider API
+        verify(shareProviderApi).getMaxHistory();
+        LocalDate expectedFromDate = LocalDate.now().minusDays(providerMaxHistory);
+        assertEquals(expectedFromDate, fromDateCaptor.getValue());
 
         // And: the repository is called to save the prices as a batch
         @SuppressWarnings("unchecked")
