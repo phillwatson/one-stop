@@ -4,13 +4,10 @@ import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.NewAuthProvider;
 import com.hillayes.notification.config.TemplateName;
-import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.time.Instant;
 import java.util.Map;
@@ -19,19 +16,16 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserAuthTopicConsumer_NewAuthProviderTest {
-    @Mock
-    SendEmailTask sendEmailTask;
+    private final SendEmailTask sendEmailTask = mock();
 
-    @Mock
-    NotificationService notificationService;
-
-    @InjectMocks
-    UserAuthTopicConsumer fixture;
+    private final UserAuthTopicConsumer fixture = new UserAuthTopicConsumer(
+        sendEmailTask
+    );
 
     @BeforeEach
     public void setup() {
@@ -62,9 +56,6 @@ public class UserAuthTopicConsumer_NewAuthProviderTest {
         assertNotNull(param);
         assertEquals(event.getUserId(), param.getUserId());
         assertEquals(event.getAuthProvider(), param.getAuthProvider());
-
-        // and: no notification is issued
-        verifyNoInteractions(notificationService);
     }
 
     private EventPacket mockEventPacket(Object payload) {

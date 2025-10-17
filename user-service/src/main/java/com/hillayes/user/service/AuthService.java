@@ -7,13 +7,12 @@ import com.hillayes.user.domain.User;
 import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.openid.OpenIdAuthentication;
 import com.hillayes.user.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotAuthorizedException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.net.URI;
 import java.util.UUID;
@@ -24,18 +23,14 @@ import java.util.UUID;
  * key rotation 30 minutes - must be no less than refresh duration
  */
 @Singleton
+@RequiredArgsConstructor
 @Slf4j
 public class AuthService {
-    @Inject
-    UserRepository userRepository;
-    @Inject
-    PasswordCrypto passwordCrypto;
-    @Inject
-    UserEventSender userEventSender;
-    @Inject
-    OpenIdAuthentication openIdAuth;
-    @Inject
-    RotatedJwkSet jwkSet;
+    private final UserRepository userRepository;
+    private final PasswordCrypto passwordCrypto;
+    private final UserEventSender userEventSender;
+    private final OpenIdAuthentication openIdAuth;
+    private final RotatedJwkSet jwkSet;
 
     /**
      * Provides external access to the public keys used to verify signed auth

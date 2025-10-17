@@ -4,13 +4,12 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.hillayes.nordigen.model.ObtainJwtResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -19,22 +18,26 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 @Singleton
 @Slf4j
 public class NordigenSimulator {
-    @Inject
-    InstitutionsEndpoint institutionsEndpoint;
-
-    @Inject
-    AgreementsEndpoint agreementsEndpoint;
-
-    @Inject
-    RequisitionsEndpoint requisitionsEndpoint;
-
-    @Inject
-    AccountsEndpoint accountsEndpoint;
-
-    @ConfigProperty(name = "one-stop.tests.nordigen.port")
-    int portNumber;
+    private final InstitutionsEndpoint institutionsEndpoint;
+    private final AgreementsEndpoint agreementsEndpoint;
+    private final RequisitionsEndpoint requisitionsEndpoint;
+    private final AccountsEndpoint accountsEndpoint;
+    private final int portNumber;
 
     private WireMockServer wireMockServer;
+
+    public NordigenSimulator(InstitutionsEndpoint institutionsEndpoint,
+                             AgreementsEndpoint agreementsEndpoint,
+                             RequisitionsEndpoint requisitionsEndpoint,
+                             AccountsEndpoint accountsEndpoint,
+                             @ConfigProperty(name = "one-stop.tests.nordigen.port")
+                             int portNumber) {
+        this.institutionsEndpoint = institutionsEndpoint;
+        this.agreementsEndpoint = agreementsEndpoint;
+        this.requisitionsEndpoint = requisitionsEndpoint;
+        this.accountsEndpoint = accountsEndpoint;
+        this.portNumber = portNumber;
+    }
 
     @PostConstruct
     public void init() {

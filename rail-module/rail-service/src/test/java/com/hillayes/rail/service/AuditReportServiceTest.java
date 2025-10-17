@@ -18,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,36 +25,30 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static com.hillayes.rail.utils.TestData.*;
+import static com.hillayes.rail.utils.TestData.mockAuditIssue;
+import static com.hillayes.rail.utils.TestData.mockAuditReportConfig;
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AuditReportServiceTest {
-    List<AuditReportTemplate> mockTemplates;
+    private final List<AuditReportTemplate> mockTemplates = IntStream.range(0, 20)
+        .mapToObj(i -> mockAuditReportTemplate(insecure().nextAlphanumeric(10)))
+        .toList();
 
-    Instance<AuditReportTemplate> reportTemplates;
+    private final Instance<AuditReportTemplate> reportTemplates = mock();
+    private final AuditReportConfigRepository auditReportConfigRepository = mock();
+    private final AuditIssueRepository auditIssueRepository = mock();
 
-    @Mock
-    AuditReportConfigRepository auditReportConfigRepository;
-
-    @Mock
-    AuditIssueRepository auditIssueRepository;
-
-    @InjectMocks
-    AuditReportService fixture;
+    private final AuditReportService fixture = new AuditReportService(
+        reportTemplates,
+        auditReportConfigRepository,
+        auditIssueRepository
+    );
 
     @BeforeEach
     public void init() {
-        mockTemplates = IntStream.range(0, 20)
-            .mapToObj(i -> mockAuditReportTemplate(insecure().nextAlphanumeric(10)))
-            .toList();
-
-        reportTemplates = mock(Instance.class);
         when(reportTemplates.stream()).thenReturn(mockTemplates.stream());
-
-        openMocks(this);
 
         when(auditIssueRepository.save(any())).thenAnswer(i -> {
             AuditIssue issue = i.getArgument(0);

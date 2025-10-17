@@ -10,8 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.time.Duration;
@@ -24,22 +22,18 @@ import java.util.stream.Stream;
 import static com.hillayes.rail.utils.TestApiData.mockRailProviderApi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class InstitutionServiceTest {
-    @Mock
-    RailProviderFactory railProviderFactory;
+    private final RailProviderFactory railProviderFactory = mock();
+    private final ServiceConfiguration config = mock();
 
-    @Mock
-    ServiceConfiguration config;
-
-    @InjectMocks
-    InstitutionService fixture;
+    private final InstitutionService fixture = new InstitutionService(
+        railProviderFactory,
+        config
+    );
 
     @BeforeEach
     public void init() {
-        openMocks(this);
-
         ServiceConfiguration.Caches caches = mock(ServiceConfiguration.Caches.class);
         when(caches.institutions()).thenReturn(Duration.ofSeconds(30));
         when(config.caches()).thenReturn(caches);

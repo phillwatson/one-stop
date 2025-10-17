@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.io.IOException;
 import java.net.URI;
@@ -43,43 +41,31 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserConsentServiceTest {
-    @Mock
-    UserConsentRepository userConsentRepository;
+    private final ServiceConfiguration configuration = mock();
+    private final UserConsentRepository userConsentRepository = mock();
+    private final InstitutionService institutionService = mock();
+    private final RailProviderFactory railProviderFactory = mock();
+    private final PollConsentAdhocTask pollConsentAdhocTask = mock();
+    private final ConsentTimeoutAdhocTask consentTimeoutAdhocTask = mock();
+    private final ConsentEventSender consentEventSender = mock();
+    private final RailProviderApi railProviderApi = mock();
+    private final Gateway gateway = mock();
 
-    @Mock
-    InstitutionService institutionService;
-
-    @Mock
-    RailProviderFactory railProviderFactory;
-
-    @Mock
-    PollConsentAdhocTask pollConsentAdhocTask;
-
-    @Mock
-    ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
-
-    @Mock
-    ConsentEventSender consentEventSender;
-
-    @Mock
-    ServiceConfiguration configuration;
-
-    @Mock
-    RailProviderApi railProviderApi;
-
-    @Mock
-    Gateway gateway;
-
-    @InjectMocks
-    UserConsentService fixture;
+    private final UserConsentService fixture = new UserConsentService(
+        configuration,
+        userConsentRepository,
+        institutionService,
+        railProviderFactory,
+        pollConsentAdhocTask,
+        consentTimeoutAdhocTask,
+        consentEventSender,
+        gateway
+    );
 
     @BeforeEach
     public void beforeEach() throws IOException {
-        openMocks(this);
-
         when(gateway.getHost()).thenReturn("localhost");
         when(gateway.getPort()).thenReturn(8080);
         when(gateway.getScheme()).thenReturn("http");

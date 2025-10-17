@@ -14,7 +14,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -28,21 +27,26 @@ import java.util.*;
 @ApplicationScoped
 @Slf4j
 public class UserAuditReportsAdhocTask extends AbstractNamedAdhocTask<UserAuditReportsAdhocTask.Payload> {
-    @Inject
-    AuditReportConfigRepository auditReportConfigRepository;
+    private final AuditReportConfigRepository auditReportConfigRepository;
+    private final Instance<AuditReportTemplate> reportTemplates;
+    private final AuditIssueRepository auditIssueRepository;
+    private final AuditEventSender auditEventSender;
+    private final Optional<Duration> ackTimeout;
 
-    @Inject
-    @Any
-    Instance<AuditReportTemplate> reportTemplates;
-
-    @Inject
-    AuditIssueRepository auditIssueRepository;
-
-    @Inject
-    AuditEventSender auditEventSender;
-
-    @ConfigProperty(name = "one-stop.rail.audit.issues.ack-timeout")
-    Optional<Duration> ackTimeout;
+    public UserAuditReportsAdhocTask(AuditReportConfigRepository auditReportConfigRepository,
+                                     @Any
+                                     Instance<AuditReportTemplate> reportTemplates,
+                                     AuditIssueRepository auditIssueRepository,
+                                     AuditEventSender auditEventSender,
+                                     @ConfigProperty(name = "one-stop.rail.audit.issues.ack-timeout")
+                                     Optional<Duration> ackTimeout
+    ) {
+        this.auditReportConfigRepository = auditReportConfigRepository;
+        this.reportTemplates = reportTemplates;
+        this.auditIssueRepository = auditIssueRepository;
+        this.auditEventSender = auditEventSender;
+        this.ackTimeout = ackTimeout;
+    }
 
     @RegisterForReflection
     public record Payload(

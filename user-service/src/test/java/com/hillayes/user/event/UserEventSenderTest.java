@@ -18,8 +18,6 @@ import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Duration;
@@ -34,21 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserEventSenderTest {
-    @Mock
-    private EventSender eventSender;
-    @Mock
-    private RequestHeaders requestHeaders;
+    private final EventSender eventSender = mock();
+    private final RequestHeaders requestHeaders = mock();
 
-    @InjectMocks
-    private UserEventSender fixture;
+    private final UserEventSender fixture = new UserEventSender(
+        eventSender,
+        requestHeaders
+    );
 
     @BeforeEach
     public void setUp() {
-        openMocks(this);
-
         when(requestHeaders.getAll()).thenReturn(new MultivaluedMapImpl());
     }
 

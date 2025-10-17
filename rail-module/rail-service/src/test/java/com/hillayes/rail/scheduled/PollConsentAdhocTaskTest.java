@@ -4,8 +4,8 @@ import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.api.domain.AgreementStatus;
+import com.hillayes.rail.api.domain.RailAgreement;
 import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,27 +24,22 @@ import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class PollConsentAdhocTaskTest {
-    @Mock
-    UserConsentService userConsentService;
-    @Mock
-    RailProviderFactory railProviderFactory;
-    @Mock
-    RailProviderApi railProviderApi;
-    @Mock
-    PollAccountAdhocTask pollAccountAdhocTask;
-    @Mock
-    SchedulerFactory scheduler;
+    private final UserConsentService userConsentService = mock();
+    private final RailProviderFactory railProviderFactory = mock();
+    private final PollAccountAdhocTask pollAccountAdhocTask = mock();
+    private final RailProviderApi railProviderApi = mock();
+    private final SchedulerFactory scheduler = mock();
 
-    @InjectMocks
-    PollConsentAdhocTask fixture;
+    private final PollConsentAdhocTask fixture = new PollConsentAdhocTask(
+        userConsentService,
+        railProviderFactory,
+        pollAccountAdhocTask
+    );
 
     @BeforeEach
     public void init() {
-        openMocks(this);
-
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
     }
 

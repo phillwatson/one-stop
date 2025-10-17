@@ -6,8 +6,6 @@ import com.hillayes.notification.repository.TemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import sendinblue.ApiException;
 import sibApi.TransactionalEmailsApi;
 import sibModel.CreateSmtpEmail;
@@ -20,27 +18,21 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
+import static org.mockito.Mockito.*;
 
 public class SendEmailServiceTest {
-    @Mock
-    TransactionalEmailsApi emailApi;
+    private final TransactionalEmailsApi emailApi = mock();
+    private final TemplateRepository templateRepository = mock();
+    private final EmailConfiguration configuration = mock();
 
-    @Mock
-    TemplateRepository templateRepository;
-
-    @Mock
-    EmailConfiguration configuration;
-
-    @InjectMocks
-    SendEmailService fixture;
+    private final SendEmailService fixture = new SendEmailService(
+        configuration,
+        templateRepository,
+        emailApi
+    );
 
     @BeforeEach
     public void beforeEach() throws ApiException {
-        openMocks(this);
-
         when(emailApi.sendTransacEmail(any()))
             .thenReturn(new CreateSmtpEmail().messageId("mock-message-id"));
     }

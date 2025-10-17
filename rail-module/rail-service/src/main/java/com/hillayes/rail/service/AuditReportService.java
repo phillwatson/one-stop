@@ -9,14 +9,13 @@ import com.hillayes.rail.domain.AuditIssue;
 import com.hillayes.rail.domain.AuditIssueSummary;
 import com.hillayes.rail.domain.AuditReportConfig;
 import com.hillayes.rail.errors.AuditReportConfigAlreadyExistsException;
-import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.AuditIssueRepository;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -26,20 +25,13 @@ import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class AuditReportService {
-    @Inject
     @Any
-    Instance<AuditReportTemplate> reportTemplates;
-
-    @Inject
-    AuditReportConfigRepository auditReportConfigRepository;
-
-    @Inject
-    AuditIssueRepository auditIssueRepository;
-
-    @Inject
-    AccountTransactionRepository accountTransactionRepository;
+    private final Instance<AuditReportTemplate> reportTemplates;
+    private final AuditReportConfigRepository auditReportConfigRepository;
+    private final AuditIssueRepository auditIssueRepository;
 
     public Page<AuditReportTemplate> getAuditTemplates(int page, int pageSize) {
         log.info("Listing audit report templates [page: {}, pageSize: {}]", page, pageSize);

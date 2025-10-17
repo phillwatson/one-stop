@@ -3,31 +3,24 @@ package com.hillayes.rail.scheduled;
 import com.hillayes.rail.domain.ConsentStatus;
 import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.UserConsentRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class PollAllConsentsScheduledTaskTest {
-    @Mock
-    UserConsentRepository userConsentRepository;
-    @Mock
-    PollConsentAdhocTask pollConsentAdhocTask;
+    private final UserConsentRepository userConsentRepository = mock();
+    private final PollConsentAdhocTask pollConsentAdhocTask = mock();
 
     @InjectMocks
-    PollAllConsentsScheduledTask fixture;
-
-    @BeforeEach
-    public void init() {
-        openMocks(this);
-    }
+    private final PollAllConsentsScheduledTask fixture = new PollAllConsentsScheduledTask(
+        userConsentRepository,
+        pollConsentAdhocTask
+    );
 
     @Test
     public void testGetName() {
