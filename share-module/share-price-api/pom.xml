@@ -5,17 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hillayes</groupId>
-        <artifactId>one-stop</artifactId>
+        <artifactId>share-module</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>share-price-module</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>share-price-api</artifactId>
 
-    <modules>
-        <module>share-price-api</module>
-        <module>alpha-vantage-lib</module>
-        <module>ft-finance-lib</module>
-        <module>share-price-service</module>
-    </modules>
 </project>

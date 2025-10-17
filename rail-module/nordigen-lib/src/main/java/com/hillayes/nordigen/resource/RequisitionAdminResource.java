@@ -6,11 +6,11 @@ import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionRequest;
 import com.hillayes.nordigen.service.RequisitionService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -19,10 +19,11 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Slf4j
 public class RequisitionAdminResource {
-    private final RequisitionService requisitionService;
+    @Inject
+    RequisitionService requisitionService;
 
     @GET
     public PaginatedList<Requisition> list(@QueryParam("limit") int limit,

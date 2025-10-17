@@ -1,6 +1,7 @@
 services:
   # Simulator container. This hosts the rail simulator.
   sim:
+    restart: unless-stopped
     image: ghcr.io/phillwatson/sim-lib:1.0.0-SNAPSHOT
     ports:
       - "9090:8080"
@@ -39,6 +40,17 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
       QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
+
+  share-service:
+    image: ghcr.io/phillwatson/share-service:1.0.0-SNAPSHOT
+    ports:
+      - "8185:8080"
+      - "5005:5005"
+    environment:
+      QUARKUS_LOG_LEVEL: "INFO"
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
+      QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: "false"
+      ONE_STOP_ALPHA_VANTAGE_SECRET_KEY: "ABCDEF12345"
 
   notification-service:
     image: ghcr.io/phillwatson/notification-service:1.0.0-SNAPSHOT

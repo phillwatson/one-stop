@@ -23,7 +23,6 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,10 +54,10 @@ public class RequisitionFlowTestIT extends ApiTestBase {
     public void testUserConsentEndToEnd() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 

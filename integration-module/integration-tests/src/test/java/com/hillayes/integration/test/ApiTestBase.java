@@ -8,6 +8,8 @@ import com.hillayes.sim.yapily.YapilySimClient;
 import com.hillayes.sim.yapily.YapilySimulator;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
@@ -18,6 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public abstract class ApiTestBase {
+    public static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
+    public static final RandomUtils randomNumbers = RandomUtils.insecure();
+
     /**
      * The port exposed by the wiremock container.
      */
