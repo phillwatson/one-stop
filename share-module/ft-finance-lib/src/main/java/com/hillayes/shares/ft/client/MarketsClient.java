@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hillayes.commons.Strings;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.ft.domain.IsinIssueLookup;
 import com.hillayes.shares.ft.errors.ShareServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
-import joptsimple.internal.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -95,7 +95,7 @@ public class MarketsClient {
 
     private String extractName(Document doc) {
         String result = doc.title();
-        if (Strings.isNullOrEmpty(result)) {
+        if (Strings.isBlank(result)) {
             return null;
         }
         return result.split(",")[0];

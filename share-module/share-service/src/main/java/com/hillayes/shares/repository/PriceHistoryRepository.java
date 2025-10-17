@@ -137,8 +137,6 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     @ActivateRequestContext
     public void _saveBatch(Collection<PriceHistory> batch) {
-        log.debug("Concurrently saving batch of share prices [size: {}]", batch.size());
-
         // construct a native SQL statement
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(dbSchema).append(".price_history ")
             .append(sqlMapper.colNames)

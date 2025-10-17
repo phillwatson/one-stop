@@ -41,7 +41,7 @@ public class IsinLookupServiceTest {
     @Test
     public void testIsinNotCached() {
         // Given: a valid ISIN
-        String stockIsin = "GB00B0CNGT73";
+        String stockIsin = "GB00B8XYYQ86";
 
         // And: the ISIN is not cached locally
         when(isinIssueLookupRepository.findByIsin(stockIsin)).thenReturn(Optional.empty());
@@ -55,7 +55,7 @@ public class IsinLookupServiceTest {
         // And: the result is as expected
         assertNotNull(issueId);
         assertTrue(issueId.isPresent());
-        assertEquals("74137468", issueId.get());
+        assertEquals("52606664", issueId.get());
 
         // And: the retrieved value is persisted to the local cache
         ArgumentCaptor<IsinIssueLookup> lookupCaptor = ArgumentCaptor.forClass(IsinIssueLookup.class);
