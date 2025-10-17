@@ -17,7 +17,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +39,7 @@ public class UserOnboardTestIT extends ApiTestBase {
 
         // given: a request to register a user by email
         UserRegisterRequest registerRequest = new UserRegisterRequest()
-            .email(randomAlphanumeric(30));
+            .email(randomStrings.nextAlphanumeric(30));
 
         // when: the request is sent to the service
         userOnboardApi.registerUser(registerRequest);
@@ -65,9 +64,9 @@ public class UserOnboardTestIT extends ApiTestBase {
         // when: the magic-link token is returned to the server to complete registration
         UserCompleteRequest completeRequest = new UserCompleteRequest()
             .token(token)
-            .username(randomAlphanumeric(12))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(15));
+            .username(randomStrings.nextAlphanumeric(12))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(15));
         Map<String, String> authTokens = userOnboardApi.onboardUser(completeRequest).getRight();
 
         // then: auth tokens are returned

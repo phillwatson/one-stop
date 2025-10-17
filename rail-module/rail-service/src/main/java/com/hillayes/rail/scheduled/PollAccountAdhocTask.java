@@ -17,7 +17,6 @@ import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.UserConsentService;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 

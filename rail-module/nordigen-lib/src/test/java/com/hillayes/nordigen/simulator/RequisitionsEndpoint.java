@@ -10,10 +10,9 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionRequest;
 import com.hillayes.nordigen.model.RequisitionStatus;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -25,16 +24,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @Singleton
 @Slf4j
 public class RequisitionsEndpoint extends AbstractResponseTransformer {
-    @Inject
-    AgreementsEndpoint agreements;
-
-    @Inject
-    AccountsEndpoint accounts;
-
+    private final AgreementsEndpoint agreements;
+    private final AccountsEndpoint accounts;
     private final Map<String, Requisition> requisitions = new HashMap<>();
 
-    public RequisitionsEndpoint() {
+    public RequisitionsEndpoint(AgreementsEndpoint agreements,
+                                AccountsEndpoint accounts) {
         super(null);
+        this.agreements = agreements;
+        this.accounts = accounts;
     }
 
     public void register(WireMockServer wireMockServer) {
@@ -211,7 +209,7 @@ public class RequisitionsEndpoint extends AbstractResponseTransformer {
         // delete associated agreements
         agreements.removeAgreement(entity.agreement);
         entity.accounts.forEach(accountId ->  accounts.removeAccount(accountId) );
-        
+
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
             .withBody(toJson(Map.of(

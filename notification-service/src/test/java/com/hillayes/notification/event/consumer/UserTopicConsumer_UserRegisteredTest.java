@@ -4,14 +4,12 @@ import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.user.UserRegistered;
 import com.hillayes.notification.config.TemplateName;
-import com.hillayes.notification.repository.UserRepository;
+import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.service.SendEmailService;
+import com.hillayes.notification.service.UserService;
 import com.hillayes.notification.task.SendEmailTask;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Instant;
@@ -23,37 +21,20 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserTopicConsumer_UserRegisteredTest {
-    @Mock
-    UserRepository userRepository;
+    private final UserService userService = mock();
+    private final SendEmailTask sendEmailTask = mock();
+    private final NotificationService notificationService = mock();
 
-    @Mock
-    SendEmailTask sendEmailTask;
-
-    @InjectMocks
-    UserTopicConsumer fixture;
-
-    @BeforeEach
-    public void setup() {
-        openMocks(this);
-    }
-
-    @BeforeEach
-    public void beforeEach() {
-        when(userRepository.save(any())).then(invocation ->
-            invocation.getArgument(0)
-        );
-
-        when(userRepository.save(any())).then(invocation ->
-            invocation.getArgument(0)
-        );
-    }
+    private final UserTopicConsumer fixture = new UserTopicConsumer(
+        userService,
+        sendEmailTask,
+        notificationService
+    );
 
     @Test
     public void testUserRegistered() {

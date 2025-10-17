@@ -18,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.net.URI;
 import java.time.Instant;
@@ -29,27 +27,24 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AuthServiceTest {
-    @Mock
-    UserRepository userRepository;
-    @Mock
-    PasswordCrypto passwordCrypto;
-    @Mock
-    UserEventSender userEventSender;
-    @Mock
-    OpenIdAuthentication openIdAuth;
-    @Mock
-    RotatedJwkSet jwkSet;
+    private final UserRepository userRepository = mock();
+    private final PasswordCrypto passwordCrypto = mock();
+    private final UserEventSender userEventSender = mock();
+    private final OpenIdAuthentication openIdAuth = mock();
+    private final RotatedJwkSet jwkSet = mock();
 
-    @InjectMocks
-    AuthService fixture;
+    private final AuthService fixture = new AuthService(
+        userRepository,
+        passwordCrypto,
+        userEventSender,
+        openIdAuth,
+        jwkSet
+    );
 
     @BeforeEach
     public void beforeEach() {
-        openMocks(this);
-
         // simulate setting of ID when record is persisted
         when(userRepository.save(any())).then((invocation) -> {
             User user = invocation.getArgument(0);

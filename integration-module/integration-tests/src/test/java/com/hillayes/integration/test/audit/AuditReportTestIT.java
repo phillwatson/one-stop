@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuditReportTestIT extends ApiTestBase {
@@ -17,10 +16,10 @@ public class AuditReportTestIT extends ApiTestBase {
     public void testGetAuditReportTemplates() {
         // given: a user
         UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build());
 
         AuditReportApi auditReportApi = new AuditReportApi(user.getAuthTokens());
@@ -38,10 +37,10 @@ public class AuditReportTestIT extends ApiTestBase {
     public void testAuditReportConfigs() {
         // given: a user
         UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build());
 
         AuditReportApi auditReportApi = new AuditReportApi(user.getAuthTokens());
@@ -62,8 +61,8 @@ public class AuditReportTestIT extends ApiTestBase {
         // and: the user creates an audit report config for that template
         AuditReportConfigRequest request = new AuditReportConfigRequest()
             .templateName(template.getName())
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50))
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50))
             .disabled(false)
             .source(AuditReportSource.ACCOUNT)
             .sourceId(UUID.randomUUID()); // this should identify a specific account
@@ -71,7 +70,7 @@ public class AuditReportTestIT extends ApiTestBase {
         // and: the user supplies config parameters for the report
         template.getParameters().forEach(param ->
             request.getParameters().put(param.getName(), switch (param.getType()) {
-                    case STRING -> randomAlphanumeric(20);
+                    case STRING -> randomStrings.nextAlphanumeric(20);
                     case BOOLEAN -> "true";
                     case LONG -> "1";
                     case DOUBLE -> "1.0";
@@ -121,14 +120,14 @@ public class AuditReportTestIT extends ApiTestBase {
 
         // given: the user updates the config
         AuditReportConfigRequest updateRequest = new AuditReportConfigRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50))
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50))
             .disabled(false)
             .templateName(template.getName())
             .source(AuditReportSource.ACCOUNT);
         template.getParameters().forEach(param ->
             updateRequest.getParameters().put(param.getName(), switch (param.getType()) {
-                    case STRING -> randomAlphanumeric(20);
+                    case STRING -> randomStrings.nextAlphanumeric(20);
                     case BOOLEAN -> "false";
                     case LONG -> "100";
                     case DOUBLE -> "123.4";

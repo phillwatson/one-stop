@@ -20,11 +20,10 @@ import com.hillayes.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -37,34 +36,27 @@ import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserServiceTest {
-    @Mock
-    UserRepository userRepository;
+    private final UserRepository userRepository = mock();
+    private final DeletedUserRepository deletedUserRepository = mock();
+    private final PasswordCrypto passwordCrypto = mock();
+    private final AuthTokens authTokens = mock();
+    private final UserEventSender userEventSender = mock();
+    private final Gateway gateway = mock();
 
-    @Mock
-    DeletedUserRepository deletedUserRepository;
-
-    @Mock
-    PasswordCrypto passwordCrypto;
-
-    @Mock
-    AuthTokens authTokens;
-
-    @Mock
-    UserEventSender userEventSender;
-    
-    @Mock
-    Gateway gateway;
-
-    @InjectMocks
-    UserService fixture;
+    private final UserService fixture = new UserService(
+        userRepository,
+        deletedUserRepository,
+        passwordCrypto,
+        userEventSender,
+        gateway,
+        authTokens,
+        Duration.ofMinutes(30)
+    );
 
     @BeforeEach
     public void beforeEach() {
-        openMocks(this);
-
         // simulate a successful password hash
         when(passwordCrypto.getHash(any())).thenReturn(insecure().nextAlphanumeric(20));
 
@@ -133,10 +125,10 @@ public class UserServiceTest {
 
         // and: a gateway error occurs
         when(gateway.getHost()).thenThrow(new IOException());
-        
+
         // when: we register a user
         // then: an exception is raised
-        UserRegistrationException exception = 
+        UserRegistrationException exception =
             assertThrows(UserRegistrationException.class, () -> fixture.registerUser(email));
 
         // and: a registration is recorded

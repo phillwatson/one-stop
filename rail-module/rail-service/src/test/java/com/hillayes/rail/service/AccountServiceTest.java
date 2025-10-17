@@ -7,10 +7,7 @@ import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.utils.TestData;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,23 +17,17 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AccountServiceTest {
-    @Mock
-    AccountRepository accountRepository;
-    @Mock
-    AccountBalanceRepository accountBalanceRepository;
-    @Mock
-    UserConsentService userConsentService;
+    private final AccountRepository accountRepository = mock();
+    private final AccountBalanceRepository accountBalanceRepository = mock();
+    private final UserConsentService userConsentService = mock();
 
-    @InjectMocks
-    AccountService fixture;
-
-    @BeforeEach
-    public void init() {
-        openMocks(this);
-    }
+    private final AccountService fixture = new AccountService(
+        accountRepository,
+        accountBalanceRepository,
+        userConsentService
+    );
 
     @Test
     public void testGetAccounts() {

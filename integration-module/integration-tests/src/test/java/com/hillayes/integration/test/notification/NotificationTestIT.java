@@ -26,7 +26,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,10 +54,10 @@ public class NotificationTestIT extends ApiTestBase {
     public void testUserConsentNotification() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -82,7 +81,7 @@ public class NotificationTestIT extends ApiTestBase {
             requisition = requisitionAdminApi.get(requisition.id);
         }
 
-        String errorDetails = randomAlphanumeric(30);
+        String errorDetails = randomStrings.nextAlphanumeric(30);
         try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
             // when: an error response is returned from the rails service
             userConsentApi.consentResponse(institution.getProvider(), requisition.reference, "mock-error-code", errorDetails);

@@ -27,12 +27,11 @@
 
     <modules>
         <module>client</module>
-
-        <module>share-price-module</module>
         <module>openapi-doc</module>
 
         <module>event-module</module>
         <module>lib-module</module>
+        <module>share-module</module>
 
         <module>audit-service</module>
         <module>notification-service</module>
@@ -53,6 +52,9 @@
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+        <mockito.version>5.18.0</mockito.version>
+        <mockito.agent>${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.agent>
 
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
@@ -253,7 +255,17 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>share-price-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>alpha-vantage-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>ft-finance-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -269,6 +281,11 @@
             <dependency>
                 <groupId>com.hillayes</groupId>
                 <artifactId>rail-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>share-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -443,6 +460,18 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>properties</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
                     <configuration>
@@ -450,6 +479,7 @@
                             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                             <maven.home>${maven.home}</maven.home>
                         </systemPropertyVariables>
+                        <argLine>-javaagent:${mockito.agent}</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -468,6 +498,7 @@
                                     <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                                     <maven.home>${maven.home}</maven.home>
                                 </systemPropertyVariables>
+                                <argLine>-javaagent:${mockito.agent}</argLine>
                             </configuration>
                         </execution>
                     </executions>

@@ -6,7 +6,6 @@ import com.hillayes.rail.errors.RailNotFoundException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 
 import java.util.stream.Stream;
 
@@ -15,9 +14,11 @@ import java.util.stream.Stream;
  */
 @ApplicationScoped
 public class RailProviderFactory {
-    @Inject
-    @Any
-    Instance<RailProviderApi> railProviderApis;
+    private final Instance<RailProviderApi> railProviderApis;
+
+    public RailProviderFactory(@Any Instance<RailProviderApi> railProviderApis) {
+        this.railProviderApis = railProviderApis;
+    }
 
     /**
      * Returns the RailProviderApi implementation for the RailProvider identified

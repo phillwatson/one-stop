@@ -7,11 +7,8 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.NotificationId;
 import com.hillayes.notification.service.NotificationService;
 import com.hillayes.notification.task.SendEmailTask;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -23,23 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class ConsentTopicConsumer_ConsentExpiredTest {
-    @Mock
-    SendEmailTask sendEmailTask;
+    private final SendEmailTask sendEmailTask = mock();
+    private final NotificationService notificationService = mock();
 
-    @Mock
-    NotificationService notificationService;
-
-    @InjectMocks
-    ConsentTopicConsumer fixture;
-
-    @BeforeEach
-    public void setup() {
-        openMocks(this);
-    }
+    private final ConsentTopicConsumer fixture = new ConsentTopicConsumer(
+        sendEmailTask,
+        notificationService
+    );
 
     @Test
     public void test() {

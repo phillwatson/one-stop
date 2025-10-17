@@ -3,21 +3,21 @@ package com.hillayes.rail.service;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Country;
 import com.hillayes.rail.repository.CountryRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Optional;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class CountryService {
-    @Inject
-    CountryRepository countryRepository;
+    private final CountryRepository countryRepository;
 
     public Collection<Country> list() {
         log.info("List countries");

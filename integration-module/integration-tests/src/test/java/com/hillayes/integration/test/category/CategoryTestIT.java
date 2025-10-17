@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,18 +29,18 @@ public class CategoryTestIT extends ApiTestBase {
     public void testCategoryGroups() {
         // given: a user
         UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
         // when: the user creates a category group
         CategoryGroupRequest createGroupRequest = new CategoryGroupRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50));
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50));
         CategoryGroupResponse group = categoryApi.createCategoryGroup(createGroupRequest);
 
         // then: the new group is returned
@@ -52,8 +51,8 @@ public class CategoryTestIT extends ApiTestBase {
 
         // when: the category group is updated
         CategoryGroupRequest updateGroupRequest = new CategoryGroupRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50));
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50));
         categoryApi.updateCategoryGroup(group.getId(), updateGroupRequest);
 
         // and: the updated category group is retrieved
@@ -69,8 +68,8 @@ public class CategoryTestIT extends ApiTestBase {
         allGroupIds.add(group.getId());
         allGroupIds.addAll(IntStream.range(0, 19)
             .mapToObj(i -> new CategoryGroupRequest()
-                .name(randomAlphanumeric(20))
-                .description(randomAlphanumeric(50))
+                .name(randomStrings.nextAlphanumeric(20))
+                .description(randomStrings.nextAlphanumeric(50))
             )
             .map(request -> categoryApi.createCategoryGroup(request).getId())
             .toList()
@@ -98,24 +97,24 @@ public class CategoryTestIT extends ApiTestBase {
     public void testCategories() {
         // given: a user
         UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
         // and: the user creates a category group
         CategoryGroupResponse group = categoryApi.createCategoryGroup(new CategoryGroupRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50)));
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50)));
         assertNotNull(group);
 
         // when: the user creates a category within the group
         CategoryRequest createCategoryRequest = new CategoryRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50))
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50))
             .colour("#112233");
         CategoryResponse category = categoryApi.createCategory(group.getId(), createCategoryRequest);
 
@@ -127,8 +126,8 @@ public class CategoryTestIT extends ApiTestBase {
 
         // when: the category is updated
         CategoryRequest updateCategoryRequest = new CategoryRequest()
-            .name(randomAlphanumeric(20))
-            .description(randomAlphanumeric(50))
+            .name(randomStrings.nextAlphanumeric(20))
+            .description(randomStrings.nextAlphanumeric(50))
             .colour("#445566");
         categoryApi.updateCategory(category.getId(), updateCategoryRequest);
 
@@ -147,8 +146,8 @@ public class CategoryTestIT extends ApiTestBase {
         allCategoryIds.add(category.getId());
         allCategoryIds.addAll(IntStream.range(0, 19)
             .mapToObj(i -> new CategoryRequest()
-                .name(randomAlphanumeric(20))
-                .description(randomAlphanumeric(50))
+                .name(randomStrings.nextAlphanumeric(20))
+                .description(randomStrings.nextAlphanumeric(50))
                 .colour("#778899")
             )
             .map(request -> categoryApi.createCategory(group.getId(), request).getId())
@@ -216,10 +215,10 @@ public class CategoryTestIT extends ApiTestBase {
 
         // and: a user is created
         UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build());
 
         // and: the user creates accounts - and the first account is selected
@@ -229,20 +228,20 @@ public class CategoryTestIT extends ApiTestBase {
 
         // and: the user creates a category group
         CategoryGroupResponse group = categoryApi.createCategoryGroup(new CategoryGroupRequest()
-            .name(randomAlphanumeric(20)));
+            .name(randomStrings.nextAlphanumeric(20)));
         assertNotNull(group);
 
         // and: the user creates a category within the group
         CategoryResponse category = categoryApi.createCategory(group.getId(), new CategoryRequest()
-            .name(randomAlphanumeric(20)));
+            .name(randomStrings.nextAlphanumeric(20)));
         assertNotNull(category);
 
         // when: the user creates category selectors
         List<AccountCategorySelector> setSelectorsRequest = IntStream.range(0, 10)
             .mapToObj(i -> new AccountCategorySelector()
-                .creditorContains(randomAlphanumeric(10))
-                .refContains(randomAlphanumeric(10))
-                .infoContains(randomAlphanumeric(10))
+                .creditorContains(randomStrings.nextAlphanumeric(10))
+                .refContains(randomStrings.nextAlphanumeric(10))
+                .infoContains(randomStrings.nextAlphanumeric(10))
             ).toList();
         List<AccountCategorySelector> selectors =
             categoryApi.setAccountCategorySelectors(category.getId(), accountId, setSelectorsRequest);
@@ -261,9 +260,9 @@ public class CategoryTestIT extends ApiTestBase {
         List<AccountCategorySelector> updateSelectorsRequest = Streams.concat(
                 setSelectorsRequest.stream().limit(5),
                 IntStream.range(0, 10).mapToObj(i -> new AccountCategorySelector()
-                    .creditorContains(randomAlphanumeric(10))
-                    .refContains(randomAlphanumeric(10))
-                    .infoContains(randomAlphanumeric(10))
+                    .creditorContains(randomStrings.nextAlphanumeric(10))
+                    .refContains(randomStrings.nextAlphanumeric(10))
+                    .infoContains(randomStrings.nextAlphanumeric(10))
                 )
             )
             .toList();

@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class AccountAdminResource {
     @Inject
-    private AccountService accountService;
+    AccountService accountService;
 
     @GET
     @Path("{id}")
