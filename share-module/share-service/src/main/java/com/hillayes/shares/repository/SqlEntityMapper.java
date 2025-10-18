@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class SqlEntityMapper<T> {
     /**
@@ -70,9 +71,9 @@ public abstract class SqlEntityMapper<T> {
      * PreparedStatement.
      */
     public void map(PreparedStatement statement, int index, T entity) {
-        int offset = index * colMappings.size();
+        AtomicInteger offset = new AtomicInteger(index * colMappings.size());
         colMappings.forEach((key, value) ->
-            value.map(statement, offset, entity)
+            value.map(statement, offset.incrementAndGet(), entity)
         );
     }
 

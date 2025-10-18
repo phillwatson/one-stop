@@ -1,5 +1,6 @@
 package com.hillayes.shares.repository;
 
+import com.hillayes.commons.correlation.Correlation;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
@@ -110,14 +111,17 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
         batch.forEachRemaining(asList::add);
 
         // queue a threaded task to insert the records
+        String correlationId = Correlation.getCorrelationId().orElse(null);
         pendingBatchCount.incrementAndGet();
-        executorService.submit(() -> {
-            try {
-                _saveBatch(asList);
-            } finally {
-                pendingBatchCount.decrementAndGet();
-            }
-        });
+        executorService.submit(() -> Correlation.run(
+            correlationId,
+            () -> {
+                try {
+                    _saveBatch(asList);
+                } finally {
+                    pendingBatchCount.decrementAndGet();
+                }
+            }));
     }
 
     /**
