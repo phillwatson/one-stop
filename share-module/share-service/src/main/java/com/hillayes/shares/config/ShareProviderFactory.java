@@ -5,7 +5,6 @@ import com.hillayes.shares.errors.ProviderNotFoundException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 
 import com.hillayes.shares.api.ShareProviderApi;
 
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
  */
 @ApplicationScoped
 public class ShareProviderFactory {
-    private Instance<ShareProviderApi> shareProviderApis;
+    private final Instance<ShareProviderApi> shareProviderApis;
 
     public ShareProviderFactory(@Any Instance<ShareProviderApi> allProviders) {
         shareProviderApis = allProviders;

@@ -1,10 +1,12 @@
 package com.hillayes.shares.repository;
 
 import com.hillayes.shares.domain.PriceHistory;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@ApplicationScoped
 public class PriceHistorySqlMapper extends SqlEntityMapper<PriceHistory> {
     @Override
     public Map<String, ColMapper<PriceHistory>> initColMappings() {

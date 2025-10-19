@@ -8,7 +8,6 @@ import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.domain.SharePriceResolution;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
-import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 

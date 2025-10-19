@@ -5,8 +5,11 @@ import com.hillayes.shares.domain.ShareIndex;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -18,6 +21,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor
 public class ShareIndexRepositoryTest {
     private final ShareIndexRepository shareIndexRepository;
+
+    @BeforeEach
+    public void beforeEach() {
+        shareIndexRepository.deleteAll();
+    }
 
     @Test
     public void testFindByIsin() {
