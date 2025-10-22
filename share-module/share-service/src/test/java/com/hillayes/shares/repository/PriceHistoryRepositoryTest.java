@@ -5,6 +5,7 @@ import com.hillayes.shares.domain.PriceHistory;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.domain.SharePriceResolution;
 import com.hillayes.shares.errors.DatabaseException;
+import com.hillayes.shares.utils.TestData;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
@@ -19,9 +20,9 @@ import org.mockito.ArgumentCaptor;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,21 +62,33 @@ public class PriceHistoryRepositoryTest {
     @Test
     public void testListPrices() {
         // Given:
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        LocalDate fromDate = LocalDate.now().minusDays(20);
-        LocalDate toDate = LocalDate.now().minusDays(2);
+        ShareIndex shareIndex = shareIndexRepository.save(mockShareIndex());
+
+        // And: the index has a collection of daily prices
+        LocalDate startDate = LocalDate.now().minusDays(50);
+        LocalDate today = LocalDate.now();
+        LocalDate date = startDate;
+        List<PriceHistory> prices = new ArrayList<>();
+        while (date.isBefore(today)) {
+            prices.add(TestData.mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY));
+            date = date.plusDays(1);
+        }
+        priceHistoryRepository.saveAll(prices);
 
         // When:
+        LocalDate fromDate = LocalDate.now().minusDays(40);
+        LocalDate toDate = LocalDate.now().minusDays(2);
         Page<PriceHistory> page = priceHistoryRepository
-            .listPrices(shareIndex, SharePriceResolution.DAILY, fromDate, toDate, 2, 20);
+            .listPrices(shareIndex, SharePriceResolution.DAILY, fromDate, toDate, 1, 20);
 
         // Then:
         assertNotNull(page);
-        assertTrue(page.isEmpty());
-        assertEquals(0, page.getContentSize());
-        assertEquals(2, page.getPageIndex());
+        assertFalse(page.isEmpty());
+        assertEquals(38, page.getTotalCount());
+        assertEquals(2, page.getTotalPages());
+        assertEquals(18, page.getContentSize());
+        assertEquals(1, page.getPageIndex());
         assertEquals(20, page.getPageSize());
-        assertEquals(0, page.getTotalPages());
     }
 
     @Test

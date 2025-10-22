@@ -84,7 +84,8 @@ public class TestData {
             BigDecimal.valueOf(randomNumbers.randomDouble(10.00, 20.00)),
             BigDecimal.valueOf(randomNumbers.randomDouble(10.00, 20.00)),
             BigDecimal.valueOf(randomNumbers.randomDouble(10.00, 20.00)),
-            BigDecimal.valueOf(randomNumbers.randomDouble(10.00, 20.00))
+            BigDecimal.valueOf(randomNumbers.randomDouble(10.00, 20.00)),
+            randomNumbers.randomLong(100, 2000)
         );
     }
 }

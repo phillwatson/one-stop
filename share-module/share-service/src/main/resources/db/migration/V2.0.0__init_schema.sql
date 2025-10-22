@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
 -- records the shares that have been registered by any user
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.share_index (
     id uuid PRIMARY KEY,
-    isin text NOT NULL,
+    isin text NOT NULL UNIQUE,
     name text NOT NULL,
     currency_code text NOT NULL,
     provider text NOT NULL
@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.price_history (
     high_price numeric(16, 4) NOT NULL,
     low_price numeric(16, 4) NOT NULL,
     close_price numeric(16, 4) NOT NULL,
-    PRIMARY KEY (share_index_id, market_date)
+    volume bigint NOT NULL,
+    PRIMARY KEY (share_index_id, resolution, market_date)
 );
 
 
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.price_history (
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.portfolio (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL,
-    name text NOT NULL,
+    name text NOT NULL UNIQUE,
     date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_user_portfolio ON ${flyway:defaultSchema}.portfolio (user_id);

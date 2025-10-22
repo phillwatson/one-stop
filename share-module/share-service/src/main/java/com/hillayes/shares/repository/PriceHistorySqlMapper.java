@@ -18,6 +18,7 @@ public class PriceHistorySqlMapper extends SqlEntityMapper<PriceHistory> {
         result.put("high_price", (s, offset, entity) -> setDecimal(s, offset, entity.getHigh()));
         result.put("low_price", (s, offset, entity) -> setDecimal(s, offset, entity.getLow()));
         result.put("close_price", (s, offset, entity) -> setDecimal(s, offset, entity.getClose()));
+        result.put("volume", (s, offset, entity) -> setLong(s, offset, entity.getVolume()));
 
         return result;
     }

@@ -10,11 +10,13 @@ import java.time.LocalDate;
  * @param high The highest price achieved on the date.
  * @param low The lowest price achieved on the date.
  * @param close The price at market close on the date.
+ * @param volume The number of shares traded on the date.
  */
 public record PriceData(
     LocalDate date,
     BigDecimal open,
     BigDecimal high,
     BigDecimal low,
-    BigDecimal close
+    BigDecimal close,
+    Long volume
 ) {}

@@ -17,7 +17,6 @@ import org.hibernate.Session;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -222,7 +221,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * @param shareIndex the ShareIndex for which the prices are required.
      * @param resolution the resolution at which the prices are required.
      * @param fromDate the earliest date to be included in the page (inclusive).
-     * @param toDate the latest date to be included in the page (inclusive).
+     * @param toDate the latest date to be included in the page (exclusive).
      * @param pageNumber the (zero based) index of the page to be returned.
      * @param pageSize the size of the page, and the maximum number of records to be returned.
      * @return the page of records, or an empty page if no records are found.
@@ -243,7 +242,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * @param shareIndexId the identity of the ShareIndex for which the prices are required.
      * @param resolution the resolution at which the prices are required.
      * @param fromDate the earliest date to be included in the page (inclusive).
-     * @param toDate the latest date to be included in the page (inclusive).
+     * @param toDate the latest date to be included in the page (exclusive).
      * @param pageNumber the (zero based) index of the page to be returned.
      * @param pageSize the size of the page, and the maximum number of records to be returned.
      * @return the page of records, or an empty page if no records are found.
@@ -256,7 +255,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
         return pageAll("id.shareIndexId = :shareIndexId " +
                 "and id.resolution = :resolution " +
                 "and id.date >= :fromDate " +
-                "and id.date <= :toDate",
+                "and id.date < :toDate",
             pageNumber, pageSize,
             OrderBy.by("id.shareIndexId").and("id.date"),
             Map.of(

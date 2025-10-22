@@ -6,6 +6,7 @@ import org.postgresql.util.PGobject;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
@@ -81,6 +82,15 @@ public abstract class SqlEntityMapper<T> {
         try {
             if (value == null) statement.setNull(index, java.sql.Types.VARCHAR);
             else statement.setString(index, value);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void setLong(PreparedStatement statement, int index, Long value) {
+        try {
+            if (value == null) statement.setNull(index, Types.BIGINT);
+            else statement.setLong(index, value);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

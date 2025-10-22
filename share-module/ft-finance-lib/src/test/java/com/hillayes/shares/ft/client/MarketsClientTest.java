@@ -24,10 +24,10 @@ public class MarketsClientTest {
             IsinIssueLookup.builder().isin("GB00B0CNH502").issueId("74137467").name("Legal & General UK 100 Index Trust I Class Accumulation").currencyCode("GBP").build(),
             IsinIssueLookup.builder().isin("GB00B0CNGT73").issueId("74137468").name("Legal & General US Index Trust I Class Accumulation").currencyCode("GBP").build(),
             IsinIssueLookup.builder().isin("GB00B8XYYQ86").issueId("52606664").name("Royal London Short Term Money Market Fund Y Acc").currencyCode("GBP").build(),
-            IsinIssueLookup.builder().isin("AV.").issueId("54712").name("Aviva PLC").currencyCode("GBP").build(),
-            IsinIssueLookup.builder().isin("LGEN").issueId("183100").name("Legal & General Group PLC").currencyCode("GBP").build(),
-            IsinIssueLookup.builder().isin("NG.").issueId("2534902").name("National Grid PLC").currencyCode("GBP").build(),
-            IsinIssueLookup.builder().isin("TW.").issueId("274273").name("Taylor Wimpey PLC").currencyCode("GBP").build()
+            IsinIssueLookup.builder().isin("GB00BPQY8M80").issueId("54712").name("Aviva PLC").currencyCode("GBP").build(),
+            IsinIssueLookup.builder().isin("GB0005603997").issueId("183100").name("Legal & General Group PLC").currencyCode("GBP").build(),
+            IsinIssueLookup.builder().isin("GB00BDR05C01").issueId("2534902").name("National Grid PLC").currencyCode("GBP").build(),
+            IsinIssueLookup.builder().isin("GB0008782301").issueId("274273").name("Taylor Wimpey PLC").currencyCode("GBP").build()
         ).forEach(expected -> {
             marketsClient.getIssueID(expected.getIsin()).ifPresentOrElse(lookup -> {
                 assertNotNull(lookup.getIssueId());
@@ -63,6 +63,13 @@ public class MarketsClientTest {
                 assertEquals(expectedDay, price.date().getDayOfWeek());
             }
             prev.set(price.date());
+
+            assertNotNull(price.open());
+            assertNotNull(price.close());
+            assertNotNull(price.low());
+            assertNotNull(price.high());
+            assertNotNull(price.volume());
+            assertTrue(price.volume() > 0);
         });
     }
 }

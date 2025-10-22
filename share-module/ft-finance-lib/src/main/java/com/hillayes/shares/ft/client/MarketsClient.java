@@ -146,13 +146,15 @@ public class MarketsClient {
                 .map(row -> {
                     Elements cols = row.getElementsByTag("td");
                     String date = cols.get(0).getElementsByClass("mod-ui-hide-small-below").get(0).text();
+                    String volume = cols.get(5).getElementsByClass("mod-ui-hide-small-below").get(0).text();
 
                     return new PriceData(
                         LocalDate.parse(date, DATE_PARSER),
                         BigDecimal.valueOf(Double.parseDouble(cols.get(1).text().replace(",", ""))),
                         BigDecimal.valueOf(Double.parseDouble(cols.get(2).text().replace(",", ""))),
                         BigDecimal.valueOf(Double.parseDouble(cols.get(3).text().replace(",", ""))),
-                        BigDecimal.valueOf(Double.parseDouble(cols.get(4).text().replace(",", "")))
+                        BigDecimal.valueOf(Double.parseDouble(cols.get(4).text().replace(",", ""))),
+                        Long.valueOf(volume.replace(",", ""))
                     );
                 })
                 .sorted(Comparator.comparing(PriceData::date))

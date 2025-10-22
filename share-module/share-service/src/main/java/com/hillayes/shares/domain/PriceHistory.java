@@ -47,6 +47,10 @@ public class PriceHistory {
     @Column(name = "close_price", nullable = false)
     private BigDecimal close;
 
+    @ToString.Include
+    @Column(name = "volume", nullable = false)
+    private long volume;
+
     @Data
     @lombok.Builder
     @NoArgsConstructor
