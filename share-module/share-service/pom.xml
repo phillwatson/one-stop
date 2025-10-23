@@ -79,7 +79,7 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
+            <artifactId>outbox-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
