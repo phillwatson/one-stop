@@ -378,22 +378,22 @@ public class ShareIndexResourceTest extends TestBase {
 
         assertNotNull(response.getLinks().getPrevious());
         assertEquals(path, response.getLinks().getFirst().getPath());
-        assertTrue(response.getLinks().getFirst().getQuery().contains(fromDate.toString()));
-        assertTrue(response.getLinks().getFirst().getQuery().contains(toDate.toString()));
+        assertTrue(response.getLinks().getPrevious().getQuery().contains(fromDate.toString()));
+        assertTrue(response.getLinks().getPrevious().getQuery().contains(toDate.toString()));
         assertTrue(response.getLinks().getPrevious().getQuery().contains("page-size=12"));
         assertTrue(response.getLinks().getPrevious().getQuery().contains("page=1"));
 
         assertNotNull(response.getLinks().getNext());
         assertEquals(path, response.getLinks().getFirst().getPath());
-        assertTrue(response.getLinks().getFirst().getQuery().contains(fromDate.toString()));
-        assertTrue(response.getLinks().getFirst().getQuery().contains(toDate.toString()));
+        assertTrue(response.getLinks().getNext().getQuery().contains(fromDate.toString()));
+        assertTrue(response.getLinks().getNext().getQuery().contains(toDate.toString()));
         assertTrue(response.getLinks().getNext().getQuery().contains("page-size=12"));
         assertTrue(response.getLinks().getNext().getQuery().contains("page=3"));
 
         assertNotNull(response.getLinks().getLast());
         assertEquals(path, response.getLinks().getFirst().getPath());
-        assertTrue(response.getLinks().getFirst().getQuery().contains(fromDate.toString()));
-        assertTrue(response.getLinks().getFirst().getQuery().contains(toDate.toString()));
+        assertTrue(response.getLinks().getLast().getQuery().contains(fromDate.toString()));
+        assertTrue(response.getLinks().getLast().getQuery().contains(toDate.toString()));
         assertTrue(response.getLinks().getLast().getQuery().contains("page-size=12"));
         assertTrue(response.getLinks().getLast().getQuery().contains("page=7"));
     }
