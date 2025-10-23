@@ -11,7 +11,7 @@ import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.onestop.api.*;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.yapily.YapilySimClient;
 import io.restassured.response.Response;
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,10 +54,10 @@ public class RequisitionFlowTestIT extends ApiTestBase {
     public void testUserConsentEndToEnd() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -133,7 +132,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         // then: the requisitioned accounts are identified
         assertFalse(requisition.accounts.isEmpty());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the success response is returned from the rails service
             Response response = userConsentApi.consentResponse(institution.getProvider(), requisition.reference, null, null);
 
@@ -217,7 +216,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             assertEquals(expectedTotalCount, totalCount);
         });
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the user deletes the consent
             userConsentApi.deleteConsent(institution.getId(), true);
 

@@ -5,7 +5,7 @@ import com.hillayes.integration.api.UserOnboardApi;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.sim.email.EmailMessage;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UserUtils {
     public static List<UserEntity> createUsers(int wiremockPort,
                                                List<UserEntity> users) {
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(wiremockPort)) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(wiremockPort)) {
             return users.stream()
                 .map(user -> __createUser(emailSim, user))
                 .toList();
@@ -31,12 +31,12 @@ public class UserUtils {
 
     public static UserEntity createUser(int wiremockPort,
                                          UserEntity user) {
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(wiremockPort)) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(wiremockPort)) {
             return __createUser(emailSim, user);
         }
     }
 
-    private static UserEntity __createUser(SendWithBlueSimulator emailSim,
+    private static UserEntity __createUser(SendInBlueSimulator emailSim,
                                            UserEntity user) {
         log.info("Creating user [username: {}]", user.getUsername());
         UserOnboardApi userOnboardApi = new UserOnboardApi();

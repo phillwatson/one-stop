@@ -19,7 +19,6 @@ import com.hillayes.user.event.UserEventSender;
 import com.hillayes.user.repository.DeletedUserRepository;
 import com.hillayes.user.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -38,20 +37,30 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class UserService {
-    @Inject
-    UserRepository userRepository;
-    @Inject
-    DeletedUserRepository deletedUserRepository;
-    @Inject
-    PasswordCrypto passwordCrypto;
-    @Inject
-    UserEventSender userEventSender;
-    @Inject
-    Gateway gateway;
-    @Inject
-    AuthTokens authTokens;
-    @ConfigProperty(name = "one-stop.auth.onboarding.token-expires-in")
-    Duration tokenDuration;
+    private final UserRepository userRepository;
+    private final DeletedUserRepository deletedUserRepository;
+    private final PasswordCrypto passwordCrypto;
+    private final UserEventSender userEventSender;
+    private final Gateway gateway;
+    private final AuthTokens authTokens;
+    private final Duration tokenDuration;
+
+    public UserService(UserRepository userRepository,
+                       DeletedUserRepository deletedUserRepository,
+                       PasswordCrypto passwordCrypto,
+                       UserEventSender userEventSender,
+                       Gateway gateway,
+                       AuthTokens authTokens,
+                       @ConfigProperty(name = "one-stop.auth.onboarding.token-expires-in")
+                       Duration tokenDuration) {
+        this.userRepository = userRepository;
+        this.deletedUserRepository = deletedUserRepository;
+        this.passwordCrypto = passwordCrypto;
+        this.userEventSender = userEventSender;
+        this.gateway = gateway;
+        this.authTokens = authTokens;
+        this.tokenDuration = tokenDuration;
+    }
 
 
     /**

@@ -1,7 +1,8 @@
 package com.hillayes.nordigen.resource;
 
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.nordigen.model.*;
+import com.hillayes.nordigen.model.Institution;
+import com.hillayes.nordigen.model.InstitutionDetail;
 import com.hillayes.nordigen.service.InstitutionService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ import java.util.List;
 @Slf4j
 public class InstitutionAdminResource {
     @Inject
-    private InstitutionService institutionService;
+    InstitutionService institutionService;
 
     @GET
     public List<Institution> listInstitutions(@QueryParam("country") String countryCode,

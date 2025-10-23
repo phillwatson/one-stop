@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,25 +24,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class CategoryServiceTest {
-    @Mock
-    CategoryGroupRepository categoryGroupRepository;
+    private final CategoryGroupRepository categoryGroupRepository = mock();
+    private final CategoryRepository categoryRepository = mock();
+    private final AccountRepository accountRepository = mock();
 
-    @Mock
-    CategoryRepository categoryRepository;
-
-    @Mock
-    AccountRepository accountRepository;
-
-    @InjectMocks
-    CategoryService fixture;
+    private final CategoryService fixture = new CategoryService(
+        categoryGroupRepository,
+        categoryRepository,
+        accountRepository
+    );
 
     @BeforeEach
     public void initTests() {
-        openMocks(this);
-
         // mock the save method to return a new UUID
         when(categoryGroupRepository.save(any())).then(invocation -> {
             CategoryGroup result = invocation.getArgument(0);

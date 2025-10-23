@@ -7,10 +7,7 @@ import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.utils.TestData;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,22 +17,17 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AccountTransactionServiceTest {
-    @Mock
-    AccountService accountService;
+    private final AccountService accountService = mock();
+    private final CategoryService categoryService = mock();
+    private final AccountTransactionRepository accountTransactionRepository = mock();
 
-    @Mock
-    AccountTransactionRepository accountTransactionRepository;
-
-    @InjectMocks
-    AccountTransactionService fixture;
-
-    @BeforeEach
-    public void init() {
-        openMocks(this);
-    }
+    private final AccountTransactionService fixture = new AccountTransactionService(
+        accountService,
+        categoryService,
+        accountTransactionRepository
+    );
 
     @Test
     public void testGetTransactions_WithAccountId() {

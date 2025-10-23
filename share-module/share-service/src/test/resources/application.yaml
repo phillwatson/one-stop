@@ -1,0 +1,15 @@
+quarkus:
+  hibernate-orm:
+    log:
+      sql: true
+      bind-parameters: true
+
+  log:
+    category:
+      "org.apache.http.wire":
+        level: DEBUG
+
+one-stop:
+  auth:
+    xsrf:
+      secret: "this is a secret for xsrf tokens"

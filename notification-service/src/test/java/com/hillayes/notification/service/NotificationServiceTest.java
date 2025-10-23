@@ -14,8 +14,6 @@ import com.hillayes.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -27,30 +25,23 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class NotificationServiceTest {
-    @Spy
-    ObjectMapper objectMapper = new ObjectMapper()
+    private final ObjectMapper objectMapper = new ObjectMapper()
         .configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
-    @Mock
-    NotificationRepository notificationRepository;
-
-    @Mock
-    UserService userService;
-
-    @Mock
-    NotificationConfiguration configuration;
+    private final NotificationRepository notificationRepository = mock();
+    private final UserService userService = mock();
+    private final NotificationConfiguration configuration = mock();
 
     @InjectMocks
-    NotificationService fixture;
-
-    @BeforeEach
-    public void setup() {
-        openMocks(this);
-    }
+    private final NotificationService fixture = new NotificationService(
+        objectMapper,
+        configuration,
+        notificationRepository,
+        userService
+    );
 
     @BeforeEach
     public void beforeEach() {

@@ -3,43 +3,37 @@ package com.hillayes.notification.task;
 import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.TaskContext;
 import com.hillayes.notification.config.EmailConfiguration;
+import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.service.SendEmailService;
 import com.hillayes.notification.service.UserService;
-import com.hillayes.notification.config.TemplateName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import java.util.*;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SendEmailTaskTest {
-    @Mock
-    UserService userService;
+    private final UserService userService = mock();
+    private final SendEmailService sendEmailService = mock();
+    private final SchedulerFactory scheduler = mock();
 
-    @Mock
-    SendEmailService sendEmailService;
-
-    @Mock
-    SchedulerFactory scheduler;
-
-    @InjectMocks
-    SendEmailTask fixture;
+    private final SendEmailTask fixture = new SendEmailTask(
+        userService,
+        sendEmailService
+    );
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        fixture = new SendEmailTask(userService, sendEmailService);
         fixture.taskInitialised(scheduler);
     }
 

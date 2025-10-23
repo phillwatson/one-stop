@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.UriBuilder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -32,6 +33,7 @@ import java.util.*;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class UserConsentService {
     // those statuses in which an existing user-consent can be renewed/registered
@@ -44,29 +46,14 @@ public class UserConsentService {
         ConsentStatus.INITIATED, ConsentStatus.GIVEN
     );
 
-    @Inject
-    ServiceConfiguration configuration;
-
-    @Inject
-    UserConsentRepository userConsentRepository;
-
-    @Inject
-    InstitutionService institutionService;
-
-    @Inject
-    RailProviderFactory railProviderFactory;
-
-    @Inject
-    PollConsentAdhocTask pollConsentAdhocTask;
-
-    @Inject
-    ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
-
-    @Inject
-    ConsentEventSender consentEventSender;
-
-    @Inject
-    Gateway gateway;
+    private final ServiceConfiguration configuration;
+    private final UserConsentRepository userConsentRepository;
+    private final InstitutionService institutionService;
+    private final RailProviderFactory railProviderFactory;
+    private final PollConsentAdhocTask pollConsentAdhocTask;
+    private final ConsentTimeoutAdhocTask consentTimeoutAdhocTask;
+    private final ConsentEventSender consentEventSender;
+    private final Gateway gateway;
 
     public Page<UserConsent> listConsents(UUID userId, int page, int pageSize) {
         log.info("Listing user's banks [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
