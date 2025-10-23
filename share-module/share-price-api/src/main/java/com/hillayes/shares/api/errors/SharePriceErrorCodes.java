@@ -1,4 +1,4 @@
-package com.hillayes.shares.ft.errors;
+package com.hillayes.shares.api.errors;
 
 import com.hillayes.exception.ErrorCode;
 import lombok.Getter;

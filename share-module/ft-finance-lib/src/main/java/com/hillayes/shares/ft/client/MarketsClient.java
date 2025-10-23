@@ -6,8 +6,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.Strings;
 import com.hillayes.shares.api.domain.PriceData;
+import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.shares.ft.domain.IsinIssueLookup;
-import com.hillayes.shares.ft.errors.ShareServiceException;
+import com.hillayes.shares.api.errors.ShareServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class MarketsClient {
                 .build()
             );
         } catch (IOException e) {
-            throw new ShareServiceException("IsinLookupService", e, Map.of("isin", stockIsin));
+            throw new ShareServiceException(ShareProvider.FT_MARKET_DATA, "IsinLookupService", e, Map.of("isin", stockIsin));
         }
     }
 
@@ -95,10 +96,7 @@ public class MarketsClient {
 
     private String extractName(Document doc) {
         String result = doc.title();
-        if (Strings.isBlank(result)) {
-            return null;
-        }
-        return result.split(",")[0];
+        return Strings.isBlank(result) ? null : result.split(",")[0];
     }
 
     private String extractCurrencyCode(Document doc) {
@@ -163,7 +161,7 @@ public class MarketsClient {
             log.debug("Retrieved share prices [issueId: {}, startDate: {}, endDate: {}, size: {}]", issueId, startDate, endDate, result.size());
             return result;
         } catch (IOException e) {
-            throw new ShareServiceException("PriceLookupService", e,
+            throw new ShareServiceException(ShareProvider.FT_MARKET_DATA, "PriceLookupService", e,
                 Map.of(
                     "issueId", issueId,
                     "startDate", startDate,
