@@ -5,11 +5,8 @@ import com.hillayes.notification.config.TemplateName;
 import com.hillayes.notification.domain.User;
 import com.hillayes.notification.repository.UserRepository;
 import com.hillayes.notification.task.SendEmailTask;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.Locale;
 import java.util.Map;
@@ -22,22 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserService_UserDeletedTest {
-    @Mock
-    UserRepository userRepository;
+    private final UserRepository userRepository = mock();
+    private final SendEmailTask sendEmailTask = mock();
 
-    @Mock
-    SendEmailTask sendEmailTask;
-
-    @InjectMocks
-    UserService fixture;
-
-    @BeforeEach
-    public void setup() {
-        openMocks(this);
-    }
+    private final UserService fixture = new UserService(
+        userRepository,
+        sendEmailTask
+    );
 
     @Test
     public void testUserDeleted() {

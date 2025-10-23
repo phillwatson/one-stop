@@ -4,8 +4,8 @@ import com.hillayes.executors.scheduler.SchedulerFactory;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.rail.repository.AuditReportConfigRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,13 +14,11 @@ import lombok.extern.slf4j.Slf4j;
  * one configured audit report.
  */
 @ApplicationScoped
+@RequiredArgsConstructor
 @Slf4j
 public class AuditReportsScheduledTask implements NamedScheduledTask {
-    @Inject
-    AuditReportConfigRepository auditReportRepository;
-
-    @Inject
-    UserAuditReportsAdhocTask userAuditReportsAdhocTask;
+    private final AuditReportConfigRepository auditReportRepository;
+    private final UserAuditReportsAdhocTask userAuditReportsAdhocTask;
 
 
     @Override

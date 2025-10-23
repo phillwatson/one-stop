@@ -8,8 +8,6 @@ import com.hillayes.notification.task.SendEmailTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -25,22 +23,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class UserService_UserUpdatedTest {
-    @Mock
-    UserRepository userRepository;
+    private final UserRepository userRepository = mock();
+    private final SendEmailTask sendEmailTask = mock();
 
-    @Mock
-    SendEmailTask sendEmailTask;
-
-    @InjectMocks
-    UserService fixture;
+    private final UserService fixture = new UserService(
+        userRepository,
+        sendEmailTask
+    );
 
     @BeforeEach
     public void beforeEach() {
-        openMocks(this);
-
         when(userRepository.save(any())).then(invocation ->
             invocation.getArgument(0)
         );

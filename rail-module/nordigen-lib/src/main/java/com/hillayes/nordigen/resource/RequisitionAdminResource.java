@@ -19,10 +19,11 @@ import java.util.Map;
 @RolesAllowed("admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+//@RequiredArgsConstructor
 @Slf4j
 public class RequisitionAdminResource {
     @Inject
-    private RequisitionService requisitionService;
+    RequisitionService requisitionService;
 
     @GET
     public PaginatedList<Requisition> list(@QueryParam("limit") int limit,

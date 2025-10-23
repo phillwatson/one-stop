@@ -8,13 +8,10 @@ import com.hillayes.nordigen.service.AgreementService;
 import com.hillayes.nordigen.service.InstitutionService;
 import com.hillayes.nordigen.service.RequisitionService;
 import com.hillayes.rail.api.RailProviderApi;
-import com.hillayes.rail.api.domain.RailAccountStatus;
-import com.hillayes.rail.api.domain.RailBalance;
-import com.hillayes.rail.api.domain.RailInstitution;
 import com.hillayes.rail.api.domain.*;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -22,26 +19,19 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Stream;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 @Slf4j
 public class NordigenRailProvider implements RailProviderApi {
     // The number of days for which account access will be agreed
     private final static int ACCESS_VALID_FOR_DAYS = 90;
     private final static List<String> CONSENT_SCOPES = List.of("balances", "details", "transactions");
 
-    @Inject
-    AccountService accountService;
-
-    @Inject
-    RequisitionService requisitionService;
-
-    @Inject
-    AgreementService agreementService;
-
-    @Inject
-    InstitutionService institutionService;
+    private final AccountService accountService;
+    private final RequisitionService requisitionService;
+    private final AgreementService agreementService;
+    private final InstitutionService institutionService;
 
     @Override
     public RailProvider getProviderId() {

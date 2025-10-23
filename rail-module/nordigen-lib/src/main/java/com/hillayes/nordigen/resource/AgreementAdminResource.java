@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class AgreementAdminResource {
     @Inject
-    private AgreementService agreementService;
+    AgreementService agreementService;
 
     @GET
     public PaginatedList<EndUserAgreement> list(@QueryParam("limit") int limit,

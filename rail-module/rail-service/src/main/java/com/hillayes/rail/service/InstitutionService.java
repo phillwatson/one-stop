@@ -7,18 +7,16 @@ import com.hillayes.rail.config.RailProviderFactory;
 import com.hillayes.rail.config.ServiceConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class InstitutionService {
-    @Inject
-    RailProviderFactory railProviderFactory;
-
-    @Inject
-    ServiceConfiguration config;
+    private final RailProviderFactory railProviderFactory;
+    private final ServiceConfiguration config;
 
     private Cache<CacheKey, List<RailInstitution>> cacheByCountry;
     private Cache<String, Optional<RailInstitution>> cacheById;

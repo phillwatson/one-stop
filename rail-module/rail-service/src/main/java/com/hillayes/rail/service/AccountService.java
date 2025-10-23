@@ -7,8 +7,8 @@ import com.hillayes.rail.domain.UserConsent;
 import com.hillayes.rail.repository.AccountBalanceRepository;
 import com.hillayes.rail.repository.AccountRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -17,14 +17,12 @@ import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class AccountService {
-    @Inject
-    AccountRepository accountRepository;
-    @Inject
-    AccountBalanceRepository accountBalanceRepository;
-    @Inject
-    UserConsentService userConsentService;
+    private final AccountRepository accountRepository;
+    private final AccountBalanceRepository accountBalanceRepository;
+    private final UserConsentService userConsentService;
 
     public Page<Account> getAccounts(UUID userId,
                                      int page,

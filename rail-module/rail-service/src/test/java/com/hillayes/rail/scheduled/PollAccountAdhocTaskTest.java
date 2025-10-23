@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -32,35 +30,30 @@ import java.util.UUID;
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 public class PollAccountAdhocTaskTest {
-    @Mock
-    UserConsentService userConsentService;
-    @Mock
-    ConsentEventSender consentEventSender;
-    @Mock
-    AccountRepository accountRepository;
-    @Mock
-    AccountBalanceRepository accountBalanceRepository;
-    @Mock
-    AccountTransactionRepository accountTransactionRepository;
-    @Mock
-    RailProviderFactory railProviderFactory;
-    @Mock
-    RailProviderApi railProviderApi;
-    @Mock
-    SchedulerFactory scheduler;
-    @Mock
-    ServiceConfiguration configuration;
+    private final ServiceConfiguration configuration = mock();
+    private final UserConsentService userConsentService = mock();
+    private final ConsentEventSender consentEventSender = mock();
+    private final AccountRepository accountRepository = mock();
+    private final AccountBalanceRepository accountBalanceRepository = mock();
+    private final AccountTransactionRepository accountTransactionRepository = mock();
+    private final RailProviderFactory railProviderFactory = mock();
+    private final RailProviderApi railProviderApi = mock();
+    private final SchedulerFactory scheduler = mock();
 
-    @InjectMocks
-    PollAccountAdhocTask fixture;
+    private final PollAccountAdhocTask fixture = new PollAccountAdhocTask(
+        configuration,
+        userConsentService,
+        consentEventSender,
+        accountRepository,
+        accountBalanceRepository,
+        accountTransactionRepository,
+        railProviderFactory
+    );
 
     @BeforeEach
     public void init() {
-        openMocks(this);
-
         when(railProviderFactory.get(any())).thenReturn(railProviderApi);
         when(configuration.accountPollingInterval()).thenReturn(Duration.ofHours(1));
 

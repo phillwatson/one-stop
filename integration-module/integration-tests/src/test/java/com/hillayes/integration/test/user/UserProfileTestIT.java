@@ -6,15 +6,13 @@ import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
 import com.hillayes.onestop.api.*;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,10 +21,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testGetAuthProviders() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -44,10 +42,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testProfile() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -68,17 +66,17 @@ public class UserProfileTestIT extends ApiTestBase {
         assertEquals(1, profile.getRoles().size());
         assertTrue(profile.getRoles().contains("user"));
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the user updates their profile
             UserProfileRequest updateProfileRequest = new UserProfileRequest()
-                .username(randomAlphanumeric(20))
-                .title(randomAlphanumeric(5))
-                .givenName(randomAlphanumeric(10))
-                .familyName(randomAlphanumeric(20))
-                .preferredName(randomAlphanumeric(20))
+                .username(randomStrings.nextAlphanumeric(20))
+                .title(randomStrings.nextAlphanumeric(5))
+                .givenName(randomStrings.nextAlphanumeric(10))
+                .familyName(randomStrings.nextAlphanumeric(20))
+                .preferredName(randomStrings.nextAlphanumeric(20))
                 .locale(Locale.CHINESE.toLanguageTag())
-                .email(randomAlphanumeric(20))
-                .phone(randomNumeric(10));
+                .email(randomStrings.nextAlphanumeric(20))
+                .phone(randomStrings.nextNumeric(10));
             UserProfileResponse updateProfileResponse = userProfileApi.updateProfile(updateProfileRequest);
 
             // then: the response confirms update
@@ -122,10 +120,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testChangePassword() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -134,7 +132,7 @@ public class UserProfileTestIT extends ApiTestBase {
         // when: the user changes their password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
             .oldPassword(user.getPassword())
-            .newPassword(randomAlphanumeric(20));
+            .newPassword(randomStrings.nextAlphanumeric(20));
         userProfileApi.changePassword(request);
     }
 
@@ -142,10 +140,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testChangePassword_MissingOldPassword() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -153,7 +151,7 @@ public class UserProfileTestIT extends ApiTestBase {
 
         // when: the user changes their password - without giving old password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .newPassword(randomAlphanumeric(20));
+            .newPassword(randomStrings.nextAlphanumeric(20));
 
         // then: the service returns bad-request status
         withServiceError(userProfileApi.changePassword(request, 400), errorResponse -> {
@@ -169,10 +167,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testChangePassword_MissingNewPassword() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -196,10 +194,10 @@ public class UserProfileTestIT extends ApiTestBase {
     public void testChangePassword_InvalidOldPassword() {
         // given: a user
         UserEntity user = UserEntity.builder()
-            .username(randomAlphanumeric(20))
-            .givenName(randomAlphanumeric(10))
-            .password(randomAlphanumeric(30))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30))
             .build();
         user = UserUtils.createUser(getWiremockPort(), user);
 
@@ -207,8 +205,8 @@ public class UserProfileTestIT extends ApiTestBase {
 
         // when: the user changes their password - without giving new password
         PasswordUpdateRequest request = new PasswordUpdateRequest()
-            .oldPassword(randomAlphanumeric(10))
-            .newPassword(randomAlphanumeric(10));
+            .oldPassword(randomStrings.nextAlphanumeric(10))
+            .newPassword(randomStrings.nextAlphanumeric(10));
 
         // then: the service returns unauthorized status
         userProfileApi.changePassword(request, 401);

@@ -10,7 +10,7 @@ import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserRole;
 import com.hillayes.onestop.api.UserUpdateRequest;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -98,7 +97,7 @@ public class UserAdminTestIT extends ApiTestBase {
         assertNotNull(authTokens);
         assertEquals(3, authTokens.size());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the admin user updates each user
             UserAdminApi adminApi = new UserAdminApi(authTokens);
             expectedUsers.forEach(user -> {
@@ -106,13 +105,13 @@ public class UserAdminTestIT extends ApiTestBase {
                 assertEquals(user.getId(), userDetails.getId());
 
                 UserUpdateRequest updateRequest = new UserUpdateRequest()
-                    .username(randomAlphanumeric(20))
-                    .email(randomAlphabetic(20))
-                    .preferredName(randomAlphanumeric(20))
-                    .title(randomAlphabetic(5))
-                    .givenName(randomAlphanumeric(20))
-                    .familyName(randomAlphanumeric(20))
-                    .phone(randomNumeric(8))
+                    .username(randomStrings.nextAlphanumeric(20))
+                    .email(randomStrings.nextAlphabetic(20))
+                    .preferredName(randomStrings.nextAlphanumeric(20))
+                    .title(randomStrings.nextAlphabetic(5))
+                    .givenName(randomStrings.nextAlphanumeric(20))
+                    .familyName(randomStrings.nextAlphanumeric(20))
+                    .phone(randomStrings.nextNumeric(8))
                     .locale(Locale.FRANCE.toLanguageTag())
                     .roles(userDetails.getRoles().stream().map(UserRole::fromValue).toList());
                 UserResponse updatedUser = adminApi.updateUser(user.getId(), updateRequest);
@@ -162,7 +161,7 @@ public class UserAdminTestIT extends ApiTestBase {
         assertEquals(initialUserCount + expectedUsers.size(),
             adminApi.listUsers(0, 30).getTotal());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             expectedUsers.forEach(user -> {
                 // when: admin deletes the user
                 adminApi.deleteUser(user.getId());
@@ -183,20 +182,20 @@ public class UserAdminTestIT extends ApiTestBase {
         return UserUtils.createUsers(getWiremockPort(),
             List.of(
                 UserEntity.builder()
-                    .username(randomAlphanumeric(15))
-                    .givenName(randomAlphanumeric(10))
-                    .email(randomAlphanumeric(20))
-                    .password(randomAlphanumeric(12)).build(),
+                    .username(randomStrings.nextAlphanumeric(15))
+                    .givenName(randomStrings.nextAlphanumeric(10))
+                    .email(randomStrings.nextAlphanumeric(20))
+                    .password(randomStrings.nextAlphanumeric(12)).build(),
                 UserEntity.builder()
-                    .username(randomAlphanumeric(15))
-                    .givenName(randomAlphanumeric(10))
-                    .email(randomAlphanumeric(20))
-                    .password(randomAlphanumeric(12)).build(),
+                    .username(randomStrings.nextAlphanumeric(15))
+                    .givenName(randomStrings.nextAlphanumeric(10))
+                    .email(randomStrings.nextAlphanumeric(20))
+                    .password(randomStrings.nextAlphanumeric(12)).build(),
                 UserEntity.builder()
-                    .username(randomAlphanumeric(15))
-                    .givenName(randomAlphanumeric(10))
-                    .email(randomAlphanumeric(20))
-                    .password(randomAlphanumeric(12)).build()
+                    .username(randomStrings.nextAlphanumeric(15))
+                    .givenName(randomStrings.nextAlphanumeric(10))
+                    .email(randomStrings.nextAlphanumeric(20))
+                    .password(randomStrings.nextAlphanumeric(12)).build()
             )
         );
     }

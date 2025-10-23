@@ -16,6 +16,7 @@ import com.hillayes.rail.repository.CategoryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -25,16 +26,12 @@ import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class CategoryService {
-    @Inject
-    CategoryGroupRepository categoryGroupRepository;
-
-    @Inject
-    CategoryRepository categoryRepository;
-
-    @Inject
-    AccountRepository accountRepository;
+    private final CategoryGroupRepository categoryGroupRepository;
+    private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
 
     /**
      * Returns the selected page of category groups for the specified user; in name order.

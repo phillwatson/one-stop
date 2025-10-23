@@ -8,25 +8,24 @@ import com.hillayes.rail.domain.TransactionMovement;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.TransactionFilter;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
 public class AccountTransactionService {
-    @Inject
-    AccountService accountService;
-
-    @Inject
-    CategoryService categoryService;
-
-    @Inject
-    AccountTransactionRepository accountTransactionRepository;
+    private final AccountService accountService;
+    private final CategoryService categoryService;
+    private final AccountTransactionRepository accountTransactionRepository;
 
     public Optional<AccountTransaction> getTransaction(UUID transactionId) {
         log.info("Get transactions [transactionId: {}]", transactionId);

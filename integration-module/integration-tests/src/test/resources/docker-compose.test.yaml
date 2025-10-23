@@ -1,6 +1,7 @@
 services:
   # Simulator container. This hosts the rail simulator.
   sim:
+    restart: unless-stopped
     image: ghcr.io/phillwatson/sim-lib:1.0.0-SNAPSHOT
     ports:
       - "9090:8080"
@@ -34,6 +35,7 @@ services:
       QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
       ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+      ONE_STOP_ALPHA_VANTAGE_SECRET_KEY: "ABCDEF12345"
 
   client:
     image: ghcr.io/phillwatson/client:1.0.0-SNAPSHOT

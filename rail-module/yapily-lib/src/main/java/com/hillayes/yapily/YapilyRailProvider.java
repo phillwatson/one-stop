@@ -5,10 +5,12 @@ import com.hillayes.commons.Strings;
 import com.hillayes.rail.api.RailProviderApi;
 import com.hillayes.rail.api.domain.*;
 import com.hillayes.yapily.model.*;
-import com.hillayes.yapily.service.*;
+import com.hillayes.yapily.service.AccountsService;
+import com.hillayes.yapily.service.ConsentsService;
+import com.hillayes.yapily.service.InstitutionsService;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 @Slf4j
 public class YapilyRailProvider implements RailProviderApi {
     /**
@@ -28,14 +31,9 @@ public class YapilyRailProvider implements RailProviderApi {
      */
     private static final int MAX_HISTORY = 89;
 
-    @Inject
-    ConsentsService consentsService;
-
-    @Inject
-    AccountsService accountsService;
-
-    @Inject
-    InstitutionsService institutionsService;
+    private final ConsentsService consentsService;
+    private final AccountsService accountsService;
+    private final InstitutionsService institutionsService;
 
     @Override
     public RailProvider getProviderId() {
