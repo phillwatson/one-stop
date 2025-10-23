@@ -44,7 +44,7 @@ one-stop:
     schema: ${quarkus.hibernate-orm.database.default-schema}
     tasks:
       # nightly task to retrieve latest share prices
-      poll-all-share-indexes:
+      poll-all-share-indices:
         frequency:
           time-of-day: "02:00:00"
         on-failure:
