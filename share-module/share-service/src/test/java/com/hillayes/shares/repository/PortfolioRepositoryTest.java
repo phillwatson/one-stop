@@ -29,7 +29,7 @@ public class PortfolioRepositoryTest {
 
     @Test
     public void testSaveOneToMany() {
-        // Given: a collection of share indexes
+        // Given: a collection of share indices
         Iterable<ShareIndex> shares = shareIndexRepository.saveAll(List.of(
             mockShareIndex(),
             mockShareIndex(),
@@ -65,7 +65,7 @@ public class PortfolioRepositoryTest {
 
     @Test
     public void testDeleteOneToMany() {
-        // Given: a collection of share indexes
+        // Given: a collection of share indices
         Iterable<ShareIndex> shares = shareIndexRepository.saveAll(List.of(
             mockShareIndex(),
             mockShareIndex(),

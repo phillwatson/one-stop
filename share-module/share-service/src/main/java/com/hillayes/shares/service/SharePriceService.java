@@ -27,6 +27,18 @@ public class SharePriceService {
     private final PriceHistoryRepository priceHistoryRepository;
     private final ShareProviderFactory providerFactory;
 
+    /**
+     * Returns a page of PriceHistory records, in ascending date order, for
+     * the given ShareIndex. The records will include only those within the given
+     * date range.
+     *
+     * @param shareIndex the ShareIndex for which the prices are required.
+     * @param fromDate the earliest date to be included in the page (inclusive).
+     * @param toDate the latest date to be included in the page (exclusive).
+     * @param pageIndex the (zero based) index of the page to be returned.
+     * @param pageSize the size of the page, and the maximum number of records to be returned.
+     * @return the page of records, or an empty page if no records are found.
+     */
     public Page<PriceHistory> getPrices(ShareIndex shareIndex,
                                         LocalDate fromDate,
                                         LocalDate toDate,

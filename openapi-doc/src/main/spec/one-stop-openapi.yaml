@@ -1699,12 +1699,12 @@ paths:
         500:
           description: Internal server error
 
-  /shares/indexes:
+  /shares/indices:
     get:
       tags: [ "shares" ]
-      summary: List share indexes
-      description: Returns the registered share indexes.
-      operationId: getAllShareIndexes
+      summary: List share indices
+      description: Returns the registered share indices.
+      operationId: getAllShareIndices
       security:
         - cookieAuth: [ ]
       parameters:
@@ -1716,7 +1716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedShareIndexes'
+                $ref: '#/components/schemas/PaginatedShareIndices'
         401:
           description: Unauthorized
         500:
@@ -1724,9 +1724,9 @@ paths:
 
     post:
       tags: [ "shares" ]
-      summary: Register one or more share indexes.
-      description: Register new share indexes, so that it might be added to a portfolio.
-      operationId: registerShareIndexes
+      summary: Register one or more share indices.
+      description: Register new share indices, so that it might be added to a portfolio.
+      operationId: registerShareIndices
       security:
         - cookieAuth: [ ]
       requestBody:
@@ -1751,12 +1751,12 @@ paths:
           description: Invalid request
         401:
           description: Unauthorized
-        404:
-          description: Institution not found
+        409:
+          description: ISIN is already registered
         500:
           description: Internal server error
 
-  /shares/indexes/{shareId}/prices:
+  /shares/indices/{shareId}/prices:
     get:
       tags: [ "shares" ]
       summary: Get a list of historical prices
@@ -3180,14 +3180,14 @@ components:
               items:
                 $ref: '#/components/schemas/AuditIssueResponse'
 
-    PaginatedShareIndexes:
+    PaginatedShareIndices:
       allOf:
         - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
-              description: The list of registered share indexes
+              description: The list of registered share indices
               items:
                 $ref: '#/components/schemas/ShareIndexResponse'
 

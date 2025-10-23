@@ -4,7 +4,8 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.repository.ShareIndexRepository;
-import com.hillayes.shares.utils.TestData;
+import com.hillayes.shares.scheduled.PollShareIndexAdhocTask;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -14,15 +15,35 @@ import static com.hillayes.shares.utils.TestData.mockShareIndex;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ShareIndexServiceTest {
     private final ShareIndexRepository shareIndexRepository = mock();
+    private final PollShareIndexAdhocTask pollShareIndexAdhocTask = mock();
 
     private final ShareIndexService fixture = new ShareIndexService(
-        shareIndexRepository
+        shareIndexRepository,
+        pollShareIndexAdhocTask
     );
+
+    @BeforeEach
+    public void beforeEach() {
+        when(shareIndexRepository.save(any(ShareIndex.class)))
+            .then(invocation -> {
+                ShareIndex entity = invocation.getArgument(0);
+                if (entity.getId() != null)
+                    return entity;
+
+                // assign a new UUID
+                return ShareIndex.builder()
+                    .id(UUID.randomUUID())
+                    .isin(entity.getIsin())
+                    .name(entity.getName())
+                    .currency(entity.getCurrency())
+                    .provider(entity.getProvider())
+                    .build();
+            });
+    }
 
     @Test
     public void testGetShareIndex_Found() {
@@ -63,10 +84,6 @@ public class ShareIndexServiceTest {
         Currency currency = Currency.getInstance("GBP");
         ShareProvider provider = ShareProvider.FT_MARKET_DATA;
 
-        // And: the repository is able to save the record
-        when(shareIndexRepository.save(any(ShareIndex.class)))
-            .then(invovation -> invovation.getArgument(0));
-
         // When: the service is called
         ShareIndex shareIndex = fixture.registerShareIndex(isin, name, currency, provider);
 
@@ -78,11 +95,83 @@ public class ShareIndexServiceTest {
         assertEquals(name, shareIndex.getName());
         assertEquals(currency, shareIndex.getCurrency());
         assertEquals(provider, shareIndex.getProvider());
+
+        // And: the repository was called
+        verify(shareIndexRepository).save(any(ShareIndex.class));
+
+        // And: the share index polling task was queued
+        verify(pollShareIndexAdhocTask).queueTask(shareIndex.getId());
     }
 
     @Test
-    public void testListShareIndexes() {
-        // Given: a collection of ShareIndexes exists
+    public void testRegisterShareIndices() {
+        // Given: a collection of new share indices
+        List<ShareIndex> shareIndices = IntStream.range(0, 10)
+            .mapToObj(i -> mockShareIndex()).toList();
+
+        // When: the service is called
+        Collection<ShareIndex> result = fixture.registerShareIndices(shareIndices);
+
+        // Then: the result is the same size
+        assertNotNull(result);
+        assertEquals(shareIndices.size(), result.size());
+
+        // And: each index has the same properties as given
+        shareIndices.forEach(expected -> {
+            ShareIndex actual = result.stream()
+                .filter(s -> s.getIsin().equals(expected.getIsin()))
+                .findFirst().orElse(null);
+
+            assertNotNull(actual);
+            assertNotNull(actual.getId());
+            assertEquals(expected.getIsin(), actual.getIsin());
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(expected.getCurrency(), actual.getCurrency());
+            assertEquals(expected.getProvider(), actual.getProvider());
+        });
+
+        // And: the repository was called for each index
+        verify(shareIndexRepository, times(shareIndices.size())).save(any(ShareIndex.class));
+
+        // And: a task was queued for each index
+        verify(pollShareIndexAdhocTask, times(shareIndices.size())).queueTask(any(UUID.class));
+    }
+
+    @Test
+    public void testRegisterShareIndices_EmptyList() {
+        // When: the service is called with an empty list
+        Collection<ShareIndex> result = fixture.registerShareIndices(List.of());
+
+        // Then: the result is the same size
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: the repository is NOT called
+        verifyNoInteractions(shareIndexRepository);
+
+        // And: NO task was queued for each index
+        verifyNoInteractions(pollShareIndexAdhocTask);
+    }
+
+    @Test
+    public void testRegisterShareIndices_NullList() {
+        // When: the service is called with an null list
+        Collection<ShareIndex> result = fixture.registerShareIndices(null);
+
+        // Then: the result is the same size
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: the repository is NOT called
+        verifyNoInteractions(shareIndexRepository);
+
+        // And: NO task was queued for each index
+        verifyNoInteractions(pollShareIndexAdhocTask);
+    }
+
+    @Test
+    public void testListShareIndices() {
+        // Given: a collection of ShareIndices exists
         List<ShareIndex> shares = IntStream.range(0, 100)
             .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
             .sorted(Comparator.comparing(ShareIndex::getName))
@@ -96,7 +185,7 @@ public class ShareIndexServiceTest {
         });
 
         // When: the service is called
-        Page<ShareIndex> page = fixture.listShareIndexes(1, 20);
+        Page<ShareIndex> page = fixture.listShareIndices(1, 20);
 
         // Then: the requested page is returned
         assertNotNull(page);

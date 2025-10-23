@@ -55,7 +55,7 @@ public class PriceHistoryRepositoryTest {
 
     @AfterEach
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void deleteShareIndexes() {
+    public void deleteShareIndices() {
         shareIndexRepository.deleteAll();
     }
 

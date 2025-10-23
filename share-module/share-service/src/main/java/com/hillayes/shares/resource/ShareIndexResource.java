@@ -23,7 +23,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/api/v1/shares/indexes")
+@Path("/api/v1/shares/indices")
 @RolesAllowed("user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,30 +34,39 @@ public class ShareIndexResource {
     private final SharePriceService sharePriceService;
 
     @POST
-    public Response registerShareIndexes(@Valid List<RegisterShareIndexRequest> request) {
-        log.info("Registering share indexes [size: {}]", request.size());
+    public Response registerShareIndices(@Valid List<RegisterShareIndexRequest> request) {
+        log.info("Registering share indices [size: {}]", (request == null) ? 0 : request.size());
 
-        List<ShareIndexResponse> result = request.stream()
-            .map(index ->
-                shareIndexService.registerShareIndex(index.getIsin(), index.getName(),
-                    Currency.getInstance(index.getCurrency()),
-                    ShareProvider.valueOf(index.getProvider())))
+        if ((request == null) || (request.isEmpty())) {
+            return Response.ok(List.of()).build();
+        }
+
+        List<ShareIndex> indices = request.stream()
+            .map(index -> ShareIndex.builder()
+                .isin(index.getIsin())
+                .name(index.getName())
+                .currency(Currency.getInstance(index.getCurrency()))
+                .provider(ShareProvider.valueOf(index.getProvider()))
+                .build()
+            ).toList();
+
+        List<ShareIndexResponse> result = shareIndexService.registerShareIndices(indices).stream()
             .map(this::marshal)
             .toList();
 
-        log.debug("Registered share indexes [size: {}]", result.size());
+        log.debug("Registered share indices [size: {}]", result.size());
         return Response.ok(result).build();
     }
 
     @GET
-    public Response getAllShareIndexes(@Context UriInfo uriInfo,
+    public Response getAllShareIndices(@Context UriInfo uriInfo,
                                        @QueryParam("page") @DefaultValue("0") int page,
                                        @QueryParam("page-size") @DefaultValue("20") int pageSize) {
-        log.info("Listing share indexes [page: {}, pageSize: {}]", page, pageSize);
+        log.info("Listing share indices [page: {}, pageSize: {}]", page, pageSize);
 
-        Page<ShareIndex> sharesPage = shareIndexService.listShareIndexes(page, pageSize);
+        Page<ShareIndex> sharesPage = shareIndexService.listShareIndices(page, pageSize);
 
-        PaginatedShareIndexes response = new PaginatedShareIndexes()
+        PaginatedShareIndices response = new PaginatedShareIndices()
             .page(sharesPage.getPageIndex())
             .pageSize(sharesPage.getPageSize())
             .count(sharesPage.getContentSize())
@@ -66,7 +75,7 @@ public class ShareIndexResource {
             .items(sharesPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, sharesPage));
 
-        log.debug("Listing share indexes [page: {}, pageSize: {}, count: {}, total: {}]",
+        log.debug("Listing share indices [page: {}, pageSize: {}, count: {}, total: {}]",
             page, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }

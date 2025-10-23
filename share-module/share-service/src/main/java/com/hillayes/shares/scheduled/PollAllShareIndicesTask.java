@@ -15,24 +15,24 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
-public class PollAllShareIndexesTask implements NamedScheduledTask {
+public class PollAllShareIndicesTask implements NamedScheduledTask {
     private final ShareIndexRepository shareIndexRepository;
     private final PollShareIndexAdhocTask pollShareIndexAdhocTask;
 
     @Override
     public String getName() {
-        return "poll-all-share-indexes";
+        return "poll-all-share-indices";
     }
 
     @Override
     public void taskInitialised(SchedulerFactory scheduler) {
-        log.info("PollAllShareIndexesTask.taskScheduled()");
+        log.info("PollAllShareIndicesTask.taskScheduled()");
     }
 
     @Override
     @Transactional
     public void run() {
-        log.info("PollAllShareIndexesTask.run()");
+        log.info("PollAllShareIndicesTask.run()");
         shareIndexRepository.listAll()
             .forEach(shareIndex -> pollShareIndexAdhocTask.queueTask(shareIndex.getId()));
     }

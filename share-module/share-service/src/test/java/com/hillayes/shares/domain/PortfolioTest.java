@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PortfolioTest {
     @Test
     public void testAddHolding() {
-        // Given: a collection of share indexes
+        // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
             mockShareIndex(),
             mockShareIndex(),
@@ -33,7 +33,7 @@ public class PortfolioTest {
 
     @Test
     public void testRemoveHolding() {
-        // Given: a collection of share indexes
+        // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
             mockShareIndex(),
             mockShareIndex(),
@@ -58,7 +58,7 @@ public class PortfolioTest {
 
     @Test
     public void testRemoveShareIndex() {
-        // Given: a collection of share indexes
+        // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
             mockShareIndex(),
             mockShareIndex(),

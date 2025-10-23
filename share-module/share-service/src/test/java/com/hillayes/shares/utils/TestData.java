@@ -15,8 +15,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class TestData {
-    private static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
-    private static final RandomUtils randomNumbers = RandomUtils.insecure();
+    public static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
+    public static final RandomUtils randomNumbers = RandomUtils.insecure();
 
     public static ShareIndex mockShareIndex() {
         return mockShareIndex(null);
