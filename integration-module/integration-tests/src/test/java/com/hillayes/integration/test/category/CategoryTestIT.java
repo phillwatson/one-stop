@@ -12,7 +12,7 @@ import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.onestop.api.*;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
@@ -356,7 +356,7 @@ public class CategoryTestIT extends ApiTestBase {
         // then: the requisitioned accounts are identified
         assertFalse(requisition.accounts.isEmpty());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the success response is returned from the rails service
             Response response = userConsentApi.consentResponse(institution.getProvider(), requisition.reference, null, null);
 

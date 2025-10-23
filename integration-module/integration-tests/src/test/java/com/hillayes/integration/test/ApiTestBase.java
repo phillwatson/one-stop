@@ -1,7 +1,7 @@
 package com.hillayes.integration.test;
 
 import com.hillayes.onestop.api.ServiceErrorResponse;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.nordigen.NordigenSimulator;
 import com.hillayes.sim.yapily.YapilySimClient;
@@ -57,7 +57,7 @@ public abstract class ApiTestBase {
      * This is passed to the Email Service container (via the config properties) to allow it
      * to connect to the simulator.
      */
-    public static final String EMAIL_HOST = "http://wiremock:" + WIREMOCK_PORT + SendWithBlueSimulator.BASE_URI;
+    public static final String EMAIL_HOST = "http://wiremock:" + WIREMOCK_PORT + SendInBlueSimulator.BASE_URI;
 
     // a semaphore to ensure that the docker containers are only initialized once
     private static final AtomicBoolean initialized = new AtomicBoolean();

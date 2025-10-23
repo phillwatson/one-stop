@@ -6,7 +6,7 @@ import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
 import com.hillayes.onestop.api.*;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -66,7 +66,7 @@ public class UserProfileTestIT extends ApiTestBase {
         assertEquals(1, profile.getRoles().size());
         assertTrue(profile.getRoles().contains("user"));
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the user updates their profile
             UserProfileRequest updateProfileRequest = new UserProfileRequest()
                 .username(randomStrings.nextAlphanumeric(20))

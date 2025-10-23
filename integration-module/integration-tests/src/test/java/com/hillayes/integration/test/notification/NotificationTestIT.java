@@ -15,7 +15,7 @@ import com.hillayes.onestop.api.InstitutionResponse;
 import com.hillayes.onestop.api.NotificationResponse;
 import com.hillayes.onestop.api.PaginatedNotifications;
 import com.hillayes.onestop.api.UserConsentRequest;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +82,7 @@ public class NotificationTestIT extends ApiTestBase {
         }
 
         String errorDetails = randomStrings.nextAlphanumeric(30);
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: an error response is returned from the rails service
             userConsentApi.consentResponse(institution.getProvider(), requisition.reference, "mock-error-code", errorDetails);
 

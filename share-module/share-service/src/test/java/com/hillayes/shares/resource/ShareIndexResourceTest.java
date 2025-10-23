@@ -57,15 +57,13 @@ public class ShareIndexResourceTest extends TestBase {
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
         when(shareIndexService.registerShareIndex(
             anyString(), anyString(), any(Currency.class), any(ShareProvider.class)))
-            .then(invocation -> {
-                return ShareIndex.builder()
-                    .id(UUID.randomUUID())
-                    .isin(invocation.getArgument(0))
-                    .name(invocation.getArgument(1))
-                    .currency(invocation.getArgument(2))
-                    .provider(invocation.getArgument(3))
-                    .build();
-            });
+            .then(invocation -> ShareIndex.builder()
+                .id(UUID.randomUUID())
+                .isin(invocation.getArgument(0))
+                .name(invocation.getArgument(1))
+                .currency(invocation.getArgument(2))
+                .provider(invocation.getArgument(3))
+                .build());
 
         // When: client calls the endpoint
         List<ShareIndexResponse> response = given()
