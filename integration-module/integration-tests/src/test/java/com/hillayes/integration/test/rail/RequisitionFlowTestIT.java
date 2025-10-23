@@ -11,7 +11,7 @@ import com.hillayes.nordigen.model.PaginatedList;
 import com.hillayes.nordigen.model.Requisition;
 import com.hillayes.nordigen.model.RequisitionStatus;
 import com.hillayes.onestop.api.*;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.yapily.YapilySimClient;
 import io.restassured.response.Response;
@@ -132,7 +132,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
         // then: the requisitioned accounts are identified
         assertFalse(requisition.accounts.isEmpty());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the success response is returned from the rails service
             Response response = userConsentApi.consentResponse(institution.getProvider(), requisition.reference, null, null);
 
@@ -216,7 +216,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             assertEquals(expectedTotalCount, totalCount);
         });
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the user deletes the consent
             userConsentApi.deleteConsent(institution.getId(), true);
 

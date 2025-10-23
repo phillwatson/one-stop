@@ -84,7 +84,9 @@ public class Page<T> {
      * size is as given in this Page.
      */
     public int getTotalPages() {
-        return (pageSize > 0) ? (int) Math.ceil((double) totalCount / (double) pageSize) : 1;
+        return (totalCount == 0)
+            ? 0
+            : (pageSize > 0) ? (int) Math.ceil((double) totalCount / (double) pageSize) : 1;
     }
 
     /**
@@ -109,6 +111,13 @@ public class Page<T> {
     }
 
     /**
+     * A factory method to create an empty Page.
+     */
+    public static <T> Page<T> empty(int pageIndex, int pageSize) {
+        return new Page<>(null, 0, pageIndex, pageSize);
+    }
+
+    /**
      * A factory method to create a page of the given content. The page index is
      * assumed to be 0, the page size and total number of elements is assumed to
      * be the size of the given list.
@@ -127,13 +136,14 @@ public class Page<T> {
      * @param pageSize the number of elements per page.
      */
     public static <T> Page<T> of(List<T> fullContent, int pageIndex, int pageSize) {
+        int size = (fullContent == null) ? 0 : fullContent.size();
         int startIndex = pageIndex * pageSize;
-        if (startIndex > fullContent.size()) {
-            return new Page<>(List.of(), fullContent.size(), pageIndex, pageSize);
+        if (startIndex > size) {
+            return new Page<>(List.of(), size, pageIndex, pageSize);
         }
 
-        int endIndex = Math.min(startIndex + pageSize, fullContent.size());
-        List<T> subset = fullContent.subList(startIndex, endIndex);
-        return new Page<>(subset, fullContent.size(), pageIndex, pageSize);
+        int endIndex = Math.min(startIndex + pageSize, size);
+        List<T> subset = (size == 0) ? List.of() : fullContent.subList(startIndex, endIndex);
+        return new Page<>(subset, size, pageIndex, pageSize);
     }
 }

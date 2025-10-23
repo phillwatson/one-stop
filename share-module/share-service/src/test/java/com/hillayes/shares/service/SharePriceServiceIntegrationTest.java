@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @RequiredArgsConstructor
-public class ShareIndexServiceIntegrationTest {
+public class SharePriceServiceIntegrationTest {
     private final ShareIndexRepository shareIndexRepository;
     private final PriceHistoryRepository priceHistoryRepository;
-    private final ShareIndexService shareIndexService;
+    private final SharePriceService sharePriceService;
 
     @BeforeEach
     @Transactional
@@ -38,7 +38,7 @@ public class ShareIndexServiceIntegrationTest {
         ShareIndex shareIndex = createShareIndex();
 
         // When: the prices are refreshed
-        int newEntryCount = shareIndexService.refreshSharePrices(shareIndex.getId());
+        int newEntryCount = sharePriceService.refreshSharePrices(shareIndex.getId());
 
         // Then: prices are retrieved
         assertTrue(newEntryCount > 0);

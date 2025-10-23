@@ -8,7 +8,7 @@ import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserProfileResponse;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.sim.email.EmailMessage;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +21,11 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserOnboardTestIT extends ApiTestBase {
-    private SendWithBlueSimulator emailSim;
+    private SendInBlueSimulator emailSim;
 
     @BeforeEach
     public void startEmailSim() {
-        emailSim = new SendWithBlueSimulator(getWiremockPort());
+        emailSim = new SendInBlueSimulator(getWiremockPort());
     }
 
     @AfterEach

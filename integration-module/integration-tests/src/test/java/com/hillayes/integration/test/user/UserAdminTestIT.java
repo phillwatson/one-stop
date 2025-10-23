@@ -10,7 +10,7 @@ import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserRole;
 import com.hillayes.onestop.api.UserUpdateRequest;
-import com.hillayes.sim.email.SendWithBlueSimulator;
+import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -97,7 +97,7 @@ public class UserAdminTestIT extends ApiTestBase {
         assertNotNull(authTokens);
         assertEquals(3, authTokens.size());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             // when: the admin user updates each user
             UserAdminApi adminApi = new UserAdminApi(authTokens);
             expectedUsers.forEach(user -> {
@@ -161,7 +161,7 @@ public class UserAdminTestIT extends ApiTestBase {
         assertEquals(initialUserCount + expectedUsers.size(),
             adminApi.listUsers(0, 30).getTotal());
 
-        try (SendWithBlueSimulator emailSim = new SendWithBlueSimulator(getWiremockPort())) {
+        try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
             expectedUsers.forEach(user -> {
                 // when: admin deletes the user
                 adminApi.deleteUser(user.getId());

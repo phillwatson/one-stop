@@ -11,4 +11,10 @@
 
     <artifactId>share-price-api</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>exception-lib</artifactId>
+        </dependency>
+    </dependencies>
 </project>

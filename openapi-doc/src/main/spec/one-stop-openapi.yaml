@@ -25,6 +25,8 @@ tags:
     description: Operations related to transaction categories
   - name: "notifications"
     description: Operations related to user notifications
+  - name: "shares"
+    description: Operations related to the share portfolios
 
 paths:
   /auth/login:
@@ -1697,6 +1699,107 @@ paths:
         500:
           description: Internal server error
 
+  /shares/indices:
+    get:
+      tags: [ "shares" ]
+      summary: List share indices
+      description: Returns the registered share indices.
+      operationId: getAllShareIndices
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedShareIndices'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+    post:
+      tags: [ "shares" ]
+      summary: Register one or more share indices.
+      description: Register new share indices, so that it might be added to a portfolio.
+      operationId: registerShareIndices
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        description: The share index details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegisterShareIndexRequest'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShareIndexResponse'
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+        409:
+          description: ISIN is already registered
+        500:
+          description: Internal server error
+
+  /shares/indices/{shareId}/prices:
+    get:
+      tags: [ "shares" ]
+      summary: Get a list of historical prices
+      description: Returns the historical prices for the identified Share Index over a given date range.
+      operationId: getSharePrices
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "shareId"
+          in: "path"
+          description: ID of Share Index whose prices are to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "from-date"
+          in: "query"
+          description: The date, inclusive, from which the prices should start.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "to-date"
+          in: "query"
+          description: The date, exclusive, to which the prices should end.
+          required: false
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSharePrices'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
 components:
   securitySchemes:
     cookieAuth:
@@ -2778,6 +2881,99 @@ components:
           description: The number of issues acknowledged by the user
           example: 3
 
+    RegisterShareIndexRequest:
+      description: Identifies the Share or Fund to be registered.
+      type: object
+      required:
+        - isin
+        - name
+        - currency
+        - provider
+      properties:
+        isin:
+          type: string
+          description: The unique International Securities Identification Number
+        name:
+          type: string
+          description: The name of the Share or Fund
+        currency:
+          type: string
+          description: The ISO-4217 currency code in which the shares are traded.
+          minLength: 3
+          maxLength: 3
+          example: GBP
+        provider:
+          type: string
+          description: The Share Price Provider from which the Share Index is sourced
+          example: FT_MARKET_DATA
+
+    ShareIndexResponse:
+      description: The details of a Share Index
+      type: object
+      required:
+        - id
+        - isin
+        - name
+        - currency
+        - provider
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The share index's internal Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        isin:
+          type: string
+          description: The unique International Securities Identification Number
+        name:
+          type: string
+          description: The name of the Share or Fund
+        currency:
+          type: string
+          description: The ISO-4217 currency code in which the shares are traded.
+          minLength: 3
+          maxLength: 3
+          example: GBP
+        provider:
+          type: string
+          description: The Share Price Provider from which the Share Index is sourced
+          example: FT_MARKET_DATA
+
+    HistoricalPrice:
+      type: object
+      required:
+        - date
+        - open
+        - high
+        - low
+        - close
+        - volume
+      properties:
+        date:
+          type: string
+          format: date
+          description: the date on which the price applies
+        open:
+          type: number
+          format: double
+          description: the opening price on the date
+        high:
+          type: number
+          format: double
+          description: the highest price achieved on the date
+        low:
+          type: number
+          format: double
+          description: the lowest price achieved on the date
+        close:
+          type: number
+          format: double
+          description: the closing price on the date
+        volume:
+          type: integer
+          format: int64
+          description: the number of shares traded on the date
+
     PageLinks:
       type: object
       required:
@@ -2983,3 +3179,25 @@ components:
               description: The list of audit report issue transactions
               items:
                 $ref: '#/components/schemas/AuditIssueResponse'
+
+    PaginatedShareIndices:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of registered share indices
+              items:
+                $ref: '#/components/schemas/ShareIndexResponse'
+
+    PaginatedSharePrices:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of share price records.
+              items:
+                $ref: '#/components/schemas/HistoricalPrice'

@@ -17,7 +17,6 @@ import org.hibernate.Session;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -31,21 +30,35 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * Defines the maximum size of the batches in which PriceHistory records are
      * inserted.
      */
-    @ConfigProperty(name = "one-stop.shares.share-price.insert-batch-size", defaultValue = "50")
-    public int insertBatchSize;
+    private int insertBatchSize;
 
     /**
      * Identifies the DB schema in which PriceHistory records are held.
      */
-    @ConfigProperty(name ="quarkus.hibernate-orm.database.default-schema", defaultValue = "shares")
-    public String dbSchema;
+    private String dbSchema;
 
     // a utility method to map PriceHistory records to native SQL statements
-    private static final PriceHistorySqlMapper sqlMapper = new PriceHistorySqlMapper();
+    private final PriceHistorySqlMapper sqlMapper;
+
+    public PriceHistoryRepository(
+        @ConfigProperty(name = "one-stop.shares.share-price.insert-batch-size", defaultValue = "50")
+        int insertBatchSize,
+        @ConfigProperty(name ="quarkus.hibernate-orm.database.default-schema", defaultValue = "shares")
+        String dbSchema,
+        PriceHistorySqlMapper sqlMapper
+    ) {
+        this.insertBatchSize = insertBatchSize;
+        this.dbSchema = dbSchema;
+        this.sqlMapper = sqlMapper;
+    }
 
     // a pool of virtual threads on which batches can be persisted
     private static final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
     private final AtomicInteger pendingBatchCount = new AtomicInteger();
+
+    public int getInsertBatchSize() {
+        return insertBatchSize;
+    }
 
     /**
      * Tests whether the insertion of any batches of PriceHistory records are
@@ -118,6 +131,16 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
             () -> {
                 try {
                     _saveBatch(asList);
+                } catch (Exception e) {
+                    PriceHistory.PrimaryKey from = asList.getFirst().getId();
+                    PriceHistory.PrimaryKey to = asList.getLast().getId();
+                    if (from.getDate().isAfter(to.getDate())) {
+                        PriceHistory.PrimaryKey x = from;
+                        from = to;
+                        to = x;
+                    }
+                    log.warn("Unexpected exception saving prices [shareId: {}, from: {}, to: {}]",
+                        from.getShareIndexId(), from.getDate(), to.getDate(), e);
                 } finally {
                     pendingBatchCount.decrementAndGet();
                 }
@@ -141,6 +164,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     @ActivateRequestContext
     public void _saveBatch(Collection<PriceHistory> batch) {
+        log.debug("_saveBatch [size: {}]", batch.size());
         // construct a native SQL statement
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(dbSchema).append(".price_history ")
             .append(sqlMapper.colNames)
@@ -167,10 +191,8 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
                 statement.execute();
             }
         } catch (DatabaseException e) {
-            log.warn("Unexpected exception", e);
             throw e;
-        } catch (SQLException e) {
-            log.warn("Unexpected exception", e);
+        } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
@@ -199,7 +221,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * @param shareIndex the ShareIndex for which the prices are required.
      * @param resolution the resolution at which the prices are required.
      * @param fromDate the earliest date to be included in the page (inclusive).
-     * @param toDate the latest date to be included in the page (inclusive).
+     * @param toDate the latest date to be included in the page (exclusive).
      * @param pageNumber the (zero based) index of the page to be returned.
      * @param pageSize the size of the page, and the maximum number of records to be returned.
      * @return the page of records, or an empty page if no records are found.
@@ -220,7 +242,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * @param shareIndexId the identity of the ShareIndex for which the prices are required.
      * @param resolution the resolution at which the prices are required.
      * @param fromDate the earliest date to be included in the page (inclusive).
-     * @param toDate the latest date to be included in the page (inclusive).
+     * @param toDate the latest date to be included in the page (exclusive).
      * @param pageNumber the (zero based) index of the page to be returned.
      * @param pageSize the size of the page, and the maximum number of records to be returned.
      * @return the page of records, or an empty page if no records are found.
@@ -233,7 +255,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
         return pageAll("id.shareIndexId = :shareIndexId " +
                 "and id.resolution = :resolution " +
                 "and id.date >= :fromDate " +
-                "and id.date <= :toDate",
+                "and id.date < :toDate",
             pageNumber, pageSize,
             OrderBy.by("id.shareIndexId").and("id.date"),
             Map.of(

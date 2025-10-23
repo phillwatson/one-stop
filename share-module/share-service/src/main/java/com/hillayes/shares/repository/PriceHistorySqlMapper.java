@@ -1,10 +1,12 @@
 package com.hillayes.shares.repository;
 
 import com.hillayes.shares.domain.PriceHistory;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@ApplicationScoped
 public class PriceHistorySqlMapper extends SqlEntityMapper<PriceHistory> {
     @Override
     public Map<String, ColMapper<PriceHistory>> initColMappings() {
@@ -16,6 +18,7 @@ public class PriceHistorySqlMapper extends SqlEntityMapper<PriceHistory> {
         result.put("high_price", (s, offset, entity) -> setDecimal(s, offset, entity.getHigh()));
         result.put("low_price", (s, offset, entity) -> setDecimal(s, offset, entity.getLow()));
         result.put("close_price", (s, offset, entity) -> setDecimal(s, offset, entity.getClose()));
+        result.put("volume", (s, offset, entity) -> setLong(s, offset, entity.getVolume()));
 
         return result;
     }

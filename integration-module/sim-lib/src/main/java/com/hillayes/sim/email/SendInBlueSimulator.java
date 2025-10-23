@@ -18,7 +18,7 @@ import java.util.List;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
-public class SendWithBlueSimulator implements Closeable {
+public class SendInBlueSimulator implements Closeable {
     private static final ObjectReader jsonReader = MapperFactory.readerFor(EmailMessage.class);
 
     public static final String BASE_URI = "/api.sendinblue.com/v3";
@@ -26,7 +26,7 @@ public class SendWithBlueSimulator implements Closeable {
 
     private final WireMock wireMockClient;
 
-    public SendWithBlueSimulator(int wiremockPort) {
+    public SendInBlueSimulator(int wiremockPort) {
         log.info("Starting SendWithBlue Simulator [port: {}]", wiremockPort);
         wireMockClient = new WireMock(wiremockPort);
 
