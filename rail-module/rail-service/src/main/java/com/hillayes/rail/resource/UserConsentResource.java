@@ -152,7 +152,13 @@ public class UserConsentResource {
 
     private UserConsentResponse marshal(UserConsent consent) {
         RailInstitution institution = institutionService.get(consent.getProvider(), consent.getInstitutionId())
-            .orElseThrow(() -> new NotFoundException("Institution", consent.getInstitutionId()));
+            .orElseGet(() -> {
+                log.warn("Failed to retrieve Institution record [id: {}]", consent.getInstitutionId());
+                return RailInstitution.builder()
+                    .id(consent.getInstitutionId())
+                    .name(consent.getInstitutionId())
+                    .build();
+            });
 
         return new UserConsentResponse()
             .id(consent.getId())
