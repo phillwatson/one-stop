@@ -41,7 +41,13 @@ export default function UserConsentList(props: Props) {
   
   useEffect(() => {
     Promise.all(
-      userConsents.map(consent => InstitutionService.get(consent.institutionId).then(response => response))
+      userConsents.map(consent => InstitutionService
+        .get(consent.institutionId)
+        .then(response => response)
+        .catch(ignore => {
+          return { id: consent.institutionId, name: consent.institutionName, bic: "", logo: ""} as Institution
+        })
+      )
     ).then(result => setInstitutions(result))
   }, [ userConsents ])
 

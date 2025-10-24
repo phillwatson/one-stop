@@ -69,7 +69,7 @@ public class AccountResource {
                 log.warn("Failed to retrieve Institution record [id: {}]", account.getInstitutionId());
                 return RailInstitution.builder()
                     .id(account.getInstitutionId())
-                    .name("Unable to find")
+                    .name(account.getInstitutionId())
                     .build();
             });
 
