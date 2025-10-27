@@ -10,7 +10,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,7 +42,7 @@ public class PortfolioRepositoryTest {
         long portfolioCount = getPortfolioCount();
 
         // And: a new portfolio with holdings in each share index
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
         shares.forEach(portfolio::add);
         assertFalse(portfolio.getHoldings().isEmpty());
 
@@ -57,7 +59,7 @@ public class PortfolioRepositoryTest {
         assertEquals(portfolio.getHoldings().size(), getHoldingCount(portfolio));
 
         // And: IDs are assigned to each holding
-        Set<Holding> holdings = portfolio.getHoldings();
+        List<Holding> holdings = portfolio.getHoldings();
         assertNotNull(holdings);
         assertEquals(3, holdings.size());
         holdings.forEach(holding -> assertNotNull(holding.getId()));
@@ -76,7 +78,7 @@ public class PortfolioRepositoryTest {
         long originalCount = getPortfolioCount();
 
         // And: a new portfolio with holdings in each share index
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
         shares.forEach(portfolio::add);
         assertFalse(portfolio.getHoldings().isEmpty());
 
@@ -100,6 +102,35 @@ public class PortfolioRepositoryTest {
     }
 
     @Test
+    public void testDeleteSingleHolding() {
+        // Given: a collection of share indices
+        List<ShareIndex> shares = shareIndexRepository.saveAll(List.of(
+            mockShareIndex(),
+            mockShareIndex(),
+            mockShareIndex()
+        ));
+
+        // And: a new portfolio with holdings in each share index
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
+        shares.forEach(portfolio::add);
+        assertEquals(shares.size(), portfolio.getHoldings().size());
+
+        // And: the portfolio is saved
+        portfolio = portfolioRepository.saveAndFlush(portfolio);
+        assertEquals(shares.size(), getHoldingCount(portfolio));
+
+        // When: a holding is removed
+        portfolio.remove(shares.get(0));
+        portfolioRepository.saveAndFlush(portfolio);
+
+        // Then: the portfolio's holdings are reduced
+        assertEquals(shares.size() - 1, portfolio.getHoldings().size());
+
+        // And: the holding count is decremented
+        assertEquals(shares.size() - 1, getHoldingCount(portfolio));
+    }
+
+    @Test
     public void testDeleteUsersPortfolios() {
         // Given: a collection of user IDs
         List<UUID> userIds = IntStream.range(0, 5)
@@ -113,7 +144,7 @@ public class PortfolioRepositoryTest {
         Map<UUID, List<Portfolio>> portfolios = userIds.stream()
             .flatMap(userId ->
                 LongStream.range(0, portfoliosPerUser).mapToObj(index ->
-                    portfolioRepository.save(mockPortfolio(userId, "Portfolio: " + index))
+                    portfolioRepository.save(mockPortfolio(userId))
                 )
             )
             .collect(Collectors.groupingBy(Portfolio::getUserId));
@@ -141,13 +172,11 @@ public class PortfolioRepositoryTest {
 
         // And: two portfolios for each user ID
         int portfoliosPerUser = 2;
-        Map<UUID, List<Portfolio>> portfolios = userIds.stream()
-            .flatMap(userId ->
-                LongStream.range(0, portfoliosPerUser).mapToObj(index ->
-                    portfolioRepository.save(mockPortfolio(userId, "Portfolio: " + index))
-                )
+        userIds.forEach(userId ->
+            IntStream.range(0, portfoliosPerUser).forEach(index ->
+                portfolioRepository.save(mockPortfolio(userId))
             )
-            .collect(Collectors.groupingBy(Portfolio::getUserId));
+        );
 
         // When: a user's portfolios are retrieved
         int pageSize = portfoliosPerUser + 5; // plus more for good measure

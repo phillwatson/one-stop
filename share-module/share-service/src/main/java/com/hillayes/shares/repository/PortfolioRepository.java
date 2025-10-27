@@ -19,13 +19,13 @@ public class PortfolioRepository extends RepositoryBase<Portfolio, UUID> {
      * Returns the portfolios for the identified user in name order.
      *
      * @param userId the ID of the user to whom the portfolios belong.
-     * @param pageNumber the (zero-based) index of the page to be returned
+     * @param pageIndex the (zero-based) index of the page to be returned
      * @param pageSize the size of the page.
      * @return the qualified sub-set of Portfolio records.
      */
-    public Page<Portfolio> getUsersPortfolios(UUID userId, int pageNumber, int pageSize) {
+    public Page<Portfolio> getUsersPortfolios(UUID userId, int pageIndex, int pageSize) {
         return pageAll("userId = :userId",
-            pageNumber, pageSize,
+            pageIndex, pageSize,
             OrderBy.by("name"),
             Map.of("userId", userId));
     }

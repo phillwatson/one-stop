@@ -20,9 +20,11 @@ public class ShareIndex {
     @Id
     @GeneratedValue(generator = "uuid2")
     @ToString.Include
-    @EqualsAndHashCode.Include
+    @Setter
     private UUID id;
 
+    @ToString.Include
+    @EqualsAndHashCode.Include
     @Column(name = "isin", nullable = false)
     private String isin;
 

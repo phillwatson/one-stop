@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 public enum SharesErrorCodes implements ErrorCode {
     PROVIDER_NOT_FOUND(Severity.error, "Unable to identify share provider.", INTERNAL_SERVER_ERROR_STATUS),
-    DUPLICATE_SHARE_ISIN(Severity.warning, "The ISIN has already been registered", CONFLICT_STATUS),
-    DATABASE_ERROR(Severity.error, "Unexpected database error", INTERNAL_SERVER_ERROR_STATUS);
+    DUPLICATE_SHARE_ISIN(Severity.warning, "The ISIN has already been registered.", CONFLICT_STATUS),
+    DUPLICATE_PORTFOLIO(Severity.warning, "A portfolio of that name already exists.", CONFLICT_STATUS),
+    DATABASE_ERROR(Severity.error, "Unexpected database error.", INTERNAL_SERVER_ERROR_STATUS);
 
     private final Severity severity;
     private final String message;

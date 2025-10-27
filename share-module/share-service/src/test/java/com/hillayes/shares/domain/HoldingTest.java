@@ -15,7 +15,7 @@ public class HoldingTest {
     @Test
     public void testBuy() {
         // Given: A portfolio
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "Share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
 
         // And: a share index
         ShareIndex index = mockShareIndex();
@@ -38,7 +38,7 @@ public class HoldingTest {
     @Test
     public void testBuyNegativeQuantity() {
         // Given: A portfolio
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "Share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
 
         // And: a share index
         ShareIndex index = mockShareIndex();
@@ -61,7 +61,7 @@ public class HoldingTest {
     @Test
     public void testSell() {
         // Given: A portfolio
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "Share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
 
         // And: a share index
         ShareIndex index = mockShareIndex();
@@ -84,7 +84,7 @@ public class HoldingTest {
     @Test
     public void testSellNegativeQuantity() {
         // Given: A portfolio
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "Share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
 
         // And: a share index
         ShareIndex index = mockShareIndex();
