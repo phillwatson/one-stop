@@ -156,7 +156,7 @@ public class ShareIndexResourceTest extends TestBase {
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
         when(shareIndexService.registerShareIndex(
             anyString(), anyString(), any(Currency.class), any(ShareProvider.class)))
-            .thenThrow(new DuplicateIsinException(request.get(0).getIsin()));
+            .thenThrow(new DuplicateIsinException(request.get(0).getIsin(), null));
 
         // When: client calls the endpoint
         ServiceErrorResponse response = given()
