@@ -3,7 +3,6 @@ package com.hillayes.shares.domain;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.hillayes.shares.utils.TestData.mockPortfolio;
@@ -15,17 +14,17 @@ public class PortfolioTest {
     public void testAddHolding() {
         // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
-            mockShareIndex(),
-            mockShareIndex(),
-            mockShareIndex()
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID()))
         );
 
         // When: a new portfolio with holdings in each share index
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
         shares.forEach(portfolio::add);
 
         // Then: the holdings are assigned to the portfolio
-        Set<Holding> holdings = portfolio.getHoldings();
+        List<Holding> holdings = portfolio.getHoldings();
         assertNotNull(holdings);
         assertEquals(shares.size(), holdings.size());
         holdings.forEach(holding -> assertEquals(portfolio, holding.getPortfolio()));
@@ -35,21 +34,24 @@ public class PortfolioTest {
     public void testRemoveHolding() {
         // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
-            mockShareIndex(),
-            mockShareIndex(),
-            mockShareIndex()
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID()))
         );
 
         // And: a new portfolio with holdings in each share index
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "share ISA");
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
         List<Holding> holdings = shares.stream()
             .map(portfolio::add)
             .toList();
-        assertEquals(shares.size(), holdings.size());
+        assertEquals(shares.size(), portfolio.getHoldings().size());
 
         // When: the holdings are removed
         holdings.forEach(holding -> {
             assertTrue(portfolio.remove(holding));
+
+            assertFalse(portfolio.getHoldings().stream()
+                .anyMatch(h -> h.equals(holding)));
         });
 
         // Then: no holdings are left
@@ -60,24 +62,27 @@ public class PortfolioTest {
     public void testRemoveShareIndex() {
         // Given: a collection of share indices
         List<ShareIndex> shares = List.of(
-            mockShareIndex(),
-            mockShareIndex(),
-            mockShareIndex()
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID())),
+            mockShareIndex(s -> s.id(UUID.randomUUID()))
         );
 
         // And: a new portfolio with holdings in each share index
-        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), "share ISA");
-        List<Holding> holdings = shares.stream()
-            .map(portfolio::add)
-            .toList();
-        assertEquals(shares.size(), holdings.size());
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
+        shares.forEach(portfolio::add);
+        assertEquals(shares.size(), portfolio.getHoldings().size());
 
-        // When: the holdings are removed by their share index
+        // When: each holding is removed by their share index
         shares.forEach(share -> {
             assertTrue(portfolio.remove(share));
+
+            // Then: the holding is no longer present
+            assertNull(portfolio.getHoldings().stream()
+                .filter(h -> h.getShareIndex().equals(share))
+                .findFirst().orElse(null));
         });
 
-        // Then: no holdings are left
+        // And: no holding a left
         assertTrue(portfolio.getHoldings().isEmpty());
     }
 }

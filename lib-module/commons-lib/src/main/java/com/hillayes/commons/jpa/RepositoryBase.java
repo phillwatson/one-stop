@@ -57,7 +57,7 @@ public abstract class RepositoryBase<Entity, Id> implements PanacheRepositoryBas
         return entity;
     }
 
-    public Iterable<Entity> saveAll(Iterable<Entity> entities) {
+    public <T extends Iterable<Entity>> T saveAll(T entities) {
         persist(entities);
         return entities;
     }

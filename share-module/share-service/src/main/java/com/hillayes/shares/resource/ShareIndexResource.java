@@ -86,15 +86,15 @@ public class ShareIndexResource {
                                    @PathParam("shareId") UUID shareIndexId,
                                    @QueryParam("from-date") LocalDate fromDate,
                                    @QueryParam("to-date") LocalDate toDate,
-                                   @QueryParam("page")@DefaultValue("0") int page,
+                                   @QueryParam("page")@DefaultValue("0") int pageIndex,
                                    @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         log.info("Listing share prices [shareIndex: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}",
-            shareIndexId, fromDate, toDate, page, pageSize);
+            shareIndexId, fromDate, toDate, pageIndex, pageSize);
 
         ShareIndex shareIndex = shareIndexService.getShareIndex(shareIndexId)
-            .orElseThrow(() -> new NotFoundException("share-index", shareIndexId));
+            .orElseThrow(() -> new NotFoundException("ShareIndex", shareIndexId));
 
-        Page<PriceHistory> prices = sharePriceService.getPrices(shareIndex, fromDate, toDate, page, pageSize);
+        Page<PriceHistory> prices = sharePriceService.getPrices(shareIndex, fromDate, toDate, pageIndex, pageSize);
 
         PaginatedSharePrices response = new PaginatedSharePrices()
             .page(prices.getPageIndex())
@@ -106,7 +106,7 @@ public class ShareIndexResource {
             .links(PaginationUtils.buildPageLinks(uriInfo, prices));
 
         log.debug("Listing share prices [page: {}, pageSize: {}, count: {}, total: {}]",
-            page, pageSize, response.getCount(), response.getTotal());
+            pageIndex, pageSize, response.getCount(), response.getTotal());
         return Response.ok(response).build();
     }
 
@@ -119,8 +119,8 @@ public class ShareIndexResource {
             .provider(shareIndex.getProvider().name());
     }
 
-    private HistoricalPrice marshal(PriceHistory priceHistory) {
-        return new HistoricalPrice()
+    private HistoricalPriceResponse marshal(PriceHistory priceHistory) {
+        return new HistoricalPriceResponse()
             .date(priceHistory.getId().getDate())
             .open(priceHistory.getOpen().doubleValue())
             .high(priceHistory.getHigh().doubleValue())

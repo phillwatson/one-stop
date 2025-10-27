@@ -21,12 +21,18 @@ public class DealingHistory {
     @Setter
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "share_holding_id")
+    @Getter(AccessLevel.PRIVATE)
+    @EqualsAndHashCode.Include
+    @Column(name = "holding_id", insertable=false, updatable=false)
+    private UUID holdingId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "holding_id")
     private Holding holding;
 
-    @Column(name = "market_date", nullable = false)
-    private LocalDate marketDate;
+    @Column(name = "date_executed", nullable = false)
+    @EqualsAndHashCode.Include
+    private LocalDate dateExecuted;
 
     /**
      * The number of shares bought or sold. Sold shares are recorded as a negative number.

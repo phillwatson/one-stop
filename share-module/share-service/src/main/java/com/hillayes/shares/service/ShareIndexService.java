@@ -62,7 +62,7 @@ public class ShareIndexService {
             log.debug("Created ShareIndex [isin: {}, id: {}]", index.getIsin(), index.getId());
             return index;
         } catch (ConstraintViolationException e) {
-            throw new DuplicateIsinException("isin");
+            throw new DuplicateIsinException(isin, e);
         }
     }
 
