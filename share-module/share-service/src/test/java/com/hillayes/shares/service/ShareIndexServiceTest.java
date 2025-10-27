@@ -31,17 +31,11 @@ public class ShareIndexServiceTest {
         when(shareIndexRepository.save(any(ShareIndex.class)))
             .then(invocation -> {
                 ShareIndex entity = invocation.getArgument(0);
-                if (entity.getId() != null)
-                    return entity;
-
-                // assign a new UUID
-                return ShareIndex.builder()
-                    .id(UUID.randomUUID())
-                    .isin(entity.getIsin())
-                    .name(entity.getName())
-                    .currency(entity.getCurrency())
-                    .provider(entity.getProvider())
-                    .build();
+                if (entity.getId() == null) {
+                    // assign a new UUID
+                    entity.setId(UUID.randomUUID());
+                }
+                return entity;
             });
     }
 

@@ -57,6 +57,16 @@ public class SharePriceService {
         return result;
     }
 
+    /**
+     * Returns the record of the most recent DAILY share price record for the given
+     * ShareIndex.
+     *
+     * @param shareIndex the ShareIndex whose price history is to be searched.
+     * @return the record of the most recent share price, or an empty result.
+     */
+    public Optional<PriceHistory> getMostRecentPrice(ShareIndex shareIndex) {
+        return priceHistoryRepository.getMostRecent(shareIndex);
+    }
 
     /**
      * Retrieves the latest share prices for the identified ShareIndex record.

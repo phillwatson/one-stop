@@ -10,8 +10,11 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class TestData {
@@ -60,15 +63,26 @@ public class TestData {
         return builder.build();
     }
 
-    public static Portfolio mockPortfolio(UUID userId, String name) {
-        return mockPortfolio(userId, name, null);
+    public static List<PriceHistory> mockPriceHistory(ShareIndex shareIndex, LocalDate fromDate, LocalDate toDate) {
+        List<PriceHistory> result = new ArrayList<>();
+        LocalDate date = fromDate;
+        while (!date.isAfter(toDate)) {
+            result.add(mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY));
+            date = date.plusDays(1);
+        }
+
+        return result;
     }
 
-    public static Portfolio mockPortfolio(UUID userId, String name,
+    public static Portfolio mockPortfolio(UUID userId) {
+        return mockPortfolio(userId, null);
+    }
+
+    public static Portfolio mockPortfolio(UUID userId,
                                           Consumer<Portfolio.Builder> modifier) {
         Portfolio.Builder builder = Portfolio.builder()
             .userId(userId)
-            .name(name)
+            .name(randomStrings.nextAlphanumeric(30))
             .dateCreated(Instant.now().minus(Duration.ofDays(90)));
 
         if (modifier != null) {

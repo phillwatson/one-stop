@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,20 +27,20 @@ public class Portfolio {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    @Setter
     @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "name", nullable = false)
     private String name;
 
     @lombok.Builder.Default
-    @EqualsAndHashCode.Include
     @ToString.Include
     @Column(name = "date_created", nullable = false)
     protected Instant dateCreated = Instant.now();
 
     @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @lombok.Builder.Default
-    private Set<Holding> holdings = new HashSet<>();
+    private List<Holding> holdings = new ArrayList<>();
 
     /**
      * Adds the given share index to the holdings within this portfolio.
@@ -51,9 +51,10 @@ public class Portfolio {
      */
     public Holding add(ShareIndex shareIndex) {
         Holding holding = Holding.builder()
-            .userId(this.userId)
+            .portfolioId(this.getId())
             .portfolio(this)
             .shareIndexId(shareIndex.getId())
+            .shareIndex(shareIndex)
             .build();
 
         holdings.add(holding);
@@ -70,7 +71,7 @@ public class Portfolio {
     public boolean remove(ShareIndex shareIndex) {
         int count = getHoldings().size();
         getHoldings().stream()
-            .filter(holding -> holding.getShareIndexId() == shareIndex.getId())
+            .filter(holding -> holding.getShareIndex().equals(shareIndex))
             .findFirst()
             .ifPresent(this::remove);
         return getHoldings().size() < count;
