@@ -28,7 +28,7 @@ public class ShareIndexServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        when(shareIndexRepository.save(any(ShareIndex.class)))
+        when(shareIndexRepository.saveAndFlush(any(ShareIndex.class)))
             .then(invocation -> {
                 ShareIndex entity = invocation.getArgument(0);
                 if (entity.getId() == null) {
@@ -91,7 +91,7 @@ public class ShareIndexServiceTest {
         assertEquals(provider, shareIndex.getProvider());
 
         // And: the repository was called
-        verify(shareIndexRepository).save(any(ShareIndex.class));
+        verify(shareIndexRepository).saveAndFlush(any(ShareIndex.class));
 
         // And: the share index polling task was queued
         verify(pollShareIndexAdhocTask).queueTask(shareIndex.getId());
@@ -125,7 +125,7 @@ public class ShareIndexServiceTest {
         });
 
         // And: the repository was called for each index
-        verify(shareIndexRepository, times(shareIndices.size())).save(any(ShareIndex.class));
+        verify(shareIndexRepository, times(shareIndices.size())).saveAndFlush(any(ShareIndex.class));
 
         // And: a task was queued for each index
         verify(pollShareIndexAdhocTask, times(shareIndices.size())).queueTask(any(UUID.class));

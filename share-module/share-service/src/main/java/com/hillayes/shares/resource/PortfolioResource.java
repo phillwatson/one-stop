@@ -7,6 +7,7 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.shares.domain.*;
 import com.hillayes.shares.service.PortfolioService;
 import com.hillayes.shares.service.SharePriceService;
+import com.hillayes.shares.service.ShareTradeService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class PortfolioResource {
     private final PortfolioService portfolioService;
     private final SharePriceService sharePriceService;
+    private final ShareTradeService shareTradeService;
 
     @GET
     public Response getPortfolios(@Context SecurityContext ctx,
@@ -64,6 +66,7 @@ public class PortfolioResource {
         Portfolio portfolio = portfolioService.getPortfolio(userId, portfolioId)
             .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
 
+        log.debug("Retrieved portfolio [userId: {}, portfolioId: {}]", userId, portfolioId);
         return Response.ok(marshalDetail(portfolio)).build();
     }
 
@@ -93,7 +96,25 @@ public class PortfolioResource {
         Portfolio portfolio = portfolioService.updatePortfolio(userId, portfolioId, request.getName())
             .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
 
+        log.debug("Updated portfolio [userId: {}, portfolioId: {}]", userId, portfolioId);
         return Response.ok(marshal(portfolio)).build();
+    }
+
+    @POST
+    @Path("/{portfolioId}/holdings")
+    public Response createShareTrade(@Context SecurityContext ctx,
+                                     @PathParam("portfolioId") UUID portfolioId,
+                                     TradeRequest request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
+            userId, portfolioId, request.getIsin(), request.getQuantity());
+
+        Holding holding = shareTradeService.createShareTrade(userId, portfolioId, request.getDateExecuted(),
+            request.getIsin(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
+
+        log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
+            userId, portfolioId, request.getIsin(), request.getQuantity());
+        return Response.ok(marshal(holding)).build();
     }
 
     private PortfolioSummaryResponse marshal(Portfolio portfolio) {
