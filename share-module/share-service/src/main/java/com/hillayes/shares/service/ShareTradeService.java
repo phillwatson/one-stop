@@ -4,6 +4,7 @@ import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
+import com.hillayes.shares.errors.SaleExceedsHoldingException;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.repository.HoldingRepository;
 import com.hillayes.shares.repository.PortfolioRepository;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -61,6 +63,8 @@ public class ShareTradeService {
 
         if (quantity > 0)
             holding.buy(dateExecuted, quantity, pricePerShare);
+        else if (-quantity > holding.getQuantity())
+            throw new SaleExceedsHoldingException(shareIsin, quantity, holding.getQuantity());
         else
             holding.sell(dateExecuted, quantity, pricePerShare);
 

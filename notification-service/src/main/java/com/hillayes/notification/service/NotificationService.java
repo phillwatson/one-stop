@@ -105,7 +105,7 @@ public class NotificationService {
                 }
                 return new Page<>(mapped, notifications.getTotalCount(), pageIndex, pageSize);
             })
-            .orElse(Page.empty());
+            .orElseGet(() -> Page.empty());
     }
 
     public void deleteNotification(UUID userId, UUID notificationId) {

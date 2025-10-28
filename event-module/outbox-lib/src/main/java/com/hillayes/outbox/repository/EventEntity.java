@@ -36,7 +36,7 @@ public class EventEntity {
         Instant now = Instant.now();
         return EventEntity.builder()
             .eventId(UUID.randomUUID())
-            .correlationId(Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()))
+            .correlationId(Correlation.getCorrelationId().orElseGet(() -> UUID.randomUUID().toString()))
             .retryCount(0)
             .timestamp(now)
             .scheduledFor(now)

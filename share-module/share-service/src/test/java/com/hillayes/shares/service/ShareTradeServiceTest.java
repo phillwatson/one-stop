@@ -6,6 +6,7 @@ import com.hillayes.shares.domain.DealingHistory;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
+import com.hillayes.shares.errors.SaleExceedsHoldingException;
 import com.hillayes.shares.errors.SharesErrorCodes;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.repository.HoldingRepository;
@@ -50,9 +51,8 @@ public class ShareTradeServiceTest {
         });
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = { 123, -123 }) // a buy and sell
-    public void testCreateShareTrade_NewHolding(int quantity) {
+    @Test
+    public void testCreateShareTrade_NewHolding() {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
         when(shareIndexService.getShareIndex(shareIndex.getIsin()))
@@ -72,6 +72,7 @@ public class ShareTradeServiceTest {
 
         // When: the service is called
         LocalDate dateExecuted = LocalDate.now().minusDays(1);
+        int quantity = 1200;
         BigDecimal price = BigDecimal.valueOf(123.435);
         Holding holding = fixture.createShareTrade(userId, portfolio.getId(),
             dateExecuted, shareIndex.getIsin(), quantity, price);
@@ -113,6 +114,14 @@ public class ShareTradeServiceTest {
         Holding existingHolding = portfolio.add(shareIndex);
         assertEquals(5, portfolio.getHoldings().size());
 
+        // And: the holding quantity is greater than this sale (to prevent errors)
+        if (quantity < 0) {
+            existingHolding.buy(
+                LocalDate.now().minusDays(100),
+                (-quantity) + 100,
+                BigDecimal.valueOf(22.22));
+        }
+
         // When: the service is called
         LocalDate dateExecuted = LocalDate.now().minusDays(1);
         BigDecimal price = BigDecimal.valueOf(123.435);
@@ -131,7 +140,10 @@ public class ShareTradeServiceTest {
 
         // And: the holding records the new trade
         assertFalse(holding.getDealings().isEmpty());
-        DealingHistory dealing = holding.getDealings().get(0);
+        DealingHistory dealing = holding.getDealings().stream()
+            .filter(d -> d.getDateExecuted().equals(dateExecuted))
+            .findFirst().orElse(null);
+        assertNotNull(dealing);
         assertEquals(dateExecuted, dealing.getDateExecuted());
         assertEquals(quantity, dealing.getQuantity());
         assertEquals(price, dealing.getPrice());
@@ -164,6 +176,9 @@ public class ShareTradeServiceTest {
         assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
         assertEquals("Portfolio", exception.getParameter("entity-type"));
         assertEquals(portfolioId, exception.getParameter("entity-id"));
+
+        // And: no deal is persisted
+        verify(holdingRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -193,6 +208,9 @@ public class ShareTradeServiceTest {
         assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
         assertEquals("ShareIndex", exception.getParameter("entity-type"));
         assertEquals(shareIndexIsin, exception.getParameter("entity-id"));
+
+        // And: no deal is persisted
+        verify(holdingRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -225,5 +243,52 @@ public class ShareTradeServiceTest {
         // Then: the exception indicates the ISIN selected
         assertEquals(SharesErrorCodes.ZERO_TRADE_QUANTITY, exception.getErrorCode());
         assertEquals(shareIndex.getIsin(), exception.getParameter("isin"));
+
+        // And: no deal is persisted
+        verify(holdingRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    public void testSaleExceedsHolding() {
+        // Given: a share to be traded has been registered
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+            .thenReturn(Optional.of(shareIndex));
+
+        // And: an authenticated user
+        UUID userId = UUID.randomUUID();
+
+        // And: a portfolio belonging to that user
+        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findByIdOptional(portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
+
+        // And: portfolio has several dealings for this share
+        Holding existingHolding = portfolio.add(shareIndex);
+        for (int i = 5; i > 0; --i) {
+            existingHolding.buy(LocalDate.now().minusDays(i * 10L), 100, BigDecimal.valueOf(123.34));
+        }
+        assertEquals(5, existingHolding.getDealings().size());
+        assertEquals(500, existingHolding.getQuantity());
+
+        // And: dealing is for a sale of more than quantity held
+        int quantity = -(10 + existingHolding.getQuantity());
+
+        // When: the service is called
+        LocalDate dateExecuted = LocalDate.now().minusDays(1);
+        BigDecimal price = BigDecimal.valueOf(123.435);
+        SaleExceedsHoldingException exception = assertThrows(SaleExceedsHoldingException.class, () ->
+            fixture.createShareTrade(userId, portfolio.getId(),
+                dateExecuted, shareIndex.getIsin(), quantity, price)
+        );
+
+        // Then: the exception indicates the ISIN selected
+        assertEquals(SharesErrorCodes.SALE_EXCEEDS_HOLDING, exception.getErrorCode());
+        assertEquals(shareIndex.getIsin(), exception.getParameter("isin"));
+        assertEquals(-quantity, (int)exception.getParameter("quantity"));
+        assertEquals(existingHolding.getQuantity(), (int)exception.getParameter("holding"));
+
+        // And: no deal is persisted
+        verify(holdingRepository, never()).saveAndFlush(any());
     }
 }
