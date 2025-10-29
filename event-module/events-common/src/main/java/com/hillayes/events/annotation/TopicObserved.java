@@ -1,6 +1,7 @@
 package com.hillayes.events.annotation;
 
 import com.hillayes.events.domain.Topic;
+import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
 
 import java.lang.annotation.ElementType;
@@ -15,5 +16,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TopicObserved {
-    Topic[] value();
+    Topic value();
 }
