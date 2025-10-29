@@ -57,7 +57,7 @@
         <mockito.version>5.18.0</mockito.version>
         <mockito.agent>${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.agent>
 
-        <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
