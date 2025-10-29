@@ -100,6 +100,21 @@ public class PortfolioResource {
         return Response.ok(marshal(portfolio)).build();
     }
 
+    @DELETE
+    @Path("/{portfolioId}")
+    @Transactional
+    public Response deletePortfolio(@Context SecurityContext ctx,
+                                    @PathParam("portfolioId") UUID portfolioId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting portfolio [userId: {}, portfolioId: {}]", userId, portfolioId);
+
+        portfolioService.deletePortfolio(userId, portfolioId)
+            .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
+
+        log.debug("Deleted portfolio [userId: {}, portfolioId: {}]", userId, portfolioId);
+        return Response.noContent().build();
+    }
+
     @POST
     @Path("/{portfolioId}/holdings")
     public Response createShareTrade(@Context SecurityContext ctx,

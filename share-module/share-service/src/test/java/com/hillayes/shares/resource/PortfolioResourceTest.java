@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -80,7 +81,7 @@ public class PortfolioResourceTest extends TestBase {
     public void testUpdatePortfolio() {
         // Given: the user has a portfolio
         Portfolio portfolio = withTransaction(() -> {
-            UUID userId= UUID.fromString(userIdStr);
+            UUID userId = UUID.fromString(userIdStr);
             Portfolio newPortfolio = mockPortfolio(userId);
 
             // And: the whole portfolio is saved
@@ -125,7 +126,7 @@ public class PortfolioResourceTest extends TestBase {
     public void testUpdatePortfolio_WrongUser() {
         // Given: another user has a portfolio
         Portfolio portfolio = withTransaction(() -> {
-            UUID userId= UUID.randomUUID();
+            UUID userId = UUID.randomUUID();
             Portfolio newPortfolio = mockPortfolio(userId);
 
             // And: the whole portfolio is saved
@@ -268,7 +269,7 @@ public class PortfolioResourceTest extends TestBase {
             );
 
             // And: the user has a portfolio
-            UUID userId= UUID.fromString(userIdStr);
+            UUID userId = UUID.fromString(userIdStr);
             Portfolio newPortfolio = mockPortfolio(userId);
 
             // And: the portfolio holds the share
@@ -325,7 +326,7 @@ public class PortfolioResourceTest extends TestBase {
     public void testGetPortfolio_WrongUser() {
         // Given: another user has a portfolio
         Portfolio portfolio = withTransaction(() -> {
-            UUID userId= UUID.randomUUID();
+            UUID userId = UUID.randomUUID();
             Portfolio newPortfolio = mockPortfolio(userId);
 
             // And: the whole portfolio is saved
@@ -362,6 +363,95 @@ public class PortfolioResourceTest extends TestBase {
         assertNotNull(serviceError.getContextAttributes());
         assertEquals("Portfolio", serviceError.getContextAttributes().get("entity-type"));
         assertEquals(portfolio.getId().toString(), serviceError.getContextAttributes().get("entity-id"));
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testDeletePortfolio() {
+        AtomicLong originalCount = new AtomicLong();
+
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(() -> {
+            originalCount.set(portfolioRepository.count());
+
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            // And: the count is incremented
+            assertEquals(originalCount.get() + 1, portfolioRepository.count());
+            return newPortfolio;
+        });
+
+        // When: the service is called
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolio.getId())
+            .delete("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(204);
+
+        // Then: the portfolio count is as original
+        assertEquals(originalCount.get(), portfolioRepository.count());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testDeletePortfolio_WrongUser() {
+        AtomicLong originalCount = new AtomicLong();
+
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(() -> {
+            originalCount.set(portfolioRepository.count());
+
+            UUID userId = UUID.randomUUID();
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            // And: the count is incremented
+            assertEquals(originalCount.get() + 1, portfolioRepository.count());
+            return newPortfolio;
+        });
+
+        // When: the authenticated user calls the endpoint
+        ServiceErrorResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolio.getId())
+            .delete("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        // Then: the response indicates the error
+        assertNotNull(response);
+
+        assertEquals(ErrorSeverity.INFO, response.getSeverity());
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+
+        ServiceError serviceError = response.getErrors().get(0);
+        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
+
+        assertNotNull(serviceError.getContextAttributes());
+        assertEquals("Portfolio", serviceError.getContextAttributes().get("entity-type"));
+        assertEquals(portfolio.getId().toString(), serviceError.getContextAttributes().get("entity-id"));
+
+        // And: no portfolio is deleted
+        assertEquals(originalCount.get() + 1, portfolioRepository.count());
     }
 
     @Transactional
