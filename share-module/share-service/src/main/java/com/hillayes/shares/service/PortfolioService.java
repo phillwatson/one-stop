@@ -39,17 +39,12 @@ public class PortfolioService {
                                                String portfolioName) {
         log.info("Updating portfolio [name: {}]", portfolioName);
         try {
-            Optional<Portfolio> portfolio = portfolioRepository.findByIdOptional(portfolioId)
-                .filter(p -> userId.equals(p.getUserId()));
-
-            if (portfolio.isEmpty()) {
-                return Optional.empty();
-            }
-
-            return portfolio.map(p -> {
-                p.setName(portfolioName);
-                return portfolioRepository.saveAndFlush(p);
-            });
+            return portfolioRepository.findByIdOptional(portfolioId)
+                .filter(p -> userId.equals(p.getUserId()))
+                .map(p -> {
+                    p.setName(portfolioName);
+                    return portfolioRepository.saveAndFlush(p);
+                });
         } catch (ConstraintViolationException e) {
             throw new DuplicatePortfolioException(portfolioName, e);
         }
@@ -72,6 +67,7 @@ public class PortfolioService {
     public Optional<Portfolio> deletePortfolio(UUID userId, UUID portfolioId) {
         log.info("Deleting portfolio [portfolioId: {}]", portfolioId);
         return portfolioRepository.findByIdOptional(portfolioId)
+            .filter(portfolio -> userId.equals(portfolio.getUserId()))
             .map(portfolio -> {
                 portfolioRepository.delete(portfolio);
 
