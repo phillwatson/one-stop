@@ -1,9 +1,9 @@
-package com.hillayes.shares.ft;
+package com.hillayes.ftmarket.api;
 
 import com.hillayes.shares.api.ShareProviderApi;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.ft.service.PriceLookupService;
+import com.hillayes.ftmarket.api.service.PriceLookupService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

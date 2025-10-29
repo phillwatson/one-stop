@@ -1,9 +1,9 @@
-package com.hillayes.shares.ft.service;
+package com.hillayes.ftmarket.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hillayes.shares.ft.client.MarketsClient;
-import com.hillayes.shares.ft.domain.IsinIssueLookup;
-import com.hillayes.shares.ft.repository.IsinIssueLookupRepository;
+import com.hillayes.ftmarket.api.client.MarketsClient;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
+import com.hillayes.ftmarket.api.repository.IsinIssueLookupRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

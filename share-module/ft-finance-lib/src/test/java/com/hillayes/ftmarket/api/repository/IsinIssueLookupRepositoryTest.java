@@ -1,9 +1,8 @@
-package com.hillayes.shares.ft.repository;
+package com.hillayes.ftmarket.api.repository;
 
-import com.hillayes.shares.ft.domain.IsinIssueLookup;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;

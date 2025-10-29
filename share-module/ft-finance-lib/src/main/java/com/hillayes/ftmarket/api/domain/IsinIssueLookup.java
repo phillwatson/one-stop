@@ -1,4 +1,4 @@
-package com.hillayes.shares.ft.domain;
+package com.hillayes.ftmarket.api.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

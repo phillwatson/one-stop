@@ -1,7 +1,7 @@
-package com.hillayes.shares.ft.repository;
+package com.hillayes.ftmarket.api.repository;
 
 import com.hillayes.commons.jpa.RepositoryBase;
-import com.hillayes.shares.ft.domain.IsinIssueLookup;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Optional;

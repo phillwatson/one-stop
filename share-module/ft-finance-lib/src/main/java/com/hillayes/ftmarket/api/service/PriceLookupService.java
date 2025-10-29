@@ -1,8 +1,8 @@
-package com.hillayes.shares.ft.service;
+package com.hillayes.ftmarket.api.service;
 
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.ft.client.MarketsClient;
+import com.hillayes.ftmarket.api.client.MarketsClient;
 import com.hillayes.shares.api.errors.IsinNotFoundException;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;

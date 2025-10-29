@@ -1,4 +1,4 @@
-package com.hillayes.shares.ft.service;
+package com.hillayes.ftmarket.api.service;
 
 import com.hillayes.shares.api.domain.PriceData;
 import io.quarkus.test.junit.QuarkusTest;

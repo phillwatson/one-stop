@@ -1,8 +1,8 @@
-package com.hillayes.shares.ft.client;
+package com.hillayes.ftmarket.api.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.shares.api.domain.PriceData;
-import com.hillayes.shares.ft.domain.IsinIssueLookup;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;

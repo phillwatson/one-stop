@@ -1,4 +1,4 @@
-package com.hillayes.shares.ft.client;
+package com.hillayes.ftmarket.api.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.Strings;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.ft.domain.IsinIssueLookup;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.errors.ShareServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
