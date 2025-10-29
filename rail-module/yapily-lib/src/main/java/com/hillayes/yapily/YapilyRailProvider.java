@@ -324,7 +324,7 @@ public class YapilyRailProvider implements RailProviderApi {
                 .dateTime(balance.getDateTime())
                 .amount(of(balance.getBalanceAmount()))
                 .build()
-            ).orElse(RailBalance.builder()
+            ).orElseGet(() -> RailBalance.builder()
                 .type("UNKNOWN")
                 .dateTime(Instant.now())
                 .amount(MonetaryAmount.ZERO)

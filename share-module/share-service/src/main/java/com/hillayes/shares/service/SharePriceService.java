@@ -91,7 +91,7 @@ public class SharePriceService {
         // from what date are the latest prices to be retrieved
         LocalDate fromDate = priceHistoryRepository.getMostRecent(shareIndex)
             .map(price -> price.getId().getDate())
-            .orElse(LocalDate.now().minusDays(provider.getMaxHistory()));
+            .orElseGet(() -> LocalDate.now().minusDays(provider.getMaxHistory()));
         LocalDate toDate = LocalDate.now().minusDays(1);
 
         // if we don't need to refresh the prices

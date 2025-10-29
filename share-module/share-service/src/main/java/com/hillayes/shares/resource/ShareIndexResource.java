@@ -9,6 +9,7 @@ import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.service.ShareIndexService;
 import com.hillayes.shares.service.SharePriceService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -34,6 +35,7 @@ public class ShareIndexResource {
     private final SharePriceService sharePriceService;
 
     @POST
+    @Transactional
     public Response registerShareIndices(@Valid List<RegisterShareIndexRequest> request) {
         log.info("Registering share indices [size: {}]", (request == null) ? 0 : request.size());
 

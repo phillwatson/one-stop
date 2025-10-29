@@ -177,7 +177,7 @@ public class NordigenRailProvider implements RailProviderApi {
                 .name(account.ownerName)
                 .ownerName(account.ownerName)
                 .status(RailAccountStatus.valueOf(account.status.name()))
-                .balance(getBalance(id).orElse(RailBalance.builder()
+                .balance(getBalance(id).orElseGet(() -> RailBalance.builder()
                         .type("")
                         .dateTime(Instant.now())
                         .amount(MonetaryAmount.ZERO)

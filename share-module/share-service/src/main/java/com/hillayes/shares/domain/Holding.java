@@ -62,32 +62,32 @@ public class Holding {
      * Records a purchase of shares against this holding.
      * This ensures that the relationships are maintained correctly.
      *
-     * @param date the date on which the transaction occurred.
+     * @param dateExecuted the date on which the transaction occurred.
      * @param quantity the number of shares involved.
      * @param price the price of each share.
      * @return the newly added purchase.
      */
-    public DealingHistory buy(LocalDate date, int quantity, BigDecimal price) {
-        return add(date, Math.abs(quantity), price);
+    public DealingHistory buy(LocalDate dateExecuted, int quantity, BigDecimal price) {
+        return add(dateExecuted, Math.abs(quantity), price);
     }
 
     /**
      * Records a sale of shares against this holding.
      * This ensures that the relationships are maintained correctly.
      *
-     * @param date the date on which the transaction occurred.
+     * @param dateExecuted the date on which the transaction occurred.
      * @param quantity the number of shares involved.
      * @param price the price of each share.
      * @return the newly added sale.
      */
-    public DealingHistory sell(LocalDate date, int quantity, BigDecimal price) {
-        return add(date, -Math.abs(quantity), price);
+    public DealingHistory sell(LocalDate dateExecuted, int quantity, BigDecimal price) {
+        return add(dateExecuted, -Math.abs(quantity), price);
     }
 
-    private DealingHistory add(LocalDate date, int quantity, BigDecimal price) {
+    private DealingHistory add(LocalDate dateExecuted, int quantity, BigDecimal price) {
         DealingHistory dealing = DealingHistory.builder()
             .holding(this)
-            .dateExecuted(date)
+            .dateExecuted(dateExecuted)
             .quantity(quantity)
             .price(price)
             .build();
