@@ -35,8 +35,8 @@ public class PortfolioService {
 
     @Transactional
     public Optional<Portfolio> updatePortfolio(UUID userId,
-                                                 UUID portfolioId,
-                                     String portfolioName) {
+                                               UUID portfolioId,
+                                               String portfolioName) {
         log.info("Updating portfolio [name: {}]", portfolioName);
         try {
             Optional<Portfolio> portfolio = portfolioRepository.findByIdOptional(portfolioId)
@@ -70,7 +70,7 @@ public class PortfolioService {
 
     @Transactional
     public Optional<Portfolio> deletePortfolio(UUID userId, UUID portfolioId) {
-        log.info("Deleting portfolio [id: {}]", portfolioId);
+        log.info("Deleting portfolio [portfolioId: {}]", portfolioId);
         return portfolioRepository.findByIdOptional(portfolioId)
             .map(portfolio -> {
                 portfolioRepository.delete(portfolio);

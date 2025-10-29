@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @ApplicationScoped
@@ -53,7 +54,11 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
     }
 
     // a pool of virtual threads on which batches can be persisted
-    private static final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+    private static final ExecutorService executorService = Executors.newThreadPerTaskExecutor(
+        Thread.ofVirtual().name("virtual-thread-", 1L).factory()
+    );
+
+    // maintains a count of active virtual threads
     private final AtomicInteger pendingBatchCount = new AtomicInteger();
 
     public int getInsertBatchSize() {

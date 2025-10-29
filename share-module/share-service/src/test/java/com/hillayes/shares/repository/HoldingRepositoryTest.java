@@ -29,7 +29,7 @@ public class HoldingRepositoryTest {
     public void testGetHolding() {
         // Given: several share indices
         List<ShareIndex> shares = shareIndexRepository.saveAll(
-            IntStream.range(0, 10).mapToObj(i -> mockShareIndex() ).toList()
+            IntStream.range(0, 10).mapToObj(i -> mockShareIndex()).toList()
         );
 
         // And: a portfolio to which the holdings belong
@@ -57,4 +57,26 @@ public class HoldingRepositoryTest {
         });
     }
 
+    @Test
+    public void testSave() {
+        // Given: a share index
+        ShareIndex shareIndex = shareIndexRepository.saveAndFlush(mockShareIndex());
+
+        // And: a portfolio to which the holdings belong
+        Portfolio portfolio = portfolioRepository.saveAndFlush(mockPortfolio(UUID.randomUUID()));
+
+        // And: a holding is added to the portfolio
+        Holding holding = portfolio.add(shareIndex);
+
+        // When: the holding is saved
+        holdingRepository.saveAndFlush(holding);
+
+        // Then: a new ID is generated
+        assertNotNull(holding.getId());
+        assertNotNull(holding.getDateCreated());
+
+        // And: the holding links to the share and portfolio
+        assertEquals(shareIndex, holding.getShareIndex());
+        assertEquals(portfolio, holding.getPortfolio());
+    }
 }

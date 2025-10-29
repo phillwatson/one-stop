@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -49,6 +50,7 @@ public class Portfolio {
      * @param shareIndex the share index for which a holding is to be added
      * @return the newly added holding
      */
+    @Transient
     public Holding add(ShareIndex shareIndex) {
         Holding holding = Holding.builder()
             .portfolioId(this.getId())
@@ -59,6 +61,13 @@ public class Portfolio {
 
         holdings.add(holding);
         return holding;
+    }
+
+    @Transient
+    public Optional<Holding> get(ShareIndex shareIndex) {
+        return getHoldings().stream()
+            .filter(holding -> holding.getShareIndex().equals(shareIndex))
+            .findFirst();
     }
 
     /**

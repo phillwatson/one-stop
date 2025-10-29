@@ -177,7 +177,7 @@ public class ShareIndexResourceTest extends TestBase {
 
         // And: the response describes the ISIN conflict
         assertNotNull(response);
-        assertEquals(ErrorSeverity.WARNING, response.getSeverity());
+        assertEquals(ErrorSeverity.INFO, response.getSeverity());
         assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
 

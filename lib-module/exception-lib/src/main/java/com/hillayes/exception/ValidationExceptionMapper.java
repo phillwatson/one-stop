@@ -24,7 +24,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViol
 
     @Override
     public Response toResponse(ConstraintViolationException aException) {
-        String correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
+        String correlationId = Correlation.getCorrelationId().orElseGet(() -> UUID.randomUUID().toString());
 
         return Response
             .status(Response.Status.BAD_REQUEST)

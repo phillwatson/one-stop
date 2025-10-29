@@ -78,8 +78,8 @@ public class SendEmailService {
 
             SendSmtpEmail email = new SendSmtpEmail()
                 .sender(new SendSmtpEmailSender()
-                    .name(templateConfig.sender().orElse(configuration.defaultSender()).getName())
-                    .email(templateConfig.sender().orElse(configuration.defaultSender()).getEmail()))
+                    .name(templateConfig.sender().orElseGet(() -> configuration.defaultSender()).getName())
+                    .email(templateConfig.sender().orElseGet(() -> configuration.defaultSender()).getEmail()))
                 .addToItem(new SendSmtpEmailTo()
                     .name(recipient.getName())
                     .email(recipient.getEmail()))

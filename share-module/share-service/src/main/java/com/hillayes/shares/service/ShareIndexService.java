@@ -27,6 +27,11 @@ public class ShareIndexService {
     }
 
     @Transactional
+    public Optional<ShareIndex> getShareIndex(String shareIsin) {
+        return shareIndexRepository.findByIsin(shareIsin);
+    }
+
+    @Transactional
     public Collection<ShareIndex> registerShareIndices(Collection<ShareIndex> indices) {
         if ((indices == null) || (indices.isEmpty()))
             return List.of();
@@ -47,7 +52,7 @@ public class ShareIndexService {
                                          ShareProvider provider) {
         log.info("Creating new ShareIndex [isin: {}]", isin);
         try {
-            ShareIndex index = shareIndexRepository.save(
+            ShareIndex index = shareIndexRepository.saveAndFlush(
                 ShareIndex.builder()
                     .isin(isin)
                     .name(name)

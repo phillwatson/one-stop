@@ -24,7 +24,7 @@ public class MensaExceptionMapper implements ExceptionMapper<MensaException> {
         }
 
         ErrorCode errorCode = aException.getErrorCode();
-        String correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
+        String correlationId = Correlation.getCorrelationId().orElseGet(() -> UUID.randomUUID().toString());
 
         Response.Status status = Response.Status.fromStatusCode(errorCode.getStatusCode());
         return Response
