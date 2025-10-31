@@ -1,5 +1,6 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.rail;
 
+import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.*;
 import io.restassured.response.Response;
 

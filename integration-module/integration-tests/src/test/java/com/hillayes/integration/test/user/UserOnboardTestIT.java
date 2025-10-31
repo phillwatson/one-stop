@@ -1,8 +1,8 @@
 package com.hillayes.integration.test.user;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.hillayes.integration.api.UserOnboardApi;
-import com.hillayes.integration.api.UserProfileApi;
+import com.hillayes.integration.api.user.UserOnboardApi;
+import com.hillayes.integration.api.user.UserProfileApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserProfileResponse;

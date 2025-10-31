@@ -1,6 +1,6 @@
 package com.hillayes.integration.test.audit;
 
-import com.hillayes.integration.api.AuditReportApi;
+import com.hillayes.integration.api.rail.AuditReportApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;

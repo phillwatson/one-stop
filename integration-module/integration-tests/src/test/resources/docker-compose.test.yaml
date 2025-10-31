@@ -10,7 +10,7 @@ services:
 
   # Wiremock container. This hosts the email simulator.
   wiremock:
-    image: wiremock/wiremock:2.35.0-1
+    image: wiremock/wiremock:3.13.1-alpine
     networks:
       - onestop-http-network
     logging:
@@ -50,6 +50,7 @@ services:
       QUARKUS_LOG_LEVEL: "INFO"
       QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
       QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: "false"
+      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       ONE_STOP_ALPHA_VANTAGE_SECRET_KEY: "ABCDEF12345"
 
   notification-service:

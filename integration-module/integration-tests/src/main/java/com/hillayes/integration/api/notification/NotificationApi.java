@@ -1,5 +1,6 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.notification;
 
+import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.PaginatedNotifications;
 import io.restassured.response.Response;
 

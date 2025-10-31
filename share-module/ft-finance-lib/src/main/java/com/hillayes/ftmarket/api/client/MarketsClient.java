@@ -12,6 +12,7 @@ import com.hillayes.shares.api.errors.ShareServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
@@ -29,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
-@RequiredArgsConstructor
 @Slf4j
 public class MarketsClient {
     private static final DateTimeFormatter DATE_FORMATTER =
@@ -40,6 +40,14 @@ public class MarketsClient {
         new TypeReference<>() {};
 
     private final ObjectMapper objectMapper;
+    private final String host;
+
+    public MarketsClient(ObjectMapper objectMapper,
+                         @ConfigProperty(name = "one-stop.shares.ft-market.url") String host) {
+        this.objectMapper = objectMapper;
+        this.host = host;
+        log.debug("Creating client [host: {}]", host);
+    }
 
     /**
      * Returns the issue-id by which the FT Finance API identifies companies and
@@ -54,7 +62,7 @@ public class MarketsClient {
         try {
             // https://markets.ft.com/data/funds/tearsheet/summary?s=GB00B0CNGT73
             // Configure request with headers to avoid blocking
-            Document doc = Jsoup.connect("https://markets.ft.com/data/funds/tearsheet/summary?s=" + stockIsin)
+            Document doc = Jsoup.connect(host + "/data/funds/tearsheet/summary?s=" + stockIsin)
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0")
                 .header("Accept", "text/html")
                 .header("Accept-Language", "en-GB,en;q=0.5")
@@ -83,12 +91,17 @@ public class MarketsClient {
         if (input == null) {
             Element li = doc.selectFirst("li.mod-news__mind-event[data-mod-mind*=xid]");
             if (li != null) {
-                Map<String,String> json = objectMapper.readValue(li.attribute("data-mod-mind").getValue(), MAP_TYPE_REFERENCE);
-                result = json.get("xid");
+                Attribute attribute = li.attribute("data-mod-mind");
+                if (attribute != null) {
+                    Map<String, String> json = objectMapper.readValue(attribute.getValue(), MAP_TYPE_REFERENCE);
+                    result = json.get("xid");
+                }
             }
         } else {
             Attribute valueAttr = input.attribute("value");
-            result = valueAttr.getValue();
+            if (valueAttr != null) {
+                result = valueAttr.getValue();
+            }
         }
 
         return result;
@@ -103,17 +116,20 @@ public class MarketsClient {
         String result = null;
         Element input = doc.selectFirst("input[name=currencyCode]");
         if (input != null) {
-            result = input.attribute("value").getValue();
+            Attribute attribute = input.attribute("value");
+            if (attribute != null) {
+                result = attribute.getValue();
+            }
         }
 
         if (result == null) {
             Elements profileRows = doc.select("table.mod-profile-and-investment-app__table--profile tr");
             result = profileRows.stream()
+                .filter(row -> row.firstElementChild() != null)
                 .filter(row -> row.firstElementChild().hasText())
                 .filter(row -> row.firstElementChild().text().toLowerCase().contains("currency"))
-                .findFirst()
                 .map(row -> row.child(1).text())
-                .orElse(null);
+                .findFirst().orElse(null);
         }
 
         return result;
@@ -123,7 +139,7 @@ public class MarketsClient {
         log.info("Retrieving share prices [issueId: {}, startDate: {}, endDate: {}]", issueId, startDate, endDate);
         try {
             //https://markets.ft.com/data/equities/ajax/get-historical-prices?startDate=2025/08/28&endDate=2025/09/28&symbol=74137468
-            String url = "https://markets.ft.com/data/equities/ajax/get-historical-prices" +
+            String url = host + "/data/equities/ajax/get-historical-prices" +
                 "?startDate=" + startDate.format(DATE_FORMATTER) +
                 "&endDate=" + endDate.format(DATE_FORMATTER) +
                 "&symbol=" + issueId;

@@ -24,7 +24,7 @@ public class IsinLookupServiceTest {
     @BeforeAll
     public static void beforeAll() {
         isinIssueLookupRepository = mock();
-        marketsClient = spy(new MarketsClient(new ObjectMapper()));
+        marketsClient = spy(new MarketsClient(new ObjectMapper(), "https://markets.ft.com"));
 
         isinLookupService = new IsinLookupService(isinIssueLookupRepository, marketsClient);
     }

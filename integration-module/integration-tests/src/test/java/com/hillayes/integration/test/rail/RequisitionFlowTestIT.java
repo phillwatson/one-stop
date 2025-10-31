@@ -1,8 +1,12 @@
 package com.hillayes.integration.test.rail;
 
 import com.hillayes.integration.api.*;
-import com.hillayes.integration.api.admin.RailAgreementAdminApi;
-import com.hillayes.integration.api.admin.RailRequisitionAdminApi;
+import com.hillayes.integration.api.rail.admin.RailAgreementAdminApi;
+import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
+import com.hillayes.integration.api.rail.AccountApi;
+import com.hillayes.integration.api.rail.AccountTransactionsApi;
+import com.hillayes.integration.api.rail.InstitutionApi;
+import com.hillayes.integration.api.user.UserConsentApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;

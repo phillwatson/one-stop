@@ -1,7 +1,7 @@
 package com.hillayes.integration.test.util;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.hillayes.integration.api.UserOnboardApi;
+import com.hillayes.integration.api.user.UserOnboardApi;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import com.hillayes.sim.email.EmailMessage;

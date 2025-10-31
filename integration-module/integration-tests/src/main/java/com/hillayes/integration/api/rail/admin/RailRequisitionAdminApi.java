@@ -1,4 +1,4 @@
-package com.hillayes.integration.api.admin;
+package com.hillayes.integration.api.rail.admin;
 
 import com.hillayes.integration.api.ApiBase;
 import com.hillayes.nordigen.model.PaginatedList;

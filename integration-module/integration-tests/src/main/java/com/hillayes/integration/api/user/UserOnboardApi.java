@@ -1,5 +1,6 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.user;
 
+import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.UserCompleteRequest;
 import com.hillayes.onestop.api.UserRegisterRequest;
 import io.restassured.response.Response;

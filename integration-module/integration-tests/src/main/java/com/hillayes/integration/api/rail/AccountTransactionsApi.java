@@ -1,5 +1,6 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.rail;
 
+import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.PaginatedTransactions;
 import com.hillayes.onestop.api.TransactionResponse;
 import io.restassured.common.mapper.TypeRef;

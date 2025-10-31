@@ -2,7 +2,7 @@ package com.hillayes.integration.test.user;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.integration.api.AuthApi;
-import com.hillayes.integration.api.UserAdminApi;
+import com.hillayes.integration.api.user.UserAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;

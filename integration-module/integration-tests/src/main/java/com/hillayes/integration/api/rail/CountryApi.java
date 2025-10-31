@@ -1,5 +1,7 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.rail;
 
+import com.hillayes.integration.api.ApiBase;
+import com.hillayes.integration.api.FileResponse;
 import com.hillayes.onestop.api.CountryResponse;
 import com.hillayes.onestop.api.PaginatedCountries;
 import io.restassured.response.Response;

@@ -1,5 +1,6 @@
-package com.hillayes.integration.api;
+package com.hillayes.integration.api.user;
 
+import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.PaginatedUsers;
 import com.hillayes.onestop.api.UserResponse;
 import com.hillayes.onestop.api.UserUpdateRequest;
