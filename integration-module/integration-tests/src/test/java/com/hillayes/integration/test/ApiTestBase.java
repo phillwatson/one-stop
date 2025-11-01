@@ -2,6 +2,7 @@ package com.hillayes.integration.test;
 
 import com.hillayes.onestop.api.ServiceErrorResponse;
 import com.hillayes.sim.email.SendInBlueSimulator;
+import com.hillayes.sim.ftmarket.FtMarketSimulator;
 import com.hillayes.sim.nordigen.NordigenSimClient;
 import com.hillayes.sim.nordigen.NordigenSimulator;
 import com.hillayes.sim.server.SimServer;
@@ -55,7 +56,12 @@ public abstract class ApiTestBase {
      */
     public static final String EMAIL_HOST = "http://sim:" + SimServer.WIREMOCK_PORT + SendInBlueSimulator.BASE_URI;
 
-    public static final String FTMARKET_HOST = "http://sim:" + SimServer.WIREMOCK_PORT;
+    /**
+     * The URI on which the FT Market simulator is running. This is INTERNAL to docker work.
+     * This is passed to the Share Service container (via the config properties) to allow it
+     * to connect to the simulator.
+     */
+    public static final String FTMARKET_HOST = "http://sim:" + SimServer.WIREMOCK_PORT + FtMarketSimulator.BASE_URI;
 
     // a semaphore to ensure that the docker containers are only initialized once
     private static final AtomicBoolean initialized = new AtomicBoolean();

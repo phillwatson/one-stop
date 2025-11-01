@@ -5,22 +5,24 @@ import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern;
 import com.hillayes.sim.server.Expectation;
+import com.hillayes.sim.server.FileCache;
 import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Slf4j
 public class FtMarketSimulator implements Closeable {
-    private static final UrlPathPattern SUMMARY_URL_PATH = urlPathEqualTo("/data/funds/tearsheet/summary");
-    private static final UrlPathPattern PRICES_URL_PATH = urlPathEqualTo("/data/equities/ajax/get-historical-prices");
+    // a base path to ensure ft-market calls can be differentiated from other mocked services
+    public static final String BASE_URI = "/api.ft-market";
+
+    // various patterns used within the mocked requests
+    private static final UrlPathPattern SUMMARY_URL_PATH = urlPathEqualTo(BASE_URI + "/data/funds/tearsheet/summary");
+    private static final UrlPathPattern PRICES_URL_PATH = urlPathEqualTo(BASE_URI + "/data/equities/ajax/get-historical-prices");
     private static final StringValuePattern DATE_PATTERN = matching("^\\d{4}\\/\\d{2}\\/\\d{2}$");
+
     private final WireMock wireMockClient;
 
     public FtMarketSimulator(int wiremockPort) {
@@ -40,7 +42,7 @@ public class FtMarketSimulator implements Closeable {
                 .withQueryParam("s", equalTo(symbol))
                 .willReturn(aResponse()
                     .withHeader(ContentTypeHeader.KEY, MediaType.TEXT_HTML)
-                    .withBody(loadPage())
+                    .withBody(FileCache.loadFile("/ftmarket/fund-summary.html"))
                     .withTransformers("response-template")
                     .withTransformerParameter("symbol", symbol)
                     .withTransformerParameter("issueId", issueId)
@@ -73,19 +75,5 @@ public class FtMarketSimulator implements Closeable {
                 .withQueryParam("endDate", DATE_PATTERN)
                 .withQueryParam("symbol", equalTo(symbol))
         );
-    }
-
-
-    private static String SUMMARY_PAGE;
-    private String loadPage() {
-        if (SUMMARY_PAGE == null) {
-            try {
-                URL resource = this.getClass().getResource("/ftmarket/fund-summary.html");
-                SUMMARY_PAGE = IOUtils.toString(resource, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-        return SUMMARY_PAGE;
     }
 }
