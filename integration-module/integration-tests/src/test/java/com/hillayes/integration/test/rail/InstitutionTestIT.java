@@ -1,6 +1,6 @@
 package com.hillayes.integration.test.rail;
 
-import com.hillayes.integration.api.InstitutionApi;
+import com.hillayes.integration.api.rail.InstitutionApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;

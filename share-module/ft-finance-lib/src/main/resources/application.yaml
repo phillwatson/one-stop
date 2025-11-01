@@ -30,3 +30,8 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
+
+one-stop:
+  shares:
+    ft-market:
+      url: https://markets.ft.com

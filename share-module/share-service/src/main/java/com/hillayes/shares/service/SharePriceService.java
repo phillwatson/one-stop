@@ -52,8 +52,10 @@ public class SharePriceService {
                 shareIndex, SharePriceResolution.DAILY, fromDate, toDate, pageIndex, pageSize
             );
 
-        log.debug("Listing share prices [isin: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
-            shareIndex.getIsin(), fromDate, toDate, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing share prices [isin: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                shareIndex.getIsin(), fromDate, toDate, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        }
         return result;
     }
 

@@ -1,11 +1,14 @@
 package com.hillayes.executors.scheduler.helpers;
 
+import org.apache.commons.io.IOUtils;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,14 +35,8 @@ public class TestDatasource {
     }
 
     private static String readFile(String resource) throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(TestDatasource.class.getResourceAsStream(resource)))) {
-            String line;
-            StringBuilder createTables = new StringBuilder();
-            while ((line = in.readLine()) != null) {
-                createTables.append(line);
-            }
-            return createTables.toString();
-        }
+        URL url = TestDatasource.class.getResource(resource);
+        return IOUtils.toString(url, StandardCharsets.UTF_8);
     }
 
     private static void doWithConnection(DataSource dataSource, Consumer<Connection> consumer) {

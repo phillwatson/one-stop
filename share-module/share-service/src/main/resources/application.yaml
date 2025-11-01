@@ -53,7 +53,7 @@ one-stop:
 
       # adhoc task to retrieve latest prices for an identified share index
       poll-share-index:
-        on-failure: # gives a max of 16 minutes
+        on-failure: # gives a max of 7.5 minutes
           max-retry: 4
-          retry-interval: PT2M
+          retry-interval: PT1M
           retry-exponent: 1.5

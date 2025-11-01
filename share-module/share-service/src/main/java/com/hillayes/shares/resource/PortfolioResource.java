@@ -50,8 +50,10 @@ public class PortfolioResource {
             .items(portfolios.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, portfolios));
 
-        log.debug("Listing portfolios [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
-            userId, pageIndex, pageSize, response.getCount(), response.getTotal());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing portfolios [userId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, pageIndex, pageSize, response.getCount(), response.getTotal());
+        }
         return Response.ok(response).build();
     }
 
@@ -79,8 +81,10 @@ public class PortfolioResource {
 
         Portfolio portfolio = portfolioService.createPortfolio(userId, request.getName());
 
-        log.debug("Created portfolio [userId: {}, portfolioId: {}, portfolioName: {}]",
-            userId, portfolio.getUserId(), portfolio.getName());
+        if (log.isDebugEnabled()) {
+            log.debug("Created portfolio [userId: {}, portfolioId: {}, portfolioName: {}]",
+                userId, portfolio.getUserId(), portfolio.getName());
+        }
         return Response.ok(marshal(portfolio)).build();
     }
 
@@ -127,8 +131,10 @@ public class PortfolioResource {
         Holding holding = shareTradeService.createShareTrade(userId, portfolioId, request.getDateExecuted(),
             request.getIsin(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
 
-        log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
-            userId, portfolioId, request.getIsin(), request.getQuantity());
+        if (log.isDebugEnabled()) {
+            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
+                userId, portfolioId, request.getIsin(), request.getQuantity());
+        }
         return Response.ok(marshal(holding)).build();
     }
 
