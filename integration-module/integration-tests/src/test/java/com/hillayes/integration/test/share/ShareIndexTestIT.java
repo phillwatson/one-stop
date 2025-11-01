@@ -39,7 +39,7 @@ public class ShareIndexTestIT extends ApiTestBase {
             // And: the FT Market data can return the share details
             String ftMarketIssueId = randomStrings.nextNumeric(5);
             try (Expectation expectSummary = ftMarketSimulator
-                .expectSummaryFor(request.getIsin(), request.getName(), request.getCurrency())) {
+                .expectSummaryFor(request.getIsin(), ftMarketIssueId, request.getName(), request.getCurrency())) {
 
                 try (Expectation expectPrices = ftMarketSimulator.expectPricesFor(ftMarketIssueId)) {
 
@@ -51,12 +51,10 @@ public class ShareIndexTestIT extends ApiTestBase {
                     assertNotNull(response);
 
                     // And: the FT Market summary was retrieved
-                    List<LoggedRequest> verify = expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-                    assertNotNull(verify);
+                    expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
                     // And: the FT Market prices were retrieved
-                    List<LoggedRequest> verify1 = expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-                    assertNotNull(verify1);
+                    expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
                 }
             }
         }
