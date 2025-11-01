@@ -34,7 +34,6 @@ public class FtShareProvider implements ShareProviderApi {
     @Override
     public Optional<List<PriceData>> getPrices(String stockIsin, LocalDate startDate, LocalDate endDate) {
         List<PriceData> result = priceLookupService.getPrices(stockIsin, startDate, endDate);
-        if (result.isEmpty()) result = null;
         return Optional.ofNullable(result);
     }
 }

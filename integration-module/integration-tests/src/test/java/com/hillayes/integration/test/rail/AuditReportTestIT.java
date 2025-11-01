@@ -1,4 +1,4 @@
-package com.hillayes.integration.test.audit;
+package com.hillayes.integration.test.rail;
 
 import com.hillayes.integration.api.rail.AuditReportApi;
 import com.hillayes.integration.test.ApiTestBase;

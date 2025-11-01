@@ -47,7 +47,7 @@ public class UserUtils {
 
         // wait for registration email containing magic-token
         List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(user.getEmail(),
-            await().atMost(Duration.ofSeconds(60)));
+            await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
         EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
 
@@ -80,7 +80,7 @@ public class UserUtils {
 
         // wait for welcome email
         emailSim.verifyEmailSent(user.getEmail(), "Welcome to One-Stop",
-            await().atMost(Duration.ofSeconds(60)));
+            await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
         return user;
     }

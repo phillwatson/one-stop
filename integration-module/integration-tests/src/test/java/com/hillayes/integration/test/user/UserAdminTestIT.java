@@ -130,13 +130,13 @@ public class UserAdminTestIT extends ApiTestBase {
                 // and: an email is sent to old email address
                 List<LoggedRequest> toOldEmail = emailSim.verifyEmailSent(
                     user.getEmail(), "Your account has been updated",
-                    await().atMost(Duration.ofSeconds(60)));
+                    await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
                 assertEquals(1, toOldEmail.size());
 
                 // and: an email is sent to new email address
                 List<LoggedRequest> toNewEmail = emailSim.verifyEmailSent(
                     updatedUser.getEmail(), "Your account has been updated",
-                    await().atMost(Duration.ofSeconds(60)));
+                    await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
                 assertEquals(1, toNewEmail.size());
             });
         }
@@ -169,7 +169,7 @@ public class UserAdminTestIT extends ApiTestBase {
                 // then: an email is sent to the user
                 List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(
                     user.getEmail(), "Sorry to see you go",
-                    await().atMost(Duration.ofSeconds(60)));
+                    await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
                 assertEquals(1, emailRequests.size());
             });
         }

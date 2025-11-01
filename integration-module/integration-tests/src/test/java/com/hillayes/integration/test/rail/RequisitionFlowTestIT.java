@@ -145,7 +145,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
             // and: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
             // and: the user can retrieve their consent record
             UserConsentResponse consentForInstitution = userConsentApi.getConsentForInstitution(institution.getId());
@@ -226,7 +226,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
 
             // then: an email is sent to the user for confirmation
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
         }
 
         // when: the user attempts to retrieve the institution consent

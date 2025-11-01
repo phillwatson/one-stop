@@ -88,7 +88,7 @@ public class NotificationTestIT extends ApiTestBase {
 
             // then: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
         }
 
         // and: a notification is issued to the user

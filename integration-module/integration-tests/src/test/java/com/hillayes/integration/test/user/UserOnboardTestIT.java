@@ -46,7 +46,7 @@ public class UserOnboardTestIT extends ApiTestBase {
 
         // then: an email is sent to the user
         List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(registerRequest.getEmail(),
-            await().atMost(Duration.ofSeconds(30)));
+            await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(30)));
         assertNotNull(emailRequests);
         assertEquals(1, emailRequests.size());
 

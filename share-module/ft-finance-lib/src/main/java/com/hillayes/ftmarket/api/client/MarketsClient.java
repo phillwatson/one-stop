@@ -9,6 +9,7 @@ import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.errors.ShareServiceException;
+import jakarta.activation.MimeType;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -144,18 +145,17 @@ public class MarketsClient {
                 "&endDate=" + endDate.format(DATE_FORMATTER) +
                 "&symbol=" + issueId;
 
-            String doc = Jsoup.connect(url)
+            Document doc = Jsoup.connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0")
                 .ignoreContentType(true)
                 .header("Accept", "application/json; charset=utf-8")
                 .header("Accept-Language", "en-GB,en;q=0.5")
-                .get()
-                .body().text();
+                .get();
 
-            JsonNode node = objectMapper.readTree(doc);
+            JsonNode node = objectMapper.readTree(doc.body().text());
             JsonNode xml = node.findPath("html");
 
-            Document data = Parser.xmlParser().parseInput(xml.asText(), "http://localhost");
+            Document data = Parser.xmlParser().parseInput(xml.asText(), "http://localhost"); // any URL will do
             List<PriceData> result = data.getElementsByTag("tr").stream()
                 .map(row -> {
                     Elements cols = row.getElementsByTag("td");

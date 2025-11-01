@@ -1,4 +1,4 @@
-package com.hillayes.integration.test.category;
+package com.hillayes.integration.test.rail;
 
 import com.google.common.collect.Streams;
 import com.hillayes.integration.api.*;
@@ -369,7 +369,7 @@ public class CategoryTestIT extends ApiTestBase {
 
             // and: a confirmation email is sent to the user
             emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
             // and: the user can retrieve their consent record
             UserConsentResponse consentForInstitution = userConsentApi.getConsentForInstitution(institution.getId());
