@@ -1,6 +1,5 @@
 package com.hillayes.integration.test.share;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.integration.api.share.ShareIndexApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
@@ -8,7 +7,6 @@ import com.hillayes.integration.test.util.UserUtils;
 import com.hillayes.onestop.api.RegisterShareIndexRequest;
 import com.hillayes.onestop.api.ShareIndexResponse;
 import com.hillayes.sim.ftmarket.FtMarketSimulator;
-import com.hillayes.sim.server.Expectation;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -38,25 +36,24 @@ public class ShareIndexTestIT extends ApiTestBase {
 
             // And: the FT Market data can return the share details
             String ftMarketIssueId = randomStrings.nextNumeric(5);
-            try (Expectation expectSummary = ftMarketSimulator
-                .expectSummaryFor(request.getIsin(), ftMarketIssueId, request.getName(), request.getCurrency())) {
+            ftMarketSimulator.expectSummaryFor(request.getIsin(), ftMarketIssueId,
+                request.getName(), request.getCurrency(), expectSummary ->
+                    ftMarketSimulator.expectPricesFor(ftMarketIssueId, expectPrices -> {
 
-                try (Expectation expectPrices = ftMarketSimulator.expectPricesFor(ftMarketIssueId)) {
+                        // When: the user registers a share index
+                        ShareIndexApi shareIndexApi = new ShareIndexApi(user.getAuthTokens());
+                        List<ShareIndexResponse> response = shareIndexApi.registerShareIndices(List.of(request));
 
-                    // When: the user registers a share index
-                    ShareIndexApi shareIndexApi = new ShareIndexApi(user.getAuthTokens());
-                    List<ShareIndexResponse> response = shareIndexApi.registerShareIndices(List.of(request));
+                        // Then: a response is returned
+                        assertNotNull(response);
 
-                    // Then: a response is returned
-                    assertNotNull(response);
+                        // And: the FT Market summary was retrieved
+                        expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
-                    // And: the FT Market summary was retrieved
-                    expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-
-                    // And: the FT Market prices were retrieved
-                    expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-                }
-            }
+                        // And: the FT Market prices were retrieved
+                        expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+                    })
+                );
         }
     }
 }

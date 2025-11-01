@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
+import java.util.function.Consumer;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -26,7 +27,7 @@ public class FtMarketSimulator implements Closeable {
     private final WireMock wireMockClient;
 
     public FtMarketSimulator(int wiremockPort) {
-        log.info("Starting FundSummary Simulator [port: {}]", wiremockPort);
+        log.info("Starting FT Market Simulator [port: {}]", wiremockPort);
         wireMockClient = new WireMock(wiremockPort);
     }
 
@@ -35,8 +36,10 @@ public class FtMarketSimulator implements Closeable {
         wireMockClient.removeMappings();
     }
 
-    public Expectation expectSummaryFor(String symbol, String issueId, String name, String currency) {
-        return new Expectation("fund summary for " + symbol, wireMockClient,
+    public void expectSummaryFor(String symbol, String issueId,
+                                 String name, String currency,
+                                 Consumer<Expectation> action) {
+        try (Expectation expectation = new Expectation("fund summary for " + symbol, wireMockClient,
             get(SUMMARY_URL_PATH)
                 .withHeader("Accept", containing(MediaType.TEXT_HTML))
                 .withQueryParam("s", equalTo(symbol))
@@ -53,12 +56,14 @@ public class FtMarketSimulator implements Closeable {
             getRequestedFor(SUMMARY_URL_PATH)
                 .withHeader("Accept", containing(MediaType.TEXT_HTML))
                 .withQueryParam("s", equalTo(symbol))
-        );
+        )) {
+            action.accept(expectation);
+        }
     }
 
 
-    public Expectation expectPricesFor(String symbol) {
-        return new Expectation("history prices for " + symbol, wireMockClient,
+    public void expectPricesFor(String symbol, Consumer<Expectation> action) {
+        try (Expectation expectation = new Expectation("historic prices for " + symbol, wireMockClient,
             get(PRICES_URL_PATH)
                 .withHeader("Accept", containing(MediaType.APPLICATION_JSON))
                 .withQueryParam("startDate", DATE_PATTERN)
@@ -74,6 +79,8 @@ public class FtMarketSimulator implements Closeable {
                 .withQueryParam("startDate", DATE_PATTERN)
                 .withQueryParam("endDate", DATE_PATTERN)
                 .withQueryParam("symbol", equalTo(symbol))
-        );
+        )) {
+            action.accept(expectation);
+        }
     }
 }

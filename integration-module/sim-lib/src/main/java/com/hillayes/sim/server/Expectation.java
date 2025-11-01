@@ -37,7 +37,6 @@ public class Expectation implements Closeable {
         return wireMockClient.find(request);
     }
 
-
     @Override
     public void close() {
         wireMockClient.removeStubMapping(stubMapping);
