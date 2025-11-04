@@ -44,18 +44,20 @@ export default function AccountList(props: Props) {
   const balanceTotals: Array<AccountBalance> = useMemo(() => {
     const result = Array<AccountBalance>();
     props.accounts.forEach(account => {
-      account.balance.forEach(balance => {
-        if (result.length === 0) {
-          result.push({...balance});
-        } else {
-          const type = result.find(i => i.type === balance.type)
-          if (type == null) {
-            result.push({...balance})
+      if (account.balance) {
+        account.balance.forEach(balance => {
+          if (result.length === 0) {
+            result.push({...balance});
           } else {
-            type.amount += balance.amount
+            const type = result.find(i => i.type === balance.type)
+            if (type == null) {
+              result.push({...balance})
+            } else {
+              type.amount += balance.amount
+            }
           }
-        }
-      })
+        })
+      }
     });
 
     return result;

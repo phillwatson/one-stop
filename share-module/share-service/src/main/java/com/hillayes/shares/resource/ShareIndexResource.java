@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/shares/indices")
-@RolesAllowed("user")
+@RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
@@ -77,8 +77,10 @@ public class ShareIndexResource {
             .items(sharesPage.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, sharesPage));
 
-        log.debug("Listing share indices [page: {}, pageSize: {}, count: {}, total: {}]",
-            page, pageSize, response.getCount(), response.getTotal());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing share indices [page: {}, pageSize: {}, count: {}, total: {}]",
+                page, pageSize, response.getCount(), response.getTotal());
+        }
         return Response.ok(response).build();
     }
 
@@ -107,8 +109,10 @@ public class ShareIndexResource {
             .items(prices.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, prices));
 
-        log.debug("Listing share prices [page: {}, pageSize: {}, count: {}, total: {}]",
-            pageIndex, pageSize, response.getCount(), response.getTotal());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing share prices [page: {}, pageSize: {}, count: {}, total: {}]",
+                pageIndex, pageSize, response.getCount(), response.getTotal());
+        }
         return Response.ok(response).build();
     }
 

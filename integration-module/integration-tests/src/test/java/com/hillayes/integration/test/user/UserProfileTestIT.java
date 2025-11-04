@@ -1,7 +1,7 @@
 package com.hillayes.integration.test.user;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.hillayes.integration.api.UserProfileApi;
+import com.hillayes.integration.api.user.UserProfileApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -92,13 +92,13 @@ public class UserProfileTestIT extends ApiTestBase {
             // and: an email is sent to user's old email address to confirm update
             List<LoggedRequest> toOldEmail = emailSim.verifyEmailSent(
                 user.getEmail(), "Your account has been updated",
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
             assertEquals(1, toOldEmail.size());
 
             // and: an email is sent to new email address
             List<LoggedRequest> toNewEmail = emailSim.verifyEmailSent(
                 updateProfileRequest.getEmail(), "Your account has been updated",
-                await().atMost(Duration.ofSeconds(60)));
+                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
             assertEquals(1, toNewEmail.size());
 
             // when: the user retrieves profile again

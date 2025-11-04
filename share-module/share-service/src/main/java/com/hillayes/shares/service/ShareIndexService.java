@@ -77,8 +77,10 @@ public class ShareIndexService {
 
         Page<ShareIndex> result = shareIndexRepository.listAll(pageIndex, pageSize);
 
-        log.debug("Listing share indices [page: {}, pageSize: {}, size: {}, totalCount: {}]",
-            pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing share indices [page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        }
         return result;
     }
 }
