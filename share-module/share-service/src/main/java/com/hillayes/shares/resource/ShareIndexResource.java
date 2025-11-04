@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/shares/indices")
-@RolesAllowed("user")
+@RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
