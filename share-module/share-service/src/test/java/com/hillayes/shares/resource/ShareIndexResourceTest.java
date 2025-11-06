@@ -2,11 +2,10 @@ package com.hillayes.shares.resource;
 
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
-import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.shares.domain.PriceHistory;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.domain.SharePriceResolution;
-import com.hillayes.shares.errors.DuplicateIsinException;
+import com.hillayes.shares.errors.DuplicateShareIndexException;
 import com.hillayes.shares.service.ShareIndexService;
 import com.hillayes.shares.service.SharePriceService;
 import io.quarkus.test.InjectMock;
@@ -29,7 +28,6 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
@@ -55,15 +53,13 @@ public class ShareIndexResourceTest extends TestBase {
 
         // And: and the service will register the indices
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
-        when(shareIndexService.registerShareIndex(
-            anyString(), anyString(), any(Currency.class), any(ShareProvider.class)))
-            .then(invocation -> ShareIndex.builder()
-                .id(UUID.randomUUID())
-                .isin(invocation.getArgument(0))
-                .name(invocation.getArgument(1))
-                .currency(invocation.getArgument(2))
-                .provider(invocation.getArgument(3))
-                .build());
+        when(shareIndexService.registerShareIndex(any()))
+            .then(invocation -> {
+                ShareIndex.ShareIdentity id = invocation.getArgument(0);
+                return mockShareIndex(s ->
+                    s.id(UUID.randomUUID()).identity(id)
+                );
+            });
 
         // When: client calls the endpoint
         List<ShareIndexResponse> response = given()
@@ -82,23 +78,20 @@ public class ShareIndexResourceTest extends TestBase {
         verify(shareIndexService).registerShareIndices(anyList());
 
         // And: the share index service is called for each share in the request
-        verify(shareIndexService, times(request.size())).registerShareIndex(
-            anyString(), anyString(), any(Currency.class), any(ShareProvider.class)
-        );
+        verify(shareIndexService, times(request.size())).registerShareIndex(any());
 
         // And: the response contains each registered share
         assertNotNull(response);
         assertEquals(request.size(), response.size());
         request.forEach(expected -> {
-            ShareIndexResponse actual = response.stream().filter(s -> s.getIsin().equals(expected.getIsin()))
+            ShareIndexResponse actual = response.stream()
+                .filter(s -> s.getShareId().getIsin().equals(expected.getIsin()))
                 .findFirst().orElse(null);
 
             assertNotNull(actual);
             assertNotNull(actual.getId());
-            assertEquals(expected.getIsin(), actual.getIsin());
-            assertEquals(expected.getName(), actual.getName());
-            assertEquals(expected.getCurrency(), actual.getCurrency());
-            assertEquals(expected.getProvider(), actual.getProvider());
+            assertEquals(expected.getIsin(), actual.getShareId().getIsin());
+            assertEquals(expected.getTickerSymbol(), actual.getShareId().getTickerSymbol());
         });
     }
 
@@ -110,16 +103,11 @@ public class ShareIndexResourceTest extends TestBase {
 
         // And: and the service will register the indices
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
-        when(shareIndexService.registerShareIndex(
-            anyString(), anyString(), any(Currency.class), any(ShareProvider.class)))
+        when(shareIndexService.registerShareIndex(any()))
             .then(invocation -> {
-                return ShareIndex.builder()
-                    .id(UUID.randomUUID())
-                    .isin(invocation.getArgument(0))
-                    .name(invocation.getArgument(1))
-                    .currency(invocation.getArgument(2))
-                    .provider(invocation.getArgument(3))
-                    .build();
+                ShareIndex entity = invocation.getArgument(0);
+                if (entity.getId() == null) entity.setId(UUID.randomUUID());
+                return entity;
             });
 
         // When: client calls the endpoint
@@ -154,9 +142,8 @@ public class ShareIndexResourceTest extends TestBase {
 
         // And: and the service will register the indices
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
-        when(shareIndexService.registerShareIndex(
-            anyString(), anyString(), any(Currency.class), any(ShareProvider.class)))
-            .thenThrow(new DuplicateIsinException(request.get(0).getIsin(), null));
+        when(shareIndexService.registerShareIndex(any()))
+            .thenThrow(new DuplicateShareIndexException(request.get(0).getIsin(), request.get(0).getTickerSymbol(), null));
 
         // When: client calls the endpoint
         ServiceErrorResponse response = given()
@@ -173,7 +160,7 @@ public class ShareIndexResourceTest extends TestBase {
 
         // Then: the share index service is called to save the index
         verify(shareIndexService).registerShareIndices(anyList());
-        verify(shareIndexService).registerShareIndex(anyString(), anyString(), any(Currency.class), any(ShareProvider.class));
+        verify(shareIndexService).registerShareIndex(any());
 
         // And: the response describes the ISIN conflict
         assertNotNull(response);
@@ -186,8 +173,9 @@ public class ShareIndexResourceTest extends TestBase {
 
         Map<String, String> contextAttributes = serviceError.getContextAttributes();
         assertNotNull(contextAttributes);
-        assertEquals(1, contextAttributes.size());
+        assertEquals(2, contextAttributes.size());
         assertEquals(duplicateShareIndex.getIsin(), contextAttributes.get("isin"));
+        assertEquals(duplicateShareIndex.getTickerSymbol(), contextAttributes.get("ticker-symbol"));
     }
 
     @Test
@@ -468,8 +456,6 @@ public class ShareIndexResourceTest extends TestBase {
     private RegisterShareIndexRequest mockRegisterShareIndexRequest() {
         return new RegisterShareIndexRequest()
             .isin(randomStrings.nextAlphanumeric(12))
-            .name(randomStrings.nextAlphanumeric(30))
-            .currency("GBP")
-            .provider(ShareProvider.FT_MARKET_DATA.name());
+            .tickerSymbol(randomStrings.nextAlphabetic(4));
     }
 }

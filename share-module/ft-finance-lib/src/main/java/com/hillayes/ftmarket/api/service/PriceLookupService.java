@@ -1,5 +1,7 @@
 package com.hillayes.ftmarket.api.service;
 
+import com.hillayes.commons.Strings;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.ftmarket.api.client.MarketsClient;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -18,11 +21,16 @@ public class PriceLookupService {
     private final IsinLookupService isinLookupService;
     private final MarketsClient marketsClient;
 
-    public List<PriceData> getPrices(String stockIsin, LocalDate startDate, LocalDate endDate) {
-        log.info("Retrieving share prices [isin: {}, startDate: {}, endDate: {}]", stockIsin, startDate, endDate);
-        String issueId = isinLookupService.lookupIssueId(stockIsin)
-            .orElseThrow(() -> new IsinNotFoundException(ShareProvider.FT_MARKET_DATA, stockIsin));
+    public Optional<List<PriceData>> getPrices(String symbol, LocalDate startDate, LocalDate endDate) {
+        log.info("Retrieving share prices [isin: {}, startDate: {}, endDate: {}]", symbol, startDate, endDate);
 
-        return marketsClient.getPrices(issueId, startDate, endDate);
+        if (Strings.isBlank(symbol)) {
+            return Optional.empty();
+        }
+
+        IsinIssueLookup lookup = isinLookupService.lookupIssueId(symbol)
+            .orElseThrow(() -> new IsinNotFoundException(ShareProvider.FT_MARKET_DATA, symbol));
+
+        return Optional.ofNullable(marketsClient.getPrices(lookup.getIssueId(), startDate, endDate));
     }
 }

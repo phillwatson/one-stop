@@ -125,15 +125,21 @@ public class PortfolioResource {
                                      @PathParam("portfolioId") UUID portfolioId,
                                      TradeRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
-            userId, portfolioId, request.getIsin(), request.getQuantity());
+        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
+            userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
 
-        Holding holding = shareTradeService.createShareTrade(userId, portfolioId, request.getDateExecuted(),
-            request.getIsin(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
+        Holding holding = shareTradeService.createShareTrade(
+            userId, portfolioId, request.getDateExecuted(),
+            ShareIndex.ShareIdentity.builder()
+                .isin(request.getShareId().getIsin())
+                .tickerSymbol(request.getShareId().getTickerSymbol())
+                .build(),
+            request.getQuantity(),
+            BigDecimal.valueOf(request.getPricePerShare()));
 
         if (log.isDebugEnabled()) {
-            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
-                userId, portfolioId, request.getIsin(), request.getQuantity());
+            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
+                userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
         }
         return Response.ok(marshal(holding)).build();
     }
@@ -161,7 +167,10 @@ public class PortfolioResource {
         return new HoldingResponse()
             .id(holding.getId())
             .shareIndexId(shareIndex.getId())
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            )
             .name(shareIndex.getName())
             .totalCost(holding.getTotalCost().doubleValue())
             .currency(holding.getCurrency().getCurrencyCode())

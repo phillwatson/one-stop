@@ -630,7 +630,7 @@ public class PortfolioResourceTest extends TestBase {
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testCreateShareTrade() {
+    public void testCreateShareTrade_ByIsinOnly() {
         // Given: a share index
         ShareIndex shareIndex = mockShareIndex();
 
@@ -651,9 +651,11 @@ public class PortfolioResourceTest extends TestBase {
             return newPortfolio;
         });
 
-        // And: a request to make a trade
+        // And: a request to make a trade - using only the ISIN
         TradeRequest request = new TradeRequest()
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
             .pricePerShare(randomNumbers.randomDouble(100, 200))
             .quantity(120)
             .dateExecuted(LocalDate.now().minusDays(2));
@@ -678,7 +680,8 @@ public class PortfolioResourceTest extends TestBase {
 
         // And: the holding identifies the share traded
         assertEquals(shareIndex.getId(), response.getShareIndexId());
-        assertEquals(shareIndex.getIsin(), response.getIsin());
+        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
         assertEquals(shareIndex.getName(), response.getName());
         assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
 
@@ -696,6 +699,127 @@ public class PortfolioResourceTest extends TestBase {
     }
 
     @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testCreateShareTrade_ByTickerOnly() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex();
+
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(shareIndex, (share) -> {
+            // Given: a share index exists
+            shareIndexRepository.save(share);
+
+            // And: the user has a portfolio
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            return newPortfolio;
+        });
+
+        // And: a request to make a trade - using only the ISIN
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        HoldingResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolio.getId())
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(HoldingResponse.class);
+
+        // Then: the new holding is returned
+        assertNotNull(response);
+        assertNotNull(response.getId());
+
+        // And: the holding identifies the share traded
+        assertEquals(shareIndex.getId(), response.getShareIndexId());
+        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
+        assertEquals(shareIndex.getName(), response.getName());
+        assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
+
+        // And: the holding identifies the new total holding (just this one)
+        assertEquals(request.getQuantity(), response.getQuantity());
+        assertEquals(request.getPricePerShare() * request.getQuantity(), response.getTotalCost());
+
+        // And: the new (only) dealing is included
+        assertNotNull(response.getDealings());
+        assertEquals(1, response.getDealings().size());
+        DealingHistoryResponse dealing = response.getDealings().get(0);
+        assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
+        assertEquals(request.getQuantity(), dealing.getQuantity());
+        assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testCreateShareTrade_ShareIndexNotFound() {
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(() -> {
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            return newPortfolio;
+        });
+
+        // And: a request to make a trade - using only the ISIN
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .isin(randomStrings.nextAlphanumeric(12))
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        ServiceErrorResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolio.getId())
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        // Then: an error response is returned
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+
+        ServiceError error = response.getErrors().get(0);
+        assertEquals(ErrorSeverity.INFO, error.getSeverity());
+        assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
+        assertEquals("ShareIndex", error.getContextAttributes().get("entity-type"));
+        assertTrue(error.getContextAttributes().get("entity-id").contains(request.getShareId().getIsin()));
+    }
+
+    @Test
     public void testCreateShareTrade_NotAuthorised() {
         // Given: a share index
         ShareIndex shareIndex = mockShareIndex();
@@ -705,7 +829,9 @@ public class PortfolioResourceTest extends TestBase {
 
         // And: a request to make a trade
         TradeRequest request = new TradeRequest()
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
             .pricePerShare(randomNumbers.randomDouble(100, 200))
             .quantity(120)
             .dateExecuted(LocalDate.now().minusDays(2));
@@ -733,7 +859,9 @@ public class PortfolioResourceTest extends TestBase {
 
         // And: a request to make a trade
         TradeRequest request = new TradeRequest()
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
             .pricePerShare(randomNumbers.randomDouble(100, 200))
             .quantity(120)
             .dateExecuted(LocalDate.now().minusDays(2));

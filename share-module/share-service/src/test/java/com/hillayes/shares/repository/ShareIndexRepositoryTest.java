@@ -5,12 +5,10 @@ import com.hillayes.shares.domain.ShareIndex;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
-import org.awaitility.Awaitility;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -37,7 +35,12 @@ public class ShareIndexRepositoryTest {
 
         // When:
         indices.forEach(expected -> {
-            ShareIndex actual = shareIndexRepository.findByIsin(expected.getIsin()).orElse(null);
+            ShareIndex.ShareIdentity shareIdentity = ShareIndex.ShareIdentity.builder()
+                .isin(expected.getIdentity().getIsin())
+                .tickerSymbol(expected.getIdentity().getTickerSymbol())
+                .build();
+            ShareIndex actual = shareIndexRepository.findByIdentity(shareIdentity)
+                .orElse(null);
 
             // Then:
             assertNotNull(actual);
@@ -85,7 +88,14 @@ public class ShareIndexRepositoryTest {
 
         // When: another share index with the same ISIN is saved
         ConstraintViolationException expected = assertThrows(ConstraintViolationException.class, () ->
-            shareIndexRepository.saveAndFlush(mockShareIndex(s -> s.isin(existingIndex.getIsin())))
+            shareIndexRepository.saveAndFlush(
+                mockShareIndex(s ->
+                    s.identity(ShareIndex.ShareIdentity.builder()
+                        .isin(existingIndex.getIdentity().getIsin())
+                        .tickerSymbol(existingIndex.getIdentity().getTickerSymbol())
+                        .build())
+                )
+            )
         );
 
         // Then: the exception is due to a unique constraint violation

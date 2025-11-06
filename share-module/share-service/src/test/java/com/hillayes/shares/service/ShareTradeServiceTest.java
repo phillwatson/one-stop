@@ -55,7 +55,7 @@ public class ShareTradeServiceTest {
     public void testCreateShareTrade_NewHolding() {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
             .thenReturn(Optional.of(shareIndex));
 
         // And: an authenticated user
@@ -75,7 +75,7 @@ public class ShareTradeServiceTest {
         int quantity = 1200;
         BigDecimal price = BigDecimal.valueOf(123.435);
         Holding holding = fixture.createShareTrade(userId, portfolio.getId(),
-            dateExecuted, shareIndex.getIsin(), quantity, price);
+            dateExecuted, shareIndex.getIdentity(), quantity, price);
 
         // Then: a new holding is created
         assertNotNull(holding);
@@ -98,7 +98,7 @@ public class ShareTradeServiceTest {
     public void testCreateShareTrade_ExistingHolding(int quantity) {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
             .thenReturn(Optional.of(shareIndex));
 
         // And: an authenticated user
@@ -126,7 +126,7 @@ public class ShareTradeServiceTest {
         LocalDate dateExecuted = LocalDate.now().minusDays(1);
         BigDecimal price = BigDecimal.valueOf(123.435);
         Holding holding = fixture.createShareTrade(userId, portfolio.getId(),
-            dateExecuted, shareIndex.getIsin(), quantity, price);
+            dateExecuted, shareIndex.getIdentity(), quantity, price);
 
         // Then: the existing holding is returned
         assertEquals(existingHolding, holding);
@@ -153,7 +153,7 @@ public class ShareTradeServiceTest {
     public void testCreateShareTrade_PortfolioNotFound() {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
             .thenReturn(Optional.of(shareIndex));
 
         // And: an authenticated user
@@ -170,7 +170,7 @@ public class ShareTradeServiceTest {
         BigDecimal price = BigDecimal.valueOf(123.435);
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             fixture.createShareTrade(userId, portfolioId,
-                dateExecuted, shareIndex.getIsin(), quantity, price));
+                dateExecuted, shareIndex.getIdentity(), quantity, price));
 
         // Then: the exception indicates the missing portfolio
         assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
@@ -184,8 +184,8 @@ public class ShareTradeServiceTest {
     @Test
     public void testCreateShareTrade_ShareIndexNotFound() {
         // Given: NO share of given ISIN is registered
-        String shareIndexIsin = randomStrings.nextAlphanumeric(12);
-        when(shareIndexService.getShareIndex(shareIndexIsin))
+        ShareIndex.ShareIdentity shareIdentity = mockShareIdentity();
+        when(shareIndexService.getShareIndex(shareIdentity))
             .thenReturn(Optional.empty());
 
         // And: an authenticated user
@@ -202,12 +202,12 @@ public class ShareTradeServiceTest {
         BigDecimal price = BigDecimal.valueOf(123.435);
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIndexIsin, quantity, price));
+                dateExecuted, shareIdentity, quantity, price));
 
         // Then: the exception indicates the missing share index
         assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
         assertEquals("ShareIndex", exception.getParameter("entity-type"));
-        assertEquals(shareIndexIsin, exception.getParameter("entity-id"));
+        assertEquals(shareIdentity, exception.getParameter("entity-id"));
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
@@ -217,7 +217,7 @@ public class ShareTradeServiceTest {
     public void testCreateShareTrade_zeroQuantity() {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
             .thenReturn(Optional.of(shareIndex));
 
         // And: an authenticated user
@@ -238,11 +238,12 @@ public class ShareTradeServiceTest {
         BigDecimal price = BigDecimal.valueOf(123.435);
         ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
             fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIndex.getIsin(), quantity, price));
+                dateExecuted, shareIndex.getIdentity(), quantity, price));
 
         // Then: the exception indicates the ISIN selected
         assertEquals(SharesErrorCodes.ZERO_TRADE_QUANTITY, exception.getErrorCode());
-        assertEquals(shareIndex.getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
@@ -252,7 +253,7 @@ public class ShareTradeServiceTest {
     public void testSaleExceedsHolding() {
         // Given: a share to be traded has been registered
         ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIsin()))
+        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
             .thenReturn(Optional.of(shareIndex));
 
         // And: an authenticated user
@@ -279,12 +280,13 @@ public class ShareTradeServiceTest {
         BigDecimal price = BigDecimal.valueOf(123.435);
         SaleExceedsHoldingException exception = assertThrows(SaleExceedsHoldingException.class, () ->
             fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIndex.getIsin(), quantity, price)
+                dateExecuted, shareIndex.getIdentity(), quantity, price)
         );
 
         // Then: the exception indicates the ISIN selected
         assertEquals(SharesErrorCodes.SALE_EXCEEDS_HOLDING, exception.getErrorCode());
-        assertEquals(shareIndex.getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
         assertEquals(-quantity, (int)exception.getParameter("quantity"));
         assertEquals(existingHolding.getQuantity(), (int)exception.getParameter("holding"));
 

@@ -1,9 +1,12 @@
 package com.hillayes.ftmarket.api;
 
+import com.hillayes.commons.Strings;
+import com.hillayes.ftmarket.api.service.IsinLookupService;
+import com.hillayes.ftmarket.api.service.PriceLookupService;
 import com.hillayes.shares.api.ShareProviderApi;
 import com.hillayes.shares.api.domain.PriceData;
+import com.hillayes.shares.api.domain.ShareInfo;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.ftmarket.api.service.PriceLookupService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class FtShareProvider implements ShareProviderApi {
+    private final IsinLookupService isinLookupService;
     private final PriceLookupService priceLookupService;
 
     @Override
@@ -32,8 +36,21 @@ public class FtShareProvider implements ShareProviderApi {
     }
 
     @Override
-    public Optional<List<PriceData>> getPrices(String stockIsin, LocalDate startDate, LocalDate endDate) {
-        List<PriceData> result = priceLookupService.getPrices(stockIsin, startDate, endDate);
-        return Optional.ofNullable(result);
+    public Optional<ShareInfo> getShareInfo(String isin, String tickerSymbol) {
+        return isinLookupService.lookupIssueId(isin)
+            .or(() -> isinLookupService.lookupIssueId(tickerSymbol))
+            .map(lookup -> new ShareInfo(
+                isin,
+                tickerSymbol,
+                lookup.getName(),
+                lookup.getCurrencyCode()
+            ));
+    }
+
+    @Override
+    public Optional<List<PriceData>> getPrices(String stockIsin, String tickerSymbol,
+                                               LocalDate startDate, LocalDate endDate) {
+        return priceLookupService.getPrices(stockIsin, startDate, endDate)
+            .or(() -> priceLookupService.getPrices(tickerSymbol, startDate, endDate));
     }
 }
