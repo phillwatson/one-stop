@@ -106,7 +106,6 @@ public class PortfolioResource {
 
     @DELETE
     @Path("/{portfolioId}")
-    @Transactional
     public Response deletePortfolio(@Context SecurityContext ctx,
                                     @PathParam("portfolioId") UUID portfolioId) {
         UUID userId = AuthUtils.getUserId(ctx);
@@ -163,7 +162,13 @@ public class PortfolioResource {
 
     private HoldingResponse marshal(Holding holding) {
         ShareIndex shareIndex = holding.getShareIndex();
-        Optional<PriceHistory> mostRecentPrice = sharePriceService.getMostRecentPrice(shareIndex);
+        BigDecimal mostRecentPrice = sharePriceService.getMostRecentPrice(shareIndex)
+            .map(PriceHistory::getClose)
+            .orElse(BigDecimal.ZERO);
+
+        int totalQuantity = holding.getQuantity();
+        Double totalValue = mostRecentPrice.multiply(BigDecimal.valueOf(totalQuantity)).doubleValue();
+
         return new HoldingResponse()
             .id(holding.getId())
             .shareIndexId(shareIndex.getId())
@@ -174,10 +179,8 @@ public class PortfolioResource {
             .name(shareIndex.getName())
             .totalCost(holding.getTotalCost().doubleValue())
             .currency(holding.getCurrency().getCurrencyCode())
-            .latestValue(mostRecentPrice
-                .map(price -> price.getClose().multiply(BigDecimal.valueOf(holding.getQuantity())).doubleValue())
-                .orElse(0.00))
-            .quantity(holding.getQuantity())
+            .quantity(totalQuantity)
+            .latestValue(totalValue)
             .dealings(holding.getDealings().stream()
                 .map(this::marshal).toList()
             );

@@ -51,18 +51,24 @@ public class ShareIndexService {
         log.info("Creating new ShareIndex [identity: {}]", identity);
         try {
             ShareIndex shareIndex = providerFactory.getAll()
-                .map(provider -> provider.getShareInfo(identity.getIsin(), identity.getTickerSymbol())
-                    .map(info -> ShareIndex.builder()
-                        .identity(ShareIndex.ShareIdentity.builder()
-                            .isin(info.getIsin())
-                            .tickerSymbol(info.getTickerSymbol())
-                            .build())
-                        .name(info.getName())
-                        .currency(info.getCurrency())
-                        .provider(provider.getProviderId())
-                        .build()
-                    )
-                )
+                .map(provider -> {
+                    try {
+                        return provider.getShareInfo(identity.getIsin(), identity.getTickerSymbol())
+                            .map(info -> ShareIndex.builder()
+                                .identity(ShareIndex.ShareIdentity.builder()
+                                    .isin(info.getIsin())
+                                    .tickerSymbol(info.getTickerSymbol())
+                                    .build())
+                                .name(info.getName())
+                                .currency(info.getCurrency())
+                                .provider(provider.getProviderId())
+                                .build()
+                            );
+                    } catch (Exception e) {
+                        log.warn("Share Provider failure.", e);
+                        return Optional.<ShareIndex>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()

@@ -19,41 +19,32 @@ public class ShareIndexTestIT extends ApiTestBase {
     @Test
     public void testRegisterShareIndex() {
         // given: a user
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         // And:
         try (FtMarketSimulator ftMarketSimulator = new FtMarketSimulator(getWiremockPort())) {
             RegisterShareIndexRequest request = new RegisterShareIndexRequest()
-                .provider("FT_MARKET_DATA")
-                .isin(randomStrings.nextAlphanumeric(12))
-                .name(randomStrings.nextAlphanumeric(30))
-                .currency("GBP");
+                .isin(randomStrings.nextAlphanumeric(12));
 
             // And: the FT Market data can return the share details
             String ftMarketIssueId = randomStrings.nextNumeric(5);
-            ftMarketSimulator.expectSummaryFor(request.getIsin(), ftMarketIssueId,
-                request.getName(), request.getCurrency(), expectSummary ->
-                    ftMarketSimulator.expectPricesFor(ftMarketIssueId, expectPrices -> {
+            ftMarketSimulator.expectSummaryFor(request.getIsin(), ftMarketIssueId, expectSummary ->
+                ftMarketSimulator.expectPricesFor(ftMarketIssueId, expectPrices -> {
 
-                        // When: the user registers a share index
-                        ShareIndexApi shareIndexApi = new ShareIndexApi(user.getAuthTokens());
-                        List<ShareIndexResponse> response = shareIndexApi.registerShareIndices(List.of(request));
+                    // When: the user registers a share index
+                    ShareIndexApi shareIndexApi = new ShareIndexApi(user.getAuthTokens());
+                    List<ShareIndexResponse> response = shareIndexApi.registerShareIndices(List.of(request));
 
-                        // Then: a response is returned
-                        assertNotNull(response);
+                    // Then: a response is returned
+                    assertNotNull(response);
 
-                        // And: the FT Market summary was retrieved
-                        expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+                    // And: the FT Market summary was retrieved
+                    expectSummary.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
 
-                        // And: the FT Market prices were retrieved
-                        expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-                    })
-                );
+                    // And: the FT Market prices were retrieved
+                    expectPrices.verify(await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+                })
+            );
         }
     }
 }

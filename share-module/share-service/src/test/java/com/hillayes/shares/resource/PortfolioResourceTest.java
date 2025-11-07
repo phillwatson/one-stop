@@ -4,9 +4,11 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
+import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.PortfolioRepository;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
@@ -27,6 +29,8 @@ import static com.hillayes.shares.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @QuarkusTest
 public class PortfolioResourceTest extends TestBase {
@@ -38,6 +42,9 @@ public class PortfolioResourceTest extends TestBase {
 
     @Inject
     PortfolioRepository portfolioRepository;
+
+    @InjectMock
+    PortfolioEventSender portfolioEventSender;
 
     @BeforeEach
     @Transactional
@@ -696,6 +703,9 @@ public class PortfolioResourceTest extends TestBase {
         assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
         assertEquals(request.getQuantity(), dealing.getQuantity());
         assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
+
+        // And: a notification of the transaction is issued
+        verify(portfolioEventSender).sendSharesTransacted(any());
     }
 
     @Test
@@ -766,6 +776,9 @@ public class PortfolioResourceTest extends TestBase {
         assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
         assertEquals(request.getQuantity(), dealing.getQuantity());
         assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
+
+        // And: a notification of the transaction is issued
+        verify(portfolioEventSender).sendSharesTransacted(any());
     }
 
     @Test

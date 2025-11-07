@@ -9,6 +9,7 @@ import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.errors.SaleExceedsHoldingException;
 import com.hillayes.shares.errors.SharesErrorCodes;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
+import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.HoldingRepository;
 import com.hillayes.shares.repository.PortfolioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +32,13 @@ public class ShareTradeServiceTest {
     private final ShareIndexService shareIndexService = mock();
     private final PortfolioRepository portfolioRepository = mock();
     private final HoldingRepository holdingRepository = mock();
+    private final PortfolioEventSender portfolioEventSender = mock();
 
     private final ShareTradeService fixture = new ShareTradeService(
         shareIndexService,
         portfolioRepository,
-        holdingRepository
+        holdingRepository,
+        portfolioEventSender
     );
 
     @BeforeEach
@@ -91,6 +94,9 @@ public class ShareTradeServiceTest {
         assertEquals(dateExecuted, dealing.getDateExecuted());
         assertEquals(quantity, dealing.getQuantity());
         assertEquals(price, dealing.getPrice());
+
+        // And: a notification event was issued
+        verify(portfolioEventSender).sendSharesTransacted(dealing);
     }
 
     @ParameterizedTest
@@ -147,6 +153,9 @@ public class ShareTradeServiceTest {
         assertEquals(dateExecuted, dealing.getDateExecuted());
         assertEquals(quantity, dealing.getQuantity());
         assertEquals(price, dealing.getPrice());
+
+        // And: a notification event was issued
+        verify(portfolioEventSender).sendSharesTransacted(dealing);
     }
 
     @Test
@@ -179,6 +188,9 @@ public class ShareTradeServiceTest {
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
+
+        // And: no notification event was issued
+        verifyNoInteractions(portfolioEventSender);
     }
 
     @Test
@@ -211,6 +223,9 @@ public class ShareTradeServiceTest {
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
+
+        // And: no notification event was issued
+        verifyNoInteractions(portfolioEventSender);
     }
 
     @Test
@@ -247,6 +262,9 @@ public class ShareTradeServiceTest {
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
+
+        // And: no notification event was issued
+        verifyNoInteractions(portfolioEventSender);
     }
 
     @Test
@@ -292,5 +310,8 @@ public class ShareTradeServiceTest {
 
         // And: no deal is persisted
         verify(holdingRepository, never()).saveAndFlush(any());
+
+        // And: no notification event was issued
+        verifyNoInteractions(portfolioEventSender);
     }
 }

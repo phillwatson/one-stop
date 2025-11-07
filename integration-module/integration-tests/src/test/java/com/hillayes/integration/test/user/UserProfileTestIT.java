@@ -20,12 +20,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testGetAuthProviders() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());
@@ -41,12 +36,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testProfile() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());
@@ -91,14 +81,12 @@ public class UserProfileTestIT extends ApiTestBase {
 
             // and: an email is sent to user's old email address to confirm update
             List<LoggedRequest> toOldEmail = emailSim.verifyEmailSent(
-                user.getEmail(), "Your account has been updated",
-                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+                user.getEmail(), "Your account has been updated");
             assertEquals(1, toOldEmail.size());
 
             // and: an email is sent to new email address
             List<LoggedRequest> toNewEmail = emailSim.verifyEmailSent(
-                updateProfileRequest.getEmail(), "Your account has been updated",
-                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+                updateProfileRequest.getEmail(), "Your account has been updated");
             assertEquals(1, toNewEmail.size());
 
             // when: the user retrieves profile again
@@ -119,12 +107,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testChangePassword() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());
@@ -139,12 +122,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testChangePassword_MissingOldPassword() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());
@@ -166,12 +144,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testChangePassword_MissingNewPassword() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());
@@ -193,12 +166,7 @@ public class UserProfileTestIT extends ApiTestBase {
     @Test
     public void testChangePassword_InvalidOldPassword() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         UserProfileApi userProfileApi = new UserProfileApi(user.getAuthTokens());

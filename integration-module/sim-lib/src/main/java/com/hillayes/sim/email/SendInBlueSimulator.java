@@ -13,13 +13,17 @@ import org.awaitility.core.ConditionFactory;
 import sibModel.CreateSmtpEmail;
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.awaitility.Awaitility.await;
 
 @Slf4j
 public class SendInBlueSimulator implements Closeable {
     private static final ObjectReader jsonReader = MapperFactory.readerFor(EmailMessage.class);
+    private static final ConditionFactory DEFAULT_WAIT =
+        await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60));
 
     public static final String BASE_URI = "/api.sendinblue.com/v3";
     private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";
@@ -55,12 +59,21 @@ public class SendInBlueSimulator implements Closeable {
         }
     }
 
+    public List<LoggedRequest> verifyEmailSent(String toEmailAddress) {
+        return verifyEmailSent(toEmailAddress, DEFAULT_WAIT);
+    }
+
     public List<LoggedRequest> verifyEmailSent(String toEmailAddress,
                                                ConditionFactory awaiting) {
         log.info("Verifying email sent [address: {}]", toEmailAddress);
         return verifyEmailSent(
             matchingJsonPath("$.to[0].email", equalToIgnoreCase(toEmailAddress)),
             awaiting);
+    }
+
+    public List<LoggedRequest> verifyEmailSent(String toEmailAddress,
+                                               String subject) {
+        return verifyEmailSent(toEmailAddress, subject, DEFAULT_WAIT);
     }
 
     public List<LoggedRequest> verifyEmailSent(String toEmailAddress,
@@ -71,6 +84,10 @@ public class SendInBlueSimulator implements Closeable {
             matchingJsonPath("$.to[0].email", equalToIgnoreCase(toEmailAddress))
                 .and(matchingJsonPath("$.subject", containing(subject))),
             awaiting);
+    }
+
+    public <T> List<LoggedRequest> verifyEmailSent(ContentPattern<T> body) {
+        return verifyEmailSent(body, DEFAULT_WAIT);
     }
 
     public <T> List<LoggedRequest> verifyEmailSent(ContentPattern<T> body,

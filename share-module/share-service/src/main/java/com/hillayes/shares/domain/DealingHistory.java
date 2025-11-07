@@ -40,6 +40,9 @@ public class DealingHistory {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    /**
+     * The price paid or received for each share.
+     */
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 

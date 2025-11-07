@@ -1,11 +1,13 @@
 package com.hillayes.shares.service;
 
 import com.hillayes.exception.common.NotFoundException;
+import com.hillayes.shares.domain.DealingHistory;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.errors.SaleExceedsHoldingException;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
+import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.HoldingRepository;
 import com.hillayes.shares.repository.PortfolioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,6 +26,7 @@ public class ShareTradeService {
     private final ShareIndexService shareIndexService;
     private final PortfolioRepository portfolioRepository;
     private final HoldingRepository holdingRepository;
+    private final PortfolioEventSender portfolioEventSender;
 
     /**
      * Registers a new trade in the identified share to be held within the
@@ -62,14 +65,16 @@ public class ShareTradeService {
         Holding holding = portfolio.get(shareIndex)
             .orElseGet(() -> portfolio.add(shareIndex));
 
+        DealingHistory dealing;
         if (quantity > 0)
-            holding.buy(dateExecuted, quantity, pricePerShare);
+            dealing = holding.buy(dateExecuted, quantity, pricePerShare);
         else if (-quantity > holding.getQuantity())
             throw new SaleExceedsHoldingException(shareIdentity, quantity, holding.getQuantity());
         else
-            holding.sell(dateExecuted, quantity, pricePerShare);
+            dealing = holding.sell(dateExecuted, quantity, pricePerShare);
 
         holdingRepository.saveAndFlush(holding);
+        portfolioEventSender.sendSharesTransacted(dealing);
         return holding;
     }
 }

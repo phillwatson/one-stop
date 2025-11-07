@@ -7,7 +7,7 @@ import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.api.rail.AccountApi;
 import com.hillayes.integration.api.rail.CategoryApi;
 import com.hillayes.integration.api.rail.InstitutionApi;
-import com.hillayes.integration.api.user.UserConsentApi;
+import com.hillayes.integration.api.rail.UserConsentApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -32,12 +32,7 @@ public class CategoryTestIT extends ApiTestBase {
     @Test
     public void testCategoryGroups() {
         // given: a user
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
@@ -100,12 +95,7 @@ public class CategoryTestIT extends ApiTestBase {
     @Test
     public void testCategories() {
         // given: a user
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         CategoryApi categoryApi = new CategoryApi(user.getAuthTokens());
 
@@ -218,12 +208,7 @@ public class CategoryTestIT extends ApiTestBase {
         assertEquals(3, adminAuthTokens.size());
 
         // and: a user is created
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         // and: the user creates accounts - and the first account is selected
         UUID accountId = createAccounts(adminAuthTokens, user).get(0);
@@ -368,8 +353,7 @@ public class CategoryTestIT extends ApiTestBase {
             assertEquals(callbackUri.toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName());
 
             // and: the user can retrieve their consent record
             UserConsentResponse consentForInstitution = userConsentApi.getConsentForInstitution(institution.getId());
