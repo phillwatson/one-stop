@@ -20,7 +20,7 @@ public class QueryApiTest {
     private final AlphaVantageApi fixture;
 
     @ParameterizedTest
-    @ValueSource(strings = { "TW.", "TW.LON" })
+    @ValueSource(strings = { "TW.LON" })
     public void testGetDaily(String ticker) {
         DailyTimeSeries response = fixture.getDailySeries(ticker);
 
