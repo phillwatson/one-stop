@@ -15,12 +15,7 @@ public class AuditReportTestIT extends ApiTestBase {
     @Test
     public void testGetAuditReportTemplates() {
         // given: a user
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         AuditReportApi auditReportApi = new AuditReportApi(user.getAuthTokens());
 
@@ -36,12 +31,7 @@ public class AuditReportTestIT extends ApiTestBase {
     @Test
     public void testAuditReportConfigs() {
         // given: a user
-        UserEntity user = UserUtils.createUser(getWiremockPort(), UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build());
+        UserEntity user = UserUtils.createUser(getWiremockPort(), UserUtils.mockUser());
 
         AuditReportApi auditReportApi = new AuditReportApi(user.getAuthTokens());
 

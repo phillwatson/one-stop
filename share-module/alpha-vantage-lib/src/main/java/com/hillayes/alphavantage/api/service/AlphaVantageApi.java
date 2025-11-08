@@ -2,11 +2,11 @@ package com.hillayes.alphavantage.api.service;
 
 import com.hillayes.alphavantage.api.domain.ApiFunction;
 import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
-import com.hillayes.alphavantage.api.domain.Overview;
 import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
 import io.restassured.specification.RequestSpecification;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
@@ -29,24 +29,14 @@ public class AlphaVantageApi {
             .queryParam("function", function);
     }
 
-    public DailyTimeSeries getDailySeries(String stockSymbol) throws AssertionError {
+    public DailyTimeSeries getDailySeries(String stockSymbol) {
         return givenAuth(ApiFunction.TIME_SERIES_DAILY)
             .queryParam("symbol", stockSymbol)
             .get("query")
             .then()
-            .statusCode(200)
             .contentType(JSON)
+            .statusCode(200)
             .extract().as(DailyTimeSeries.class);
-    }
-
-    public Overview getOverview(String stockSymbol) {
-        return givenAuth(ApiFunction.OVERVIEW)
-            .queryParam("symbol", stockSymbol)
-            .get("query")
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract().as(Overview.class);
     }
 
     public TickerSearchResponse symbolSearch(String keywords) {

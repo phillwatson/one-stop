@@ -3,11 +3,13 @@ package com.hillayes.ftmarket.api.service;
 import com.hillayes.shares.api.domain.PriceData;
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,18 +19,19 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PriceLookupServiceTest {
     private final PriceLookupService priceLookupService;
 
-    @Test
-    public void testGetPrices() {
-        String stockIsin = "GB00B0CNGT73";
+    @ParameterizedTest
+    @ValueSource(strings = { "GB00B0CNGT73", "TW." })
+    public void testGetPrices(String symbol) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(20);
 
-        List<PriceData> prices = priceLookupService.getPrices(stockIsin, startDate, endDate);
+        Optional<List<PriceData>> prices = priceLookupService.getPrices(symbol, startDate, endDate);
         assertNotNull(prices);
-        assertFalse(prices.isEmpty());
+        assertTrue(prices.isPresent());
+        assertFalse(prices.get().isEmpty());
 
         AtomicReference<LocalDate> prev = new AtomicReference<>(null);
-        prices.forEach( price -> {
+        prices.get().forEach( price -> {
             LocalDate prevDate = prev.get();
             if (prevDate != null) {
                 // prices should be in date order ascending

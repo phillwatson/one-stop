@@ -106,7 +106,6 @@ public class PortfolioResource {
 
     @DELETE
     @Path("/{portfolioId}")
-    @Transactional
     public Response deletePortfolio(@Context SecurityContext ctx,
                                     @PathParam("portfolioId") UUID portfolioId) {
         UUID userId = AuthUtils.getUserId(ctx);
@@ -125,15 +124,21 @@ public class PortfolioResource {
                                      @PathParam("portfolioId") UUID portfolioId,
                                      TradeRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
-            userId, portfolioId, request.getIsin(), request.getQuantity());
+        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
+            userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
 
-        Holding holding = shareTradeService.createShareTrade(userId, portfolioId, request.getDateExecuted(),
-            request.getIsin(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
+        Holding holding = shareTradeService.createShareTrade(
+            userId, portfolioId, request.getDateExecuted(),
+            ShareIndex.ShareIdentity.builder()
+                .isin(request.getShareId().getIsin())
+                .tickerSymbol(request.getShareId().getTickerSymbol())
+                .build(),
+            request.getQuantity(),
+            BigDecimal.valueOf(request.getPricePerShare()));
 
         if (log.isDebugEnabled()) {
-            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, quantity: {}]",
-                userId, portfolioId, request.getIsin(), request.getQuantity());
+            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
+                userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
         }
         return Response.ok(marshal(holding)).build();
     }
@@ -157,18 +162,25 @@ public class PortfolioResource {
 
     private HoldingResponse marshal(Holding holding) {
         ShareIndex shareIndex = holding.getShareIndex();
-        Optional<PriceHistory> mostRecentPrice = sharePriceService.getMostRecentPrice(shareIndex);
+        BigDecimal mostRecentPrice = sharePriceService.getMostRecentPrice(shareIndex)
+            .map(PriceHistory::getClose)
+            .orElse(BigDecimal.ZERO);
+
+        int totalQuantity = holding.getQuantity();
+        Double totalValue = mostRecentPrice.multiply(BigDecimal.valueOf(totalQuantity)).doubleValue();
+
         return new HoldingResponse()
             .id(holding.getId())
             .shareIndexId(shareIndex.getId())
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            )
             .name(shareIndex.getName())
             .totalCost(holding.getTotalCost().doubleValue())
             .currency(holding.getCurrency().getCurrencyCode())
-            .latestValue(mostRecentPrice
-                .map(price -> price.getClose().multiply(BigDecimal.valueOf(holding.getQuantity())).doubleValue())
-                .orElse(0.00))
-            .quantity(holding.getQuantity())
+            .quantity(totalQuantity)
+            .latestValue(totalValue)
             .dealings(holding.getDealings().stream()
                 .map(this::marshal).toList()
             );

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -37,7 +38,6 @@ public class FtMarketSimulator implements Closeable {
     }
 
     public void expectSummaryFor(String symbol, String issueId,
-                                 String name, String currency,
                                  Consumer<Expectation> action) {
         try (Expectation expectation = new Expectation("fund summary for " + symbol, wireMockClient,
             get(SUMMARY_URL_PATH)
@@ -49,8 +49,8 @@ public class FtMarketSimulator implements Closeable {
                     .withTransformers("response-template")
                     .withTransformerParameter("symbol", symbol)
                     .withTransformerParameter("issueId", issueId)
-                    .withTransformerParameter("name", name)
-                    .withTransformerParameter("currency", currency)
+                    .withTransformerParameter("name", "company " + symbol)
+                    .withTransformerParameter("currency", "GBP")
                 ).build(),
 
             getRequestedFor(SUMMARY_URL_PATH)
@@ -60,7 +60,6 @@ public class FtMarketSimulator implements Closeable {
             action.accept(expectation);
         }
     }
-
 
     public void expectPricesFor(String symbol, Consumer<Expectation> action) {
         try (Expectation expectation = new Expectation("historic prices for " + symbol, wireMockClient,

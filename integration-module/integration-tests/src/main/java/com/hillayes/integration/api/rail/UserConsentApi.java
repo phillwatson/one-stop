@@ -1,4 +1,4 @@
-package com.hillayes.integration.api.user;
+package com.hillayes.integration.api.rail;
 
 import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.PaginatedUserConsents;

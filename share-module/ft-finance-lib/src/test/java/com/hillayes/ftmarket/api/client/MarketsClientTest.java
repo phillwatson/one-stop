@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -17,7 +19,7 @@ public class MarketsClientTest {
     private MarketsClient marketsClient = new MarketsClient(objectMapper, "https://markets.ft.com");
 
     @Test
-    public void testAll() {
+    public void testGetIssueId() {
         List.of(
             IsinIssueLookup.builder().isin("GB00B80QG052").issueId("535631580").name("HSBC FTSE 250 Index Accumulation C").currencyCode("GBP").build(),
             IsinIssueLookup.builder().isin("GB00B0CNGR59").issueId("74137488").name("Legal & General European Index Trust I Class Accumulation").currencyCode("GBP").build(),
@@ -37,6 +39,23 @@ public class MarketsClientTest {
 
             }, () -> fail("Missing " + expected.getIsin()));
         });
+    }
+
+    /**
+     * Tests whether a stock can be located by its Ticker Symbol rather than its
+     * ISIN.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = { "LGEN", "LGEN:LSE" })
+    public void testGetIssueId_ViaTickerSymbol(String tickerSymbol) {
+        marketsClient.getIssueID(tickerSymbol).ifPresentOrElse(lookup -> {
+            System.out.println(lookup.getIssueId());
+            assertNotNull(lookup.getIssueId());
+            assertEquals(tickerSymbol, lookup.getIsin());
+            assertEquals("Legal & General Group PLC", lookup.getName());
+            assertEquals("GBP", lookup.getCurrencyCode());
+
+        }, () -> fail("Missing " + tickerSymbol));
     }
 
     @Test

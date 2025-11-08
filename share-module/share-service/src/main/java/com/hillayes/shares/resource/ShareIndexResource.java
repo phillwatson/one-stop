@@ -3,7 +3,6 @@ package com.hillayes.shares.resource;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
-import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.shares.domain.PriceHistory;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.service.ShareIndexService;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,12 +41,10 @@ public class ShareIndexResource {
             return Response.ok(List.of()).build();
         }
 
-        List<ShareIndex> indices = request.stream()
-            .map(index -> ShareIndex.builder()
-                .isin(index.getIsin())
-                .name(index.getName())
-                .currency(Currency.getInstance(index.getCurrency()))
-                .provider(ShareProvider.valueOf(index.getProvider()))
+        List<ShareIndex.ShareIdentity> indices = request.stream()
+            .map(r -> ShareIndex.ShareIdentity.builder()
+                .isin(r.getIsin())
+                .tickerSymbol(r.getTickerSymbol())
                 .build()
             ).toList();
 
@@ -119,7 +115,10 @@ public class ShareIndexResource {
     private ShareIndexResponse marshal(ShareIndex shareIndex) {
         return new ShareIndexResponse()
             .id(shareIndex.getId())
-            .isin(shareIndex.getIsin())
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            )
             .name(shareIndex.getName())
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .provider(shareIndex.getProvider().name());

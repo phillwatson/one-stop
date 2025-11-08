@@ -55,6 +55,7 @@ public class Holding {
     protected Instant dateCreated = Instant.now();
 
     @OneToMany(mappedBy = "holding", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OrderBy("dateExecuted ASC")
     @lombok.Builder.Default
     private List<DealingHistory> dealings = new ArrayList<>();
 

@@ -13,13 +13,33 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
+import static com.hillayes.integration.test.ApiTestBase.randomStrings;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class UserUtils {
+    public static UserEntity mockUser() {
+        return mockUser(null);
+    }
+
+    public static UserEntity mockUser(Consumer<UserEntity.UserEntityBuilder> modifier) {
+        UserEntity.UserEntityBuilder result = UserEntity.builder()
+            .username(randomStrings.nextAlphanumeric(20))
+            .givenName(randomStrings.nextAlphanumeric(10))
+            .password(randomStrings.nextAlphanumeric(30))
+            .email(randomStrings.nextAlphanumeric(30));
+
+        if (modifier != null) {
+            modifier.accept(result);
+        }
+
+        return result.build();
+    }
+
     public static List<UserEntity> createUsers(int wiremockPort,
                                                List<UserEntity> users) {
         try (SendInBlueSimulator emailSim = new SendInBlueSimulator(wiremockPort)) {
@@ -46,9 +66,7 @@ public class UserUtils {
         userOnboardApi.registerUser(registerRequest);
 
         // wait for registration email containing magic-token
-        List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(user.getEmail(),
-            await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
-
+        List<LoggedRequest> emailRequests = emailSim.verifyEmailSent(user.getEmail());
         EmailMessage emailMessage = emailSim.parse(emailRequests.get(0));
 
         // extract the magic-link token
@@ -79,8 +97,7 @@ public class UserUtils {
         log.info("Created user [username: {}]", user.getUsername());
 
         // wait for welcome email
-        emailSim.verifyEmailSent(user.getEmail(), "Welcome to One-Stop",
-            await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60)));
+        emailSim.verifyEmailSent(user.getEmail(), "Welcome to One-Stop");
 
         return user;
     }

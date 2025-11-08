@@ -58,7 +58,9 @@ public class SharePriceServiceIntegrationTest {
     public ShareIndex createShareIndex() {
         ShareIndex shareIndex = ShareIndex.builder()
             .provider(ShareProvider.FT_MARKET_DATA)
-            .isin("GB00B80QG052")
+            .identity(ShareIndex.ShareIdentity.builder()
+                .isin("GB00B80QG052")
+                .build())
             .name("HSBC FTSE 250 Index Accumulation C")
             .currency(Currency.getInstance("GBP"))
             .build();

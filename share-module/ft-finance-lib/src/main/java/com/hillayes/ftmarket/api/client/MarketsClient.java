@@ -54,16 +54,16 @@ public class MarketsClient {
      * Returns the issue-id by which the FT Finance API identifies companies and
      * funds.
      *
-     * @param stockIsin the company, or fund, International Securities Identification Number
-     * @return the FT Finance API issue ID for the given ISIN
+     * @param symbol the ticker symbol or ISIN (International Securities Identification Number)
+     * @return the FT Finance API issue ID for the given symbol
      * @throws ShareServiceException
      */
-    public Optional<IsinIssueLookup> getIssueID(String stockIsin) throws ShareServiceException {
-        log.info("Retrieving stock issue-id [isin: {}]", stockIsin);
+    public Optional<IsinIssueLookup> getIssueID(String symbol) throws ShareServiceException {
+        log.info("Retrieving stock issue-id [symbol: {}]", symbol);
         try {
             // https://markets.ft.com/data/funds/tearsheet/summary?s=GB00B0CNGT73
             // Configure request with headers to avoid blocking
-            Document doc = Jsoup.connect(host + "/data/funds/tearsheet/summary?s=" + stockIsin)
+            Document doc = Jsoup.connect(host + "/data/funds/tearsheet/summary?s=" + symbol)
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0")
                 .header("Accept", "text/html")
                 .header("Accept-Language", "en-GB,en;q=0.5")
@@ -75,14 +75,14 @@ public class MarketsClient {
             }
 
             return Optional.of(IsinIssueLookup.builder()
-                .isin(stockIsin)
+                .isin(symbol)
                 .issueId(issueId)
                 .name(extractName(doc))
                 .currencyCode(extractCurrencyCode(doc))
                 .build()
             );
         } catch (IOException e) {
-            throw new ShareServiceException(ShareProvider.FT_MARKET_DATA, "IsinLookupService", e, Map.of("isin", stockIsin));
+            throw new ShareServiceException(ShareProvider.FT_MARKET_DATA, "IsinLookupService", e, Map.of("isin", symbol));
         }
     }
 

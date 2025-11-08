@@ -62,14 +62,19 @@ public class SharePriceService_RefreshPricesTest {
             marketDate.set(marketDate.get().plusDays(1));
             return priceData;
         }).toList();
-        when(shareProviderApi.getPrices(shareIndex.getIsin(), mostRecent.getId().getDate(), yesterday))
-            .thenReturn(Optional.of(prices));
+        when(shareProviderApi.getPrices(
+            shareIndex.getIdentity().getIsin(),
+            shareIndex.getIdentity().getTickerSymbol(),
+            mostRecent.getId().getDate(), yesterday)).thenReturn(Optional.of(prices));
 
         // When: the service is called
         int recordCount = fixture.refreshSharePrices(shareIndex.getId());
 
         // Then: the provider is called to retrieve the share prices over the given dates
-        verify(shareProviderApi).getPrices(shareIndex.getIsin(), mostRecent.getId().getDate(), yesterday);
+        verify(shareProviderApi).getPrices(
+            shareIndex.getIdentity().getIsin(),
+            shareIndex.getIdentity().getTickerSymbol(),
+            mostRecent.getId().getDate(), yesterday);
 
         // And: the repository is called to save the prices as a batch
         @SuppressWarnings("unchecked")
@@ -121,15 +126,20 @@ public class SharePriceService_RefreshPricesTest {
             marketDate.set(marketDate.get().plusDays(1));
             return priceData;
         }).toList();
-        when(shareProviderApi.getPrices(eq(shareIndex.getIsin()), any(), eq(yesterday)))
-            .thenReturn(Optional.of(prices));
+        when(shareProviderApi.getPrices(
+            eq(shareIndex.getIdentity().getIsin()),
+            eq(shareIndex.getIdentity().getTickerSymbol()),
+            any(), eq(yesterday))).thenReturn(Optional.of(prices));
 
         // When: the service is called
         int recordCount = fixture.refreshSharePrices(shareIndex.getId());
 
         // Then: the provider is called to retrieve the share prices over the given dates
         ArgumentCaptor<LocalDate> fromDateCaptor = ArgumentCaptor.forClass(LocalDate.class);
-        verify(shareProviderApi).getPrices(eq(shareIndex.getIsin()), fromDateCaptor.capture(), eq(yesterday));
+        verify(shareProviderApi).getPrices(
+            eq(shareIndex.getIdentity().getIsin()),
+            eq(shareIndex.getIdentity().getTickerSymbol()),
+            fromDateCaptor.capture(), eq(yesterday));
 
         // And: the from-date is calculated from the provider API
         verify(shareProviderApi).getMaxHistory();
@@ -184,7 +194,7 @@ public class SharePriceService_RefreshPricesTest {
         verify(priceHistoryRepository).getMostRecent(any());
 
         // And: the provider is never called
-        verify(shareProviderApi, never()).getPrices(any(), any(), any());
+        verify(shareProviderApi, never()).getPrices(any(), any(), any(), any());
 
         // And: no records are saved
         verify(priceHistoryRepository, never()).saveBatch(any(List.class));
@@ -234,15 +244,20 @@ public class SharePriceService_RefreshPricesTest {
             .thenReturn(shareProviderApi);
 
         // And: the provider is unable to find share index
-        when(shareProviderApi.getPrices(eq(shareIndex.getIsin()), any(), any()))
-            .thenReturn(Optional.empty());
+        when(shareProviderApi.getPrices(
+            eq(shareIndex.getIdentity().getIsin()),
+            eq(shareIndex.getIdentity().getTickerSymbol()),
+            any(), any())).thenReturn(Optional.empty());
 
         // When: the service is called
         int recordCount = fixture.refreshSharePrices(shareIndex.getId());
 
         // Then: the provider is called to retrieve the share prices over the given dates
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        verify(shareProviderApi).getPrices(shareIndex.getIsin(), mostRecent.getId().getDate(), yesterday);
+        verify(shareProviderApi).getPrices(
+            shareIndex.getIdentity().getIsin(),
+            shareIndex.getIdentity().getTickerSymbol(),
+            mostRecent.getId().getDate(), yesterday);
 
         // And: no records are saved
         verify(priceHistoryRepository, never()).saveBatch(any(Collection.class));
@@ -269,15 +284,20 @@ public class SharePriceService_RefreshPricesTest {
             .thenReturn(shareProviderApi);
 
         // And: the provider is able to find share index BUT has none
-        when(shareProviderApi.getPrices(eq(shareIndex.getIsin()), any(), any()))
-            .thenReturn(Optional.of(List.of()));
+        when(shareProviderApi.getPrices(
+            eq(shareIndex.getIdentity().getIsin()),
+            eq(shareIndex.getIdentity().getTickerSymbol()),
+            any(), any())).thenReturn(Optional.of(List.of()));
 
         // When: the service is called
         int recordCount = fixture.refreshSharePrices(shareIndex.getId());
 
         // Then: the provider is called to retrieve the share prices over the given dates
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        verify(shareProviderApi).getPrices(shareIndex.getIsin(), mostRecent.getId().getDate(), yesterday);
+        verify(shareProviderApi).getPrices(
+            shareIndex.getIdentity().getIsin(),
+            shareIndex.getIdentity().getTickerSymbol(),
+            mostRecent.getId().getDate(), yesterday);
 
         // And: no records are saved
         verify(priceHistoryRepository, never()).saveBatch(any(Collection.class));
