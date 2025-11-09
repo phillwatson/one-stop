@@ -1,7 +1,10 @@
 package com.hillayes.shares.service;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.shares.api.ShareProviderApi;
+import com.hillayes.shares.api.domain.ShareInfo;
 import com.hillayes.shares.api.domain.ShareProvider;
+import com.hillayes.shares.config.ShareProviderFactory;
 import com.hillayes.shares.domain.ShareIndex;
 import com.hillayes.shares.repository.ShareIndexRepository;
 import com.hillayes.shares.scheduled.PollShareIndexAdhocTask;
@@ -9,9 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static com.hillayes.shares.utils.TestData.mockShareIndex;
+import static com.hillayes.shares.utils.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -20,14 +25,22 @@ import static org.mockito.Mockito.*;
 public class ShareIndexServiceTest {
     private final ShareIndexRepository shareIndexRepository = mock();
     private final PollShareIndexAdhocTask pollShareIndexAdhocTask = mock();
+    private final ShareProviderFactory providerFactory = mock();
+    private final ShareProviderApi shareProviderApi = mock();
 
     private final ShareIndexService fixture = new ShareIndexService(
         shareIndexRepository,
-        pollShareIndexAdhocTask
+        pollShareIndexAdhocTask,
+        providerFactory
     );
 
     @BeforeEach
     public void beforeEach() {
+        when(shareProviderApi.getProviderId()).thenReturn(ShareProvider.FT_MARKET_DATA);
+        when(providerFactory.getAll()).then( i ->
+            Stream.of(shareProviderApi)
+        );
+
         when(shareIndexRepository.saveAndFlush(any(ShareIndex.class)))
             .then(invocation -> {
                 ShareIndex entity = invocation.getArgument(0);
@@ -72,23 +85,27 @@ public class ShareIndexServiceTest {
 
     @Test
     public void testRegisterShareIndex() {
-        // Given: new share index date
-        String isin = "GB00B80QG052";
-        String name = "HSBC FTSE 250 Index Accumulation C";
-        Currency currency = Currency.getInstance("GBP");
-        ShareProvider provider = ShareProvider.FT_MARKET_DATA;
+        // Given: new share index identity
+        ShareIndex.ShareIdentity request = mockShareIdentity();
+
+        // And: the share provider will return the share info for the identity
+        ShareInfo shareInfo = new ShareInfo(request.getIsin(), request.getTickerSymbol(),
+            randomStrings.nextAlphanumeric(30), "GBP");
+        when(shareProviderApi.getShareInfo(request.getIsin(), request.getTickerSymbol()))
+            .thenReturn(Optional.of(shareInfo));
 
         // When: the service is called
-        ShareIndex shareIndex = fixture.registerShareIndex(isin, name, currency, provider);
+        ShareIndex shareIndex = fixture.registerShareIndex(request);
 
         // Then: a new share index is returned
         assertNotNull(shareIndex);
 
         // And: the record matches the given data
-        assertEquals(isin, shareIndex.getIsin());
-        assertEquals(name, shareIndex.getName());
-        assertEquals(currency, shareIndex.getCurrency());
-        assertEquals(provider, shareIndex.getProvider());
+        assertEquals(request.getIsin(), shareIndex.getIdentity().getIsin());
+        assertEquals(request.getTickerSymbol(), shareIndex.getIdentity().getTickerSymbol());
+        assertEquals(shareInfo.getName(), shareIndex.getName());
+        assertEquals(shareInfo.getCurrency(), shareIndex.getCurrency());
+        assertEquals(shareProviderApi.getProviderId(), shareIndex.getProvider());
 
         // And: the repository was called
         verify(shareIndexRepository).saveAndFlush(any(ShareIndex.class));
@@ -99,36 +116,52 @@ public class ShareIndexServiceTest {
 
     @Test
     public void testRegisterShareIndices() {
-        // Given: a collection of new share indices
-        List<ShareIndex> shareIndices = IntStream.range(0, 10)
-            .mapToObj(i -> mockShareIndex()).toList();
+        // Given: a collection of new share identities
+        Map<ShareIndex.ShareIdentity, ShareInfo> shareIds = IntStream.range(0, 10)
+            .mapToObj(i -> mockShareIdentity())
+            .collect(Collectors.toMap(id -> id, id ->
+                    new ShareInfo(id.getIsin(), id.getTickerSymbol(), randomStrings.nextAlphanumeric(20), "GBP")));
+
+        // And: the providers will return the share info for those identities
+        when(shareProviderApi.getShareInfo(anyString(), anyString())).then(invocation -> {
+                String isin = invocation.getArgument(0);
+                String ticker = invocation.getArgument(1);
+                return shareIds.entrySet().stream()
+                .filter(info -> {
+                    ShareIndex.ShareIdentity id = info.getKey();
+                    return isin.equals(id.getIsin()) && ticker.equals(id.getTickerSymbol());
+                })
+                .map(Map.Entry::getValue)
+                .findFirst();
+        });
 
         // When: the service is called
-        Collection<ShareIndex> result = fixture.registerShareIndices(shareIndices);
+        Collection<ShareIndex> result = fixture.registerShareIndices(shareIds.keySet());
 
         // Then: the result is the same size
         assertNotNull(result);
-        assertEquals(shareIndices.size(), result.size());
+        assertEquals(shareIds.size(), result.size());
 
         // And: each index has the same properties as given
-        shareIndices.forEach(expected -> {
+        shareIds.forEach((expected, info) -> {
             ShareIndex actual = result.stream()
-                .filter(s -> s.getIsin().equals(expected.getIsin()))
+                .filter(s -> s.getIdentity().getIsin().equals(expected.getIsin()))
                 .findFirst().orElse(null);
 
             assertNotNull(actual);
             assertNotNull(actual.getId());
-            assertEquals(expected.getIsin(), actual.getIsin());
-            assertEquals(expected.getName(), actual.getName());
-            assertEquals(expected.getCurrency(), actual.getCurrency());
-            assertEquals(expected.getProvider(), actual.getProvider());
+            assertEquals(expected.getIsin(), actual.getIdentity().getIsin());
+            assertEquals(expected.getTickerSymbol(), actual.getIdentity().getTickerSymbol());
+            assertEquals(info.getName(), actual.getName());
+            assertEquals(info.getCurrency(), actual.getCurrency());
+            assertEquals(shareProviderApi.getProviderId(), actual.getProvider());
         });
 
         // And: the repository was called for each index
-        verify(shareIndexRepository, times(shareIndices.size())).saveAndFlush(any(ShareIndex.class));
+        verify(shareIndexRepository, times(shareIds.size())).saveAndFlush(any(ShareIndex.class));
 
         // And: a task was queued for each index
-        verify(pollShareIndexAdhocTask, times(shareIndices.size())).queueTask(any(UUID.class));
+        verify(pollShareIndexAdhocTask, times(shareIds.size())).queueTask(any(UUID.class));
     }
 
     @Test

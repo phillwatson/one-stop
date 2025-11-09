@@ -4,9 +4,11 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
+import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.PortfolioRepository;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -26,6 +29,8 @@ import static com.hillayes.shares.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @QuarkusTest
 public class PortfolioResourceTest extends TestBase {
@@ -37,6 +42,9 @@ public class PortfolioResourceTest extends TestBase {
 
     @Inject
     PortfolioRepository portfolioRepository;
+
+    @InjectMock
+    PortfolioEventSender portfolioEventSender;
 
     @BeforeEach
     @Transactional
@@ -74,6 +82,41 @@ public class PortfolioResourceTest extends TestBase {
         // And: the portfolio ID and date are returned
         assertNotNull(response.getId());
         assertNotNull(response.getDateCreated());
+    }
+
+    @Test
+    public void testCreatePortfolio_NotAuthorised() {
+        // Given: a create portfolio request
+        PortfolioRequest request = new PortfolioRequest()
+            .name(randomStrings.nextAlphanumeric(30));
+
+        // When: the service is called with no auth header
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .post("/api/v1/shares/portfolios")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testCreatePortfolio_NotUserRole() {
+        // Given: a create portfolio request
+        PortfolioRequest request = new PortfolioRequest()
+            .name(randomStrings.nextAlphanumeric(30));
+
+        // When: the service is called with no auth header
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .post("/api/v1/shares/portfolios")
+            .then()
+            .statusCode(403);
     }
 
     @Test
@@ -171,6 +214,49 @@ public class PortfolioResourceTest extends TestBase {
     }
 
     @Test
+    public void testUpdatePortfolio_NotAuthorised() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // And: an update portfolio request
+        PortfolioRequest request = new PortfolioRequest()
+            .name(randomStrings.nextAlphanumeric(30));
+
+        // When: the un-authenticated user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolioId)
+            .put("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testUpdatePortfolio_NotUserRole() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // And: an update portfolio request
+        PortfolioRequest request = new PortfolioRequest()
+            .name(randomStrings.nextAlphanumeric(30));
+
+        // When: the admin user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolioId)
+            .put("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(403);
+    }
+
+    @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testGetPortfolios() {
         // Given: the user has several portfolios
@@ -252,6 +338,35 @@ public class PortfolioResourceTest extends TestBase {
         assertEquals(0, response.getTotal());
         assertNotNull(response.getItems());
         assertTrue(response.getItems().isEmpty());
+    }
+
+    @Test
+    public void testGetPortfolios_NotAuthorised() {
+        // When: the un-authenticated user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .queryParam("page", 0)
+            .queryParam("page-size", 100)
+            .get("/api/v1/shares/portfolios")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testGetPortfolios_NotUserRole() {
+        // When: the admin user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .queryParam("page", 0)
+            .queryParam("page-size", 100)
+            .get("/api/v1/shares/portfolios")
+            .then()
+            .statusCode(403);
     }
 
     @Test
@@ -366,6 +481,39 @@ public class PortfolioResourceTest extends TestBase {
     }
 
     @Test
+    public void testGetPortfolio_NotAuthorised() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // When: the un-authenticated user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolioId)
+            .get("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testGetPortfolio_NotUserRole() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // When: the admin user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolioId)
+            .get("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(403);
+    }
+
+    @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testDeletePortfolio() {
         AtomicLong originalCount = new AtomicLong();
@@ -454,8 +602,302 @@ public class PortfolioResourceTest extends TestBase {
         assertEquals(originalCount.get() + 1, portfolioRepository.count());
     }
 
+    @Test
+    public void testDeletePortfolio_NotAuthorised() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // When: the authenticated user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolioId)
+            .delete("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testDeletePortfolio_NotUserRole() {
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // When: the authenticated user calls the endpoint
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .pathParam("portfolioId", portfolioId)
+            .delete("/api/v1/shares/portfolios/{portfolioId}")
+            .then()
+            .statusCode(403);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testCreateShareTrade_ByIsinOnly() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex();
+
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(shareIndex, (share) -> {
+            // Given: a share index exists
+             shareIndexRepository.save(share);
+
+            // And: the user has a portfolio
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            return newPortfolio;
+        });
+
+        // And: a request to make a trade - using only the ISIN
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        HoldingResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolio.getId())
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(HoldingResponse.class);
+
+        // Then: the new holding is returned
+        assertNotNull(response);
+        assertNotNull(response.getId());
+
+        // And: the holding identifies the share traded
+        assertEquals(shareIndex.getId(), response.getShareIndexId());
+        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
+        assertEquals(shareIndex.getName(), response.getName());
+        assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
+
+        // And: the holding identifies the new total holding (just this one)
+        assertEquals(request.getQuantity(), response.getQuantity());
+        assertEquals(request.getPricePerShare() * request.getQuantity(), response.getTotalCost());
+
+        // And: the new (only) dealing is included
+        assertNotNull(response.getDealings());
+        assertEquals(1, response.getDealings().size());
+        DealingHistoryResponse dealing = response.getDealings().get(0);
+        assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
+        assertEquals(request.getQuantity(), dealing.getQuantity());
+        assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
+
+        // And: a notification of the transaction is issued
+        verify(portfolioEventSender).sendSharesTransacted(any());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testCreateShareTrade_ByTickerOnly() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex();
+
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(shareIndex, (share) -> {
+            // Given: a share index exists
+            shareIndexRepository.save(share);
+
+            // And: the user has a portfolio
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            return newPortfolio;
+        });
+
+        // And: a request to make a trade - using only the ISIN
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        HoldingResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolio.getId())
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(HoldingResponse.class);
+
+        // Then: the new holding is returned
+        assertNotNull(response);
+        assertNotNull(response.getId());
+
+        // And: the holding identifies the share traded
+        assertEquals(shareIndex.getId(), response.getShareIndexId());
+        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
+        assertEquals(shareIndex.getName(), response.getName());
+        assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
+
+        // And: the holding identifies the new total holding (just this one)
+        assertEquals(request.getQuantity(), response.getQuantity());
+        assertEquals(request.getPricePerShare() * request.getQuantity(), response.getTotalCost());
+
+        // And: the new (only) dealing is included
+        assertNotNull(response.getDealings());
+        assertEquals(1, response.getDealings().size());
+        DealingHistoryResponse dealing = response.getDealings().get(0);
+        assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
+        assertEquals(request.getQuantity(), dealing.getQuantity());
+        assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
+
+        // And: a notification of the transaction is issued
+        verify(portfolioEventSender).sendSharesTransacted(any());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testCreateShareTrade_ShareIndexNotFound() {
+        // Given: the user has a portfolio
+        Portfolio portfolio = withTransaction(() -> {
+            UUID userId = UUID.fromString(userIdStr);
+            Portfolio newPortfolio = mockPortfolio(userId);
+
+            // And: the whole portfolio is saved
+            portfolioRepository.save(newPortfolio);
+            portfolioRepository.flush();
+            portfolioRepository.getEntityManager().clear();
+
+            return newPortfolio;
+        });
+
+        // And: a request to make a trade - using only the ISIN
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .isin(randomStrings.nextAlphanumeric(12))
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        ServiceErrorResponse response = given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolio.getId())
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        // Then: an error response is returned
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+
+        ServiceError error = response.getErrors().get(0);
+        assertEquals(ErrorSeverity.INFO, error.getSeverity());
+        assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
+        assertEquals("ShareIndex", error.getContextAttributes().get("entity-type"));
+        assertTrue(error.getContextAttributes().get("entity-id").contains(request.getShareId().getIsin()));
+    }
+
+    @Test
+    public void testCreateShareTrade_NotAuthorised() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex();
+
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // And: a request to make a trade
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolioId)
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "admin")
+    public void testCreateShareTrade_NotUserRole() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex();
+
+        // Given: a portfolio ID
+        UUID portfolioId = UUID.randomUUID();
+
+        // And: a request to make a trade
+        TradeRequest request = new TradeRequest()
+            .shareId(new ShareId()
+                .isin(shareIndex.getIdentity().getIsin())
+            )
+            .pricePerShare(randomNumbers.randomDouble(100, 200))
+            .quantity(120)
+            .dateExecuted(LocalDate.now().minusDays(2));
+
+        // When: the service is called
+        given()
+            .request()
+            .contentType(JSON)
+            .when()
+            .body(request)
+            .pathParam("portfolioId", portfolioId)
+            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .then()
+            .statusCode(403);
+    }
+
     @Transactional
-    public <T> T withTransaction(Supplier<T> supplier) {
+    public <R> R withTransaction(Supplier<R> supplier) {
         return supplier.get();
+    }
+
+    @Transactional
+    public <T, R> R withTransaction(T arg, Function<T, R> function) {
+        return function.apply(arg);
     }
 }

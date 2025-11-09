@@ -60,12 +60,12 @@ export default function UpdateProfile() {
 
           <Grid container direction="row" justifyContent="center" columns={ 2 } columnGap={ 2 } rowGap={ 2 }>
             <Grid item>
-              <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+              <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
                 <AuthProviderList/>
               </Paper>
             </Grid>
             <Grid item>
-              <Paper square={ false } variant="outlined" sx={{ minWidth: "600px", maxWidth: "600px" }}>
+              <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
                 <UserConsentList/>
               </Paper>
             </Grid>

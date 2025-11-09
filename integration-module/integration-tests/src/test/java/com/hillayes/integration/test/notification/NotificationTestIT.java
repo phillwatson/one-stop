@@ -1,10 +1,10 @@
 package com.hillayes.integration.test.notification;
 
 import com.hillayes.integration.api.AuthApi;
-import com.hillayes.integration.api.InstitutionApi;
-import com.hillayes.integration.api.NotificationApi;
-import com.hillayes.integration.api.UserConsentApi;
-import com.hillayes.integration.api.admin.RailRequisitionAdminApi;
+import com.hillayes.integration.api.rail.InstitutionApi;
+import com.hillayes.integration.api.notification.NotificationApi;
+import com.hillayes.integration.api.rail.UserConsentApi;
+import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -53,12 +53,7 @@ public class NotificationTestIT extends ApiTestBase {
     @Test
     public void testUserConsentNotification() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         // establish authenticated APIs
@@ -87,8 +82,7 @@ public class NotificationTestIT extends ApiTestBase {
             userConsentApi.consentResponse(institution.getProvider(), requisition.reference, "mock-error-code", errorDetails);
 
             // then: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName());
         }
 
         // and: a notification is issued to the user

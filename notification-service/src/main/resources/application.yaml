@@ -98,6 +98,11 @@ one-stop:
           subject: "Your One-Stop access to $event.institutionName$"
           template: "consent-expired/en.html"
 
+      shares-transacted:
+        en:
+          subject: "Your $if (event.purchase)$purchase$else$sale$endif$ of shares in $event.companyName$"
+          template: "shares-transacted/en.html"
+
   notification:
     common-args:
       COMPANY_LONG_NAME: ${one-stop.email.common-args.COMPANY_LONG_NAME}

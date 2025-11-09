@@ -4,13 +4,9 @@ services:
     restart: unless-stopped
     image: ghcr.io/phillwatson/sim-lib:1.0.0-SNAPSHOT
     ports:
+      - "5008:5005"
       - "9090:8080"
-    networks:
-      - onestop-http-network
-
-  # Wiremock container. This hosts the email simulator.
-  wiremock:
-    image: wiremock/wiremock:2.35.0-1
+      - "8089:8089"
     networks:
       - onestop-http-network
     logging:

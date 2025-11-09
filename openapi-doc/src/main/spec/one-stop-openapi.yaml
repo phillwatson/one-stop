@@ -3064,40 +3064,33 @@ components:
           description: The number of issues acknowledged by the user
           example: 3
 
-    RegisterShareIndexRequest:
-      description: Identifies the Share or Fund to be registered.
+    ShareId:
+      description: |
+        Identifies a Share Index, either by its ISIN or ticker symbol, or both.
+        At least one of the identifying properties must be provided.
       type: object
-      required:
-        - isin
-        - name
-        - currency
-        - provider
       properties:
         isin:
           type: string
           description: The unique International Securities Identification Number
           example: GB00B80QG052
-        name:
+        tickerSymbol:
           type: string
-          description: The name of the Share or Fund
-          example: HSBC FTSE 250 Index Accumulation C
-        currency:
-          type: string
-          description: The ISO-4217 currency code in which the shares are traded.
-          minLength: 3
-          maxLength: 3
-          example: GBP
-        provider:
-          type: string
-          description: The Share Price Provider from which the Share Index is sourced
-          example: FT_MARKET_DATA
+          description: The share's ticker symbol
+          example: AV.
+
+    RegisterShareIndexRequest:
+      description: |
+        Identifies the Share or Fund to be registered.
+      allOf:
+        - $ref: '#/components/schemas/ShareId'
 
     ShareIndexResponse:
       description: The details of a Share Index
       type: object
       required:
         - id
-        - isin
+        - shareId
         - name
         - currency
         - provider
@@ -3107,10 +3100,8 @@ components:
           format: uuid
           description: The share index's internal Id
           example: 07061d76-74f3-4163-aa07-fb6909681f81
-        isin:
-          type: string
-          description: The unique International Securities Identification Number
-          example: GB00B80QG052
+        shareId:
+          $ref: '#/components/schemas/ShareId'
         name:
           type: string
           description: The name of the Share or Fund
@@ -3213,8 +3204,8 @@ components:
       required:
         - id
         - shareIndexId
-        - shareIsin
-        - shareName
+        - shareId
+        - name
         - quantity
         - totalCost
         - latestValue
@@ -3230,10 +3221,8 @@ components:
           format: uuid
           description: The share index Id
           example: 07061d76-74f3-4163-aa07-fb6909681f81
-        isin:
-          type: string
-          description: The share's ISIN (International Securities Identification Number)
-          example: GB00B80QG052
+        shareId:
+          $ref: '#/components/schemas/ShareId'
         name:
           type: string
           description: The name of the share
@@ -3297,15 +3286,13 @@ components:
     TradeRequest:
       type: object
       required:
-        - shareIsin
+        - shareId
         - dateExecuted
         - quantity
         - pricePerShare
       properties:
-        isin:
-          type: string
-          description: The share's ISIN (International Securities Identification Number)
-          example: GB00B80QG052
+        shareId:
+          $ref: '#/components/schemas/ShareId'
         dateExecuted:
           type: string
           format: date

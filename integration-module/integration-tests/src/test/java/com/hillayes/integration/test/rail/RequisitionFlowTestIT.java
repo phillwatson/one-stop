@@ -1,8 +1,12 @@
 package com.hillayes.integration.test.rail;
 
-import com.hillayes.integration.api.*;
-import com.hillayes.integration.api.admin.RailAgreementAdminApi;
-import com.hillayes.integration.api.admin.RailRequisitionAdminApi;
+import com.hillayes.integration.api.AuthApi;
+import com.hillayes.integration.api.rail.AccountApi;
+import com.hillayes.integration.api.rail.AccountTransactionsApi;
+import com.hillayes.integration.api.rail.InstitutionApi;
+import com.hillayes.integration.api.rail.UserConsentApi;
+import com.hillayes.integration.api.rail.admin.RailAgreementAdminApi;
+import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -53,12 +57,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
     @Test
     public void testUserConsentEndToEnd() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         // establish authenticated APIs
@@ -140,8 +139,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             assertEquals(consentRequest.getCallbackUri().toString(), response.getHeader("Location"));
 
             // and: a confirmation email is sent to the user
-            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName());
 
             // and: the user can retrieve their consent record
             UserConsentResponse consentForInstitution = userConsentApi.getConsentForInstitution(institution.getId());
@@ -221,8 +219,7 @@ public class RequisitionFlowTestIT extends ApiTestBase {
             userConsentApi.deleteConsent(institution.getId(), true);
 
             // then: an email is sent to the user for confirmation
-            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName(),
-                await().atMost(Duration.ofSeconds(60)));
+            emailSim.verifyEmailSent(user.getEmail(), "Your One-Stop access to " + institution.getName());
         }
 
         // when: the user attempts to retrieve the institution consent

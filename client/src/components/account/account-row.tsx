@@ -82,7 +82,7 @@ export default function AccountList(props: Props) {
   return(
     <>
       <TableRow key={props.account.id}>
-        <TableCell size="small" padding='none' rowSpan={props.account.balance.length}
+        <TableCell size="small" padding='none' rowSpan={ Math.max(1, props.account.balance.length) }
           id="account-button" onClick={toggleMenu}
           aria-haspopup="true"
           aria-controls={menuOpen ? 'account-menu' : undefined}
@@ -90,17 +90,19 @@ export default function AccountList(props: Props) {
           <MoreVertIcon fontSize="small"/>
         </TableCell>
 
-        <TableCell size="small" padding='none' rowSpan={props.account.balance.length} onClick={handleSelectAccount}>
+        <TableCell size="small" padding='none' rowSpan={ Math.max(1, props.account.balance.length) } onClick={handleSelectAccount}>
           <Avatar src={ props.account.institution.logo } alt="{ props.bank.name } logo"
             sx={{ margin: "3px", width: "38px", height: "38px" }}></Avatar>
         </TableCell>
 
-        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
-        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
-        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.name}</TableCell>
-        <TableCell size="small" rowSpan={props.account.balance.length} onClick={handleSelectAccount}>{props.account.iban}</TableCell>
-        <TableCell size="small" onClick={handleSelectAccount}>{props.account.balance[0].type}</TableCell>
-        <TableCell size="small" align='right' style={{ whiteSpace: 'nowrap' }} onClick={handleSelectAccount}>{formatMoney(props.account.balance[0].amount, props.account.balance[0].currency)}</TableCell>
+        <TableCell size="small" rowSpan={ Math.max(1, props.account.balance.length) } onClick={handleSelectAccount}>{props.account.institution.name}</TableCell>
+        <TableCell size="small" rowSpan={ Math.max(1, props.account.balance.length) } onClick={handleSelectAccount}>{props.account.ownerName}</TableCell>
+        <TableCell size="small" rowSpan={ Math.max(1, props.account.balance.length) } onClick={handleSelectAccount}>{props.account.name}</TableCell>
+        <TableCell size="small" rowSpan={ Math.max(1, props.account.balance.length) } onClick={handleSelectAccount} style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '20ch' }}>{props.account.iban}</TableCell>
+        <TableCell size="small" onClick={handleSelectAccount}>{ (props.account.balance.length > 0) ? props.account.balance[0].type : '' }</TableCell>
+        <TableCell size="small" align='right' style={{ whiteSpace: 'nowrap' }} onClick={handleSelectAccount}>
+          {(props.account.balance.length > 0) ? formatMoney(props.account.balance[0].amount, props.account.balance[0].currency) : '' }
+        </TableCell>
       </TableRow>
 
       { props.account.balance.length > 1 && props.account.balance.slice(1).map( balance =>

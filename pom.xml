@@ -524,7 +524,7 @@
                                 <groupId>${project.groupId}</groupId>
                                 <artifactVersion>${project.version}</artifactVersion>
                                 <configOptions>
-                                    <sourceFolder>src/main/java</sourceFolder>
+                                    <sourceFolder>${project.build.sourceDirectory}</sourceFolder>
                                     <openApiNullable>false</openApiNullable>
                                     <dateLibrary>java8</dateLibrary>
                                     <library>resttemplate</library>

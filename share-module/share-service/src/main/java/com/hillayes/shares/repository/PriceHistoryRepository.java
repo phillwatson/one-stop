@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @ApplicationScoped
 @Slf4j
@@ -184,7 +186,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
         // add ON CONFLICT clause to ignore duplicate (constraint) conflicts
         sql.append(" ON CONFLICT DO NOTHING");
 
-        try (Connection connection = getConnection()) {
+        withConnection(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
                 // map each record to the SQL statement place-holders
                 AtomicInteger index = new AtomicInteger();
@@ -195,11 +197,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
                 // perform the batch insert
                 statement.execute();
             }
-        } catch (DatabaseException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        }
+        });
     }
 
     /**
@@ -274,9 +272,9 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * Obtains a JDBC connection from the entity manager; allowing native access
      * to the database. Used only for inserting batches of share price records.
      */
-    private Connection getConnection() {
-        return getEntityManager()
-            .unwrap(Session.class)
-            .doReturningWork(connection -> connection);
+    private void withConnection(Work action) {
+        try (Session session = getEntityManager().unwrap(Session.class)) {
+            session.doWork(action);
+        }
     }
 }
