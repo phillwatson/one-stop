@@ -5,6 +5,7 @@ import com.hillayes.shares.api.domain.ShareProvider;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Currency;
 import java.util.UUID;
 
@@ -25,8 +26,8 @@ public class ShareIndex {
 
     @ToString.Include
     @EqualsAndHashCode.Include
-    @Column(name = "isin", nullable = false)
-    private String isin;
+    @Embedded
+    private ShareIdentity identity;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -39,4 +40,24 @@ public class ShareIndex {
     @Enumerated(EnumType.STRING)
     @Column(name ="provider", nullable = false)
     private ShareProvider provider;
+
+
+    @Data
+    @lombok.Builder
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Embeddable
+    public static class ShareIdentity implements Serializable {
+        @EqualsAndHashCode.Include
+        @Column(name = "isin", nullable = false)
+        private String isin;
+
+        @EqualsAndHashCode.Include
+        @Column(name = "ticker_symbol", nullable = false)
+        private String tickerSymbol;
+
+        public String toString() {
+            return "[isin: " + isin + ", ticker: " + tickerSymbol + "]";
+        }
+    }
 }

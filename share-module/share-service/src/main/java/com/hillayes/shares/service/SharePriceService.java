@@ -44,16 +44,18 @@ public class SharePriceService {
                                         LocalDate toDate,
                                         int pageIndex,
                                         int pageSize) {
-        log.info("Listing share prices [isin: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}",
-            shareIndex.getIsin(), fromDate, toDate, pageIndex, pageSize);
+        log.info("Listing share prices [identity: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}",
+            shareIndex.getIdentity(), fromDate, toDate, pageIndex, pageSize);
 
         Page<PriceHistory> result =
             priceHistoryRepository.listPrices(
                 shareIndex, SharePriceResolution.DAILY, fromDate, toDate, pageIndex, pageSize
             );
 
-        log.debug("Listing share prices [isin: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
-            shareIndex.getIsin(), fromDate, toDate, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        if (log.isDebugEnabled()) {
+            log.debug("Listing share prices [identity: {}, fromDate: {}, toDate: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                shareIndex.getIdentity(), fromDate, toDate, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        }
         return result;
     }
 
@@ -96,22 +98,26 @@ public class SharePriceService {
 
         // if we don't need to refresh the prices
         if (!fromDate.isBefore(toDate)) {
-            log.debug("Share prices are up-to-date [isin: {}, most-recent: {}]",
-                shareIndex.getIsin(), fromDate);
+            log.debug("Share prices are up-to-date [identity: {}, most-recent: {}]",
+                shareIndex.getIdentity(), fromDate);
             return 0;
         }
 
-        Optional<List<PriceData>> response = provider.getPrices(shareIndex.getIsin(), fromDate, toDate);
+        Optional<List<PriceData>> response = provider.getPrices(
+            shareIndex.getIdentity().getIsin(),
+            shareIndex.getIdentity().getTickerSymbol(),
+            fromDate, toDate);
+
         if (response.isEmpty()) {
-            log.warn("Provider failed locate share index [provider: {}, isin: {}, name: {}]",
-                shareIndex.getProvider(), shareIndex.getIsin(), shareIndex.getName());
+            log.warn("Provider failed locate share index [provider: {}, identity: {}, name: {}]",
+                shareIndex.getProvider(), shareIndex.getIdentity(), shareIndex.getName());
             return 0;
         }
 
         List<PriceData> prices = response.get();
         if (prices.isEmpty()) {
-            log.warn("Provider returned no new prices [provider: {}, isin: {}, name: {}, from: {} ]",
-                shareIndex.getProvider(), shareIndex.getIsin(), shareIndex.getName(), fromDate);
+            log.warn("Provider returned no new prices [provider: {}, identity: {}, name: {}, from: {} ]",
+                shareIndex.getProvider(), shareIndex.getIdentity(), shareIndex.getName(), fromDate);
             return 0;
         }
 
@@ -121,8 +127,8 @@ public class SharePriceService {
             .toList();
         priceHistoryRepository.saveBatch(history);
 
-        log.debug("Retrieved and persisted latest share prices [ISIN: {}, count: {}]",
-            shareIndex.getIsin(), prices.size());
+        log.debug("Retrieved and persisted latest share prices [identity: {}, count: {}]",
+            shareIndex.getIdentity(), prices.size());
         return prices.size();
     }
 

@@ -1,6 +1,7 @@
 package com.hillayes.shares.api;
 
 import com.hillayes.shares.api.domain.PriceData;
+import com.hillayes.shares.api.domain.ShareInfo;
 import com.hillayes.shares.api.domain.ShareProvider;
 
 import java.time.LocalDate;
@@ -38,6 +39,16 @@ public interface ShareProviderApi {
     public ShareProvider getProviderId();
 
     /**
+     * Attempts to retrieve the information about a share, or fund, identified by
+     * either its ISIN or Ticker Symbol.
+     *
+     * @param isin the International Share Identification Number
+     * @param tickerSymbol the stock exchange ticker symbol.
+     * @return
+     */
+    public Optional<ShareInfo> getShareInfo(String isin, String tickerSymbol);
+
+    /**
      * Returns the maximum number of days for which this provider can retrieve
      * historical price information.
      */
@@ -47,11 +58,14 @@ public interface ShareProviderApi {
      * Returns the share price movements between the given dates, inclusive.
      * Or an empty value if the provider does not support the given ISIN.
      *
-     * @param stockIsin the International Securities Identification Number (ISIN)
+     * Either the stockIsin or tickerSymbol must be provided.
+     *
+     * @param stockIsin the optional International Securities Identification Number (ISIN)
      *                  for the stock in question.
+     * @param tickerSymbol the optional Stock Ticker symbols for the stock in question.
      * @param startDate the start of the date range; inclusive.
      * @param endDate the end of the date range; inclusive.
      * @return the collection of share price movements; in ascending date order.
      */
-    public Optional<List<PriceData>> getPrices(String stockIsin, LocalDate startDate, LocalDate endDate);
+    public Optional<List<PriceData>> getPrices(String stockIsin, String tickerSymbol, LocalDate startDate, LocalDate endDate);
 }

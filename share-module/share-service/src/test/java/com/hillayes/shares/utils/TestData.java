@@ -2,7 +2,10 @@ package com.hillayes.shares.utils;
 
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.domain.*;
+import com.hillayes.shares.domain.Portfolio;
+import com.hillayes.shares.domain.PriceHistory;
+import com.hillayes.shares.domain.ShareIndex;
+import com.hillayes.shares.domain.SharePriceResolution;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -14,12 +17,27 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class TestData {
     public static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
     public static final RandomUtils randomNumbers = RandomUtils.insecure();
+
+    public static ShareIndex.ShareIdentity mockShareIdentity() {
+        return mockShareIdentity(null);
+    }
+
+    public static ShareIndex.ShareIdentity mockShareIdentity(Consumer<ShareIndex.ShareIdentity.ShareIdentityBuilder> modifier) {
+        ShareIndex.ShareIdentity.ShareIdentityBuilder builder = ShareIndex.ShareIdentity.builder()
+            .isin(randomStrings.nextAlphanumeric(12))
+            .tickerSymbol(randomStrings.nextAlphabetic(4));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+
+        return builder.build();
+    }
 
     public static ShareIndex mockShareIndex() {
         return mockShareIndex(null);
@@ -27,7 +45,7 @@ public class TestData {
 
     public static ShareIndex mockShareIndex(Consumer<ShareIndex.Builder> modifier) {
         ShareIndex.Builder builder = ShareIndex.builder()
-            .isin(randomStrings.nextAlphanumeric(12))
+            .identity(mockShareIdentity(null))
             .name(randomStrings.nextAlphanumeric(30))
             .currency(Currency.getInstance("GBP"))
             .provider(ShareProvider.FT_MARKET_DATA);

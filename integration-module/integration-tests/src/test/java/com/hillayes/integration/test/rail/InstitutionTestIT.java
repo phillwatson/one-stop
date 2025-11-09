@@ -1,6 +1,6 @@
 package com.hillayes.integration.test.rail;
 
-import com.hillayes.integration.api.InstitutionApi;
+import com.hillayes.integration.api.rail.InstitutionApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -34,12 +34,7 @@ public class InstitutionTestIT extends ApiTestBase {
     @Test
     public void testListInstitutions() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         // when: the institutions are listed
@@ -83,12 +78,7 @@ public class InstitutionTestIT extends ApiTestBase {
     @Test
     public void testGetInstitution() {
         // given: a user
-        UserEntity user = UserEntity.builder()
-            .username(randomStrings.nextAlphanumeric(20))
-            .givenName(randomStrings.nextAlphanumeric(10))
-            .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30))
-            .build();
+        UserEntity user = UserUtils.mockUser();
         user = UserUtils.createUser(getWiremockPort(), user);
 
         // when: the user asks for an institution by ID

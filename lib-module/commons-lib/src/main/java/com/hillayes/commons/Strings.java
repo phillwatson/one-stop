@@ -2,7 +2,8 @@ package com.hillayes.commons;
 
 public class Strings {
     /**
-     * Tests whether the given string is null or empty.
+     * Tests whether the given string is null or empty or contains only white
+     * space codepoints.
      *
      * @param str the string to test.
      * @return true if the string is null or empty, false otherwise.

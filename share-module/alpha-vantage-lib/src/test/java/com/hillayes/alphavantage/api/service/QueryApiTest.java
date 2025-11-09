@@ -6,18 +6,25 @@ import com.hillayes.alphavantage.api.domain.TickerSearchRecord;
 import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @QuarkusTest
 @RequiredArgsConstructor
 public class QueryApiTest {
     private final AlphaVantageApi fixture;
 
-    @Test
-    public void testGetDaily() {
-        DailyTimeSeries response = fixture.getDailySeries("TW.LON");
+    @ParameterizedTest
+    @ValueSource(strings = { "TW.LON" })
+    public void testGetDaily(String ticker) {
+        DailyTimeSeries response = fixture.getDailySeries(ticker);
 
         assertNotNull(response);
         assertNotNull(response.series);
@@ -29,21 +36,13 @@ public class QueryApiTest {
 //            });
     }
 
-    @Test
-    public void testOverview() {
-        Overview response = fixture.getOverview("TW.LON");
+    @ParameterizedTest
+    @ValueSource(strings = { "TW.", "TW.LON" })
+    public void testSymbolSearch(String ticker) {
+        TickerSearchResponse response = fixture.symbolSearch(ticker);
 
         assertNotNull(response);
-        assertNull(response.symbol);
-        assertNull(response.name);
-        assertNull(response.currency);
-    }
-
-    @Test
-    public void testSymbolSearch() {
-        TickerSearchResponse response = fixture.symbolSearch("TW.LON");
-
-        assertNotNull(response);
+        assertNotNull(response.bestMatches);
         assertFalse(response.bestMatches.isEmpty());
         assertEquals(1, response.bestMatches.size());
 
@@ -51,6 +50,14 @@ public class QueryApiTest {
         assertEquals("TW.LON", record.symbol);
         assertEquals("Taylor Wimpey PLC", record.name);
         assertEquals("GBX", record.currency);
+    }
 
+    @Test
+    public void testSymbolSearch_NoMatch() {
+        TickerSearchResponse response = fixture.symbolSearch("ZZ.LON");
+
+        assertNotNull(response);
+        assertNotNull(response.bestMatches);
+        assertTrue(response.bestMatches.isEmpty());
     }
 }

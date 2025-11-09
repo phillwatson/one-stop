@@ -11,12 +11,6 @@
 
     <artifactId>integration-tests</artifactId>
 
-    <properties>
-        <!-- skip compilation and tests by default -->
-        <skip.compile>true</skip.compile>
-        <skip.its>true</skip.its>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.rest-assured</groupId>
@@ -43,33 +37,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>test</id>
-            <properties>
-                <!-- enable compilation tests image by default -->
-                <skip.compile>false</skip.compile>
-                <skip.its>false</skip.its>
-            </properties>
-        </profile>
-    </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <skipMain>${skip.compile}</skipMain>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <skipITs>${skip.its}</skipITs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

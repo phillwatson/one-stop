@@ -16,4 +16,51 @@
         <module>sim-lib</module>
         <module>integration-tests</module>
     </modules>
+
+    <properties>
+        <!-- skip compilation and tests by default -->
+        <skip.compile>true</skip.compile>
+        <skip.its>true</skip.its>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>test</id>
+            <properties>
+                <!-- enable compilation tests image by default -->
+                <skip.compile>false</skip.compile>
+                <skip.its>false</skip.its>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <skipMain>${skip.compile}</skipMain>
+                    <skip>${skip.compile}</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- there are no unit tests -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <skipITs>${skip.its}</skipITs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

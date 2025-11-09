@@ -1,5 +1,6 @@
 package com.hillayes.shares.repository;
 
+import com.hillayes.shares.domain.DealingHistory;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
@@ -8,6 +9,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,5 +81,39 @@ public class HoldingRepositoryTest {
         // And: the holding links to the share and portfolio
         assertEquals(shareIndex, holding.getShareIndex());
         assertEquals(portfolio, holding.getPortfolio());
+    }
+
+    @Test
+    public void testDealingsOrder() {
+        // Given: a share index
+        ShareIndex shareIndex = shareIndexRepository.saveAndFlush(mockShareIndex());
+
+        // And: a portfolio to which the holdings belong
+        Portfolio portfolio = portfolioRepository.saveAndFlush(mockPortfolio(UUID.randomUUID()));
+
+        // And: a holding is added to the portfolio
+        Holding holding = portfolio.add(shareIndex);
+
+        // And: and several dealings are registered - in random date order
+        holding.buy(LocalDate.now().minusDays(2), 10, BigDecimal.valueOf(12.34));
+        holding.sell(LocalDate.now().minusDays(8), 2, BigDecimal.valueOf(12.34));
+        holding.sell(LocalDate.now().minusDays(4), 9, BigDecimal.valueOf(12.34));
+        holding.buy(LocalDate.now().minusDays(12), 6, BigDecimal.valueOf(12.34));
+
+        holdingRepository.saveAndFlush(holding);
+        holdingRepository.getEntityManager().clear();
+
+        // When: the holding is retrieved
+        holding = holdingRepository.findById(holding.getId());
+
+        // Then: the dealings are order by date, ascending
+        List<DealingHistory> dealings = holding.getDealings();
+        assertEquals(4, dealings.size());
+        LocalDate prev = dealings.get(0).getDateExecuted();
+        for (int i = 1; i < dealings.size(); i++) {
+            LocalDate dateExecuted = dealings.get(i).getDateExecuted();
+            assertTrue(prev.isBefore(dateExecuted));
+            prev = dateExecuted;
+        }
     }
 }
