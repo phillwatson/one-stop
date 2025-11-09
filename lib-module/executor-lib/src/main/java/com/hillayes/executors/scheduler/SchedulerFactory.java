@@ -293,8 +293,12 @@ public class SchedulerFactory {
         log.info("Scheduling named scheduled tasks [tableName: {}, adhocSize: {}, recurringSize: {}]",
             tableName, adhocTasks.size(), recurringTasks.size());
 
+        // No database-specific jdbc-overrides applied. Assuming time-related columns to be of type compatibe with
+        // 'TIMESTAMP WITH TIME ZONE', i.e. zone is persisted. If not, consider overriding to always UTC via
+        // '.alwaysPersistTimestampInUTC()
         Scheduler result = Scheduler.create(dataSource, new ArrayList<>(adhocTasks))
             .tableName(tableName)
+            .alwaysPersistTimestampInUTC()
             .serializer(new TaskDataSerializer())
             .threads(configuration.threadCount().orElse(SchedulerConfig.DEFAULT_THREAD_COUNT))
             .pollingInterval(configuration.pollingInterval().orElse(SchedulerConfig.DEFAULT_POLLING_INTERVAL))
