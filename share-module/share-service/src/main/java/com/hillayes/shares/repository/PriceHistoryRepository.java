@@ -14,7 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,9 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @ApplicationScoped
 @Slf4j

@@ -18,8 +18,7 @@
     </modules>
 
     <properties>
-        <!-- skip compilation and tests by default -->
-        <skip.compile>true</skip.compile>
+        <!-- skip integration tests by default -->
         <skip.its>true</skip.its>
     </properties>
 
@@ -27,8 +26,7 @@
         <profile>
             <id>test</id>
             <properties>
-                <!-- enable compilation tests image by default -->
-                <skip.compile>false</skip.compile>
+                <!-- enable integration tests -->
                 <skip.its>false</skip.its>
             </properties>
         </profile>
@@ -36,15 +34,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <skipMain>${skip.compile}</skipMain>
-                    <skip>${skip.compile}</skip>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <!-- there are no unit tests -->
                 <groupId>org.apache.maven.plugins</groupId>
