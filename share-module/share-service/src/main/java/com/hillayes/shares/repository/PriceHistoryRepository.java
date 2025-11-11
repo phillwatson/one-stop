@@ -186,7 +186,7 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
         // add ON CONFLICT clause to ignore duplicate (constraint) conflicts
         sql.append(" ON CONFLICT DO NOTHING");
 
-        withConnection(connection -> {
+        try (Connection connection = getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
                 // map each record to the SQL statement place-holders
                 AtomicInteger index = new AtomicInteger();
@@ -197,7 +197,11 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
                 // perform the batch insert
                 statement.execute();
             }
-        });
+        } catch (DatabaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
     }
 
     /**
@@ -272,9 +276,9 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * Obtains a JDBC connection from the entity manager; allowing native access
      * to the database. Used only for inserting batches of share price records.
      */
-    private void withConnection(Work action) {
-        try (Session session = getEntityManager().unwrap(Session.class)) {
-            session.doWork(action);
-        }
+    private Connection getConnection() {
+        return getEntityManager()
+            .unwrap(Session.class)
+            .doReturningWork(connection -> connection);
     }
 }
