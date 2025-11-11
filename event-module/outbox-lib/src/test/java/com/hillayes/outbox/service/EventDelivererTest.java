@@ -7,6 +7,7 @@ import com.hillayes.events.annotation.TopicObserved;
 import com.hillayes.outbox.repository.EventEntity;
 import com.hillayes.outbox.repository.EventRepository;
 import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,6 +36,10 @@ public class EventDelivererTest {
     @Mock
     @TopicObserved(Topic.CONSENT)
     Event<EventPacket> consentEvent;
+
+    @Mock
+    @TopicObserved(Topic.PORTFOLIO)
+    private Event<EventPacket> portfolioEvent;
 
     @Mock
     @TopicObserved(Topic.HOSPITAL_TOPIC)
