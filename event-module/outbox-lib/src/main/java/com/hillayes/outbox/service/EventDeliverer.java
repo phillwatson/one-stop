@@ -79,6 +79,10 @@ public class EventDeliverer {
     private Event<EventPacket> consentEvent;
 
     @Inject
+    @TopicObserved(Topic.PORTFOLIO)
+    private Event<EventPacket> portfolioEvent;
+
+    @Inject
     @TopicObserved(Topic.HOSPITAL_TOPIC)
     private Event<EventPacket> hospitalEvent;
 
@@ -132,18 +136,19 @@ public class EventDeliverer {
         log.trace("Event batch delivery started");
 
         events.forEach(event -> {
-            Event<EventPacket> sender = switch (event.getTopic()) {
-                case USER -> userEvent;
-                case USER_AUTH -> userAuthEvent;
-                case CONSENT -> consentEvent;
-                case HOSPITAL_TOPIC -> hospitalEvent;
-                default -> {
-                    log.error("Unknown topic [topic: {}]", event.getTopic());
-                    throw new IllegalArgumentException("Unknown topic: " + event.getTopic());
-                }
-            };
-
             try {
+                Event<EventPacket> sender = switch (event.getTopic()) {
+                    case USER -> userEvent;
+                    case USER_AUTH -> userAuthEvent;
+                    case CONSENT -> consentEvent;
+                    case PORTFOLIO -> portfolioEvent;
+                    case HOSPITAL_TOPIC -> hospitalEvent;
+                    default -> {
+                        log.error("Unknown topic [topic: {}]", event.getTopic());
+                        throw new IllegalArgumentException("Unknown topic: " + event.getTopic());
+                    }
+                };
+
                 // send event to consumers
                 sender.fire(event.toEventPacket());
 
