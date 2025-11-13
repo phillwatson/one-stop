@@ -30,4 +30,7 @@ public class AccountSummary {
 
     @JsonProperty("owner_name")
     public String ownerName;
+
+    @JsonProperty("bban")
+    public String bban;
 }
