@@ -12,6 +12,7 @@ import com.hillayes.notification.domain.User;
 import com.hillayes.notification.errors.SendEmailException;
 import com.hillayes.notification.repository.TemplateRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +25,7 @@ import java.util.*;
 public class SendEmailService {
     private final EmailConfiguration configuration;
     private final TemplateRepository templateRepository;
-    private final EmailProviderApi emailProvider;
+    private final Instance<EmailProviderApi> emailProviders;
 
     public void sendEmail(TemplateName templateName,
                           EmailConfiguration.Corresponder recipient,
@@ -89,7 +90,19 @@ public class SendEmailService {
                 .build();
 
             log.trace("Sending email [template: {}, {}]", templateName, email);
-            String messageId = emailProvider.sendEmail(email);
+            String messageId = emailProviders.stream()
+                .map(emailProvider -> {
+                    try {
+                        return emailProvider.sendEmail(email);
+                    } catch (Exception e) {
+                        log.warn("Failed to send email [provider: {}]", emailProvider, e);
+                        return (String)null;
+                    }
+                })
+                .filter(Strings::isNotBlank)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("All email providers failed to send email"));
+
             log.debug("Sent email [template: {}, id: {}]", templateName, messageId);
         } catch (Exception e) {
             throw new SendEmailException(templateName, recipient, e);
