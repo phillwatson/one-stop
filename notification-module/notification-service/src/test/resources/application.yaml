@@ -1,0 +1,10 @@
+quarkus:
+  hibernate-orm:
+    log:
+      sql: true
+      bind-parameters: true
+
+one-stop:
+  auth:
+    xsrf:
+      secret: this is a secret for xsrf tokens

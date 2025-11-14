@@ -57,7 +57,7 @@ services:
       - "5004:5005"
     environment:
       ONE_STOP_EMAIL_API_KEY: "abcdef"
-      ONE_STOP_EMAIL_SERVICE_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+      QUARKUS_REST_CLIENT_BREVO_API_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
 
   audit-service:
