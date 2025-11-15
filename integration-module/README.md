@@ -5,7 +5,7 @@
 ## Integration Module
 The integration module serves two purposes. It provides a Java API (based on RestAssured)
 to the One-Stop services. It also provides integration tests that test the services
-in their "production" environment - although 3rd party services (such as rails and sendEmail
+in their "production" environment - although 3rd party services (such as rails and email
 providers) are represented by WireMock simulators (sim-lib).
 
 ### Integration Tests

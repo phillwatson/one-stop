@@ -5,7 +5,7 @@ export default interface UserProfile {
   title: string;
   givenName: string;
   familyName: string;
-  sendEmail: string;
+  email: string;
   phone: string;
   dateCreated: Date | undefined;
   dateOnboarded: Date | undefined;
@@ -18,7 +18,7 @@ export const NULL_PROFILE: UserProfile = {
   title: '',
   givenName: '',
   familyName: '',
-  sendEmail: '',
+  email: '',
   phone: '',
   dateCreated: undefined,
   dateOnboarded: undefined

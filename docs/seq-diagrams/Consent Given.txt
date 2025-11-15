@@ -4,7 +4,7 @@ participant nordigen
 participant scheduler
 participant rail-service
 participant database
-participant sendEmail-service
+participant email-service
 participant broker
 
 nordigen->rail-service:GET: /api/v1/rails/consents/NORDIGEN/response?ref=consentRef
@@ -25,16 +25,16 @@ deactivateafter scheduler
 rail-service->broker:CONSENT_GIVEN
 activate broker
 deactivateafter broker
-rbox over sendEmail-service#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n  ...\n}
+rbox over email-service#bee7ff:{\n  userId: UUID\n  institutionId: String\n  institutionName: String\n  ...\n}
 deactivateafter rail-service
 
 space 2
-broker->sendEmail-service:CONSENT_GIVEN
-activate sendEmail-service
-sendEmail-service->database:User.get(userId)
+broker->email-service:CONSENT_GIVEN
+activate email-service
+email-service->database:User.get(userId)
 activate database
-database-->sendEmail-service:user
+database-->email-service:user
 deactivate database
-sendEmail-service->sendEmail-service:send sendEmail\n"consent received ..."
-deactivateafter sendEmail-service
+email-service->email-service:send email\n"consent received ..."
+deactivateafter email-service
 

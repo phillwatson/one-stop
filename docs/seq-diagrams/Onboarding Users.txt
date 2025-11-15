@@ -3,17 +3,17 @@ title On-Boarding Users
 participant client
 participant user-service
 participant broker
-participant sendEmail-service
+participant email-service
 
 rbox right of client#lightblue:New user wishes to onboard
-client->user-service:POST /api/v1/users/onboard/register\n{\n  "sendEmail": "jane@work.com"\n}
+client->user-service:POST /api/v1/users/onboard/register\n{\n  "email": "jane@work.com"\n}
 activate client
 activate user-service
 rbox over client,user-service#lightblue:end-point requires no authorisation
 
 user-service->user-service:findByEmail()
 
-alt#lightblue sendEmail already exists
+alt#lightblue email already exists
 
 rbox left of broker#lightblue:user-active event to records\nunusual activity of user account
 user-service->broker:user-activity(user)
@@ -21,24 +21,24 @@ client<--user-service:http 202
 rbox over client,user-service#lightblue:sending 409 risks hackers using\nthe endpoint for phishing
 else
 user-service->user-service:generate magic-token
-rbox over user-service#lightblue:Magic-token is a signed JWT with configured\n expiry time. Its claims contain the sendEmail address.
-user-service->broker:user-registered(sendEmail,magic-token)
+rbox over user-service#lightblue:Magic-token is a signed JWT with configured\n expiry time. Its claims contain the email address.
+user-service->broker:user-registered(email,magic-token)
 client<--user-service:http 202
 end
 deactivateafter user-service
 deactivateafter client
-broker->sendEmail-service:user-activity(user)
-activate sendEmail-service
-sendEmail-service->sendEmail-service:send sendEmail to warn that "someone is attempting\n to register with your sendEmail"
-deactivateafter sendEmail-service
+broker->email-service:user-activity(user)
+activate email-service
+email-service->email-service:send email to warn that "someone is attempting\n to register with your email"
+deactivateafter email-service
 
-broker->sendEmail-service:user-registered(sendEmail,magic-token)
-activate sendEmail-service
-sendEmail-service->sendEmail-service:send sendEmail with link to client app\nGET /onboarding?token={magic-token}
-deactivateafter sendEmail-service
+broker->email-service:user-registered(email,magic-token)
+activate email-service
+email-service->email-service:send email with link to client app\nGET /onboarding?token={magic-token}
+deactivateafter email-service
 
 
-rbox right of client#lightblue:User receives sendEmail with magic-token\nand navigates to client app to enter\na username and password.\n\nGET /onboarding?token={magic-token}
+rbox right of client#lightblue:User receives email with magic-token\nand navigates to client app to enter\na username and password.\n\nGET /onboarding?token={magic-token}
 space
 
 activate client
@@ -56,11 +56,11 @@ client<--user-service:http 400
 else username already taken
 
 client<--user-service:http 409
-else sendEmail already taken
+else email already taken
 
 client<--user-service:http 409
 else valid
-user-service->user-service:createUser\n(\n username: "jane",\n password: "My-New-Account-20", - hashed\n sendEmail: "jane@work.com", - from magic-token\n created: now(),\n role: "user"\n)
+user-service->user-service:createUser\n(\n username: "jane",\n password: "My-New-Account-20", - hashed\n email: "jane@work.com", - from magic-token\n created: now(),\n role: "user"\n)
 user-service->broker:user-created(user)
 user-service->broker:user-login(user)
 client<--user-service:http 204\n(with new JWT)
@@ -69,10 +69,10 @@ deactivateafter user-service
 deactivateafter client
 
 
-broker->sendEmail-service:user-created(user)
-activate sendEmail-service
-sendEmail-service->sendEmail-service:create user record
-sendEmail-service->sendEmail-service:send welcome sendEmail
-deactivateafter sendEmail-service
+broker->email-service:user-created(user)
+activate email-service
+email-service->email-service:create user record
+email-service->email-service:send welcome email
+deactivateafter email-service
 
 

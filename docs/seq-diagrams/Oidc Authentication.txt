@@ -10,7 +10,7 @@ client->user-service:/api/v1/auth/login/{authProvider}
 activate user-service
 user-service->user-service:select oidc-provider implementation
 user-service->user-service:generateAuthRequest()
-note over user-service,oidc-provider#lightblue:e.g.\nhttps://accounts.google.com/o/oauth2/v2/auth\n?response_type=code\n&client_id=<clientId>\n&scope=openid profile sendEmail\n&redirect_uri=http://one-stop/api/v1/auth/validate/google\n&state=<clientState>
+note over user-service,oidc-provider#lightblue:e.g.\nhttps://accounts.google.com/o/oauth2/v2/auth\n?response_type=code\n&client_id=<clientId>\n&scope=openid profile email\n&redirect_uri=http://one-stop/api/v1/auth/validate/google\n&state=<clientState>
 client<--user-service:307: redirect(uri)
 deactivate user-service
 
@@ -44,11 +44,11 @@ note left of user-service#lightblue:user has been marked as blocked.
 client<--user-service:401: Unauthorized
 end
 else user does not exist
-alt#dba99c sendEmail NOT in id-token
-note left of user-service#lightblue:sendEmail address not provided in \noidc-provider's id-token claims.
+alt#dba99c email NOT in id-token
+note left of user-service#lightblue:email address not provided in \noidc-provider's id-token claims.
 client<--user-service:401: Unauthorized
 else
-user-service->user-repository:findByEmail(sendEmail)
+user-service->user-repository:findByEmail(email)
 activate user-repository
 user-service<--user-repository:user | null
 deactivate user-repository

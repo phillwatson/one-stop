@@ -72,6 +72,6 @@ deactivate UserAuditReportsAdhocTask
 space
 NotificationService<-broker:TRANSACTION_AUDIT(issues)
 activate NotificationService
-NotificationService->NotificationService:sendEmail()
+NotificationService->NotificationService:email()
 NotificationService->NotificationService:createNotification()
 deactivateafter NotificationService

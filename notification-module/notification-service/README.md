@@ -26,13 +26,13 @@ one-stop:
         en: "Access to $event.institutionName$ has expired.\nYou need to renew your consent."
 ```
 
-The sendEmail subject and templates are also configured within the `application.yaml`,
+The email subject and templates are also configured within the `application.yaml`,
 and map to the enum `com.hillayes.notification.config.TemplateName`.
 The following is an example of the template configuration for
 `TemplateName.USER_REGISTERED`.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     templates:
       user-registered:
         en:
@@ -51,12 +51,12 @@ be located using `java.lang.class.getResourceAsStream(String)`; normally with th
 `resources` folder.
 
 #### Header and Footer
-The template body file will contain only the body particular to the sendEmail subject.
+The template body file will contain only the body particular to the email subject.
 Any header and footer content will be taken from the "special" `TemplateName.HEADER`,
 which may also be chosen by locale.
 
 #### Template Args
-Based on the Antlr ST4 template library, the notification and sendEmail templates
+Based on the Antlr ST4 template library, the notification and email templates
 may reference any property in a given Map of key/values. Templates may also
 reference properties of the value in the Map. For example; if the Map contains
 a reference the interface (or class), with the key `"account"`:
@@ -70,11 +70,11 @@ Then the template may reference the BIC code for this account using `$account.bi
 
 #### Common Args
 Some properties are common to all templates, and are therefore defined in the
-`application.yaml` under the `one-stop.sendEmail.common-args` key. These properties
+`application.yaml` under the `one-stop.email.common-args` key. These properties
 can be used to provide the company name, address, and contact details.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     common-args:
       COMPANY_LONG_NAME: Hillayes One-Stop
       COMPANY_COPYRIGHT_NAME: One-Stop
@@ -85,20 +85,20 @@ one-stop:
 ```
 
 #### Recipient
-Email are normally issued in response to an event, and the sendEmail recipient is
-the User identified by the event payload, or by the sendEmail address provided in
+Email are normally issued in response to an event, and the email recipient is
+the User identified by the event payload, or by the email address provided in
 the event payload.
 
-For those occasions when the sendEmail is to be sent to a non-User (e.g. an administrator),
+For those occasions when the email is to be sent to a non-User (e.g. an administrator),
 the recipient can be defined in the template.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     templates:
       message-hospital:
         recipient:
           name: "Administrator"
-          sendEmail: "admin@one-stop.com"
+          email: "admin@one-stop.com"
           locale: "en"
         en:
           subject: "An event has failed to be processed"
@@ -106,15 +106,15 @@ one-stop:
 ```
 
 #### Sender
-Each template may also define a sender, to be identified in the sendEmail header.
+Each template may also define a sender, to be identified in the email header.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     templates:
       user-registered:
         sender:
           name: "Administrator"
-          sendEmail: "admin@one-stop.com"
+          email: "admin@one-stop.com"
           locale: "en"
         en:
           subject: "Hi $user.preferredName$, please complete your One-Stop registration"
@@ -124,19 +124,19 @@ one-stop:
 If no sender is provided in the template, the `default-sender` is used.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     default-sender:
-      name: ${one-stop.sendEmail.common-args.COMPANY_LONG_NAME}
-      sendEmail: ${one-stop.sendEmail.common-args.COMPANY_CONTACT_EMAIL}
+      name: ${one-stop.email.common-args.COMPANY_LONG_NAME}
+      email: ${one-stop.email.common-args.COMPANY_CONTACT_EMAIL}
       locale: "en"
 ```
 
 #### Disabling Emails
-The sendEmail service can be disabled by setting the `one-stop.sendEmail.disabled` property
+The email service can be disabled by setting the `one-stop.email.disabled` property
 to `true`. This will prevent any emails from being sent, but notifications will still
 be issued.
 ```yaml
 one-stop:
-  sendEmail:
+  email:
     disabled: false
 ```
