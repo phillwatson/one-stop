@@ -27,7 +27,7 @@ export default function UpdateProfile() {
       errors.push("Username is required");
     }
 
-    if (profile.email?.length === 0) {
+    if (profile.sendEmail?.length === 0) {
       errors.push("Email is required");
     }
 

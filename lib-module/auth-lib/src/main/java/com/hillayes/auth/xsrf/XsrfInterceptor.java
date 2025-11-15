@@ -2,12 +2,6 @@ package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
 import io.quarkus.security.Authenticated;
-import jakarta.enterprise.inject.Instance;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jboss.resteasy.core.ResourceMethodInvoker;
-
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -17,11 +11,16 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.resteasy.core.ResourceMethodInvoker;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static com.hillayes.commons.Strings.isBlank;
 
@@ -51,16 +50,16 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
 
     @ConfigProperty(name = "one-stop.auth.access-token.cookie")
-    Instance<String> accessCookieName;
+    Optional<String> accessCookieName;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
-    Instance<String> refreshCookieName;
+    Optional<String> refreshCookieName;
 
     @ConfigProperty(name = "one-stop.auth.xsrf.header", defaultValue = "X-XSRF-TOKEN")
-    Instance<String> xsrfHeaderName;
+    Optional<String> xsrfHeaderName;
 
     @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
-    Instance<Duration> refreshDuration;
+    Optional<Duration> refreshDuration;
 
     @Inject
     XsrfTokens xsrfTokens;

@@ -8,9 +8,9 @@ import com.github.tomakehurst.wiremock.matching.ContentPattern;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.hillayes.commons.json.MapperFactory;
+import com.hillayes.email.brevo.api.domain.BrevoEmailResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.core.ConditionFactory;
-import sibModel.CreateSmtpEmail;
 
 import java.io.Closeable;
 import java.time.Duration;
@@ -25,7 +25,7 @@ public class SendInBlueSimulator implements Closeable {
     private static final ConditionFactory DEFAULT_WAIT =
         await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(60));
 
-    public static final String BASE_URI = "/api.sendinblue.com/v3";
+    public static final String BASE_URI = "/api.brevo.com/v3";
     private static final String TRANSACTIONAL_EMAIL_URI = BASE_URI + "/smtp/email";
 
     private final WireMock wireMockClient;
@@ -37,7 +37,10 @@ public class SendInBlueSimulator implements Closeable {
         wireMockClient.register(
             post(TRANSACTIONAL_EMAIL_URI)
                 .willReturn(ResponseDefinitionBuilder.okForJson(
-                    new CreateSmtpEmail().messageId("<201798300811.5787683@relay.domain.com>")))
+                    BrevoEmailResponse.builder()
+                        .messageId("<201798300811.5787683@relay.domain.com>")
+                        .build())
+                )
         );
     }
 

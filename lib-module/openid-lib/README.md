@@ -44,23 +44,23 @@ access-token. With that we can call the GitHub REST API to retrieve the user's
 profile data.
 
 **IMPORTANT:**
-> Ideally, the user's email address should be provided in the claims of the ID-Token
+> Ideally, the user's sendEmail address should be provided in the claims of the ID-Token
 (or the profile data) returned by the open-id provider. If not provided, no emails can
-be delivered to the user until they supply an email address in their one-stop profile
+be delivered to the user until they supply an sendEmail address in their one-stop profile
 settings.
 
-> When the user authenticates via an open-id provider for the first time, their email
+> When the user authenticates via an open-id provider for the first time, their sendEmail
 address is also used to match them to an existing record in the database; and the
 user is logged in as that user.
-If the email address is not provided by the open-id provider, a new user will be created.
+If the sendEmail address is not provided by the open-id provider, a new user will be created.
 
 > For GitHub that requires explicit action on the user's part, to allow access to
-their email address:
-> 1. In their GitHub email settings (https://github.com/settings/emails),
-uncheck the "Keep my email address private"
+their sendEmail address:
+> 1. In their GitHub sendEmail settings (https://github.com/settings/emails),
+uncheck the "Keep my sendEmail address private"
 > 2. Then, in their GitHub profile (https://github.com/settings/profile), select the
-email address in the "Public email" drop-down.
-> 3. Having authenticated once, they can make their email address private again.
+sendEmail address in the "Public sendEmail" drop-down.
+> 3. Having authenticated once, they can make their sendEmail address private again.
 
 ## Adding a New Open-Id Connect Provider
 For most providers only two classes need to be implemented; OpenIdFactory
