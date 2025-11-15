@@ -47,10 +47,10 @@ public class XsrfInterceptorTest {
 
         fixture.jwtTokens = jwtTokens;
         fixture.xsrfTokens = xsrfGenerator;
-        fixture.accessCookieName = mockInstance(ACCESS_TOKEN);
-        fixture.refreshCookieName = mockInstance(REFRESH_TOKEN);
-        fixture.xsrfHeaderName = mockInstance(XSRF_HEADER);
-        fixture.refreshDuration = mockInstance(Duration.ofSeconds(60));
+        fixture.accessCookieName = Optional.of(ACCESS_TOKEN);
+        fixture.refreshCookieName = Optional.of(REFRESH_TOKEN);
+        fixture.xsrfHeaderName = Optional.of(XSRF_HEADER);
+        fixture.refreshDuration = Optional.of(Duration.ofSeconds(60));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class XsrfInterceptorTest {
         mockMethod(requestContext, mockRolesAllowed());
         mockUriInfo(requestContext);
 
-        fixture.refreshDuration = mockInstance(Duration.ofSeconds(1));
+        fixture.refreshDuration = Optional.of(Duration.ofSeconds(1));
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
@@ -224,11 +224,5 @@ public class XsrfInterceptorTest {
                 return new String[0];
             }
         };
-    }
-
-    private <T> Instance<T> mockInstance(T value) {
-        Instance<T> mock = mock(Instance.class);
-        when(mock.get()).thenReturn(value);
-        return mock;
     }
 }

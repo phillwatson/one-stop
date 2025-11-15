@@ -35,8 +35,8 @@ For example; the use-case for "get user's consent" may be:
 
 The use-cases for the ConsentGiven event may be:
 - Given: a ConsentGiven event has been raised
-- When: that event is received by the email service
-- Then: the user is sent a confirmation email
+- When: that event is received by the sendEmail service
+- Then: the user is sent a confirmation sendEmail
 
 and:
 - Given: a ConsentGiven event has been raised
@@ -55,10 +55,10 @@ we rewrote the above use-case.
 - Given: a user provides consent to access their bank account
 - When: the consent is posted to the consent service
 - Then: record the user's consent in the database
-- And: raise an event to send a confirmation email
+- And: raise an event to send a confirmation sendEmail
 - And: raise an event to retrieve the user's bank account transactions
 
-We now have a coupling between the services. The consent service knows that the email
+We now have a coupling between the services. The consent service knows that the sendEmail
 service and account service need to perform explicit actions when a user's consent is
 given. Also, any new actions would require changes to the consent service.
 

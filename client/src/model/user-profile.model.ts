@@ -5,20 +5,20 @@ export default interface UserProfile {
   title: string;
   givenName: string;
   familyName: string;
-  email: string;
+  sendEmail: string;
   phone: string;
   dateCreated: Date | undefined;
   dateOnboarded: Date | undefined;
 }
 
 export const NULL_PROFILE: UserProfile = {
-  id: undefined, 
+  id: undefined,
   username: '',
   preferredName: '',
   title: '',
   givenName: '',
   familyName: '',
-  email: '',
+  sendEmail: '',
   phone: '',
   dateCreated: undefined,
   dateOnboarded: undefined

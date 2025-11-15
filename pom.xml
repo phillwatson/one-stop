@@ -31,11 +31,11 @@
 
         <module>event-module</module>
         <module>lib-module</module>
-        <module>share-module</module>
 
         <module>audit-service</module>
-        <module>notification-service</module>
+        <module>notification-module</module>
         <module>rail-module</module>
+        <module>share-module</module>
         <module>user-service</module>
 
         <module>integration-module</module>
@@ -121,6 +121,7 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.42</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.openapitools</groupId>
@@ -152,17 +153,6 @@
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>3.13.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sendinblue</groupId>
-                <artifactId>sib-api-v3-sdk</artifactId>
-                <version>6.0.0</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.swagger</groupId>
-                        <artifactId>swagger-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.antlr</groupId>
@@ -272,6 +262,16 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>email-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>brevo-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>notification-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -307,7 +307,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>

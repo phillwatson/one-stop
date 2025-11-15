@@ -53,8 +53,8 @@ Responsible for communicating with external banking rail services; managing and
 downloading account information.
 
 #### Notification Service
-Responsible for issuing notifications to users and administrators; via email and
-REST API. Generates email and notifications in the user's locale.
+Responsible for issuing notifications to users and administrators; via sendEmail and
+REST API. Generates sendEmail and notifications in the user's locale.
 
 #### Audit Service
 Responsible for recording audit events.

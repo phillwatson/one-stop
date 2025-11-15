@@ -28,8 +28,8 @@ export default function UserProfileForm(props: Props) {
       <TextField id="familyName" label="Family name" variant="outlined" fullWidth margin="normal"
         value={profile.familyName} onChange={e => setProfile({...profile, familyName: e.target.value})}/>
 
-      <TextField id="email" label="Email" required variant="outlined" fullWidth margin="normal"
-        value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})}/>
+      <TextField id="sendEmail" label="Email" required variant="outlined" fullWidth margin="normal"
+        value={profile.sendEmail} onChange={e => setProfile({...profile, sendEmail: e.target.value})}/>
 
       <TextField id="phone" label="Phone" variant="outlined" fullWidth margin="normal"
         value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}/>
