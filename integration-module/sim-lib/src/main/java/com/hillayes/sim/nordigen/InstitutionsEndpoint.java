@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class InstitutionsEndpoint extends AbstractEndpoint {
         String filename = paymentsEnabled == Boolean.TRUE
             ? "/institutions-payments-enabled.json"
             : "/institutions-payments-disabled.json";
-        URL resource = this.getClass().getResource(filename);
+        InputStream resource = this.getClass().getResourceAsStream(filename);
 
         List<Institution> institutions = objectMapper.readValue(resource, INSTITUTION_LIST);
         return Response.ok(institutions).build();

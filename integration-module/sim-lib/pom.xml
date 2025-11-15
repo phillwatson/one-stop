@@ -46,10 +46,6 @@
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sendinblue</groupId>
-            <artifactId>sib-api-v3-sdk</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -79,6 +75,10 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>yapily-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>brevo-lib</artifactId>
         </dependency>
     </dependencies>
 

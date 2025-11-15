@@ -1,0 +1,4 @@
+quarkus:
+  rest-client:
+    brevo-api:
+      url: https://api.brevo.com/v3
