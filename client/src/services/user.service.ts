@@ -17,9 +17,9 @@ class UserService {
     //window.location.href = window.location.origin + "/api/v1/auth/login/" + provider + "?state=same-state-value";
   }
 
-  registerNewUser(sendEmail: string): Promise<void> {
+  registerNewUser(email: string): Promise<void> {
     const body = {
-      sendEmail: sendEmail
+      email: email
     }
     return http.post<void>('/users/onboard/register', body)
       .then(response => response.data);
