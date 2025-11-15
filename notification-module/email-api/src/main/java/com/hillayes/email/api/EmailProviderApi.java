@@ -7,13 +7,13 @@ import com.hillayes.email.api.domain.SendEmail;
  */
 public interface EmailProviderApi {
     /**
-     * Sends the given sendEmail to the recipients identified within it.
+     * Sends the given email to the recipients identified within it.
      * The service provider will return an identifier that can be used to track the
-     * sendEmail's delivery.
+     * email's delivery.
      *
-     * @param sendEmail the sendEmail instance to be delivered; with the emailSender and recipients
+     * @param sendEmail the email instance to be delivered; with the sender and recipients
      *              identifiers, and the content.
-     * @return the identifier returned by the sendEmail service provider
+     * @return the identifier returned by the email service provider
      */
     public String sendEmail(SendEmail sendEmail);
 }

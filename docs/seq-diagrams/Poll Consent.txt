@@ -5,9 +5,9 @@ participant rail-service
 participant database
 participant nordigen
 participant broker
-participant sendEmail-service
+participant email-service
 
-note over scheduler,sendEmail-service#b7d6ff :Consents are polled when initially given.\nAfter that they are polled on a daily scheduled basis.
+note over scheduler,email-service#b7d6ff :Consents are polled when initially given.\nAfter that they are polled on a daily scheduled basis.
 
 scheduler->rail-service:POLL_CONSENT(consentId)
 activate rail-service
@@ -74,22 +74,22 @@ end
 deactivateafter rail-service
 
 space
-broker->sendEmail-service:CONSENT_EXPIRED
-activate sendEmail-service
-sendEmail-service->database:User.get(userId)
+broker->email-service:CONSENT_EXPIRED
+activate email-service
+email-service->database:User.get(userId)
 activate database
-database-->sendEmail-service:user
+database-->email-service:user
 deactivate database
-sendEmail-service->sendEmail-service:send sendEmail\n"consent expired..."
-deactivateafter sendEmail-service
-rbox over sendEmail-service#bee7ff:sendEmail includes link to allow\nuser to renew consent
+email-service->email-service:send email\n"consent expired..."
+deactivateafter email-service
+rbox over email-service#bee7ff:email includes link to allow\nuser to renew consent
 
 space
-broker->sendEmail-service:CONSENT_SUSPENDED
-activate sendEmail-service
-sendEmail-service->database:User.get(userId)
+broker->email-service:CONSENT_SUSPENDED
+activate email-service
+email-service->database:User.get(userId)
 activate database
-database-->sendEmail-service:user
+database-->email-service:user
 deactivate database
-sendEmail-service->sendEmail-service:send sendEmail\n"access has been\n suspended..."
-deactivateafter sendEmail-service
+email-service->email-service:send email\n"access has been\n suspended..."
+deactivateafter email-service

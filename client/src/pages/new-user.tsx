@@ -9,13 +9,13 @@ import TextField from "@mui/material/TextField";
 export default function NewUser() {
   const showMessage = useMessageDispatch();
 
-  const [sendEmail, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   function validateForm(): Array<string> {
     const errors = Array<string>();
 
-    if (sendEmail.length === 0) {
+    if (email.length === 0) {
       errors.push("Email address is required");
     }
 
@@ -29,10 +29,10 @@ export default function NewUser() {
     if (errors.length > 0) {
       errors.forEach(value => showMessage({ type: 'add', level: 'error', text: value}))
     } else {
-      UserService.registerNewUser(sendEmail)
+      UserService.registerNewUser(email)
         .then(() => {
           setSubmitted(true);
-          showMessage({ type: 'add', level: 'success', text: 'Please check your sendEmail.' });
+          showMessage({ type: 'add', level: 'success', text: 'Please check your email.' });
         })
         .catch(error => showMessage(error));
     }
@@ -43,7 +43,7 @@ export default function NewUser() {
         <form onSubmit={ handleSubmit }>
           <div className="panel">
             <TextField className="field" id="emailAddress" label="Email Address" required variant="outlined" fullWidth margin="normal"
-              value={sendEmail} onChange={ e => setEmail(e.target.value) }/>
+              value={email} onChange={ e => setEmail(e.target.value) }/>
             <Button type="submit" variant="outlined" disabled={(!submitted) && validateForm().length > 0}>Send</Button>
           </div>
         </form>
