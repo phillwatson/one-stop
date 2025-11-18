@@ -9,9 +9,10 @@ volumes:
   db-data:
   broker-data:
   management-data:
+  grafana-data:
 
 services:
-  management-service:
+  metrics-service:
     restart: unless-stopped
     image: prom/prometheus:v3.7.3
     ports:
@@ -25,6 +26,28 @@ services:
       - type: bind
         source: ./prometheus.yaml
         target: /etc/prometheus/prometheus.yml
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  metrics-client: # admin/admin
+    restart: unless-stopped
+    image: grafana/grafana:12.4.0-19363970803
+    ports:
+      - "3000:3000"
+    networks:
+      - onestop-db-network
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
 
   broker:
     restart: unless-stopped
