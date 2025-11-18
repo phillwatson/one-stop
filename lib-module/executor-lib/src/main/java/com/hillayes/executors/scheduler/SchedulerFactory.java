@@ -15,6 +15,9 @@ import com.hillayes.executors.scheduler.tasks.NamedAdhocTask;
 import com.hillayes.executors.scheduler.tasks.NamedScheduledTask;
 import com.hillayes.executors.scheduler.tasks.NamedTask;
 import com.hillayes.executors.scheduler.tasks.TaskConclusion;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -41,6 +44,9 @@ import static java.lang.Math.round;
  */
 @Slf4j
 public class SchedulerFactory {
+    private final Timer scheduledTimer = Metrics.timer("scheduler.tasks.scheduled");
+    private final Timer adhocTimer = Metrics.timer("scheduler.tasks.adhoc");
+
     private final DataSource dataSource;
 
     private final Scheduler scheduler;
@@ -164,7 +170,7 @@ public class SchedulerFactory {
                     // add task - with call-back to execute
                     result.add(builder.execute((inst, ctx) ->
                         // call the task - use the task name as a correlation ID
-                        Correlation.run(inst.getTaskAndInstance(), (Runnable) task)
+                        scheduledTimer.record(() -> Correlation.run(inst.getTaskAndInstance(), (Runnable) task))
                     ));
                 }
             }
@@ -217,7 +223,9 @@ public class SchedulerFactory {
 
                     // call the task using the correlation ID used when task was queued
                     final NamedAdhocTask<Object> function = (NamedAdhocTask<Object>) task;
-                    TaskConclusion conclusion = Correlation.call(inst.getData().correlationId, function, taskContext);
+                    TaskConclusion conclusion = adhocTimer.record(() ->
+                        Correlation.call(inst.getData().correlationId, function, taskContext)
+                    );
 
                     // if task has completed
                     if (conclusion == TaskConclusion.COMPLETE) {

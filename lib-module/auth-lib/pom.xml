@@ -24,6 +24,11 @@
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-jwt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.hillayes</groupId>

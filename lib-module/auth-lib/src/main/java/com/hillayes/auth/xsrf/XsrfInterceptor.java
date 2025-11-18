@@ -1,7 +1,10 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.security.Authenticated;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -67,8 +70,19 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     @Inject
     JwtTokens jwtTokens;
 
+    @Inject
+    MeterRegistry metrics;
+
+    private Counter authFailureCounter;
+
+    @PostConstruct
+    public void init() {
+        authFailureCounter = metrics.counter("auth.xsrf.failures");
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
+
         log.trace("Filtering XSRF tokens");
         ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
         Annotation[] methodAnnotations = methodInvoker.getMethodAnnotations();
@@ -90,6 +104,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             log.trace("Method requires authentication");
             // check xsrf token in access-token cookie
             if (tokenIsInvalid(requestContext, accessCookieName.get())) {
+                authFailureCounter.increment();
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         } else if ((isAnnotationPresent(methodAnnotations, XSRF_REQUIRED)) ||
@@ -97,6 +112,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             log.trace("Method requires XSRF validation");
             // check xsrf token in refresh-token cookie
             if (tokenIsInvalid(requestContext, refreshCookieName.get())) {
+                authFailureCounter.increment();
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }
