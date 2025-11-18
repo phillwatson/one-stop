@@ -1,0 +1,25 @@
+quarkus:
+  management:
+    enabled: true
+    port: 9002
+    root-path: management
+
+  micrometer: # see: https://quarkus.io/guides/telemetry-micrometer#configuration-reference
+    enabled: true
+    binder:
+      jvm: false # Micrometer JVM metrics support.
+      system: false # System metrics support.
+      virtual-threads:
+        enabled: true # Virtual Threads metrics support.
+      netty:
+        enabled: false # Netty metrics support.
+      http-client:
+        enabled: true # Outbound HTTP request metrics support.
+      http-server:
+        enabled: true # Inbound HTTP metrics support.
+        suppress4xx-errors: true # Suppress 4xx errors from metrics collection for unmatched templates. Does not apply to 404 errors.
+        suppress-non-application-uris: true # Suppress non-application uris from metrics collection.
+      kafka:
+        enabled: true # Kafka metrics support.
+      messaging:
+        enabled: true # Support for Reactive Messaging if Micrometer support is enabled, MessageObservationCollector interface is on the classpath

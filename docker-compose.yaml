@@ -8,8 +8,24 @@ networks:
 volumes:
   db-data:
   broker-data:
+  management-data:
 
 services:
+  management-service:
+    restart: unless-stopped
+    image: prom/prometheus:v3.7.3
+    ports:
+      - "9090:9090"
+    networks:
+      - onestop-db-network
+    volumes:
+      - type: volume
+        source: management-data
+        target: /prometheus
+      - type: bind
+        source: ./prometheus.yaml
+        target: /etc/prometheus/prometheus.yml
+
   broker:
     restart: unless-stopped
     image: redpandadata/redpanda:v25.2.5

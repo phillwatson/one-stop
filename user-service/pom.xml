@@ -85,6 +85,10 @@
             <groupId>com.hillayes</groupId>
             <artifactId>openapi-doc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>management-lib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
