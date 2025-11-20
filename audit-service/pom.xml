@@ -39,6 +39,10 @@
             <groupId>com.hillayes</groupId>
             <artifactId>events-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>management-lib</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>

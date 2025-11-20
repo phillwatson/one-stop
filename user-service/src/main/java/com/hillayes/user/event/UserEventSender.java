@@ -13,6 +13,7 @@ import com.hillayes.openid.AuthProvider;
 import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.user.domain.DeletedUser;
 import com.hillayes.user.domain.User;
+import io.micrometer.core.annotation.Counted;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class UserEventSender {
     private final EventSender eventSender;
     private final RequestHeaders requestHeaders;
 
+    @Counted(value = "user.events")
     public void sendUserRegistered(String email, Duration expires, URI acknowledgerUri) {
         log.debug("Sending UserRegistered event [email: {}]", Strings.maskEmail(email));
         List<Locale> languages = requestHeaders.getAcceptableLanguages();
@@ -42,8 +44,10 @@ public class UserEventSender {
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendUserCreated(User user) {
         log.debug("Sending UserCreated event [userId: {}]", user.getId());
+
         eventSender.send(Topic.USER, UserCreated.builder()
             .dateCreated(user.getDateCreated())
             .userId(user.getId())
@@ -58,8 +62,10 @@ public class UserEventSender {
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendUserUpdated(User user) {
         log.debug("Sending UserUpdated event [userId: {}]", user.getId());
+
         eventSender.send(Topic.USER, UserUpdated.builder()
             .dateUpdated(Instant.now())
             .userId(user.getId())
@@ -74,16 +80,20 @@ public class UserEventSender {
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendUserDeleted(DeletedUser user) {
         log.debug("Sending UserDeleted event [userId: {}]", user.getId());
+
         eventSender.send(Topic.USER, UserDeleted.builder()
             .userId(user.getId())
             .dateDeleted(user.getDateDeleted())
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendAccountActivity(User user, SuspiciousActivity activity) {
         log.debug("Sending AccountActivity event [userId: {}]", user.getId());
+
         eventSender.send(Topic.USER, AccountActivity.builder()
             .userId(user.getId())
             .activity(activity)
@@ -93,8 +103,10 @@ public class UserEventSender {
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendUserAuthenticated(User user, AuthProvider authProvider) {
         log.debug("Sending UserAuthenticated event [userId: {}]", user.getId());
+
         eventSender.send(Topic.USER_AUTH, UserAuthenticated.builder()
             .userId(user.getId())
             .dateLogin(Instant.now())
@@ -104,8 +116,10 @@ public class UserEventSender {
             .build());
     }
 
+    @Counted(value = "user.events")
     public void sendAuthenticationFailed(String username, AuthProvider authProvider, String reason) {
         log.debug("Sending AuthenticationFailed event [username: {}, reason: {}]", username, reason);
+
         eventSender.send(Topic.USER_AUTH, AuthenticationFailed.builder()
             .username(username)
             .dateLogin(Instant.now())
