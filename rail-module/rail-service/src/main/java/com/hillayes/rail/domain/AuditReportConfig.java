@@ -17,7 +17,7 @@ import java.util.*;
  * @see com.hillayes.rail.audit.AuditReportTemplate
  */
 @Entity
-@Table(name = "audit_report_config")
+@Table(schema = "rails", name = "audit_report_config")
 @Getter
 @Setter
 @Builder(builderClassName = "Builder")
