@@ -82,5 +82,10 @@
             <artifactId>auth-lib</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>management-lib</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

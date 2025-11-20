@@ -1,7 +1,10 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.security.Authenticated;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -11,6 +14,8 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -49,26 +54,45 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     // the XSRF token is checked in the refresh-token cookie
     private static final Collection<Class<? extends Annotation>> XSRF_REQUIRED = List.of(XsrfRequired.class);
 
-    @ConfigProperty(name = "one-stop.auth.access-token.cookie")
-    Optional<String> accessCookieName;
+    protected Optional<String> accessCookieName;
+    protected Optional<String> refreshCookieName;
+    protected Optional<String> xsrfHeaderName;
+    protected Optional<Duration> refreshDuration;
+    protected XsrfTokens xsrfTokens;
+    protected JwtTokens jwtTokens;
+    protected MeterRegistry metrics;
 
-    @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
-    Optional<String> refreshCookieName;
+    private Counter authFailureCounter;
 
-    @ConfigProperty(name = "one-stop.auth.xsrf.header", defaultValue = "X-XSRF-TOKEN")
-    Optional<String> xsrfHeaderName;
-
-    @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
-    Optional<Duration> refreshDuration;
-
-    @Inject
-    XsrfTokens xsrfTokens;
+    // no-arg constructor required for @Provider
+    public XsrfInterceptor() {}
 
     @Inject
-    JwtTokens jwtTokens;
+    public XsrfInterceptor(@ConfigProperty(name = "one-stop.auth.access-token.cookie")
+                           Optional<String> accessCookieName,
+                           @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
+                           Optional<String> refreshCookieName,
+                           @ConfigProperty(name = "one-stop.auth.xsrf.header", defaultValue = "X-XSRF-TOKEN")
+                           Optional<String> xsrfHeaderName,
+                           @ConfigProperty(name = "one-stop.auth.refresh-token.expires-in")
+                           Optional<Duration> refreshDuration,
+                           XsrfTokens xsrfTokens,
+                           JwtTokens jwtTokens,
+                           MeterRegistry metrics) {
+        this.accessCookieName = accessCookieName;
+        this.refreshCookieName = refreshCookieName;
+        this.xsrfHeaderName = xsrfHeaderName;
+        this.refreshDuration = refreshDuration;
+        this.xsrfTokens = xsrfTokens;
+        this.jwtTokens = jwtTokens;
+        this.metrics = metrics;
+
+        authFailureCounter = metrics.counter("auth.xsrf.failures");
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+
         log.trace("Filtering XSRF tokens");
         ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
         Annotation[] methodAnnotations = methodInvoker.getMethodAnnotations();
@@ -90,6 +114,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             log.trace("Method requires authentication");
             // check xsrf token in access-token cookie
             if (tokenIsInvalid(requestContext, accessCookieName.get())) {
+                authFailureCounter.increment();
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         } else if ((isAnnotationPresent(methodAnnotations, XSRF_REQUIRED)) ||
@@ -97,6 +122,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
             log.trace("Method requires XSRF validation");
             // check xsrf token in refresh-token cookie
             if (tokenIsInvalid(requestContext, refreshCookieName.get())) {
+                authFailureCounter.increment();
                 requestContext.abortWith(ACCESS_UNAUTHORIZED);
             }
         }
