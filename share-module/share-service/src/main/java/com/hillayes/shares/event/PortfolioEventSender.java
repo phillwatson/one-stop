@@ -6,6 +6,7 @@ import com.hillayes.outbox.sender.EventSender;
 import com.hillayes.shares.domain.DealingHistory;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
+import io.micrometer.core.annotation.Counted;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PortfolioEventSender {
     private final EventSender eventSender;
 
+    @Counted("portfolio.events")
     public void sendSharesTransacted(DealingHistory purchase) {
         Portfolio portfolio = purchase.getHolding().getPortfolio();
         ShareIndex shareIndex = purchase.getHolding().getShareIndex();

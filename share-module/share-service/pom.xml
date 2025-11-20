@@ -92,6 +92,10 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>management-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>alpha-vantage-lib</artifactId>
         </dependency>
         <dependency>

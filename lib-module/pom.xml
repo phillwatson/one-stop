@@ -18,5 +18,6 @@
         <module>executor-lib</module>
         <module>auth-lib</module>
         <module>openid-lib</module>
+        <module>management-lib</module>
     </modules>
 </project>

@@ -277,6 +277,11 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
+                <artifactId>management-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
                 <artifactId>notification-service</artifactId>
                 <version>${project.version}</version>
             </dependency>

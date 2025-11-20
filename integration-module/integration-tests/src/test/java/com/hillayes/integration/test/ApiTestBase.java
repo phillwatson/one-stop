@@ -33,7 +33,7 @@ public abstract class ApiTestBase {
     /**
      * The port exposed by the nordigen rail simulator.
      */
-    private static final int RAIL_PORT = 9090;
+    private static final int RAIL_PORT = 9098;
 
     /**
      * The URI on which the nordigen simulator is running. This is INTERNAL to docker network.

@@ -1,6 +1,9 @@
 package com.hillayes.auth.xsrf;
 
 import com.hillayes.auth.jwt.JwtTokens;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -28,10 +31,15 @@ public class XsrfInterceptorTest {
 
     private final XsrfTokens xsrfGenerator = new XsrfTokens(UUID.randomUUID().toString());
 
-    private final XsrfInterceptor fixture = new XsrfInterceptor();
+    private final MeterRegistry metrics = mock();
+    private final Counter authFailureCounter = mock();
+
+    private XsrfInterceptor fixture;
 
     @BeforeEach
     public void beforeEach() throws Exception {
+        when(metrics.counter(any())).thenReturn(authFailureCounter);
+
         JwtTokens jwtTokens = mock();
         when(jwtTokens.getToken(any(), any())).thenAnswer(invocation -> {
             Map<String, Cookie> cookies = invocation.getArgument(1);
@@ -45,12 +53,15 @@ public class XsrfInterceptorTest {
             return Optional.of(jwt);
         });
 
-        fixture.jwtTokens = jwtTokens;
-        fixture.xsrfTokens = xsrfGenerator;
-        fixture.accessCookieName = Optional.of(ACCESS_TOKEN);
-        fixture.refreshCookieName = Optional.of(REFRESH_TOKEN);
-        fixture.xsrfHeaderName = Optional.of(XSRF_HEADER);
-        fixture.refreshDuration = Optional.of(Duration.ofSeconds(60));
+        fixture = new XsrfInterceptor(
+            Optional.of(ACCESS_TOKEN),
+            Optional.of(REFRESH_TOKEN),
+            Optional.of(XSRF_HEADER),
+            Optional.of(Duration.ofSeconds(60)),
+            xsrfGenerator,
+            jwtTokens,
+            metrics
+        );
     }
 
     @Test
@@ -66,6 +77,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext, never()).abortWith(any());
+        verifyNoInteractions(authFailureCounter);
     }
 
     @Test
@@ -81,6 +93,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -96,6 +109,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -111,6 +125,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -132,6 +147,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -148,6 +164,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -164,6 +181,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     @Test
@@ -180,6 +198,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext).abortWith(any());
+        verify(authFailureCounter).increment();
     }
 
     private void mockUriInfo(ContainerRequestContext requestContext) {

@@ -96,6 +96,10 @@
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>management-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>nordigen-lib</artifactId>
         </dependency>
         <dependency>
