@@ -10,6 +10,9 @@ import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionDetail } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from "../../contexts/messages/context";
+import useUpdateTransaction from '../../contexts/update-transaction/update-transaction-context';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
 import { formatDate, toISODate } from "../../util/date-util";
 import { PaginatedTransactions } from "../../model/account.model";
 import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
@@ -80,6 +83,23 @@ export default function TransactionList(props: Props) {
       valueFormatter: (value: any, row: TransactionDetail) => row.amount >= 0 ? formatMoney(row.amount, row.currency) : '',
       valueGetter: (value: any, row: TransactionDetail) => row.amount
     },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 72,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) => {
+        const row = params.row as TransactionDetail;
+        return (
+          <IconButton size="small" onClick={() => openUpdate(row, updated => {
+            setTransactions(prev => ({ ...prev, items: prev.items.map(i => i.id === updated.id ? updated : i) }));
+          })}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        )
+      }
+    }
   ] as GridColDef[]}, [ formatMoney ] );
   
 
@@ -92,6 +112,7 @@ export default function TransactionList(props: Props) {
     pageSize: DEFAULT_PAGE_SIZE,
   });
   const [transactionFilter, setTransactionFilter] = useState<any | undefined>(undefined);
+  const openUpdate = useUpdateTransaction();
 
   const onFilterChange = useCallback((filterModel: GridFilterModel) => {
     var filter: any;
