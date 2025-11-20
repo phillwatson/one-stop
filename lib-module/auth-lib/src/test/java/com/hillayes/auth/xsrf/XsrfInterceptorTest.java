@@ -77,6 +77,7 @@ public class XsrfInterceptorTest {
         fixture.filter(requestContext);
 
         verify(requestContext, never()).abortWith(any());
+        verifyNoInteractions(authFailureCounter);
     }
 
     @Test

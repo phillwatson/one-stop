@@ -67,6 +67,7 @@ public class XsrfInterceptor implements ContainerRequestFilter {
     // no-arg constructor required for @Provider
     public XsrfInterceptor() {}
 
+    @Inject
     public XsrfInterceptor(@ConfigProperty(name = "one-stop.auth.access-token.cookie")
                            Optional<String> accessCookieName,
                            @ConfigProperty(name = "one-stop.auth.refresh-token.cookie")
