@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,22 @@ public class AccountTransactionResource {
         AccountTransaction transaction = accountTransactionService.getTransaction(transactionId)
             .filter(t -> t.getUserId().equals(userId))
             .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
+        return Response.ok(marshal(transaction)).build();
+    }
+
+    @PUT
+    @Path("/{transactionId}")
+    public Response updateTransaction(@Context SecurityContext ctx,
+                                      @PathParam("transactionId") UUID transactionId,
+                                      UpdateTransactionRequest request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating account transaction [userId: {}, transactionId: {}]", userId, transactionId);
+
+        AccountTransaction transaction = accountTransactionService
+            .updateTransaction(userId, transactionId,
+                Optional.ofNullable(request.getReconciled()),
+                Optional.ofNullable(request.getNotes()));
+
         return Response.ok(marshal(transaction)).build();
     }
 

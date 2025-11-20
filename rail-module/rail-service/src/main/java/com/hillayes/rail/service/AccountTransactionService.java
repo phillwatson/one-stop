@@ -32,6 +32,20 @@ public class AccountTransactionService {
         return accountTransactionRepository.findByIdOptional(transactionId);
     }
 
+    public AccountTransaction updateTransaction(UUID userId,
+                                                UUID transactionId,
+                                                Optional<Boolean> reconciled,
+                                                Optional<String> notes) {
+        log.info("Updating transactions [transactionId: {}]", transactionId);
+        AccountTransaction transaction = accountTransactionRepository.findByIdOptional(transactionId)
+            .filter(t -> t.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
+
+        reconciled.ifPresent(transaction::setReconciled);
+        notes.ifPresent(transaction::setNotes);
+        return accountTransactionRepository.save(transaction);
+    }
+
     /**
      * Returns the transactions for the given user, and optionally filtered by the
      * given properties; ordered by booking-datetime, descending.

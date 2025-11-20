@@ -766,6 +766,46 @@ paths:
         500:
           description: Internal server error
 
+    put:
+      tags: [ "transactions" ]
+      summary: Updates the calling user's transaction
+      description: |
+        Allows the caller to update one of their transactions. Only a limited set
+        of the transaction properties can be updated.
+      operationId: updateTransaction
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "transactionId"
+          in: "path"
+          description: ID of transaction to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The properties to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTransactionRequest'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        400:
+          description: Invalid ID or payload supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Transaction not found
+        500:
+          description: Internal server error
+
   /rails/transactions/movements:
     get:
       tags: [ "transactions" ]
@@ -2593,6 +2633,7 @@ components:
         - amount
         - date
         - description
+        - reconciled
       properties:
         id:
           type: string
@@ -2640,6 +2681,25 @@ components:
           type: string
           description: The name of the creditor
           example: John Doe
+        reconciled:
+          type: boolean
+          description: Indicates that user recognises the transaction.
+        notes:
+          type: string
+          description: Additional notes about the transaction, provided by the user.
+          example: Includes holiday expenses
+
+    UpdateTransactionRequest:
+      description: Allows the user to update a transaction to which they have access.
+      type: object
+      properties:
+        reconciled:
+          type: boolean
+          description: Indicates that user recognises the transaction.
+        notes:
+          type: string
+          description: Additional notes about the transaction, provided by the user.
+          example: Includes holiday expenses
 
     MovementEntry:
       description: |
