@@ -1,6 +1,7 @@
 package com.hillayes.rail.resource;
 
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.service.AccountService;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -258,5 +260,101 @@ public class AccountTransactionResourceTest extends TestBase {
 
         // and: the service was called to retrieve the transaction
         verify(accountTransactionService).getTransaction(transaction.getId());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testUpdateTransaction_HappyPath() {
+        UUID userId = UUID.fromString(userIdStr);
+
+        Stream.of(Boolean.TRUE, Boolean.FALSE, null).forEach(reconciled -> {
+            Stream.of("modified notes", null).forEach(notes -> {
+                // given: an account transaction for the user can be identified
+                AccountTransaction transaction = TestData.mockAccountTransaction(t -> t.userId(userId));
+                when(accountTransactionService.getTransaction(transaction.getId()))
+                    .thenReturn(Optional.of(transaction));
+
+                when(accountTransactionService.updateTransaction(eq(userId), eq(transaction.getId()), any(), any()))
+                    .thenReturn(transaction);
+
+                // and: an update transaction request
+                UpdateTransactionRequest request = new UpdateTransactionRequest()
+                    .reconciled(reconciled)
+                    .notes(notes);
+
+                // when: the client calls the endpoint
+                TransactionResponse response = given()
+                    .request()
+                    .contentType(JSON)
+                    .body(request)
+                    .when()
+                    .pathParam("transactionId", transaction.getId())
+                    .put("/api/v1/rails/transactions/{transactionId}")
+                    .then()
+                    .statusCode(200)
+                    .contentType(JSON)
+                    .extract()
+                    .as(TransactionResponse.class);
+
+                // then: the identified transaction is returned
+                assertNotNull(response);
+
+                // and: the transaction is marshalled correctly
+                assertEquals(transaction.getId(), response.getId());
+                assertEquals(transaction.getAmount().toDecimal(), response.getAmount());
+                assertEquals(transaction.getAmount().getCurrencyCode(), response.getCurrency());
+                assertEquals(transaction.getBookingDateTime(), response.getBookingDateTime());
+                assertEquals(transaction.getReference(), response.getReference());
+                assertEquals(transaction.getAccountId(), response.getAccountId());
+
+                // and: the service was called to update the transaction
+                verify(accountTransactionService).updateTransaction(userId, transaction.getId(),
+                    Optional.ofNullable(request.getReconciled()),
+                    Optional.ofNullable(request.getNotes()));
+            });
+        });
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testUpdateTransaction_TransactionNotFound() {
+        UUID userId = UUID.fromString(userIdStr);
+
+        // given: an account transaction for the user CANNOT be identified
+        UUID transactionId = UUID.randomUUID();
+        when(accountTransactionService.updateTransaction(eq(userId), eq(transactionId), any(), any()))
+            .thenThrow(new NotFoundException("Transaction", transactionId));
+
+        // and: an update transaction request
+        UpdateTransactionRequest request = new UpdateTransactionRequest()
+            .reconciled(true)
+            .notes("modified notes");
+
+        // when: the client calls the endpoint
+        // then: a 404 (not found) response is returned
+        ServiceErrorResponse response = given()
+            .request()
+            .contentType(JSON)
+            .body(request)
+            .when()
+            .pathParam("transactionId", transactionId)
+            .put("/api/v1/rails/transactions/{transactionId}")
+            .then()
+            .statusCode(404)
+            .contentType(JSON)
+            .extract()
+            .as(ServiceErrorResponse.class);
+
+        // then: the service was called to update the transaction
+        verify(accountTransactionService).updateTransaction(eq(userId), eq(transactionId), any(), any());
+
+        // and: the response was returned
+        assertNotNull(response);
+
+        // and: the response contains the expected error message
+        assertNotFoundError(response, (contextAttributes) -> {
+            assertEquals("Transaction", contextAttributes.get("entity-type"));
+            assertEquals(transactionId.toString(), contextAttributes.get("entity-id"));
+        });
     }
 }

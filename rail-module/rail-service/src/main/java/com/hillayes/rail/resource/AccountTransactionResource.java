@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -99,6 +100,22 @@ public class AccountTransactionResource {
         return Response.ok(marshal(transaction)).build();
     }
 
+    @PUT
+    @Path("/{transactionId}")
+    public Response updateTransaction(@Context SecurityContext ctx,
+                                      @PathParam("transactionId") UUID transactionId,
+                                      UpdateTransactionRequest request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating account transaction [userId: {}, transactionId: {}]", userId, transactionId);
+
+        AccountTransaction transaction = accountTransactionService
+            .updateTransaction(userId, transactionId,
+                Optional.ofNullable(request.getReconciled()),
+                Optional.ofNullable(request.getNotes()));
+
+        return Response.ok(marshal(transaction)).build();
+    }
+
     @GET
     @Path("/movements")
     public Response getTransactionMovements(@Context SecurityContext ctx,
@@ -162,7 +179,9 @@ public class AccountTransactionResource {
             .valueDateTime(transaction.getValueDateTime())
             .reference(transaction.getReference())
             .additionalInformation(transaction.getAdditionalInformation())
-            .creditorName(transaction.getCreditorName());
+            .creditorName(transaction.getCreditorName())
+            .reconciled(transaction.isReconciled())
+            .notes(transaction.getNotes());
     }
 
     private TransactionMovementResponse marshal(TransactionMovement movement) {

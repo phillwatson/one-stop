@@ -65,6 +65,15 @@ class AccountService {
       { params: { "account-id": accountId, "from-date": fromDateStr, "to-date": toDateStr }})
       .then(response => response.data);
   }
+
+  updateTransaction(transactionId: string, reconciled?: boolean, notes?: string): Promise<TransactionDetail> {
+    return http.put<TransactionDetail>(`/rails/transactions/${transactionId}`, 
+      {
+        reconciled: reconciled,
+        notes: notes
+      })
+      .then(response => response.data);
+  }
 }
 
 const instance = new AccountService();

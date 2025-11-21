@@ -1,6 +1,8 @@
+import styles from './transaction.module.css';
 import { useCallback, useEffect, useState } from "react";
 
-import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridToolbar, GridFilterModel, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators,
+   getGridDateOperators, GridToolbar, GridFilterModel, GridCellParams, GridCellClassNamePropType, GridValidRowModel } from '@mui/x-data-grid';
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
@@ -10,6 +12,7 @@ import AccountService from '../../services/account.service';
 import { AccountDetail, TransactionDetail } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from "../../contexts/messages/context";
+import ReconcilationButton from "../reconciliation/reconciliation-button";
 import { formatDate, toISODate } from "../../util/date-util";
 import { PaginatedTransactions } from "../../model/account.model";
 import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
@@ -21,6 +24,12 @@ interface Props {
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
+
+function getClassname(data: GridValidRowModel): GridCellClassNamePropType {
+  return data.row.reconciled
+    ? styles.reconciled
+    : styles.unreconciled;
+}
 
 export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
@@ -41,21 +50,24 @@ export default function TransactionList(props: Props) {
       headerName: 'Additional Info',
       flex: 1,
       width: 380,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains')
+      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
+      cellClassName: getClassname
     },
     {
       field: 'creditorName',
       headerName: 'Creditor',
       flex: 0.5,
       width: 200,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains')
+      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
+      cellClassName: getClassname
     },
     {
       field: 'reference',
       headerName: 'Reference',
       flex: 0.5,
       width: 200,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains')
+      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
+      cellClassName: getClassname
     },
     {
       field: 'debit',
@@ -66,6 +78,7 @@ export default function TransactionList(props: Props) {
       align: 'right',
       width: 130,
       filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
+      cellClassName: getClassname,
       valueFormatter: (value: any, row: TransactionDetail) => row.amount < 0 ? formatMoney(0 - row.amount, row.currency) : '',
       valueGetter: (value: any, row: TransactionDetail) => 0 - row.amount
     },
@@ -77,9 +90,25 @@ export default function TransactionList(props: Props) {
       align: 'right',
       width: 130,
       filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
+      cellClassName: getClassname,
       valueFormatter: (value: any, row: TransactionDetail) => row.amount >= 0 ? formatMoney(row.amount, row.currency) : '',
       valueGetter: (value: any, row: TransactionDetail) => row.amount
     },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 54,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) => {
+        const row = params.row as TransactionDetail;
+        return (
+          <ReconcilationButton
+            transaction={ row }
+            onUpdate={ updated => { setTransactions(prev => ({ ...prev, items: prev.items.map(i => i.id === updated.id ? updated : i) }))} }/>
+        )
+      }
+    }
   ] as GridColDef[]}, [ formatMoney ] );
   
 
@@ -126,11 +155,10 @@ export default function TransactionList(props: Props) {
     setTransactionFilter(filter);
   }, []);
 
-  function addToCategory(selection: GridRowSelectionModel) {
-    if (selection.length === 0) return;
+  function onRowClick(cellParams: GridCellParams) {
+    var transaction = cellParams.row as TransactionDetail;
+    if (! transaction) return;
 
-    const transactionId = selection[0] as string;
-    const transaction = transactions.items.find(t => t.id === transactionId);
     setSelectedTransaction(transaction);
     if (transaction !== undefined) {
       setShowAddCategory(true);
@@ -154,7 +182,7 @@ export default function TransactionList(props: Props) {
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={ setPaginationModel }
         filterMode="server" filterDebounceMs={ 500 } onFilterModelChange={ onFilterChange }
-        onRowSelectionModelChange={ newRowSelectionModel => addToCategory(newRowSelectionModel) }
+        onCellClick={ params => { if (params.field !== 'actions') onRowClick(params) } }
       />
 
       { transactionFilter && transactions.currencyTotals &&
