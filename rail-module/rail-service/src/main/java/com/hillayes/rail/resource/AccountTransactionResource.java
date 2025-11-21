@@ -179,7 +179,9 @@ public class AccountTransactionResource {
             .valueDateTime(transaction.getValueDateTime())
             .reference(transaction.getReference())
             .additionalInformation(transaction.getAdditionalInformation())
-            .creditorName(transaction.getCreditorName());
+            .creditorName(transaction.getCreditorName())
+            .reconciled(transaction.isReconciled())
+            .notes(transaction.getNotes());
     }
 
     private TransactionMovementResponse marshal(TransactionMovement movement) {

@@ -1,0 +1,8 @@
+.reconciled {
+  color: #64676D;
+  font-style: italic;
+}
+
+.unreconciled {
+  font-style: normal;
+}

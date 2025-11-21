@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, TextField } from '@mui/material';
+import Table from '@mui/material/Table';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
 import AccountService from '../../services/account.service';
 import { TransactionDetail } from '../../model/account.model';
 import { useMessageDispatch } from '../../contexts/messages/context';
+import useMonetaryContext from '../../contexts/monetary/monetary-context';
+import { formatDate } from "../../util/date-util";
 
 type Props = {
   open: boolean;
@@ -13,14 +20,15 @@ type Props = {
 
 export default function UpdateTransactionDialog(props: Props) {
   const showMessage = useMessageDispatch();
+  const [ formatMoney ] = useMonetaryContext();
 
   const [ reconciled, setReconciled ] = useState<boolean>(props.transaction.reconciled || false);
-  const [ notes, setNotes ] = useState<string>(props.transaction.note || props.transaction.additionalInformation || '');
+  const [ notes, setNotes ] = useState<string>(props.transaction.notes || '');
   const [ saving, setSaving ] = useState<boolean>(false);
 
   useEffect(() => {
     setReconciled(props.transaction.reconciled || false);
-    setNotes(props.transaction.note || props.transaction.additionalInformation || '');
+    setNotes(props.transaction.notes || '');
   }, [ props.transaction ]);
 
   function handleCancel() {
@@ -34,19 +42,30 @@ export default function UpdateTransactionDialog(props: Props) {
         showMessage({ type: 'add', level: 'success', text: 'Transaction updated' });
         // inform caller so they can update local state optimistically
         if (props.onUpdated) props.onUpdated(response);
-        setSaving(false);
         props.onClose();
       })
       .catch(err => {
-        setSaving(false);
         showMessage(err);
+      })
+      .finally(() => {
+        setSaving(false);
       });
   }
 
   return (
     <Dialog open={props.open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Update Transaction</DialogTitle>
+      <DialogTitle>Reconcile Transaction</DialogTitle>
       <DialogContent>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>{formatDate(props.transaction.bookingDateTime)}</TableCell>
+              <TableCell>{props.transaction.additionalInformation || props.transaction.reference}</TableCell>
+              <TableCell>{formatMoney(props.transaction.amount, props.transaction.currency)}</TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+
         <FormControlLabel
           control={<Checkbox checked={reconciled} onChange={e => setReconciled(e.target.checked)} />}
           label="Reconciled"

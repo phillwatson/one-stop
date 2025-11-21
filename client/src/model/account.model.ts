@@ -15,7 +15,7 @@ export interface TransactionDetail {
   additionalInformation: string;
   creditorName: string;
   reconciled: boolean;
-  note?: string;
+  notes?: string;
 }
 
 export interface AccountBalance {
