@@ -92,7 +92,6 @@ public class AccountTransactionService {
         return reconciledCount + unreconciledCount;
     }
 
->>>>>>> Stashed changes
     /**
      * Returns the transactions for the given user, and optionally filtered by the
      * given properties; ordered by booking-datetime, descending.
