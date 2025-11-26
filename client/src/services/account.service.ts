@@ -74,6 +74,16 @@ class AccountService {
       })
       .then(response => response.data);
   }
+
+  batchReconciliationUpdate(reconciliations: Map<string, boolean>): Promise<void> {
+    const updates = Array.from(reconciliations.entries()).map(([transactionId, reconciled]) => ({
+      transactionId: transactionId,
+      reconciled: reconciled
+    }));
+
+    return http.put<void>('/rails/transactions/reconciliations', updates)
+      .then(response => response.data);
+  }
 }
 
 const instance = new AccountService();

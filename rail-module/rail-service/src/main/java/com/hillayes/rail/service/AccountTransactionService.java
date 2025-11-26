@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 @Transactional
@@ -44,6 +41,35 @@ public class AccountTransactionService {
         reconciled.ifPresent(transaction::setReconciled);
         notes.ifPresent(transaction::setNotes);
         return accountTransactionRepository.save(transaction);
+    }
+
+    public int batchReconciliationUpdate(UUID userId, Map<UUID, Boolean> updates) {
+        log.info("Updating account transaction reconciliations [userId: {}, count: {}]", userId, updates.size());
+
+        List<UUID> reconciled = updates.entrySet().stream()
+            .filter(Map.Entry::getValue)
+            .map(Map.Entry::getKey)
+            .toList();
+
+        int reconciledCount = 0;
+        if (! reconciled.isEmpty()) {
+            reconciledCount = accountTransactionRepository
+                .update("reconciled = true where userId = ?1 and id in ?2", userId, reconciled);
+        }
+
+        List<UUID> unreconciled = updates.entrySet().stream()
+            .filter(entry -> !entry.getValue())
+            .map(Map.Entry::getKey)
+            .toList();
+        int unreconciledCount = 0;
+        if (! unreconciled.isEmpty()) {
+            unreconciledCount = accountTransactionRepository
+                .update("reconciled = false where userId = ?1 and id in ?2", userId, reconciled);
+        }
+
+        log.info("Updated account transaction reconciliations [userId: {}, reconciled: {}, unreconciled: {}]",
+            userId, reconciledCount, unreconciledCount);
+        return reconciledCount + unreconciledCount;
     }
 
     /**

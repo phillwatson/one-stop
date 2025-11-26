@@ -1,73 +1,92 @@
 import styles from './transaction.module.css';
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators,
-   getGridDateOperators, GridToolbar, GridFilterModel, GridCellParams, GridCellClassNamePropType, GridValidRowModel } from '@mui/x-data-grid';
+   getGridDateOperators, GridToolbar, GridFilterModel, GridRowParams, GridRowClassNameParams } from '@mui/x-data-grid';
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import { TableContainer } from "@mui/material";
 
 import AccountService from '../../services/account.service';
-import { AccountDetail, TransactionDetail } from "../../model/account.model";
+import { AccountDetail, TransactionDetail, Currency, PaginatedTransactions } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from "../../contexts/messages/context";
-import ReconcilationButton from "../reconciliation/reconciliation-button";
 import { formatDate, toISODate } from "../../util/date-util";
-import { PaginatedTransactions } from "../../model/account.model";
 import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
 import AddSelector from "../categories/add-selector";
-import { Currency } from "../../model/account.model";
+import useReconcileTransactions from '../reconciliation/reconcile-transactions-context';
+import ReconcilationButton from "../reconciliation/reconciliation-button";
 
 interface Props {
   account: AccountDetail;
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
+const DEFAULT_SLOTS = { toolbar: GridToolbar };
 
-function getClassname(data: GridValidRowModel): GridCellClassNamePropType {
-  return data.row.reconciled
-    ? styles.reconciled
-    : styles.unreconciled;
-}
+const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
+const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
+const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=');
+
+function getMoneyValue(value: number, _row: TransactionDetail, column: GridColDef) {
+  return column.field === 'credit' ? value : 0 - value;
+};
+
+function getDateValue(value: string) {
+  return new Date(value);
+};
 
 export default function TransactionList(props: Props) {
   const showMessage = useMessageDispatch();
   const [ formatMoney ] = useMonetaryContext();
+  const reconcilations = useReconcileTransactions();
 
-  const getColumnDefs = useCallback(() => { return [
+  const renderReconciliationCell = useCallback((params: any) => {
+    const row = params.row as TransactionDetail;
+    return (
+      <ReconcilationButton
+        transaction={ row }
+        onUpdate={ updated => { setTransactions(prev => ({ ...prev, items: prev.items.map(i => i.id === updated.id ? updated : i) }))} }/>
+    )
+  }, [ ] );
+
+  const renderMoneyCell = useCallback((value: any, row: TransactionDetail, column: GridColDef) => {
+    return column.field === 'credit'
+      ? row.amount > 0 ? formatMoney(row.amount, row.currency) : ''
+      : row.amount < 0 ? formatMoney(0 - row.amount, row.currency) : ''
+  }, [ formatMoney ] );
+
+  const columnDefs = useMemo(() => ([
     {
       field: 'bookingDateTime',
       type: 'date',
       headerName: 'Date',
       width: 110,
-      filterOperators: getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter'),
-      valueFormatter: (value: string) => formatDate(value),
-      valueGetter: (value: string) => new Date(value)
+      filterOperators: dateFilterOperators,
+      valueFormatter: formatDate,
+      valueGetter: getDateValue
     },
     {
       field: 'additionalInformation',
       headerName: 'Additional Info',
       flex: 1,
-      width: 380,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
-      cellClassName: getClassname
+      width: 370,
+      filterOperators: stringFilterOperators
     },
     {
       field: 'creditorName',
       headerName: 'Creditor',
       flex: 0.5,
       width: 200,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
-      cellClassName: getClassname
+      filterOperators: stringFilterOperators
     },
     {
       field: 'reference',
       headerName: 'Reference',
       flex: 0.5,
       width: 200,
-      filterOperators: getGridStringOperators().filter((op) => op.value === 'contains'),
-      cellClassName: getClassname
+      filterOperators: stringFilterOperators
     },
     {
       field: 'debit',
@@ -76,11 +95,10 @@ export default function TransactionList(props: Props) {
       headerClassName: 'colhead',
       headerAlign: 'right',
       align: 'right',
-      width: 130,
-      filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
-      cellClassName: getClassname,
-      valueFormatter: (value: any, row: TransactionDetail) => row.amount < 0 ? formatMoney(0 - row.amount, row.currency) : '',
-      valueGetter: (value: any, row: TransactionDetail) => 0 - row.amount
+      width: 120,
+      filterOperators: moneyFilterOperators,
+      valueFormatter: renderMoneyCell,
+      valueGetter: getMoneyValue
     },
     {
       field: 'credit',
@@ -88,39 +106,28 @@ export default function TransactionList(props: Props) {
       headerName: 'Credit',
       headerAlign: 'right',
       align: 'right',
-      width: 130,
-      filterOperators: getGridNumericOperators().filter((op) => op.value === '>='),
-      cellClassName: getClassname,
-      valueFormatter: (value: any, row: TransactionDetail) => row.amount >= 0 ? formatMoney(row.amount, row.currency) : '',
-      valueGetter: (value: any, row: TransactionDetail) => row.amount
+      width: 120,
+      filterOperators: moneyFilterOperators,
+      valueFormatter: renderMoneyCell, 
+      valueGetter: getMoneyValue
     },
     {
       field: 'actions',
-      headerName: '',
-      width: 54,
+      headerName: 'Reconciled',
+      width: 86,
       sortable: false,
       filterable: false,
-      renderCell: (params: any) => {
-        const row = params.row as TransactionDetail;
-        return (
-          <ReconcilationButton
-            transaction={ row }
-            onUpdate={ updated => { setTransactions(prev => ({ ...prev, items: prev.items.map(i => i.id === updated.id ? updated : i) }))} }/>
-        )
-      }
+      renderCell: renderReconciliationCell
     }
-  ] as GridColDef[]}, [ formatMoney ] );
+  ] as GridColDef[]), [ renderMoneyCell, renderReconciliationCell ] );
   
 
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_LIST);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail>();
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  });
   const [transactionFilter, setTransactionFilter] = useState<any | undefined>(undefined);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: DEFAULT_PAGE_SIZE });
 
   const onFilterChange = useCallback((filterModel: GridFilterModel) => {
     var filter: any;
@@ -155,13 +162,27 @@ export default function TransactionList(props: Props) {
     setTransactionFilter(filter);
   }, []);
 
-  function onRowClick(cellParams: GridCellParams) {
-    var transaction = cellParams.row as TransactionDetail;
+  function onRowClick(rowParams: GridRowParams) {
+    var transaction = rowParams.row as TransactionDetail;
     if (! transaction) return;
 
     setSelectedTransaction(transaction);
     if (transaction !== undefined) {
       setShowAddCategory(true);
+    }
+  }
+
+  function getRowClassName(params: GridRowClassNameParams) {
+    var transaction = params.row as TransactionDetail;
+    var pendingState = reconcilations.pendingState(transaction);
+    if (pendingState === undefined) {
+      return transaction.reconciled
+        ? styles.reconciled
+        : styles.unreconciled;
+    } else {
+      return pendingState
+        ? styles.reconciled + ' ' + styles.pending
+        : styles.unreconciled + ' ' + styles.pending;
     }
   }
 
@@ -175,14 +196,16 @@ export default function TransactionList(props: Props) {
 
   return (
     <>
-      <DataGrid rows={transactions.items} rowCount={transactions.total} columns={ getColumnDefs() } 
+      <DataGrid rows={ transactions.items } rowCount={ transactions.total } columns={ columnDefs } 
         density="compact" disableDensitySelector
-        loading={loading} slots={{ toolbar: GridToolbar }}
-        pagination paginationModel={paginationModel}
+        loading={ loading } slots={ DEFAULT_SLOTS }
+        pagination paginationModel={ paginationModel }
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={ setPaginationModel }
         filterMode="server" filterDebounceMs={ 500 } onFilterModelChange={ onFilterChange }
-        onCellClick={ params => { if (params.field !== 'actions') onRowClick(params) } }
+
+        getRowClassName={ getRowClassName }
+        onRowClick={ onRowClick }
       />
 
       { transactionFilter && transactions.currencyTotals &&

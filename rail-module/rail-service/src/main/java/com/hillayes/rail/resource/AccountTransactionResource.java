@@ -21,9 +21,11 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Path("/api/v1/rails/transactions")
 @RolesAllowed("user")
@@ -79,7 +81,7 @@ public class AccountTransactionResource {
             response.currencyTotals(
                 accountTransactionService.getTransactionTotals(filter)
                     .stream()
-                    .collect(Collectors.toMap(t -> t.getCurrency().getCurrencyCode(), MonetaryAmount::toDecimal))
+                    .collect(toMap(t -> t.getCurrency().getCurrencyCode(), MonetaryAmount::toDecimal))
             );
         }
 
@@ -114,6 +116,21 @@ public class AccountTransactionResource {
                 Optional.ofNullable(request.getNotes()));
 
         return Response.ok(marshal(transaction)).build();
+    }
+
+    @PUT
+    @Path("/reconciliations")
+    public Response batchReconciliationUpdate(@Context SecurityContext ctx,
+                                              List<ReconciliationRequest> request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Updating account transaction reconciliations [userId: {}, count: {}]", userId, request.size());
+
+        Map<UUID, Boolean> updates = request.stream()
+            .collect(toMap(ReconciliationRequest::getTransactionId, ReconciliationRequest::getReconciled));
+
+        accountTransactionService.batchReconciliationUpdate(userId, updates);
+
+        return Response.accepted().build();
     }
 
     @GET

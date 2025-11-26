@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, TextField } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
@@ -10,6 +10,7 @@ import { TransactionDetail } from '../../model/account.model';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { formatDate } from "../../util/date-util";
+import useReconcileTransactions from './reconcile-transactions-context';
 
 type Props = {
   open: boolean;
@@ -21,15 +22,21 @@ type Props = {
 export default function UpdateTransactionDialog(props: Props) {
   const showMessage = useMessageDispatch();
   const [ formatMoney ] = useMonetaryContext();
+  const reconcilations = useReconcileTransactions();
 
-  const [ reconciled, setReconciled ] = useState<boolean>(props.transaction.reconciled || false);
+  // determine initial reconciled state - either from pending changes, or from transaction itself
+  const isTransactionReconciled = useCallback(() => {
+    var result = reconcilations.pendingState(props.transaction);
+    return (result === undefined) ? props.transaction.reconciled : result;
+  }, [ reconcilations, props.transaction ]);
+
+  const [ reconciled, setReconciled ] = useState<boolean>(isTransactionReconciled());
   const [ notes, setNotes ] = useState<string>(props.transaction.notes || '');
   const [ saving, setSaving ] = useState<boolean>(false);
 
-  useEffect(() => {
-    setReconciled(props.transaction.reconciled || false);
-    setNotes(props.transaction.notes || '');
-  }, [ props.transaction ]);
+  function isSaveDisabled(): boolean {
+    return saving || (reconciled === isTransactionReconciled() && notes === (props.transaction.notes || ''));
+  }
 
   function handleCancel() {
     props.onClose();
@@ -83,7 +90,7 @@ export default function UpdateTransactionDialog(props: Props) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} disabled={saving} variant="outlined">Cancel</Button>
-        <Button onClick={handleSave} disabled={saving} variant="contained">Save</Button>
+        <Button onClick={handleSave} disabled={isSaveDisabled()} variant="contained">Save</Button>
       </DialogActions>
     </Dialog>
   );
