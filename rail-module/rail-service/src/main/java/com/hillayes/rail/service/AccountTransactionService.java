@@ -29,6 +29,17 @@ public class AccountTransactionService {
         return accountTransactionRepository.findByIdOptional(transactionId);
     }
 
+    /**
+     * Updates those mutable properties of the identified transaction.
+     *
+     * @param userId the authenticated user attempting to update the transaction.
+     * @param transactionId the ID of the transaction to be updated.
+     * @param reconciled the optional reconciled value to be set.
+     * @param notes the optional notes value to be set.
+     * @return the updated transaction
+     * @throws NotFoundException if the transaction cannot be found, or the user does
+     * not have access to the transaction.
+     */
     public AccountTransaction updateTransaction(UUID userId,
                                                 UUID transactionId,
                                                 Optional<Boolean> reconciled,
@@ -43,6 +54,15 @@ public class AccountTransactionService {
         return accountTransactionRepository.save(transaction);
     }
 
+    /**
+     * Sets and/or resets the reconciled property of a collection of transactions belonging
+     * to the authenticated user. If the user does not have access to any of the transactions,
+     * those transactions will be ignored.
+     *
+     * @param userId the authenticated user attempting to update the transactions.
+     * @param updates the map of reconciled values keys on the transaction identifier.
+     * @return the number of transactions updated.
+     */
     public int batchReconciliationUpdate(UUID userId, Map<UUID, Boolean> updates) {
         log.info("Updating account transaction reconciliations [userId: {}, count: {}]", userId, updates.size());
 
@@ -72,6 +92,7 @@ public class AccountTransactionService {
         return reconciledCount + unreconciledCount;
     }
 
+>>>>>>> Stashed changes
     /**
      * Returns the transactions for the given user, and optionally filtered by the
      * given properties; ordered by booking-datetime, descending.
