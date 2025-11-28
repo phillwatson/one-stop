@@ -65,6 +65,26 @@ class AccountService {
       { params: { "account-id": accountId, "from-date": fromDateStr, "to-date": toDateStr }})
       .then(response => response.data);
   }
+
+  updateTransaction(transactionId: string, reconciled?: boolean, notes?: string): Promise<TransactionDetail> {
+    const trimmedNotes = notes?.trim();
+    return http.put<TransactionDetail>(`/rails/transactions/${transactionId}`, 
+      {
+        reconciled: reconciled,
+        notes: trimmedNotes?.length === 0 ? undefined : trimmedNotes
+      })
+      .then(response => response.data);
+  }
+
+  batchReconciliationUpdate(reconciliations: Map<string, boolean>): Promise<void> {
+    const updates = Array.from(reconciliations.entries()).map(([transactionId, reconciled]) => ({
+      transactionId: transactionId,
+      reconciled: reconciled
+    }));
+
+    return http.put<void>('/rails/transactions/reconciliations', updates)
+      .then(response => response.data);
+  }
 }
 
 const instance = new AccountService();
