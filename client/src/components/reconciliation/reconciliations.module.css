@@ -1,0 +1,12 @@
+.reconciled {
+  font-style: italic;
+}
+
+.unreconciled {
+  font-style: inherit;
+}
+
+.pending {
+  background-color: rgba(211, 211, 211, 0.342);
+  color:crimson
+}

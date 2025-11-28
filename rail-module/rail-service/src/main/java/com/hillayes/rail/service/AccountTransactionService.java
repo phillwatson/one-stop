@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 @Transactional
@@ -33,6 +30,69 @@ public class AccountTransactionService {
     }
 
     /**
+     * Updates those mutable properties of the identified transaction.
+     *
+     * @param userId the authenticated user attempting to update the transaction.
+     * @param transactionId the ID of the transaction to be updated.
+     * @param reconciled the optional reconciled value to be set.
+     * @param notes the optional notes value to be set.
+     * @return the updated transaction
+     * @throws NotFoundException if the transaction cannot be found, or the user does
+     * not have access to the transaction.
+     */
+    public AccountTransaction updateTransaction(UUID userId,
+                                                UUID transactionId,
+                                                Optional<Boolean> reconciled,
+                                                Optional<String> notes) {
+        log.info("Updating transactions [transactionId: {}]", transactionId);
+        AccountTransaction transaction = accountTransactionRepository.findByIdOptional(transactionId)
+            .filter(t -> t.getUserId().equals(userId))
+            .orElseThrow(() -> new NotFoundException("Transaction", transactionId));
+
+        reconciled.ifPresent(transaction::setReconciled);
+        notes.ifPresent(transaction::setNotes);
+        return accountTransactionRepository.save(transaction);
+    }
+
+    /**
+     * Sets and/or resets the reconciled property of a collection of transactions belonging
+     * to the authenticated user. If the user does not have access to any of the transactions,
+     * those transactions will be ignored.
+     *
+     * @param userId the authenticated user attempting to update the transactions.
+     * @param updates the map of reconciled values keys on the transaction identifier.
+     * @return the number of transactions updated.
+     */
+    public int batchReconciliationUpdate(UUID userId, Map<UUID, Boolean> updates) {
+        log.info("Updating account transaction reconciliations [userId: {}, count: {}]", userId, updates.size());
+
+        List<UUID> reconciled = updates.entrySet().stream()
+            .filter(Map.Entry::getValue)
+            .map(Map.Entry::getKey)
+            .toList();
+
+        int reconciledCount = 0;
+        if (! reconciled.isEmpty()) {
+            reconciledCount = accountTransactionRepository
+                .update("reconciled = true where userId = ?1 and id in ?2", userId, reconciled);
+        }
+
+        List<UUID> unreconciled = updates.entrySet().stream()
+            .filter(entry -> !entry.getValue())
+            .map(Map.Entry::getKey)
+            .toList();
+        int unreconciledCount = 0;
+        if (! unreconciled.isEmpty()) {
+            unreconciledCount = accountTransactionRepository
+                .update("reconciled = false where userId = ?1 and id in ?2", userId, unreconciled);
+        }
+
+        log.info("Updated account transaction reconciliations [userId: {}, reconciled: {}, unreconciled: {}]",
+            userId, reconciledCount, unreconciledCount);
+        return reconciledCount + unreconciledCount;
+    }
+
+    /**
      * Returns the transactions for the given user, and optionally filtered by the
      * given properties; ordered by booking-datetime, descending.
      *
@@ -44,7 +104,7 @@ public class AccountTransactionService {
     public Page<AccountTransaction> getTransactions(TransactionFilter filter,
                                                     int page,
                                                     int pageSize) {
-        log.info("Listing transaction [filter: {}]", filter);
+        log.info("Listing transactions [filter: {}]", filter);
 
         if (filter == null) {
             filter = TransactionFilter.NULL;
@@ -54,7 +114,7 @@ public class AccountTransactionService {
 
         Page<AccountTransaction> result = accountTransactionRepository.findByFilter(filter, page, pageSize);
 
-        log.info("Listing transaction [filter: {}, size: {}, total: {}]",
+        log.info("Listing transactions complete [filter: {}, size: {}, total: {}]",
             filter, result.getContentSize(), result.getTotalCount());
         return result;
     }

@@ -4,6 +4,7 @@ import { MonetaryFormatProvider } from "./contexts/monetary/monetary-context";
 import MessageProvider from "./contexts/messages/context";
 import NotificationProvider from "./contexts/notifications/context";
 import UserProfileProvider from "./contexts/user-context";
+import { ReconcileTransactionsProvider } from "./components/reconciliation/reconcile-transactions-context";
 
 import MainPage from './pages/main';
 import Accounts from "./pages/accounts";
@@ -94,7 +95,9 @@ export default function App() {
       <MessageProvider>
         <UserProfileProvider>
           <NotificationProvider>
-            <RouterProvider router={router} />
+            <ReconcileTransactionsProvider>
+              <RouterProvider router={router} />
+            </ReconcileTransactionsProvider>
           </NotificationProvider>
         </UserProfileProvider>
       </MessageProvider>

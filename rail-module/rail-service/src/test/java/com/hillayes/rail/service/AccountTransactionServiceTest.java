@@ -6,14 +6,14 @@ import com.hillayes.rail.domain.Account;
 import com.hillayes.rail.domain.AccountTransaction;
 import com.hillayes.rail.repository.AccountTransactionRepository;
 import com.hillayes.rail.repository.TransactionFilter;
-import com.hillayes.rail.utils.TestData;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static com.hillayes.rail.utils.TestData.mockAccount;
+import static com.hillayes.rail.utils.TestData.mockAccountTransaction;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -32,7 +32,7 @@ public class AccountTransactionServiceTest {
     @Test
     public void testGetTransactions_WithAccountId() {
         // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions belonging to that account
@@ -69,7 +69,7 @@ public class AccountTransactionServiceTest {
     @Test
     public void testGetTransactions_WithWrongAccountId() {
         // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions belonging to that account
@@ -89,7 +89,7 @@ public class AccountTransactionServiceTest {
     @Test
     public void testGetTransactions_WithNoAccountId() {
         // given: an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
         when(accountService.getAccount(account.getUserId(), account.getId())).thenReturn(Optional.of(account));
 
         // and: a collection of transactions belonging to that account
@@ -120,8 +120,8 @@ public class AccountTransactionServiceTest {
     @Test
     public void testGetTransaction() {
         // given: a transaction exists for an account
-        Account account = TestData.mockAccount(UUID.randomUUID(), UUID.randomUUID());
-        AccountTransaction transaction = TestData.mockAccountTransaction(account);
+        Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        AccountTransaction transaction = mockAccountTransaction(account);
         when(accountTransactionRepository.findByIdOptional(transaction.getId()))
             .thenReturn(Optional.of(transaction));
 
@@ -149,11 +149,143 @@ public class AccountTransactionServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void testUpdateTransaction() {
+        // given: a user ID and an account
+        UUID userId = UUID.randomUUID();
+        Account account = mockAccount(userId, UUID.randomUUID());
+
+        when(accountTransactionRepository.save(any())).then( invocation ->
+            invocation.getArgument(0)
+        );
+
+        Stream.of(Boolean.TRUE, Boolean.FALSE, null).forEach(reconciled -> {
+            Stream.of("modified notes", null).forEach(notes -> {
+                // and: a transaction exists
+                AccountTransaction transaction = spy(mockAccountTransaction(account));
+                when(accountTransactionRepository.findByIdOptional(transaction.getId()))
+                    .thenReturn(Optional.of(transaction));
+
+                // when: the transaction is updated
+                AccountTransaction result = fixture.updateTransaction(userId, transaction.getId(),
+                    Optional.ofNullable(reconciled),
+                    Optional.ofNullable(notes));
+
+                // then: the updated transaction is returned
+                assertNotNull(result);
+
+                // and: the updated are applied
+                if (reconciled != null) {
+                    verify(transaction).setReconciled(reconciled);
+                } else {
+                    verify(transaction, never()).setReconciled(anyBoolean());
+                }
+                if (notes != null) {
+                    verify(transaction).setNotes(notes);
+                } else {
+                    verify(transaction, never()).setNotes(anyString());
+                }
+
+                // and: the update transaction is saved
+                verify(accountTransactionRepository).save(transaction);
+            });
+        });
+    }
+
+    @Test
+    public void testUpdateTransaction_NotFound() {
+        // given: a user iD
+        UUID userId = UUID.randomUUID();
+
+        // and: an unknown transaction ID
+        UUID transactionId = UUID.randomUUID();
+        when(accountTransactionRepository.findByIdOptional(transactionId))
+            .thenReturn(Optional.empty());
+
+        Optional<Boolean> reconciled = Optional.of(Boolean.TRUE);
+        Optional<String> notes = Optional.of("modified notes");
+
+        // when: the transaction is updated
+        // then: an exception is thrown
+        assertThrows(NotFoundException.class, () ->
+            fixture.updateTransaction(userId, transactionId, reconciled, notes)
+        );
+
+        // and: NO transaction is updated
+        verify(accountTransactionRepository, never()).save(any());
+    }
+
+    @Test
+    public void testUpdateTransaction_WrongUser() {
+        // given: a user iD
+        UUID userId = UUID.randomUUID();
+
+        // given: a transaction exists for another user's account
+        Account account = mockAccount(UUID.randomUUID(), UUID.randomUUID());
+        AccountTransaction transaction = mockAccountTransaction(account);
+        when(accountTransactionRepository.findByIdOptional(transaction.getId()))
+            .thenReturn(Optional.of(transaction));
+
+        Optional<Boolean> reconciled = Optional.of(Boolean.TRUE);
+        Optional<String> notes = Optional.of("modified notes");
+
+        // when: the transaction is updated
+        // then: an exception is thrown
+        assertThrows(NotFoundException.class, () ->
+            fixture.updateTransaction(userId, transaction.getId(), reconciled, notes)
+        );
+
+        // and: NO transaction is updated
+        verify(accountTransactionRepository, never()).save(any());
+    }
+
+    @Test
+    public void testBatchReconciliationUpdate() {
+        // given: a user ID
+        UUID userId = UUID.randomUUID();
+
+        // and: a mixed batch of updates
+        Map<UUID, Boolean> updates = Map.of(
+            UUID.randomUUID(), true,
+            UUID.randomUUID(), false,
+            UUID.randomUUID(), true,
+            UUID.randomUUID(), false,
+            UUID.randomUUID(), true
+        );
+
+        // and: the repository can perform update
+        when(accountTransactionRepository.update(anyString(), anyMap())).thenReturn(10);
+
+        // when: the updates are passed to service
+        fixture.batchReconciliationUpdate(userId, updates);
+
+        // then: the repository is called twice to perform the updates
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Object[]> paramsCaptor = ArgumentCaptor.forClass(Object[].class);
+        verify(accountTransactionRepository, times(2))
+            .update(queryCaptor.capture(), paramsCaptor.capture());
+
+        // and: the query parameters are as expected
+        Iterator<Object[]> params = paramsCaptor.getAllValues().iterator();
+        queryCaptor.getAllValues().forEach(query -> {
+            Object[] actualParams = params.next();
+
+            assertEquals(userId, actualParams[0]);
+            if (query.contains("reconciled = true")) {
+                // true value count
+                assertEquals(3, ((List<?>)actualParams[1]).size());
+            } else {
+                // false value count
+                assertEquals(2, ((List<?>)actualParams[1]).size());
+            }
+        });
+    }
+
     private List<AccountTransaction> mockTransactions(Account account) {
         // and: a collection of transactions belonging to that account
         List<AccountTransaction> transactions = Stream.iterate(1, (n) -> n + 1)
             .limit(23)
-            .map(n -> TestData.mockAccountTransaction(account))
+            .map(n -> mockAccountTransaction(account))
             .toList();
         when(accountTransactionRepository.findByFilter(any(), anyInt(), anyInt()))
             .then(invocation -> {

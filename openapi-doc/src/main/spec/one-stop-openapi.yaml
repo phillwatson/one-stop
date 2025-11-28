@@ -766,6 +766,77 @@ paths:
         500:
           description: Internal server error
 
+    put:
+      tags: [ "transactions" ]
+      summary: Updates the calling user's transaction
+      description: |
+        Allows the caller to update one of their transactions. Only a limited set
+        of the transaction properties can be updated.
+      operationId: updateTransaction
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "transactionId"
+          in: "path"
+          description: ID of transaction to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The properties to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTransactionRequest'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        400:
+          description: Invalid ID or payload supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Transaction not found
+        500:
+          description: Internal server error
+
+  /rails/transactions/reconciliations:
+    put:
+      tags: [ "transactions" ]
+      summary: Batch update of transaction reconciliation state.
+      description: |
+        Allows the authenticated user to update the reconciliation state of their
+        transactions en-masse.
+      operationId: batchReconciliationUpdate
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        description: The transactions to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReconciliationRequest'
+      responses:
+        202:
+          description: batch update successful
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Account not found
+        500:
+          description: Internal server error
+
   /rails/transactions/movements:
     get:
       tags: [ "transactions" ]
@@ -2593,6 +2664,7 @@ components:
         - amount
         - date
         - description
+        - reconciled
       properties:
         id:
           type: string
@@ -2640,6 +2712,42 @@ components:
           type: string
           description: The name of the creditor
           example: John Doe
+        reconciled:
+          type: boolean
+          description: Indicates that user recognises the transaction.
+        notes:
+          type: string
+          description: Additional notes about the transaction, provided by the user.
+          example: Includes holiday expenses
+
+    UpdateTransactionRequest:
+      description: Allows the user to update a transaction to which they have access.
+      type: object
+      properties:
+        reconciled:
+          type: boolean
+          description: Indicates that user recognises the transaction.
+        notes:
+          type: string
+          description: Additional notes about the transaction, provided by the user.
+          example: Includes holiday expenses
+
+    ReconciliationRequest:
+      description: |
+        Identifies a transaction whose reconciliation state is to be updated.
+      type: object
+      required:
+        - transactionId
+        - reconciled
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+          description: The Id of the transaction to be updated
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+        reconciled:
+          type: boolean
+          description: The reconciled state to be set on the identified transaction.
 
     MovementEntry:
       description: |

@@ -101,7 +101,9 @@ public class MarketsClient {
             }
             else {
                 element = doc.selectFirst("section[data-mod-config*=xid]");
-                attribute = element.attribute("data-mod-config");
+                if (element != null) {
+                    attribute = element.attribute("data-mod-config");
+                }
             }
 
             if (attribute != null) {
