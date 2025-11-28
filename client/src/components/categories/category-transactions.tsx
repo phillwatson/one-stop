@@ -91,12 +91,12 @@ export default function CategoryTransactions(props: Props) {
           </TableHead>
           <TableBody>
             { transactions.map(transaction => (
-              <TableRow key={transaction.id} onClick={() => addToCategory(transaction)}>
-                <TableCell className={ reconcilations.rowClassname(transaction) }>{formatDate(transaction.bookingDateTime)}</TableCell>
-                <TableCell className={ reconcilations.rowClassname(transaction) }>{transaction.additionalInformation}</TableCell>
-                <TableCell className={ reconcilations.rowClassname(transaction) } align="right">{transaction.amount < 0 ? formatMoney(0 - transaction.amount, transaction.currency) : ''}</TableCell>
-                <TableCell className={ reconcilations.rowClassname(transaction) } align="right">{transaction.amount > 0 ? formatMoney(transaction.amount, transaction.currency) : ''}</TableCell>
-                <TableCell className={ reconcilations.rowClassname(transaction) } align="center">
+              <TableRow key={transaction.id} onClick={() => addToCategory(transaction)} className={ reconcilations.rowClassname(transaction) }>
+                <TableCell>{formatDate(transaction.bookingDateTime)}</TableCell>
+                <TableCell>{transaction.additionalInformation}</TableCell>
+                <TableCell align="right">{transaction.amount < 0 ? formatMoney(0 - transaction.amount, transaction.currency) : ''}</TableCell>
+                <TableCell align="right">{transaction.amount > 0 ? formatMoney(transaction.amount, transaction.currency) : ''}</TableCell>
+                <TableCell align="center">
                   <ReconcilationButton
                     transaction={ transaction }
                     onUpdate={ updated => { setTransactions(prev => prev.map(i => i.id === updated.id ? updated : i) )} }/>
