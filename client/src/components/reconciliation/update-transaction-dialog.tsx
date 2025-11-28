@@ -46,7 +46,7 @@ export default function UpdateTransactionDialog(props: Props) {
     setSaving(true);
     AccountService.updateTransaction(props.transaction.id, reconciled, notes)
       .then(response => {
-        showMessage({ type: 'add', level: 'success', text: 'Transaction updated' });
+        showMessage({ type: 'add', level: 'success', text: "Transaction updated" });
         // inform caller so they can update local state optimistically
         if (props.onUpdated) props.onUpdated(response);
         props.onClose();

@@ -84,7 +84,7 @@ public class AccountTransactionService {
         int unreconciledCount = 0;
         if (! unreconciled.isEmpty()) {
             unreconciledCount = accountTransactionRepository
-                .update("reconciled = false where userId = ?1 and id in ?2", userId, reconciled);
+                .update("reconciled = false where userId = ?1 and id in ?2", userId, unreconciled);
         }
 
         log.info("Updated account transaction reconciliations [userId: {}, reconciled: {}, unreconciled: {}]",
@@ -104,7 +104,7 @@ public class AccountTransactionService {
     public Page<AccountTransaction> getTransactions(TransactionFilter filter,
                                                     int page,
                                                     int pageSize) {
-        log.info("Listing transaction [filter: {}]", filter);
+        log.info("Listing transactions [filter: {}]", filter);
 
         if (filter == null) {
             filter = TransactionFilter.NULL;
@@ -114,7 +114,7 @@ public class AccountTransactionService {
 
         Page<AccountTransaction> result = accountTransactionRepository.findByFilter(filter, page, pageSize);
 
-        log.info("Listing transaction [filter: {}, size: {}, total: {}]",
+        log.info("Listing transactions complete [filter: {}, size: {}, total: {}]",
             filter, result.getContentSize(), result.getTotalCount());
         return result;
     }

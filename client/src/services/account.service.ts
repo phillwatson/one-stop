@@ -67,10 +67,11 @@ class AccountService {
   }
 
   updateTransaction(transactionId: string, reconciled?: boolean, notes?: string): Promise<TransactionDetail> {
+    const trimmedNotes = notes?.trim();
     return http.put<TransactionDetail>(`/rails/transactions/${transactionId}`, 
       {
         reconciled: reconciled,
-        notes: notes
+        notes: trimmedNotes?.length === 0 ? undefined : trimmedNotes
       })
       .then(response => response.data);
   }

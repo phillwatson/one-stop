@@ -19,14 +19,13 @@ export default function ReconcilationButton(props: Props) {
   const reconcilations = useReconcileTransactions();
 
   const isReconciled = useCallback(() => {
-    //console.log('isReconciled called for transaction', props.transaction.id);
     const pending = reconcilations.pendingState(props.transaction);
     return (pending !== undefined) ? pending : props.transaction.reconciled;
   }, [ props.transaction, reconcilations ]);
 
   return (
     <>
-      <IconButton size="small" style={{ padding: 6, margin: 0 }}
+      <IconButton size="small" style={{ padding: 4, margin: 0 }}
         onClick={ event => {
           event.stopPropagation();
           reconcilations.add(props.transaction);
@@ -38,7 +37,7 @@ export default function ReconcilationButton(props: Props) {
       </IconButton>
 
       <Tooltip title={ props.transaction.notes }>
-        <IconButton size="small" style={{ padding: 6, margin: 0, color: props.transaction.notes ? '#000000ff' : '#0000006e' }}
+        <IconButton size="small" style={{ padding: 4, margin: 0, color: props.transaction.notes ? '#000000ff' : '#0000006e' }}
           onClick={ event => {
             event.stopPropagation();
             reconcilations.openDialog(props.transaction, props.onUpdate);

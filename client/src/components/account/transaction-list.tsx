@@ -1,4 +1,3 @@
-import styles from './transaction.module.css';
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators,
@@ -173,26 +172,27 @@ export default function TransactionList(props: Props) {
   }
 
   function getRowClassName(params: GridRowClassNameParams) {
-    var transaction = params.row as TransactionDetail;
-    var pendingState = reconcilations.pendingState(transaction);
-    if (pendingState === undefined) {
-      return transaction.reconciled
-        ? styles.reconciled
-        : styles.unreconciled;
-    } else {
-      return pendingState
-        ? styles.reconciled + ' ' + styles.pending
-        : styles.unreconciled + ' ' + styles.pending;
-    }
+    return reconcilations.rowClassname(params.row as TransactionDetail);
   }
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     setLoading(true);
     AccountService.getTransactions(props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter)
       .then( response => setTransactions(response))
       .catch(err => showMessage(err))
       .finally(() => setLoading(false));
   }, [props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter, showMessage]);
+
+  useEffect(() => {
+    refresh();
+  }, [ refresh ]);
+
+  useEffect(() => {
+    reconcilations.onSubmit=refresh;
+    return () => {
+      reconcilations.onSubmit=undefined;
+    }
+  }, [ reconcilations, refresh ]);
 
   return (
     <>
