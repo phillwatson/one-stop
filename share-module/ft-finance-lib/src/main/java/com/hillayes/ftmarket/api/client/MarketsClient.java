@@ -25,10 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @ApplicationScoped
 @Slf4j
@@ -89,19 +86,29 @@ public class MarketsClient {
     private String extractIssueId(Document doc) throws JsonProcessingException {
         String result = null;
         Element input = doc.selectFirst("input[name=issueID]");
-        if (input == null) {
-            Element li = doc.selectFirst("li.mod-news__mind-event[data-mod-mind*=xid]");
-            if (li != null) {
-                Attribute attribute = li.attribute("data-mod-mind");
-                if (attribute != null) {
-                    Map<String, String> json = objectMapper.readValue(attribute.getValue(), MAP_TYPE_REFERENCE);
-                    result = json.get("xid");
-                }
-            }
-        } else {
+        if (input != null) {
             Attribute valueAttr = input.attribute("value");
             if (valueAttr != null) {
                 result = valueAttr.getValue();
+            }
+        }
+
+        if (result == null) {
+            Attribute attribute = null;
+            Element element = doc.selectFirst("li.mod-news__mind-event[data-mod-mind*=xid]");
+            if (element != null) {
+                attribute = element.attribute("data-mod-mind");
+            }
+            else {
+                element = doc.selectFirst("section[data-mod-config*=xid]");
+                if (element != null) {
+                    attribute = element.attribute("data-mod-config");
+                }
+            }
+
+            if (attribute != null) {
+                Map<String, String> json = objectMapper.readValue(attribute.getValue(), MAP_TYPE_REFERENCE);
+                result = json.get("xid");
             }
         }
 

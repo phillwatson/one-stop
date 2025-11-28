@@ -13,6 +13,7 @@ import MonetarySwitch from '../../contexts/monetary/monetary-switch';
 import UserAvatar from '../user-profile/user-avatar';
 import MenuItemDef from '../app-menu/menu-item-def';
 import NotificationBell from '../../contexts/notifications/notification-bell';
+import SubmitReconcilationButton from '../reconciliation/submit-button';
 
 interface Props extends MuiAppBarProps {
   title?: string;
@@ -49,6 +50,9 @@ export default function AppHeader(props: Props) {
           </Grid>
 
           <Grid container direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={ 1 }>
+            <Grid item>
+              <SubmitReconcilationButton />
+            </Grid>
             <Grid item>
               <NotificationBell />
             </Grid>

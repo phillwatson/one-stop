@@ -30,7 +30,7 @@ public class AccountService {
         log.info("Listing user's accounts [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
         Page<Account> result = accountRepository.findByUserId(userId, page, pageSize);
 
-        log.debug("Listing account's transactions [accountId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+        log.debug("Listing account's [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
             userId, page, pageSize, result.getContentSize(), result.getTotalCount());
         return result;
     }

@@ -26,7 +26,7 @@ interface MonetaryContextValue {
 }
 
 /**
- * Creates a context in which to store, and pass, the state of the monetary value.
+ * Creates a context in which to store, and pass, the state of the monetary value
  * display; and a format function to allow the caller to format a monerary value.
  */
 const MonetaryContext = createContext<MonetaryContextValue>({

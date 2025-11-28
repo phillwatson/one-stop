@@ -92,4 +92,12 @@ public class AccountTransaction {
      */
     @Column(name = "reference", nullable = true)
     private String reference;
+
+    @Setter
+    @Column(name = "reconciled", nullable = false)
+    private boolean reconciled;
+
+    @Setter
+    @Column(name = "notes", nullable = true)
+    private String notes;
 }
