@@ -42,9 +42,16 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+#    - name: Cache node modules
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/.pnpm-store
+#        key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+
     - name: Build with Maven
       run: |
         mvn -B verify -Pclient -Ptest \
           -DQUARKUS_HIBERNATE_ORM_LOG_SQL=false \
           -DQUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS=false \
           -DQUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP_WIRE__LEVEL=ERROR
+        pnpm store path
