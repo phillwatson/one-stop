@@ -8,7 +8,8 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "EmailUser")
+@Table(schema = "notifications", name = "user")
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
