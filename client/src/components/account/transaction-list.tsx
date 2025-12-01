@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators,
-   getGridDateOperators, GridToolbar, GridFilterModel, GridRowParams, GridRowClassNameParams } from '@mui/x-data-grid';
+   getGridDateOperators, GridFilterModel, GridRowParams, GridRowClassNameParams } from '@mui/x-data-grid';
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
@@ -22,7 +22,6 @@ interface Props {
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
-const DEFAULT_SLOTS = { toolbar: GridToolbar };
 
 const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
 const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
@@ -197,8 +196,8 @@ export default function TransactionList(props: Props) {
   return (
     <>
       <DataGrid rows={ transactions.items } rowCount={ transactions.total } columns={ columnDefs } 
-        density="compact" disableDensitySelector
-        loading={ loading } slots={ DEFAULT_SLOTS }
+        density="compact" disableDensitySelector showToolbar
+        loading={ loading }
         pagination paginationModel={ paginationModel }
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={ setPaginationModel }

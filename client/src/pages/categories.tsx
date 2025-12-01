@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
+import Item from "@mui/material/Grid";
 
 import PageHeader from "../components/page-header/page-header";
 import CategoryGroupList from "../components/categories/category-group-list";
@@ -67,19 +68,23 @@ export default function Categories() {
   return (
     <PageHeader title="Transaction Category Groups">
       <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
-        <Grid item width="49%">
-          <CategoryGroupList elevation={ 1 }
-            groups={ groups }
-            onSelected={ selectGroup }
-            onAdd={ addGroup }
-            onEdit={ editGroup }
-            onDelete={ deleteGroup }/>
+        <Grid width="49%">
+          <Item>
+            <CategoryGroupList elevation={ 1 }
+              groups={ groups }
+              onSelected={ selectGroup }
+              onAdd={ addGroup }
+              onEdit={ editGroup }
+              onDelete={ deleteGroup }/>
+          </Item>
         </Grid>
-        <Grid item width="49%">
-          <CategoryList elevation={ 1 } group={ selectedGroup } categories={ categories }
-            onAdd={ addCategory }
-            onEdit={ editCategory }
-            onDelete={ deleteCategory }/>
+        <Grid width="49%">
+          <Item>
+            <CategoryList elevation={ 1 } group={ selectedGroup } categories={ categories }
+              onAdd={ addCategory }
+              onEdit={ editCategory }
+              onDelete={ deleteCategory }/>
+          </Item>
         </Grid>
       </Grid>
     </PageHeader>

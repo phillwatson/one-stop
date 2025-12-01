@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import Paper from '@mui/material/Paper/Paper';
+import Paper from '@mui/material/Paper';
 import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { BarSeriesType } from '@mui/x-charts/models/seriesType/bar';
-import { MakeOptional } from '@mui/x-charts/models/helpers';
-import { AxisConfig, ChartsYAxisProps, ScaleName } from '@mui/x-charts/models/axis';
+import { YAxis } from '@mui/x-charts/models/axis';
 
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
@@ -35,16 +33,18 @@ export default function BarGraph(props: Props) {
     return value === null ? "" : formatMoney(value, 'GBP');
   }, [ formatMoney ])
 
-  const series = useMemo<MakeOptional<BarSeriesType, 'type'>[]>(() => {
+  const series = useMemo(() => {
     return [
       { dataKey: 'credits', stack: 'a', color: '#00BF00', label: 'credits', valueFormatter: formatValue },
       { dataKey: 'debits',  stack: 'a', color: '#BF0000', label: 'debits',  valueFormatter: formatValue }
     ];
   }, [ formatValue ]);
 
-  const yAxisConfig = useMemo<AxisConfig<ScaleName, any, ChartsYAxisProps>[]>(() => {
+  const yAxisConfig = useMemo<YAxis[]>(() => {
     return [{
       id: 'amount',
+      label: 'Amount',
+      width: 100,
       scaleType: 'linear',
       valueFormatter: formatValue
     }]
@@ -100,20 +100,13 @@ export default function BarGraph(props: Props) {
             series={ series }
             yAxis={ yAxisConfig }
             xAxis={ [{
-              id: 'dates', data: xAxis, scaleType: 'band',
+              id: 'dates', data: xAxis, scaleType: 'band', label: 'Date', height: 95,
               valueFormatter: (v: number) => dayjs.unix(v).format('DD/MM/YYYY'),
-              tickLabelInterval: (_, index) => index % 2 === 0
+              tickLabelStyle: { angle: -40, textAnchor: 'end' },
+              tickInterval: (_, index) => index % 2 === 0
             }] }
             height={ 450 }
-            margin={{ top: 50, right: 10, bottom: 70, left: 100 }}
-            bottomAxis={{
-              axisId: 'dates',
-              tickLabelStyle: {
-                angle: -40,
-                textAnchor: 'end',
-                fontSize: 12,
-              }
-            }}
+            margin={{ top: 50, right: 10, bottom: 10, left: 22 }}
         >
           <ChartsReferenceLine
               y={ 0 }
