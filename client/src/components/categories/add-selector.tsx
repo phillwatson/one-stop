@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
+import Item from "@mui/material/Grid";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -141,33 +142,37 @@ export default function AddSelector(props: Props) {
       <br/>
       <DialogContent>
         <Grid container direction="column" spacing={2}>
-          <Grid item>
-            <FormControl fullWidth>
-              <InputLabel id="select-group">Category Group</InputLabel>
-              <Select labelId="select-group" label="Category Group" value={ group.id || ''}
-                onChange={(e) => selectGroup(e.target.value as string)} >
-                { groups && groups.map(group =>
-                  <MenuItem value={ group.id } key={ group.id }>{ group.name }</MenuItem>
-                )}
-              </Select>
-            </FormControl>
+          <Grid>
+            <Item>
+              <FormControl fullWidth>
+                <InputLabel id="select-group">Category Group</InputLabel>
+                <Select labelId="select-group" label="Category Group" value={ group.id || ''}
+                  onChange={(e) => selectGroup(e.target.value as string)} >
+                  { groups && groups.map(group =>
+                    <MenuItem value={ group.id } key={ group.id }>{ group.name }</MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+            </Item>
           </Grid>
-          <Grid item>
-            <FormControl fullWidth>
-              <InputLabel id="select-category">Category</InputLabel>
-              <Select labelId="select-category" label="Category" value={ category.id || ''}
-                onChange={(e) => selectCategory(e.target.value as string)} renderValue={() => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
-                    <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
-                  </Box>
-                )}>
-                { categories && categories.map(cat =>
-                  <MenuItem value={ cat.id } key={ cat.id }>
-                    <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
-                  </MenuItem>
-                )}
-              </Select>
-            </FormControl>
+          <Grid>
+            <Item>
+              <FormControl fullWidth>
+                <InputLabel id="select-category">Category</InputLabel>
+                <Select labelId="select-category" label="Category" value={ category.id || ''}
+                  onChange={(e) => selectCategory(e.target.value as string)} renderValue={() => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
+                      <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
+                    </Box>
+                  )}>
+                  { categories && categories.map(cat =>
+                    <MenuItem value={ cat.id } key={ cat.id }>
+                      <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
+                    </MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+            </Item>
           </Grid>
         </Grid>
       </DialogContent>

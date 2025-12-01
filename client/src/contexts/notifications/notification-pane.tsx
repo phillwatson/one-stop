@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import Alert from "@mui/material/Alert/Alert";
-import AlertTitle from "@mui/material/AlertTitle/AlertTitle";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 import { formatDateTime } from "../../util/date-util";
 import Notification from "../../model/notification-model";

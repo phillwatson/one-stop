@@ -1,0 +1,11 @@
+packages:
+  - .
+  - packages/*
+
+onlyBuiltDependencies:
+  - core-js
+  - core-js-pure
+
+settings:
+  autoInstallPeers: true
+  shamefully-hoist: false

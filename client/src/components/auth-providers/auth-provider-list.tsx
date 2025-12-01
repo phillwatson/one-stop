@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 
 import { UserAuthProvider } from "../../model/user-profile.model";
 import ProfileService from "../../services/profile.service"
-import Tooltip from '@mui/material/Tooltip/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ConfirmationDialog from '../dialogs/confirm-dialog';
 import { formatDateTime } from '../../util/date-util';

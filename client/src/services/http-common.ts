@@ -28,11 +28,13 @@ class HttpService {
     // add Ip-Address and location data to default headers
     // TODO: this is a bit of a hack - it doesn't set the headers for the OIdC authentication requests
     getLocation().then(location => {
-      this.http.defaults.headers.common["X-Location-IP"] = location.ip;
-      this.http.defaults.headers.common["X-Location-City"] = location.city;
-      this.http.defaults.headers.common["X-Location-Country"] = location.country_name;
-      this.http.defaults.headers.common["X-Location-Lat"] = location.latitude;
-      this.http.defaults.headers.common["X-Location-Long"] = location.longitude;
+      if (location) {
+        this.http.defaults.headers.common["X-Location-IP"] = location.ip;
+        this.http.defaults.headers.common["X-Location-City"] = location.city;
+        this.http.defaults.headers.common["X-Location-Country"] = location.country_name;
+        this.http.defaults.headers.common["X-Location-Lat"] = location.latitude;
+        this.http.defaults.headers.common["X-Location-Long"] = location.longitude;
+      }
     });
   }
 

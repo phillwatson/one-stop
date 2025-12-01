@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Grid from '@mui/material/Grid';
+import Item from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -35,32 +36,44 @@ export default function AppHeader(props: Props) {
   return (
     <AppBar position="fixed">
       <Toolbar>
-        <Grid container direction="row" alignItems="center" wrap='nowrap'>
+        <Grid container direction="row" alignItems="center" wrap='nowrap' size="grow">
 
-          <Grid item>
-            <IconButton color="inherit" aria-label="open drawer" onClick={ props.onClick } edge="start">
-              <MenuIcon />
-            </IconButton>
+          <Grid>
+            <Item>
+              <IconButton color="inherit" aria-label="open drawer" onClick={ props.onClick } edge="start">
+                <MenuIcon />
+              </IconButton>
+            </Item>
           </Grid>
 
-          <Grid item>
-            <Typography variant="h6" noWrap>
-              { props.title }
-            </Typography>
+          <Grid size="grow">
+            <Item>
+              <Typography variant="h6" noWrap>
+                { props.title }
+              </Typography>
+            </Item>
           </Grid>
 
-          <Grid container direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={ 1 }>
-            <Grid item>
-              <SubmitReconcilationButton />
+          <Grid container direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={ 0.5 }>
+            <Grid>
+              <Item>
+                <SubmitReconcilationButton />
+              </Item>
             </Grid>
-            <Grid item>
-              <NotificationBell />
+            <Grid>
+              <Item>
+                <NotificationBell />
+              </Item>
             </Grid>
-            <Grid item>
-              <MonetarySwitch />
+            <Grid>
+              <Item>
+                <MonetarySwitch />
+              </Item>
             </Grid>
-            <Grid item>
-              <UserAvatar user={ currentUser } menuItems={ props.menuItems } />
+            <Grid>
+              <Item>
+                <UserAvatar user={ currentUser } menuItems={ props.menuItems } />
+              </Item>
             </Grid>
           </Grid>
         </Grid>
