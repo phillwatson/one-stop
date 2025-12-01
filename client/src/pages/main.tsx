@@ -52,19 +52,17 @@ export default function MainPage() {
       { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
     ]), [ logout ]);
 
-  if (!user) {
-    return (<SignIn/>);
-  }
-
-  return (
-    <Box padding={{ xs: 1, sm: 2 }}>
-      <AppHeader onClick={ openMenu } title={ appTitle } menuItems={ profileMenuItems }/>
-      <SideBar open={ menuOpen } onClose={ closeMenu }>
-        <AppMenu menuItems={ mainMenuItems } />
-      </SideBar>
-      <Box style={{ paddingTop: "60px" }}>
-        <Outlet />
+  return (!user)
+    ? (<SignIn/>)
+    : (
+      <Box padding={{ xs: 1, sm: 2 }}>
+        <AppHeader onClick={ openMenu } title={ appTitle } menuItems={ profileMenuItems }/>
+        <SideBar open={ menuOpen } onClose={ closeMenu }>
+          <AppMenu menuItems={ mainMenuItems } />
+        </SideBar>
+        <Box style={{ paddingTop: "60px" }}>
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
-  );
+    );
 }
