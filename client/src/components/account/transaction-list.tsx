@@ -22,19 +22,6 @@ interface Props {
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
-const DEFAULT_SLOTS = { toolbar: GridToolbar };
-
-const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
-const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
-const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=');
-
-function getMoneyValue(value: number, _row: TransactionDetail, column: GridColDef) {
-  return column.field === 'credit' ? value : 0 - value;
-};
-
-function getDateValue(value: string) {
-  return new Date(value);
-};
 
 const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
 const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
