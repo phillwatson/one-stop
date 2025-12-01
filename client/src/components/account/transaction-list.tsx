@@ -22,6 +22,19 @@ interface Props {
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
+const DEFAULT_SLOTS = { toolbar: GridToolbar };
+
+const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
+const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
+const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=');
+
+function getMoneyValue(value: number, _row: TransactionDetail, column: GridColDef) {
+  return column.field === 'credit' ? value : 0 - value;
+};
+
+function getDateValue(value: string) {
+  return new Date(value);
+};
 
 const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
 const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
@@ -106,7 +119,7 @@ export default function TransactionList(props: Props) {
       align: 'right',
       width: 120,
       filterOperators: moneyFilterOperators,
-      valueFormatter: renderMoneyCell, 
+      valueFormatter: renderMoneyCell,
       valueGetter: getMoneyValue
     },
     {
@@ -118,7 +131,7 @@ export default function TransactionList(props: Props) {
       renderCell: renderReconciliationCell
     }
   ] as GridColDef[]), [ renderMoneyCell, renderReconciliationCell ] );
-  
+
 
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<PaginatedTransactions>(EMPTY_PAGINATED_LIST);
@@ -195,7 +208,7 @@ export default function TransactionList(props: Props) {
 
   return (
     <>
-      <DataGrid rows={ transactions.items } rowCount={ transactions.total } columns={ columnDefs } 
+      <DataGrid rows={ transactions.items } rowCount={ transactions.total } columns={ columnDefs }
         density="compact" disableDensitySelector showToolbar
         loading={ loading }
         pagination paginationModel={ paginationModel }
@@ -221,7 +234,7 @@ export default function TransactionList(props: Props) {
           </Table>
         </TableContainer>
       }
- 
+
     <AddSelector open={ showAddCategory }
         groupId='{ props.account.groupId }'
         transaction={ selectedTransaction }
