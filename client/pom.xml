@@ -13,7 +13,7 @@
 
     <properties>
         <node.version>v19.6.0</node.version>
-        <pnpm.version>10.24.0</pnpm.version>
+        <pnpm.version>v10.24.0</pnpm.version>
         <frontend-maven-plugin.version>1.15.4</frontend-maven-plugin.version>
 <!--        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>-->
         <skip.clean>true</skip.clean>
