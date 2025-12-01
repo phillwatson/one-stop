@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
+import Item from "@mui/material/Grid";
 
 import { useMessageDispatch } from "../contexts/messages/context";
 import { useCurrentUser } from "../contexts/user-context";
@@ -54,20 +55,26 @@ export default function UpdateProfile() {
     <PageHeader title="Profile Information" >
       <form onSubmit={ handleSubmit }>
         <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
-          <Grid item padding={ 5 }>
-            <UserProfileForm profile={ profile } setter={ setProfile }/>
+          <Grid>
+            <Item padding={ 5 }>
+              <UserProfileForm profile={ profile } setter={ setProfile }/>
+            </Item>
           </Grid>
 
           <Grid container direction="row" justifyContent="center" columns={ 2 } columnGap={ 2 } rowGap={ 2 }>
-            <Grid item>
-              <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
-                <AuthProviderList/>
-              </Paper>
+            <Grid>
+              <Item>
+                <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
+                  <AuthProviderList/>
+                </Paper>
+              </Item>
             </Grid>
-            <Grid item>
-              <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
-                <UserConsentList/>
-              </Paper>
+            <Grid>
+              <Item>
+                <Paper square={ false } variant="outlined" sx={{ minWidth: "650px", maxWidth: "650px" }}>
+                  <UserConsentList/>
+                </Paper>
+              </Item>
             </Grid>
           </Grid>
 

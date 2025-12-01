@@ -7,6 +7,10 @@
 }
 
 .pending {
+  color:crimson;
   background-color: rgba(211, 211, 211, 0.342);
-  color:crimson
+}
+
+.pending > td {
+  color:crimson;
 }

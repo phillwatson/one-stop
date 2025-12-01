@@ -82,14 +82,14 @@ export default function Institutions(props: Props) {
 
   function handleLinkSelect(institution: Institution) {
     UserConsentService.registerConsent(institution.id).then(registerUri => {
-      window.location = registerUri;
+      window.location.replace(registerUri.href);
     })
     .catch(err => showMessage(err))
   }
 
   return (
     <Dialog open={ props.open } onClose={ handleClose }
-      TransitionComponent={Transition} aria-labelledby="scroll-dialog-title">
+      slots={{ transition: Transition}} aria-labelledby="scroll-dialog-title">
       <DialogTitle id="scroll-dialog-title" sx={ dialogTitle }>Add Institution</DialogTitle>
 
       <DialogContent dividers={ true }>

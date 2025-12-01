@@ -1,6 +1,6 @@
 
 import { Paper } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2/Grid2";
+import Grid from "@mui/material/Grid";
 
 import { AccountDetail } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';

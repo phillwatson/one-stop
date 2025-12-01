@@ -24,51 +24,45 @@ export default function MainPage() {
   const [user, setUser] = useCurrentUser();
   const [menuOpen, setMenuOpen] = React.useState(false);
 
-  const handleDrawerOpen = () => {
+  function openMenu() {
     setMenuOpen(true);
   };
 
-  const handleDrawerClose = () => {
+  function closeMenu() {
     setMenuOpen(false);
   };
 
   const logout = useCallback(() => {
-    handleDrawerClose();
+    closeMenu();
     ProfileService.logout()
       .finally(() => setUser(undefined) );
   }, [ setUser ]);
 
-  const mainMenuItems: MenuItemDef[] = useMemo(() => {
-    return [
-      { label: 'Accounts', route: 'accounts', icon: <Savings/>, action: handleDrawerClose },
-      { label: 'Categories', route: 'categories', icon: <CategoryIcon/>, action: handleDrawerClose },
-      { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/>, action: handleDrawerClose },
-      { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: handleDrawerClose },
-      { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: handleDrawerClose },
+  const mainMenuItems: MenuItemDef[] = useMemo(() => ([
+      { label: 'Accounts', route: 'accounts', icon: <Savings/>, action: closeMenu },
+      { label: 'Categories', route: 'categories', icon: <CategoryIcon/>, action: closeMenu },
+      { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/>, action: closeMenu },
+      { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: closeMenu },
+      { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: closeMenu },
       { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
-    ];
-  }, [ logout ]);
+    ]), [ logout ]);
 
-  const profileMenuItems: MenuItemDef[] = useMemo(() => {
-    return [
+  const profileMenuItems: MenuItemDef[] = useMemo(() => ([
       { label: 'Profile', route: 'profile', icon: <Person/> },
       { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
-    ];
-  }, [ logout ]);
+    ]), [ logout ]);
 
-  if (!user) {
-    return (<SignIn/>);
-  }
-
-  return (
-    <Box padding={{ xs: 1, sm: 2 }}>
-      <AppHeader onClick={ handleDrawerOpen } title={ appTitle } menuItems={ profileMenuItems }/>
-      <SideBar open={ menuOpen } onClose={ handleDrawerClose }>
-        <AppMenu menuItems={ mainMenuItems } />
-      </SideBar>
-      <Box style={{ paddingTop: "60px" }}>
-        <Outlet />
+  return (!user)
+    ? (<SignIn/>)
+    : (
+      <Box padding={{ xs: 1, sm: 2 }}>
+        <AppHeader onClick={ openMenu } title={ appTitle } menuItems={ profileMenuItems }/>
+        <SideBar open={ menuOpen } onClose={ closeMenu }>
+          <AppMenu menuItems={ mainMenuItems } />
+        </SideBar>
+        <Box style={{ paddingTop: "60px" }}>
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
-  );
+    );
 }

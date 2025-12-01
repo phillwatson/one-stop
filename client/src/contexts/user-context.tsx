@@ -27,7 +27,7 @@ export default function UserProfileProvider(props: PropsWithChildren) {
   useEffect(() => {
     ProfileService.get()
       .then(user => { setUser(user); } )
-      .catch(() => setUser(undefined));
+      .catch(() => { setUser(undefined); } );
   }, []);
 
   return (

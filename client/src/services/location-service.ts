@@ -27,8 +27,15 @@ export interface LocationData {
   version: string
 }
 
-export default async function getLocation(): Promise<LocationData> {
-  const response = await fetch("https://ipapi.co/json");
-  const data = await response.json();
-  return data as LocationData;
+// An alternative implementation that goes via euro server https://eu-api.ipdata.co/
+// See https://docs.ipdata.co/docs/getting-started
+
+// export default async function getLocation(): Promise<LocationData> {
+//   const response = await fetch("https://ipapi.co/json");
+//   const data = await response.json();
+//   return data as LocationData;
+// }
+
+export default function getLocation(): Promise<LocationData | undefined> {
+  return Promise.resolve(undefined);
 }

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import MenuItem from '@mui/material/MenuItem/MenuItem';
+import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { SxProps, Theme } from '@mui/material/styles';

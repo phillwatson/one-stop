@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
-import Alert from "@mui/material/Alert/Alert";
-import Slide from "@mui/material/Slide/Slide";
+import Alert from "@mui/material/Alert";
+import Slide from "@mui/material/Slide";
 
 import { Message, MessageAction } from "./model";
 
