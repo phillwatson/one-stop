@@ -8,7 +8,7 @@ name: Pull Request CI with Maven
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths-ignore: [ 'docs/**', 'client/**', '**/README.md' ]
+    paths-ignore: [ 'docs/**', '**/README.md' ]
 
 env:
   REGISTRY: ghcr.io

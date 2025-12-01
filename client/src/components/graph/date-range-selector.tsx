@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 import Grid from '@mui/material/Grid';
+import Item from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
@@ -8,13 +9,12 @@ import MenuItem from '@mui/material/MenuItem';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { debounce } from '@mui/material';
 
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-gb';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
-
-var debounce = require('lodash/debounce');
 
 const now = dayjs.utc().startOf('day');
 const tomorrow = now.add(1, 'day');
@@ -56,30 +56,36 @@ export default function DateRangeSelector(props: Props) {
   return (
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale='en-gb'>
       <Grid container direction="row" rowGap={ 3 } columnGap={ 3 } justifyContent="space-evenly">
-        <Grid key={1} item>
-          <FormControl sx={{ width: { xs: 180, md: 220 }}}>
-            <InputLabel id="range-label">{ props.rangeLabel || "Range" }</InputLabel>
-            <Select labelId="select-range" id="select-range" label={ props.rangeLabel || "Range" }
-              value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
-              { StaticRanges.map((range, index) =>
-                <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
-              )}
-            </Select>
-          </FormControl>
+        <Grid key={1}>
+          <Item>
+            <FormControl sx={{ width: { xs: 180, md: 220 }}}>
+              <InputLabel id="range-label">{ props.rangeLabel || "Range" }</InputLabel>
+              <Select labelId="select-range" id="select-range" label={ props.rangeLabel || "Range" }
+                value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
+                { StaticRanges.map((range, index) =>
+                  <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
+                )}
+              </Select>
+            </FormControl>
+          </Item>
         </Grid>
-        <Grid key={2} item>
-          <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
-            onChange={ (value: Dayjs | null, context: any) => {
-              if (value != null && context.validationError == null)
-                debouncedSetDateRange([ value, props.dateRange[1] ])
-              }}/>
+        <Grid key={2}>
+          <Item>
+            <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
+              onChange={ (value: Dayjs | null, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([ value, props.dateRange[1] ])
+                }}/>
+          </Item>
         </Grid>
-        <Grid key={3} item>
-          <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
-            onChange={ (value: Dayjs | null, context: any) => {
-              if (value != null && context.validationError == null)
-                debouncedSetDateRange([ props.dateRange[0], value ])
-              }}/>
+        <Grid key={3}>
+          <Item>
+            <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
+              onChange={ (value: Dayjs | null, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([ props.dateRange[0], value ])
+                }}/>
+          </Item>
         </Grid>
       </Grid>
     </LocalizationProvider>

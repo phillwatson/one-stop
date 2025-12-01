@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Grid from '@mui/material/Grid';
+import Item from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 
 import Institution from '../../model/institution.model';
@@ -28,22 +29,26 @@ export default function BankList(props: Props) {
 
   return (
     <Grid container justifyContent="space-around" gap={ 2 }>
-      <Grid item>
-        <TextField id="institution-filter" label="Filter"
-          value={ institutionFilter } onChange={ e => setInstitutionFilter(e.target.value) }
-        />
+      <Grid>
+        <Item>
+          <TextField id="institution-filter" label="Filter"
+            value={ institutionFilter } onChange={ e => setInstitutionFilter(e.target.value) }
+          />
+        </Item>
       </Grid>
-      <Grid item component={ Paper } padding={ 1 }
-        minWidth={{ xs: "380px", sm: "500px" }}
-        maxWidth={{ xs: "380px", sm: "500px" }}
-        minHeight="36vh" maxHeight="36vh" overflow="auto">
-        { props.institutions && props.institutions
-          .filter( institution => filter(institutionFilter, institution.name))
-          .sort((a, b) => a.name.localeCompare(b.name) )
-          .map((institution, index: number) =>
-            <BankCard key={ index } institution={ institution } consent={ getConsent(institution) } onLinkSelect= { props.onLinkSelect }/>
-          )
-        }
+      <Grid>
+        <Item component={ Paper } padding={ 1 }
+          minWidth={{ xs: "380px", sm: "500px" }}
+          maxWidth={{ xs: "380px", sm: "500px" }}
+          minHeight="36vh" maxHeight="36vh" overflow="auto">
+          { props.institutions && props.institutions
+            .filter( institution => filter(institutionFilter, institution.name))
+            .sort((a, b) => a.name.localeCompare(b.name) )
+            .map((institution, index: number) =>
+              <BankCard key={ index } institution={ institution } consent={ getConsent(institution) } onLinkSelect= { props.onLinkSelect }/>
+            )
+          }
+        </Item>
       </Grid>
     </Grid>
   );

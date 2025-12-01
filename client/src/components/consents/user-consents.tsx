@@ -16,7 +16,7 @@ import UserConsent from '../../model/user-consent.model';
 import DeleteConsentDialog from './delete-consent-dialog';
 import Tooltip from '@mui/material/Tooltip';
 import { formatDateTime } from '../../util/date-util';
-import Avatar from '@mui/material/Avatar/Avatar';
+import Avatar from '@mui/material/Avatar';
 
 interface Props {
 }
