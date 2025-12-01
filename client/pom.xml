@@ -14,6 +14,7 @@
     <properties>
         <node.version>v19.6.0</node.version>
         <yarn.version>v1.22.19</yarn.version>
+        <pnpm.version>10.24.0</pnpm.version>
         <frontend-maven-plugin.version>1.15.4</frontend-maven-plugin.version>
         <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
         <skip.clean>true</skip.clean>
@@ -81,7 +82,7 @@
 
                 <configuration>
                     <nodeVersion>${node.version}</nodeVersion>
-                    <yarnVersion>${yarn.version}</yarnVersion>
+                    <pnpmVersion>${pnpm.version}</pnpmVersion>
                     <workingDirectory>${project.basedir}</workingDirectory>
                     <installDirectory>${project.build.directory}</installDirectory>
                     <skip>${skip.install}</skip>
@@ -91,24 +92,24 @@
                     <execution>
                         <id>install-frontend-tools</id>
                         <goals>
-                            <goal>install-node-and-yarn</goal>
+                            <goal>install-node-and-pnpm</goal>
                         </goals>
                     </execution>
 
-                    <execution>
-                        <id>yarn-install</id>
-                        <goals>
-                            <goal>yarn</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>yarn-install</id>-->
+<!--                        <goals>-->
+<!--                            <goal>yarn</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <arguments>install</arguments>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
 
                     <execution>
                         <id>build-frontend</id>
                         <goals>
-                            <goal>yarn</goal>
+                            <goal>pnpm</goal>
                         </goals>
                         <phase>prepare-package</phase>
                         <configuration>

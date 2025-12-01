@@ -12,9 +12,7 @@ export interface RegistrationCredentials {
 class UserService {
   login(provider: string) {
     return http.get<Location>(`auth/login/${provider}`, { params: { "state": "same-state-value" }})
-      .then(response => window.location.assign(response.data.href));
-
-    //window.location.href = window.location.origin + "/api/v1/auth/login/" + provider + "?state=same-state-value";
+      .then(response => window.location.assign(response.data.toString()));
   }
 
   registerNewUser(email: string): Promise<void> {
