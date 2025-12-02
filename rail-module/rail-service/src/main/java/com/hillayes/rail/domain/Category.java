@@ -3,8 +3,8 @@ package com.hillayes.rail.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -65,8 +65,9 @@ public class Category {
      * transactions, must be different.
      */
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OrderBy("infoContains, refContains, creditorContains")
     @lombok.Builder.Default
-    private Set<CategorySelector> selectors = new HashSet<>();
+    private List<CategorySelector> selectors = new ArrayList<>();
 
     /**
      * Adds a selector to the category; ensuring that the selector is associated

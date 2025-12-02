@@ -576,7 +576,7 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
-        Set<CategorySelector> expectedSelectors = new HashSet(category
+        Set<CategorySelector> expectedSelectors = new HashSet<>(category
             .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
@@ -589,16 +589,16 @@ public class CategoryServiceTest {
             .addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
 
         // when: the category selectors are requested
-        Collection<CategorySelector> actualSelectors =
-            fixture.getCategorySelectors(userId, category.getId(), account.getId());
+        Page<CategorySelector> actualSelectors =
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100);
 
         // then: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
 
         // and: only the identified account's selectors are returned
-        assertEquals(expectedSelectors.size(), actualSelectors.size());
+        assertEquals(expectedSelectors.size(), actualSelectors.getContentSize());
         expectedSelectors.forEach(expected ->
-            assertTrue(actualSelectors.contains(expected))
+            assertTrue(actualSelectors.getContent().contains(expected))
         );
     }
 
@@ -693,8 +693,8 @@ public class CategoryServiceTest {
         category.addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
 
         // when: the category selectors are requested
-        Collection<CategorySelector> actualSelectors =
-            fixture.getCategorySelectors(userId, category.getId(), account.getId());
+        Page<CategorySelector> actualSelectors =
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100);
 
         // then: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
@@ -724,7 +724,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, categoryId, account.getId())
+            fixture.getCategorySelectors(userId, categoryId, account.getId(), 0, 100)
         );
 
         // and: the exception identifies the category
@@ -754,7 +754,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), account.getId())
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100)
         );
 
         // and: the exception identifies the category
@@ -781,7 +781,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), accountId)
+            fixture.getCategorySelectors(userId, category.getId(), accountId, 0, 100)
         );
 
         // and: the exception identifies the account
@@ -811,7 +811,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), account.getId())
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100)
         );
 
         // and: the exception identifies the account
@@ -839,7 +839,7 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
-        Set<CategorySelector> oldSelectors = new HashSet(category
+        Set<CategorySelector> oldSelectors = new HashSet<>(category
             .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
@@ -908,7 +908,7 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
-        Set<CategorySelector> oldSelectors = new HashSet(category
+        Set<CategorySelector> oldSelectors = new HashSet<>(category
             .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
             .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -95,7 +94,7 @@ public class CategoryRepositoryTest {
         category.addSelector(account.getId(), builder ->
             builder.creditorContains(insecure().nextAlphanumeric(10))
         );
-        Set<CategorySelector> selectors = category.getSelectors();
+        List<CategorySelector> selectors = category.getSelectors();
 
         // then: the selectors are linked to the category
         selectors.forEach(selector -> assertEquals(category, selector.getCategory()));
@@ -145,7 +144,7 @@ public class CategoryRepositoryTest {
         category.addSelector(account.getId(), builder -> builder.infoContains(insecure().nextAlphanumeric(20)));
         category.addSelector(account.getId(), builder -> builder.refContains(insecure().nextAlphanumeric(5)));
         category.addSelector(account.getId(), builder -> builder.creditorContains(insecure().nextAlphanumeric(10)));
-        Set<CategorySelector> selectors = category.getSelectors();
+        List<CategorySelector> selectors = category.getSelectors();
 
         // when: the parent category is saved
         fixture.save(category);

@@ -1,13 +1,13 @@
 package com.hillayes.integration.test.rail;
 
 import com.google.common.collect.Streams;
-import com.hillayes.integration.api.*;
-import com.hillayes.integration.api.rail.admin.RailAgreementAdminApi;
-import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
+import com.hillayes.integration.api.AuthApi;
 import com.hillayes.integration.api.rail.AccountApi;
 import com.hillayes.integration.api.rail.CategoryApi;
 import com.hillayes.integration.api.rail.InstitutionApi;
 import com.hillayes.integration.api.rail.UserConsentApi;
+import com.hillayes.integration.api.rail.admin.RailAgreementAdminApi;
+import com.hillayes.integration.api.rail.admin.RailRequisitionAdminApi;
 import com.hillayes.integration.test.ApiTestBase;
 import com.hillayes.integration.test.util.UserEntity;
 import com.hillayes.integration.test.util.UserUtils;
@@ -226,13 +226,13 @@ public class CategoryTestIT extends ApiTestBase {
         assertNotNull(category);
 
         // when: the user creates category selectors
-        List<AccountCategorySelector> setSelectorsRequest = IntStream.range(0, 10)
-            .mapToObj(i -> new AccountCategorySelector()
+        List<AccountCategorySelectorRequest> setSelectorsRequest = IntStream.range(0, 10)
+            .mapToObj(i -> new AccountCategorySelectorRequest()
                 .creditorContains(randomStrings.nextAlphanumeric(10))
                 .refContains(randomStrings.nextAlphanumeric(10))
                 .infoContains(randomStrings.nextAlphanumeric(10))
             ).toList();
-        List<AccountCategorySelector> selectors =
+        List<AccountCategorySelectorResponse> selectors =
             categoryApi.setAccountCategorySelectors(category.getId(), accountId, setSelectorsRequest);
 
         // then: the new selectors are returned
@@ -246,9 +246,9 @@ public class CategoryTestIT extends ApiTestBase {
 
         // when: the selectors are modified
         // take first 5 original and add 10 new
-        List<AccountCategorySelector> updateSelectorsRequest = Streams.concat(
+        List<AccountCategorySelectorRequest> updateSelectorsRequest = Streams.concat(
                 setSelectorsRequest.stream().limit(5),
-                IntStream.range(0, 10).mapToObj(i -> new AccountCategorySelector()
+                IntStream.range(0, 10).mapToObj(i -> new AccountCategorySelectorRequest()
                     .creditorContains(randomStrings.nextAlphanumeric(10))
                     .refContains(randomStrings.nextAlphanumeric(10))
                     .infoContains(randomStrings.nextAlphanumeric(10))
@@ -293,8 +293,8 @@ public class CategoryTestIT extends ApiTestBase {
         });
     }
 
-    private void compare(Collection<AccountCategorySelector> expected,
-                         Collection<AccountCategorySelector> actual) {
+    private void compare(Collection<AccountCategorySelectorRequest> expected,
+                         Collection<AccountCategorySelectorResponse> actual) {
         assertNotNull(actual);
         assertEquals(expected.size(), actual.size());
         expected.forEach(request ->

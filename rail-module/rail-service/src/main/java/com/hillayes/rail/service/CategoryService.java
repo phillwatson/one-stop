@@ -37,17 +37,17 @@ public class CategoryService {
      * Returns the selected page of category groups for the specified user; in name order.
      *
      * @param userId The user ID.
-     * @param page The zero-based, page number.
+     * @param pageIndex The zero-based, page number.
      * @param pageSize The max number of groups per page.
      * @return The selected page of category groups.
      */
-    public Page<CategoryGroup> getCategoryGroups(UUID userId, int page, int pageSize) {
-        log.info("Listing category groups [userId: {}, page: {}, pageSize: {}]", userId, page, pageSize);
-        Page<CategoryGroup> result = categoryGroupRepository.findByUserId(userId, page, pageSize);
+    public Page<CategoryGroup> getCategoryGroups(UUID userId, int pageIndex, int pageSize) {
+        log.info("Listing category groups [userId: {}, page: {}, pageSize: {}]", userId, pageIndex, pageSize);
+        Page<CategoryGroup> result = categoryGroupRepository.findByUserId(userId, pageIndex, pageSize);
 
         if (log.isDebugEnabled()) {
             log.debug("Listing category groups [userId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
-                userId, page, pageSize, result.getContentSize(), result.getTotalCount());
+                userId, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
         }
         return result;
     }
@@ -119,19 +119,19 @@ public class CategoryService {
      * Returns the selected page of categories for the identified category group; in name order.
      *
      * @param groupId The category group ID.
-     * @param page The zero-based, page number.
+     * @param pageIndex The zero-based, page number.
      * @param pageSize The max number of groups per page.
      * @return The selected page of category groups.
      */
-    public Page<Category> getCategories(UUID userId, UUID groupId, int page, int pageSize) {
+    public Page<Category> getCategories(UUID userId, UUID groupId, int pageIndex, int pageSize) {
         log.info("Listing categories for group [userId: {}, groupId: {}, page: {}, pageSize: {}]",
-            userId, groupId, page, pageSize);
+            userId, groupId, pageIndex, pageSize);
         getCategoryGroup(userId, groupId);
-        Page<Category> result = categoryRepository.findByGroupId(groupId, page, pageSize);
+        Page<Category> result = categoryRepository.findByGroupId(groupId, pageIndex, pageSize);
 
         if (log.isDebugEnabled()) {
             log.debug("Listing categories for group [groupId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
-                groupId, page, pageSize, result.getContentSize(), result.getTotalCount());
+                groupId, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
         }
         return result;
     }
@@ -187,6 +187,13 @@ public class CategoryService {
         return category;
     }
 
+    /**
+     * Deletes the identified category, if it belongs to the identified user.
+     * All the selectors of the category will also be deleted.
+     * @param userId the user attempting to delete the category.
+     * @param categoryId the category's identifier.
+     * @return the deleted category.
+     */
     public Category deleteCategory(UUID userId, UUID categoryId) {
         log.info("Deleting category [userId: {}, categoryId: {}]",
             userId, categoryId);
@@ -196,6 +203,21 @@ public class CategoryService {
         return category;
     }
 
+    public Page<CategorySelector> getCategorySelectors(UUID userId, UUID categoryId,
+                                                       int pageIndex, int pageSize) {
+        log.info("Listing category selectors [userId: {}, categoryId: {},, page: {}, pageSize: {}]",
+            userId, categoryId, pageIndex, pageSize);
+
+        Category category = validate(userId, categoryId);
+        Page<CategorySelector> result = Page.of(category.getSelectors(), pageIndex, pageSize);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category selectors [userId: {}, categoryId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                userId, categoryId, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        }
+        return result;
+
+    }
     /**
      * Returns the selectors for the identified category and account.
      *
@@ -204,16 +226,23 @@ public class CategoryService {
      * @param accountId The account ID to which the selectors are associated.
      * @return The category selectors.
      */
-    public Collection<CategorySelector> getCategorySelectors(UUID userId, UUID categoryId, UUID accountId) {
-        log.info("Listing category selectors [userId: {}, categoryId: {}, accountId: {}]",
-            userId, categoryId, accountId);
+    public Page<CategorySelector> getCategorySelectors(UUID userId, UUID categoryId, UUID accountId,
+                                                       int pageIndex, int pageSize) {
+        log.info("Listing category selectors [userId: {}, categoryId: {}, accountId: {}, page: {}, pageSize: {},]",
+            userId, categoryId, accountId, pageIndex, pageSize);
 
         Category category = validate(userId, categoryId);
         validateAccount(category.getGroup(), accountId);
 
-        return category.getSelectors().stream()
+        Page<CategorySelector> result = Page.of(category.getSelectors().stream()
             .filter(selector -> selector.getAccountId().equals(accountId))
-            .toList();
+            .toList(), pageIndex, pageSize);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category selectors [userId: {}, categoryId: {}, accountId: {}, page: {}, pageSize: {}, size: {}, totalCount: {}]",
+                userId, categoryId, accountId, pageIndex, pageSize, result.getContentSize(), result.getTotalCount());
+        }
+        return result;
     }
 
     /**

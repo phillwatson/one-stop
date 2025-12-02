@@ -13,7 +13,7 @@ import java.util.UUID;
 import static io.restassured.http.ContentType.JSON;
 
 public class CategoryApi extends ApiBase {
-    private static final TypeRef<List<AccountCategorySelector>> SELECTORS_LIST = new TypeRef<>() {};
+    private static final TypeRef<List<AccountCategorySelectorResponse>> SELECTORS_LIST = new TypeRef<>() {};
 
     public CategoryApi(Map<String, String> authCookies) {
         super(authCookies);
@@ -157,7 +157,7 @@ public class CategoryApi extends ApiBase {
             .extract().response();
     }
 
-    public List<AccountCategorySelector> getAccountCategorySelectors(UUID categoryId, UUID accountId) {
+    public List<AccountCategorySelectorResponse> getAccountCategorySelectors(UUID categoryId, UUID accountId) {
         return getAccountCategorySelectors(categoryId, accountId, 200)
             .as(SELECTORS_LIST);
     }
@@ -171,14 +171,14 @@ public class CategoryApi extends ApiBase {
             .extract().response();
     }
 
-    public List<AccountCategorySelector> setAccountCategorySelectors(UUID categoryId, UUID accountId,
-                                                               Collection<AccountCategorySelector> selectors) {
+    public List<AccountCategorySelectorResponse> setAccountCategorySelectors(UUID categoryId, UUID accountId,
+                                                               Collection<AccountCategorySelectorRequest> selectors) {
         return setAccountCategorySelectors(categoryId, accountId, selectors, 200)
             .as(SELECTORS_LIST);
     }
 
     public Response setAccountCategorySelectors(UUID categoryId, UUID accountId,
-                                                Collection<AccountCategorySelector> selectors,
+                                                Collection<AccountCategorySelectorRequest> selectors,
                                                 int expectedStatus) {
         return givenAuth()
             .contentType(JSON)
