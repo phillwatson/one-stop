@@ -254,7 +254,6 @@ public class CategoryResource {
             .items(selectors.getContent().stream().map(this::marshal).toList())
             .links(PaginationUtils.buildPageLinks(uriInfo, selectors));
 
-
         if (log.isDebugEnabled()) {
             log.debug("Listing category selectors [userId: {}, categoryId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
                 userId, categoryId, accountId, page, pageSize, result.getCount(), result.getTotal());

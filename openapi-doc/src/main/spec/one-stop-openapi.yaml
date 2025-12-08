@@ -1386,8 +1386,10 @@ paths:
       tags: [ "categories" ]
       summary: Get category statistics
       description: |
-        Get the transaction statistics for the identified category group, across all
-        accounts of the authenticated user.
+        Returns the statistics for the transactions covered by the given category
+        group over the given date range. The response will contain an entry for
+        each of the group's categories for which transactions exist within the
+        given date range, across all accounts of the authenticated user.
       operationId: getCategoryStatistics
       security:
         - cookieAuth: [ ]

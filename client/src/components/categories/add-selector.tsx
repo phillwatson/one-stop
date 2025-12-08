@@ -20,7 +20,7 @@ const colhead: SxProps = {
 
 const NULL_GROUP: CategoryGroup = { name: '', description: '' };
 const NULL_CATEGORY: Category = { name: '', description: '', colour: '' };
-const NULL_SELECTOR: CategorySelector = { infoContains: '', refContains: '', creditorContains: '' };
+const NULL_SELECTOR: CategorySelector = { categoryId: '', accountId: '', infoContains: '', refContains: '', creditorContains: '' };
 
 interface Props {
   open: boolean;
@@ -75,6 +75,8 @@ export default function AddSelector(props: Props) {
   useEffect(() => {
     if (props.open && props.transaction !== undefined) {
       setSelector({
+        categoryId: props.catagoryId!,
+        accountId: props.transaction.accountId,
         infoContains: props.transaction.additionalInformation,
         refContains: props.transaction.reference,
         creditorContains: props.transaction.creditorName
@@ -82,11 +84,11 @@ export default function AddSelector(props: Props) {
     } else {
       setSelector(NULL_SELECTOR);
     }
-  }, [ props.open, props.transaction ]);
+  }, [ props.open, props.catagoryId, props.transaction ]);
 
   useEffect(() => {
     if (accountId && category.id) {
-      CategoryService.getCategorySelectors(category.id!!, accountId)
+      CategoryService.getAllAccountCategorySelectors(category.id!!, accountId)
         .then(response => { setSelectors(response); })
     } else {
       setSelectors([]);

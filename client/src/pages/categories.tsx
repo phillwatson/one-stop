@@ -1,92 +1,71 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { DndContext, DragOverlay, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+
 import Grid from "@mui/material/Grid";
 import Item from "@mui/material/Grid";
 
-import PageHeader from "../components/page-header/page-header";
-import CategoryGroupList from "../components/categories/category-group-list";
-import CategoryList from "../components/categories/category-list";
 import { CategoryGroup, Category } from "../model/category.model";
-import CategoryService from "../services/category.service";
+import PageHeader from "../components/page-header/page-header";
+import CategoryTree from "../components/category/category-tree";
+import Selectors from "../components/category/selector-list";
+import { DraggableSectorRow, DraggedSelector } from "../components/category/selector-row";
+
+interface Selection {
+  group?: CategoryGroup;
+  category?: Category;
+};
 
 export default function Categories() {
-  const [ groups, setGroups ] = useState<Array<CategoryGroup>>([]);
-  const [ selectedGroup, selectGroup ] = useState<CategoryGroup|undefined>(undefined);
-  const [ categories, setCategories ] = useState<Array<Category>>([]);
+  const [ selected, setSelected ] = useState<Selection | undefined>(undefined);
+  const [ draggingSelector, setDraggingSelector ] = useState<DraggedSelector | null>(null);
 
-  useEffect(() => {
-    CategoryService.fetchAllGroups().then(response => setGroups(response));
-  }, [ ]);
+  function handleDragStart(event: DragStartEvent) {
+    const draggedSelector = event.active.data.current as unknown as DraggedSelector;
+    setDraggingSelector(draggedSelector);
+  }
 
-  useEffect(() => {
-    if (selectedGroup) {
-      CategoryService.fetchAllCategories(selectedGroup.id!!)
-        .then( response => setCategories(response));
+  function handleDragEnd(event: DragEndEvent) {
+    const category = event.over?.data.current as unknown as Category;
+    const draggedSelector = event.active.data.current as unknown as DraggedSelector;
+    if (category === undefined || draggedSelector.selector === undefined) {
+      return;
     }
-  }, [ selectedGroup ]);
-
-  function deleteGroup(group: CategoryGroup) {
-    selectGroup(undefined);
-    setGroups(groups.filter(c => c.id !== group.id));
+    console.log(`Dropped selector ${draggedSelector.selector.infoContains} on category ${category.name}`);
   }
 
-  function editGroup(group: CategoryGroup) {
-    setGroups(groups
-      .filter(g => g.id !== group.id)
-      .concat(group)
-      .sort((a, b) => a.name.localeCompare(b.name))
-    );
-    selectGroup(group);
-  }
-
-  function addGroup(group: CategoryGroup) {
-    setGroups(groups
-      .concat(group)
-      .sort((a, b) => a.name.localeCompare(b.name))
-    );
-    selectGroup(group);
-  }
-
-  function deleteCategory(category: Category) {
-    setCategories(categories.filter(c => c.id !== category.id));
-  }
-
-  function editCategory(category: Category) {
-    setCategories(categories
-      .filter(c => c.id !== category.id)
-      .concat(category)
-      .sort((a, b) => a.name.localeCompare(b.name))
-    );
-  }
-
-  function addCategory(category: Category) {
-    setCategories(categories
-      .concat(category)
-      .sort((a, b) => a.name.localeCompare(b.name))
-    );
+  function selectCategory(group: CategoryGroup, category: Category) {
+    setSelected({ group, category });
   }
 
   return (
-    <PageHeader title="Transaction Category Groups">
-      <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
-        <Grid width="49%">
-          <Item>
-            <CategoryGroupList elevation={ 1 }
-              groups={ groups }
-              onSelected={ selectGroup }
-              onAdd={ addGroup }
-              onEdit={ editGroup }
-              onDelete={ deleteGroup }/>
-          </Item>
+    <PageHeader title="Transaction Categories">
+      <DndContext onDragStart={ handleDragStart } onDragEnd={ handleDragEnd }>
+        <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
+          <Grid width="29%">
+            <Item>
+              <CategoryTree onSelectCategory={ selectCategory } />
+            </Item>
+          </Grid>
+          <Grid width="69%">
+            <Item>
+              <Selectors
+                group={ selected?.group }
+                category={ selected?.category }
+              />
+            </Item>
+          </Grid>
         </Grid>
-        <Grid width="49%">
-          <Item>
-            <CategoryList elevation={ 1 } group={ selectedGroup } categories={ categories }
-              onAdd={ addCategory }
-              onEdit={ editCategory }
-              onDelete={ deleteCategory }/>
-          </Item>
-        </Grid>
-      </Grid>
+
+
+        <DragOverlay dropAnimation={ null } zIndex={ 2 }>
+          { draggingSelector &&
+            <DraggableSectorRow
+              key={ draggingSelector.selector.id! }
+              selector={ draggingSelector.selector }
+              accountName={ draggingSelector.accountName } />
+          }
+        </DragOverlay>
+      </DndContext>
     </PageHeader>
   );
 }

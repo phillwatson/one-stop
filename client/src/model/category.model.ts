@@ -13,6 +13,9 @@ export interface Category {
 }
 
 export interface CategorySelector {
+  id?: string;
+  categoryId: string;
+  accountId: string;
   infoContains?: string;
   refContains?: string;
   creditorContains?: string;
