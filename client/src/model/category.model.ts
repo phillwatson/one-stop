@@ -21,6 +21,11 @@ export interface CategorySelector {
   creditorContains?: string;
 }
 
+// attempts to create a text identifier from the given selector
+export function selectorName(selector: CategorySelector) {
+  return selector.infoContains || selector.refContains || selector.creditorContains;
+}
+
 export interface CategoryStatistics {
   groupId: string;
   groupName: string;

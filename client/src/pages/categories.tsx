@@ -4,19 +4,17 @@ import { DndContext, DragOverlay, DragEndEvent, DragStartEvent } from '@dnd-kit/
 import Grid from "@mui/material/Grid";
 import Item from "@mui/material/Grid";
 
-import { CategoryGroup, Category } from "../model/category.model";
+import { useMessageDispatch } from '../contexts/messages/context';
+import CategoryService from "../services/category.service";
+import { CategoryGroup, Category, CategorySelector, selectorName } from "../model/category.model";
 import PageHeader from "../components/page-header/page-header";
 import CategoryTree from "../components/category/category-tree";
 import Selectors from "../components/category/selector-list";
 import { DraggableSectorRow, DraggedSelector } from "../components/category/selector-row";
 
-interface Selection {
-  group?: CategoryGroup;
-  category?: Category;
-};
-
 export default function Categories() {
-  const [ selected, setSelected ] = useState<Selection | undefined>(undefined);
+  const showMessage = useMessageDispatch();
+  const [ selectors, setSelectors ] = useState<Array<CategorySelector>>([]);
   const [ draggingSelector, setDraggingSelector ] = useState<DraggedSelector | null>(null);
 
   function handleDragStart(event: DragStartEvent) {
@@ -30,11 +28,40 @@ export default function Categories() {
     if (category === undefined || draggedSelector.selector === undefined) {
       return;
     }
-    console.log(`Dropped selector ${draggedSelector.selector.infoContains} on category ${category.name}`);
+    
+    const selector = draggedSelector.selector;
+    CategoryService.moveCategorySelector(selector, category.id!)
+      .then(() => {
+        showMessage({ type: 'add', level: 'success', text: `Selector "${selectorName(selector)}" moved successfully` });
+
+        // delete selector node from local state
+        setSelectors(selectors.filter(s => s.id !== selector.id));
+      })
+      .catch(err => showMessage(err))
   }
 
-  function selectCategory(group: CategoryGroup, category: Category) {
-    setSelected({ group, category });
+  function deleteSelector(selector: CategorySelector) {
+    if (selector) {
+      CategoryService.deleteCategorySelector(selector)
+        .then(() => {
+          showMessage({ type: 'add', level: 'success', text: `Selector "${selectorName(selector)}" deleted` });
+
+          // delete selector from local state
+          setSelectors(selectors.filter(s => s.id !== selector.id));
+        })
+        .catch(err => showMessage(err));
+    }
+  }
+
+  function selectCategory(group?: CategoryGroup, category?: Category) {
+    if (category) {
+      CategoryService
+        .getAllCategorySelectors(category?.id!)
+        .then(response => setSelectors(response))
+        .catch(err => showMessage(err));
+    } else {
+      setSelectors([]);
+    }
   }
 
   return (
@@ -48,10 +75,7 @@ export default function Categories() {
           </Grid>
           <Grid width="69%">
             <Item>
-              <Selectors
-                group={ selected?.group }
-                category={ selected?.category }
-              />
+              <Selectors selectors={ selectors } onDeleteSelector={ deleteSelector } />
             </Item>
           </Grid>
         </Grid>

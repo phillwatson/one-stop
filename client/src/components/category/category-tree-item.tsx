@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEventHandler } from "react";
+import { useState, useEffect, MouseEventHandler, MouseEvent } from "react";
 import { useDroppable } from '@dnd-kit/core';
 
 import PieChartIcon from '@mui/icons-material/PieChart';
@@ -13,7 +13,7 @@ interface Props extends CustomTreeItemProps {
   onDeleteClick?: MouseEventHandler | undefined;
 };
 
-export function CategoryTreeItem(props: Props) {
+export default function CategoryTreeItem(props: Props) {
   const { isOver, active, setNodeRef } = useDroppable({
     id: props.category.id!,
     data: props.category
@@ -30,10 +30,21 @@ export function CategoryTreeItem(props: Props) {
     setDroppable(result);
   }, [ props.category, isOver, active ])
 
+
+  function handleEditClick(event: MouseEvent) {
+    if (props.onEditClick)
+      props.onEditClick(event);
+  }
+
+  function handleDeleteClick(event: MouseEvent) {
+    if (props.onDeleteClick)
+      props.onDeleteClick(event);
+  }
+
   return (
     <CustomTreeItem ref={ setNodeRef }
-      onEditClick={ props.onEditClick }
-      onDeleteClick={ props.onDeleteClick }
+      onEditClick={ handleEditClick }
+      onDeleteClick={ handleDeleteClick }
       label={ props.category.name }
       labelIcon={ <Box component={ PieChartIcon } color={ props.category.colour } /> }
       style={{ userSelect: 'none', backgroundColor: isDroppable ? '#c2e6ab6e' : undefined }}

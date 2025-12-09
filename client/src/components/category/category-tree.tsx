@@ -7,9 +7,10 @@ import CategoryService from '../../services/category.service';
 import { CategoryGroup, Category } from '../../model/category.model';
 
 import GroupTreeItem from './group-tree-item';
-import { CategoryTreeItem } from './category-tree-item';
+import CategoryTreeItem from './category-tree-item';
 import EditCategoryGroup from './edit-category-group';
 import EditCategory from './edit-category';
+import ConfirmationDialog from '../dialogs/confirm-dialog';
 
 export class CategoryGroupNode {
   group: CategoryGroup;
@@ -25,16 +26,20 @@ export class CategoryGroupNode {
 };
 
 interface Props {
-  onSelectCategory?: (group: CategoryGroup, category: Category) => void;
+  onSelectCategory?: (group?: CategoryGroup, category?: Category) => void;
 }
 
 export default function CategoryTree(props: Props) {
   const showMessage = useMessageDispatch();
   const [ nodes, setNodes ] = useState<Array<CategoryGroupNode>>([]);
-  const [ selectedNode, setSelectedNode ] = useState<CategoryGroupNode | undefined>(undefined);
+  const [ focusedNode, setFocusedNode ] = useState<CategoryGroupNode | undefined>(undefined);
+  const [ focusedCategory, setFocusedCategory ] = useState<Category | undefined>(undefined);
   const [ selectedCategory, setSelectedCategory ] = useState<Category | undefined>(undefined);
+
   const [ editGroupOpen, setEditGroupOpen ] = useState<boolean>(false);
   const [ editCategoryOpen, setEditCategoryOpen ] = useState<boolean>(false);
+  const [ deleteGroupOpen, setDeleteGroupOpen ] = useState<boolean>(false);
+  const [ deleteCategoryOpen, setDeleteCategoryOpen ] = useState<boolean>(false);
 
   useEffect(() => {
     CategoryService
@@ -52,62 +57,139 @@ export default function CategoryTree(props: Props) {
       ).then(result => setNodes(result))
   }, []);
 
+  function selectCategory(node?: CategoryGroupNode, category?: Category) {
+    setSelectedCategory(category);
+    if (props.onSelectCategory) {
+      props.onSelectCategory(node?.group, category);
+    }
+  }
 
   function startGroupEdit(node: CategoryGroupNode) {
-    setSelectedNode(node)
+    setFocusedNode(node)
     setEditGroupOpen(true);
   }
 
   function confirmGroupEdit(group: CategoryGroup) {
+    const creating = group.id === undefined;
+    (creating)
+      ? CategoryService.createGroup(group)
+      : CategoryService.updateGroup(group)
+      .then(updated => {
+        setEditGroupOpen(false);
+
+        const message = `Group "${updated.name}" ${creating ? "added" : "updated"} successfully`
+        showMessage({ type: 'add', level: 'success', text: message });
+        
+        // reflect change on local state
+        const node = new CategoryGroupNode(updated);
+        if (! creating) node.setCategories(focusedNode!.categories);
+
+        setNodes(nodes
+          .filter(n => n.group.id !== updated.id)
+          .concat(node!)
+          .sort((a, b) => a.group.name.localeCompare(b.group.name))
+        );
+      })
+      .catch(err => showMessage(err))
   }
 
   function deleteGroup(node: CategoryGroupNode) {
+    setFocusedNode(node);
+    setDeleteGroupOpen(true);
+  }
+
+  function confirmDeleteGroup() {
+    const group = focusedNode?.group
+    if (group) {
+      CategoryService.deleteGroup(group.id!)
+        .then(() => {
+          setDeleteGroupOpen(false);
+          showMessage({ type: 'add', level: 'success', text: `Group "${group.name}" deleted` });
+
+          // delete group node from local state
+          setNodes(nodes
+            .filter(n => n.group.id !== group.id)
+          );
+
+          // reflect deletion on containing element
+          if (group.id === selectedCategory?.groupId) {
+            selectCategory(undefined, undefined);
+          }
+        })
+        .catch(err => showMessage(err))
+    } else {
+      setDeleteGroupOpen(false);
+    }
   }
 
   function startCategoryEdit(node: CategoryGroupNode, category: Category) {
-    setSelectedNode(node)
-    setSelectedCategory(category);
+    setFocusedNode(node)
+    setFocusedCategory(category);
     setEditCategoryOpen(true);
   }
 
   function confirmCategoryEdit(category: Category) {
-    const node = selectedNode;
-    if (node) {
-      if (category.id) {
-        CategoryService.updateCategory(category)
-          .then(category => {
-            setEditCategoryOpen(false);
-            showMessage({ type: 'add', level: 'success', text: `Category "${category.name}" updated successfully` });
+    const node = focusedNode;
+    if (node && category) {
+      const creating = category.id === undefined;
+      (creating)
+        ? CategoryService.createCategory(node.group.id!!, category)
+        : CategoryService.updateCategory(category)
+        .then(updated => {
+          setEditCategoryOpen(false);
 
-            node.setCategories(node.categories
-                .filter(c => c.id !== category.id)
-                .concat(category)
-                .sort((a, b) => a.name.localeCompare(b.name))
-            );
-            
-            setNodes(nodes
-              .filter(n => n.group.id !== category.groupId)
-              .concat(node)
-              .sort((a, b) => a.group.name.localeCompare(b.group.name))
-            );
-          })
-          .catch(err => showMessage(err))
-      } else {
-        CategoryService.createCategory(node.group.id!!, category)
-          .then(category => {
-            setEditCategoryOpen(false);
-            showMessage({ type: 'add', level: 'success', text: `Category "${category.name}" added successfully`});
-          })
-          .catch(err => showMessage(err))
-      }
+          const message = `Category "${updated.name}" ${creating ? "added" : "updated"} successfully`
+          showMessage({ type: 'add', level: 'success', text: message });
+
+          // reflect change on group node's state
+          node.setCategories(node.categories
+              .filter(c => c.id !== updated.id)
+              .concat(updated)
+              .sort((a, b) => a.name.localeCompare(b.name))
+          );
+          
+          // reflect change on local state
+          setNodes(nodes
+            .filter(n => n.group.id !== updated.groupId)
+            .concat(node)
+            .sort((a, b) => a.group.name.localeCompare(b.group.name))
+          );
+        })
+        .catch(err => showMessage(err))
+    } else {
+      setEditCategoryOpen(false);
     }
   }
 
-  function clickCategory(node: CategoryGroupNode, category: Category) {
-    if (props.onSelectCategory) props.onSelectCategory(node.group, category)
+  function deleteCategory(node: CategoryGroupNode, category: Category) {
+    setFocusedNode(node);
+    setFocusedCategory(category);
+    setDeleteCategoryOpen(true);
   }
 
-  function deleteCategory(node: CategoryGroupNode, category: Category) {
+  function confirmDeleteCategory() {
+    const node = focusedNode;
+    const category = focusedCategory;
+    if (node && category) {
+      CategoryService.deleteCategory(category.id!)
+        .then(() => {
+          setDeleteCategoryOpen(false);
+          showMessage({ type: 'add', level: 'success', text: `Category "${category.name}" deleted` });
+
+          // delete catagory from local state
+          node.setCategories(node.categories
+            .filter(c => c.id !== category.id)
+          );
+
+          // reflect deletion on containing element
+          if (category.id === selectedCategory?.groupId) {
+            selectCategory(undefined, undefined);
+          }
+        })
+        .catch(err => showMessage(err))
+    } else {
+      setDeleteCategoryOpen(false);
+    }
   }
 
   return (
@@ -122,7 +204,7 @@ export default function CategoryTree(props: Props) {
             { node.categories.map(category =>
               <CategoryTreeItem key={ category.id! } itemId={ category.id! }
                 category={ category }
-                onClick={ () => clickCategory(node, category) }
+                onClick={ () => selectCategory(node, category) }
                 onEditClick={ () => startCategoryEdit(node, category) }
                 onDeleteClick={ () => deleteCategory(node, category) }
               />
@@ -133,17 +215,38 @@ export default function CategoryTree(props: Props) {
   
       { editCategoryOpen &&
         <EditCategory open={ editCategoryOpen }
-          group={ selectedNode!.group }
-          category={ selectedCategory! }
+          group={ focusedNode!.group }
+          category={ focusedCategory! }
           onConfirm={ confirmCategoryEdit }
           onCancel={() => setEditCategoryOpen(false)}/>
       }
 
       { editGroupOpen &&
         <EditCategoryGroup open={ editGroupOpen }
-          group={ selectedNode!.group }
+          group={ focusedNode!.group }
           onConfirm={ confirmGroupEdit }
           onCancel={() => setEditGroupOpen(false)}/>
+      }
+ 
+      { deleteCategoryOpen &&
+        <ConfirmationDialog open={deleteCategoryOpen}
+          title={"Delete Category \""+ focusedCategory?.name + "\""}
+          content={ [
+            "Are you sure you want to delete this category, and it's transaction selectors?",
+            "This action cannot be undone." ] }
+          onConfirm={ confirmDeleteCategory }
+          onCancel={() => setDeleteCategoryOpen(false)} />
+      }
+ 
+      { deleteGroupOpen &&
+        <ConfirmationDialog open={deleteGroupOpen}
+          title={"Delete Category Group \""+ focusedNode?.group.name + "\""}
+           content={ [
+            "Are you sure you want to delete this group?",
+            "This will delete the categories in the group and their transaction selectors.",
+            "This action cannot be undone." ] }
+          onConfirm={ confirmDeleteGroup }
+          onCancel={() => setDeleteGroupOpen(false)} />
       }
     </div>
   )

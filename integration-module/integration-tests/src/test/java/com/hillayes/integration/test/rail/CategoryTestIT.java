@@ -226,29 +226,29 @@ public class CategoryTestIT extends ApiTestBase {
         assertNotNull(category);
 
         // when: the user creates category selectors
-        List<AccountCategorySelectorRequest> setSelectorsRequest = IntStream.range(0, 10)
-            .mapToObj(i -> new AccountCategorySelectorRequest()
+        List<CategorySelectorRequest> setSelectorsRequest = IntStream.range(0, 10)
+            .mapToObj(i -> new CategorySelectorRequest()
                 .creditorContains(randomStrings.nextAlphanumeric(10))
                 .refContains(randomStrings.nextAlphanumeric(10))
                 .infoContains(randomStrings.nextAlphanumeric(10))
             ).toList();
-        List<AccountCategorySelectorResponse> selectors =
+        List<CategorySelectorResponse> selectors =
             categoryApi.setAccountCategorySelectors(category.getId(), accountId, setSelectorsRequest);
 
         // then: the new selectors are returned
         compare(setSelectorsRequest, selectors);
 
         // when: the selectors are retrieved
-        selectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId);
+        PaginatedCategorySelectors pagedSelectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId, 0, 100);
 
         // then: the selectors are returned
-        compare(setSelectorsRequest, selectors);
+        compare(setSelectorsRequest, pagedSelectors.getItems());
 
         // when: the selectors are modified
         // take first 5 original and add 10 new
-        List<AccountCategorySelectorRequest> updateSelectorsRequest = Streams.concat(
+        List<CategorySelectorRequest> updateSelectorsRequest = Streams.concat(
                 setSelectorsRequest.stream().limit(5),
-                IntStream.range(0, 10).mapToObj(i -> new AccountCategorySelectorRequest()
+                IntStream.range(0, 10).mapToObj(i -> new CategorySelectorRequest()
                     .creditorContains(randomStrings.nextAlphanumeric(10))
                     .refContains(randomStrings.nextAlphanumeric(10))
                     .infoContains(randomStrings.nextAlphanumeric(10))
@@ -262,10 +262,10 @@ public class CategoryTestIT extends ApiTestBase {
         compare(updateSelectorsRequest, selectors);
 
         // when: the updated selectors are retrieved
-        selectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId);
+        pagedSelectors = categoryApi.getAccountCategorySelectors(category.getId(), accountId, 0, 100);
 
         // then: the updated selectors are returned
-        compare(updateSelectorsRequest, selectors);
+        compare(updateSelectorsRequest, pagedSelectors.getItems());
 
         // when: the category is deleted
         categoryApi.deleteCategory(category.getId());
@@ -282,7 +282,7 @@ public class CategoryTestIT extends ApiTestBase {
         });
 
         // and: the selectors can no longer be retrieved
-        withServiceError(categoryApi.getAccountCategorySelectors(category.getId(), accountId, 404), errorResponse -> {
+        withServiceError(categoryApi.getAccountCategorySelectors(category.getId(), accountId, 0, 100, 404), errorResponse -> {
             ServiceError error = errorResponse.getErrors().get(0);
 
             // then: a not-found error is returned
@@ -293,8 +293,8 @@ public class CategoryTestIT extends ApiTestBase {
         });
     }
 
-    private void compare(Collection<AccountCategorySelectorRequest> expected,
-                         Collection<AccountCategorySelectorResponse> actual) {
+    private void compare(Collection<CategorySelectorRequest> expected,
+                         Collection<CategorySelectorResponse> actual) {
         assertNotNull(actual);
         assertEquals(expected.size(), actual.size());
         expected.forEach(request ->

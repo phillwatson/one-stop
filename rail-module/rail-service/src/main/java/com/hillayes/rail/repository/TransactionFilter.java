@@ -23,7 +23,7 @@ import java.util.*;
 @ToString
 @EqualsAndHashCode
 public class TransactionFilter {
-    // a NULl value instance of the transaction 
+    // a NULl value instance of the transaction
     public static final TransactionFilter NULL = TransactionFilter.builder().build();
 
     // the user to which the transaction must belong.
@@ -51,7 +51,7 @@ public class TransactionFilter {
      *
      * @param from the date from which the transaction should be included - inclusive.
      * @param to the date to which the transaction should be included - exclusive.
-     * @return the transaction 
+     * @return the transaction
      */
     public TransactionFilter dateRange(LocalDate from, LocalDate to) {
         // convert dates to instant
@@ -81,7 +81,7 @@ public class TransactionFilter {
      * Only those parameters with a non-null value are included.
      */
     public Map<String, Object> toParams() {
-        Map<String, Object> params = new HashMap();
+        Map<String, Object> params = new HashMap<>();
 
         if (getUserId() != null) {
             params.put("userId", getUserId());
@@ -186,6 +186,6 @@ public class TransactionFilter {
             predicates.add(builder.like(root.get("creditorName"), "%" + getCreditor() + "%"));
         }
 
-        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        return builder.and(predicates.toArray(new Predicate[0]));
     }
 }

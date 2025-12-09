@@ -6,15 +6,14 @@ import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategoryGroup;
-import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.domain.CategorySelector;
+import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.errors.CategoryAlreadyExistsException;
 import com.hillayes.rail.errors.CategoryGroupAlreadyExistsException;
 import com.hillayes.rail.repository.AccountRepository;
 import com.hillayes.rail.repository.CategoryGroupRepository;
 import com.hillayes.rail.repository.CategoryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -267,7 +266,7 @@ public class CategoryService {
 
         category.getSelectors().removeIf(selector -> selector.getAccountId().equals(accountId));
         if (selectors != null) {
-            selectors.forEach(newSelector -> category.addSelector(accountId, selector -> selector
+            selectors.forEach(newSelector -> category.add(accountId, selector -> selector
                 .infoContains(Strings.trimOrNull(newSelector.getInfoContains()))
                 .refContains(Strings.trimOrNull(newSelector.getRefContains()))
                 .creditorContains(Strings.trimOrNull(newSelector.getCreditorContains()))
@@ -276,6 +275,40 @@ public class CategoryService {
 
         categoryRepository.save(category);
         return category.getSelectors();
+    }
+
+    public CategorySelector moveCategorySelector(UUID userId,
+                                                 UUID categoryId,
+                                                 UUID selectorId,
+                                                 UUID destinationCategoryId) {
+        log.info("Moving category selector [userId: {}, categoryId: {}, selectorId: {}, destinationId: {}]",
+            userId, categoryId, selectorId, destinationCategoryId);
+
+        Category sourceCategory = validate(userId, categoryId);
+        Category destinationCategory = validate(userId, destinationCategoryId);
+
+        CategorySelector selector = sourceCategory.getSelectors().stream()
+            .filter(s -> s.getId().equals(selectorId))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("CategorySelector", selectorId));
+
+        destinationCategory.add(selector);
+
+        categoryRepository.save(sourceCategory);
+        categoryRepository.save(destinationCategory);
+        return selector;
+    }
+
+    public CategorySelector deleteCategorySelector(UUID userId,
+                                                   UUID categoryId,
+                                                   UUID selectorId) {
+        log.info("Deleting category selector [userId: {}, categoryId: {}, selectorId: {}]",
+            userId, categoryId, selectorId);
+
+        Category category = validate(userId, categoryId);
+        CategorySelector selector = category.removeSelector(selectorId);
+        categoryRepository.save(category);
+        return selector;
     }
 
     /**

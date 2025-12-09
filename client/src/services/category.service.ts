@@ -168,6 +168,30 @@ class CategoryService {
   }
 
   /**
+   * Moves the identified category selector to the identified destination category.
+   * @param selector the category selector to be moved.
+   * @param destCategoryId the identifier of the category to which the selector is to be moved.
+   * @returns 
+   */
+  moveCategorySelector(selector: CategorySelector, destCategoryId: string): Promise<CategorySelector> {
+    const destination = {
+      categoryId: destCategoryId
+    }
+    return http.put<CategorySelector>(`/rails/categories/${selector.categoryId}/selectors/${selector.id!}`, destination)
+      .then(response => response.data);
+  }
+
+  /**
+   * Deletes the identified category selector.
+   * @param selector the selector to be deleted.
+   * @returns an empty response.
+   */
+  deleteCategorySelector(selector: CategorySelector): Promise<any> {
+    return http.delete<void>(`/rails/categories/${selector.categoryId}/selectors/${selector.id!}`)
+      .then(response => response.data);
+  }
+
+  /**
    * Returns the category selectors for both the identified category and account.
    * @param categoryId the category's unique identifier.
    * @param accountId the account's unique identifier.
@@ -177,7 +201,7 @@ class CategoryService {
    */
   getAccountCategorySelectors(categoryId: string, accountId: string,
                               page: number = 0, pageSize: number = 20): Promise<PaginatedList<CategorySelector>> {
-    return http.get<PaginatedList<CategorySelector>>(`/rails/categories/${categoryId}/selectors/${accountId}`, { params: { "page": page, "page-size": pageSize }})
+    return http.get<PaginatedList<CategorySelector>>(`/rails/categories/${categoryId}/account-selectors/${accountId}`, { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
   }
 
@@ -199,9 +223,9 @@ class CategoryService {
    * @param selectors the collection of category selectors to be assigned.
    * @returns 
    */
-  setCategorySelectors(categoryId: string, accountId: string,
-                       selectors: Array<CategorySelector>): Promise<Array<CategorySelector>> {
-    return http.put<Array<CategorySelector>>(`/rails/categories/${categoryId}/selectors/${accountId}`, selectors)
+  setAccountCategorySelectors(categoryId: string, accountId: string,
+                              selectors: Array<CategorySelector>): Promise<Array<CategorySelector>> {
+    return http.put<Array<CategorySelector>>(`/rails/categories/${categoryId}/account-selectors/${accountId}`, selectors)
       .then(response => response.data);
   }
 

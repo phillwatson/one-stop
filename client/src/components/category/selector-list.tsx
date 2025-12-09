@@ -8,10 +8,11 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 
-import { CategoryGroup, Category, CategorySelector } from "../../model/category.model";
-import CategoryService from '../../services/category.service';
+import { useMessageDispatch } from '../../contexts/messages/context';
+import { CategorySelector, selectorName } from "../../model/category.model";
 import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
+import ConfirmationDialog from '../dialogs/confirm-dialog';
 
 import SelectorRow from './selector-row';
 
@@ -20,39 +21,48 @@ const colhead: SxProps = {
 };
 
 interface Props {
-  group?: CategoryGroup;
-  category?: Category;
+  selectors: Array<CategorySelector>;
+  onDeleteSelector?: (selector: CategorySelector) => void;  
 }
 
 export default function Selectors(props: Props) {
-  const [ selectors, setSelectors ] = useState<Array<CategorySelector>>([]);
+  const showMessage = useMessageDispatch();
   const [ accounts, setAccounts ] = useState<Array<AccountDetail>>([]);
+  const [ deleteSelector, setDeleteSelector ] = useState<CategorySelector | undefined>(undefined);
 
   useEffect(() => {
-    AccountService.fetchAll().then(response => setAccounts(response))
-  }, []);
+    AccountService.fetchAll()
+      .then(response => setAccounts(response))
+      .catch(err => showMessage(err));
+  }, [ showMessage ]);
 
   function getAccountName(accountId: String): String {
     const name = accounts.find(account => account.id === accountId)?.name;
     return name ? name : "";
   }
 
-  useEffect(() => {
-    if (props.category !== undefined) {
-      CategoryService
-        .getAllCategorySelectors(props.category.id!)
-        .then(response => setSelectors(response));
+  function onDeleteSelector(selector: CategorySelector) {
+    setDeleteSelector(selector);
+  }
+
+  function confirmDeleteSelector() {
+    const selector = deleteSelector;
+    if (selector) {
+      if (props.onDeleteSelector) {
+        props.onDeleteSelector(selector);
+      }
     } else {
-      setSelectors([]);
+      setDeleteSelector(undefined);
     }
-  }, [ props.category ]);
+  }
 
   return (
     <div style={{ height: '700px', overflow: 'scroll' }}>
       <TableContainer>
-        <Table size='small'>
+        <Table size='small' stickyHeader>
           <TableHead>
             <TableRow>
+              <TableCell sx={ colhead }></TableCell>
               <TableCell sx={ colhead }></TableCell>
               <TableCell sx={ colhead }>Account</TableCell>
               <TableCell sx={ colhead }>Info</TableCell>
@@ -61,15 +71,26 @@ export default function Selectors(props: Props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            { selectors.map(selector =>
+            { props.selectors.map(selector =>
               <SelectorRow
                 key={ selector.id! }
                 selector={ selector }
-                accountName={ getAccountName(selector.accountId) } />
+                accountName={ getAccountName(selector.accountId) }
+                onDeleteClick={ () => onDeleteSelector(selector) } />
             )}
           </TableBody>
         </Table>
       </TableContainer>
+ 
+      { deleteSelector &&
+        <ConfirmationDialog open={ true }
+          title={"Delete Selector \""+ selectorName(deleteSelector) + "\""}
+           content={ [
+            "Are you sure you want to delete this transaction selector?",
+            "This action cannot be undone." ] }
+          onConfirm={ confirmDeleteSelector }
+          onCancel={() => setDeleteSelector(undefined)} />
+      }
     </div>
   );
 }

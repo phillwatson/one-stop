@@ -123,7 +123,7 @@ export default function AddSelector(props: Props) {
 
   function handleConfirm() {
     if (accountId && category.id) {
-      CategoryService.setCategorySelectors(category.id!!, accountId, [ ...selectors, selector ])
+      CategoryService.setAccountCategorySelectors(category.id!!, accountId, [ ...selectors, selector ])
       .then(() => {
         showMessage({ type: 'add', level: 'success', text: `Successfully added to Category "${category.name}"` });
         props.onConfirm(category, selector);
@@ -202,7 +202,7 @@ export default function AddSelector(props: Props) {
 
       <DialogContent>
         <Divider textAlign="left" sx={{fontWeight: 'light'}}>Or choose from existing selectors:</Divider>
-        <TableContainer>
+        <TableContainer style={{ maxHeight: "300px" }}>
           <Table size='small'>
             <TableHead>
               <TableRow>

@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class CategoryResourceTest extends TestBase {
-    private static final TypeRef<Collection<AccountCategorySelectorResponse>> ACCOUNT_CATEGORY_SELECTOR_LIST = new TypeRef<>() {};
+    private static final TypeRef<Collection<CategorySelectorResponse>> ACCOUNT_CATEGORY_SELECTOR_LIST = new TypeRef<>() {};
     private static final TypeRef<List<CategoryStatisticsResponse>> CATEGORY_STATISTICS_RESPONSE_LIST = new TypeRef<>() {};
 
     @InjectMock
@@ -483,7 +482,7 @@ public class CategoryResourceTest extends TestBase {
         // and: the selectors cover all accounts
         assertNotNull(response.getItems());
         categorySelectors.forEach(expected -> {
-            AccountCategorySelectorResponse actual = response.getItems().stream()
+            CategorySelectorResponse actual = response.getItems().stream()
                 .filter(selector -> selector.getId().equals(expected.getId()))
                 .findFirst()
                 .orElse(null);
@@ -543,10 +542,10 @@ public class CategoryResourceTest extends TestBase {
         UUID accountId = UUID.randomUUID();
 
         // and: a collection of new category-selectors
-        List<AccountCategorySelectorRequest> selectors = List.of(
-            new AccountCategorySelectorRequest().infoContains(insecure().nextAlphanumeric(20)),
-            new AccountCategorySelectorRequest().refContains(insecure().nextAlphanumeric(20)),
-            new AccountCategorySelectorRequest().creditorContains(insecure().nextAlphanumeric(20))
+        List<CategorySelectorRequest> selectors = List.of(
+            new CategorySelectorRequest().infoContains(insecure().nextAlphanumeric(20)),
+            new CategorySelectorRequest().refContains(insecure().nextAlphanumeric(20)),
+            new CategorySelectorRequest().creditorContains(insecure().nextAlphanumeric(20))
         );
 
         // and: the service is primed with data
@@ -555,7 +554,7 @@ public class CategoryResourceTest extends TestBase {
             .thenReturn(updatedSelectors);
 
         // when: the category selectors are updated
-        Collection<AccountCategorySelectorResponse> response = given()
+        Collection<CategorySelectorResponse> response = given()
             .request()
             .pathParam("categoryId", categoryId)
             .pathParam("accountId", accountId)

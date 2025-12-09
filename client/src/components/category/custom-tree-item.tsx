@@ -16,8 +16,8 @@ import {
  } from '@mui/x-tree-view';
 import { IconButton, Stack } from "@mui/material";
 
-export interface CustomTreeItemProps
-  extends Omit<UseTreeItemParameters, 'rootRef'>,
+export interface CustomTreeItemProps extends
+      Omit<UseTreeItemParameters, 'rootRef'>,
       Omit<React.HTMLAttributes<HTMLLIElement>, 'onFocus'> { 
   labelIcon?: any;
   onEditClick?: MouseEventHandler | undefined;
@@ -63,10 +63,14 @@ export const CustomTreeItem = forwardRef((
 
           { LabelIcon }
 
-          <TreeItemLabel { ...getLabelProps() } />
+          <TreeItemLabel { ...getLabelProps() } >
+            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              { label }
+            </span>
+          </TreeItemLabel>
 
           { isMouseOver && (props.onEditClick || props.onDeleteClick) &&
-            <Stack direction="row" spacing={1} marginLeft="auto" >
+            <Stack direction="row" spacing={1} marginLeft="auto" zIndex={2} >
               { props.onEditClick &&
                 <IconButton
                   color="inherit" aria-label="edit" edge="start" size="small"

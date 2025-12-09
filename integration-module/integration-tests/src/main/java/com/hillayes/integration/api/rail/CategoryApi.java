@@ -13,7 +13,7 @@ import java.util.UUID;
 import static io.restassured.http.ContentType.JSON;
 
 public class CategoryApi extends ApiBase {
-    private static final TypeRef<List<AccountCategorySelectorResponse>> SELECTORS_LIST = new TypeRef<>() {};
+    private static final TypeRef<List<CategorySelectorResponse>> SELECTORS_LIST = new TypeRef<>() {};
 
     public CategoryApi(Map<String, String> authCookies) {
         super(authCookies);
@@ -157,33 +157,84 @@ public class CategoryApi extends ApiBase {
             .extract().response();
     }
 
-    public List<AccountCategorySelectorResponse> getAccountCategorySelectors(UUID categoryId, UUID accountId) {
-        return getAccountCategorySelectors(categoryId, accountId, 200)
-            .as(SELECTORS_LIST);
+    public PaginatedCategorySelectors getCategorySelectors(UUID categoryId, int pageIndex, int pageSize) {
+        return getCategorySelectors(categoryId, pageIndex, pageSize, 200)
+            .as(PaginatedCategorySelectors.class);
     }
 
-    public Response getAccountCategorySelectors(UUID categoryId, UUID accountId, int expectedStatus) {
+    public Response getCategorySelectors(UUID categoryId, int pageIndex, int pageSize, int expectedStatus) {
         return givenAuth()
-            .get("/api/v1/rails/categories/{categoryId}/selectors/{accountId}", categoryId, accountId)
+            .queryParam("page", pageIndex)
+            .queryParam("page-size", pageSize)
+            .get("/api/v1/rails/categories/{categoryId}/selectors", categoryId)
             .then()
             .statusCode(expectedStatus)
             .contentType(JSON)
             .extract().response();
     }
 
-    public List<AccountCategorySelectorResponse> setAccountCategorySelectors(UUID categoryId, UUID accountId,
-                                                               Collection<AccountCategorySelectorRequest> selectors) {
+    public CategorySelectorResponse moveCategorySelector(UUID categoryId, UUID selectorId, UUID destCategoryId) {
+        return moveCategorySelector(categoryId, selectorId, destCategoryId, 200)
+            .as(CategorySelectorResponse.class);
+    }
+
+    public Response moveCategorySelector(UUID categoryId, UUID selectorId, UUID destCategoryId, int expectedStatus) {
+        CategorySelectorUpdateRequest request = new CategorySelectorUpdateRequest()
+            .categoryId(destCategoryId);
+
+        return givenAuth()
+            .body(request)
+            .put("/api/v1/rails/categories/{categoryId}/selectors/{selectorId}", categoryId, selectorId)
+            .then()
+            .statusCode(expectedStatus)
+            .contentType(JSON)
+            .extract().response();
+    }
+
+    public Response deleteCategorySelector(UUID categoryId, UUID selectorId) {
+        return deleteCategorySelector(categoryId, selectorId, 200);
+    }
+
+    public Response deleteCategorySelector(UUID categoryId, UUID selectorId, int expectedStatus) {
+        return givenAuth()
+            .delete("/api/v1/rails/categories/{categoryId}/selectors/{selectorId}", categoryId, selectorId)
+            .then()
+            .statusCode(expectedStatus)
+            .contentType(JSON)
+            .extract().response();
+    }
+
+    public PaginatedCategorySelectors getAccountCategorySelectors(UUID categoryId, UUID accountId,
+                                                                  int pageIndex, int pageSize) {
+        return getAccountCategorySelectors(categoryId, accountId, pageIndex, pageSize, 200)
+            .as(PaginatedCategorySelectors.class);
+    }
+
+    public Response getAccountCategorySelectors(UUID categoryId, UUID accountId,
+                                                int pageIndex, int pageSize, int expectedStatus) {
+        return givenAuth()
+            .queryParam("page", pageIndex)
+            .queryParam("page-size", pageSize)
+            .get("/api/v1/rails/categories/{categoryId}/account-selectors/{accountId}", categoryId, accountId)
+            .then()
+            .statusCode(expectedStatus)
+            .contentType(JSON)
+            .extract().response();
+    }
+
+    public List<CategorySelectorResponse> setAccountCategorySelectors(UUID categoryId, UUID accountId,
+                                                               Collection<CategorySelectorRequest> selectors) {
         return setAccountCategorySelectors(categoryId, accountId, selectors, 200)
             .as(SELECTORS_LIST);
     }
 
     public Response setAccountCategorySelectors(UUID categoryId, UUID accountId,
-                                                Collection<AccountCategorySelectorRequest> selectors,
+                                                Collection<CategorySelectorRequest> selectors,
                                                 int expectedStatus) {
         return givenAuth()
             .contentType(JSON)
             .body(selectors)
-            .put("/api/v1/rails/categories/{categoryId}/selectors/{accountId}", categoryId, accountId)
+            .put("/api/v1/rails/categories/{categoryId}/account-selectors/{accountId}", categoryId, accountId)
             .then()
             .statusCode(expectedStatus)
             .contentType(JSON)
