@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Divider } from "@mui/material";
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import CategoryService from '../../services/category.service';
