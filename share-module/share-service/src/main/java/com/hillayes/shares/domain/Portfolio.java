@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Entity
-@Table(name = "portfolio")
+@Table(schema = "shares", name = "portfolio")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
