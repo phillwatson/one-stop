@@ -489,13 +489,13 @@ public class AccountTransactionRepositoryTest {
         // and: a collection of categories with selectors for the account's transactions
         Map<Category, List<AccountTransaction>> categoryTransactions = Map.of(
             categoryGroup.addCategory("category 1", b -> {})
-                .addSelector(account.getId(), builder -> builder.infoContains("info 1").build()), new ArrayList<>(),
+                .add(account.getId(), builder -> builder.infoContains("info 1").build()), new ArrayList<>(),
             categoryGroup.addCategory("category 2", b -> {})
-                .addSelector(account.getId(), builder -> builder.refContains("ref 2").build()), new ArrayList<>(),
+                .add(account.getId(), builder -> builder.refContains("ref 2").build()), new ArrayList<>(),
             categoryGroup.addCategory("category 3", b -> {})
-                .addSelector(account.getId(), builder -> builder.creditorContains("info 3").build()), new ArrayList<>(),
+                .add(account.getId(), builder -> builder.creditorContains("info 3").build()), new ArrayList<>(),
             categoryGroup.addCategory("category 4", b -> {})
-                .addSelector(account.getId(), builder -> builder.infoContains("creditor 4").build()), new ArrayList<>()
+                .add(account.getId(), builder -> builder.infoContains("creditor 4").build()), new ArrayList<>()
         );
         categoryGroupRepository.save(categoryGroup);
 

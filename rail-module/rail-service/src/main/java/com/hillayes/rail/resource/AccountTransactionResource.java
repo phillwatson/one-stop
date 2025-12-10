@@ -10,6 +10,7 @@ import com.hillayes.rail.domain.TransactionMovement;
 import com.hillayes.rail.repository.TransactionFilter;
 import com.hillayes.rail.service.AccountTransactionService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
@@ -106,7 +107,7 @@ public class AccountTransactionResource {
     @Path("/{transactionId}")
     public Response updateTransaction(@Context SecurityContext ctx,
                                       @PathParam("transactionId") UUID transactionId,
-                                      UpdateTransactionRequest request) {
+                                      @Valid UpdateTransactionRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating account transaction [userId: {}, transactionId: {}]", userId, transactionId);
 
@@ -121,7 +122,7 @@ public class AccountTransactionResource {
     @PUT
     @Path("/reconciliations")
     public Response batchReconciliationUpdate(@Context SecurityContext ctx,
-                                              List<ReconciliationRequest> request) {
+                                              List<@Valid ReconciliationRequest> request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating account transaction reconciliations [userId: {}, count: {}]", userId, request.size());
 
