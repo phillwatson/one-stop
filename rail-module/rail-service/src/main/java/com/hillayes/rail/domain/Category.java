@@ -3,8 +3,8 @@ package com.hillayes.rail.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -65,8 +65,9 @@ public class Category {
      * transactions, must be different.
      */
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OrderBy("infoContains, refContains, creditorContains")
     @lombok.Builder.Default
-    private Set<CategorySelector> selectors = new HashSet<>();
+    private List<CategorySelector> selectors = new ArrayList<>();
 
     /**
      * Adds a selector to the category; ensuring that the selector is associated
@@ -76,8 +77,8 @@ public class Category {
      * @param modifier A consumer that can be used to modify the selector as it is added.
      * @return The category, to allow method chaining.
      */
-    public Category addSelector(UUID accountId,
-                                Consumer<CategorySelector.Builder> modifier) {
+    public Category add(UUID accountId,
+                        Consumer<CategorySelector.Builder> modifier) {
         CategorySelector.Builder builder = CategorySelector.builder()
             .category(this)
             .accountId(accountId);
@@ -91,7 +92,35 @@ public class Category {
         return this;
     }
 
-    public boolean removeSelector(CategorySelector selector) {
+    /**
+     * Adds the given selector to this category and returns the same selector.
+     * It ensures that the selector is removed from any category it currently
+     * belongs to.
+     * This is useful when moving a selector from one category to another.
+     * @param selector the selector to be added.
+     * @return the added selector - with the category set within it.
+     */
+    public CategorySelector add(CategorySelector selector) {
+        if (selector.getCategory() != null) {
+            selector.getCategory().remove(selector);
+        }
+
+        selector.setCategory(this);
+        selectors.add(selector);
+        return selector;
+    }
+
+    public boolean remove(CategorySelector selector) {
         return selectors.remove(selector);
+    }
+
+    public CategorySelector removeSelector(UUID selectorId) {
+        CategorySelector selector = selectors.stream()
+            .filter(s -> s.getId().equals(selectorId))
+            .findFirst().orElse(null);
+        if (selector != null) {
+            selectors.remove(selector);
+        }
+        return selector;
     }
 }

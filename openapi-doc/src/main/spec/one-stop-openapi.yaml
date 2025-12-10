@@ -1230,7 +1230,9 @@ paths:
     delete:
       tags: [ "categories" ]
       summary: Delete category
-      description: Deletes the authenticated user's identified category.
+      description: |
+        Deletes the authenticated user's identified category. All the selectors of
+        the category will also be deleted.
       operationId: deleteCategory
       security:
         - cookieAuth: [ ]
@@ -1252,10 +1254,127 @@ paths:
         500:
           description: Internal server error
 
-  /rails/categories/{categoryId}/selectors/{accountId}:
+  /rails/categories/{categoryId}/selectors:
     get:
       tags: [ "categories" ]
-      summary: Get category selectors
+      summary: Get the identified category's selectors
+      description: |
+        Returns a page of the selectors for identified category. All selectors
+        are included, regardless of the account to which they refer.
+      operationId: getAllCategorySelectors
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category whose selectors are to be returned
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategorySelectors'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Category not found
+        500:
+          description: Internal server error
+
+  /rails/categories/{categoryId}/selectors/{selectorId}:
+    put:
+      tags: [ "categories" ]
+      summary: Moves the identified category selector to another category.
+      description: |
+        Allows the identified category selector to be moved to another category.
+        The selector and the destination category must both belongs to the user.
+      operationId: moveCategorySelector
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category to which the selector currently belongs.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "selectorId"
+          in: "path"
+          description: ID of the selector to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The properties to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategorySelectorUpdateRequest'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategorySelectorResponse'
+        400:
+          description: Invalid request supplied
+        401:
+          description: Unauthorized
+        404:
+          description: Category or selector not found
+        500:
+          description: Internal server error
+
+    delete:
+      tags: [ "categories" ]
+      summary: Delete the identified category selector.
+      description: |
+        Deletes the identified category selector. The selector must both belongs to the user.
+      operationId: deleteCategorySelector
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "categoryId"
+          in: "path"
+          description: ID of category to which selector belongs.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "selectorId"
+          in: "path"
+          description: ID of the selector to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: successful operation
+        401:
+          description: Unauthorized
+        404:
+          description: Category or selector not found
+        500:
+          description: Internal server error
+
+  /rails/categories/{categoryId}/account-selectors/{accountId}:
+    get:
+      tags: [ "categories" ]
+      summary: Get category selectors for account
       description: Get selectors for identified category and account.
       operationId: getCategorySelectors
       security:
@@ -1275,15 +1394,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - $ref: '#/components/parameters/PageIndexParam'
+        - $ref: '#/components/parameters/PageSizeParam'
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AccountCategorySelector'
+                $ref: '#/components/schemas/PaginatedCategorySelectors'
         400:
           description: Invalid ID supplied
         401:
@@ -1323,7 +1442,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/AccountCategorySelector'
+                $ref: '#/components/schemas/CategorySelectorRequest'
       responses:
         200:
           description: successful operation
@@ -1332,7 +1451,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AccountCategorySelector'
+                  $ref: '#/components/schemas/CategorySelectorResponse'
         400:
           description: Invalid ID supplied
         401:
@@ -1347,8 +1466,10 @@ paths:
       tags: [ "categories" ]
       summary: Get category statistics
       description: |
-        Get the transaction statistics for the identified category group, across all
-        accounts of the authenticated user.
+        Returns the statistics for the transactions covered by the given category
+        group over the given date range. The response will contain an entry for
+        each of the group's categories for which transactions exist within the
+        given date range, across all accounts of the authenticated user.
       operationId: getCategoryStatistics
       security:
         - cookieAuth: [ ]
@@ -2900,7 +3021,7 @@ components:
               description: The category's group Id
               example: 07061d76-74f3-4163-aa07-fb6909681f81
 
-    AccountCategorySelector:
+    CategorySelectorRequest:
       description: |
         A selector to match an account's transactions to a category. Multiple selectors may
         exist for the same category/account pair. In which case, a transaction can match any
@@ -2922,6 +3043,48 @@ components:
           description: |
             Any occurrence of the value within the creditor name will match. The comparison is case-sensitive.
           example: John Doe
+
+    CategorySelectorUpdateRequest:
+      description: |
+        Provides the new properties for an identified category selector.
+      type: object
+      required:
+        - categoryId
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: The category to which the selector is to be moved
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
+
+    CategorySelectorResponse:
+      description: |
+        A selector to match an account's transactions to a category. Multiple selectors may
+        exist for the same category/account pair. In which case, a transaction can match any
+        of the selectors to be categorised.
+      allOf:
+        - $ref: '#/components/schemas/CategorySelectorRequest'
+        - type: object
+          required:
+            - id
+            - categoryId
+            - accountId
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The category selector's unique ID
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
+            categoryId:
+              type: string
+              format: uuid
+              description: The category to which the selector belongs
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
+            accountId:
+              type: string
+              format: uuid
+              description: The account to which the selector belongs
+              example: 07061d76-74f3-4163-aa07-fb6909681f81
 
     CategoryStatisticsResponse:
       description: A summary of the transactions in a category.
@@ -3589,6 +3752,17 @@ components:
               description: The list of categories
               items:
                 $ref: '#/components/schemas/CategoryResponse'
+
+    PaginatedCategorySelectors:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedItems'
+        - type: object
+          properties:
+            items:
+              type: array
+              description: The list of category selectors.
+              items:
+                $ref: '#/components/schemas/CategorySelectorResponse'
 
     PaginatedAuditTemplates:
       allOf:

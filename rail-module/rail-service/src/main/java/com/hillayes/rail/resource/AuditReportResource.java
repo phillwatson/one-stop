@@ -10,6 +10,7 @@ import com.hillayes.rail.domain.*;
 import com.hillayes.rail.service.AccountTransactionService;
 import com.hillayes.rail.service.AuditReportService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +87,7 @@ public class AuditReportResource {
     @Path("/configs")
     public Response createAuditConfig(@Context SecurityContext ctx,
                                       @Context UriInfo uriInfo,
-                                      AuditReportConfigRequest request) {
+                                      @Valid AuditReportConfigRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Creating audit report config [userId: {}, name: {}]", userId, request.getName());
 
@@ -114,7 +115,7 @@ public class AuditReportResource {
     @Path("/configs/{configId}")
     public Response updateAuditConfig(@Context SecurityContext ctx,
                                       @PathParam("configId") UUID configId,
-                                      AuditReportConfigRequest request) {
+                                      @Valid AuditReportConfigRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating audit report config [userId: {}, configId: {}]", userId, configId);
 
@@ -197,7 +198,7 @@ public class AuditReportResource {
     @Path("/issues/{issueId}")
     public Response updateAuditIssue(@Context SecurityContext ctx,
                                      @PathParam("issueId") UUID issueId,
-                                     AuditIssueRequest request) {
+                                     @Valid AuditIssueRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating audit issue [userId: {}, issueId: {}, acknowledged: {}]",
             userId, issueId, request.getAcknowledged());

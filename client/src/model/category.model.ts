@@ -13,9 +13,17 @@ export interface Category {
 }
 
 export interface CategorySelector {
+  id?: string;
+  categoryId: string;
+  accountId: string;
   infoContains?: string;
   refContains?: string;
   creditorContains?: string;
+}
+
+// attempts to create a text identifier from the given selector
+export function selectorName(selector: CategorySelector) {
+  return selector.infoContains || selector.refContains || selector.creditorContains;
 }
 
 export interface CategoryStatistics {

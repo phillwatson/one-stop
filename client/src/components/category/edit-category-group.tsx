@@ -5,7 +5,7 @@ import { CategoryGroup } from "../../model/category.model";
 
 interface Props {
   open: boolean;
-  group: CategoryGroup | undefined;
+  group?: CategoryGroup;
   onConfirm: (group: CategoryGroup) => void;
   onCancel: () => void;
 }
@@ -28,27 +28,27 @@ export default function EditCategoryGroup(props: Props) {
 
   return (
     <Dialog open={ props.open } onClose={ handleCancel } fullWidth>
-      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>{ props.group ? "Edit Category Group" : "Add Category Group" }</DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>{ props.group ? "Edit Category Group" : "New Category Group" }</DialogTitle>
       <DialogContent>
         <p/>
         <TextField
           id="name" label="Group Name" autoFocus required
           margin="normal" fullWidth variant="standard"
-          value={group.name}
+          value={ group.name }
           onChange={(e) => setGroup({ ...group, name: e.target.value })}
         />
 
         <TextField
           id="name" label="Description"
           margin="normal" fullWidth variant="standard"
-          value={group.description}
+          value={ group.description }
           onChange={(e) => setGroup({ ...group, description: e.target.value })}
         />
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleCancel} variant="outlined">Cancel</Button>
-        <Button onClick={handleConfirm} variant="contained" disabled={!validateForm()}>
+        <Button onClick={ handleCancel } variant="outlined">Cancel</Button>
+        <Button onClick={ handleConfirm } variant="contained" disabled={ !validateForm() }>
           { props.group ? "Save" : "Add" }
         </Button>
       </DialogActions>

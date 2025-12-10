@@ -2,6 +2,7 @@ package com.hillayes.rail.resource;
 
 import com.hillayes.auth.jwt.AuthUtils;
 import com.hillayes.commons.jpa.Page;
+import com.hillayes.exception.common.MissingParameterException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.rail.domain.Category;
 import com.hillayes.rail.domain.CategoryGroup;
@@ -9,6 +10,7 @@ import com.hillayes.rail.domain.CategorySelector;
 import com.hillayes.rail.domain.CategoryStatistics;
 import com.hillayes.rail.service.CategoryService;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +77,7 @@ public class CategoryResource {
     @Path("/category-groups")
     public Response createCategoryGroup(@Context SecurityContext ctx,
                                         @Context UriInfo uriInfo,
-                                        CategoryGroupRequest newGroup) {
+                                        @Valid CategoryGroupRequest newGroup) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Creating category group [userId: {}, group: {}]", userId, newGroup.getName());
 
@@ -94,7 +96,7 @@ public class CategoryResource {
     @Path("/category-groups/{groupId}")
     public Response updateCategoryGroup(@Context SecurityContext ctx,
                                         @PathParam("groupId") UUID groupId,
-                                        CategoryGroupRequest details) {
+                                        @Valid CategoryGroupRequest details) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating category group [userId: {}, groupId: {}, group: {}]",
             userId, groupId, details.getName());
@@ -149,7 +151,7 @@ public class CategoryResource {
     public Response createCategory(@Context SecurityContext ctx,
                                    @Context UriInfo uriInfo,
                                    @PathParam("groupId") UUID groupId,
-                                   CategoryRequest newCategory) {
+                                   @Valid CategoryRequest newCategory) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Creating category [userId: {}, groupId: {}, category: {}]",
             userId, groupId, newCategory.getName());
@@ -180,7 +182,7 @@ public class CategoryResource {
     @Path("/categories/{categoryId}")
     public Response updateCategory(@Context SecurityContext ctx,
                                    @PathParam("categoryId") UUID categoryId,
-                                   CategoryRequest details) {
+                                   @Valid CategoryRequest details) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Updating category [userId: {}, categoryId: {}, category: {}]", userId, categoryId, details.getName());
 
@@ -202,29 +204,101 @@ public class CategoryResource {
     }
 
     @GET
-    @Path("/categories/{categoryId}/selectors/{accountId}")
+    @Path("/categories/{categoryId}/selectors")
     public Response getCategorySelectors(@Context SecurityContext ctx,
+                                         @Context UriInfo uriInfo,
                                          @PathParam("categoryId") UUID categoryId,
-                                         @PathParam("accountId") UUID accountId) {
+                                         @QueryParam("page") @DefaultValue("0") int page,
+                                         @QueryParam("page-size") @DefaultValue("20") int pageSize) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Getting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
+        log.info("Getting category selectors [userId: {}, categoryId: {}, page: {}, pageSize: {}]",
+            userId, categoryId, page, pageSize);
 
-        Collection<AccountCategorySelector> result =
-            categoryService.getCategorySelectors(userId, categoryId, accountId).stream()
-            .map(this::marshal)
-            .toList();
+        Page<CategorySelector> selectors =
+            categoryService.getCategorySelectors(userId, categoryId, page, pageSize);
 
-        log.debug("Getting category selectors [userId: {}, categoryId: {}, accountId: {}, count: {}]",
-            userId, categoryId, accountId, result.size());
+        PaginatedCategorySelectors result = new PaginatedCategorySelectors()
+            .page(selectors.getPageIndex())
+            .pageSize(selectors.getPageSize())
+            .count(selectors.getContentSize())
+            .total(selectors.getTotalCount())
+            .totalPages(selectors.getTotalPages())
+            .items(selectors.getContent().stream().map(this::marshal).toList())
+            .links(PaginationUtils.buildPageLinks(uriInfo, selectors));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category selectors [userId: {}, categoryId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, categoryId, page, pageSize, result.getCount(), result.getTotal());
+        }
         return Response.ok(result).build();
     }
 
     @PUT
-    @Path("/categories/{categoryId}/selectors/{accountId}")
+    @Path("/categories/{categoryId}/selectors/{selectorId}")
+    public Response moveCategorySelector(@Context SecurityContext ctx,
+                                         @PathParam("categoryId") UUID categoryId,
+                                         @PathParam("selectorId") UUID selectorId,
+                                         @Valid CategorySelectorUpdateRequest request) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Moving category selector [userId: {}, categoryId: {}, selectorId: {}]",
+            userId, categoryId, selectorId);
+
+        CategorySelector categorySelector = categoryService
+            .moveCategorySelector(userId, categoryId, selectorId, request.getCategoryId());
+
+        return Response.ok(marshal(categorySelector)).build();
+    }
+
+    @DELETE
+    @Path("/categories/{categoryId}/selectors/{selectorId}")
+    public Response deleteCategorySelector(@Context SecurityContext ctx,
+                                           @PathParam("categoryId") UUID categoryId,
+                                           @PathParam("selectorId") UUID selectorId) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Deleting category selector [userId: {}, categoryId: {}, selectorId: {}]",
+            userId, categoryId, selectorId);
+
+        categoryService.deleteCategorySelector(userId, categoryId, selectorId);
+
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/categories/{categoryId}/account-selectors/{accountId}")
+    public Response getCategorySelectorsForAccount(@Context SecurityContext ctx,
+                                                   @Context UriInfo uriInfo,
+                                                   @PathParam("categoryId") UUID categoryId,
+                                                   @PathParam("accountId") UUID accountId,
+                                                   @QueryParam("page") @DefaultValue("0") int page,
+                                                   @QueryParam("page-size") @DefaultValue("20") int pageSize) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Getting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
+
+        Page<CategorySelector> selectors =
+            categoryService.getCategorySelectors(userId, categoryId, accountId, page, pageSize);
+
+        PaginatedCategorySelectors result = new PaginatedCategorySelectors()
+            .page(selectors.getPageIndex())
+            .pageSize(selectors.getPageSize())
+            .count(selectors.getContentSize())
+            .total(selectors.getTotalCount())
+            .totalPages(selectors.getTotalPages())
+            .items(selectors.getContent().stream().map(this::marshal).toList())
+            .links(PaginationUtils.buildPageLinks(uriInfo, selectors));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing category selectors [userId: {}, categoryId: {}, accountId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, categoryId, accountId, page, pageSize, result.getCount(), result.getTotal());
+        }
+        return Response.ok(result).build();
+    }
+
+    @PUT
+    @Path("/categories/{categoryId}/account-selectors/{accountId}")
     public Response setCategorySelectors(@Context SecurityContext ctx,
                                          @PathParam("categoryId") UUID categoryId,
                                          @PathParam("accountId") UUID accountId,
-                                         List<AccountCategorySelector> selectors) {
+                                         List<@Valid CategorySelectorRequest> selectors) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Setting category selectors [userId: {}, categoryId: {}, accountId: {}]", userId, categoryId, accountId);
 
@@ -236,7 +310,7 @@ public class CategoryResource {
                 .build())
             .toList();
 
-        Collection<AccountCategorySelector> result =
+        Collection<CategorySelectorResponse> result =
             categoryService.setCategorySelectors(userId, categoryId, accountId, newSelectors).stream()
                 .map(this::marshal)
                 .toList();
@@ -285,8 +359,11 @@ public class CategoryResource {
             .colour(category.getColour());
     }
 
-    private AccountCategorySelector marshal(CategorySelector selector) {
-        return new AccountCategorySelector()
+    private CategorySelectorResponse marshal(CategorySelector selector) {
+        return new CategorySelectorResponse()
+            .id(selector.getId())
+            .categoryId(selector.getCategory().getId())
+            .accountId(selector.getAccountId())
             .creditorContains(selector.getCreditorContains())
             .refContains(selector.getRefContains())
             .infoContains(selector.getInfoContains());

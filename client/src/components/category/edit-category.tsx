@@ -7,7 +7,7 @@ import { CategoryGroup, Category } from "../../model/category.model";
 interface Props {
   open: boolean;
   group: CategoryGroup;
-  category: Category | undefined;
+  category?: Category;
   onConfirm: (category: Category) => void;
   onCancel: () => void;
 }
@@ -30,7 +30,7 @@ export default function EditCategory(props: Props) {
 
   return (
     <Dialog open={ props.open } onClose={ handleCancel } fullWidth>
-      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>{ props.category ? "Edit Category" : "Add Category" }</DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>{ props.category ? "Edit Category" : "New Category" }</DialogTitle>
       <DialogContent>
         <p/>
         <TextField

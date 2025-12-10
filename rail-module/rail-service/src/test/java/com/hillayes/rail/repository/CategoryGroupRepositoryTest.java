@@ -295,13 +295,13 @@ public class CategoryGroupRepositoryTest {
         // and: a collection of categories with selectors for the account's transactions
         List<Category> categories = List.of(
             categoryGroup.addCategory("category 1", builder -> builder.description("desc 1").colour("#111111").build())
-                .addSelector(account.getId(), builder -> builder.infoContains("info 1").build()),
+                .add(account.getId(), builder -> builder.infoContains("info 1").build()),
             categoryGroup.addCategory("category 2", builder -> builder.description("desc 2").colour("#222222").build())
-                .addSelector(account.getId(), builder -> builder.refContains("info 2").build()),
+                .add(account.getId(), builder -> builder.refContains("info 2").build()),
             categoryGroup.addCategory("category 3", builder -> builder.description("desc 3").colour("#333333").build())
-                .addSelector(account.getId(), builder -> builder.creditorContains("info 3").build()),
+                .add(account.getId(), builder -> builder.creditorContains("info 3").build()),
             categoryGroup.addCategory("category 4", builder -> builder.description("desc 4").colour("#444444").build())
-                .addSelector(account.getId(), builder -> builder.infoContains("info 4").build())
+                .add(account.getId(), builder -> builder.infoContains("info 4").build())
         );
 
         fixture.save(categoryGroup);

@@ -1,5 +1,6 @@
 package com.hillayes.commons.jpa;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -135,15 +136,17 @@ public class Page<T> {
      * @param pageIndex the zero-based page index.
      * @param pageSize the number of elements per page.
      */
-    public static <T> Page<T> of(List<T> fullContent, int pageIndex, int pageSize) {
+    public static <T> Page<T> of(Collection<T> fullContent, int pageIndex, int pageSize) {
         int size = (fullContent == null) ? 0 : fullContent.size();
         int startIndex = pageIndex * pageSize;
         if (startIndex > size) {
             return new Page<>(List.of(), size, pageIndex, pageSize);
         }
 
-        int endIndex = Math.min(startIndex + pageSize, size);
-        List<T> subset = (size == 0) ? List.of() : fullContent.subList(startIndex, endIndex);
+        List<T> subset = (size == 0) ? List.of() : fullContent.stream()
+            .skip(startIndex)
+            .limit(pageSize)
+            .toList();
         return new Page<>(subset, size, pageIndex, pageSize);
     }
 }

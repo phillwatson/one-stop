@@ -78,6 +78,7 @@ public class CategoryServiceTest {
         verify(categoryGroupRepository).findByIdOptional(group.getId());
 
         // and: the category group is returned
+        assertNotNull(actualGroup);
         assertEquals(group.getId(), actualGroup.getId());
     }
 
@@ -557,52 +558,6 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void testGetCategorySelectors() {
-        // given: a user id
-        UUID userId = UUID.randomUUID();
-
-        // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
-
-        // and: the user has a category group
-        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
-
-        // and: a category belonging to that group
-        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
-
-        // and: the category has selectors associated with the account
-        Set<CategorySelector> expectedSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
-            .getSelectors());
-
-        // and: the category has selectors associated with other accounts
-        category
-            .addSelector(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
-            .addSelector(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
-            .addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
-
-        // when: the category selectors are requested
-        Collection<CategorySelector> actualSelectors =
-            fixture.getCategorySelectors(userId, category.getId(), account.getId());
-
-        // then: the category is retrieved from the repository
-        verify(categoryRepository).findByIdOptional(category.getId());
-
-        // and: only the identified account's selectors are returned
-        assertEquals(expectedSelectors.size(), actualSelectors.size());
-        expectedSelectors.forEach(expected ->
-            assertTrue(actualSelectors.contains(expected))
-        );
-    }
-
-    @Test
     public void testDeleteCategory() {
         // given: a user id
         UUID userId = UUID.randomUUID();
@@ -669,17 +624,53 @@ public class CategoryServiceTest {
     }
 
     @Test
+    public void testGetCategorySelectors() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an account belonging to that user
+        Account account = mockAccount(userId);
+
+        // and: the user has a category group
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
+
+        // and: a category belonging to that group
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
+
+        // and: the category has selectors associated with the account
+        Set<CategorySelector> expectedSelectors = new HashSet<>(category
+            .add(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+            .getSelectors());
+
+        // and: the category has selectors associated with other accounts
+        category
+            .add(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .add(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .add(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
+
+        // when: the category selectors are requested
+        Page<CategorySelector> actualSelectors =
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100);
+
+        // then: the category is retrieved from the repository
+        verify(categoryRepository).findByIdOptional(category.getId());
+
+        // and: only the identified account's selectors are returned
+        assertEquals(expectedSelectors.size(), actualSelectors.getContentSize());
+        expectedSelectors.forEach(expected ->
+            assertTrue(actualSelectors.getContent().contains(expected))
+        );
+    }
+
+    @Test
     public void testGetCategorySelectors_NonFound() {
         // given: a user id
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: the user has a category group
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -688,13 +679,13 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with other accounts
-        category.addSelector(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)));
-        category.addSelector(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
+        category.add(UUID.randomUUID(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)));
+        category.add(UUID.randomUUID(), selector -> selector.refContains(insecure().nextAlphanumeric(10)));
+        category.add(UUID.randomUUID(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)));
 
         // when: the category selectors are requested
-        Collection<CategorySelector> actualSelectors =
-            fixture.getCategorySelectors(userId, category.getId(), account.getId());
+        Page<CategorySelector> actualSelectors =
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100);
 
         // then: the category is retrieved from the repository
         verify(categoryRepository).findByIdOptional(category.getId());
@@ -709,12 +700,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: an unknown category id
         UUID categoryId = UUID.randomUUID();
@@ -724,7 +710,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, categoryId, account.getId())
+            fixture.getCategorySelectors(userId, categoryId, account.getId(), 0, 100)
         );
 
         // and: the exception identifies the category
@@ -738,12 +724,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: a category group belonging to another user
         CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
@@ -754,7 +735,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), account.getId())
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100)
         );
 
         // and: the exception identifies the category
@@ -781,7 +762,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), accountId)
+            fixture.getCategorySelectors(userId, category.getId(), accountId, 0, 100)
         );
 
         // and: the exception identifies the account
@@ -795,12 +776,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account NOT belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(UUID.randomUUID())
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(UUID.randomUUID());
 
         // and: a category group belonging to that user
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -811,7 +787,7 @@ public class CategoryServiceTest {
         // when: the category selectors are requested
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
             // then: an exception is thrown
-            fixture.getCategorySelectors(userId, category.getId(), account.getId())
+            fixture.getCategorySelectors(userId, category.getId(), account.getId(), 0, 100)
         );
 
         // and: the exception identifies the account
@@ -825,12 +801,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: a category group belonging to that user
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -839,11 +810,11 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
-        Set<CategorySelector> oldSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+        Set<CategorySelector> oldSelectors = new HashSet<>(category
+            .add(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
             .getSelectors());
 
         // and: the new selectors to replace the old ones
@@ -894,12 +865,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: a category group belonging to that user
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -908,11 +874,11 @@ public class CategoryServiceTest {
         Category category = mockCategory(group, insecure().nextAlphanumeric(20));
 
         // and: the category has selectors associated with the account
-        Set<CategorySelector> oldSelectors = new HashSet(category
-            .addSelector(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
-            .addSelector(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+        Set<CategorySelector> oldSelectors = new HashSet<>(category
+            .add(account.getId(), selector -> selector.infoContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.refContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.creditorContains(insecure().nextAlphanumeric(10)))
             .getSelectors());
 
         // when: the category selectors are set to an empty collection
@@ -953,12 +919,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: a category group belonging to that user
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -1009,12 +970,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: an unknown category id
         UUID categoryId = UUID.randomUUID();
@@ -1041,12 +997,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(userId)
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(userId);
 
         // and: a category group belonging to another user
         CategoryGroup group = mockCategoryGroup(UUID.randomUUID(), insecure().nextAlphanumeric(20));
@@ -1104,12 +1055,7 @@ public class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
 
         // and: an account NOT belonging to that user
-        Account account = Account.builder()
-            .id(UUID.randomUUID())
-            .userId(UUID.randomUUID())
-            .build();
-        when(accountRepository.findByIdOptional(account.getId()))
-            .thenReturn(Optional.of(account));
+        Account account = mockAccount(UUID.randomUUID());
 
         // and: a category group belonging to that user
         CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
@@ -1129,6 +1075,86 @@ public class CategoryServiceTest {
 
         // and: no updates are made to the category
         verify(categoryGroupRepository, never()).save(any());
+    }
+
+    @Test
+    public void testMoveCategorySelectors() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an account belonging to that user
+        Account account = mockAccount(userId);
+
+        // and: the user has a category group
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
+
+        // and: a category belonging to that group
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
+
+        // and: the category has selectors
+        category
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).infoContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).refContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).creditorContains(insecure().nextAlphanumeric(10)));
+
+        // and: another category to which the selector can be moved
+        Category destCategory = mockCategory(group, insecure().nextAlphanumeric(20));
+
+        // when: a selector is moved
+        CategorySelector selector = category.getSelectors().get(1);
+        CategorySelector updatedSelector = fixture
+            .moveCategorySelector(userId, category.getId(), selector.getId(), destCategory.getId());
+
+        // then: the returned selector is the same as that identified
+        assertEquals(selector.getId(), updatedSelector.getId());
+
+        // and: the selector parent has been updated
+        assertEquals(destCategory, selector.getCategory());
+
+        // and: the selector no longer resides in the original category
+        assertFalse(category.getSelectors().contains(selector));
+
+        // and: the selector now resides in the destination
+        assertTrue(destCategory.getSelectors().contains(selector));
+
+        // and: the both categories have been updated
+        verify(categoryRepository).save(category);
+        verify(categoryRepository).save(destCategory);
+    }
+
+    @Test
+    public void testDeleteCategorySelectors() {
+        // given: a user id
+        UUID userId = UUID.randomUUID();
+
+        // and: an account belonging to that user
+        Account account = mockAccount(userId);
+
+        // and: the user has a category group
+        CategoryGroup group = mockCategoryGroup(userId, insecure().nextAlphanumeric(20));
+
+        // and: a category belonging to that group
+        Category category = mockCategory(group, insecure().nextAlphanumeric(20));
+
+        // and: the category has selectors
+        category
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).infoContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).refContains(insecure().nextAlphanumeric(10)))
+            .add(account.getId(), selector -> selector.id(UUID.randomUUID()).creditorContains(insecure().nextAlphanumeric(10)));
+
+        // when: a selector is deleted
+        CategorySelector selector = category.getSelectors().get(1);
+        CategorySelector deletedSelector = fixture
+            .deleteCategorySelector(userId, category.getId(), selector.getId());
+
+        // then: the returned selector is the same as that identified
+        assertEquals(selector.getId(), deletedSelector.getId());
+
+        // and: the selector no longer resides in the original category
+        assertFalse(category.getSelectors().contains(selector));
+
+        // and: the category has been updated
+        verify(categoryRepository).save(category);
     }
 
     @Test
@@ -1182,5 +1208,15 @@ public class CategoryServiceTest {
         when(categoryRepository.findByIdOptional(category.getId()))
             .thenReturn(Optional.of(category));
         return category;
+    }
+
+    private Account mockAccount(UUID userId) {
+        Account account = Account.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .build();
+        when(accountRepository.findByIdOptional(account.getId()))
+            .thenReturn(Optional.of(account));
+        return account;
     }
 }
