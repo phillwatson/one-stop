@@ -39,6 +39,7 @@ public class CategorySelector {
      * The category that this selector is associated with.
      */
     @ManyToOne
+    @Setter
     private Category category;
 
     /**
@@ -55,6 +56,7 @@ public class CategorySelector {
      */
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Setter
     @Column(name = "info_contains")
     private String infoContains;
 
@@ -64,6 +66,7 @@ public class CategorySelector {
      */
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Setter
     @Column(name = "ref_contains")
     private String refContains;
 
@@ -73,6 +76,7 @@ public class CategorySelector {
      */
     @EqualsAndHashCode.Include
     @ToString.Include
+    @Setter
     @Column(name = "creditor_contains")
     private String creditorContains;
 }

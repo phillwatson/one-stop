@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
 import Item from "@mui/material/Grid";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,7 +7,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import DeleteIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import PieChartIcon from '@mui/icons-material/PieChart';
 
 import CategoryService from "../../services/category.service";
 import { CategoryGroup, Category, CategorySelector } from "../../model/category.model";
@@ -20,7 +21,7 @@ const colhead: SxProps = {
 
 const NULL_GROUP: CategoryGroup = { name: '', description: '' };
 const NULL_CATEGORY: Category = { name: '', description: '', colour: '' };
-const NULL_SELECTOR: CategorySelector = { infoContains: '', refContains: '', creditorContains: '' };
+const NULL_SELECTOR: CategorySelector = { categoryId: '', accountId: '', infoContains: '', refContains: '', creditorContains: '' };
 
 interface Props {
   open: boolean;
@@ -75,6 +76,8 @@ export default function AddSelector(props: Props) {
   useEffect(() => {
     if (props.open && props.transaction !== undefined) {
       setSelector({
+        categoryId: props.catagoryId!,
+        accountId: props.transaction.accountId,
         infoContains: props.transaction.additionalInformation,
         refContains: props.transaction.reference,
         creditorContains: props.transaction.creditorName
@@ -82,11 +85,11 @@ export default function AddSelector(props: Props) {
     } else {
       setSelector(NULL_SELECTOR);
     }
-  }, [ props.open, props.transaction ]);
+  }, [ props.open, props.catagoryId, props.transaction ]);
 
   useEffect(() => {
     if (accountId && category.id) {
-      CategoryService.getCategorySelectors(category.id!!, accountId)
+      CategoryService.getAllAccountCategorySelectors(category.id!!, accountId)
         .then(response => { setSelectors(response); })
     } else {
       setSelectors([]);
@@ -121,7 +124,7 @@ export default function AddSelector(props: Props) {
 
   function handleConfirm() {
     if (accountId && category.id) {
-      CategoryService.setCategorySelectors(category.id!!, accountId, [ ...selectors, selector ])
+      CategoryService.setAccountCategorySelectors(category.id!!, accountId, [ ...selectors, selector ])
       .then(() => {
         showMessage({ type: 'add', level: 'success', text: `Successfully added to Category "${category.name}"` });
         props.onConfirm(category, selector);
@@ -162,12 +165,14 @@ export default function AddSelector(props: Props) {
                 <Select labelId="select-category" label="Category" value={ category.id || ''}
                   onChange={(e) => selectCategory(e.target.value as string)} renderValue={() => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
-                      <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
+                      <Box component={ PieChartIcon } color={ category.colour } width={ 24 } height={ 24 } alignSelf="center"/>
+                      &nbsp;{ category?.name }
                     </Box>
                   )}>
                   { categories && categories.map(cat =>
                     <MenuItem value={ cat.id } key={ cat.id }>
-                      <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
+                      <Box component={ PieChartIcon } color={ cat.colour } />
+                      &nbsp;{ cat.name }
                     </MenuItem>
                   )}
                 </Select>
@@ -200,7 +205,7 @@ export default function AddSelector(props: Props) {
 
       <DialogContent>
         <Divider textAlign="left" sx={{fontWeight: 'light'}}>Or choose from existing selectors:</Divider>
-        <TableContainer>
+        <TableContainer style={{ maxHeight: "300px" }}>
           <Table size='small'>
             <TableHead>
               <TableRow>
