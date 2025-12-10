@@ -1,17 +1,18 @@
 import { useState, MouseEventHandler, MouseEvent } from "react";
 import { useDraggable } from '@dnd-kit/core';
 
+import DragIndicatorOutlinedIcon from '@mui/icons-material/DragIndicatorOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+
 import { SxProps } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 import { CategorySelector } from "../../model/category.model";
-
-import DragIndicatorOutlinedIcon from '@mui/icons-material/DragIndicatorOutlined';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 const compactCell: SxProps = {
   paddingLeft: 0.4,
@@ -77,19 +78,23 @@ export default function SelectorRow(props: Props) {
         onMouseLeave={ () => setMouseOver(false) }
      >
       <TableCell sx={ compactCell } width={"22px"}>
-        <IconButton color="inherit" aria-label="move" edge="start" size="small"
-          ref={ setActivatorNodeRef } {...listeners} {...attributes} >
-          <DragIndicatorOutlinedIcon />
-        </IconButton>
+        <Tooltip title="Drag to another Category">
+          <IconButton color="inherit" aria-label="move" edge="start" size="small"
+            ref={ setActivatorNodeRef } {...listeners} {...attributes} >
+            <DragIndicatorOutlinedIcon />
+          </IconButton>
+        </Tooltip>
       </TableCell>
       <TableCell sx={ compactCell } width={"22px"}>
         { props.onDeleteClick && isMouseOver &&
-          <IconButton aria-label="delete" edge="start" size="small"
-            onClick={ (e) => action(e, props.onDeleteClick) }>
-            <DeleteOutlinedIcon fontSize="small" color="warning"
-              sx={{ opacity: 0.6, cursor: 'pointer' }}
-            />
-          </IconButton>
+          <Tooltip title="Delete Selector">
+            <IconButton aria-label="delete" edge="start" size="small"
+              onClick={ (e) => action(e, props.onDeleteClick) }>
+              <DeleteOutlinedIcon fontSize="small" color="warning"
+                sx={{ opacity: 0.6, cursor: 'pointer' }}
+              />
+            </IconButton>
+          </Tooltip>
         }
       </TableCell>
       <TableCell sx={ compactCell }>{ props.accountName }</TableCell>

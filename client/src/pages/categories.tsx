@@ -14,6 +14,7 @@ import { DraggableSectorRow, DraggedSelector } from "../components/category/sele
 
 export default function Categories() {
   const showMessage = useMessageDispatch();
+  const [ currentCategory, setCurrentCategory ] = useState<Category | undefined>(undefined);
   const [ selectors, setSelectors ] = useState<Array<CategorySelector>>([]);
   const [ draggingSelector, setDraggingSelector ] = useState<DraggedSelector | null>(null);
 
@@ -54,6 +55,7 @@ export default function Categories() {
   }
 
   function selectCategory(group?: CategoryGroup, category?: Category) {
+    setCurrentCategory(category)
     if (category) {
       CategoryService
         .getAllCategorySelectors(category?.id!)
@@ -75,7 +77,7 @@ export default function Categories() {
           </Grid>
           <Grid width="69%">
             <Item>
-              <Selectors selectors={ selectors } onDeleteSelector={ deleteSelector } />
+              <Selectors category={ currentCategory } selectors={ selectors } onDeleteSelector={ deleteSelector } />
             </Item>
           </Grid>
         </Grid>

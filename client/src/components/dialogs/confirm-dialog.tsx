@@ -22,8 +22,8 @@ export default function ConfirmationDialog(props: Props) {
         {props.title}
       </DialogTitle>
       <DialogContent dividers>
-        { message.map(line =>
-          <Typography gutterBottom>
+        { message.map((line, index) =>
+          <Typography key={ index } gutterBottom>
             { line }
           </Typography>
         )}

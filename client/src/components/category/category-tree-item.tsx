@@ -1,7 +1,11 @@
 import { useState, useEffect, MouseEventHandler, MouseEvent } from "react";
 import { useDroppable } from '@dnd-kit/core';
 
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import { IconButton, Stack, Tooltip } from "@mui/material";
+
 import Box from "@mui/material/Box";
 
 import { Category, CategorySelector } from "../../model/category.model";
@@ -12,6 +16,37 @@ interface Props extends CustomTreeItemProps {
   onEditClick?: MouseEventHandler | undefined;
   onDeleteClick?: MouseEventHandler | undefined;
 };
+
+function HoverActions(props: Props) {
+  function action(event: MouseEvent, handler: MouseEventHandler | undefined) {
+    event.stopPropagation();
+    if (handler) {
+      handler(event);
+    }
+  }
+
+  return (
+    <Stack direction="row" spacing={1} marginLeft="auto" zIndex={2} >
+      { props.onEditClick &&
+        <Tooltip title="Edit Category">
+          <IconButton onClick={ (e) => action(e, props.onEditClick) }
+            color="inherit" aria-label="edit" edge="start" size="small" style={{ padding: "2px" }}>
+            <EditIcon fontSize="small" color="info" sx={{ opacity: 0.6, cursor: 'pointer' }} />
+          </IconButton>
+        </Tooltip>
+      }
+
+      { props.onDeleteClick &&
+        <Tooltip title="Delete Category">
+          <IconButton onClick={ (e) => action(e, props.onDeleteClick) }
+            color="inherit" aria-label="delete" edge="start" size="small" style={{ padding: "2px" }} >
+            <DeleteIcon fontSize="small" color="warning" sx={{ opacity: 0.6, cursor: 'pointer' }} />
+          </IconButton>
+        </Tooltip>
+      }
+    </Stack>
+  );
+}
 
 export default function CategoryTreeItem(props: Props) {
   const { isOver, active, setNodeRef } = useDroppable({
@@ -31,23 +66,16 @@ export default function CategoryTreeItem(props: Props) {
   }, [ props.category, isOver, active ])
 
 
-  function handleEditClick(event: MouseEvent) {
-    if (props.onEditClick)
-      props.onEditClick(event);
-  }
-
-  function handleDeleteClick(event: MouseEvent) {
-    if (props.onDeleteClick)
-      props.onDeleteClick(event);
+  function showOptions() {
+    return HoverActions(props);
   }
 
   return (
     <CustomTreeItem ref={ setNodeRef }
-      onEditClick={ handleEditClick }
-      onDeleteClick={ handleDeleteClick }
       label={ props.category.name }
       labelIcon={ <Box component={ PieChartIcon } color={ props.category.colour } /> }
       style={{ userSelect: 'none', backgroundColor: isDroppable ? '#c2e6ab6e' : undefined }}
+      hoverComponent={ showOptions }
       { ...props }
     />
   )

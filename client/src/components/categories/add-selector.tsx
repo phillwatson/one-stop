@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SxProps, TextField, Tooltip } from "@mui/material";
 import Item from "@mui/material/Grid";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,7 +7,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import DeleteIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import PieChartIcon from '@mui/icons-material/PieChart';
 
 import CategoryService from "../../services/category.service";
 import { CategoryGroup, Category, CategorySelector } from "../../model/category.model";
@@ -164,12 +165,14 @@ export default function AddSelector(props: Props) {
                 <Select labelId="select-category" label="Category" value={ category.id || ''}
                   onChange={(e) => selectCategory(e.target.value as string)} renderValue={() => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'baseline'}}>
-                      <Avatar sx={{ backgroundColor: category?.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ category?.name }
+                      <Box component={ PieChartIcon } color={ category.colour } width={ 24 } height={ 24 } alignSelf="center"/>
+                      &nbsp;{ category?.name }
                     </Box>
                   )}>
                   { categories && categories.map(cat =>
                     <MenuItem value={ cat.id } key={ cat.id }>
-                      <Avatar sx={{ backgroundColor: cat.colour, width: 24, height: 24 }}>&nbsp;</Avatar>&nbsp;{ cat.name }
+                      <Box component={ PieChartIcon } color={ cat.colour } />
+                      &nbsp;{ cat.name }
                     </MenuItem>
                   )}
                 </Select>

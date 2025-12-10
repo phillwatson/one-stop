@@ -1,7 +1,4 @@
-import { forwardRef, useState, MouseEvent, MouseEventHandler } from "react";
-
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import { forwardRef, ReactElement, useState } from "react";
 
 import { useTreeItem } from '@mui/x-tree-view/useTreeItem';
 import { 
@@ -14,14 +11,12 @@ import {
   TreeItemGroupTransition,
   UseTreeItemParameters
  } from '@mui/x-tree-view';
-import { IconButton, Stack } from "@mui/material";
 
 export interface CustomTreeItemProps extends
       Omit<UseTreeItemParameters, 'rootRef'>,
       Omit<React.HTMLAttributes<HTMLLIElement>, 'onFocus'> { 
   labelIcon?: any;
-  onEditClick?: MouseEventHandler | undefined;
-  onDeleteClick?: MouseEventHandler | undefined;
+  hoverComponent?: () => ReactElement;
  }
 
 export const CustomTreeItem = forwardRef((
@@ -29,7 +24,7 @@ export const CustomTreeItem = forwardRef((
   ref: React.Ref<HTMLLIElement>
 ) => { 
 
-  const { id, itemId, label, disabled, children, labelIcon: LabelIcon, ...other } = props;
+  const { id, itemId, label, disabled, children, labelIcon: LabelIcon, hoverComponent, ...other } = props;
   const { 
     getContextProviderProps,
     getRootProps,
@@ -41,13 +36,6 @@ export const CustomTreeItem = forwardRef((
   } = useTreeItem({ id, itemId, label, disabled, children, rootRef: ref });
 
   const [ isMouseOver, setMouseOver ] = useState<boolean>(false);
-
-  function action(event: MouseEvent, handler: MouseEventHandler | undefined) {
-    event.stopPropagation();
-    if (handler) {
-      handler(event);
-    }
-  }
 
   return (
     <TreeItemProvider { ...getContextProviderProps() }>
@@ -69,29 +57,8 @@ export const CustomTreeItem = forwardRef((
             </span>
           </TreeItemLabel>
 
-          { isMouseOver && (props.onEditClick || props.onDeleteClick) &&
-            <Stack direction="row" spacing={1} marginLeft="auto" zIndex={2} >
-              { props.onEditClick &&
-                <IconButton
-                  color="inherit" aria-label="edit" edge="start" size="small"
-                  style={{ padding: "2px" }}
-                  onClick={ (e) => action(e, props.onEditClick) }>
-                  <EditOutlinedIcon fontSize="small" color="info" 
-                    sx={{ opacity: 0.6, cursor: 'pointer' }}
-                  />
-                </IconButton>
-              }
-              { props.onDeleteClick &&
-                <IconButton
-                  color="inherit" aria-label="delete" edge="start" size="small"
-                  style={{ padding: "2px" }}
-                  onClick={ (e) => action(e, props.onDeleteClick) }>
-                  <DeleteOutlinedIcon fontSize="small" color="warning"
-                    sx={{ opacity: 0.6, cursor: 'pointer' }}
-                  />
-                </IconButton>
-              }
-            </Stack>
+          { isMouseOver && props.hoverComponent &&
+            props.hoverComponent()
           }
         </TreeItemContent>
 

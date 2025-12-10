@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { Box, Divider, Typography } from "@mui/material";
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import CategoryService from '../../services/category.service';
@@ -64,16 +65,16 @@ export default function CategoryTree(props: Props) {
     }
   }
 
-  function startGroupEdit(node: CategoryGroupNode) {
+  function startGroupEdit(node?: CategoryGroupNode) {
     setFocusedNode(node)
     setEditGroupOpen(true);
   }
 
   function confirmGroupEdit(group: CategoryGroup) {
     const creating = group.id === undefined;
-    (creating)
+    (creating
       ? CategoryService.createGroup(group)
-      : CategoryService.updateGroup(group)
+      : CategoryService.updateGroup(group))
       .then(updated => {
         setEditGroupOpen(false);
 
@@ -122,7 +123,7 @@ export default function CategoryTree(props: Props) {
     }
   }
 
-  function startCategoryEdit(node: CategoryGroupNode, category: Category) {
+  function startCategoryEdit(node: CategoryGroupNode, category?: Category) {
     setFocusedNode(node)
     setFocusedCategory(category);
     setEditCategoryOpen(true);
@@ -132,9 +133,9 @@ export default function CategoryTree(props: Props) {
     const node = focusedNode;
     if (node && category) {
       const creating = category.id === undefined;
-      (creating)
+      (creating
         ? CategoryService.createCategory(node.group.id!!, category)
-        : CategoryService.updateCategory(category)
+        : CategoryService.updateCategory(category))
         .then(updated => {
           setEditCategoryOpen(false);
 
@@ -194,16 +195,22 @@ export default function CategoryTree(props: Props) {
 
   return (
     <div style={{ height: '700px', overflow: 'scroll' }}>
+      <Box style={{ padding: "8px", fontWeight: 'bold' }}>
+          Category Groups
+        <Divider style={{ paddingTop: "10px"}}/>
+      </Box>
+
       <SimpleTreeView style={{ height: '100%' }} >
         { nodes && nodes.map(node =>
-          <GroupTreeItem group={ node.group } key={ node.group.id! }
+          <GroupTreeItem group={ node.group } key={ node.group.id! } itemId={ node.group.id! }
+            onAddCategoryClick={() => startCategoryEdit(node, undefined) }
+            onAddGroupClick={ () => startGroupEdit(undefined) }
             onEditClick={() => startGroupEdit(node) }
             onDeleteClick={ () => deleteGroup(node) }
           >
 
             { node.categories.map(category =>
-              <CategoryTreeItem key={ category.id! } itemId={ category.id! }
-                category={ category }
+              <CategoryTreeItem category={ category } key={ category.id! } itemId={ category.id! }
                 onClick={ () => selectCategory(node, category) }
                 onEditClick={ () => startCategoryEdit(node, category) }
                 onDeleteClick={ () => deleteCategory(node, category) }
@@ -213,9 +220,9 @@ export default function CategoryTree(props: Props) {
         )}
       </SimpleTreeView>
   
-      { editCategoryOpen &&
+      { editCategoryOpen && focusedNode?.group &&
         <EditCategory open={ editCategoryOpen }
-          group={ focusedNode!.group }
+          group={ focusedNode.group }
           category={ focusedCategory! }
           onConfirm={ confirmCategoryEdit }
           onCancel={() => setEditCategoryOpen(false)}/>
@@ -223,7 +230,7 @@ export default function CategoryTree(props: Props) {
 
       { editGroupOpen &&
         <EditCategoryGroup open={ editGroupOpen }
-          group={ focusedNode!.group }
+          group={ focusedNode?.group }
           onConfirm={ confirmGroupEdit }
           onCancel={() => setEditGroupOpen(false)}/>
       }

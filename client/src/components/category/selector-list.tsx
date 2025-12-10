@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
-import { CategorySelector, selectorName } from "../../model/category.model";
+import { Category, CategorySelector, selectorName } from "../../model/category.model";
 import AccountService from '../../services/account.service';
 import { AccountDetail } from "../../model/account.model";
 import ConfirmationDialog from '../dialogs/confirm-dialog';
@@ -21,6 +21,7 @@ const colhead: SxProps = {
 };
 
 interface Props {
+  category?: Category;
   selectors: Array<CategorySelector>;
   onDeleteSelector?: (selector: CategorySelector) => void;  
 }
@@ -61,6 +62,15 @@ export default function Selectors(props: Props) {
       <TableContainer>
         <Table size='small' stickyHeader>
           <TableHead>
+            <TableRow>
+              <TableCell colSpan={6} align="center" sx={ colhead }>
+                Transaction Selectors { props.category &&
+                  <>
+                    ({ props.category.name })
+                  </>
+                }
+              </TableCell>
+            </TableRow>
             <TableRow>
               <TableCell sx={ colhead }></TableCell>
               <TableCell sx={ colhead }></TableCell>
