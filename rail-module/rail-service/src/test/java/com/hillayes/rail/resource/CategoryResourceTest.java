@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -506,8 +507,8 @@ public class CategoryResourceTest extends TestBase {
         Collection<CategorySelector> categorySelectors = mockCategorySelectors(5, accountId, categoryId);
         when(categoryService.getCategorySelectors(eq(userId), eq(categoryId), eq(accountId), anyInt(), anyInt())).then(invocation -> {
             int pageIndex = invocation.getArgument(3);
-            int pagesize = invocation.getArgument(4);
-            return Page.of(categorySelectors, pageIndex, pagesize);
+            int pageSize = invocation.getArgument(4);
+            return Page.of(categorySelectors, pageIndex, pageSize);
         });
 
         // when: the category selectors are requested
@@ -517,7 +518,7 @@ public class CategoryResourceTest extends TestBase {
             .pathParam("accountId", accountId)
             .contentType(JSON)
             .when()
-            .get("/api/v1/rails/categories/{categoryId}/selectors/{accountId}")
+            .get("/api/v1/rails/categories/{categoryId}/account-selectors/{accountId}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -561,7 +562,7 @@ public class CategoryResourceTest extends TestBase {
             .contentType(JSON)
             .body(selectors)
             .when()
-            .put("/api/v1/rails/categories/{categoryId}/selectors/{accountId}")
+            .put("/api/v1/rails/categories/{categoryId}/account-selectors/{accountId}")
             .then()
             .statusCode(200)
             .contentType(JSON)
@@ -578,6 +579,93 @@ public class CategoryResourceTest extends TestBase {
         // and: the new category-selectors are passed to the category-service
         List<CategorySelector> actual = captor.getValue();
         assertEquals(selectors.size(), actual.size());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testMoveCategorySelector() {
+        // given: an authenticated user
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a category group with categories exist
+        CategoryGroup categoryGroup = mockCategoryGroup(userId, "mock-group");
+        Category[] categories = new Category[] {
+            mockCategory(categoryGroup, "mock-category-1"),
+            mockCategory(categoryGroup, "mock-category-2")
+        };
+
+        // and: a collection of new category-selectors
+        UUID accountId = UUID.randomUUID();
+        CategorySelector selector = mockCategorySelector(accountId, categories[0]);
+
+        // and: the service is primed with data
+        when(categoryService.moveCategorySelector(
+            eq(userId), eq(selector.getCategory().getId()), eq(selector.getId()), any(UUID.class)))
+            .then(invocation -> {
+                UUID destCategoryId = invocation.getArgument(3);
+                selector.setCategory(Arrays.stream(categories)
+                    .filter(c -> c.getId().equals(destCategoryId))
+                    .findFirst().orElse(null)
+                );
+                return selector;
+            });
+
+        // when: a category selector is moved
+        CategorySelectorUpdateRequest request = new CategorySelectorUpdateRequest()
+            .categoryId(categories[1].getId());
+        CategorySelectorResponse response = given()
+            .request()
+            .pathParam("categoryId", selector.getCategory().getId())
+            .pathParam("selectorId", selector.getId())
+            .contentType(JSON)
+            .body(request)
+            .when()
+            .put("/api/v1/rails/categories/{categoryId}/selectors/{selectorId}")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().as(CategorySelectorResponse.class);
+
+        // then: the service is called to move the identified selector to the identified category
+        verify(categoryService).moveCategorySelector(
+            userId, categories[0].getId(), selector.getId(), request.getCategoryId());
+
+        // and: the updated category selector is returned
+        assertEquals(selector.getId(), response.getId());
+        assertEquals(request.getCategoryId(), response.getCategoryId());
+    }
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testDeleteCategorySelectors() {
+        // given: an authenticated user
+        UUID userId = UUID.fromString(userIdStr);
+
+        // and: a category-id and account-id
+        CategoryGroup categoryGroup = mockCategoryGroup(userId, "mock-group");
+        Category category = mockCategory(categoryGroup, "mock-category");
+
+        // and: a collection of new category-selectors
+        UUID accountId = UUID.randomUUID();
+        CategorySelector selector = mockCategorySelector(accountId, category);
+
+        // and: the service is primed with data
+        when(categoryService.deleteCategorySelector(userId, selector.getCategory().getId(), selector.getId()))
+            .thenReturn(selector);
+
+        // when: a category selectors is deleted
+        given()
+            .request()
+            .pathParam("categoryId", selector.getCategory().getId())
+            .pathParam("selectorId", selector.getId())
+            .contentType(JSON)
+            .when()
+            .delete("/api/v1/rails/categories/{categoryId}/selectors/{selectorId}")
+            .then()
+            .statusCode(204);
+
+        // then: the service is called to delete the identified selector
+        verify(categoryService).deleteCategorySelector(userId, category.getId(), selector.getId());
     }
 
     @Test

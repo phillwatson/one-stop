@@ -258,8 +258,7 @@ public class CategoryResource {
         log.info("Deleting category selector [userId: {}, categoryId: {}, selectorId: {}]",
             userId, categoryId, selectorId);
 
-        CategorySelector categorySelector = categoryService
-            .deleteCategorySelector(userId, categoryId, selectorId);
+        categoryService.deleteCategorySelector(userId, categoryId, selectorId);
 
         return Response.noContent().build();
     }
