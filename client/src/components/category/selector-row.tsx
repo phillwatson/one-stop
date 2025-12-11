@@ -59,7 +59,7 @@ export default function SelectorRow(props: Props) {
   });
 
   const rowStyle = {
-    userSelect: 'none',
+    userSelect: 'text',
     backgroundColor: ( isDragging ? "#dddfe0ff" : "transparent" )    
   } as React.CSSProperties;
 

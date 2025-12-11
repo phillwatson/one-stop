@@ -55,8 +55,8 @@ export default function DateRangeSelector(props: Props) {
 
   return (
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale='en-gb'>
-      <Grid container direction="row" rowGap={ 3 } columnGap={ 3 } justifyContent="space-evenly">
-        <Grid key={1}>
+      <Grid container direction="row" spacing={ 3 } justifyContent="space-evenly">
+        <Grid>
           <Item>
             <FormControl sx={{ width: { xs: 180, md: 220 }}}>
               <InputLabel id="range-label">{ props.rangeLabel || "Range" }</InputLabel>
@@ -69,23 +69,26 @@ export default function DateRangeSelector(props: Props) {
             </FormControl>
           </Item>
         </Grid>
-        <Grid key={2}>
-          <Item>
-            <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
-              onChange={ (value: Dayjs | null, context: any) => {
-                if (value != null && context.validationError == null)
-                  debouncedSetDateRange([ value, props.dateRange[1] ])
-                }}/>
-          </Item>
-        </Grid>
-        <Grid key={3}>
-          <Item>
-            <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
-              onChange={ (value: Dayjs | null, context: any) => {
-                if (value != null && context.validationError == null)
-                  debouncedSetDateRange([ props.dateRange[0], value ])
-                }}/>
-          </Item>
+
+        <Grid container direction="row" justifyContent="space-evenly">
+          <Grid>
+            <Item>
+              <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
+                onChange={ (value: Dayjs | null, context: any) => {
+                  if (value != null && context.validationError == null)
+                    debouncedSetDateRange([ value, props.dateRange[1] ])
+                  }}/>
+            </Item>
+          </Grid>
+          <Grid>
+            <Item>
+              <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
+                onChange={ (value: Dayjs | null, context: any) => {
+                  if (value != null && context.validationError == null)
+                    debouncedSetDateRange([ props.dateRange[0], value ])
+                  }}/>
+            </Item>
+          </Grid>
         </Grid>
       </Grid>
     </LocalizationProvider>
