@@ -653,7 +653,8 @@ paths:
       summary: Get the calling user's transactions
       description: |
         Get the transactions for the authenticated user, filtered by the given values.
-        The results will be returned in descending booking date order.
+        The results will be returned in the order specified, the default is descending
+        booking date order.
       operationId: getTransactions
       security:
         - cookieAuth: [ ]
@@ -718,6 +719,16 @@ paths:
           required: false
           schema:
             type: string
+        - name: "order-by"
+          in: "query"
+          description: |
+            The column on which the transactions will be ordered
+          required: false
+          schema:
+            type: string
+            enum: [ bookingDateTime, additionalInformation, creditorName, reference, amount ]
+            default: bookingDateTime
+        - $ref: '#/components/parameters/OrderByDirectionParam'
       responses:
         200:
           description: successful operation
@@ -2207,6 +2218,17 @@ components:
         default: 20
         minimum: 1
       example: 30
+
+    OrderByDirectionParam:
+      name: "direction"
+      in: query
+      description: The order in which items are to be sorted.
+      required: false
+      schema:
+        type: string
+        enum: [ asc, desc]
+        default: desc
+      example: asc
 
     RailProviderParam:
       name: rail

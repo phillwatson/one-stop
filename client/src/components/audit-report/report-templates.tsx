@@ -51,7 +51,7 @@ export function AuditReportTemplates(props: Props) {
       </Grid>
       <Grid container direction="row">
         <TextField id="template-description" value={ selectedTemplate?.description }
-          fullWidth multiline rows={ 4 } variant="filled" disabled
+          fullWidth multiline rows={ 5 } variant="filled" disabled
         />
       </Grid>
     </Grid>
