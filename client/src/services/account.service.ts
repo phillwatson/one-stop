@@ -2,6 +2,19 @@ import http from './http-common';
 import PaginatedList from '../model/paginated-list.model';
 import { AccountDetail, TransactionDetail, PaginatedTransactions, TransactionMovement } from '../model/account.model';
 
+export type SortDirection = 'asc' | 'desc';
+export interface SortBy {
+  /**
+   * The column field identifier.
+   */
+  field: string;
+  /**
+   * The direction of the column that the grid should sort.
+   */
+  direction?: SortDirection;
+}
+
+
 class AccountService {
   getAll(page: number = 0, pageSize: number = 1000): Promise<PaginatedList<AccountDetail>> {
     return http.get<PaginatedList<AccountDetail>>('/rails/accounts', { params: { "page": page, "page-size": pageSize }})
@@ -23,9 +36,11 @@ class AccountService {
       .then(response => response.data);
   }
 
-  getTransactions(accountId: string, page: number = 0, pageSize = 25, filters: any = {}): Promise<PaginatedTransactions> {
+  getTransactions(accountId: string, page: number = 0, pageSize = 25,
+                  sortBy: SortBy = { field: "bookingDateTime", direction: 'desc' },
+                  filters: any = {}): Promise<PaginatedTransactions> {
     return http.get<PaginatedTransactions>('/rails/transactions',
-     { params: { "account-id": accountId, "page": page, "page-size": pageSize, ...filters} })
+     { params: { "account-id": accountId, "page": page, "page-size": pageSize, "order-by": sortBy.field, "direction": sortBy.direction, ...filters} })
      .then(response => response.data);
   }
 

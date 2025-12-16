@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
 import static org.junit.jupiter.api.Assertions.*;
@@ -207,6 +208,60 @@ public class AccountTransactionRepositoryTest {
                 assertEquals("Transaction 2", transaction.getAdditionalInformation());
             });
         });
+    }
+
+    @Test
+    public void testOrderBy() {
+        // given: a user-consent
+        UserConsent consent = userConsentRepository.save(mockUserConsent());
+
+        // and: a linked account
+        Account account = accountRepository.save(mockAccount(consent));
+
+        // and: a list of transactions over past 2 weeks
+        List<AccountTransaction> transactions = new ArrayList<>();
+        LocalDate bookingDate = LocalDate.now().minusWeeks(2);
+        while (bookingDate.isBefore(LocalDate.now())) {
+            transactions.add(mockTransaction(account, bookingDate));
+            bookingDate = bookingDate.plusDays(1);
+        }
+        fixture.saveAll(transactions);
+        fixture.flush();
+
+        // and: a set of requested order-by cols - with comparator to sort the list above
+        Map<String, Comparator<AccountTransaction>> ordering = new HashMap<>(5);
+        ordering.put("bookingDateTime", Comparator.comparing(AccountTransaction::getBookingDateTime));
+        ordering.put("additionalInformation", Comparator.comparing(t -> t.getAdditionalInformation().toLowerCase()));
+        ordering.put("creditorName", Comparator.comparing(t -> t.getCreditorName().toLowerCase()));
+        ordering.put("reference", Comparator.comparing(t -> t.getReference().toLowerCase()));
+        ordering.put("amount", Comparator.comparing(t -> t.getAmount().getAmount()));
+
+        // and: for each column on which to sort
+        ordering.forEach((orderBy, comparator) ->
+            // and: in each direction to sort
+            List.of("asc", "desc").forEach(direction -> {
+                // when: the transactions are returned in selected column order
+                TransactionFilter filter = TransactionFilter.builder()
+                    .userId(consent.getUserId())
+                    .accountId(account.getId())
+                    .orderBy(orderBy)
+                    .direction(direction)
+                    .build();
+                Page<AccountTransaction> result =
+                    fixture.findByFilter(filter, 0, 100);
+
+                // then: the results contain the transaction in the requested order
+                assertFalse(result.isEmpty());
+                assertEquals(transactions.size(), result.getContentSize());
+
+                // and: the results are in the requested order
+                Comparator<AccountTransaction> order = ("desc".equals(direction)) ? comparator.reversed() : comparator;
+                Iterator<AccountTransaction> actual = result.getContent().iterator();
+                transactions.stream().sorted(order).forEach(expected ->
+                    assertEquals(expected.getId(), actual.next().getId())
+                );
+            })
+        );
     }
 
     @Test

@@ -144,7 +144,7 @@ export default function AddSelector(props: Props) {
       <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white'}}>Add To Category</DialogTitle>
       <br/>
       <DialogContent>
-        <Grid container direction="column" spacing={2}>
+        <Grid container direction="column" spacing={ 2 }>
           <Grid>
             <Item>
               <FormControl fullWidth>
@@ -205,7 +205,7 @@ export default function AddSelector(props: Props) {
 
       <DialogContent>
         <Divider textAlign="left" sx={{fontWeight: 'light'}}>Or choose from existing selectors:</Divider>
-        <TableContainer style={{ maxHeight: "300px" }}>
+        <TableContainer style={{ maxHeight: "280px" }}>
           <Table size='small'>
             <TableHead>
               <TableRow>

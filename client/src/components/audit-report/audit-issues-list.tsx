@@ -8,17 +8,13 @@ import { formatDate } from "../../util/date-util";
 
 import Switch from '@mui/material/Switch';
 import PaginatedList, { EMPTY_PAGINATED_LIST } from '../../model/paginated-list.model';
-import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators, getGridDateOperators, GridRenderCellParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 interface Props {
   reportConfig: AuditReportConfig;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
-
-const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
-const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
-const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=');
 
 interface IssueUpdate {
   issue: AuditIssue;
@@ -90,7 +86,6 @@ export default function AuditIssuesList(props: Props) {
       type: 'date',
       headerName: 'Date',
       width: 110,
-      filterOperators: dateFilterOperators,
       valueFormatter: formatDate,
       valueGetter: getDateValue
     },
@@ -98,22 +93,19 @@ export default function AuditIssuesList(props: Props) {
       field: 'additionalInformation',
       headerName: 'Additional Info',
       flex: 1,
-      width: 380,
-      filterOperators: stringFilterOperators
+      width: 380
     },
     {
       field: 'creditorName',
       headerName: 'Creditor',
       flex: 0.5,
-      width: 200,
-      filterOperators: stringFilterOperators
+      width: 200
     },
     {
       field: 'reference',
       headerName: 'Reference',
       flex: 0.5,
-      width: 200,
-      filterOperators: stringFilterOperators
+      width: 200
     },
     {
       field: 'debit',
@@ -123,7 +115,6 @@ export default function AuditIssuesList(props: Props) {
       headerAlign: 'right',
       align: 'right',
       width: 130,
-      filterOperators: moneyFilterOperators,
       valueFormatter: renderMoneyCell,
       valueGetter: getMoneyValue
     },
@@ -134,7 +125,6 @@ export default function AuditIssuesList(props: Props) {
       headerAlign: 'right',
       align: 'right',
       width: 130,
-      filterOperators: moneyFilterOperators,
       valueFormatter: renderMoneyCell,
       valueGetter: getMoneyValue
     },
@@ -142,8 +132,8 @@ export default function AuditIssuesList(props: Props) {
 
   return (
     <DataGrid rows={ issues.items } rowCount={ issues.total } columns={ columnDefs } 
-      density="compact" disableDensitySelector disableRowSelectionOnClick
-      loading={ loading } showToolbar
+      density="compact" showToolbar loading={ loading }
+      disableDensitySelector disableRowSelectionOnClick disableColumnFilter
       pagination paginationModel={ paginationModel }
       pageSizeOptions={[ 5, 15, DEFAULT_PAGE_SIZE, 50, 100 ]}
       paginationMode="server" onPaginationModelChange={ setPaginationModel }
