@@ -1,6 +1,7 @@
 package com.hillayes.rail.repository;
 
 import com.hillayes.commons.MonetaryAmount;
+import com.hillayes.commons.Strings;
 import com.hillayes.commons.jpa.OrderBy;
 import com.hillayes.commons.jpa.Page;
 import com.hillayes.commons.jpa.RepositoryBase;
@@ -120,8 +121,12 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
         String query = filter.toQuery();
         Map<String, Object> params = filter.toParams();
 
-        return pageAll(query, page, pageSize,
-            OrderBy.by("bookingDateTime", OrderBy.Direction.Descending), params);
+        OrderBy.Direction direction = ("asc".equals(filter.getDirection())
+            ? OrderBy.Direction.Ascending
+            : OrderBy.Direction.Descending);
+        String orderByCol = Strings.getOrDefault(filter.getOrderBy(), "bookingDateTime");
+
+        return pageAll(query, page, pageSize, OrderBy.by(orderByCol, direction), params);
     }
 
     public List<MonetaryAmount> findTotals(TransactionFilter filter) {

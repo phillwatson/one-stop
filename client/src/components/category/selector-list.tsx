@@ -52,9 +52,8 @@ export default function Selectors(props: Props) {
       if (props.onDeleteSelector) {
         props.onDeleteSelector(selector);
       }
-    } else {
-      setDeleteSelector(undefined);
     }
+    setDeleteSelector(undefined);
   }
 
   return (

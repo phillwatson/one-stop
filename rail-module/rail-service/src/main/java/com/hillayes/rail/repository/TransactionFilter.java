@@ -44,6 +44,10 @@ public class TransactionFilter {
     private String info;
     // the value that the transaction's creditor must contain - case-insensitive.
     private String creditor;
+    // the column on which to sort the results.
+    private String orderBy;
+    // the order direction in which the results are sorted (asc, desc)
+    private String direction;
 
     /**
      * Sets the date range for the transaction  The date range is inclusive of the

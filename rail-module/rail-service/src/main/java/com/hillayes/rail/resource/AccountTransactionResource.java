@@ -49,7 +49,9 @@ public class AccountTransactionResource {
                                     @QueryParam("max-amount") Double maxAmount,
                                     @QueryParam("reference") String refContaining,
                                     @QueryParam("info") String infoContaining,
-                                    @QueryParam("creditor") String creditorContaining) {
+                                    @QueryParam("creditor") String creditorContaining,
+                                    @QueryParam("order-by") @DefaultValue("bookingDateTime") String orderBy,
+                                    @QueryParam("direction") @DefaultValue("desc") String direction) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing transaction [userId: {}, accountId: {}, from: {}, to: {}]",
             userId, accountId, fromDate, toDate);
@@ -62,6 +64,8 @@ public class AccountTransactionResource {
             .reference(refContaining)
             .info(infoContaining)
             .creditor(creditorContaining)
+            .orderBy(orderBy)
+            .direction(direction)
             .build()
             .dateRange(fromDate, toDate);
 
