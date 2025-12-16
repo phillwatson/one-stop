@@ -27,6 +27,8 @@
                  this entry would be in the user-service/pom.xml.
                 -->
                 <quarkus.native.additional-build-args>-H:DynamicProxyConfigurationResources=proxy-config.json</quarkus.native.additional-build-args>
+<!--                <quarkus.native.additional-build-args>-H:DynamicProxyConfigurationResources=proxy-config.json,&#45;&#45;initialize-at-run-time=io.restassured.path.xml.mapper.factory.DefaultJAXBObjectMapperFactory</quarkus.native.additional-build-args>-->
+                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>
             </properties>
         </profile>
     </profiles>
