@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { DataGrid, GridColDef, getGridNumericOperators, getGridStringOperators,
-   getGridDateOperators, GridFilterModel, GridRowParams, GridRowClassNameParams } from '@mui/x-data-grid';
+   getGridDateOperators, GridFilterModel, GridRowParams, GridRowClassNameParams, GridSortModel } from '@mui/x-data-grid';
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import { TableContainer } from "@mui/material";
 
-import AccountService from '../../services/account.service';
+import AccountService, { SortBy } from '../../services/account.service';
 import { AccountDetail, TransactionDetail, Currency, PaginatedTransactions } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from "../../contexts/messages/context";
@@ -16,16 +16,18 @@ import { EMPTY_PAGINATED_LIST } from "../../model/paginated-list.model";
 import AddSelector from "../categories/add-selector";
 import useReconcileTransactions from '../reconciliation/reconcile-transactions-context';
 import ReconcilationButton from "../reconciliation/reconciliation-button";
+import { GridSortItem } from "@mui/x-data-grid/models/gridSortModel";
 
 interface Props {
   account: AccountDetail;
 }
 
 const DEFAULT_PAGE_SIZE: number = 30;
+const DEFAULT_SORT: GridSortItem = { field: 'bookingDateTime', sort: 'desc' };
 
 const dateFilterOperators = getGridDateOperators().filter((op) => op.value === 'before' || op.value === 'onOrAfter');
 const stringFilterOperators = getGridStringOperators().filter((op) => op.value === 'contains');
-const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=');
+const moneyFilterOperators = getGridNumericOperators().filter((op) => op.value === '>=' || op.value === '=' || op.value === '<=');
 
 function getMoneyValue(value: number, _row: TransactionDetail, column: GridColDef) {
   return column.field === 'credit' ? value : 0 - value;
@@ -126,6 +128,24 @@ export default function TransactionList(props: Props) {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [transactionFilter, setTransactionFilter] = useState<any | undefined>(undefined);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: DEFAULT_PAGE_SIZE });
+  const [sortModel, setSortModel] = useState<GridSortModel>([ DEFAULT_SORT ]);
+
+  const getSortBy = useCallback((): SortBy => {
+    const model = (sortModel && sortModel.length > 0) ? sortModel[0] : DEFAULT_SORT;
+    var result: SortBy = {
+      field: model.field,
+      direction: model.sort || 'desc'
+    };
+      
+    if (result.field === 'debit') {
+      result.field = 'amount';
+      result.direction = result.direction === 'asc' ? 'desc' : 'asc';
+    } else if (result.field === 'credit') {
+      result.field = 'amount';
+    }
+
+    return result;
+  }, [ sortModel ]);
 
   const onFilterChange = useCallback((filterModel: GridFilterModel) => {
     var filter: any;
@@ -149,10 +169,30 @@ export default function TransactionList(props: Props) {
             filter = { "from-date": dateStr, ...filter };
         }
         if (item.field === 'debit') {
-          filter = { "max-amount": 0 - item.value as number, ...filter };
+          if (item.operator === '>=') {
+            filter = { "max-amount": 0 - item.value as number, ...filter };
+          }
+          else if (item.operator === '=') {
+            filter = { "min-amount": 0 - item.value as number, ...filter };
+            filter = { "max-amount": 0 - item.value as number, ...filter };
+          }
+          else if (item.operator === '<=') {
+            filter = { "min-amount": 0 - item.value as number, ...filter };
+            filter = { "max-amount": 0, ...filter };
+          }
         }
         if (item.field === 'credit') {
-          filter = { "min-amount": item.value as number, ...filter };
+          if (item.operator === '>=') {
+            filter = { "min-amount": item.value as number, ...filter };
+          }
+          else if (item.operator === '=') {
+            filter = { "min-amount": item.value as number, ...filter };
+            filter = { "max-amount": item.value as number, ...filter };
+          }
+          else if (item.operator === '<=') {
+            filter = { "min-amount": 0, ...filter };
+            filter = { "max-amount": item.value as number, ...filter };
+          }
         }
       }
     );
@@ -176,11 +216,13 @@ export default function TransactionList(props: Props) {
 
   const refresh = useCallback(() => {
     setLoading(true);
-    AccountService.getTransactions(props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter)
+    AccountService.getTransactions(props.account.id,
+      paginationModel.page, paginationModel.pageSize, getSortBy(),
+      transactionFilter)
       .then( response => setTransactions(response))
       .catch(err => showMessage(err))
       .finally(() => setLoading(false));
-  }, [props.account.id, paginationModel.page, paginationModel.pageSize, transactionFilter, showMessage]);
+  }, [props.account.id, paginationModel.page, paginationModel.pageSize, getSortBy, transactionFilter, showMessage]);
 
   useEffect(() => {
     refresh();
@@ -196,8 +238,8 @@ export default function TransactionList(props: Props) {
   return (
     <>
       <DataGrid rows={ transactions.items } rowCount={ transactions.total } columns={ columnDefs }
-        density="compact" disableDensitySelector showToolbar
-        loading={ loading }
+        density="compact" disableDensitySelector showToolbar loading={ loading }
+        sortingMode="server" onSortModelChange={ setSortModel } sortModel={ sortModel }
         pagination paginationModel={ paginationModel }
         pageSizeOptions={[5, 15, DEFAULT_PAGE_SIZE, 50, 100]}
         paginationMode="server" onPaginationModelChange={ setPaginationModel }

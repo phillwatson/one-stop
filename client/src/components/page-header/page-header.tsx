@@ -18,8 +18,10 @@ export default function PageHeader(props: Props) {
 
       <Divider/>
 
-      <Box paddingTop={{ xs: 1, sm: 2 }} paddingLeft={{ xs: 0, sm: 1, md: 5, lg: 21 }} paddingRight={{ xs: 0, sm: 1, md: 5, lg: 21 }}>
-        <Paper elevation={ 3 } sx={{ padding: 1}}>
+      <Box paddingTop={{ xs: 1, sm: 2 }}
+           paddingLeft={{ xs: 0, sm: 1, md: 5, lg: 15 }}
+           paddingRight={{ xs: 0, sm: 1, md: 5, lg: 15 }}>
+        <Paper elevation={ 3 } sx={{ padding: 1 }}>
           {props.children}
         </Paper>
       </Box>
