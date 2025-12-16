@@ -1,5 +1,6 @@
 package com.hillayes.alphavantage.api;
 
+import com.hillayes.alphavantage.api.domain.ApiFunction;
 import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
 import com.hillayes.alphavantage.api.domain.TickerSearchRecord;
 import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
@@ -12,6 +13,7 @@ import com.hillayes.shares.api.domain.ShareProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,10 +26,18 @@ import java.util.Optional;
  * The bridge that provides access to the Alpha Vantage share price data.
  */
 @ApplicationScoped
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Slf4j
 public class AlphaVantageProvider implements ShareProviderApi {
+    private final String API_KEY;
     private final AlphaVantageApi alphaVantageApi;
+
+    AlphaVantageProvider(@ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
+                         String API_KEY,
+                         AlphaVantageApi alphaVantageApi) {
+        this.API_KEY = API_KEY;
+        this.alphaVantageApi = alphaVantageApi;
+    }
 
     @Override
     public ShareProvider getProviderId() {
@@ -46,7 +56,7 @@ public class AlphaVantageProvider implements ShareProviderApi {
             return Optional.empty();
         }
 
-        TickerSearchResponse response = alphaVantageApi.symbolSearch(tickerSymbol);
+        TickerSearchResponse response = alphaVantageApi.symbolSearch(API_KEY, ApiFunction.SYMBOL_SEARCH, tickerSymbol);
 
         if ((response == null) || (response.bestMatches == null)) {
             return Optional.empty();
@@ -85,7 +95,7 @@ public class AlphaVantageProvider implements ShareProviderApi {
             return Optional.empty();
         }
 
-        DailyTimeSeries series = alphaVantageApi.getDailySeries(tickerSymbol);
+        DailyTimeSeries series = alphaVantageApi.getDailySeries(API_KEY, ApiFunction.TIME_SERIES_DAILY, tickerSymbol);
         if ((series == null) || (series.series == null) || (series.series.isEmpty())) {
             return Optional.empty();
         }

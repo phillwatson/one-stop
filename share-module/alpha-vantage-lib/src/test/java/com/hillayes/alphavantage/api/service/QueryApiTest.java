@@ -1,30 +1,30 @@
 package com.hillayes.alphavantage.api.service;
 
-import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
-import com.hillayes.alphavantage.api.domain.Overview;
-import com.hillayes.alphavantage.api.domain.TickerSearchRecord;
-import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
+import com.hillayes.alphavantage.api.domain.*;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+//@Disabled
 @QuarkusTest
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class QueryApiTest {
-    private final AlphaVantageApi fixture;
+    @ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
+    String API_KEY;
+
+    @Inject AlphaVantageApi fixture;
 
     @ParameterizedTest
     @ValueSource(strings = { "TW.LON" })
     public void testGetDaily(String ticker) {
-        DailyTimeSeries response = fixture.getDailySeries(ticker);
+        DailyTimeSeries response = fixture.getDailySeries(API_KEY, ApiFunction.TIME_SERIES_DAILY, ticker);
 
         assertNotNull(response);
         assertNotNull(response.series);
@@ -39,7 +39,7 @@ public class QueryApiTest {
     @ParameterizedTest
     @ValueSource(strings = { "TW.", "TW.LON" })
     public void testSymbolSearch(String ticker) {
-        TickerSearchResponse response = fixture.symbolSearch(ticker);
+        TickerSearchResponse response = fixture.symbolSearch(API_KEY, ApiFunction.SYMBOL_SEARCH, ticker);
 
         assertNotNull(response);
         assertNotNull(response.bestMatches);
@@ -54,7 +54,7 @@ public class QueryApiTest {
 
     @Test
     public void testSymbolSearch_NoMatch() {
-        TickerSearchResponse response = fixture.symbolSearch("ZZ.LON");
+        TickerSearchResponse response = fixture.symbolSearch(API_KEY, ApiFunction.SYMBOL_SEARCH, "ZZ.LON");
 
         assertNotNull(response);
         assertNotNull(response.bestMatches);
