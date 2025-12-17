@@ -20,6 +20,9 @@
     <properties>
         <!-- skip integration tests by default -->
         <skip.its>true</skip.its>
+
+        <!-- don't perform native build -->
+        <quarkus.native.enabled>true</quarkus.native.enabled>
     </properties>
 
     <profiles>
