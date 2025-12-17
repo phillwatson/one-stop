@@ -28,6 +28,17 @@
             <groupId>com.hillayes</groupId>
             <artifactId>share-price-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-client-jackson</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

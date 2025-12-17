@@ -1,10 +1,13 @@
 package com.hillayes.alphavantage.api.service;
 
-import com.hillayes.alphavantage.api.domain.*;
+import com.hillayes.alphavantage.api.domain.ApiFunction;
+import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
+import com.hillayes.alphavantage.api.domain.TickerSearchRecord;
+import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,14 +15,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-//@Disabled
+@Disabled
 @QuarkusTest
-//@RequiredArgsConstructor
 public class QueryApiTest {
     @ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
     String API_KEY;
 
-    @Inject AlphaVantageApi fixture;
+    @Inject
+    @RestClient
+    AlphaVantageApi fixture;
 
     @ParameterizedTest
     @ValueSource(strings = { "TW.LON" })

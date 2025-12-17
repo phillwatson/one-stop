@@ -3,7 +3,6 @@ package com.hillayes.alphavantage.api.service;
 import com.hillayes.alphavantage.api.domain.ApiFunction;
 import com.hillayes.alphavantage.api.domain.DailyTimeSeries;
 import com.hillayes.alphavantage.api.domain.TickerSearchResponse;
-import io.quarkus.runtime.annotations.RegisterForProxy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -14,8 +13,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  */
 @ApplicationScoped
 @RegisterRestClient(configKey = "alpha-vantage-api")
-@RegisterForProxy
-@Path("/api/v2/accounts/query/")
+@Path("/query")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface AlphaVantageApi {

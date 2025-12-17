@@ -11,9 +11,10 @@ import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareInfo;
 import com.hillayes.shares.api.domain.ShareProvider;
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,18 +27,14 @@ import java.util.Optional;
  * The bridge that provides access to the Alpha Vantage share price data.
  */
 @ApplicationScoped
-//@RequiredArgsConstructor
 @Slf4j
 public class AlphaVantageProvider implements ShareProviderApi {
-    private final String API_KEY;
-    private final AlphaVantageApi alphaVantageApi;
+    @ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
+    String API_KEY;
 
-    AlphaVantageProvider(@ConfigProperty(name = "one-stop.alpha-vantage-api.secret-key", defaultValue = "not-set")
-                         String API_KEY,
-                         AlphaVantageApi alphaVantageApi) {
-        this.API_KEY = API_KEY;
-        this.alphaVantageApi = alphaVantageApi;
-    }
+    @Inject
+    @RestClient
+    AlphaVantageApi alphaVantageApi;
 
     @Override
     public ShareProvider getProviderId() {
