@@ -1,6 +1,5 @@
 package com.hillayes.openid.rest;
 
-import io.quarkus.runtime.annotations.RegisterForProxy;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
@@ -20,7 +19,12 @@ import jakarta.ws.rs.core.MediaType;
  */
 @Produces(MediaType.APPLICATION_JSON)
 @RegisterForReflection
-@RegisterForProxy
+//@RegisterForProxy(targets = {
+//    OpenIdTokenApi.class,
+//    org.jboss.resteasy.client.jaxrs.internal.proxy.ResteasyClientProxy.class,
+//    org.jboss.resteasy.microprofile.client.RestClientProxy.class,
+//    java.io.Closeable.class
+//})
 public interface OpenIdTokenApi {
     /**
      * Calls the auth-provider's token-endpoint to exchange an auth-token for the
