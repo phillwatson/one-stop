@@ -30,6 +30,21 @@
                 <skip.its>false</skip.its>
             </properties>
         </profile>
+
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- don't perform native build -->
+                <quarkus.native.enabled>false</quarkus.native.enabled>
+                <quarkus.native.container-build>false</quarkus.native.container-build>
+                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+            </properties>
+        </profile>
     </profiles>
 
     <build>

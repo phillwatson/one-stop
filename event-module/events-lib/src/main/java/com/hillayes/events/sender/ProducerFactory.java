@@ -19,7 +19,8 @@ import java.util.Properties;
     // workaround: see https://github.com/quarkusio/quarkus/issues/34071
     // https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection
     org.apache.kafka.common.serialization.StringSerializer.class,
-    com.hillayes.events.serializers.EventPacketSerializer.class
+    com.hillayes.events.serializers.EventPacketSerializer.class,
+    org.apache.kafka.common.metrics.JmxReporter.class
 })
 @Slf4j
 public class ProducerFactory {

@@ -19,6 +19,12 @@ import jakarta.ws.rs.core.MediaType;
  */
 @Produces(MediaType.APPLICATION_JSON)
 @RegisterForReflection
+//@RegisterForProxy(targets = {
+//    OpenIdTokenApi.class,
+//    org.jboss.resteasy.client.jaxrs.internal.proxy.ResteasyClientProxy.class,
+//    org.jboss.resteasy.microprofile.client.RestClientProxy.class,
+//    java.io.Closeable.class
+//})
 public interface OpenIdTokenApi {
     /**
      * Calls the auth-provider's token-endpoint to exchange an auth-token for the

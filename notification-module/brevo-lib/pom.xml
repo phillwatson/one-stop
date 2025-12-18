@@ -13,6 +13,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-config-yaml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
@@ -20,10 +24,15 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-client</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>email-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-client-jackson</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
