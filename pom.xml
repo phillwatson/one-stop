@@ -101,6 +101,7 @@
                 </property>
             </activation>
             <properties>
+                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
                 <quarkus.native.container-build>true</quarkus.native.container-build>
                 <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>

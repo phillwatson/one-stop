@@ -1,0 +1,5 @@
+quarkus:
+  log:
+    category:
+      "org.apache.http.wire":
+        level: DEBUG
