@@ -15,8 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MarketsClientTest {
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private MarketsClient marketsClient = new MarketsClient(objectMapper, "https://markets.ft.com");
+    private MarketsClient marketsClient = new MarketsClient("https://markets.ft.com");
 
     @Test
     public void testGetIssueId() {
