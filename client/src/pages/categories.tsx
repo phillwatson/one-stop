@@ -29,6 +29,10 @@ export default function Categories() {
     if (category === undefined || draggedSelector.selector === undefined) {
       return;
     }
+
+    if (draggedSelector.selector.categoryId === category.id) {
+      return;
+    }
     
     const selector = draggedSelector.selector;
     CategoryService.moveCategorySelector(selector, category.id!)

@@ -27,7 +27,8 @@ import java.util.*;
     org.apache.kafka.clients.consumer.CooperativeStickyAssignor.class,
     org.apache.kafka.clients.consumer.RoundRobinAssignor.class,
     org.apache.kafka.clients.consumer.StickyAssignor.class,
-    com.hillayes.events.serializers.EventPacketDeserializer.class
+    com.hillayes.events.serializers.EventPacketDeserializer.class,
+    org.apache.kafka.common.metrics.JmxReporter.class
 })
 @Slf4j
 public class ConsumerFactory {
