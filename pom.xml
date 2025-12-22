@@ -86,7 +86,6 @@
                 <os><arch>aarch64</arch></os>
             </activation>
             <properties>
-                <quarkus.native.builder-image>mandrel</quarkus.native.builder-image>
                 <quarkus.jib.base-native-image>quay.io/quarkus/quarkus-micro-image:2.0-arm64</quarkus.jib.base-native-image>
                 <quarkus.container-image.tag>${revision}-arm64</quarkus.container-image.tag>
             </properties>
@@ -99,10 +98,11 @@
                 </property>
             </activation>
             <properties>
-                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>
+                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
                 <quarkus.native.container-build>true</quarkus.native.container-build>
-                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+                <quarkus.native.builder-image>mandrel</quarkus.native.builder-image>
+<!--                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>-->
             </properties>
         </profile>
     </profiles>
