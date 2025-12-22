@@ -5,9 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.Strings;
+import com.hillayes.commons.json.MapperFactory;
+import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.errors.ShareServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 @Slf4j
@@ -35,12 +39,10 @@ public class MarketsClient {
     private static final TypeReference<Map<String,String>> MAP_TYPE_REFERENCE =
         new TypeReference<>() {};
 
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper OBJECT_MAPPER = MapperFactory.defaultMapper();
     private final String host;
 
-    public MarketsClient(ObjectMapper objectMapper,
-                         @ConfigProperty(name = "one-stop.shares.ft-market.url") String host) {
-        this.objectMapper = objectMapper;
+    public MarketsClient(@ConfigProperty(name = "one-stop.shares.ft-market.url") String host) {
         this.host = host;
         log.debug("Creating client [host: {}]", host);
     }
@@ -105,7 +107,7 @@ public class MarketsClient {
             }
 
             if (attribute != null) {
-                Map<String, String> json = objectMapper.readValue(attribute.getValue(), MAP_TYPE_REFERENCE);
+                Map<String, String> json = OBJECT_MAPPER.readValue(attribute.getValue(), MAP_TYPE_REFERENCE);
                 result = json.get("xid");
             }
         }
@@ -157,7 +159,7 @@ public class MarketsClient {
                 .header("Accept-Language", "en-GB,en;q=0.5")
                 .get();
 
-            JsonNode node = objectMapper.readTree(doc.body().text());
+            JsonNode node = OBJECT_MAPPER.readTree(doc.body().text());
             JsonNode xml = node.findPath("html");
 
             Document data = Parser.xmlParser().parseInput(xml.asText(), "http://localhost"); // any URL will do
