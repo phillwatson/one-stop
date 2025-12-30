@@ -59,6 +59,7 @@
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>ghcr.io</quarkus.container-image.registry>
         <quarkus.container-image.group>phillwatson</quarkus.container-image.group>
+        <quarkus.jib.base-jvm-image>registry.access.redhat.com/ubi8/openjdk-21-runtime@sha256:ff0f1a3ffca8b6924f1292282b857fd07faed3a18d3a5feb4f2bfe4e1807d0d6</quarkus.jib.base-jvm-image>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
