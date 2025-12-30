@@ -51,7 +51,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.30.1</quarkus.platform.version>
+        <quarkus.platform.version>3.30.5</quarkus.platform.version>
 
         <quarkus.jackson.serialization-inclusion>non-null</quarkus.jackson.serialization-inclusion>
 
@@ -65,7 +65,7 @@
         <maven.test.skip>true</maven.test.skip>
         <skipITs>true</skipITs>
         <failsafe.useModulePath>false</failsafe.useModulePath>
-        <openapi-generator.version>7.17.0</openapi-generator.version>
+        <openapi-generator.version>7.18.0</openapi-generator.version>
 
         <mockito.version>5.20.0</mockito.version>
         <mockito.agent>${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.agent>
@@ -87,7 +87,6 @@
                 <os><arch>aarch64</arch></os>
             </activation>
             <properties>
-                <quarkus.native.builder.image>graalvm</quarkus.native.builder.image>
                 <quarkus.jib.base-native-image>quay.io/quarkus/quarkus-micro-image:2.0-arm64</quarkus.jib.base-native-image>
                 <quarkus.container-image.tag>${revision}-arm64</quarkus.container-image.tag>
             </properties>
@@ -100,10 +99,11 @@
                 </property>
             </activation>
             <properties>
-                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>
+                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
                 <quarkus.native.container-build>true</quarkus.native.container-build>
-                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+                <quarkus.native.builder-image>mandrel</quarkus.native.builder-image>
+<!--                <quarkus.native.report-errors-at-runtime>true</quarkus.native.report-errors-at-runtime>-->
             </properties>
         </profile>
     </profiles>
@@ -143,7 +143,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>5.5.6</version>
+                <version>6.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hsqldb</groupId>
@@ -571,7 +571,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.3</version>
                     <executions>
                         <execution>
                             <id>make-index</id>
