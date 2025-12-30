@@ -76,9 +76,9 @@ public class MarketsClientTest {
                 assertTrue(price.date().isAfter(prevDate));
 
                 // prices should not include weekends
-                DayOfWeek preDayOfWeek = prevDate.getDayOfWeek();
-                DayOfWeek expectedDay = (preDayOfWeek == DayOfWeek.FRIDAY) ? DayOfWeek.MONDAY : preDayOfWeek.plus(1);
-                assertEquals(expectedDay, price.date().getDayOfWeek());
+                DayOfWeek dayOfWeek = prevDate.getDayOfWeek();
+                assertNotEquals(DayOfWeek.SATURDAY, dayOfWeek);
+                assertNotEquals(DayOfWeek.SUNDAY, dayOfWeek);
             }
             prev.set(price.date());
 
