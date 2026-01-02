@@ -22,11 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NotificationTestIT extends ApiTestBase {

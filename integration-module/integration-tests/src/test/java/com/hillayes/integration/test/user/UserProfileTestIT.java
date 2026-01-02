@@ -9,11 +9,9 @@ import com.hillayes.onestop.api.*;
 import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserProfileTestIT extends ApiTestBase {

@@ -13,12 +13,10 @@ import com.hillayes.onestop.api.UserUpdateRequest;
 import com.hillayes.sim.email.SendInBlueSimulator;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
