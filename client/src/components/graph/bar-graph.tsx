@@ -53,39 +53,41 @@ export default function BarGraph(props: Props) {
   const [xAxis, setXAxis] = useState<Array<number>>([]);
   const [yAxis, setYAxis] = useState<Array<any>>([]);
 
-  const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs(), dayjs() ]);
+  const [ dateRange, setDateRange ] = useState<Dayjs[]>([  ]);
 
   useEffect(() => {
+    if (dateRange.length > 0) {
     // fetch transactions and group the amounts by date
     const fromDate = dateRange[0].toDate();
     const toDate = dateRange[1].toDate()
 
     AccountService.getTransactionMovements(props.account.id, fromDate, toDate)
       .then( movements => {
-        const units: ManipulateType = (dateRange[1].diff(dateRange[0], 'day') <= 65)
-          ? 'day' : 'week';
+          const units: ManipulateType = (dateRange[1].diff(dateRange[0], 'day') <= 65)
+            ? 'day' : 'week';
 
-        const range = new Map<number, Data>();
-        let date = dateRange[0];
-        while (date < dateRange[1]) {
-          range.set(date.unix(), { credits: 0, debits: 0 });
-          date = date.add(1, units);
-        }
+          const range = new Map<number, Data>();
+          let date = dateRange[0];
+          while (date < dateRange[1]) {
+            range.set(date.unix(), { credits: 0, debits: 0 });
+            date = date.add(1, units);
+          }
 
-        const keys = Array.from(range.keys()).sort();
+          const keys = Array.from(range.keys()).sort();
 
-        movements.reverse().forEach(movement => {
-          const from = dayjs.utc(movement.fromDate).unix();
-          let key = keys.find(k => k >= from) || keys[keys.length - 1];
-          let entry = range.get(key)!;
-          entry.debits  += movement.debits.amount;
-          entry.credits += movement.credits.amount;
-        });
+          movements.reverse().forEach(movement => {
+            const from = dayjs.utc(movement.fromDate).unix();
+            let key = keys.find(k => k >= from) || keys[keys.length - 1];
+            let entry = range.get(key)!;
+            entry.debits  += movement.debits.amount;
+            entry.credits += movement.credits.amount;
+          });
 
-        setXAxis(keys);
-        setYAxis(Array.from(range.values()));
-      })
-      .catch(err => showMessage(err));
+          setXAxis(keys);
+          setYAxis(Array.from(range.values()));
+        })
+        .catch(err => showMessage(err));
+      }
   }, [ props, showMessage, dateRange ]);
 
   return (

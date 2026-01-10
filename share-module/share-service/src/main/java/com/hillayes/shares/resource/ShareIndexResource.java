@@ -11,19 +11,16 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/shares/indices")
-@RolesAllowed({"admin", "user"})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
@@ -109,7 +106,14 @@ public class ShareIndexResource {
             log.debug("Listing share prices [page: {}, pageSize: {}, count: {}, total: {}]",
                 pageIndex, pageSize, response.getCount(), response.getTotal());
         }
-        return Response.ok(response).build();
+
+        // allow the response to be cached until the end of the day
+        CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge(86400 - LocalTime.now().toSecondOfDay());
+
+        return Response.ok(response)
+            .cacheControl(cacheControl)
+            .build();
     }
 
     private ShareIndexResponse marshal(ShareIndex shareIndex) {

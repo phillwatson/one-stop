@@ -7,8 +7,9 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import { TableContainer } from "@mui/material";
 
+import { Currency } from '../../model/commons.model';
 import AccountService, { SortBy } from '../../services/account.service';
-import { AccountDetail, TransactionDetail, Currency, PaginatedTransactions } from "../../model/account.model";
+import { AccountDetail, TransactionDetail, PaginatedTransactions } from "../../model/account.model";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from "../../contexts/messages/context";
 import { formatDate, toISODate } from "../../util/date-util";

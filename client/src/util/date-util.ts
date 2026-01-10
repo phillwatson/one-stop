@@ -16,6 +16,11 @@ export function getDefaultLocaleRegion(): string | undefined {
   return (locale) ? locale.region : undefined;
 }
 
+export function toDate(dateStr?: string): Date | undefined {
+  if (!dateStr) return undefined;
+  return new Date(dateStr);
+}
+
 export function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("en-GB");
