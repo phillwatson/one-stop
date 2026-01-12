@@ -12,12 +12,12 @@ class ShareService {
 
   async fetchAllIndices(): Promise<Array<ShareIndexResponse>> {
     var response = await this.getIndices(0, 100);
-    var accounts = response.items as Array<ShareIndexResponse>;
+    var indices = response.items as Array<ShareIndexResponse>;
     while (response.links.next) {
       response = await this.getIndices(response.page + 1, 100);
-      accounts = accounts.concat(response.items);
+      indices = indices.concat(response.items);
     }
-    return accounts;
+    return indices;
   }
 
   getIndexPrices(shareId: string, fromDate: Date, toDate: Date,
@@ -27,7 +27,11 @@ class ShareService {
 
     return http.get<PaginatedList<HistoricalPriceResponse>>(`/shares/indices/${shareId}/prices`,
       { params: { "from-date": fromDateStr, "to-date": toDateStr, "page": page, "page-size": pageSize }})
-      .then(response => response.data);
+      .then(response => response.data)
+      .then(response => {
+        response.items.forEach(item => item.date = new Date(item.date));
+        return response;
+      });
   }
 }
 

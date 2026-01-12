@@ -18,7 +18,7 @@ export const NULL_INDEX: ShareIndexResponse = {
 };
 
 export interface HistoricalPriceResponse {
-  date: string;
+  date: Date;
   open: number;
   high: number;
   low: number;

@@ -44,3 +44,46 @@ export function toLocaleDate(date: Date): string {
 export function toISODate(date: Date): string {
   return date.toISOString().substring(0, 10);
 }
+
+export function minDate(dateA: Date, dateB: Date): Date {
+  return (dateA)
+    ? (dateB)
+      ? (dateA < dateB) ? dateA : dateB
+      : dateA
+    : dateB;
+}
+
+export function maxDate(dateA: Date, dateB: Date): Date {
+  return (dateA)
+    ? (dateB)
+      ? (dateA > dateB) ? dateA : dateB
+      : dateA
+    : dateB;
+}
+
+export function startOfDay(date: Date, plusDays: number = 0): Date {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+
+  let result = new Date();
+  result.setUTCHours(0);
+  result.setUTCMinutes(0);
+  result.setUTCSeconds(0);
+  result.setUTCMilliseconds(0);
+  result.setUTCFullYear(year);
+  result.setUTCMonth(month);
+  result.setUTCDate(day);
+
+  if (plusDays > 0)
+    result.setDate(plusDays);
+  return result;
+}
+
+export function startOfMonth(date: Date, plusMonth: number = 0): Date {
+  let result = startOfDay(date);
+  result.setDate(1);
+  if (plusMonth > 0)
+    result.setMonth(result.getMonth() + plusMonth);
+  return result;
+}
