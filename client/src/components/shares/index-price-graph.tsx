@@ -1,11 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { LineChart } from "@mui/x-charts";
-
+import Tooltip from "@mui/material/Tooltip";
+import Avatar from "@mui/material/Avatar";
+import Switch from "@mui/material/Switch";
+import SwitchOnIcon from '@mui/icons-material/Percent';
+import SwitchOffIcon from '@mui/icons-material/AttachMoney';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ShareService from "../../services/share.service";
 import { ShareIndexResponse, HistoricalPriceResponse } from "../../model/share-indices.model";
-import { formatDate, minDate, startOfMonth } from "../../util/date-util";
+import { formatDate, startOfDay } from "../../util/date-util";
+
+function toggleIcon(checked: boolean) {
+  return (
+    <Avatar sx={{ width: 22, height: 22, bgcolor: '#ebfcf4', color: 'black' }}>
+      { checked ? <SwitchOnIcon /> : <SwitchOffIcon /> }
+    </Avatar>
+  )
+}
+
+const percentFormat = new Intl.NumberFormat(undefined, {
+    style: 'percent',
+    minimumSignificantDigits: 1,
+    maximumSignificantDigits: 3,
+  });
+
+function percentageFormatter(value: number | null): string {
+  return value === null
+    ? ''
+    : percentFormat.format(value / 100);
+}
 
 enum Resolution {
   DAILY,
@@ -23,7 +47,7 @@ function calcResolution(fromDate: Date, toDate: Date): Resolution {
 }
 
 function nextDate(date: Date, resolution: Resolution): Date {
-  const result = new Date(date.getTime());
+  const result = startOfDay(new Date(date.getTime()));
 
   switch (resolution) {
     case Resolution.WEEKLY:
@@ -56,26 +80,8 @@ export default function ShareIndexGraph(props: Props) {
 
   useEffect(() => {
     if (props.shareIndex) {
-      // retrieve index prices in monthly chunks
-      let startDate = startOfMonth(props.fromDate);
-      const endDate = props.toDate;
-
-      const requests = [];
-      while (startDate < endDate) {
-        let thisEnd = minDate(startOfMonth(startDate, 1), endDate);
-
-        requests.push(
-          ShareService.getIndexPrices(props.shareIndex!.id, startDate, thisEnd, 0, 100)
-            .then(response => response.items)
-        );
-
-        startDate = thisEnd;
-      }
-
-      Promise.all(requests)
-        .then(response => response.toSorted((a, b) => a[0].date.getTime() - b[0].date.getTime()))
-        .then(responses => responses.reduce((all, current) => all.concat(current)))
-        .then(result => setPrices(result) )
+      ShareService.getPrices(props.shareIndex!.id, props.fromDate, props.toDate)
+        .then(response => setPrices(response))
         .catch(err => {
           showMessage(err);
         })
@@ -86,7 +92,9 @@ export default function ShareIndexGraph(props: Props) {
 
   const dataset = useMemo(() => {
     let resolution = calcResolution(props.fromDate, props.toDate);
-    let next = props.fromDate;
+
+    let next = startOfDay(props.fromDate);
+
     return prices
       .filter(p => {
         // filter prices according to resolution
@@ -98,25 +106,41 @@ export default function ShareIndexGraph(props: Props) {
         next = nextDate(date, resolution);
         return true;
       })
-      .map(p => ({
-        date: p.date,
-        opening: p.open,
-        closing: p.close
-      }))
+      .map((price, index, array) => ({
+        date: price.date,
+        opening: price.open,
+        closing: price.close,
+        growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
+      }));
   }, [ prices, props.fromDate, props.toDate ]);
 
+  const [ showPercentage, setShowPercentage ] = useState<boolean>(false);
+
   return (
-    <LineChart height={ 500 }
-      dataset={ dataset }
-      xAxis={[{
-        id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
-        label: 'Date', height: 95,
-        tickLabelStyle: { angle: -40, textAnchor: 'end' }
-       }]}
-      series={[
-        { id: 'opening', label: 'opening', dataKey: 'opening', curve: 'linear', showMark: false },
-        { id: 'closing', label: 'closing', dataKey: 'closing', curve: 'linear', showMark: false }
-      ]}>
-    </LineChart>
+    <>
+      <Tooltip title='toggle growth view' placement='bottom'>
+        <Switch color='default' icon={ toggleIcon(false) } checkedIcon={ toggleIcon(true) }
+          value={ showPercentage } onChange={ e => setShowPercentage(e.target.checked) }
+        ></Switch>
+      </Tooltip>
+
+      <LineChart height={ 500 }
+        dataset={ dataset }
+        xAxis={[{
+          id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
+          label: 'Date', height: 95, tickLabelStyle: { angle: -40, textAnchor: 'end' }
+        }]}
+        series=
+        { showPercentage
+          ? [ 
+              { id: 'percentage', label: 'growth', dataKey: 'growth', curve: 'linear', showMark: false, valueFormatter: percentageFormatter }
+            ]
+          : [
+              //{ id: 'opening', label: 'opening', dataKey: 'opening', curve: 'linear', showMark: false },
+              { id: 'closing', label: 'closing price', dataKey: 'closing', curve: 'linear', showMark: false }
+            ]
+        }>
+      </LineChart>
+    </>
   );
 }
