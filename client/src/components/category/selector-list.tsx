@@ -37,7 +37,7 @@ export default function Selectors(props: Props) {
       .catch(err => showMessage(err));
   }, [ showMessage ]);
 
-  function getAccountName(accountId: String): String {
+  function getAccountName(accountId: string): string {
     const name = accounts.find(account => account.id === accountId)?.name;
     return name ? name : "";
   }

@@ -1,0 +1,68 @@
+import { useEffect, useMemo, useState } from "react";
+import { Checkbox, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+
+import { ShareIndexResponse } from "../../model/share-indices.model";
+
+interface Props {
+  shareIndices: ShareIndexResponse[],
+  excludedIndices?: ShareIndexResponse[],
+  label?: string,
+  onSelectIndices?: (value: ShareIndexResponse[]) => void;
+}
+
+export default function MultiShareIndexSelector(props: Props) {
+  // a list of items for selection - without the exclusions
+  const listedItems = useMemo(() => {
+    if (props.excludedIndices === undefined || props.excludedIndices.length === 0) {
+      return props.shareIndices;
+    }
+    return props.shareIndices.filter(item => props.excludedIndices!.findIndex(excl => excl.id === item.id) === -1)
+  }, [ props.shareIndices, props.excludedIndices]);
+
+  const [ selectedIndices, setSelectedIndices ] = useState<ShareIndexResponse[]>([]);
+
+  function selectIndex(shareIndex: ShareIndexResponse) {
+    if (selectedIndices.findIndex(s => s.id === shareIndex.id) >= 0) {
+      setSelectedIndices(prev => prev.filter(item => item.id !== shareIndex.id));
+    } else {
+      setSelectedIndices(prev => [...prev, shareIndex]);
+    }
+  }
+
+  // call the callback on selection update
+  const callback = props.onSelectIndices;
+  useEffect(() => {
+    if (callback) {
+      callback(selectedIndices);
+    }
+  }, [ callback, selectedIndices ]);
+
+  const getLabel = useMemo(() => {
+    return props.label || 'Select Indices';
+  }, [ props.label ]);
+
+  return (
+      <FormControl fullWidth>
+        <Typography gutterBottom noWrap={ true }> { getLabel } </Typography>
+
+        <List sx={{ height: '250px', overflow: 'auto', border: '1px solid lightgrey', borderRadius: '1%' }}>
+          { listedItems.map(item =>
+            <ListItem key={ item.id } dense disableGutters disablePadding>
+              <ListItemButton role={ undefined } onClick={() => selectIndex(item) } dense sx={{ height: "24pt" }}>
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start" tabIndex={-1} 
+                    checked={ selectedIndices.find(i => i.id === item.id) !== undefined }
+                    inputProps={{ 'aria-labelledby': item.id }}
+                  />
+                </ListItemIcon>
+
+                <ListItemText id={ item.id } key={ item.id } primary={ item.name } />
+              </ListItemButton>
+            </ListItem>
+          )}
+        </List>
+      </FormControl>
+    
+  );
+}

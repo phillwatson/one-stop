@@ -6,9 +6,9 @@ import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
 import SwitchOnIcon from '@mui/icons-material/Percent';
 import SwitchOffIcon from '@mui/icons-material/AttachMoney';
-import { useMessageDispatch } from '../../contexts/messages/context';
 import ShareService from "../../services/share.service";
 import { ShareIndexResponse, HistoricalPriceResponse } from "../../model/share-indices.model";
+import { useMessageDispatch } from '../../contexts/messages/context';
 import { formatDate, startOfDay } from "../../util/date-util";
 
 function toggleIcon(checked: boolean) {
@@ -26,9 +26,7 @@ const percentFormat = new Intl.NumberFormat(undefined, {
   });
 
 function percentageFormatter(value: number | null): string {
-  return value === null
-    ? ''
-    : percentFormat.format(value / 100);
+  return value === null ? '' : percentFormat.format(value / 100);
 }
 
 enum Resolution {
@@ -68,59 +66,114 @@ function nextDate(date: Date, resolution: Resolution): Date {
   return result;
 }
 
+class Comparison {
+  shareIndex: ShareIndexResponse;
+  prices: Array<HistoricalPriceResponse>;
+
+  constructor(shareIndex: ShareIndexResponse,
+              prices: Array<HistoricalPriceResponse>
+  ) {
+    this.shareIndex = shareIndex;
+    this.prices = prices;
+  }
+}
+
+function filterPrices(fromDate: Date, toDate: Date, prices: HistoricalPriceResponse[]): HistoricalPriceResponse[] {
+  let resolution = calcResolution(fromDate, toDate);
+  let next = startOfDay(fromDate);
+  return prices
+    .filter(p => {
+      if ((p.date < next) || (p.date > toDate)) {
+        return false;
+      }
+
+      next = nextDate(p.date, resolution);
+      return true;
+    });
+}
+
 interface Props {
   shareIndex?: ShareIndexResponse;
+  compareIndices?: ShareIndexResponse[];
   fromDate: Date;
   toDate: Date;
 }
 
 export default function ShareIndexGraph(props: Props) {
   const showMessage = useMessageDispatch();
-  const [ prices, setPrices ] = useState<Array<HistoricalPriceResponse>>([]);
+  const [ prices, setPrices ] = useState<Array<Comparison>>([]);
 
   useEffect(() => {
     if (props.shareIndex) {
-      ShareService.getPrices(props.shareIndex!.id, props.fromDate, props.toDate)
+      const allSets = props.compareIndices === undefined ? [ props.shareIndex ] : [ ...props.compareIndices, props.shareIndex];
+
+      const requests = allSets
+        // remove duplicates
+        .filter((value, index) => allSets.findIndex(item => item.id === value.id) === index)
+
+        // request prices for date range - filtered according to resolution
+        .map(comparison => ShareService.getPrices(comparison.id, props.fromDate, props.toDate)
+          .then(response => filterPrices(props.fromDate, props.toDate, response))
+          .then(response => new Comparison(comparison, response))
+        );
+
+      // wait for requests to complete
+      Promise.all(requests)
         .then(response => setPrices(response))
         .catch(err => {
           showMessage(err);
-        })
+        });
     } else {
       setPrices([]);
     }
-  }, [ showMessage, props ]);
+  }, [ showMessage, props.shareIndex, props.compareIndices, props.fromDate, props.toDate ]);
 
   const dataset = useMemo(() => {
-    let resolution = calcResolution(props.fromDate, props.toDate);
+    if (prices.length === 0) {
+      return [];
+    }
 
-    let next = startOfDay(props.fromDate);
+    // if no comparisions have been provided
+    if (prices.length === 1) {
+      return prices[0].prices
+        .map((price, index, array) => ({
+          date: price.date,
+          opening: price.open,
+          closing: price.close,
+          growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
+        }));
+    }
 
     return prices
-      .filter(p => {
-        // filter prices according to resolution
-        let date = p.date;
-        if ((date < next) || (date > props.toDate)) {
-          return false;
+      .flatMap((comparison) =>
+        comparison.prices.flatMap((price, index, array) => ({
+          id: index,
+          date: price.date,
+          name: comparison.shareIndex.name,
+          growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
+        }))
+      )
+      .reduce((acc, obj) => {
+        let entry: any = acc.find(item => item['id'] === obj['id']);
+        if (entry === undefined) {
+          entry = { id: obj.id, date: obj.date };
+          acc.push(entry);
         }
-
-        next = nextDate(date, resolution);
-        return true;
-      })
-      .map((price, index, array) => ({
-        date: price.date,
-        opening: price.open,
-        closing: price.close,
-        growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
-      }));
-  }, [ prices, props.fromDate, props.toDate ]);
+        
+        entry[obj.name] = obj.growth
+        return acc;
+      }, [] as any[]);
+  }, [ prices ]);
 
   const [ showPercentage, setShowPercentage ] = useState<boolean>(false);
+  const percentageView = useMemo(() => showPercentage || prices.length > 1, [ showPercentage, prices.length ] )
 
   return (
     <>
       <Tooltip title='toggle growth view' placement='bottom'>
         <Switch color='default' icon={ toggleIcon(false) } checkedIcon={ toggleIcon(true) }
-          value={ showPercentage } onChange={ e => setShowPercentage(e.target.checked) }
+          checked={ percentageView } value={ percentageView }
+          onChange={ e => setShowPercentage(e.target.checked) }
         ></Switch>
       </Tooltip>
 
@@ -130,11 +183,22 @@ export default function ShareIndexGraph(props: Props) {
           id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
           label: 'Date', height: 95, tickLabelStyle: { angle: -40, textAnchor: 'end' }
         }]}
+        yAxis={ percentageView ? [{ valueFormatter: percentageFormatter }] : []}
         series=
-        { showPercentage
-          ? [ 
-              { id: 'percentage', label: 'growth', dataKey: 'growth', curve: 'linear', showMark: false, valueFormatter: percentageFormatter }
-            ]
+        { percentageView
+          ? (prices.length === 1) 
+              ? [
+                  { id: 'percentage', label: 'growth', dataKey: 'growth', curve: 'linear', showMark: false, valueFormatter: percentageFormatter }
+                ]
+              : prices.map(comparison => ({
+                  id: comparison.shareIndex.id,
+                  label: comparison.shareIndex.name,
+                  dataKey: comparison.shareIndex.name,
+                  curve: 'linear',
+                  showMark: false,
+                  valueFormatter: percentageFormatter
+                }))
+
           : [
               //{ id: 'opening', label: 'opening', dataKey: 'opening', curve: 'linear', showMark: false },
               { id: 'closing', label: 'closing price', dataKey: 'closing', curve: 'linear', showMark: false }
