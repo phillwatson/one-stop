@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormControl,InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 import { NULL_INDEX, ShareIndexResponse } from "../../model/share-indices.model";
 

@@ -37,13 +37,9 @@ export default function MultiShareIndexSelector(props: Props) {
     }
   }, [ callback, selectedIndices ]);
 
-  const getLabel = useMemo(() => {
-    return props.label || 'Select Indices';
-  }, [ props.label ]);
-
   return (
       <FormControl fullWidth>
-        <Typography gutterBottom noWrap={ true }> { getLabel } </Typography>
+        <Typography gutterBottom noWrap={ true }> { props.label || 'Select Indices' } </Typography>
 
         <List sx={{ height: '250px', overflow: 'auto', border: '1px solid lightgrey', borderRadius: '1%' }}>
           { listedItems.map(item =>
@@ -53,7 +49,6 @@ export default function MultiShareIndexSelector(props: Props) {
                   <Checkbox
                     edge="start" tabIndex={-1} 
                     checked={ selectedIndices.find(i => i.id === item.id) !== undefined }
-                    inputProps={{ 'aria-labelledby': item.id }}
                   />
                 </ListItemIcon>
 

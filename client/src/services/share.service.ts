@@ -81,6 +81,7 @@ class ShareService {
 
     // join all results, in correct order
     return Promise.all(requests)
+      .then(responses => responses.filter(r => r.length > 0))
       .then(responses => responses.toSorted((a, b) => a[0].date.getTime() - b[0].date.getTime()))
       .then(responses => responses.reduce((all, current) => all.concat(current)))
       .catch(err => {
