@@ -48,14 +48,6 @@ export default function SharePrices() {
       </Paper>
 
       <Paper sx={{ marginTop: 2, padding: 2 }} elevation={ 1 }>
-        <ShareIndexGraph
-          shareIndex={ selectedIndex }
-          compareIndices={ comparisons }
-          fromDate={ dateRange[0].toDate() }
-          toDate={ dateRange[1].toDate() }/>
-      </Paper>
-
-      <Paper sx={{ marginTop: 2, padding: 2 }} elevation={ 1 }>
         <Grid container direction="column" rowGap={ 3 } justifyContent="space-evenly">
           <Grid key={1}>
             <MultiShareIndexSelector label={ 'Select Comparisons' }
@@ -64,6 +56,14 @@ export default function SharePrices() {
               onSelectIndices={ setComparisons } />
           </Grid>
         </Grid>
+      </Paper>
+
+      <Paper sx={{ marginTop: 2, padding: 2 }} elevation={ 1 }>
+        <ShareIndexGraph
+          shareIndex={ selectedIndex }
+          compareIndices={ comparisons }
+          fromDate={ dateRange[0].toDate() }
+          toDate={ dateRange[1].toDate() }/>
       </Paper>
     </PageHeader>
   )

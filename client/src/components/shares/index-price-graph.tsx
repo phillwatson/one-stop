@@ -168,6 +168,16 @@ export default function ShareIndexGraph(props: Props) {
   const [ showPercentage, setShowPercentage ] = useState<boolean>(false);
   const percentageView = useMemo(() => showPercentage || prices.length > 1, [ showPercentage, prices.length ] )
 
+  const colour = useMemo(() => {
+    if (prices.length === 1) {
+      const len = prices[0].prices.length;
+      const growing = prices[0].prices[0].close < prices[0].prices[len - 1].close;
+      return growing ? '#8FBC8F' : '#F08080';
+    }
+
+    return 'green';
+  }, [ prices ])
+
   return (
     <>
       <Tooltip title='toggle growth view' placement='bottom'>
@@ -180,29 +190,31 @@ export default function ShareIndexGraph(props: Props) {
       <LineChart height={ 500 }
         dataset={ dataset }
         xAxis={[{
-          id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
-          label: 'Date', height: 95, tickLabelStyle: { angle: -40, textAnchor: 'end' }
-        }]}
-        yAxis={ percentageView ? [{ valueFormatter: percentageFormatter }] : []}
+            id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
+            label: 'Date', height: 95, tickLabelStyle: { angle: -40, textAnchor: 'end' }
+          }]}
+        yAxis={ percentageView
+            ? [{ id: 'percentage', label: 'Growth (%)', valueFormatter: percentageFormatter }]
+            : [{ id: 'price', label: 'Price' }]
+          }
         series=
         { percentageView
           ? (prices.length === 1) 
-              ? [
-                  { id: 'percentage', label: 'growth', dataKey: 'growth', curve: 'linear', showMark: false, valueFormatter: percentageFormatter }
-                ]
-              : prices.map(comparison => ({
-                  id: comparison.shareIndex.id,
-                  label: comparison.shareIndex.name,
-                  dataKey: comparison.shareIndex.name,
-                  curve: 'linear',
-                  showMark: false,
-                  valueFormatter: percentageFormatter
-                }))
-
-          : [
-              //{ id: 'opening', label: 'opening', dataKey: 'opening', curve: 'linear', showMark: false },
-              { id: 'closing', label: 'closing price', dataKey: 'closing', curve: 'linear', showMark: false }
-            ]
+            ? [{
+                id: 'percentage', label: 'growth', dataKey: 'growth',
+                curve: 'linear', showMark: false, valueFormatter: percentageFormatter,
+                area: true, baseline: 'min', color: colour
+              }]
+            : prices.map(comparison => ({
+                id: comparison.shareIndex.id,
+                label: comparison.shareIndex.name,
+                dataKey: comparison.shareIndex.name,
+                curve: 'linear', showMark: false, valueFormatter: percentageFormatter
+              }))
+          : [{
+              id: 'closing', label: 'closing price', dataKey: 'closing',
+              curve: 'linear', showMark: false, area: true, baseline: 'min', color: colour
+            }]
         }>
       </LineChart>
     </>
