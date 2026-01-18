@@ -27,12 +27,12 @@ const compactCell: SxProps = {
 
 export interface DraggedSelector {
   selector: CategorySelector;
-  accountName?: String;
+  accountName?: string;
 }
 
 interface Props {
   selector: CategorySelector;
-  accountName?: String;
+  accountName?: string;
   onDeleteClick?: MouseEventHandler | undefined;
 }
 

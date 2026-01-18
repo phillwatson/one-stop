@@ -9,6 +9,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import AuditReportIcon from '@mui/icons-material/VerifiedUser';
 import AuditIssuesIcon from '@mui/icons-material/GppMaybe';
+import SharePricesIcon from '@mui/icons-material/QueryStats';
 
 import { useCurrentUser } from "../contexts/user-context";
 import AppHeader from "../components/app-header/app-header";
@@ -44,6 +45,7 @@ export default function MainPage() {
       { label: 'Statistics', route: 'statistics', icon: <PieChartIcon/>, action: closeMenu },
       { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: closeMenu },
       { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: closeMenu },
+      { label: 'Share Prices', route: 'shares/prices', icon: <SharePricesIcon />, action: closeMenu },
       { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
     ]), [ logout ]);
 

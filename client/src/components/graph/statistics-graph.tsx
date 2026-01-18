@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import Item from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
@@ -201,22 +200,18 @@ export default function StatisticsGraph(props: Props) {
       <Paper sx={{ padding: 2 }} elevation={ props.elevation || 3 }>
         <Grid container direction="column" rowGap={ 3 } justifyContent="space-evenly">
           <Grid key={1}>
-            <Item>
-              <FormControl fullWidth>
-                <InputLabel id="select-group">Category Group</InputLabel>
-                <Select labelId="select-group" label="Category Group" value={ selectedGroup?.id || "" } onChange={ selectGroup }>
-                  { categoryGroups.map(group =>
-                    <MenuItem key={ group.id } value={ group.id }>{ group.name }</MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Item>
+            <FormControl fullWidth>
+              <InputLabel id="select-group">Category Group</InputLabel>
+              <Select labelId="select-group" label="Category Group" value={ selectedGroup?.id || "" } onChange={ selectGroup }>
+                { categoryGroups.map(group =>
+                  <MenuItem key={ group.id } value={ group.id }>{ group.name }</MenuItem>
+                )}
+              </Select>
+            </FormControl>
           </Grid>
 
           <Grid key={2}>
-            <Item>
-              <DateRangeSelector dateRange={ dateRange } onSelect={ setDateRange } />
-            </Item>
+            <DateRangeSelector dateRange={ dateRange } onSelect={ setDateRange } />
           </Grid>
         </Grid>
       </Paper>
@@ -224,53 +219,43 @@ export default function StatisticsGraph(props: Props) {
       <Paper sx={{ marginTop: 1, padding: 2 }} elevation={ props.elevation || 3 }>
         <Grid container spacing={2} alignItems={"center"} justifyContent={"center"}>
           <Grid>
-            <Item>
-              <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}
-                hideLegend={ true }
-                series={ seriesData }
-                onItemClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
-              />
-            </Item>
+            <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}
+              hideLegend={ true }
+              series={ seriesData }
+              onItemClick={(event: any, slice: any) => selectCategory(slice.seriesId, slice.dataIndex) }
+            />
           </Grid>
 
           <Grid>
-            <Item>
-              <Stack margin={ 0 } marginLeft={ 2 } marginTop={ 0 }>
-                { statistics.map(stat =>
-                  <FormControlLabel key={ stat.categoryName }
-                    label={ `${stat.categoryName} (${ formatMoney(stat.total, 'GBP')})` }
-                    style={{ padding: 0, margin: 0 }}
-                    control= {
-                      <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }
-                        style={{ color: stat.selected ? stat.colour : undefined }}
-                        onChange={ e => {
-                          toggleCategory(stat.categoryId, e.target.checked);
-                          selectStat(stat);
-                        }}/>
-                    }
-                  />
-                  )
-                }
-              </Stack>
-            </Item>
+            <Stack margin={ 0 } marginLeft={ 2 } marginTop={ 0 }>
+              { statistics.map(stat =>
+                <FormControlLabel key={ stat.categoryName }
+                  label={ `${stat.categoryName} (${ formatMoney(stat.total, 'GBP')})` }
+                  style={{ padding: 0, margin: 0 }}
+                  control= {
+                    <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }
+                      style={{ color: stat.selected ? stat.colour : undefined }}
+                      onChange={ e => {
+                        toggleCategory(stat.categoryId, e.target.checked);
+                        selectStat(stat);
+                      }}/>
+                  }
+                />
+                )
+              }
+            </Stack>
           </Grid>
         </Grid>
 
         <Grid container spacing={4} alignItems={"center"} justifyContent={"center"} marginTop={ 1 }>
           <Grid>
-            <Item>
-              Debits: { formatMoney(grandTotals.debits, 'GBP')}
-            </Item>
+            Debits: { formatMoney(grandTotals.debits, 'GBP')}
           </Grid>
           <Grid>
-            <Item>
-              Credits: { formatMoney(grandTotals.credits, 'GBP')}
-            </Item>
+            Credits: { formatMoney(grandTotals.credits, 'GBP')}
           </Grid>
           <Grid>
-            <Item>
-              Total: { formatMoney(grandTotals.total, 'GBP')}
-            </Item>
+            Total: { formatMoney(grandTotals.total, 'GBP')}
           </Grid>
         </Grid>
       </Paper>
