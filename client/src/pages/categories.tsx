@@ -2,7 +2,6 @@ import { useState } from "react";
 import { DndContext, DragOverlay, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
 import Grid from "@mui/material/Grid";
-import Item from "@mui/material/Grid";
 
 import { useMessageDispatch } from '../contexts/messages/context';
 import CategoryService from "../services/category.service";
@@ -75,14 +74,10 @@ export default function Categories() {
       <DndContext onDragStart={ handleDragStart } onDragEnd={ handleDragEnd }>
         <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
           <Grid width="29%">
-            <Item>
               <CategoryTree onSelectCategory={ selectCategory } />
-            </Item>
           </Grid>
           <Grid width="69%">
-            <Item>
               <Selectors category={ currentCategory } selectors={ selectors } onDeleteSelector={ deleteSelector } />
-            </Item>
           </Grid>
         </Grid>
 

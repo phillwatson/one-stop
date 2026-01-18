@@ -18,6 +18,7 @@ import StatisticsPage from "./pages/statistics";
 import TransactionAuditReports from "./pages/trans-audit-config-list";
 import TransactionAuditReportConfig from "./pages/trans-audit-config";
 import AuditIssues from "./pages/audit-issues";
+import SharePrices from "./pages/share-prices";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "reports/audit/issues",
         element: <AuditIssues />
+      },
+      {
+        path: 'shares/prices',
+        element: <SharePrices />
       },
       {
         path: "profile",

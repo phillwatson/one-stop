@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, PropsWithChildren } from "react";
-import { Currency } from '../../model/account.model';
+import { Currency } from '../../model/commons.model';
 
 /**
  * An interface to describe the state that we will pass in the provider.
