@@ -1,7 +1,6 @@
+import { Currency } from "./commons.model";
 import Institution from "./institution.model"
 import PaginatedList from "./paginated-list.model";
-
-export type Currency = 'EUR' | 'GBP' | 'USD';
 
 export interface TransactionDetail {
   id: string;

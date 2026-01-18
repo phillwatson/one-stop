@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 
 import Grid from '@mui/material/Grid';
-import Item from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
@@ -57,37 +56,35 @@ export default function DateRangeSelector(props: Props) {
     <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale='en-gb'>
       <Grid container direction="row" spacing={ 3 } justifyContent="space-evenly">
         <Grid>
-          <Item>
-            <FormControl sx={{ width: { xs: 180, md: 220 }}}>
-              <InputLabel id="range-label">{ props.rangeLabel || "Range" }</InputLabel>
-              <Select labelId="select-range" id="select-range" label={ props.rangeLabel || "Range" }
-                value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
-                { StaticRanges.map((range, index) =>
-                  <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
-                )}
-              </Select>
-            </FormControl>
-          </Item>
+          <FormControl sx={{ width: { xs: 180, md: 220 }}}>
+            <InputLabel id="range-label">{ props.rangeLabel || "Range" }</InputLabel>
+            <Select labelId="select-range" id="select-range" label={ props.rangeLabel || "Range" }
+              value={ selectedRange } onChange={ e => setSelectedRange(e.target.value as number) } >
+              { StaticRanges.map((range, index) =>
+                <MenuItem key={ index } value={ index }>{ range.name }</MenuItem>
+              )}
+            </Select>
+          </FormControl>
         </Grid>
 
         <Grid container direction="row" justifyContent="space-evenly">
           <Grid>
-            <Item>
-              <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
-                onChange={ (value: Dayjs | null, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([ value, props.dateRange[1] ])
-                  }}/>
-            </Item>
+            { props.dateRange.length > 0 &&
+            <DatePicker disableFuture label={ props.fromDateLabel || "From Date (inclusive)" } value={ props.dateRange[0] }
+              onChange={ (value: Dayjs | null, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([ value, props.dateRange[1] ])
+                }}/>
+            }
           </Grid>
           <Grid>
-            <Item>
-              <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
-                onChange={ (value: Dayjs | null, context: any) => {
-                  if (value != null && context.validationError == null)
-                    debouncedSetDateRange([ props.dateRange[0], value ])
-                  }}/>
-            </Item>
+            { props.dateRange.length > 0 &&
+            <DatePicker maxDate={ tomorrow } label={ props.toDateLabel || "To Date (exclusive)" } value={ props.dateRange[1] }
+              onChange={ (value: Dayjs | null, context: any) => {
+                if (value != null && context.validationError == null)
+                  debouncedSetDateRange([ props.dateRange[0], value ])
+                }}/>
+            }
           </Grid>
         </Grid>
       </Grid>
