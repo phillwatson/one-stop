@@ -17,8 +17,7 @@ public class InstitutionService extends AbstractRailService {
     @RestClient
     InstitutionApi institutionApi;
 
-    public List<Institution> list(String countryCode,
-                                  Boolean paymentsEnabled) {
+    public List<Institution> list(String countryCode) {
         List<Institution> list = institutionApi.list(countryCode);
 
         // add the sandbox institution to all results
@@ -31,6 +30,7 @@ public class InstitutionService extends AbstractRailService {
                 institution.logo = detail.logo;
                 institution.countries = detail.countries;
                 institution.transactionTotalDays = detail.transactionTotalDays;
+                institution.maxAccessValidForDays = detail.maxAccessValidForDays;
                 return institution;
             })
             .ifPresent(list::add);

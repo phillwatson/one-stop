@@ -1,9 +1,6 @@
 package com.hillayes.nordigen.api;
 
-import com.hillayes.nordigen.model.EndUserAgreement;
-import com.hillayes.nordigen.model.EndUserAgreementAccepted;
-import com.hillayes.nordigen.model.EndUserAgreementRequest;
-import com.hillayes.nordigen.model.PaginatedList;
+import com.hillayes.nordigen.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -27,7 +24,7 @@ public interface AgreementApi {
     public EndUserAgreement create(EndUserAgreementRequest agreement);
 
     @PUT
-    @Path("{id}/")
+    @Path("{id}/accept/")
     public EndUserAgreement accept(@PathParam("id") String id,
                                    EndUserAgreementAccepted acceptance);
 
@@ -38,4 +35,13 @@ public interface AgreementApi {
     @DELETE
     @Path("{id}/")
     public Map<String,Object> delete(@PathParam("id") String id);
+
+    @GET
+    @Path("{id}/reconfirm/")
+    public ReconfirmationRetrieve getReconfirmation(@PathParam("id") String agreementId);
+
+    @PUT
+    @Path("{id}/reconfirm/")
+    public ReconfirmationRetrieve createReconfirmation(@PathParam("id") String agreementId,
+                                                      ReconfirmationRetrieveRequest request);
 }

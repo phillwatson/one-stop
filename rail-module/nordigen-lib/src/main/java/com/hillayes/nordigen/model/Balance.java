@@ -13,6 +13,9 @@ public class Balance {
     @JsonProperty("balanceType")
     public String balanceType;
 
+    @JsonProperty("creditLimitIncluded")
+    public Balance creditLimitIncluded;
+
     @JsonProperty("referenceDate")
     public LocalDate referenceDate;
 

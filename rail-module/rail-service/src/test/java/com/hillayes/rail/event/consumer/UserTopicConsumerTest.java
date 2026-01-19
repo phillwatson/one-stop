@@ -40,7 +40,7 @@ public class UserTopicConsumerTest {
             .userId(UUID.randomUUID())
             .build();
 
-        // and: the event payment is wrapped in an event packet
+        // and: the event is wrapped in an event packet
         EventPacket eventPacket = new EventPacket(
             UUID.randomUUID(),
             Topic.USER,

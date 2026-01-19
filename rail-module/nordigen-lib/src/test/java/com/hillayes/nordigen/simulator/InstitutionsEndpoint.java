@@ -63,7 +63,7 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
 
     private ResponseDefinition list(Request request,
                                     ResponseDefinition responseDefinition) {
-        String filename = "institutions-payments-enabled.json";
+        String filename = "institutions.json";
 
         return ResponseDefinitionBuilder.like(responseDefinition)
             .withStatus(200)
@@ -100,7 +100,6 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
                 "XX"
             ],
             "logo": "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
-            "supported_payments": {},
             "supported_features": []
         }
         """,
@@ -115,11 +114,6 @@ public class InstitutionsEndpoint extends AbstractResponseTransformer {
                 "GB"
             ],
             "logo": "https://cdn.nordigen.com/ais/FIRST_DIRECT_MIDLGB22.png",
-            "supported_payments": {
-                "single-payment": [
-                    "FPS"
-                ]
-            },
             "supported_features": [
                 "access_scopes",
                 "business_accounts",

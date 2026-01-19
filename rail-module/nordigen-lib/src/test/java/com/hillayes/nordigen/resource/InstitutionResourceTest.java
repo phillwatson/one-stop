@@ -15,32 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 public class InstitutionResourceTest extends TestResourceBase {
-    private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {
-    };
-
-    // no longer filtered on boolean "payments_enabled"
-//    @Test
-//    @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
-//    public void testListBanksPaymentNotEnabled() {
-//        List<Institution> response = given()
-//            .queryParam("country", "GB")
-//            .when().get("/api/v1/rails/nordigen/institutions")
-//            .then()
-//            .statusCode(200)
-//            .contentType(JSON)
-//            .extract()
-//            .as(INSTITUTION_LIST);
-//
-//        // and: the response corresponds to the expected list of banks
-//        assertEquals(34, response.size());
-//    }
+    private static final TypeRef<List<Institution>> INSTITUTION_LIST = new TypeRef<>() {};
 
     @Test
     @TestSecurity(user = TestResourceBase.adminIdStr, roles = "admin")
-    public void testListBanksPaymentEnabled() {
+    public void testListBanks() {
         List<Institution> response = given()
             .queryParam("country", "GB")
-            .queryParam("paymentsEnabled", true)
             .when().get("/api/v1/rails/nordigen/institutions")
             .then()
             .statusCode(200)
@@ -49,7 +30,7 @@ public class InstitutionResourceTest extends TestResourceBase {
             .as(INSTITUTION_LIST);
 
         // and: the response corresponds to the expected list of banks
-        assertEquals(74, response.size());
+        assertEquals(34, response.size());
     }
 
     @Test

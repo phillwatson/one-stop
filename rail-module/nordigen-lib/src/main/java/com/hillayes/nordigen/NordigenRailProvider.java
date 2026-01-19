@@ -26,6 +26,7 @@ import java.util.*;
 public class NordigenRailProvider implements RailProviderApi {
     // The number of days for which account access will be agreed
     private final static int ACCESS_VALID_FOR_DAYS = 90;
+
     private final static List<String> CONSENT_SCOPES = List.of("balances", "details", "transactions");
 
     private final AccountService accountService;
@@ -50,16 +51,15 @@ public class NordigenRailProvider implements RailProviderApi {
                 .logo(institution.logo)
                 .countries(institution.countries)
                 .transactionTotalDays(institution.transactionTotalDays)
-                .paymentsEnabled(false)
+                .maxAccessDays(institution.maxAccessValidForDays)
                 .build()
             );
     }
 
     @Override
-    public List<RailInstitution> listInstitutions(String countryCode,
-                                                  boolean paymentsEnabled) {
-        log.debug("Listing institutions [countryCode: {}, paymentsEnabled: {}]", countryCode, paymentsEnabled);
-        return institutionService.list(countryCode, paymentsEnabled)
+    public List<RailInstitution> listInstitutions(String countryCode) {
+        log.debug("Listing institutions [countryCode: {}]", countryCode);
+        return institutionService.list(countryCode)
             .stream()
             .map(institution -> RailInstitution.builder()
                 .id(institution.id)
@@ -69,7 +69,7 @@ public class NordigenRailProvider implements RailProviderApi {
                 .logo(institution.logo)
                 .countries(institution.countries)
                 .transactionTotalDays(institution.transactionTotalDays)
-                .paymentsEnabled(paymentsEnabled)
+                .maxAccessDays(institution.maxAccessValidForDays)
                 .build()
             )
             .toList();
@@ -84,8 +84,9 @@ public class NordigenRailProvider implements RailProviderApi {
         EndUserAgreement agreement = agreementService.create(EndUserAgreementRequest.builder()
             .institutionId(institution.getId())
             .accessScope(CONSENT_SCOPES)
-            .accessValidForDays(ACCESS_VALID_FOR_DAYS)
+            .accessValidForDays(institution.getMaxAccessDays() > 0 ? institution.getMaxAccessDays() : ACCESS_VALID_FOR_DAYS)
             .maxHistoricalDays(institution.getTransactionTotalDays())
+            .reconfirmation(false)
             .build());
 
         // create requisition

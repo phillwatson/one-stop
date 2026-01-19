@@ -1,10 +1,8 @@
 package com.hillayes.nordigen.service;
 
+import com.hillayes.commons.Strings;
 import com.hillayes.nordigen.api.AgreementApi;
-import com.hillayes.nordigen.model.EndUserAgreement;
-import com.hillayes.nordigen.model.EndUserAgreementAccepted;
-import com.hillayes.nordigen.model.EndUserAgreementRequest;
-import com.hillayes.nordigen.model.PaginatedList;
+import com.hillayes.nordigen.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -66,6 +64,35 @@ public class AgreementService extends AbstractRailService {
         } catch (WebApplicationException e) {
             if (isNotFound(e)) {
                 return Map.of();
+            }
+            throw e;
+        }
+    }
+
+    public Optional<ReconfirmationRetrieve> getReconfirmation(String agreementId) {
+        log.debug("Retrieving reconfirmation [id: {}]", agreementId);
+        try {
+            return Optional.ofNullable(agreementApi.getReconfirmation(agreementId));
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                return Optional.empty();
+            }
+            throw e;
+        }
+    }
+
+    public Optional<ReconfirmationRetrieve> createReconfirmation(String agreementId, String redirect) {
+        log.debug("Creating reconfirmation [id: {}]", agreementId);
+        try {
+            ReconfirmationRetrieveRequest request = Strings.isBlank(redirect)
+                ? null
+                : ReconfirmationRetrieveRequest.builder()
+                    .redirect(redirect)
+                    .build();
+            return Optional.ofNullable(agreementApi.createReconfirmation(agreementId, request));
+        } catch (WebApplicationException e) {
+            if (isNotFound(e)) {
+                return Optional.empty();
             }
             throw e;
         }
