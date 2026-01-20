@@ -36,8 +36,7 @@ public class InstitutionResource {
                            @QueryParam("rail") RailProvider railProvider,
                            @QueryParam("country") @DefaultValue("GB") String countryCode) {
         log.info("List institutions [country: {}, page: {}, pageSize: {}]", countryCode, page, pageSize);
-        Set<RailInstitution> allBanks = new HashSet<>(institutionService.list(railProvider, countryCode, true));
-        allBanks.addAll(institutionService.list(railProvider, countryCode, false));
+        Set<RailInstitution> allBanks = new HashSet<>(institutionService.list(railProvider, countryCode));
 
         // reduce the overall list to the subset identified by the page parameters
         List<InstitutionResponse> bankPage = allBanks.stream()

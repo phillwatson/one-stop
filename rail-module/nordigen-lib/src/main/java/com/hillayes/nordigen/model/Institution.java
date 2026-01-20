@@ -13,6 +13,8 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 public class Institution implements Comparable<Institution> {
+    public final static String RENEWAL_SUPPORTED = "reconfirmation_of_consent";
+
     @EqualsAndHashCode.Include
     public String id;
 
@@ -28,12 +30,18 @@ public class Institution implements Comparable<Institution> {
     @JsonProperty("max_access_valid_for_days")
     public int maxAccessValidForDays;
 
+    @JsonProperty("max_access_valid_for_days_reconfirmation")
+    public int maxAccessValidForDaysReconfirmation;
+
     public List<String> countries;
 
     public String logo;
 
     @JsonProperty("supported_features")
     public List<String> supportedFeatures;
+
+    @JsonProperty("identification_codes")
+    public List<String> identificationCodes;
 
     @Override
     public int compareTo(Institution other) {

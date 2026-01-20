@@ -49,11 +49,9 @@ public interface RailProviderApi {
     /**
      * Returns a list of Institutions for the given country code.
      * @param countryCode the country code.
-     * @param paymentsEnabled true if only institutions that support payments should be returned.
      * @return the list of institutions, possibly empty.
      */
-    public List<RailInstitution> listInstitutions(String countryCode,
-                                                  boolean paymentsEnabled);
+    public List<RailInstitution> listInstitutions(String countryCode);
 
     /**
      * Registers an agreement with the given institution. This will initiate the process of
@@ -110,7 +108,7 @@ public interface RailProviderApi {
 
     /**
      * Returns the account with the given id, or empty if not found.
-     * 
+     *
      * @param agreement the agreement that authorises access to the account.
      * @param id the account id.
      * @return the account, or empty if not found.

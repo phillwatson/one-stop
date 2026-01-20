@@ -25,7 +25,7 @@ public class RailAgreement {
     private String authToken;
 
     /**
-     * The date-time on which the agreement was created, but not yet acknowledged. 
+     * The date-time on which the agreement was created, but not yet acknowledged.
      */
     @Builder.Default
     @ToString.Include
