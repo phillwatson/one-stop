@@ -28,23 +28,22 @@ public class InstitutionService {
     }
 
     public List<RailInstitution> list(RailProvider railProvider,
-                                      String countryCode,
-                                      Boolean paymentsEnabled) {
+                                      String countryCode) {
         if (railProvider == null) {
             // return all institutions from all providers
             return railProviderFactory.getAll()
                 .flatMap(api -> {
-                    CacheKey key = new CacheKey(api.getProviderId(), countryCode, paymentsEnabled);
+                    CacheKey key = new CacheKey(api.getProviderId(), countryCode);
                     return cacheByCountry.getValueOrCall(key, k ->
-                        api.listInstitutions(k.countryCode(), k.paymentsEnabled())
+                        api.listInstitutions(k.countryCode())
                     ).stream();
                 }).toList();
         }
 
         // return institutions from the specified provider
-        CacheKey key = new CacheKey(railProvider, countryCode, paymentsEnabled);
+        CacheKey key = new CacheKey(railProvider, countryCode);
         return cacheByCountry.getValueOrCall(key, k ->
-            railProviderFactory.get(k.railProvider()).listInstitutions(k.countryCode(), k.paymentsEnabled()));
+            railProviderFactory.get(k.railProvider()).listInstitutions(k.countryCode()));
     }
 
     public Optional<RailInstitution> get(RailProvider railProvider, String id) {
@@ -61,6 +60,6 @@ public class InstitutionService {
         );
     }
 
-    private record CacheKey(RailProvider railProvider, String countryCode, Boolean paymentsEnabled) {
+    private record CacheKey(RailProvider railProvider, String countryCode) {
     }
 }

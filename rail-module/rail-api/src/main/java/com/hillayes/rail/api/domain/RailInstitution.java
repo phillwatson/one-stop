@@ -28,7 +28,10 @@ public class RailInstitution implements Comparable<RailInstitution> {
 
     private int transactionTotalDays;
 
-    private boolean paymentsEnabled;
+    /**
+     * The max number of days for which consent can be granted.
+     */
+    private int maxAccessDays;
 
     @Override
     public int compareTo(RailInstitution other) {

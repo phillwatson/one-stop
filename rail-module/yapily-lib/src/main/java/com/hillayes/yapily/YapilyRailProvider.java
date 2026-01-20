@@ -58,15 +58,14 @@ public class YapilyRailProvider implements RailProviderApi {
                             .toList()
                 )
                 .transactionTotalDays(90)
-                .paymentsEnabled(institutionsService.arePaymentsEnabled(institution))
                 .build()
             );
     }
 
     @Override
-    public List<RailInstitution> listInstitutions(String countryCode, boolean paymentsEnabled) {
-        log.debug("Listing institutions [countryCode: {}, paymentsEnabled: {}]", countryCode, paymentsEnabled);
-        return institutionsService.list(countryCode, paymentsEnabled).stream()
+    public List<RailInstitution> listInstitutions(String countryCode) {
+        log.debug("Listing institutions [countryCode: {}]", countryCode);
+        return institutionsService.list(countryCode).stream()
             .map(institution -> RailInstitution.builder()
                 .id(institution.getId())
                 .name(institution.getName())
@@ -80,7 +79,6 @@ public class YapilyRailProvider implements RailProviderApi {
                             .toList()
                 )
                 .transactionTotalDays(90)
-                .paymentsEnabled(paymentsEnabled)
                 .build()
             ).toList();
     }

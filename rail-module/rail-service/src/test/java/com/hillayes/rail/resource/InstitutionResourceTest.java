@@ -37,9 +37,9 @@ public class InstitutionResourceTest extends TestBase {
         List<RailInstitution> institutions = Stream
             .iterate(1, (n) -> n + 1)
             .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(false)))
+            .map(n -> TestApiData.mockInstitution())
             .toList();
-        when(institutionService.list(any(), any(), eq(false)))
+        when(institutionService.list(any(), any()))
             .thenReturn(institutions);
 
         // when: client calls the endpoint
@@ -58,8 +58,8 @@ public class InstitutionResourceTest extends TestBase {
             .extract()
             .as(PaginatedInstitutions.class);
 
-        // then: the institution service is called for country code - one for payments enabled and one for disabled
-        verify(institutionService, times(2)).list(eq(RailProvider.NORDIGEN), eq("GB"), anyBoolean());
+        // then: the institution service is called for country code
+        verify(institutionService).list(eq(RailProvider.NORDIGEN), eq("GB"));
 
         // and: the response corresponds to the paged list of accounts
         assertEquals(5, response.getCount());
@@ -77,9 +77,9 @@ public class InstitutionResourceTest extends TestBase {
         List<RailInstitution> institutions = Stream
             .iterate(1, (n) -> n + 1)
             .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(false)))
+            .map(n -> TestApiData.mockInstitution())
             .toList();
-        when(institutionService.list(any(), any(), eq(false)))
+        when(institutionService.list(any(), any()))
             .thenReturn(institutions);
 
         // when: client calls the endpoint
@@ -98,8 +98,8 @@ public class InstitutionResourceTest extends TestBase {
             .extract()
             .as(PaginatedInstitutions.class);
 
-        // then: the institution service is called for country code - one for payments enabled and one for disabled
-        verify(institutionService, times(2)).list(eq(RailProvider.NORDIGEN), eq("GB"), anyBoolean());
+        // then: the institution service is called for country code
+        verify(institutionService).list(eq(RailProvider.NORDIGEN), eq("GB"));
 
         // and: the response corresponds to the paged list of accounts
         assertEquals(5, response.getCount());
@@ -117,23 +117,14 @@ public class InstitutionResourceTest extends TestBase {
         // country code defaults to GB
         String expectedCountryCode = Strings.isBlank(countryCode) ? "GB" : countryCode;
 
-        // given: a list of institutions that don't allow payments
-        List<RailInstitution> paymentDisabledInstitutions = Stream
+        // given: a list of institutions
+        List<RailInstitution> institutions = Stream
             .iterate(1, (n) -> n + 1)
             .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(false)))
+            .map(n -> TestApiData.mockInstitution())
             .toList();
-        when(institutionService.list(isNull(), any(), eq(false)))
-            .thenReturn(paymentDisabledInstitutions);
-
-        // and: a list of institutions that do allow payments
-        List<RailInstitution> paymentEnabledInstitutions = Stream
-            .iterate(1, (n) -> n + 1)
-            .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(true)))
-            .toList();
-        when(institutionService.list(isNull(), any(), eq(true)))
-            .thenReturn(paymentEnabledInstitutions);
+        when(institutionService.list(isNull(), any()))
+            .thenReturn(institutions);
 
         // when: client calls the endpoint
         RequestSpecification request = given()
@@ -153,11 +144,8 @@ public class InstitutionResourceTest extends TestBase {
             .extract()
             .as(PaginatedInstitutions.class);
 
-        // then: the institution service is called to get non-payment enabled institutions for country code
-        verify(institutionService).list(isNull(), eq(expectedCountryCode), eq(false));
-
-        // and: the institution service is called to get payment enabled institutions for country code
-        verify(institutionService).list(isNull(), eq(expectedCountryCode), eq(true));
+        // then: the institution service is called to get institutions for country code
+        verify(institutionService).list(isNull(), eq(expectedCountryCode));
 
         // and: no other calls to the institution service are made
         verifyNoMoreInteractions(institutionService);
@@ -166,7 +154,7 @@ public class InstitutionResourceTest extends TestBase {
         assertEquals(5, response.getCount());
         assertNotNull(response.getItems());
         assertEquals(5, response.getItems().size());
-        assertEquals(paymentEnabledInstitutions.size() + paymentDisabledInstitutions.size(), response.getTotal());
+        assertEquals(institutions.size(), response.getTotal());
         assertEquals(2, response.getPage());
         assertEquals(5, response.getPageSize());
 
@@ -197,7 +185,7 @@ public class InstitutionResourceTest extends TestBase {
 
         assertEquals("/api/v1/rails/institutions", links.getLast().getPath());
         assertTrue(links.getLast().getQuery().contains("page-size=5"));
-        assertTrue(links.getLast().getQuery().contains("page=8"));
+        assertTrue(links.getLast().getQuery().contains("page=4"));
         if (Strings.isNotBlank(countryCode)) {
             assertTrue(links.getLast().getQuery().contains("country=" + countryCode));
         }
@@ -207,23 +195,14 @@ public class InstitutionResourceTest extends TestBase {
     @EnumSource(RailProvider.class)
     @TestSecurity(user = userIdStr, roles = "user")
     public void testAll_SpecificRail(RailProvider railProvider) {
-        // given: a list of institutions that don't allow payments
-        List<RailInstitution> paymentDisabledInstitutions = Stream
+        // given: a list of institutions
+        List<RailInstitution> institutions = Stream
             .iterate(1, (n) -> n + 1)
             .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(false)))
+            .map(n -> TestApiData.mockInstitution())
             .toList();
-        when(institutionService.list(eq(railProvider), any(), eq(false)))
-            .thenReturn(paymentDisabledInstitutions);
-
-        // and: a list of institutions that do allow payments
-        List<RailInstitution> paymentEnabledInstitutions = Stream
-            .iterate(1, (n) -> n + 1)
-            .limit(21)
-            .map(n -> TestApiData.mockInstitution(i -> i.paymentsEnabled(true)))
-            .toList();
-        when(institutionService.list(eq(railProvider), any(), eq(true)))
-            .thenReturn(paymentEnabledInstitutions);
+        when(institutionService.list(eq(railProvider), any()))
+            .thenReturn(institutions);
 
         // when: client calls the endpoint
         PaginatedInstitutions response = given()
@@ -240,11 +219,8 @@ public class InstitutionResourceTest extends TestBase {
             .extract()
             .as(PaginatedInstitutions.class);
 
-        // then: the institution service is called to get non-payment enabled institutions for rail provider
-        verify(institutionService).list(eq(railProvider), eq("GB"), eq(false));
-
-        // and: the institution service is called to get payment enabled institutions for rail provider
-        verify(institutionService).list(eq(railProvider), eq("GB"), eq(true));
+        // then: the institution service is called to get institutions for rail provider
+        verify(institutionService).list(eq(railProvider), eq("GB"));
 
         // and: no other calls to the institution service are made
         verifyNoMoreInteractions(institutionService);
@@ -253,7 +229,7 @@ public class InstitutionResourceTest extends TestBase {
         assertEquals(5, response.getCount());
         assertNotNull(response.getItems());
         assertEquals(5, response.getItems().size());
-        assertEquals(paymentEnabledInstitutions.size() + paymentDisabledInstitutions.size(), response.getTotal());
+        assertEquals(institutions.size(), response.getTotal());
         assertEquals(2, response.getPage());
         assertEquals(5, response.getPageSize());
 
@@ -281,7 +257,7 @@ public class InstitutionResourceTest extends TestBase {
 
         assertEquals("/api/v1/rails/institutions", links.getLast().getPath());
         assertTrue(links.getLast().getQuery().contains("page-size=5"));
-        assertTrue(links.getLast().getQuery().contains("page=8"));
+        assertTrue(links.getLast().getQuery().contains("page=4"));
         assertTrue(links.getLast().getQuery().contains("rail=" + railProvider));
         assertFalse(links.getLast().getQuery().contains("country="));
     }

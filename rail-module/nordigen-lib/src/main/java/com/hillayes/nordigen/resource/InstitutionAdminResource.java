@@ -22,10 +22,9 @@ public class InstitutionAdminResource {
     InstitutionService institutionService;
 
     @GET
-    public List<Institution> listInstitutions(@QueryParam("country") String countryCode,
-                                              @QueryParam("paymentsEnabled") Boolean paymentsEnabled) {
-        log.info("List institutions [country:{}, paymentsEnabled: {}]", countryCode, paymentsEnabled);
-        return institutionService.list(countryCode, paymentsEnabled);
+    public List<Institution> listInstitutions(@QueryParam("country") String countryCode) {
+        log.info("List institutions [country:{}]", countryCode);
+        return institutionService.list(countryCode);
     }
 
     @GET

@@ -36,7 +36,6 @@ public class TestApiData {
             .name(insecure().nextAlphanumeric(20))
             .countries(List.of("GB"))
             .logo("https://example.com/logo.png")
-            .paymentsEnabled(true)
             .transactionTotalDays(RandomUtils.insecure().randomInt(100, 900));
 
         if (modifier != null) modifier.accept(builder);
