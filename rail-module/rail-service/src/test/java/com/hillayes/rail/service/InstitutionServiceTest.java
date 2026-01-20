@@ -8,8 +8,6 @@ import com.hillayes.rail.config.ServiceConfiguration;
 import com.hillayes.rail.utils.TestApiData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import java.time.Duration;
@@ -41,15 +39,14 @@ public class InstitutionServiceTest {
         fixture.init();
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testList(Boolean paymentsEnabled) {
+    @Test
+    public void testList() {
         // given: a rail provider API
         RailProvider railProvider = RailProvider.NORDIGEN;
         RailProviderApi railProviderApi = mockRailProviderApi(railProvider);
         when(railProviderFactory.get(railProvider)).thenReturn(railProviderApi);
 
-        // and: a requested country code and payments enabled
+        // and: a requested country code
         String countryCode = "GB";
 
         // and: the rail has a list of institutions
@@ -58,22 +55,22 @@ public class InstitutionServiceTest {
             TestApiData.mockInstitution(),
             TestApiData.mockInstitution()
         );
-        when(railProviderApi.listInstitutions(countryCode, paymentsEnabled))
+        when(railProviderApi.listInstitutions(countryCode))
             .thenReturn(institutions);
 
         // when: list is called
-        List<RailInstitution> result = fixture.list(railProvider, countryCode, paymentsEnabled);
+        List<RailInstitution> result = fixture.list(railProvider, countryCode);
 
         // then: the list of institutions is returned
         assertNotNull(result);
         assertEquals(institutions.size(), result.size());
 
         // and: the rail was called
-        verify(railProviderApi).listInstitutions(countryCode, paymentsEnabled);
+        verify(railProviderApi).listInstitutions(countryCode);
 
         // when: the service is called a second time
         Mockito.clearInvocations(railProviderApi);
-        List<RailInstitution> secondResult = fixture.list(railProvider, countryCode, paymentsEnabled);
+        List<RailInstitution> secondResult = fixture.list(railProvider, countryCode);
 
         // then: the list of institutions is returned
         assertNotNull(secondResult);
@@ -83,17 +80,16 @@ public class InstitutionServiceTest {
         verifyNoMoreInteractions(railProviderApi);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testList_AllRailProviders(Boolean paymentsEnabled) {
-        // given: a requested country code and payments enabled
+    @Test
+    public void testList_AllRailProviders() {
+        // given: a requested country code
         String countryCode = "GB";
 
         // and: each Rail API has a collection of rail provider APIs
         List<RailProviderApi> railApis = Arrays.stream(RailProvider.values())
             .map(id -> {
                 RailProviderApi api = mockRailProviderApi(id);
-                when(api.listInstitutions(countryCode, paymentsEnabled))
+                when(api.listInstitutions(countryCode))
                     .thenReturn(List.of(
                         TestApiData.mockInstitution(),
                         TestApiData.mockInstitution(),
@@ -107,25 +103,25 @@ public class InstitutionServiceTest {
         when(railProviderFactory.getAll()).then((s) -> railApis.stream() );
 
         // when: list is called - with no rail provider ID
-        List<RailInstitution> result = fixture.list(null, countryCode, paymentsEnabled);
+        List<RailInstitution> result = fixture.list(null, countryCode);
 
         // then: the list of ALL institutions is returned
         assertNotNull(result);
         assertEquals(railApis.size() * 3, result.size());
 
         // and: each rail was called
-        railApis.forEach(api -> verify(api).listInstitutions(countryCode, paymentsEnabled));
+        railApis.forEach(api -> verify(api).listInstitutions(countryCode));
 
         // when: the service is called a second time
         railApis.forEach(Mockito::clearInvocations);
-        List<RailInstitution> secondResult = fixture.list(null, countryCode, paymentsEnabled);
+        List<RailInstitution> secondResult = fixture.list(null, countryCode);
 
         // then: the list of ALL institutions is returned
         assertNotNull(secondResult);
         assertEquals(railApis.size() * 3, secondResult.size());
 
         // and: the rails were NOT called
-        railApis.forEach(api -> verify(api, never()).listInstitutions(countryCode, paymentsEnabled));
+        railApis.forEach(api -> verify(api, never()).listInstitutions(countryCode));
     }
 
     @Test
