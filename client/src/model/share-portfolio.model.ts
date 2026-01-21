@@ -89,7 +89,7 @@ export interface TradeRequest {
     shareId: ShareId;
 
     // The date on which the trade occurred
-    dateExecuted: string;
+    dateExecuted: Date;
 
     // The number of shares traded.
     quantity: number;

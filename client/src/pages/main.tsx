@@ -10,6 +10,7 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import AuditReportIcon from '@mui/icons-material/VerifiedUser';
 import AuditIssuesIcon from '@mui/icons-material/GppMaybe';
 import SharePricesIcon from '@mui/icons-material/QueryStats';
+import PortfoliosIcon from '@mui/icons-material/AssessmentOutlined';
 
 import { useCurrentUser } from "../contexts/user-context";
 import AppHeader from "../components/app-header/app-header";
@@ -18,6 +19,7 @@ import { AppMenu } from "../components/app-menu";
 import MenuItemDef from "../components/app-menu/menu-item-def";
 import ProfileService from "../services/profile.service";
 import SignIn from "./sign-in";
+import SharePortfolios from "./share-portfolios";
 
 const appTitle = "One Stop";
 
@@ -46,6 +48,7 @@ export default function MainPage() {
       { label: 'Audit Reports', route: 'reports/audit/configs', icon: <AuditReportIcon/>, action: closeMenu },
       { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: closeMenu },
       { label: 'Share Prices', route: 'shares/prices', icon: <SharePricesIcon />, action: closeMenu },
+      { label: 'Share Portfolios', route: 'shares/portfolios', icon: <PortfoliosIcon />, action: closeMenu },
       { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
     ]), [ logout ]);
 
