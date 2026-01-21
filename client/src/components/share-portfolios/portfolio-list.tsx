@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -14,8 +15,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { SxProps } from '@mui/material/styles';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import { PortfolioSummaryResponse } from '../../model/share-portfolio.model';
@@ -143,57 +144,53 @@ export default function PortfolioList(props: Props) {
   const [portfolios, setPortfolios] = useState<PortfolioSummaryResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | undefined>();
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
   const [newPortfolioName, setNewPortfolioName] = useState<string>('');
   const [creating, setCreating] = useState<boolean>(false);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [portfolioToDelete, setPortfolioToDelete] = useState<PortfolioSummaryResponse | undefined>();
   const [deleteConfirmationText, setDeleteConfirmationText] = useState<string>('');
   const [deleting, setDeleting] = useState<boolean>(false);
 
-  const refreshPortfolios = () => {
+  const refreshPortfolios = useCallback(() => {
     setLoading(true);
     PortfolioService.getPortfolios()
       .then(response => setPortfolios(response.items || []))
       .catch(err => showMessage(err))
       .finally(() => setLoading(false));
-  };
+  }, [ showMessage]);
 
   useEffect(() => {
     refreshPortfolios();
-  }, [showMessage]);
+  }, [ refreshPortfolios ]);
 
-  function handleSelectPortfolio(portfolio: PortfolioSummaryResponse) {
-    const newSelectedId = selectedPortfolioId === portfolio.id ? undefined : portfolio.id;
+  function handleSelectPortfolio(portfolio?: PortfolioSummaryResponse) {
+    const newSelectedId = portfolio?.id;
     setSelectedPortfolioId(newSelectedId);
     
     if (props.onSelectPortfolio) {
-      props.onSelectPortfolio(newSelectedId ? portfolio : undefined);
+      props.onSelectPortfolio(portfolio);
     }
   }
 
-  function handleOpenDialog() {
+  function handleOpenCreateDialog() {
     setNewPortfolioName('');
-    setDialogOpen(true);
+    setCreateDialogOpen(true);
   }
 
-  function handleCloseDialog() {
-    setDialogOpen(false);
+  function handleCloseCreateDialog() {
+    setCreateDialogOpen(false);
     setNewPortfolioName('');
-  }
-
-  function validateForm(): boolean {
-    return newPortfolioName.trim().length > 0;
   }
 
   function handleCreatePortfolio() {
-    if (!validateForm()) return;
-
     setCreating(true);
     PortfolioService.createPortfolio(newPortfolioName)
       .then(() => {
         showMessage({ type: 'add', level: 'success', text: `Portfolio "${newPortfolioName}" created successfully` });
-        handleCloseDialog();
+        handleCloseCreateDialog();
         refreshPortfolios();
       })
       .catch(err => showMessage(err))
@@ -221,10 +218,7 @@ export default function PortfolioList(props: Props) {
       .then(() => {
         showMessage({ type: 'add', level: 'success', text: `Portfolio "${portfolioToDelete.name}" deleted successfully` });
         if (selectedPortfolioId === portfolioToDelete.id) {
-          setSelectedPortfolioId(undefined);
-          if (props.onSelectPortfolio) {
-            props.onSelectPortfolio(undefined);
-          }
+          handleSelectPortfolio(undefined);
         }
         handleCloseDeleteDialog();
         refreshPortfolios();
@@ -237,86 +231,63 @@ export default function PortfolioList(props: Props) {
     return <div>Loading portfolios...</div>;
   }
 
-  if (portfolios.length === 0) {
-    return (
-      <Box>
-        <div>No portfolios found</div>
-        <Button
-          variant="contained"
-          onClick={handleOpenDialog}
-          sx={{ mt: 2 }}
-        >
-          Create Portfolio
-        </Button>
-        <CreatePortfolioDialog
-          open={dialogOpen}
-          portfolioName={newPortfolioName}
-          onNameChange={setNewPortfolioName}
-          onCancel={handleCloseDialog}
-          onConfirm={handleCreatePortfolio}
-          isCreating={creating}
-        />
-      </Box>
-    );
-  }
-
   return (
     <Box>
+      { (portfolios.length === 0) &&
+        <Typography sx={{ typography: { xs: "h6", sm: "h5" } }} noWrap align='center'>
+          No portfolios found
+        </Typography>
+      }
+
       <Box sx={{ mb: 2 }}>
-        <Button
-          variant="contained"
-          onClick={handleOpenDialog}
-        >
+        <Button variant="contained" onClick={ handleOpenCreateDialog } sx={{ mt: 2 }} >
           Create Portfolio
         </Button>
       </Box>
 
-      <TableContainer>
-        <Table size='small'>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={colhead} align='center'>Name</TableCell>
-              <TableCell sx={colhead} align='center'>Created</TableCell>
-              <TableCell sx={colhead} align='center' width="40px"></TableCell>
-            </TableRow>
-          </TableHead>
+      { (portfolios.length > 0) &&
+        <TableContainer>
+          <Table size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={colhead} align='left'>Name</TableCell>
+                <TableCell sx={colhead} align='center'>Created</TableCell>
+                <TableCell sx={colhead} align='center' width="40px"></TableCell>
+              </TableRow>
+            </TableHead>
 
-          <TableBody>
-            {portfolios
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map(portfolio => (
-                <TableRow
-                  key={portfolio.id}
-                  sx={selectableRow}
-                  onClick={() => handleSelectPortfolio(portfolio)}
-                  selected={selectedPortfolioId === portfolio.id}
-                >
-                  <TableCell align='center'>{portfolio.name}</TableCell>
-                  <TableCell align='center'>
-                    { toLocaleDate(portfolio.dateCreated) }
-                  </TableCell>
-                  <TableCell align='center' width="40px">
-                    <Tooltip title="Delete portfolio">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleOpenDeleteDialog(portfolio, e)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))
-            }
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <TableBody>
+              {portfolios
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(portfolio => (
+                  <TableRow key={portfolio.id} sx={selectableRow}
+                    onClick={() => handleSelectPortfolio(portfolio)}
+                    selected={selectedPortfolioId === portfolio.id}
+                  >
+                    <TableCell align='left'>{portfolio.name}</TableCell>
+                    <TableCell align='center'>
+                      { toLocaleDate(portfolio.dateCreated) }
+                    </TableCell>
+                    <TableCell align='center' width="40px">
+                      <Tooltip title="Delete portfolio">
+                        <IconButton size="small" onClick={(e) => handleOpenDeleteDialog(portfolio, e)} >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
+      }
 
       <CreatePortfolioDialog
-        open={dialogOpen}
+        open={createDialogOpen}
         portfolioName={newPortfolioName}
         onNameChange={setNewPortfolioName}
-        onCancel={handleCloseDialog}
+        onCancel={handleCloseCreateDialog}
         onConfirm={handleCreatePortfolio}
         isCreating={creating}
       />

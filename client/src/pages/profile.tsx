@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import ProfileIcon from '@mui/icons-material/Person';
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
@@ -52,7 +53,7 @@ export default function UpdateProfile() {
   }
 
   return (
-    <PageHeader title="Profile Information" >
+    <PageHeader title="Profile Information" icon={ <ProfileIcon /> }>
       <form onSubmit={ handleSubmit }>
         <Grid container direction="row" justifyContent="center" rowSpacing={ 3 }>
           <Grid>
