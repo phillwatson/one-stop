@@ -2153,8 +2153,8 @@ paths:
     post:
       tags: [ "shares" ]
       summary: Add a share trade to user's portfolio
-      description: Creates a share trade within the authenticated user's portfolio.
-      operationId: createShareTrade
+      description: Records a share trade within the authenticated user's portfolio.
+      operationId: recordShareTrade
       security:
         - cookieAuth: [ ]
       parameters:

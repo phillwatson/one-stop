@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 @Path("/api/v1/shares/portfolios")
@@ -120,14 +119,14 @@ public class PortfolioResource {
 
     @POST
     @Path("/{portfolioId}/holdings")
-    public Response createShareTrade(@Context SecurityContext ctx,
+    public Response recordShareTrade(@Context SecurityContext ctx,
                                      @PathParam("portfolioId") UUID portfolioId,
                                      TradeRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
             userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
 
-        Holding holding = shareTradeService.createShareTrade(
+        Holding holding = shareTradeService.recordShareTrade(
             userId, portfolioId, request.getDateExecuted(),
             ShareIndex.ShareIdentity.builder()
                 .isin(request.getShareId().getIsin())

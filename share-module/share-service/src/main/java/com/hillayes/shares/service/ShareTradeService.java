@@ -43,7 +43,7 @@ public class ShareTradeService {
      * @return the updated holding.
      */
     @Transactional
-    public Holding createShareTrade(UUID userId, UUID portfolioId,
+    public Holding recordShareTrade(UUID userId, UUID portfolioId,
                                     LocalDate dateExecuted,
                                     ShareIndex.ShareIdentity shareIdentity,
                                     int quantity,

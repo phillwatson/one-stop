@@ -187,8 +187,7 @@ class CategoryService {
    * @returns an empty response.
    */
   deleteCategorySelector(selector: CategorySelector): Promise<any> {
-    return http.delete<void>(`/rails/categories/${selector.categoryId}/selectors/${selector.id!}`)
-      .then(response => response.data);
+    return http.delete<void>(`/rails/categories/${selector.categoryId}/selectors/${selector.id!}`);
   }
 
   /**
