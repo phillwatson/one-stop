@@ -5,6 +5,7 @@ import MessageProvider from "./contexts/messages/context";
 import NotificationProvider from "./contexts/notifications/context";
 import UserProfileProvider from "./contexts/user-context";
 import { ReconcileTransactionsProvider } from "./components/reconciliation/reconcile-transactions-context";
+import SharePortfolioDetail from "./pages/share-portfolio-detail";
 
 import MainPage from './pages/main';
 import Accounts from "./pages/accounts";
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: 'shares/portfolios',
         element: <SharePortfolios />
+      },
+      {
+        path: 'shares/portfolios/:portfolioId',
+        element: <SharePortfolioDetail />
       },
       {
         path: "profile",

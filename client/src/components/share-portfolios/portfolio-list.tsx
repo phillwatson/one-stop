@@ -21,7 +21,7 @@ import { SxProps } from '@mui/material/styles';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import { PortfolioSummaryResponse } from '../../model/share-portfolio.model';
 import PortfolioService from '../../services/portfolio.service';
-import { toLocaleDate } from '../../util/date-util';
+import { toLocalDateTime } from '../../util/date-util';
 
 interface Props {
   /**
@@ -252,6 +252,7 @@ export default function PortfolioList(props: Props) {
               <TableRow>
                 <TableCell sx={colhead} align='left'>Name</TableCell>
                 <TableCell sx={colhead} align='center'>Created</TableCell>
+                <TableCell sx={colhead} align='center'>Holdings</TableCell>
                 <TableCell sx={colhead} align='center' width="40px"></TableCell>
               </TableRow>
             </TableHead>
@@ -266,8 +267,9 @@ export default function PortfolioList(props: Props) {
                   >
                     <TableCell align='left'>{portfolio.name}</TableCell>
                     <TableCell align='center'>
-                      { toLocaleDate(portfolio.dateCreated) }
+                      { toLocalDateTime(portfolio.dateCreated) }
                     </TableCell>
+                    <TableCell align='center'>{portfolio.holdingCount}</TableCell>
                     <TableCell align='center' width="40px">
                       <Tooltip title="Delete portfolio">
                         <IconButton size="small" onClick={(e) => handleOpenDeleteDialog(portfolio, e)} >

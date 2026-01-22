@@ -193,6 +193,34 @@ public class PortfolioRepositoryTest {
         });
     }
 
+    @Test
+    public void testGetHoldingCount() {
+        // Given: a collection of share indices
+        Iterable<ShareIndex> shares = shareIndexRepository.saveAll(List.of(
+            mockShareIndex(),
+            mockShareIndex(),
+            mockShareIndex()
+        ));
+
+        // And: a new portfolio with holdings in each share index
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID());
+        shares.forEach(portfolio::add);
+        assertFalse(portfolio.getHoldings().isEmpty());
+
+        int expectedCount = portfolio.getHoldings().size();
+
+        // And: the portfolio is saved
+        portfolio = portfolioRepository.saveAndFlush(portfolio);
+        portfolioRepository.clearCache();
+
+        // When: the portfolio is retrieved
+        portfolio = portfolioRepository.findById(portfolio.getId());
+
+        // Then:
+        assertNotNull(portfolio);
+        assertEquals(expectedCount, portfolio.getHoldingCount());
+    }
+
     private long getPortfolioCount() {
         return portfolioRepository.count();
     }

@@ -146,7 +146,8 @@ public class PortfolioResource {
         return new PortfolioSummaryResponse()
             .id(portfolio.getId())
             .name(portfolio.getName())
-            .dateCreated(portfolio.getDateCreated());
+            .dateCreated(portfolio.getDateCreated())
+            .holdingCount(portfolio.getHoldingCount());
     }
 
     private PortfolioResponse marshalDetail(Portfolio portfolio) {
@@ -154,6 +155,7 @@ public class PortfolioResource {
             .id(portfolio.getId())
             .name(portfolio.getName())
             .dateCreated(portfolio.getDateCreated())
+            .holdingCount(portfolio.getHoldingCount())
             .holdings(portfolio.getHoldings().stream()
                 .map(this::marshal).toList()
             );

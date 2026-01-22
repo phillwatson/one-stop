@@ -3479,6 +3479,11 @@ components:
           format: date-time
           description: The date and time the portfolio was created
           example: 2019-01-01T00:00:00.000Z
+        holdingCount:
+          type: integer
+          format: int32
+          description: The number of share indices within the portfolio
+          example: 3
 
     PortfolioResponse:
       description: A user's portfolio detail, including the share holdings within.

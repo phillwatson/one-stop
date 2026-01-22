@@ -2,6 +2,7 @@ package com.hillayes.shares.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -37,7 +38,10 @@ public class Portfolio {
     @lombok.Builder.Default
     @ToString.Include
     @Column(name = "date_created", nullable = false)
-    protected Instant dateCreated = Instant.now();
+    private Instant dateCreated = Instant.now();
+
+    @Formula("(select count(1) from shares.holding h where h.portfolio_id = id)")
+    private int holdingCount;
 
     @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @lombok.Builder.Default

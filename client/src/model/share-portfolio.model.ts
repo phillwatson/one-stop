@@ -21,6 +21,9 @@ export interface PortfolioSummaryResponse {
 
   // The date and time the portfolio was created
   dateCreated: Date;
+
+  // The number of share indices within the portfolio
+  holdingCount: number;
 }
 
 /**
