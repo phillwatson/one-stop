@@ -68,7 +68,7 @@ public class PortfolioResource {
             .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
 
         log.debug("Retrieved portfolio [userId: {}, portfolioId: {}]", userId, portfolioId);
-        return Response.ok(marshalDetail(portfolio)).build();
+        return Response.ok(marshal(portfolio)).build();
     }
 
     @POST
@@ -121,10 +121,10 @@ public class PortfolioResource {
     @Path("/{portfolioId}/holdings")
     public Response recordShareTrade(@Context SecurityContext ctx,
                                      @PathParam("portfolioId") UUID portfolioId,
-                                     TradeRequest request) {
+                                     ShareDealingRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
-        log.info("Creating a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
-            userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
+        log.info("Creating a share trade [userId: {}, portfolioId: {}, shareIndexId: {}, quantity: {}]",
+            userId, portfolioId, request.getShareIndexId(), request.getQuantity());
 
         Holding holding = shareTradeService.recordShareTrade(
             userId, portfolioId, request.getDateExecuted(),
@@ -136,29 +136,18 @@ public class PortfolioResource {
             BigDecimal.valueOf(request.getPricePerShare()));
 
         if (log.isDebugEnabled()) {
-            log.debug("Created a share trade [userId: {}, portfolioId: {}, isin: {}, ticker: {}, quantity: {}]",
-                userId, portfolioId, request.getShareId().getIsin(), request.getShareId().getTickerSymbol(), request.getQuantity());
+            log.debug("Created a share trade [userId: {}, portfolioId: {}, shareIndexId: {}, quantity: {}]",
+                userId, portfolioId, request.getShareIndexId(), request.getQuantity());
         }
         return Response.ok(marshal(holding)).build();
     }
 
-    private PortfolioSummaryResponse marshal(Portfolio portfolio) {
-        return new PortfolioSummaryResponse()
-            .id(portfolio.getId())
-            .name(portfolio.getName())
-            .dateCreated(portfolio.getDateCreated())
-            .holdingCount(portfolio.getHoldingCount());
-    }
-
-    private PortfolioResponse marshalDetail(Portfolio portfolio) {
+    private PortfolioResponse marshal(Portfolio portfolio) {
         return new PortfolioResponse()
             .id(portfolio.getId())
             .name(portfolio.getName())
             .dateCreated(portfolio.getDateCreated())
-            .holdingCount(portfolio.getHoldingCount())
-            .holdings(portfolio.getHoldings().stream()
-                .map(this::marshal).toList()
-            );
+            .holdingCount(portfolio.getHoldingCount());
     }
 
     private HoldingResponse marshal(Holding holding) {
@@ -182,13 +171,10 @@ public class PortfolioResource {
             .currency(holding.getCurrency().getCurrencyCode())
             .quantity(totalQuantity)
             .latestValue(totalValue)
-            .dealings(holding.getDealings().stream()
-                .map(this::marshal).toList()
-            );
     }
 
-    private DealingHistoryResponse marshal(DealingHistory dealing) {
-        return new DealingHistoryResponse()
+    private ShareDealingResponse marshal(DealingHistory dealing) {
+        return new ShareDealingResponse()
             .id(dealing.getId())
             .dateExecuted(dealing.getDateExecuted())
             .quantity(dealing.getQuantity())
