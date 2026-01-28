@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class ShareIndexService {
@@ -26,17 +27,14 @@ public class ShareIndexService {
     private final PollShareIndexAdhocTask pollShareIndexAdhocTask;
     private final ShareProviderFactory providerFactory;
 
-    @Transactional
     public Optional<ShareIndex> getShareIndex(UUID shareIndexId) {
         return shareIndexRepository.findByIdOptional(shareIndexId);
     }
 
-    @Transactional
     public Optional<ShareIndex> getShareIndex(ShareIndex.ShareIdentity identity) {
         return shareIndexRepository.findByIdentity(identity);
     }
 
-    @Transactional
     public Collection<ShareIndex> registerShareIndices(Collection<ShareIndex.ShareIdentity> indices) {
         if ((indices == null) || (indices.isEmpty()))
             return List.of();
@@ -46,7 +44,6 @@ public class ShareIndexService {
             .toList();
     }
 
-    @Transactional
     public ShareIndex registerShareIndex(ShareIndex.ShareIdentity identity) {
         log.info("Creating new ShareIndex [identity: {}]", identity);
         try {
@@ -86,7 +83,6 @@ public class ShareIndexService {
         }
     }
 
-    @Transactional
     public Page<ShareIndex> listShareIndices(int pageIndex, int pageSize) {
         log.info("Listing share indices [page: {}, pageSize: {}]", pageIndex, pageSize);
 

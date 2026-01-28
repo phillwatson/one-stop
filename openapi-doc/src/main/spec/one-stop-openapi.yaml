@@ -2154,10 +2154,10 @@ paths:
   /shares/portfolios/{portfolioId}/holdings:
     get:
       tags: [ "shares" ]
-      summary: Get the portfolio's holdings
+      summary: Get the portfolio's share holdings
       description: |
         Get a paginated list of the identified portfolio's share holdings
-        in ascending order of name.
+        in ascending order of share index name.
       operationId: getPortfolioHoldings
       security:
         - cookieAuth: [ ]
@@ -2185,23 +2185,24 @@ paths:
         500:
           description: Internal server error
 
+  /shares/holdings/{holdingId}:
     post:
       tags: [ "shares" ]
-      summary: Add a share trade to user's portfolio
-      description: Records a share trade within the authenticated user's portfolio.
+      summary: Add a share trade to a portfolio
+      description: Records a share trade within the identified portfolio.
       operationId: recordShareTrade
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "portfolioId"
+        - name: "holdingId"
           in: "path"
-          description: ID of the portfolio in which the trade is to be recorded.
+          description: internal identifier for the share holding.
           required: true
           schema:
             type: string
             format: uuid
       requestBody:
-        description: The details of the portfolio trade
+        description: The details of the share trade
         required: true
         content:
           application/json:
@@ -2217,22 +2218,21 @@ paths:
         401:
           description: Unauthorized
         404:
-          description: Portfolio not found
+          description: Holding not found
         500:
           description: Internal server error
 
-  /shares/holdings/{holdingId}:
     get:
       tags: [ "shares" ]
-      summary: Get the identified holding
-      description: Returns the identified holding.
+      summary: Get the holdings for the identified share
+      description: Returns the portfolio's holdings for the identified share.
       operationId: getPortfolioHolding
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "holdingId"
           in: "path"
-          description: ID of the holding to be returned
+          description: internal identifier for the share holding.
           required: true
           schema:
             type: string
@@ -2254,14 +2254,14 @@ paths:
     delete:
       tags: [ "shares" ]
       summary: Delete the identified holding
-      description: Deletes the identified holding and all dealings for that holding.
+      description: Deletes the identified share and all dealings for that holding.
       operationId: deletePortfolioHolding
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "holdingId"
           in: "path"
-          description: ID of the holding to be deleted
+          description: internal identifier for the share holding.
           required: true
           schema:
             type: string
@@ -2281,15 +2281,15 @@ paths:
       tags: [ "shares" ]
       summary: Get the holding's share dealings.
       description: |
-        Get a paginated list of the identified share holding's dealings
-        in ascending order of date.
+        Get a paginated list of the portfolio's dealings in the identified
+        share, in ascending date order.
       operationId: getShareDealings
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "holdingId"
           in: "path"
-          description: ID of the portfolio holding whose dealings are to be returned
+          description: internal identifier for the share holding.
           required: true
           schema:
             type: string
@@ -2306,7 +2306,7 @@ paths:
         401:
           description: Unauthorized
         404:
-          description: Portfolio holding not found
+          description: Holding not found
         500:
           description: Internal server error
 
@@ -2344,7 +2344,7 @@ paths:
       tags: [ "shares" ]
       summary: Update the identified share dealing
       description: |
-        Updates the identified share dealing. Intended to correct errors
+        Updates the identified share dealing. Intended for correct errors
         and NOT to record a new trade on the same share.
       operationId: updateShareDealing
       security:
@@ -2381,7 +2381,9 @@ paths:
     delete:
       tags: [ "shares" ]
       summary: Delete the identified share dealing
-      description: Deletes the identified share dealing.
+      description: |
+        Deletes the identified share dealing. Intended for correcting errors
+        and NOT for recording a sale.
       operationId: deleteShareDealing
       security:
         - cookieAuth: [ ]
@@ -2402,7 +2404,6 @@ paths:
           description: Share dealing not found
         500:
           description: Internal server error
-
 
 components:
   securitySchemes:
@@ -3706,19 +3707,18 @@ components:
     HoldingResponse:
       type: object
       required:
-        - id
+        - portfolioId
         - shareIndexId
         - shareId
         - name
         - quantity
         - totalCost
-        - latestValue
         - currency
       properties:
-        id:
+        portfolioId:
           type: string
           format: uuid
-          description: The holding's internal Id
+          description: The portfolio's internal Id
           example: 07061d76-74f3-4163-aa07-fb6909681f81
         shareIndexId:
           type: string
@@ -3741,11 +3741,6 @@ components:
           format: double
           description: The total price paid for the holding in minor currency units
           example: 2341234.123
-        latestValue:
-          type: number
-          format: double
-          description: The latest market value of the holding in minor currency units
-          example: 2341234.123
         currency:
           type: string
           description: The ISO-4217 currency code in which the shares are traded.
@@ -3757,8 +3752,8 @@ components:
       description: Describes a trade to be recorded for a share within a portfolio holding.
       type: object
       required:
-        - shareIndexId
         - dateExecuted
+        - shareIndexId
         - quantity
         - pricePerShare
       properties:

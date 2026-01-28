@@ -20,11 +20,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @ApplicationScoped
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class ShareTradeService {
-    private final ShareIndexService shareIndexService;
-    private final PortfolioRepository portfolioRepository;
     private final HoldingRepository holdingRepository;
     private final PortfolioEventSender portfolioEventSender;
 
@@ -32,44 +31,52 @@ public class ShareTradeService {
      * Registers a new trade in the identified share to be held within the
      * identified user's portfolio.
      *
-     * At least one of shareIsin or tickerSymbol must be provided.
-     *
-     * @param userId the user making the trade.
-     * @param portfolioId the portfolio to which the trade is to be recorded.
+     * @param portfolio the portfolio to which the trade is to be recorded.
      * @param dateExecuted the date on which the trade was executed.
-     * @param shareIdentity the ISIN and/or ticker symbol identifying the stock being traded.
+     * @param shareIndex the stock being traded.
      * @param quantity the number of shares traded (negative = sell, positive = buy)
      * @param pricePerShare the price at which the shares were traded.
      * @return the updated holding.
      */
-    @Transactional
-    public Holding recordShareTrade(UUID userId, UUID portfolioId,
+    public Holding recordShareTrade(Portfolio portfolio,
+                                    ShareIndex shareIndex,
                                     LocalDate dateExecuted,
-                                    ShareIndex.ShareIdentity shareIdentity,
                                     int quantity,
                                     BigDecimal pricePerShare) {
-        log.info("Creating a share trade [portfolioId: {}, date: {}, identity: {}, quantity: {}, price: {}]",
-            portfolioId, dateExecuted, shareIdentity, quantity, pricePerShare);
+        log.info("Creating a share trade [portfolio: {}, date: {}, shareIndexId: {}, quantity: {}, price: {}]",
+            portfolio.getName(), dateExecuted, shareIndex.getName(), quantity, pricePerShare);
 
         if (quantity == 0) {
-            throw new ZeroTradeQuantityException(shareIdentity);
+            throw new ZeroTradeQuantityException(shareIndex);
         }
 
-        Portfolio portfolio = portfolioRepository.findByIdOptional(portfolioId)
-            .filter(p -> userId.equals(p.getUserId()))
-            .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
+        Holding holding = holdingRepository.getHolding(portfolio.getId(), shareIndex.getId())
+            .orElseGet(() -> Holding.builder()
+                .portfolioId(portfolio.getId())
+                .shareIndex(shareIndex)
+                .build()
+            );
 
-        ShareIndex shareIndex = shareIndexService.getShareIndex(shareIdentity)
-            .orElseThrow(() -> new NotFoundException("ShareIndex", shareIdentity));
+        return recordShareTrade(holding, shareIndex, dateExecuted, quantity, pricePerShare);
+    }
 
-        Holding holding = portfolio.get(shareIndex)
-            .orElseGet(() -> portfolio.add(shareIndex));
+    public Holding recordShareTrade(Holding holding,
+                                    ShareIndex shareIndex,
+                                    LocalDate dateExecuted,
+                                    int quantity,
+                                    BigDecimal pricePerShare) {
+        log.info("Creating a share trade [holdingId: {}, date: {}, quantity: {}, price: {}]",
+            holding.getId(), dateExecuted, quantity, pricePerShare);
+
+        if (quantity == 0) {
+            throw new ZeroTradeQuantityException(shareIndex);
+        }
 
         DealingHistory dealing;
         if (quantity > 0)
             dealing = holding.buy(dateExecuted, quantity, pricePerShare);
         else if (-quantity > holding.getQuantity())
-            throw new SaleExceedsHoldingException(shareIdentity, quantity, holding.getQuantity());
+            throw new SaleExceedsHoldingException(shareIndex, quantity, holding.getQuantity());
         else
             dealing = holding.sell(dateExecuted, quantity, pricePerShare);
 

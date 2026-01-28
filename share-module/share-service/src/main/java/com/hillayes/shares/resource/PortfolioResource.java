@@ -5,9 +5,7 @@ import com.hillayes.commons.jpa.Page;
 import com.hillayes.exception.common.NotFoundException;
 import com.hillayes.onestop.api.*;
 import com.hillayes.shares.domain.*;
-import com.hillayes.shares.service.PortfolioService;
-import com.hillayes.shares.service.SharePriceService;
-import com.hillayes.shares.service.ShareTradeService;
+import com.hillayes.shares.service.*;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -26,6 +24,8 @@ import java.util.UUID;
 @Slf4j
 public class PortfolioResource {
     private final PortfolioService portfolioService;
+    private final HoldingsService holdingsService;
+    private final ShareIndexService shareIndexService;
     private final SharePriceService sharePriceService;
     private final ShareTradeService shareTradeService;
 
@@ -117,6 +117,38 @@ public class PortfolioResource {
         return Response.noContent().build();
     }
 
+    @GET
+    @Path("/{portfolioId}/holdings")
+    public Response getPortfolioHoldings(@Context SecurityContext ctx,
+                                         @PathParam("portfolioId") UUID portfolioId,
+                                         @Context UriInfo uriInfo,
+                                         @QueryParam("page")@DefaultValue("0") int pageIndex,
+                                         @QueryParam("page-size") @DefaultValue("20") int pageSize) {
+        UUID userId = AuthUtils.getUserId(ctx);
+        log.info("Listing portfolio holdings [userId: {}, portfolioId: {}, page: {}, pageSize: {}",
+            userId, portfolioId, pageIndex, pageSize);
+
+        Portfolio portfolio = portfolioService.getPortfolio(userId, portfolioId)
+            .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
+
+        Page<Holding> holdings = holdingsService.listHoldings(portfolio, pageIndex, pageSize);
+
+        PaginatedPortfolioHoldings response = new PaginatedPortfolioHoldings()
+            .page(holdings.getPageIndex())
+            .pageSize(holdings.getPageSize())
+            .count(holdings.getContentSize())
+            .total(holdings.getTotalCount())
+            .totalPages(holdings.getTotalPages())
+            .items(holdings.getContent().stream().map(this::marshal).toList())
+            .links(PaginationUtils.buildPageLinks(uriInfo, holdings));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing portfolio holdings [userId: {}, portfolioId: {}, page: {}, pageSize: {}, count: {}, total: {}]",
+                userId, portfolioId, pageIndex, pageSize, response.getCount(), response.getTotal());
+        }
+        return Response.ok(response).build();
+    }
+
     @POST
     @Path("/{portfolioId}/holdings")
     public Response recordShareTrade(@Context SecurityContext ctx,
@@ -126,14 +158,15 @@ public class PortfolioResource {
         log.info("Creating a share trade [userId: {}, portfolioId: {}, shareIndexId: {}, quantity: {}]",
             userId, portfolioId, request.getShareIndexId(), request.getQuantity());
 
+        Portfolio portfolio = portfolioService.getPortfolio(userId, portfolioId)
+            .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
+
+        ShareIndex shareIndex = shareIndexService.getShareIndex(request.getShareIndexId())
+            .orElseThrow(() -> new NotFoundException("Share Index", request.getShareIndexId()));
+
         Holding holding = shareTradeService.recordShareTrade(
-            userId, portfolioId, request.getDateExecuted(),
-            ShareIndex.ShareIdentity.builder()
-                .isin(request.getShareId().getIsin())
-                .tickerSymbol(request.getShareId().getTickerSymbol())
-                .build(),
-            request.getQuantity(),
-            BigDecimal.valueOf(request.getPricePerShare()));
+            portfolio, shareIndex, request.getDateExecuted(),
+            request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
 
         if (log.isDebugEnabled()) {
             log.debug("Created a share trade [userId: {}, portfolioId: {}, shareIndexId: {}, quantity: {}]",
@@ -170,14 +203,6 @@ public class PortfolioResource {
             .totalCost(holding.getTotalCost().doubleValue())
             .currency(holding.getCurrency().getCurrencyCode())
             .quantity(totalQuantity)
-            .latestValue(totalValue)
-    }
-
-    private ShareDealingResponse marshal(DealingHistory dealing) {
-        return new ShareDealingResponse()
-            .id(dealing.getId())
-            .dateExecuted(dealing.getDateExecuted())
-            .quantity(dealing.getQuantity())
-            .pricePerShare(dealing.getPrice().doubleValue());
+            .latestValue(totalValue);
     }
 }

@@ -26,16 +26,11 @@ public class Holding {
     private UUID id;
 
     /**
-     * The ID of the containing portfolio. Only used for hash-code and equals.
+     * The ID of the containing portfolio.
      */
-    @Getter(AccessLevel.PRIVATE)
     @EqualsAndHashCode.Include
-    @Column(name = "portfolio_id", insertable=false, updatable=false)
+    @Column(name = "portfolio_id", updatable=false)
     private UUID portfolioId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio_id")
-    private Portfolio portfolio;
 
     /**
      * The ID of the referenced share index. Only used for hash-code and equals.

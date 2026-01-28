@@ -4,9 +4,9 @@ import com.hillayes.exception.MensaException;
 import com.hillayes.shares.domain.ShareIndex;
 
 public class ZeroTradeQuantityException extends MensaException {
-    public ZeroTradeQuantityException(ShareIndex.ShareIdentity identity) {
+    public ZeroTradeQuantityException(ShareIndex shareIndex) {
         super(SharesErrorCodes.ZERO_TRADE_QUANTITY);
-        addParameter("isin", identity.getIsin());
-        addParameter("ticker-symbol", identity.getTickerSymbol());
+        addParameter("isin", shareIndex.getIdentity().getIsin());
+        addParameter("ticker-symbol", shareIndex.getIdentity().getTickerSymbol());
     }
 }
