@@ -1,6 +1,6 @@
 package com.hillayes.shares.repository;
 
-import com.hillayes.shares.domain.DealingHistory;
+import com.hillayes.shares.domain.ShareDealing;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
@@ -29,7 +29,7 @@ public class HoldingRepositoryTest {
     private final HoldingRepository holdingRepository;
 
     @Test
-    public void testGetHolding() {
+    public void testGetHoldings() {
         // Given: several share indices
         List<ShareIndex> shares = shareIndexRepository.saveAll(
             IntStream.range(0, 10).mapToObj(i -> mockShareIndex()).toList()
@@ -47,7 +47,7 @@ public class HoldingRepositoryTest {
 
         shares.forEach(shareIndex -> {
             // When: we retrieve the holdings for each share index
-            Optional<Holding> holding = holdingRepository.getHolding(portfolio.getId(), shareIndex.getId());
+            Optional<Holding> holding = holdingRepository.getHoldings(portfolio.getId(), shareIndex.getId());
 
             // Then: the holding is returned
             assertNotNull(holding);
@@ -107,7 +107,7 @@ public class HoldingRepositoryTest {
         holding = holdingRepository.findById(holding.getId());
 
         // Then: the dealings are order by date, ascending
-        List<DealingHistory> dealings = holding.getDealings();
+        List<ShareDealing> dealings = holding.getDealings();
         assertEquals(4, dealings.size());
         LocalDate prev = dealings.get(0).getDateExecuted();
         for (int i = 1; i < dealings.size(); i++) {

@@ -3707,6 +3707,7 @@ components:
     HoldingResponse:
       type: object
       required:
+        - id
         - portfolioId
         - shareIndexId
         - shareId
@@ -3714,7 +3715,13 @@ components:
         - quantity
         - totalCost
         - currency
+        - latestValue
       properties:
+        id:
+          type: string
+          format: uuid
+          description: The holding's internal Id
+          example: 07061d76-74f3-4163-aa07-fb6909681f81
         portfolioId:
           type: string
           format: uuid
@@ -3747,6 +3754,11 @@ components:
           minLength: 3
           maxLength: 3
           example: GBP
+        latestValue:
+          type: number
+          format: double
+          description: The current value for the holding in minor currency units
+          example: 2341234.123
 
     ShareDealingRequest:
       description: Describes a trade to be recorded for a share within a portfolio holding.

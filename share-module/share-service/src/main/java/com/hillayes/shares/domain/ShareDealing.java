@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder(builderClassName = "Builder")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class DealingHistory {
+public class ShareDealing {
     @Id
     @GeneratedValue(generator = "uuid2")
     @Setter

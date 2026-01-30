@@ -16,20 +16,19 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class HoldingsService {
+public class HoldingService {
     private final HoldingRepository holdingRepository;
-    private final PortfolioService portfolioService;
 
     public Optional<Holding> getHolding(UUID userId, UUID holdingId) {
         log.info("Getting holding [id: {}]", holdingId);
         return holdingRepository.findByIdOptional(holdingId)
-            .filter(holding -> portfolioService.getPortfolio(userId, holding.getPortfolioId()).isPresent());
+            .filter(holding -> userId.equals(holding.getPortfolio().getUserId()));
     }
 
     public Page<Holding> listHoldings(Portfolio portfolio, int pageIndex, int pageSize) {
         log.info("Listing portfolio holdings [ portfolio: {}, page: {}, pageSize: {}]",
             portfolio.getName(), pageIndex, pageSize);
-        return holdingRepository.getHolding(portfolio, pageIndex, pageSize);
+        return holdingRepository.getHoldings(portfolio, pageIndex, pageSize);
     }
 
 }

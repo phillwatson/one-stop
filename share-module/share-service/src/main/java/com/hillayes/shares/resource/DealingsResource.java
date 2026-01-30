@@ -1,12 +1,12 @@
 package com.hillayes.shares.resource;
 
+import com.hillayes.shares.service.SharePriceService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
@@ -15,9 +15,12 @@ import java.util.UUID;
 @RolesAllowed("user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
 @Slf4j
-public class DealingsResource {
+public class DealingsResource extends ResourceBase {
+    public DealingsResource(SharePriceService sharePriceService) {
+        super(sharePriceService);
+    }
+
     @GET
     public Response getShareDealing(@Context SecurityContext ctx,
                                     @PathParam("dealingId") UUID dealingId) {

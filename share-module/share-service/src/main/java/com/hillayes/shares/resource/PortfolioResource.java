@@ -10,7 +10,6 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -20,14 +19,26 @@ import java.util.UUID;
 @RolesAllowed("user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor
 @Slf4j
-public class PortfolioResource {
+public class PortfolioResource extends ResourceBase {
     private final PortfolioService portfolioService;
-    private final HoldingsService holdingsService;
+    private final HoldingService holdingService;
     private final ShareIndexService shareIndexService;
-    private final SharePriceService sharePriceService;
     private final ShareTradeService shareTradeService;
+
+    public PortfolioResource(
+        PortfolioService portfolioService,
+        HoldingService holdingService,
+        ShareIndexService shareIndexService,
+        SharePriceService sharePriceService,
+        ShareTradeService shareTradeService
+    ) {
+        super(sharePriceService);
+        this.portfolioService = portfolioService;
+        this.holdingService = holdingService;
+        this.shareIndexService = shareIndexService;
+        this.shareTradeService = shareTradeService;
+    }
 
     @GET
     public Response getPortfolios(@Context SecurityContext ctx,
@@ -131,7 +142,7 @@ public class PortfolioResource {
         Portfolio portfolio = portfolioService.getPortfolio(userId, portfolioId)
             .orElseThrow(() -> new NotFoundException("Portfolio", portfolioId));
 
-        Page<Holding> holdings = holdingsService.listHoldings(portfolio, pageIndex, pageSize);
+        Page<Holding> holdings = holdingService.listHoldings(portfolio, pageIndex, pageSize);
 
         PaginatedPortfolioHoldings response = new PaginatedPortfolioHoldings()
             .page(holdings.getPageIndex())
@@ -173,36 +184,5 @@ public class PortfolioResource {
                 userId, portfolioId, request.getShareIndexId(), request.getQuantity());
         }
         return Response.ok(marshal(holding)).build();
-    }
-
-    private PortfolioResponse marshal(Portfolio portfolio) {
-        return new PortfolioResponse()
-            .id(portfolio.getId())
-            .name(portfolio.getName())
-            .dateCreated(portfolio.getDateCreated())
-            .holdingCount(portfolio.getHoldingCount());
-    }
-
-    private HoldingResponse marshal(Holding holding) {
-        ShareIndex shareIndex = holding.getShareIndex();
-        BigDecimal mostRecentPrice = sharePriceService.getMostRecentPrice(shareIndex)
-            .map(PriceHistory::getClose)
-            .orElse(BigDecimal.ZERO);
-
-        int totalQuantity = holding.getQuantity();
-        Double totalValue = mostRecentPrice.multiply(BigDecimal.valueOf(totalQuantity)).doubleValue();
-
-        return new HoldingResponse()
-            .id(holding.getId())
-            .shareIndexId(shareIndex.getId())
-            .shareId(new ShareId()
-                .isin(shareIndex.getIdentity().getIsin())
-                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
-            )
-            .name(shareIndex.getName())
-            .totalCost(holding.getTotalCost().doubleValue())
-            .currency(holding.getCurrency().getCurrencyCode())
-            .quantity(totalQuantity)
-            .latestValue(totalValue);
     }
 }

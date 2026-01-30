@@ -26,11 +26,15 @@ public class Holding {
     private UUID id;
 
     /**
-     * The ID of the containing portfolio.
+     * The ID of the containing portfolio. Only used for hash-code and equals.
      */
     @EqualsAndHashCode.Include
-    @Column(name = "portfolio_id", updatable=false)
+    @Column(name = "portfolio_id", insertable=false, updatable=false)
     private UUID portfolioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portfolio_id")
+    private Portfolio portfolio;
 
     /**
      * The ID of the referenced share index. Only used for hash-code and equals.
@@ -52,7 +56,7 @@ public class Holding {
     @OneToMany(mappedBy = "holding", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @OrderBy("dateExecuted ASC")
     @lombok.Builder.Default
-    private List<DealingHistory> dealings = new ArrayList<>();
+    private List<ShareDealing> dealings = new ArrayList<>();
 
     /**
      * Records a purchase of shares against this holding.
@@ -63,7 +67,7 @@ public class Holding {
      * @param price the price of each share.
      * @return the newly added purchase.
      */
-    public DealingHistory buy(LocalDate dateExecuted, int quantity, BigDecimal price) {
+    public ShareDealing buy(LocalDate dateExecuted, int quantity, BigDecimal price) {
         return add(dateExecuted, Math.abs(quantity), price);
     }
 
@@ -76,12 +80,12 @@ public class Holding {
      * @param price the price of each share.
      * @return the newly added sale.
      */
-    public DealingHistory sell(LocalDate dateExecuted, int quantity, BigDecimal price) {
+    public ShareDealing sell(LocalDate dateExecuted, int quantity, BigDecimal price) {
         return add(dateExecuted, -Math.abs(quantity), price);
     }
 
-    private DealingHistory add(LocalDate dateExecuted, int quantity, BigDecimal price) {
-        DealingHistory dealing = DealingHistory.builder()
+    private ShareDealing add(LocalDate dateExecuted, int quantity, BigDecimal price) {
+        ShareDealing dealing = ShareDealing.builder()
             .holding(this)
             .dateExecuted(dateExecuted)
             .quantity(quantity)
@@ -99,7 +103,7 @@ public class Holding {
 
     @Transient
     public int getQuantity() {
-        return getDealings().stream().mapToInt(DealingHistory::getQuantity).sum();
+        return getDealings().stream().mapToInt(ShareDealing::getQuantity).sum();
     }
 
     @Transient

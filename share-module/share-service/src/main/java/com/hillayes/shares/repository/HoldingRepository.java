@@ -21,7 +21,7 @@ public class HoldingRepository extends RepositoryBase<Holding, UUID> {
      * @param pageSize the size of the page.
      * @return the qualified sub-set of Portfolio records.
      */
-    public Page<Holding> getHolding(Portfolio portfolio, int pageIndex, int pageSize) {
+    public Page<Holding> getHoldings(Portfolio portfolio, int pageIndex, int pageSize) {
         return pageAll("portfolio = :portfolio", pageIndex, pageSize,
             pageIndex, pageSize,
             OrderBy.by("shareIndex.name"),
@@ -36,7 +36,7 @@ public class HoldingRepository extends RepositoryBase<Holding, UUID> {
      * @param shareIndexId the ID of the share index to which the holdings relate.
      * @return the share holding record for the identified portfolio and share index.
      */
-    public Optional<Holding> getHolding(UUID portfolioId, UUID shareIndexId) {
+    public Optional<Holding> getHoldings(UUID portfolioId, UUID shareIndexId) {
         return find("portfolioId = :portfolioId AND shareIndex.id = :shareIndexId",
             Map.of(
                 "portfolioId", portfolioId,

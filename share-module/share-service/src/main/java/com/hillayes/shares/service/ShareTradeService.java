@@ -1,7 +1,6 @@
 package com.hillayes.shares.service;
 
-import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.shares.domain.DealingHistory;
+import com.hillayes.shares.domain.ShareDealing;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
@@ -9,7 +8,6 @@ import com.hillayes.shares.errors.SaleExceedsHoldingException;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.HoldingRepository;
-import com.hillayes.shares.repository.PortfolioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @ApplicationScoped
 @Transactional
@@ -50,7 +47,7 @@ public class ShareTradeService {
             throw new ZeroTradeQuantityException(shareIndex);
         }
 
-        Holding holding = holdingRepository.getHolding(portfolio.getId(), shareIndex.getId())
+        Holding holding = holdingRepository.getHoldings(portfolio.getId(), shareIndex.getId())
             .orElseGet(() -> Holding.builder()
                 .portfolioId(portfolio.getId())
                 .shareIndex(shareIndex)
@@ -72,7 +69,7 @@ public class ShareTradeService {
             throw new ZeroTradeQuantityException(shareIndex);
         }
 
-        DealingHistory dealing;
+        ShareDealing dealing;
         if (quantity > 0)
             dealing = holding.buy(dateExecuted, quantity, pricePerShare);
         else if (-quantity > holding.getQuantity())

@@ -3,7 +3,7 @@ package com.hillayes.shares.event;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.portfolio.SharesTransacted;
 import com.hillayes.outbox.sender.EventSender;
-import com.hillayes.shares.domain.DealingHistory;
+import com.hillayes.shares.domain.ShareDealing;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
 import io.micrometer.core.annotation.Counted;
@@ -18,7 +18,7 @@ public class PortfolioEventSender {
     private final EventSender eventSender;
 
     @Counted("portfolio.events")
-    public void sendSharesTransacted(DealingHistory purchase) {
+    public void sendSharesTransacted(ShareDealing purchase) {
         Portfolio portfolio = purchase.getHolding().getPortfolio();
         ShareIndex shareIndex = purchase.getHolding().getShareIndex();
         log.debug("Sending SharesTransacted event [dealingId: {}, userId: {}, company: {}]",

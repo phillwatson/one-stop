@@ -24,7 +24,7 @@ public class HoldingTest {
         Holding holding = portfolio.add(index);
 
         // When: a purchase is recorded
-        DealingHistory purchase = holding.buy(LocalDate.now(), 100, BigDecimal.valueOf(123.92));
+        ShareDealing purchase = holding.buy(LocalDate.now(), 100, BigDecimal.valueOf(123.92));
 
         // Then: the holdings dealings is increased
         assertEquals(1, holding.getDealings().size());
@@ -47,7 +47,7 @@ public class HoldingTest {
         Holding holding = portfolio.add(index);
 
         // When: a purchase is recorded
-        DealingHistory purchase = holding.buy(LocalDate.now(), -100, BigDecimal.valueOf(123.92));
+        ShareDealing purchase = holding.buy(LocalDate.now(), -100, BigDecimal.valueOf(123.92));
 
         // Then: the holdings dealings is increased
         assertEquals(1, holding.getDealings().size());
@@ -70,7 +70,7 @@ public class HoldingTest {
         Holding holding = portfolio.add(index);
 
         // When: a sale is recorded
-        DealingHistory sale = holding.sell(LocalDate.now(), 100, BigDecimal.valueOf(123.92));
+        ShareDealing sale = holding.sell(LocalDate.now(), 100, BigDecimal.valueOf(123.92));
 
         // Then: the holdings dealings is increased
         assertEquals(1, holding.getDealings().size());
@@ -93,7 +93,7 @@ public class HoldingTest {
         Holding holding = portfolio.add(index);
 
         // When: a sale is recorded
-        DealingHistory sale = holding.sell(LocalDate.now(), -100, BigDecimal.valueOf(123.92));
+        ShareDealing sale = holding.sell(LocalDate.now(), -100, BigDecimal.valueOf(123.92));
 
         // Then: the holdings dealings is increased
         assertEquals(1, holding.getDealings().size());

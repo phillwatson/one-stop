@@ -2,7 +2,7 @@ package com.hillayes.shares.service;
 
 import com.hillayes.exception.common.CommonErrorCodes;
 import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.shares.domain.DealingHistory;
+import com.hillayes.shares.domain.ShareDealing;
 import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
@@ -90,7 +90,7 @@ public class ShareTradeServiceTest {
 
         // And: the holding records the new trade
         assertFalse(holding.getDealings().isEmpty());
-        DealingHistory dealing = holding.getDealings().get(0);
+        ShareDealing dealing = holding.getDealings().get(0);
         assertEquals(dateExecuted, dealing.getDateExecuted());
         assertEquals(quantity, dealing.getQuantity());
         assertEquals(price, dealing.getPrice());
@@ -146,7 +146,7 @@ public class ShareTradeServiceTest {
 
         // And: the holding records the new trade
         assertFalse(holding.getDealings().isEmpty());
-        DealingHistory dealing = holding.getDealings().stream()
+        ShareDealing dealing = holding.getDealings().stream()
             .filter(d -> d.getDateExecuted().equals(dateExecuted))
             .findFirst().orElse(null);
         assertNotNull(dealing);
