@@ -1,6 +1,5 @@
 package com.hillayes.shares.domain;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,8 +17,6 @@ public class ShareTradeSummary {
     private UUID shareIndexId;
 
     private ShareIndex.ShareIdentity shareIdentity;
-
-    private String tickerSymbol;
 
     private String name;
 

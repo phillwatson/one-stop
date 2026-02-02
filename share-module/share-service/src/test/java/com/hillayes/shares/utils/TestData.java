@@ -54,11 +54,22 @@ public class TestData {
         return builder.build();
     }
 
-    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date, SharePriceResolution resolution) {
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date) {
+        return mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY, null);
+    }
+
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                SharePriceResolution resolution) {
         return mockPriceHistory(shareIndex, date, resolution, null);
     }
 
-    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date, SharePriceResolution resolution,
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                Consumer<PriceHistory.Builder> modifier) {
+        return mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY, modifier);
+    }
+
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                SharePriceResolution resolution,
                                                 Consumer<PriceHistory.Builder> modifier) {
         PriceHistory.Builder builder = PriceHistory.builder()
             .id(PriceHistory.PrimaryKey.builder()

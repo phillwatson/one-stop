@@ -1,22 +1,26 @@
 package com.hillayes.shares.service;
 
-import com.hillayes.shares.domain.Portfolio;
-import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.domain.ShareTrade;
+import com.hillayes.commons.jpa.Page;
+import com.hillayes.shares.domain.*;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.event.PortfolioEventSender;
 import com.hillayes.shares.repository.PortfolioRepository;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
 import com.hillayes.shares.repository.ShareTradeRepository;
+import groovy.lang.IntRange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.hillayes.shares.utils.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -452,11 +456,121 @@ public class ShareTradeServiceTest {
 
     @Test
     public void testGetShareTradeSummaries() {
-        fail("Not yet implemented");
+        // Given: a collection of share indices
+        List<ShareIndex> indices = IntStream.range(0, 3)
+            .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
+            .toList();
+
+        // And: a set of latest prices - keyed on share index id
+        Map<UUID, PriceHistory> prices = indices.stream()
+            .map(index -> mockPriceHistory(index, LocalDate.now().minusDays(1)))
+            .collect(Collectors.toMap(price -> price.getId().getShareIndexId(), p -> p));
+        when(priceHistoryRepository.getMostRecent(any(UUID.class))).then(invocation ->
+            Optional.ofNullable(prices.get(invocation.getArgument(0, UUID.class))));
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // And: a collection of share trade summaries exist
+        Map<UUID, ShareTradeRepository.ShareTradeSummaryProjection> summaries = indices.stream()
+            .map(index -> mockTradeSummary(portfolio, index))
+            .collect(Collectors.toMap(ShareTradeRepository.ShareTradeSummaryProjection::getShareIndexId, s -> s));
+        when(shareTradeRepository.getShareTradeSummaries(portfolio.getUserId(), portfolio.getId()))
+            .thenReturn(summaries.values().stream().toList());
+
+        // When: the summaries are requested
+        List<ShareTradeSummary> result = shareTradeService.getShareTradeSummaries(portfolio);
+
+        // Then: the repository is called to get the trade summaries
+        verify(shareTradeRepository).getShareTradeSummaries(portfolio.getUserId(), portfolio.getId());
+
+        // And: the price repository is called to retrieve each share index price
+        indices.forEach(index -> verify(priceHistoryRepository).getMostRecent(index.getId()));
+
+        // And: the result is expected size
+        assertNotNull(result);
+        assertEquals(indices.size(), result.size());
+
+        // And: each share index is accounted for
+        result.forEach(summary -> {
+            ShareTradeRepository.ShareTradeSummaryProjection expected = summaries.get(summary.getShareIndexId());
+            assertNotNull(expected);
+
+            assertEquals(expected.getPortfolioId(), summary.getPortfolioId());
+            assertEquals(expected.getIsin(), summary.getShareIdentity().getIsin());
+            assertEquals(expected.getTickerSymbol(), summary.getShareIdentity().getTickerSymbol());
+            assertEquals(expected.getName(), summary.getName());
+            assertEquals(expected.getCurrency(), summary.getCurrency().getCurrencyCode());
+            assertEquals(expected.getQuantity(), summary.getQuantity());
+            assertEquals(expected.getTotalCost(), summary.getTotalCost());
+
+            PriceHistory priceHistory = prices.get(summary.getShareIndexId());
+            assertNotNull(priceHistory);
+            assertEquals(priceHistory.getClose(), summary.getLatestPrice());
+        });
+    }
+
+    @Test
+    public void testGetShareTradeSummaries_NoShareTrades() {
+        // Given: a collection of share indices
+        List<ShareIndex> indices = IntStream.range(0, 3)
+            .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
+            .toList();
+
+        // And: a set of latest prices - keyed on share index id
+        Map<UUID, PriceHistory> prices = indices.stream()
+            .map(index -> mockPriceHistory(index, LocalDate.now().minusDays(1)))
+            .collect(Collectors.toMap(price -> price.getId().getShareIndexId(), p -> p));
+        when(priceHistoryRepository.getMostRecent(any(UUID.class))).then(invocation ->
+            Optional.ofNullable(prices.get(invocation.getArgument(0, UUID.class))));
+
+        // And: a user's portfolio - with no share trades
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // And: NO share trades exist
+        when(shareTradeRepository.getShareTradeSummaries(portfolio.getUserId(), portfolio.getId()))
+            .thenReturn(List.of());
+
+        // When: the summaries are requested
+        List<ShareTradeSummary> result = shareTradeService.getShareTradeSummaries(portfolio);
+
+        // Then: the repository is called to get the trade summaries
+        verify(shareTradeRepository).getShareTradeSummaries(portfolio.getUserId(), portfolio.getId());
+
+        // And: the price repository is NOT called
+        indices.forEach(index -> verify(priceHistoryRepository, never()).getMostRecent(index.getId()));
+
+        // And: the result is empty
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
     public void testGetShareTrades() {
-        fail("Not yet implemented");
+        // Given: a share index
+        ShareIndex index = mockShareIndex(s -> s.id(UUID.randomUUID()));
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // When: the share index trades are requested
+        shareTradeService.getShareTrades(portfolio, index, 0, 10);
+
+        // Then: the repository is called to retrieve the selected page
+        verify(shareTradeRepository).getShareTrades(portfolio, index, 0, 10);
+    }
+
+    private ShareTradeRepository.ShareTradeSummaryProjection mockTradeSummary(Portfolio portfolio,
+                                                                              ShareIndex shareIndex) {
+        return ShareTradeRepository.ShareTradeSummaryProjection.builder()
+            .portfolioId(portfolio.getId())
+            .shareIndexId(shareIndex.getId())
+            .isin(shareIndex.getIdentity().getIsin())
+            .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            .name(shareIndex.getName())
+            .quantity(randomNumbers.randomInt(1, 200))
+            .totalCost(BigDecimal.valueOf(randomNumbers.randomDouble(100, 1000)))
+            .currency(shareIndex.getCurrency().getCurrencyCode())
+            .build();
     }
 }
