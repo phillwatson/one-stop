@@ -35,7 +35,7 @@ public class PortfolioApi extends ApiBase {
             .extract().as(PaginatedPortfolios.class);
     }
 
-    public PortfolioResponse getPortfilio(UUID portfolioId) {
+    public PortfolioResponse getPortfolio(UUID portfolioId) {
         return givenAuth()
             .get("/api/v1/shares/portfolios/{portfolioId}", portfolioId)
             .then()
@@ -56,23 +56,11 @@ public class PortfolioApi extends ApiBase {
             .extract().as(PortfolioResponse.class);
     }
 
-    public void deletePortfilio(UUID portfolioId) {
+    public void deletePortfolio(UUID portfolioId) {
         givenAuth()
             .delete("/api/v1/shares/portfolios/{portfolioId}", portfolioId)
             .then()
             .statusCode(204)
             .contentType(JSON);
-    }
-
-    public HoldingResponse createShareTrade(UUID portfolioId,
-                                            TradeRequest request) {
-        return givenAuth()
-            .contentType(JSON)
-            .body(request)
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings", portfolioId)
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract().as(HoldingResponse.class);
     }
 }

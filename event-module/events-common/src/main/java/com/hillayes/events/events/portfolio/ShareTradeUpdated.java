@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @RegisterForReflection
-public class SharesTransacted {
+public class ShareTradeUpdated {
     /**
      * The ID of the user that has made the transaction.
      */
@@ -48,7 +48,7 @@ public class SharesTransacted {
 
     /**
      * The internal identifier of the share trade. This can be used to correlate
-     * any subsequent updates to the same trade.
+     * the updated trade record with its original.
      */
     private UUID tradeId;
 

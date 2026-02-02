@@ -2,10 +2,7 @@ package com.hillayes.shares.utils;
 
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.domain.Portfolio;
-import com.hillayes.shares.domain.PriceHistory;
-import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.domain.SharePriceResolution;
+import com.hillayes.shares.domain.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -102,6 +99,27 @@ public class TestData {
             .userId(userId)
             .name(randomStrings.nextAlphanumeric(30))
             .dateCreated(Instant.now().minus(Duration.ofDays(90)));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+
+        return builder.build();
+    }
+
+    public static ShareTrade mockShareTrade(Portfolio portfolio, ShareIndex shareIndex) {
+        return mockShareTrade(portfolio, shareIndex, null);
+    }
+
+    public static ShareTrade mockShareTrade(Portfolio portfolio, ShareIndex shareIndex,
+                                            Consumer<ShareTrade.Builder> modifier) {
+        ShareTrade.Builder builder = ShareTrade.builder()
+            .userId(portfolio.getUserId())
+            .portfolioId(portfolio.getId())
+            .shareIndexId(shareIndex.getId())
+            .dateExecuted(LocalDate.now().minusDays(randomNumbers.randomInt(1, 40)))
+            .quantity(randomNumbers.randomInt())
+            .price(BigDecimal.valueOf(randomNumbers.randomFloat(0, 20000)));
 
         if (modifier != null) {
             modifier.accept(builder);

@@ -44,11 +44,11 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        204:
+        '204':
           description: successful login
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /auth/logout:
@@ -59,7 +59,7 @@ paths:
       operationId: logout
       security: []
       responses:
-        204:
+        '204':
           description: successful logout
 
   /auth/refresh:
@@ -71,11 +71,11 @@ paths:
       security:
         - cookieAuth: [ ]
       responses:
-        204:
+        '204':
           description: successful refresh
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /users:
@@ -90,15 +90,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedUsers'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /users/{id}:
@@ -118,19 +118,19 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: User not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -157,17 +157,17 @@ paths:
             schema:
               $ref: '#/components/schemas/UserUpdateRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: User not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -186,13 +186,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: User not found
-        500:
+        '500':
           description: Internal server error
 
   /users/onboard/register:
@@ -210,11 +210,11 @@ paths:
             schema:
               $ref: '#/components/schemas/UserRegisterRequest'
       responses:
-        204:
+        '204':
           description: successful operation
-        409:
+        '409':
           description: Email already in use.
-        500:
+        '500':
           description: Internal server error
 
   /users/onboard/complete:
@@ -233,7 +233,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UserCompleteRequest'
       responses:
-        201:
+        '201':
           description: Onboarding complete
           headers:
             Location:
@@ -241,9 +241,9 @@ paths:
               schema:
                 type: string
                 format: uri
-        401:
+        '401':
           description: Token not valid or has expired
-        500:
+        '500':
           description: Internal server error
 
   /profiles:
@@ -255,15 +255,15 @@ paths:
       security:
         - cookieAuth: [ ]
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfileResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -281,15 +281,15 @@ paths:
             schema:
               $ref: '#/components/schemas/UserProfileRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfileResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
   /profiles/authproviders:
     get:
@@ -300,15 +300,15 @@ paths:
       security:
         - cookieAuth: [ ]
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserAuthProvidersResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
     delete:
       tags: [ "profiles" ]
@@ -318,13 +318,13 @@ paths:
       security:
         - cookieAuth: [ ]
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: User or AuthProvider not found
-        500:
+        '500':
           description: Internal server error
 
   /profiles/password:
@@ -343,11 +343,11 @@ paths:
             schema:
               $ref: '#/components/schemas/PasswordUpdateRequest'
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/countries:
@@ -362,15 +362,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCountries'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/countries/{id}:
@@ -389,19 +389,19 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CountryResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Country not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/institutions:
@@ -423,15 +423,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedInstitutions'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/institutions/{institutionId}:
@@ -450,19 +450,19 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/InstitutionResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Institution not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/consents:
@@ -477,15 +477,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedUserConsents'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/consents/{institutionId}:
@@ -501,23 +501,23 @@ paths:
           in: "path"
           description: ID of institution to which the consent belongs
           required: true
-          example: 07061d7674f3
           schema:
             type: string
+            example: 07061d7674f3
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserConsentResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Institution or Consent not found
-        500:
+        '500':
           description: Internal server error
 
     post:
@@ -534,9 +534,9 @@ paths:
           in: "path"
           description: ID of institution to which the consent belongs
           required: true
-          example: 07061d7674f3
           schema:
             type: string
+            example: 07061d7674f3
       requestBody:
         description: The callback URI
         required: true
@@ -545,15 +545,15 @@ paths:
             schema:
               $ref: '#/components/schemas/UserConsentRequest'
       responses:
-        307:
+        '307':
           description: successful operation and redirection to consent form
-        400:
+        '400':
           description: Invalid request
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Institution not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -570,26 +570,26 @@ paths:
           in: "path"
           description: ID of institution to which the consent belongs
           required: true
-          example: 07061d7674f3
           schema:
             type: string
+            example: 07061d7674f3
         - name: "purge"
           in: "query"
           description: Indicates that the accounts and transaction records are to be purged
           required: false
-          example: "true"
           schema:
             type: boolean
+            example: "true"
       responses:
-        204:
+        '204':
           description: successful operation
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Institution or Consent not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/accounts:
@@ -604,15 +604,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAccounts'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/accounts/{id}:
@@ -632,19 +632,19 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/transactions:
@@ -730,19 +730,19 @@ paths:
             default: bookingDateTime
         - $ref: '#/components/parameters/OrderByDirectionParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedTransactions'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/transactions/{transactionId}:
@@ -762,19 +762,19 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Transaction not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -802,19 +802,19 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateTransactionRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionResponse'
-        400:
+        '400':
           description: Invalid ID or payload supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Transaction not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/transactions/reconciliations:
@@ -837,15 +837,15 @@ paths:
               items:
                 $ref: '#/components/schemas/ReconciliationRequest'
       responses:
-        202:
+        '202':
           description: batch update successful
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/transactions/movements:
@@ -881,7 +881,7 @@ paths:
             type: string
             format: date
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -889,13 +889,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TransactionMovementResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/transactions/category:
@@ -933,7 +933,7 @@ paths:
             type: string
             format: date
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -941,13 +941,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TransactionResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Transaction not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/category-groups:
@@ -962,15 +962,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCategoryGroups'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
     post:
@@ -990,7 +990,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CategoryGroupRequest'
       responses:
-        201:
+        '201':
           description: successful operation
           headers:
             Location:
@@ -1002,9 +1002,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryGroupResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/category-groups/{groupId}:
@@ -1024,17 +1024,17 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryGroupResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category group not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -1060,17 +1060,17 @@ paths:
             schema:
               $ref: '#/components/schemas/CategoryGroupRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryGroupResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category group not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -1091,13 +1091,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category group not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/category-groups/{groupId}/categories:
@@ -1119,17 +1119,17 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCategories'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category group not found
-        500:
+        '500':
           description: Internal server error
 
     post:
@@ -1155,7 +1155,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CategoryRequest'
       responses:
-        201:
+        '201':
           description: successful operation
           headers:
             Location:
@@ -1167,9 +1167,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/categories/{categoryId}:
@@ -1189,17 +1189,17 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -1225,17 +1225,17 @@ paths:
             schema:
               $ref: '#/components/schemas/CategoryRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -1256,13 +1256,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/categories/{categoryId}/selectors:
@@ -1286,19 +1286,19 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCategorySelectors'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/categories/{categoryId}/selectors/{selectorId}:
@@ -1334,19 +1334,19 @@ paths:
             schema:
               $ref: '#/components/schemas/CategorySelectorUpdateRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategorySelectorResponse'
-        400:
+        '400':
           description: Invalid request supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category or selector not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -1373,13 +1373,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category or selector not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/categories/{categoryId}/account-selectors/{accountId}:
@@ -1408,19 +1408,19 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCategorySelectors'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category or account not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -1455,7 +1455,7 @@ paths:
               items:
                 $ref: '#/components/schemas/CategorySelectorRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -1463,13 +1463,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CategorySelectorResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category or account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/category-groups/{groupId}/statistics:
@@ -1507,7 +1507,7 @@ paths:
             type: string
             format: date
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -1515,13 +1515,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CategoryStatisticsResponse'
-        400:
+        '400':
           description: Invalid ID supplied
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Category or account not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/templates:
@@ -1536,15 +1536,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditTemplates'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/configs:
@@ -1559,15 +1559,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditConfigs'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
     post:
@@ -1585,7 +1585,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AuditReportConfigRequest'
       responses:
-        201:
+        '201':
           description: successful operation
           headers:
             Location:
@@ -1597,9 +1597,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuditReportConfigRequest'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/configs/{configId}:
@@ -1619,17 +1619,17 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuditReportConfigResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report configuration not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -1655,17 +1655,17 @@ paths:
             schema:
               $ref: '#/components/schemas/AuditReportConfigRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuditReportConfigResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report configuration not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -1684,13 +1684,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report configuration not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/config/{configId}/issues:
@@ -1720,17 +1720,17 @@ paths:
           schema:
             type: boolean
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditIssues'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report configuration not found
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/summaries:
@@ -1742,7 +1742,7 @@ paths:
       security:
         - cookieAuth: [ ]
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -1750,9 +1750,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AuditIssueSummaryResponse'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /rails/audit/issues/{issueId}:
@@ -1772,17 +1772,17 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuditIssueResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report issue not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -1808,17 +1808,17 @@ paths:
             schema:
               $ref: '#/components/schemas/AuditIssueRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuditIssueResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report issue not found
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -1837,13 +1837,13 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Audit report issue not found
-        500:
+        '500':
           description: Internal server error
 
   /notifications:
@@ -1860,22 +1860,22 @@ paths:
         - name: "after"
           in: "query"
           description: ID of account to filter transactions
-          example: 2019-01-01T14:25:32.201Z
           required: false
           schema:
             type: string
             format: date-time
             default: 1970-01-01T00:00:00Z
+            example: 2019-01-01T14:25:32.201Z
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedNotifications'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /notifications/{id}:
@@ -1895,11 +1895,11 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /shares/indices:
@@ -1914,15 +1914,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedShareIndices'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
     post:
@@ -1942,7 +1942,7 @@ paths:
               items:
                 $ref: '#/components/schemas/RegisterShareIndexRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -1950,13 +1950,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ShareIndexResponse'
-        400:
+        '400':
           description: Invalid request
-        401:
+        '401':
           description: Unauthorized
-        409:
+        '409':
           description: ISIN is already registered
-        500:
+        '500':
           description: Internal server error
 
   /shares/indices/{shareId}/prices:
@@ -1992,15 +1992,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedSharePrices'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /shares/portfolios:
@@ -2019,19 +2019,19 @@ paths:
             schema:
               $ref: '#/components/schemas/PortfolioRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioResponse'
-        400:
+        '400':
           description: Invalid request
-        401:
+        '401':
           description: Unauthorized
-        409:
+        '409':
           description: The named portfolio already exists
-        500:
+        '500':
           description: Internal server error
 
     get:
@@ -2047,15 +2047,15 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedPortfolios'
-        401:
+        '401':
           description: Unauthorized
-        500:
+        '500':
           description: Internal server error
 
   /shares/portfolios/{portfolioId}:
@@ -2075,17 +2075,17 @@ paths:
             type: string
             format: uuid
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioResponse'
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Portfolio not found
-        500:
+        '500':
           description: Internal server error
 
     put:
@@ -2111,19 +2111,19 @@ paths:
             schema:
               $ref: '#/components/schemas/PortfolioRequest'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioResponse'
-        400:
+        '400':
           description: Invalid request
-        401:
+        '401':
           description: Unauthorized
-        409:
+        '409':
           description: The named portfolio already exists
-        500:
+        '500':
           description: Internal server error
 
     delete:
@@ -2142,29 +2142,111 @@ paths:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Portfolio not found
-        500:
+        '500':
           description: Internal server error
 
-  /shares/portfolios/{portfolioId}/holdings:
+  /shares/portfolios/{portfolioId}/trades:
     get:
       tags: [ "shares" ]
-      summary: Get the portfolio's share holdings
+      summary: Get summary of portfolio's share trades.
       description: |
-        Get a paginated list of the identified portfolio's share holdings
-        in ascending order of share index name.
-      operationId: getPortfolioHoldings
+        Returns a summary list of the share trades within the user's identified
+        portfolio in ascending order of share index name.
+      operationId: getPortfolioTrades
       security:
         - cookieAuth: [ ]
       parameters:
         - name: "portfolioId"
           in: "path"
-          description: ID of the portfolio whose holdings are to be returned
+          description: ID of the portfolio whose trade summaries are to be returned.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The list of the shares held within the portfolio.
+                items:
+                  $ref: '#/components/schemas/ShareTradeSummaryResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Portfolio not found
+        '500':
+          description: Internal server error
+
+    post:
+      tags: [ "shares" ]
+      summary: Record share trade within portfolio.
+      description: |
+        Creates a new share trade record within the user's identified portfolio.
+      operationId: createShareTrade
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "portfolioId"
+          in: "path"
+          description: ID of the portfolio within which the trade is to be recorded.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The details of the share trade.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareTradeRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The list of the holdings within a portfolios.
+                items:
+                  $ref: '#/components/schemas/ShareTradeResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Portfolio not found
+        '500':
+          description: Internal server error
+
+  /shares/portfolios/{portfolioId}/trades/{shareIndexId}:
+    get:
+      tags: [ "shares" ]
+      summary: Get portfolio's share trades
+      description: |
+        Returns a paginated list for the trades of the identified share index within the identified portfolio in ascending
+        date order.
+      operationId: getShareTrades
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "portfolioId"
+          in: "path"
+          description: ID of the portfolio whose trades are to be listed.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: "shareIndexId"
+          in: "path"
+          description: ID of the share index whose trades are to be listed.
           required: true
           schema:
             type: string
@@ -2172,31 +2254,60 @@ paths:
         - $ref: '#/components/parameters/PageIndexParam'
         - $ref: '#/components/parameters/PageSizeParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPortfolioHoldings'
-        401:
+                $ref: '#/components/schemas/PaginatedShareTrades'
+        '401':
           description: Unauthorized
-        404:
-          description: Portfolio not found
-        500:
+        '500':
           description: Internal server error
 
-  /shares/holdings/{holdingId}:
-    post:
+  /shares/trades/{shareTradeId}:
+    get:
       tags: [ "shares" ]
-      summary: Add a share trade to a portfolio
-      description: Records a share trade within the identified portfolio.
-      operationId: recordShareTrade
+      summary: Get the identified share trade
+      description: Returns the details of the identified share trade.
+      operationId: getShareTrade
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "holdingId"
+        - name: "shareTradeId"
           in: "path"
-          description: internal identifier for the share holding.
+          description: internal identifier for the share trade record.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareTradeResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Share Trade not found
+        '500':
+          description: Internal server error
+
+    put:
+      tags: [ "shares" ]
+      summary: Update the identified share trade
+      description: |
+        Updates the identified share trade. Intended for correct errors
+        and NOT to record a new trade on the same share.
+      operationId: updateShareTrade
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: "shareTradeId"
+          in: "path"
+          description: ID of the share trade to be updates
           required: true
           schema:
             type: string
@@ -2207,202 +2318,46 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ShareDealingRequest'
+              $ref: '#/components/schemas/ShareTradeRequest'
       responses:
-        200:
-          description: successful operation
+        '200':
+          description: Successful operation. Returns the updated share trade.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HoldingResponse'
-        401:
+                $ref: '#/components/schemas/ShareTradeResponse'
+        '401':
           description: Unauthorized
-        404:
-          description: Holding not found
-        500:
-          description: Internal server error
-
-    get:
-      tags: [ "shares" ]
-      summary: Get the holdings for the identified share
-      description: Returns the portfolio's holdings for the identified share.
-      operationId: getPortfolioHolding
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "holdingId"
-          in: "path"
-          description: internal identifier for the share holding.
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HoldingResponse'
-        401:
-          description: Unauthorized
-        404:
-          description: Holding not found
-        500:
+        '404':
+          description: Share dealing not found
+        '500':
           description: Internal server error
 
     delete:
       tags: [ "shares" ]
-      summary: Delete the identified holding
-      description: Deletes the identified share and all dealings for that holding.
-      operationId: deletePortfolioHolding
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "holdingId"
-          in: "path"
-          description: internal identifier for the share holding.
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        204:
-          description: successful operation
-        401:
-          description: Unauthorized
-        404:
-          description: Holding not found
-        500:
-          description: Internal server error
-
-  /shares/holdings/{holdingId}/dealings:
-    get:
-      tags: [ "shares" ]
-      summary: Get the holding's share dealings.
+      summary: Delete the identified share trade
       description: |
-        Get a paginated list of the portfolio's dealings in the identified
-        share, in ascending date order.
-      operationId: getShareDealings
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "holdingId"
-          in: "path"
-          description: internal identifier for the share holding.
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - $ref: '#/components/parameters/PageIndexParam'
-        - $ref: '#/components/parameters/PageSizeParam'
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedShareDealings'
-        401:
-          description: Unauthorized
-        404:
-          description: Holding not found
-        500:
-          description: Internal server error
-
-  /shares/dealings/{dealingId}:
-    get:
-      tags: [ "shares" ]
-      summary: Get the identified share dealing
-      description: Returns the identified share dealing.
-      operationId: getShareDealing
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "dealingId"
-          in: "path"
-          description: ID of the share dealing to be returned
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ShareDealingResponse'
-        401:
-          description: Unauthorized
-        404:
-          description: Share dealing not found
-        500:
-          description: Internal server error
-
-    put:
-      tags: [ "shares" ]
-      summary: Update the identified share dealing
-      description: |
-        Updates the identified share dealing. Intended for correct errors
-        and NOT to record a new trade on the same share.
-      operationId: updateShareDealing
-      security:
-        - cookieAuth: [ ]
-      parameters:
-        - name: "dealingId"
-          in: "path"
-          description: ID of the share dealing to be updates
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        description: The details of the share dealing
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ShareDealingRequest'
-      responses:
-        200:
-          description: Successful operation. Returns the updated share dealing.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ShareDealingResponse'
-        401:
-          description: Unauthorized
-        404:
-          description: Share dealing not found
-        500:
-          description: Internal server error
-
-    delete:
-      tags: [ "shares" ]
-      summary: Delete the identified share dealing
-      description: |
-        Deletes the identified share dealing. Intended for correcting errors
+        Deletes the identified share trade. Intended for correcting errors
         and NOT for recording a sale.
-      operationId: deleteShareDealing
+      operationId: deleteShareTrade
       security:
         - cookieAuth: [ ]
       parameters:
-        - name: "dealingId"
+        - name: "shareTradeId"
           in: "path"
-          description: ID of the share dealing to be deleted
+          description: ID of the share trade to be deleted
           required: true
           schema:
             type: string
             format: uuid
       responses:
-        204:
+        '204':
           description: successful operation
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '404':
           description: Share dealing not found
-        500:
+        '500':
           description: Internal server error
 
 components:
@@ -2424,7 +2379,7 @@ components:
         format: int32
         default: 0
         minimum: 0
-      example: 10
+        example: 10
 
     PageSizeParam:
       name: "page-size"
@@ -2436,7 +2391,7 @@ components:
         format: int32
         default: 20
         minimum: 1
-      example: 30
+        example: 30
 
     OrderByDirectionParam:
       name: "direction"
@@ -2447,7 +2402,7 @@ components:
         type: string
         enum: [ asc, desc]
         default: desc
-      example: asc
+        example: asc
 
     RailProviderParam:
       name: rail
@@ -2457,7 +2412,7 @@ components:
       schema:
         type: string
         enum: [NORDIGEN, YAPILY]
-      example: NORDIGEN
+        example: NORDIGEN
 
   schemas:
     LoginRequest:
@@ -2494,7 +2449,6 @@ components:
           description: The identifier to relate this error to server log entries.
           type: string
         severity:
-          description: The highest of the severity levels within the list of errors
           $ref: '#/components/schemas/ErrorSeverity'
         errors:
           type: array
@@ -2509,7 +2463,6 @@ components:
         - message
       properties:
         severity:
-          description: An indication of the severity of the error.
           $ref: '#/components/schemas/ErrorSeverity'
         messageId:
           description: The unique identifier for the message - provides index to locale strings.
@@ -3412,10 +3365,7 @@ components:
           description: The parameter's name
           example: averageDays
         type:
-          type: string
-          description: The parameter's data type
           $ref: '#/components/schemas/AuditReportParamType'
-          example: LONG
         description:
           type: string
           description: The parameter's description
@@ -3473,10 +3423,7 @@ components:
           description: The description of the audit report
           example: 'The report identifies outgoing transactions that exceed the average value'
         source:
-          type: string
-          description: The source of the transactions to be analysed by the report
           $ref: '#/components/schemas/AuditReportSource'
-          example: CATEGORY_GROUP
         sourceId:
           type: string
           format: uuid
@@ -3698,16 +3645,10 @@ components:
           format: date-time
           description: The date and time the portfolio was created
           example: 2019-01-01T00:00:00.000Z
-        holdingCount:
-          type: integer
-          format: int32
-          description: The number of share indices within the portfolio
-          example: 3
 
-    HoldingResponse:
+    ShareTradeSummaryResponse:
       type: object
       required:
-        - id
         - portfolioId
         - shareIndexId
         - shareId
@@ -3715,13 +3656,8 @@ components:
         - quantity
         - totalCost
         - currency
-        - latestValue
+        - latestPrice
       properties:
-        id:
-          type: string
-          format: uuid
-          description: The holding's internal Id
-          example: 07061d76-74f3-4163-aa07-fb6909681f81
         portfolioId:
           type: string
           format: uuid
@@ -3740,7 +3676,7 @@ components:
           example: HSBC FTSE 250 Index Accumulation C
         quantity:
           type: integer
-          format: int32
+          format: int64
           description: The number of shares held
           example: 150
         totalCost:
@@ -3754,13 +3690,13 @@ components:
           minLength: 3
           maxLength: 3
           example: GBP
-        latestValue:
+        latestPrice:
           type: number
           format: double
-          description: The current value for the holding in minor currency units
+          description: The latest closing price of the share, in minor currency units
           example: 2341234.123
 
-    ShareDealingRequest:
+    ShareTradeRequest:
       description: Describes a trade to be recorded for a share within a portfolio holding.
       type: object
       required:
@@ -3790,23 +3726,19 @@ components:
           description: The price per share at which the trade was executed, in minor currency units
           example: 2341234.123
 
-    ShareDealingResponse:
+    ShareTradeResponse:
       description: Describes a trade for a share within a portfolio holding.
       type: object
       allOf:
-        - $ref: '#/components/schemas/ShareDealingRequest'
+        - $ref: '#/components/schemas/ShareTradeRequest'
         - type: object
           required:
             - id
-            - shareIndexId
-            - dateExecuted
-            - quantity
-            - pricePerShare
           properties:
             id:
               type: string
               format: uuid
-              description: The dealing Id
+              description: The share trade Id
               example: 07061d76-74f3-4163-aa07-fb6909681f81
 
     PageLinks:
@@ -3938,11 +3870,11 @@ components:
               description: |
                 An array of the monetary totals for the filtered transactions, keyed on currency.
               type: string
-              additionalProperties:
-                type: number
-                format: double
-                description: The total amount for filtered transactions
-                example: 123.45
+            additionalProperties:
+              type: number
+              format: double
+              description: The total amount for filtered transactions
+              example: 123.45
             items:
               type: array
               description: The list of transactions
@@ -4059,24 +3991,13 @@ components:
               items:
                 $ref: '#/components/schemas/PortfolioResponse'
 
-    PaginatedPortfolioHoldings:
+    PaginatedShareTrades:
       allOf:
         - $ref: '#/components/schemas/PaginatedItems'
         - type: object
           properties:
             items:
               type: array
-              description: The list of the holdings within a portfolios.
+              description: The list of the user's portfolios.
               items:
-                $ref: '#/components/schemas/HoldingResponse'
-
-    PaginatedShareDealings:
-      allOf:
-        - $ref: '#/components/schemas/PaginatedItems'
-        - type: object
-          properties:
-            items:
-              type: array
-              description: The list of the dealings within a portfolio holding.
-              items:
-                $ref: '#/components/schemas/ShareDealingResponse'
+                $ref: '#/components/schemas/ShareTradeResponse'

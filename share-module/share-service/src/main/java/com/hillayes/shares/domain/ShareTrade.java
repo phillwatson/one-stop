@@ -8,29 +8,36 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "dealing_history")
+@Table(name = "share_trade")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Builder(builderClassName = "Builder")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class ShareDealing {
+public class ShareTrade {
     @Id
     @GeneratedValue(generator = "uuid2")
     @Setter
     private UUID id;
 
-    @Getter(AccessLevel.PRIVATE)
     @EqualsAndHashCode.Include
-    @Column(name = "holding_id", insertable=false, updatable=false)
-    private UUID holdingId;
+    @ToString.Include
+    @Column(name = "user_id", nullable = false, updatable=false)
+    private UUID userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "holding_id")
-    private Holding holding;
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    @Column(name = "portfolio_id", nullable = false, updatable=false)
+    private UUID portfolioId;
+
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    @Column(name = "share_index_id", nullable = false)
+    private UUID shareIndexId;
 
     @Column(name = "date_executed", nullable = false)
+    @Setter
     @EqualsAndHashCode.Include
     private LocalDate dateExecuted;
 
@@ -38,12 +45,14 @@ public class ShareDealing {
      * The number of shares bought or sold. Sold shares are recorded as a negative number.
      */
     @Column(name = "quantity", nullable = false)
+    @Setter
     private int quantity;
 
     /**
      * The price paid or received for each share.
      */
     @Column(name = "price", nullable = false)
+    @Setter
     private BigDecimal price;
 
     /**
