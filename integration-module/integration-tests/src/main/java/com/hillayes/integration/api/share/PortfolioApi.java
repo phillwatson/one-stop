@@ -83,7 +83,7 @@ public class PortfolioApi extends ApiBase {
         return givenAuth()
             .contentType(JSON)
             .body(request)
-            .post("/api/v1/shares/portfolios/{portfolioId}/trade", portfolioId)
+            .post("/api/v1/shares/portfolios/{portfolioId}/trades", portfolioId)
             .then()
             .statusCode(200)
             .contentType(JSON)
