@@ -67,73 +67,61 @@ public class PortfolioTestIT extends ApiTestBase {
             assertTrue(portfolio.getDateCreated().isBefore(Instant.now()));
 
             // And: the portfolio has no holdings
-            assertNotNull(portfolio.getHoldings());
-            assertTrue(portfolio.getHoldings().isEmpty());
+            List<ShareTradeSummaryResponse> holdings = portfolioApi.getPortfolioHoldings(portfolio.getId());
+            assertNotNull(holdings);
+            assertTrue(holdings.isEmpty());
 
             try (SendInBlueSimulator emailSim = new SendInBlueSimulator(getWiremockPort())) {
                 // When: the user creates a trade to buy shares
-                TradeRequest buyRequest = new TradeRequest()
-                    .shareId(shareIndex.get().getShareId())
+                ShareTradeRequest buyRequest = new ShareTradeRequest()
+                    .shareIndexId(shareIndex.get().getId())
                     .dateExecuted(LocalDate.now().minusDays(2))
                     .pricePerShare(123.45)
                     .quantity(100);
-                HoldingResponse shareHoldings = portfolioApi.createShareTrade(portfolio.getId(), buyRequest);
+                ShareTradeResponse shareTrade = portfolioApi.createShareTrade(portfolio.getId(), buyRequest);
 
                 // Then: the trade is recorded
-                assertNotNull(shareHoldings);
-                assertEquals(buyRequest.getShareId(), shareHoldings.getShareId());
-                assertEquals(shareIndex.get().getShareId().getIsin(), shareHoldings.getShareId().getIsin());
-                assertEquals(shareIndex.get().getShareId().getTickerSymbol(), shareHoldings.getShareId().getTickerSymbol());
-                assertEquals(shareIndex.get().getName(), shareHoldings.getName());
-                assertEquals(shareIndex.get().getCurrency(), shareHoldings.getCurrency());
-
-                // And: the holding totals match the single trade
-                assertEquals(buyRequest.getQuantity(), shareHoldings.getQuantity());
-                assertEquals(buyRequest.getPricePerShare() * 100, shareHoldings.getTotalCost());
-                assertNotNull(shareHoldings.getLatestValue());
+                assertNotNull(shareTrade);
+                assertEquals(buyRequest.getShareIndexId(), shareTrade.getShareIndexId());
+                assertEquals(buyRequest.getQuantity(), shareTrade.getQuantity());
+                assertEquals(buyRequest.getPricePerShare(), shareTrade.getPricePerShare());
+                assertEquals(buyRequest.getDateExecuted(), shareTrade.getDateExecuted());
 
                 // And: the holdings show the new dealing
-                assertNotNull(shareHoldings.getDealings());
-                assertEquals(1, shareHoldings.getDealings().size());
-                DealingHistoryResponse dealing = shareHoldings.getDealings().getFirst();
-                assertEquals(buyRequest.getDateExecuted(), dealing.getDateExecuted());
-                assertEquals(buyRequest.getQuantity(), dealing.getQuantity());
-                assertEquals(buyRequest.getPricePerShare(), dealing.getPricePerShare());
+                holdings = portfolioApi.getPortfolioHoldings(portfolio.getId());
+                assertNotNull(holdings);
+                assertEquals(1, holdings.size());
+                ShareTradeSummaryResponse newHolding = holdings.getFirst();
+                assertEquals(buyRequest.getShareIndexId(), newHolding.getShareIndexId());
+                assertEquals(buyRequest.getQuantity().longValue(), newHolding.getQuantity());
 
                 // And: an email is sent to the user confirming the purchase
                 emailSim.verifyEmailSent(user.getEmail(), "Your purchase of shares in " + shareIndex.get().getName());
 
                 // When: the user creates a trade to sell shares
-                TradeRequest sellRequest = new TradeRequest()
-                    .shareId(shareIndex.get().getShareId())
+                ShareTradeRequest sellRequest = new ShareTradeRequest()
+                    .shareIndexId(shareIndex.get().getId())
                     .dateExecuted(LocalDate.now().minusDays(1))
                     .pricePerShare(257.23)
                     .quantity(-10);
-                shareHoldings = portfolioApi.createShareTrade(portfolio.getId(), sellRequest);
+                shareTrade = portfolioApi.createShareTrade(portfolio.getId(), sellRequest);
 
                 // Then: the trade is recorded
-                assertNotNull(shareHoldings);
-                assertEquals(sellRequest.getShareId(), shareHoldings.getShareId());
-                assertEquals(shareIndex.get().getShareId().getIsin(), shareHoldings.getShareId().getIsin());
-                assertEquals(shareIndex.get().getShareId().getTickerSymbol(), shareHoldings.getShareId().getTickerSymbol());
-                assertEquals(shareIndex.get().getName(), shareHoldings.getName());
-                assertEquals(shareIndex.get().getCurrency(), shareHoldings.getCurrency());
+                assertNotNull(shareTrade);
+                assertEquals(sellRequest.getShareIndexId(), shareTrade.getShareIndexId());
+                assertEquals(sellRequest.getQuantity(), shareTrade.getQuantity());
+                assertEquals(sellRequest.getPricePerShare(), shareTrade.getPricePerShare());
+                assertEquals(sellRequest.getDateExecuted(), shareTrade.getDateExecuted());
 
                 // And: the holding totals match the two trades
-                assertEquals(buyRequest.getQuantity() + sellRequest.getQuantity(), shareHoldings.getQuantity());
+                holdings = portfolioApi.getPortfolioHoldings(portfolio.getId());
+                assertNotNull(holdings);
+                assertEquals(1, holdings.size());
+                assertEquals(buyRequest.getQuantity() + sellRequest.getQuantity(), shareTrade.getQuantity());
                 assertEquals(
                     (buyRequest.getPricePerShare() * buyRequest.getQuantity()) +
                             (sellRequest.getPricePerShare() * sellRequest.getQuantity()),
-                    shareHoldings.getTotalCost());
-                assertNotNull(shareHoldings.getLatestValue());
-
-                // And: the holdings show the new dealing
-                assertNotNull(shareHoldings.getDealings());
-                assertEquals(2, shareHoldings.getDealings().size());
-                dealing = shareHoldings.getDealings().get(1);
-                assertEquals(sellRequest.getDateExecuted(), dealing.getDateExecuted());
-                assertEquals(sellRequest.getQuantity(), dealing.getQuantity());
-                assertEquals(sellRequest.getPricePerShare(), dealing.getPricePerShare());
+                    holdings.getFirst().getTotalCost());
 
                 // And: an email is sent to the user confirming the sale
                 emailSim.verifyEmailSent(user.getEmail(), "Your sale of shares in " + shareIndex.get().getName());
