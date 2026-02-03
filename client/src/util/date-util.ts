@@ -17,7 +17,7 @@ export function getDefaultLocaleRegion(): string | undefined {
 }
 
 const defaultLocale = getDefaultLocale();
-const defaultRegion = getDefaultLocaleRegion();
+//const defaultRegion = getDefaultLocaleRegion();
 
 export function toDate(dateStr?: string): Date | undefined {
   if (!dateStr) return undefined;
