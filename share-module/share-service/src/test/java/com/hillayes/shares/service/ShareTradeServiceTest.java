@@ -1,6 +1,5 @@
 package com.hillayes.shares.service;
 
-import com.hillayes.commons.jpa.Page;
 import com.hillayes.shares.domain.*;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.event.PortfolioEventSender;
@@ -8,7 +7,6 @@ import com.hillayes.shares.repository.PortfolioRepository;
 import com.hillayes.shares.repository.PriceHistoryRepository;
 import com.hillayes.shares.repository.ShareIndexRepository;
 import com.hillayes.shares.repository.ShareTradeRepository;
-import groovy.lang.IntRange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

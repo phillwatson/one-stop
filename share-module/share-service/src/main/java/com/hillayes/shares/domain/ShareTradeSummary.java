@@ -1,23 +1,28 @@
 package com.hillayes.shares.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.UUID;
 
-@Builder
-@AllArgsConstructor
+@Builder(builderClassName = "Builder")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Getter
 public class ShareTradeSummary {
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private UUID portfolioId;
 
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private UUID shareIndexId;
 
     private ShareIndex.ShareIdentity shareIdentity;
 
+    @ToString.Include
     private String name;
 
     private long quantity;
