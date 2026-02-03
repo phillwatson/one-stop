@@ -12,7 +12,6 @@ import com.hillayes.shares.service.PortfolioService;
 import com.hillayes.shares.service.ShareIndexService;
 import com.hillayes.shares.service.ShareTradeService;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +60,6 @@ public class PortfolioResource {
     }
 
     @POST
-    @Transactional
     public Response createPortfolio(@Context SecurityContext ctx,
                                     PortfolioRequest request) {
         UUID userId = AuthUtils.getUserId(ctx);
@@ -78,7 +76,6 @@ public class PortfolioResource {
 
     @GET
     @Path("/{portfolioId}")
-    @Transactional
     public Response getPortfolio(@Context SecurityContext ctx,
                                  @PathParam("portfolioId") UUID portfolioId) {
         UUID userId = AuthUtils.getUserId(ctx);
@@ -93,7 +90,6 @@ public class PortfolioResource {
 
     @PUT
     @Path("/{portfolioId}")
-    @Transactional
     public Response updatePortfolio(@Context SecurityContext ctx,
                                     @PathParam("portfolioId") UUID portfolioId,
                                     PortfolioRequest request) {
@@ -130,8 +126,8 @@ public class PortfolioResource {
      */
     @GET
     @Path("/{portfolioId}/trades")
-    public Response getPortfolioTrades(@Context SecurityContext ctx,
-                                       @PathParam("portfolioId") UUID portfolioId) {
+    public Response getPortfolioHoldings(@Context SecurityContext ctx,
+                                         @PathParam("portfolioId") UUID portfolioId) {
         UUID userId = AuthUtils.getUserId(ctx);
         log.info("Listing portfolio's trades [userId: {}, portfolioId: {}]", userId, portfolioId);
 

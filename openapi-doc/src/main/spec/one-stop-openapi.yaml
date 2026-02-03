@@ -2154,11 +2154,11 @@ paths:
   /shares/portfolios/{portfolioId}/trades:
     get:
       tags: [ "shares" ]
-      summary: Get summary of portfolio's share trades.
+      summary: Get summary of portfolio's share holdings.
       description: |
         Returns a summary list of the share trades within the user's identified
         portfolio in ascending order of share index name.
-      operationId: getPortfolioTrades
+      operationId: getPortfolioHoldings
       security:
         - cookieAuth: [ ]
       parameters:
