@@ -13,12 +13,12 @@ class UserConsentService {
       .then(response => response.data);
   }
 
-  registerConsent(institutionId: string): Promise<Location> {
+  registerConsent(institutionId: string): Promise<string> {
     const body = {
       callbackUri: window.location.origin + "/accounts"
     }
     return http.post(`/rails/consents/${institutionId}`, body)
-      .then(response => response.headers["location"] as Location);
+      .then(response => response.headers["location"]);
   }
 
   cancelConsent(institutionId: string, purge: boolean = false): Promise<any> {
