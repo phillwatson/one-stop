@@ -82,7 +82,7 @@ export default function Institutions(props: Props) {
 
   function handleLinkSelect(institution: Institution) {
     UserConsentService.registerConsent(institution.id).then(registerUri => {
-      window.location.replace(registerUri.href);
+      window.location.replace(registerUri);
     })
     .catch(err => showMessage(err))
   }
