@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DndContext, DragOverlay, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
 import Grid from "@mui/material/Grid";
+import CategoriesIcon from '@mui/icons-material/Category';
 
 import { useMessageDispatch } from '../contexts/messages/context';
 import CategoryService from "../services/category.service";
@@ -70,7 +71,7 @@ export default function Categories() {
   }
 
   return (
-    <PageHeader title="Transaction Categories">
+    <PageHeader title="Transaction Categories" icon={ <CategoriesIcon /> }>
       <DndContext onDragStart={ handleDragStart } onDragEnd={ handleDragEnd }>
         <Grid container direction="row" wrap="nowrap" width="100%" columnGap={2}>
           <Grid width="29%">

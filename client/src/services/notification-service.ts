@@ -8,8 +8,8 @@ class NotificationService {
       .then(response => response.data);
   }
 
-  deleteNotification(notificationId: string) {
-    return http.delete(`/notifications/${notificationId}`);
+  deleteNotification(notificationId: string): Promise<any> {
+    return http.delete<void>(`/notifications/${notificationId}`);
   }
 }
 

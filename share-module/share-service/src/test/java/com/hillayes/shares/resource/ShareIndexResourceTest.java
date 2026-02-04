@@ -12,7 +12,6 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.common.mapper.TypeRef;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -22,8 +21,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import static com.hillayes.shares.utils.TestData.mockPriceHistory;
-import static com.hillayes.shares.utils.TestData.mockShareIndex;
+import static com.hillayes.shares.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +30,6 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class ShareIndexResourceTest extends TestBase {
-    private static final RandomStringUtils randomStrings = RandomStringUtils.insecure();
     private static final TypeRef<List<ShareIndexResponse>> SHARE_INDEX_LIST = new TypeRef<>() {};
 
     @InjectMock

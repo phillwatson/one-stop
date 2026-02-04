@@ -2,10 +2,8 @@ package com.hillayes.shares.utils;
 
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
-import com.hillayes.shares.domain.Portfolio;
-import com.hillayes.shares.domain.PriceHistory;
-import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.domain.SharePriceResolution;
+import com.hillayes.shares.domain.*;
+import com.hillayes.shares.repository.ShareTradeRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -57,11 +55,22 @@ public class TestData {
         return builder.build();
     }
 
-    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date, SharePriceResolution resolution) {
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date) {
+        return mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY, null);
+    }
+
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                SharePriceResolution resolution) {
         return mockPriceHistory(shareIndex, date, resolution, null);
     }
 
-    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date, SharePriceResolution resolution,
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                Consumer<PriceHistory.Builder> modifier) {
+        return mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY, modifier);
+    }
+
+    public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
+                                                SharePriceResolution resolution,
                                                 Consumer<PriceHistory.Builder> modifier) {
         PriceHistory.Builder builder = PriceHistory.builder()
             .id(PriceHistory.PrimaryKey.builder()
@@ -109,6 +118,56 @@ public class TestData {
 
         return builder.build();
     }
+
+    public static ShareTrade mockShareTrade(Portfolio portfolio, ShareIndex shareIndex) {
+        return mockShareTrade(portfolio, shareIndex, null);
+    }
+
+    public static ShareTrade mockShareTrade(Portfolio portfolio, ShareIndex shareIndex,
+                                            Consumer<ShareTrade.Builder> modifier) {
+        ShareTrade.Builder builder = ShareTrade.builder()
+            .userId(portfolio.getUserId())
+            .portfolioId(portfolio.getId())
+            .shareIndexId(shareIndex.getId())
+            .dateExecuted(LocalDate.now().minusDays(randomNumbers.randomInt(1, 40)))
+            .quantity(randomNumbers.randomInt())
+            .price(BigDecimal.valueOf(randomNumbers.randomFloat(0, 20000)));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+
+        return builder.build();
+    }
+
+    public static ShareTradeSummary mockShareTradeSummary(Portfolio portfolio,
+                                                          ShareIndex shareIndex) {
+        return mockShareTradeSummary(portfolio, shareIndex, null);
+    }
+
+    public static ShareTradeSummary mockShareTradeSummary(Portfolio portfolio,
+                                                          ShareIndex shareIndex,
+                                                          Consumer<ShareTradeSummary.Builder> modifier) {
+        ShareTradeSummary.Builder builder = ShareTradeSummary.builder()
+            .portfolioId(portfolio.getId())
+            .shareIndexId(shareIndex.getId())
+            .shareIdentity(ShareIndex.ShareIdentity.builder()
+                .isin(shareIndex.getIdentity().getIsin())
+                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+                .build())
+            .name(shareIndex.getName())
+            .quantity(randomNumbers.randomInt(100, 200))
+            .currency(Currency.getInstance(shareIndex.getCurrency().getCurrencyCode()))
+            .totalCost(BigDecimal.valueOf(randomNumbers.randomFloat(50000, 200000)))
+            .latestPrice(BigDecimal.valueOf(randomNumbers.randomFloat(100, 2000)));
+
+        if (modifier != null) {
+            modifier.accept(builder);
+        }
+
+        return builder.build();
+    }
+
 
     public static PriceData mockPriceData(LocalDate date) {
         return new PriceData(

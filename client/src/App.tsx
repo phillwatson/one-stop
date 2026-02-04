@@ -5,6 +5,7 @@ import MessageProvider from "./contexts/messages/context";
 import NotificationProvider from "./contexts/notifications/context";
 import UserProfileProvider from "./contexts/user-context";
 import { ReconcileTransactionsProvider } from "./components/reconciliation/reconcile-transactions-context";
+import SharePortfolioDetail from "./pages/share-portfolio-detail";
 
 import MainPage from './pages/main';
 import Accounts from "./pages/accounts";
@@ -19,6 +20,7 @@ import TransactionAuditReports from "./pages/trans-audit-config-list";
 import TransactionAuditReportConfig from "./pages/trans-audit-config";
 import AuditIssues from "./pages/audit-issues";
 import SharePrices from "./pages/share-prices";
+import SharePortfolios from "./pages/share-portfolios";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +83,14 @@ const router = createBrowserRouter([
       {
         path: 'shares/prices',
         element: <SharePrices />
+      },
+      {
+        path: 'shares/portfolios',
+        element: <SharePortfolios />
+      },
+      {
+        path: 'shares/portfolios/:portfolioId',
+        element: <SharePortfolioDetail />
       },
       {
         path: "profile",

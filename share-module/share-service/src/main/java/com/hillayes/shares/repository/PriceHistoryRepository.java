@@ -209,10 +209,14 @@ public class PriceHistoryRepository extends RepositoryBase<PriceHistory, UUID> {
      * @return the record of the most recent share price, or an empty result.
      */
     public Optional<PriceHistory> getMostRecent(ShareIndex shareIndex) {
+        return getMostRecent(shareIndex.getId());
+    }
+
+    public Optional<PriceHistory> getMostRecent(UUID shareIndexId) {
         return findFirst("id.shareIndexId = :shareIndexId AND id.resolution = :resolution",
             OrderBy.by("id.date", OrderBy.Direction.Descending),
             Map.of(
-                "shareIndexId", shareIndex.getId(),
+                "shareIndexId", shareIndexId,
                 "resolution", SharePriceResolution.DAILY)
         );
     }
