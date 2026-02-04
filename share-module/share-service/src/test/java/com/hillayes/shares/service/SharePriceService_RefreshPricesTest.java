@@ -191,7 +191,7 @@ public class SharePriceService_RefreshPricesTest {
         int recordCount = fixture.refreshSharePrices(shareIndex.getId());
 
         // And: the most recent share price is retrieved
-        verify(priceHistoryRepository).getMostRecent(any());
+        verify(priceHistoryRepository).getMostRecent(any(ShareIndex.class));
 
         // And: the provider is never called
         verify(shareProviderApi, never()).getPrices(any(), any(), any(), any());
@@ -217,7 +217,7 @@ public class SharePriceService_RefreshPricesTest {
         verifyNoInteractions(providerFactory);
 
         // And: no share prices are retrieved
-        verify(priceHistoryRepository, never()).getMostRecent(any());
+        verify(priceHistoryRepository, never()).getMostRecent(any(ShareIndex.class));
 
         // And: no records are saved
         verifyNoInteractions(priceHistoryRepository);

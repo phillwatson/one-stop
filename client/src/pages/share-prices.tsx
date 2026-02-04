@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
+import SharePricesIcon from '@mui/icons-material/QueryStats';
 
 import DateRangeSelector from '../components/graph/date-range-selector';
 import PageHeader from '../components/page-header/page-header';
@@ -34,7 +35,7 @@ export default function SharePrices() {
   }, [ showMessage ]);
 
   return (
-    <PageHeader title='Share Prices'>
+    <PageHeader title='Share Prices' icon={ <SharePricesIcon />}>
       <Paper sx={{ padding: 2 }} elevation={ 1 }>
         <Grid container direction="column" rowGap={ 3 } justifyContent="space-evenly">
           <ShareIndexSelector shareIndices={ shareIndices } onSelect={ setSelectedIndex } />

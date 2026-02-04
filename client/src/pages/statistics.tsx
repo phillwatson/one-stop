@@ -1,10 +1,11 @@
 import { useState } from "react";
-import PageHeader from "../components/page-header/page-header";
+import StatisticsIcon from '@mui/icons-material/PieChart';
+import { Stack } from "@mui/material";
 
+import PageHeader from "../components/page-header/page-header";
 import StatisticsGraph from "../components/graph/statistics-graph";
 import CategoryTransactions, { Props } from "../components/categories/category-transactions";
 import { CategoryStatistics } from "../model/category.model";
-import { Stack } from "@mui/material";
 
 export default function StatisticsPage() {
   const [transactionProps, setTransactionProps] = useState<Props | undefined>();
@@ -14,7 +15,7 @@ export default function StatisticsPage() {
   }
 
   return (
-    <PageHeader title="Transaction Statistics" >
+    <PageHeader title="Transaction Statistics" icon={ <StatisticsIcon /> }>
       <Stack direction="row" alignItems="flex-start" justifyContent="center">
         <Stack direction="column" alignItems="stretch" justifyContent="flex-start">
           <StatisticsGraph onCategorySelected={ showTransactions } elevation={ 1 }/>

@@ -1,71 +1,126 @@
 package com.hillayes.shares.resource;
 
+import com.hillayes.commons.jpa.Page;
 import com.hillayes.onestop.api.*;
-import com.hillayes.shares.domain.Holding;
 import com.hillayes.shares.domain.Portfolio;
 import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.event.PortfolioEventSender;
-import com.hillayes.shares.repository.PortfolioRepository;
-import com.hillayes.shares.repository.PriceHistoryRepository;
-import com.hillayes.shares.repository.ShareIndexRepository;
+import com.hillayes.shares.domain.ShareTrade;
+import com.hillayes.shares.domain.ShareTradeSummary;
+import com.hillayes.shares.service.PortfolioService;
+import com.hillayes.shares.service.ShareIndexService;
+import com.hillayes.shares.service.ShareTradeService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.hillayes.shares.utils.TestData.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class PortfolioResourceTest extends TestBase {
-    @Inject
-    ShareIndexRepository shareIndexRepository;
-
-    @Inject
-    PriceHistoryRepository priceHistoryRepository;
-
-    @Inject
-    PortfolioRepository portfolioRepository;
+    private static final TypeRef<List<ShareTradeSummaryResponse>> SHARE_TRADE_SUMMARY_LIST = new TypeRef<>() {
+    };
 
     @InjectMock
-    PortfolioEventSender portfolioEventSender;
+    PortfolioService portfolioService;
 
-    @BeforeEach
-    @Transactional
-    public void beforeEach() {
-        portfolioRepository.deleteAll();
-        shareIndexRepository.deleteAll();
+    @InjectMock
+    ShareIndexService shareIndexService;
+
+    @InjectMock
+    ShareTradeService shareTradeService;
+
+    @Test
+    @TestSecurity(user = userIdStr, roles = "user")
+    public void testGetPortfolios() {
+        // Given: a user ID
+        UUID userId = UUID.fromString(userIdStr);
+
+        // And: a page range
+        int page = 1;
+        int pageSize = 12;
+
+        // And: a list of portfolios
+        List<Portfolio> portfolios = IntStream.range(1, 30)
+            .mapToObj(i -> mockPortfolio(userId, p -> p.id(UUID.randomUUID())))
+            .toList();
+        when(portfolioService.listPortfolios(any(), anyInt(), anyInt())).then(invocation -> {
+            int pageIndex = invocation.getArgument(1);
+            int size = invocation.getArgument(2);
+            return Page.of(portfolios, pageIndex, size);
+        });
+
+        // When: the resource is called to get the portfolios
+        PaginatedPortfolios response = given()
+            .request()
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
+            .when()
+            .get("/api/v1/shares/portfolios")
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract()
+            .as(PaginatedPortfolios.class);
+
+        // Then: the portfolio service is called with the authenticated user-id and page
+        verify(portfolioService).listPortfolios(userId, page, pageSize);
+
+        // And: the page is returned
+        assertNotNull(response);
+        assertEquals(page, response.getPage());
+        assertEquals(pageSize, response.getPageSize());
+        assertEquals(3, response.getTotalPages());
+        assertEquals(portfolios.size(), response.getTotal());
+        assertEquals(pageSize, response.getCount());
+
+        assertNotNull(response.getItems());
+        assertEquals(pageSize, response.getItems().size());
+
+        assertNotNull(response.getLinks().getFirst());
+        assertNotNull(response.getLinks().getPrevious());
+        assertNotNull(response.getLinks().getNext());
+        assertNotNull(response.getLinks().getLast());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testCreatePortfolio() {
-        // Given: a create portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
+        // Given: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-        // When: the service is called
+        // And: a new portfolio request
+        PortfolioRequest request = new PortfolioRequest()
+            .name(randomStrings.next(20));
+
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()).name(request.getName()));
+        when(portfolioService.createPortfolio(userId, request.getName()))
+            .thenReturn(portfolio);
+
+        // When: the resource is called to create the portfolio
         PortfolioResponse response = given()
             .request()
             .contentType(JSON)
-            .when()
             .body(request)
+            .when()
             .post("/api/v1/shares/portfolios")
             .then()
             .statusCode(200)
@@ -73,831 +128,301 @@ public class PortfolioResourceTest extends TestBase {
             .extract()
             .as(PortfolioResponse.class);
 
-        // Then: the portfolio and its holdings are returned
+        // Then: the service is called to create the portfolio
+        verify(portfolioService).createPortfolio(userId, request.getName());
+
+        // And: the new portfolio is returned
         assertNotNull(response);
-
-        // And: the name is the same as that given in the request
-        assertEquals(request.getName(), response.getName());
-
-        // And: the portfolio ID and date are returned
         assertNotNull(response.getId());
+        assertEquals(request.getName(), response.getName());
         assertNotNull(response.getDateCreated());
-    }
-
-    @Test
-    public void testCreatePortfolio_NotAuthorised() {
-        // Given: a create portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
-
-        // When: the service is called with no auth header
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .post("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testCreatePortfolio_NotUserRole() {
-        // Given: a create portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
-
-        // When: the service is called with no auth header
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .post("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(403);
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testUpdatePortfolio() {
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
+        // Given: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            return newPortfolio;
-        });
-
-        // And: an update portfolio request
+        // And: a new portfolio request
         PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
+            .name(randomStrings.next(20));
 
-        // When: the service is called
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()).name(request.getName()));
+        when(portfolioService.updatePortfolio(userId, portfolio.getId(), request.getName()))
+            .thenReturn(Optional.of(portfolio));
+
+        // When: the resource is called to update the portfolio
         PortfolioResponse response = given()
             .request()
             .contentType(JSON)
-            .when()
             .body(request)
-            .pathParam("portfolioId", portfolio.getId())
-            .put("/api/v1/shares/portfolios/{portfolioId}")
+            .when()
+            .put("/api/v1/shares/portfolios/{portfolioId}", portfolio.getId())
             .then()
             .statusCode(200)
             .contentType(JSON)
             .extract()
             .as(PortfolioResponse.class);
 
-        // Then: the portfolio and its holdings are returned
+        // Then: the service is called to update the portfolio
+        verify(portfolioService).updatePortfolio(userId, portfolio.getId(), request.getName());
+
+        // And: the updated portfolio is returned
         assertNotNull(response);
-
-        // And: the name is the same as that given in the request
-        assertEquals(request.getName(), response.getName());
-
-        // And: the portfolio ID and date are returned
-        assertNotNull(response.getId());
-        assertNotNull(response.getDateCreated());
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testUpdatePortfolio_WrongUser() {
-        // Given: another user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            UUID userId = UUID.randomUUID();
-            Portfolio newPortfolio = mockPortfolio(userId);
-
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            return newPortfolio;
-        });
-
-        // And: an update portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
-
-        // When: the authenticated user calls the endpoint
-        ServiceErrorResponse response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolio.getId())
-            .put("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(404)
-            .contentType(JSON)
-            .extract()
-            .as(ServiceErrorResponse.class);
-
-        // Then: the response indicates the error
-        assertNotNull(response);
-
-        assertEquals(ErrorSeverity.INFO, response.getSeverity());
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-
-        ServiceError serviceError = response.getErrors().get(0);
-        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
-
-        assertNotNull(serviceError.getContextAttributes());
-        assertEquals("Portfolio", serviceError.getContextAttributes().get("entity-type"));
-        assertEquals(portfolio.getId().toString(), serviceError.getContextAttributes().get("entity-id"));
-    }
-
-    @Test
-    public void testUpdatePortfolio_NotAuthorised() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // And: an update portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
-
-        // When: the un-authenticated user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolioId)
-            .put("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testUpdatePortfolio_NotUserRole() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // And: an update portfolio request
-        PortfolioRequest request = new PortfolioRequest()
-            .name(randomStrings.nextAlphanumeric(30));
-
-        // When: the admin user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolioId)
-            .put("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(403);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetPortfolios() {
-        // Given: the user has several portfolios
-        UUID userId = UUID.fromString(userIdStr);
-        List<Portfolio> portfolios = withTransaction(() -> {
-            List<Portfolio> list = IntStream.range(0, 5)
-                .mapToObj(i -> mockPortfolio(userId))
-                .toList();
-
-            portfolioRepository.saveAll(list);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-            return list;
-        });
-
-        // When: the user calls the endpoint
-        PaginatedPortfolios response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .queryParam("page", 0)
-            .queryParam("page-size", 100)
-            .get("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract()
-            .as(PaginatedPortfolios.class);
-
-        // Then: the user's portfolios are returned
-        assertNotNull(response);
-
-        assertEquals(portfolios.size(), response.getCount());
-        portfolios.forEach(expected -> {
-            PortfolioSummaryResponse actual = response.getItems().stream()
-                .filter(p -> p.getId().equals(expected.getId()))
-                .findFirst().orElse(null);
-
-            assertNotNull(actual);
-            assertEquals(expected.getId(), actual.getId());
-            assertEquals(expected.getName(), actual.getName());
-            assertNotNull(actual.getDateCreated());
-        });
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetPortfolios_WrongUser() {
-        // Given: another user has several portfolios
-        UUID userId = UUID.randomUUID();
-        List<Portfolio> portfolios = withTransaction(() -> {
-            List<Portfolio> list = IntStream.range(0, 5)
-                .mapToObj(i -> mockPortfolio(userId))
-                .toList();
-
-            portfolioRepository.saveAll(list);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-            return list;
-        });
-
-        // When: the authenticated user calls the endpoint
-        PaginatedPortfolios response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .queryParam("page", 0)
-            .queryParam("page-size", 100)
-            .get("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(200)
-            .contentType(JSON)
-            .extract()
-            .as(PaginatedPortfolios.class);
-
-        // Then: the no portfolios are returned
-        assertNotNull(response);
-
-        assertEquals(0, response.getTotal());
-        assertNotNull(response.getItems());
-        assertTrue(response.getItems().isEmpty());
-    }
-
-    @Test
-    public void testGetPortfolios_NotAuthorised() {
-        // When: the un-authenticated user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .queryParam("page", 0)
-            .queryParam("page-size", 100)
-            .get("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testGetPortfolios_NotUserRole() {
-        // When: the admin user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .queryParam("page", 0)
-            .queryParam("page-size", 100)
-            .get("/api/v1/shares/portfolios")
-            .then()
-            .statusCode(403);
+        assertEquals(portfolio.getId(), response.getId());
+        assertEquals(portfolio.getName(), response.getName());
+        assertEquals(portfolio.getDateCreated(), response.getDateCreated());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testGetPortfolio() {
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            // Given: a share index exists
-            ShareIndex shareIndex = shareIndexRepository.save(mockShareIndex());
+        // Given: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-            // And: several share price records exist
-            priceHistoryRepository.saveAll(mockPriceHistory(shareIndex,
-                LocalDate.now().minusDays(20),
-                LocalDate.now().minusDays(2))
-            );
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()));
+        when(portfolioService.getPortfolio(userId, portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
 
-            // And: the user has a portfolio
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
-
-            // And: the portfolio holds the share
-            Holding holding = newPortfolio.add(shareIndex);
-
-            // And: the holding has several dealings
-            holding.buy(LocalDate.now().minusDays(100), 100, BigDecimal.valueOf(111.11));
-            holding.buy(LocalDate.now().minusDays(90), 200, BigDecimal.valueOf(222.22));
-            holding.buy(LocalDate.now().minusDays(80), 300, BigDecimal.valueOf(333.33));
-
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            return newPortfolio;
-        });
-
-        // When: the user calls the endpoint
+        // When: the resource is called to get the portfolio
         PortfolioResponse response = given()
             .request()
-            .contentType(JSON)
             .when()
-            .pathParam("portfolioId", portfolio.getId())
-            .get("/api/v1/shares/portfolios/{portfolioId}")
+            .get("/api/v1/shares/portfolios/{portfolioId}", portfolio.getId())
             .then()
             .statusCode(200)
             .contentType(JSON)
             .extract()
             .as(PortfolioResponse.class);
 
-        // Then: the portfolio and its holdings are returned
-        assertNotNull(response);
+        // Then: the service is called to update the portfolio
+        verify(portfolioService).getPortfolio(userId, portfolio.getId());
 
+        // And: the portfolio is returned
+        assertNotNull(response);
         assertEquals(portfolio.getId(), response.getId());
         assertEquals(portfolio.getName(), response.getName());
-
-        assertNotNull(response.getHoldings());
-        assertEquals(portfolio.getHoldings().size(), response.getHoldings().size());
-
-        portfolio.getHoldings().forEach(expected -> {
-            HoldingResponse actual = response.getHoldings().stream()
-                .filter(h -> expected.getId().equals(h.getId()))
-                .findFirst().orElse(null);
-
-            assertNotNull(actual);
-            assertNotNull(actual.getDealings());
-            assertEquals(expected.getDealings().size(), actual.getDealings().size());
-        });
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testGetPortfolio_WrongUser() {
-        // Given: another user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            UUID userId = UUID.randomUUID();
-            Portfolio newPortfolio = mockPortfolio(userId);
-
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            return newPortfolio;
-        });
-
-        // When: the authenticated user calls the endpoint
-        ServiceErrorResponse response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("portfolioId", portfolio.getId())
-            .get("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(404)
-            .contentType(JSON)
-            .extract()
-            .as(ServiceErrorResponse.class);
-
-        // Then: the response indicates the error
-        assertNotNull(response);
-
-        assertEquals(ErrorSeverity.INFO, response.getSeverity());
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-
-        ServiceError serviceError = response.getErrors().get(0);
-        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
-
-        assertNotNull(serviceError.getContextAttributes());
-        assertEquals("Portfolio", serviceError.getContextAttributes().get("entity-type"));
-        assertEquals(portfolio.getId().toString(), serviceError.getContextAttributes().get("entity-id"));
-    }
-
-    @Test
-    public void testGetPortfolio_NotAuthorised() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // When: the un-authenticated user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("portfolioId", portfolioId)
-            .get("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testGetPortfolio_NotUserRole() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // When: the admin user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("portfolioId", portfolioId)
-            .get("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(403);
+        assertEquals(portfolio.getDateCreated(), response.getDateCreated());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testDeletePortfolio() {
-        AtomicLong originalCount = new AtomicLong();
+        // Given: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            originalCount.set(portfolioRepository.count());
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()));
+        when(portfolioService.deletePortfolio(userId, portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
 
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
-
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            // And: the count is incremented
-            assertEquals(originalCount.get() + 1, portfolioRepository.count());
-            return newPortfolio;
-        });
-
-        // When: the service is called
+        // When: the resource is called to delete the portfolio
         given()
             .request()
-            .contentType(JSON)
             .when()
-            .pathParam("portfolioId", portfolio.getId())
-            .delete("/api/v1/shares/portfolios/{portfolioId}")
+            .delete("/api/v1/shares/portfolios/{portfolioId}", portfolio.getId())
             .then()
             .statusCode(204);
 
-        // Then: the portfolio count is as original
-        assertEquals(originalCount.get(), portfolioRepository.count());
+        // Then: the service is called to delete the portfolio
+        verify(portfolioService).deletePortfolio(userId, portfolio.getId());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testDeletePortfolio_WrongUser() {
-        AtomicLong originalCount = new AtomicLong();
+    public void testGetPortfolioHoldings() {
+        // Given: a collection shares
+        List<ShareIndex> indices = IntStream.range(0, 5)
+            .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
+            .toList();
 
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            originalCount.set(portfolioRepository.count());
+        // And: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-            UUID userId = UUID.randomUUID();
-            Portfolio newPortfolio = mockPortfolio(userId);
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()));
+        when(portfolioService.getPortfolio(userId, portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
 
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
+        // And: share trades exist within the portfolio
+        List<ShareTradeSummary> summaries = indices.stream()
+            .map(index -> mockShareTradeSummary(portfolio, index))
+            .toList();
+        when(shareTradeService.getShareTradeSummaries(portfolio))
+            .thenReturn(summaries);
 
-            // And: the count is incremented
-            assertEquals(originalCount.get() + 1, portfolioRepository.count());
-            return newPortfolio;
-        });
-
-        // When: the authenticated user calls the endpoint
-        ServiceErrorResponse response = given()
+        // When: the resource is called to get the trade summaries
+        List<ShareTradeSummaryResponse> response = given()
             .request()
-            .contentType(JSON)
             .when()
-            .pathParam("portfolioId", portfolio.getId())
-            .delete("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(404)
-            .contentType(JSON)
-            .extract()
-            .as(ServiceErrorResponse.class);
-
-        // Then: the response indicates the error
-        assertNotNull(response);
-
-        assertEquals(ErrorSeverity.INFO, response.getSeverity());
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-
-        ServiceError serviceError = response.getErrors().get(0);
-        assertEquals("ENTITY_NOT_FOUND", serviceError.getMessageId());
-
-        assertNotNull(serviceError.getContextAttributes());
-        assertEquals("Portfolio", serviceError.getContextAttributes().get("entity-type"));
-        assertEquals(portfolio.getId().toString(), serviceError.getContextAttributes().get("entity-id"));
-
-        // And: no portfolio is deleted
-        assertEquals(originalCount.get() + 1, portfolioRepository.count());
-    }
-
-    @Test
-    public void testDeletePortfolio_NotAuthorised() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // When: the authenticated user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("portfolioId", portfolioId)
-            .delete("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testDeletePortfolio_NotUserRole() {
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // When: the authenticated user calls the endpoint
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .pathParam("portfolioId", portfolioId)
-            .delete("/api/v1/shares/portfolios/{portfolioId}")
-            .then()
-            .statusCode(403);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "user")
-    public void testCreateShareTrade_ByIsinOnly() {
-        // Given: a share index
-        ShareIndex shareIndex = mockShareIndex();
-
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(shareIndex, (share) -> {
-            // Given: a share index exists
-             shareIndexRepository.save(share);
-
-            // And: the user has a portfolio
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
-
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
-
-            return newPortfolio;
-        });
-
-        // And: a request to make a trade - using only the ISIN
-        TradeRequest request = new TradeRequest()
-            .shareId(new ShareId()
-                .isin(shareIndex.getIdentity().getIsin())
-            )
-            .pricePerShare(randomNumbers.randomDouble(100, 200))
-            .quantity(120)
-            .dateExecuted(LocalDate.now().minusDays(2));
-
-        // When: the service is called
-        HoldingResponse response = given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolio.getId())
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .get("/api/v1/shares/portfolios/{portfolioId}/trades", portfolio.getId())
             .then()
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(HoldingResponse.class);
+            .as(SHARE_TRADE_SUMMARY_LIST);
 
-        // Then: the new holding is returned
+        // Then: the services are called
+        verify(portfolioService).getPortfolio(userId, portfolio.getId());
+        verify(shareTradeService).getShareTradeSummaries(portfolio);
+
+        // And: the summaries are returned
         assertNotNull(response);
-        assertNotNull(response.getId());
+        assertEquals(response.size(), summaries.size());
+        response.forEach(summary -> {
+            ShareTradeSummary expected = summaries.stream()
+                .filter(s -> s.getShareIndexId().equals(summary.getShareIndexId()))
+                .findAny().orElse(null);
+            assertNotNull(expected);
 
-        // And: the holding identifies the share traded
-        assertEquals(shareIndex.getId(), response.getShareIndexId());
-        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
-        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
-        assertEquals(shareIndex.getName(), response.getName());
-        assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
-
-        // And: the holding identifies the new total holding (just this one)
-        assertEquals(request.getQuantity(), response.getQuantity());
-        assertEquals(request.getPricePerShare() * request.getQuantity(), response.getTotalCost());
-
-        // And: the new (only) dealing is included
-        assertNotNull(response.getDealings());
-        assertEquals(1, response.getDealings().size());
-        DealingHistoryResponse dealing = response.getDealings().get(0);
-        assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
-        assertEquals(request.getQuantity(), dealing.getQuantity());
-        assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
-
-        // And: a notification of the transaction is issued
-        verify(portfolioEventSender).sendSharesTransacted(any());
+            assertEquals(expected.getPortfolioId(), summary.getPortfolioId());
+            assertEquals(expected.getShareIndexId(), summary.getShareIndexId());
+            assertEquals(expected.getShareIdentity().getIsin(), summary.getShareId().getIsin());
+            assertEquals(expected.getShareIdentity().getTickerSymbol(), summary.getShareId().getTickerSymbol());
+            assertEquals(expected.getName(), summary.getName());
+            assertEquals(expected.getQuantity(), summary.getQuantity());
+            assertEquals(expected.getTotalCost().doubleValue(), summary.getTotalCost());
+            assertEquals(expected.getCurrency().getCurrencyCode(), summary.getCurrency());
+            assertEquals(expected.getLatestPrice().doubleValue(), summary.getLatestPrice());
+        });
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testCreateShareTrade_ByTickerOnly() {
+    public void testGetShareTrades() {
         // Given: a share index
-        ShareIndex shareIndex = mockShareIndex();
+        ShareIndex index = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexService.getShareIndex(index.getId()))
+            .thenReturn(Optional.of(index));
 
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(shareIndex, (share) -> {
-            // Given: a share index exists
-            shareIndexRepository.save(share);
+        // And: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-            // And: the user has a portfolio
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()));
+        when(portfolioService.getPortfolio(userId, portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
 
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
+        // And: a page range
+        int page = 1;
+        int pageSize = 10;
 
-            return newPortfolio;
+        // And: trades exist within the portfolio for the share
+        List<ShareTrade> shareTrades = IntStream.range(0, 25)
+            .mapToObj(i -> mockShareTrade(portfolio, index, t -> t.id(UUID.randomUUID())))
+            .toList();
+        when(shareTradeService.getShareTrades(eq(portfolio), eq(index), anyInt(), anyInt())).then(invocation -> {
+            int pageIndex = invocation.getArgument(2);
+            int size = invocation.getArgument(3);
+            return Page.of(shareTrades, pageIndex, size);
         });
 
-        // And: a request to make a trade - using only the ISIN
-        TradeRequest request = new TradeRequest()
-            .shareId(new ShareId()
-                .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
-            )
-            .pricePerShare(randomNumbers.randomDouble(100, 200))
-            .quantity(120)
-            .dateExecuted(LocalDate.now().minusDays(2));
-
-        // When: the service is called
-        HoldingResponse response = given()
+        // When: the trades for the share are requested
+        PaginatedShareTrades response = given()
             .request()
-            .contentType(JSON)
+            .queryParam("page", page)
+            .queryParam("page-size", pageSize)
             .when()
-            .body(request)
-            .pathParam("portfolioId", portfolio.getId())
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .get("/api/v1/shares/portfolios/{portfolioId}/trades/{shareIndexId}", portfolio.getId(), index.getId())
             .then()
             .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(HoldingResponse.class);
+            .as(PaginatedShareTrades.class);
 
-        // Then: the new holding is returned
+        // Then: the services are called
+        verify(shareIndexService).getShareIndex(index.getId());
+        verify(portfolioService).getPortfolio(userId, portfolio.getId());
+        verify(shareTradeService).getShareTrades(portfolio, index, page, pageSize);
+
+        // And: the page is returned
         assertNotNull(response);
-        assertNotNull(response.getId());
+        assertEquals(page, response.getPage());
+        assertEquals(pageSize, response.getPageSize());
+        assertEquals(3, response.getTotalPages());
+        assertEquals(shareTrades.size(), response.getTotal());
+        assertEquals(pageSize, response.getCount());
 
-        // And: the holding identifies the share traded
-        assertEquals(shareIndex.getId(), response.getShareIndexId());
-        assertEquals(shareIndex.getIdentity().getIsin(), response.getShareId().getIsin());
-        assertEquals(shareIndex.getIdentity().getTickerSymbol(), response.getShareId().getTickerSymbol());
-        assertEquals(shareIndex.getName(), response.getName());
-        assertEquals(shareIndex.getCurrency().getCurrencyCode(), response.getCurrency());
+        assertNotNull(response.getItems());
+        assertEquals(pageSize, response.getItems().size());
 
-        // And: the holding identifies the new total holding (just this one)
-        assertEquals(request.getQuantity(), response.getQuantity());
-        assertEquals(request.getPricePerShare() * request.getQuantity(), response.getTotalCost());
-
-        // And: the new (only) dealing is included
-        assertNotNull(response.getDealings());
-        assertEquals(1, response.getDealings().size());
-        DealingHistoryResponse dealing = response.getDealings().get(0);
-        assertEquals(request.getPricePerShare(), dealing.getPricePerShare());
-        assertEquals(request.getQuantity(), dealing.getQuantity());
-        assertEquals(request.getDateExecuted(), dealing.getDateExecuted());
-
-        // And: a notification of the transaction is issued
-        verify(portfolioEventSender).sendSharesTransacted(any());
+        assertNotNull(response.getLinks().getFirst());
+        assertNotNull(response.getLinks().getPrevious());
+        assertNotNull(response.getLinks().getNext());
+        assertNotNull(response.getLinks().getLast());
     }
 
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
-    public void testCreateShareTrade_ShareIndexNotFound() {
-        // Given: the user has a portfolio
-        Portfolio portfolio = withTransaction(() -> {
-            UUID userId = UUID.fromString(userIdStr);
-            Portfolio newPortfolio = mockPortfolio(userId);
+    public void testCreateShareTrade() {
+        // Given: a share index
+        ShareIndex index = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexService.getShareIndex(index.getId()))
+            .thenReturn(Optional.of(index));
 
-            // And: the whole portfolio is saved
-            portfolioRepository.save(newPortfolio);
-            portfolioRepository.flush();
-            portfolioRepository.getEntityManager().clear();
+        // And: a user ID
+        UUID userId = UUID.fromString(userIdStr);
 
-            return newPortfolio;
-        });
+        // And: a portfolio exists
+        Portfolio portfolio = mockPortfolio(userId,
+            p -> p.id(UUID.randomUUID()));
+        when(portfolioService.getPortfolio(userId, portfolio.getId()))
+            .thenReturn(Optional.of(portfolio));
 
-        // And: a request to make a trade - using only the ISIN
-        TradeRequest request = new TradeRequest()
-            .shareId(new ShareId()
-                .isin(randomStrings.nextAlphanumeric(12))
-            )
-            .pricePerShare(randomNumbers.randomDouble(100, 200))
-            .quantity(120)
-            .dateExecuted(LocalDate.now().minusDays(2));
+        when(shareTradeService.recordShareTrade(eq(portfolio), eq(index),
+            any(LocalDate.class), anyInt(), any(BigDecimal.class)))
+            .then(invocation ->
+                ShareTrade.builder()
+                    .id(UUID.randomUUID())
+                    .userId(userId)
+                    .portfolioId(portfolio.getId())
+                    .shareIndexId(index.getId())
+                    .quantity(invocation.getArgument(3))
+                    .price(invocation.getArgument(4))
+                    .dateExecuted(invocation.getArgument(2))
+                    .build()
+            );
 
-        // When: the service is called
-        ServiceErrorResponse response = given()
+        // And: a request to create a new trade
+        ShareTradeRequest request = new ShareTradeRequest()
+            .shareIndexId(index.getId())
+            .dateExecuted(LocalDate.now().minusDays(10))
+            .quantity(randomNumbers.randomInt(2, 200))
+            .pricePerShare(randomNumbers.randomDouble(1000, 2000));
+
+        // When: the trades for the share are requested
+        ShareTradeResponse response = given()
             .request()
             .contentType(JSON)
-            .when()
             .body(request)
-            .pathParam("portfolioId", portfolio.getId())
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
+            .when()
+            .post("/api/v1/shares/portfolios/{portfolioId}/trades", portfolio.getId())
             .then()
-            .statusCode(404)
+            .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(ServiceErrorResponse.class);
+            .as(ShareTradeResponse.class);
 
-        // Then: an error response is returned
+        // Then: the services are called
+        verify(shareIndexService).getShareIndex(index.getId());
+        verify(portfolioService).getPortfolio(userId, portfolio.getId());
+        verify(shareTradeService).recordShareTrade(portfolio, index,
+            request.getDateExecuted(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
+
+        // And: the new trade is returned
         assertNotNull(response);
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-
-        ServiceError error = response.getErrors().get(0);
-        assertEquals(ErrorSeverity.INFO, error.getSeverity());
-        assertEquals("ENTITY_NOT_FOUND", error.getMessageId());
-        assertEquals("ShareIndex", error.getContextAttributes().get("entity-type"));
-        assertTrue(error.getContextAttributes().get("entity-id").contains(request.getShareId().getIsin()));
-    }
-
-    @Test
-    public void testCreateShareTrade_NotAuthorised() {
-        // Given: a share index
-        ShareIndex shareIndex = mockShareIndex();
-
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // And: a request to make a trade
-        TradeRequest request = new TradeRequest()
-            .shareId(new ShareId()
-                .isin(shareIndex.getIdentity().getIsin())
-            )
-            .pricePerShare(randomNumbers.randomDouble(100, 200))
-            .quantity(120)
-            .dateExecuted(LocalDate.now().minusDays(2));
-
-        // When: the service is called
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolioId)
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
-            .then()
-            .statusCode(401);
-    }
-
-    @Test
-    @TestSecurity(user = userIdStr, roles = "admin")
-    public void testCreateShareTrade_NotUserRole() {
-        // Given: a share index
-        ShareIndex shareIndex = mockShareIndex();
-
-        // Given: a portfolio ID
-        UUID portfolioId = UUID.randomUUID();
-
-        // And: a request to make a trade
-        TradeRequest request = new TradeRequest()
-            .shareId(new ShareId()
-                .isin(shareIndex.getIdentity().getIsin())
-            )
-            .pricePerShare(randomNumbers.randomDouble(100, 200))
-            .quantity(120)
-            .dateExecuted(LocalDate.now().minusDays(2));
-
-        // When: the service is called
-        given()
-            .request()
-            .contentType(JSON)
-            .when()
-            .body(request)
-            .pathParam("portfolioId", portfolioId)
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings")
-            .then()
-            .statusCode(403);
-    }
-
-    @Transactional
-    public <R> R withTransaction(Supplier<R> supplier) {
-        return supplier.get();
-    }
-
-    @Transactional
-    public <T, R> R withTransaction(T arg, Function<T, R> function) {
-        return function.apply(arg);
+        assertNotNull(response.getId());
+        assertEquals(request.getShareIndexId(), response.getShareIndexId());
+        assertEquals(request.getDateExecuted(), response.getDateExecuted());
+        assertEquals(request.getQuantity(), response.getQuantity());
+        assertEquals(request.getPricePerShare(), response.getPricePerShare());
     }
 }

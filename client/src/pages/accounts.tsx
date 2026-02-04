@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Fab, SxProps } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import AccountsIcon from '@mui/icons-material/Savings';
 
 import AccountService from '../services/account.service';
 import { AccountDetail } from "../model/account.model";
@@ -35,7 +36,7 @@ export default function Accounts() {
   }, []);
 
   return (
-    <PageHeader title="Accounts">
+    <PageHeader title="Your Accounts" icon={ <AccountsIcon /> }>
       <AccountList accounts={accounts}/>
 
       <Fab color="primary" aria-label="add" sx={bottomFabStyle} onClick={() => setShowInstitutions(true)}><AddIcon /></Fab>

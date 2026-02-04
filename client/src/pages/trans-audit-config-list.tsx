@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import AuditReportsIcon from '@mui/icons-material/VerifiedUser';
 
 import PageHeader from "../components/page-header/page-header";
 import AuditReportConfigList from "../components/audit-report/audit-config-list";
@@ -16,7 +17,7 @@ export default function TransactionAuditReports() {
   }
 
   return (
-    <PageHeader title="Transaction Audit Reports">
+    <PageHeader title="Transaction Audit Reports" icon={ <AuditReportsIcon /> }>
       <AuditReportConfigList
         onAdd={ handleAddConfig }
         onEdit={ handleEditConfig } />

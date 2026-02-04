@@ -2,13 +2,18 @@ package com.hillayes.integration.api.share;
 
 import com.hillayes.integration.api.ApiBase;
 import com.hillayes.onestop.api.*;
+import io.restassured.common.mapper.TypeRef;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static io.restassured.http.ContentType.JSON;
 
 public class PortfolioApi extends ApiBase {
+    private static final TypeRef<List<ShareTradeSummaryResponse>> SHARE_TRADE_SUMMARY_LIST = new TypeRef<>() {
+    };
+
     public PortfolioApi(Map<String, String> authCookies) {
         super(authCookies);
     }
@@ -35,7 +40,7 @@ public class PortfolioApi extends ApiBase {
             .extract().as(PaginatedPortfolios.class);
     }
 
-    public PortfolioResponse getPortfilio(UUID portfolioId) {
+    public PortfolioResponse getPortfolio(UUID portfolioId) {
         return givenAuth()
             .get("/api/v1/shares/portfolios/{portfolioId}", portfolioId)
             .then()
@@ -56,7 +61,7 @@ public class PortfolioApi extends ApiBase {
             .extract().as(PortfolioResponse.class);
     }
 
-    public void deletePortfilio(UUID portfolioId) {
+    public void deletePortfolio(UUID portfolioId) {
         givenAuth()
             .delete("/api/v1/shares/portfolios/{portfolioId}", portfolioId)
             .then()
@@ -64,15 +69,24 @@ public class PortfolioApi extends ApiBase {
             .contentType(JSON);
     }
 
-    public HoldingResponse createShareTrade(UUID portfolioId,
-                                            TradeRequest request) {
+    public List<ShareTradeSummaryResponse> getPortfolioHoldings(UUID portfolioId) {
         return givenAuth()
-            .contentType(JSON)
-            .body(request)
-            .post("/api/v1/shares/portfolios/{portfolioId}/holdings", portfolioId)
+            .get("/api/v1/shares/portfolios/{portfolioId}/trades", portfolioId)
             .then()
             .statusCode(200)
             .contentType(JSON)
-            .extract().as(HoldingResponse.class);
+            .extract().as(SHARE_TRADE_SUMMARY_LIST);
+    }
+
+    public ShareTradeResponse createShareTrade(UUID portfolioId,
+                                               ShareTradeRequest request) {
+        return givenAuth()
+            .contentType(JSON)
+            .body(request)
+            .post("/api/v1/shares/portfolios/{portfolioId}/trades", portfolioId)
+            .then()
+            .statusCode(200)
+            .contentType(JSON)
+            .extract().as(ShareTradeResponse.class);
     }
 }
