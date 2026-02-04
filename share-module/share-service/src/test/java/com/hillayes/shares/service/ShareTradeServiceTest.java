@@ -1,317 +1,574 @@
 package com.hillayes.shares.service;
 
-import com.hillayes.exception.common.CommonErrorCodes;
-import com.hillayes.exception.common.NotFoundException;
-import com.hillayes.shares.domain.DealingHistory;
-import com.hillayes.shares.domain.Holding;
-import com.hillayes.shares.domain.Portfolio;
-import com.hillayes.shares.domain.ShareIndex;
-import com.hillayes.shares.errors.SaleExceedsHoldingException;
-import com.hillayes.shares.errors.SharesErrorCodes;
+import com.hillayes.shares.domain.*;
 import com.hillayes.shares.errors.ZeroTradeQuantityException;
 import com.hillayes.shares.event.PortfolioEventSender;
-import com.hillayes.shares.repository.HoldingRepository;
 import com.hillayes.shares.repository.PortfolioRepository;
+import com.hillayes.shares.repository.PriceHistoryRepository;
+import com.hillayes.shares.repository.ShareIndexRepository;
+import com.hillayes.shares.repository.ShareTradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.hillayes.shares.utils.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class ShareTradeServiceTest {
-    private final ShareIndexService shareIndexService = mock();
+    private final ShareTradeRepository shareTradeRepository = mock();
+    private final ShareIndexRepository shareIndexRepository = mock();
+    private final PriceHistoryRepository priceHistoryRepository = mock();
     private final PortfolioRepository portfolioRepository = mock();
-    private final HoldingRepository holdingRepository = mock();
     private final PortfolioEventSender portfolioEventSender = mock();
 
-    private final ShareTradeService fixture = new ShareTradeService(
-        shareIndexService,
-        portfolioRepository,
-        holdingRepository,
-        portfolioEventSender
+    private final ShareTradeService shareTradeService = new ShareTradeService(
+        shareTradeRepository, shareIndexRepository, priceHistoryRepository,
+        portfolioRepository, portfolioEventSender
     );
 
     @BeforeEach
     public void beforeEach() {
-        // simulate assigning ID to new entities
-        when(holdingRepository.saveAndFlush(any())).then(invocation -> {
-            Holding entity = invocation.getArgument(0);
-
-            if (entity.getId() == null) {
-                entity.setId(UUID.randomUUID());
+        when(shareTradeRepository.saveAndFlush(any(ShareTrade.class))).then(invocation -> {
+            ShareTrade shareTrade = invocation.getArgument(0);
+            if (shareTrade.getId() == null) {
+                shareTrade.setId(UUID.randomUUID());
             }
-            return entity;
+            return shareTrade;
+        });
+
+    }
+
+    @Test
+    public void testGetShareTrade() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is requested
+        Optional<ShareTrade> result = shareTradeService
+            .getShareTrade(portfolio.getUserId(), shareTrade.getId());
+
+        // Then: the repository is called
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the identified trade is returned
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertSame(shareTrade, result.get());
+    }
+
+    @Test
+    public void testGetShareTrade_WrongUser() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is requested by another user
+        UUID invalidUserId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .getShareTrade(invalidUserId, shareTrade.getId());
+
+        // Then: the repository is called
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the identified trade is returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetShareTrade_NotFound() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: another share trade is requested
+        UUID invalidShareTradeId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .getShareTrade(portfolio.getUserId(), invalidShareTradeId);
+
+        // Then: the repository is called
+        verify(shareTradeRepository).findByIdOptional(invalidShareTradeId);
+
+        // And: an empty result returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testRecordShareTrade() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // When: a trade is recorded
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 100;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        ShareTrade shareTrade = shareTradeService
+            .recordShareTrade(portfolio, shareIndex, dateExecuted, quantity, pricePerShare);
+
+        // Then: the repository saves the new request
+        verify(shareTradeRepository).saveAndFlush(any());
+
+        // And: the new trade is returned
+        assertNotNull(shareTrade);
+        assertEquals(portfolio.getUserId(), shareTrade.getUserId());
+        assertEquals(portfolio.getId(), shareTrade.getPortfolioId());
+        assertEquals(shareIndex.getId(), shareTrade.getShareIndexId());
+        assertEquals(dateExecuted, shareTrade.getDateExecuted());
+        assertEquals(quantity, shareTrade.getQuantity());
+        assertEquals(pricePerShare, shareTrade.getPrice());
+
+        // And: an event is issued to notify of the trade
+        verify(portfolioEventSender).sendSharesTransacted(portfolio, shareIndex, shareTrade);
+    }
+
+    @Test
+    public void testRecordShareTrade_ZeroQuantity() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // When: a trade is recorded
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 0;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
+            shareTradeService.recordShareTrade(portfolio, shareIndex, dateExecuted, quantity, pricePerShare));
+
+        // Then: the repository is not called
+        verifyNoInteractions(shareTradeRepository);
+
+        // And: an exception is raised
+        assertNotNull(exception);
+        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
+
+        // And: NO event is issued to notify of the trade
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testUpdateShareTrade() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is updated
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 100;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        Optional<ShareTrade> result = shareTradeService
+            .updateShareTrade(portfolio.getUserId(), shareTrade.getId(), dateExecuted, quantity, pricePerShare);
+
+        // Then: the repository is called to retrieve the share trade
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the repository is called to save the modified trade
+        ArgumentCaptor<ShareTrade> shareTradeCaptor = ArgumentCaptor.forClass(ShareTrade.class);
+        verify(shareTradeRepository).saveAndFlush(shareTradeCaptor.capture());
+
+        ShareTrade update = shareTradeCaptor.getValue();
+        assertEquals(shareTrade.getId(), update.getId());
+        assertEquals(portfolio.getUserId(), update.getUserId());
+        assertEquals(portfolio.getId(), update.getPortfolioId());
+        assertEquals(shareIndex.getId(), update.getShareIndexId());
+        assertEquals(dateExecuted, update.getDateExecuted());
+        assertEquals(quantity, update.getQuantity());
+        assertEquals(pricePerShare, update.getPrice());
+
+        // And: the updated trade is returned
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertSame(update, result.get());
+
+        // And: an event is issued to notify of the trade update
+        verify(portfolioEventSender).sendShareTradeUpdated(portfolio, shareIndex, update);
+    }
+
+    @Test
+    public void testUpdateShareTrade_WrongUser() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is updated by another user
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 100;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        UUID invalidUserId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .updateShareTrade(invalidUserId, shareTrade.getId(), dateExecuted, quantity, pricePerShare);
+
+        // Then: the repository is called to retrieve the share trade
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the repository is NOT called to save the modified trade
+        verify(shareTradeRepository, never()).saveAndFlush(any());
+
+        // And: an empty result is returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: NO event is issued to notify of the trade update
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testUpdateShareTrade_NotFound() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is updated by another user
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 100;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        UUID invalidTradeId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .updateShareTrade(portfolio.getUserId(), invalidTradeId, dateExecuted, quantity, pricePerShare);
+
+        // Then: the repository is called to retrieve the share trade
+        verify(shareTradeRepository).findByIdOptional(invalidTradeId);
+
+        // And: the repository is NOT called to save the modified trade
+        verify(shareTradeRepository, never()).saveAndFlush(any());
+
+        // And: an empty result is returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: NO event is issued to notify of the trade update
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testUpdateShareTrade_ZeroQuantity() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is updated
+        LocalDate dateExecuted = LocalDate.now().minusDays(10);
+        int quantity = 0;
+        BigDecimal pricePerShare = BigDecimal.TEN;
+        ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
+            shareTradeService.updateShareTrade(portfolio.getUserId(), shareTrade.getId(), dateExecuted, quantity, pricePerShare));
+
+        // Then: the repository is called to retrieve the share trade
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: an exception is raised
+        assertNotNull(exception);
+        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
+        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
+
+        // And: the repository is NOT called to save the modified trade
+        verify(shareTradeRepository, never()).saveAndFlush(any());
+
+        // And: NO event is issued to notify of the trade update
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testDeleteShareTrade() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is deleted
+        Optional<ShareTrade> result = shareTradeService
+            .deleteShareTrade(portfolio.getUserId(), shareTrade.getId());
+
+        // Then: the repository is called to retrieve the trade
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the repository is called to delete the trade
+        verify(shareTradeRepository).delete(shareTrade);
+
+        // And: the identified trade is returned
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertSame(shareTrade, result.get());
+
+        // And: an event is issued to notify of the trade's deletion
+        verify(portfolioEventSender).sendShareTradeDeleted(portfolio, shareIndex, shareTrade);
+    }
+
+    @Test
+    public void testDeleteShareTrade_WrongUser() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: the share trade is deleted by another user
+        UUID invalidUserId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .deleteShareTrade(invalidUserId, shareTrade.getId());
+
+        // Then: the repository is called to retrieve the trade
+        verify(shareTradeRepository).findByIdOptional(shareTrade.getId());
+
+        // And: the repository is NOT called to delete the trade
+        verify(shareTradeRepository, never()).delete(any());
+
+        // And: an empty result is returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: NO event is issued to notify of the trade's deletion
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testDeleteShareTrade_NotFound() {
+        // Given: a share index
+        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+        when(shareIndexRepository.findById(shareIndex.getId())).thenReturn(shareIndex);
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+        when(portfolioRepository.findById(portfolio.getId())).thenReturn(portfolio);
+
+        // And: a share trade exists
+        ShareTrade shareTrade = mockShareTrade(portfolio, shareIndex, t -> t.id(UUID.randomUUID()));
+        when(shareTradeRepository.findByIdOptional(shareTrade.getId()))
+            .thenReturn(Optional.of(shareTrade));
+
+        // When: am unknown share trade is deleted by another user
+        UUID invalidShareTradeId = UUID.randomUUID();
+        Optional<ShareTrade> result = shareTradeService
+            .deleteShareTrade(portfolio.getUserId(), invalidShareTradeId);
+
+        // Then: the repository is called to retrieve the trade
+        verify(shareTradeRepository).findByIdOptional(invalidShareTradeId);
+
+        // And: the repository is NOT called to delete the trade
+        verify(shareTradeRepository, never()).delete(any());
+
+        // And: an empty result is returned
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // And: NO event is issued to notify of the trade's deletion
+        verifyNoInteractions(portfolioEventSender);
+    }
+
+    @Test
+    public void testGetShareTradeSummaries() {
+        // Given: a collection of share indices
+        List<ShareIndex> indices = IntStream.range(0, 3)
+            .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
+            .toList();
+
+        // And: a set of latest prices - keyed on share index id
+        Map<UUID, PriceHistory> prices = indices.stream()
+            .map(index -> mockPriceHistory(index, LocalDate.now().minusDays(1)))
+            .collect(Collectors.toMap(price -> price.getId().getShareIndexId(), p -> p));
+        when(priceHistoryRepository.getMostRecent(any(UUID.class))).then(invocation ->
+            Optional.ofNullable(prices.get(invocation.getArgument(0, UUID.class))));
+
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
+
+        // And: a collection of share trade summaries exist
+        Map<UUID, ShareTradeRepository.ShareTradeSummaryProjection> summaries = indices.stream()
+            .map(index -> mockTradeSummary(portfolio, index))
+            .collect(Collectors.toMap(ShareTradeRepository.ShareTradeSummaryProjection::getShareIndexId, s -> s));
+        when(shareTradeRepository.getShareTradeSummaries(portfolio.getUserId(), portfolio.getId()))
+            .thenReturn(summaries.values().stream().toList());
+
+        // When: the summaries are requested
+        List<ShareTradeSummary> result = shareTradeService.getShareTradeSummaries(portfolio);
+
+        // Then: the repository is called to get the trade summaries
+        verify(shareTradeRepository).getShareTradeSummaries(portfolio.getUserId(), portfolio.getId());
+
+        // And: the price repository is called to retrieve each share index price
+        indices.forEach(index -> verify(priceHistoryRepository).getMostRecent(index.getId()));
+
+        // And: the result is expected size
+        assertNotNull(result);
+        assertEquals(indices.size(), result.size());
+
+        // And: each share index is accounted for
+        result.forEach(summary -> {
+            ShareTradeRepository.ShareTradeSummaryProjection expected = summaries.get(summary.getShareIndexId());
+            assertNotNull(expected);
+
+            assertEquals(expected.getPortfolioId(), summary.getPortfolioId());
+            assertEquals(expected.getIsin(), summary.getShareIdentity().getIsin());
+            assertEquals(expected.getTickerSymbol(), summary.getShareIdentity().getTickerSymbol());
+            assertEquals(expected.getName(), summary.getName());
+            assertEquals(expected.getCurrency(), summary.getCurrency().getCurrencyCode());
+            assertEquals(expected.getQuantity(), summary.getQuantity());
+            assertEquals(expected.getTotalCost(), summary.getTotalCost());
+
+            PriceHistory priceHistory = prices.get(summary.getShareIndexId());
+            assertNotNull(priceHistory);
+            assertEquals(priceHistory.getClose(), summary.getLatestPrice());
         });
     }
 
     @Test
-    public void testCreateShareTrade_NewHolding() {
-        // Given: a share to be traded has been registered
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
-            .thenReturn(Optional.of(shareIndex));
+    public void testGetShareTradeSummaries_NoShareTrades() {
+        // Given: a collection of share indices
+        List<ShareIndex> indices = IntStream.range(0, 3)
+            .mapToObj(i -> mockShareIndex(s -> s.id(UUID.randomUUID())))
+            .toList();
 
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
+        // And: a set of latest prices - keyed on share index id
+        Map<UUID, PriceHistory> prices = indices.stream()
+            .map(index -> mockPriceHistory(index, LocalDate.now().minusDays(1)))
+            .collect(Collectors.toMap(price -> price.getId().getShareIndexId(), p -> p));
+        when(priceHistoryRepository.getMostRecent(any(UUID.class))).then(invocation ->
+            Optional.ofNullable(prices.get(invocation.getArgument(0, UUID.class))));
 
-        // And: a portfolio belonging to that user
-        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
-        when(portfolioRepository.findByIdOptional(portfolio.getId()))
-            .thenReturn(Optional.of(portfolio));
+        // And: a user's portfolio - with no share trades
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
 
-        // And: portfolio has several holdings but none for this share
-        IntStream.range(0, 4).forEach(i -> portfolio.add(mockShareIndex(s -> s.id(UUID.randomUUID()))));
-        assertEquals(4, portfolio.getHoldings().size());
+        // And: NO share trades exist
+        when(shareTradeRepository.getShareTradeSummaries(portfolio.getUserId(), portfolio.getId()))
+            .thenReturn(List.of());
 
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        int quantity = 1200;
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        Holding holding = fixture.createShareTrade(userId, portfolio.getId(),
-            dateExecuted, shareIndex.getIdentity(), quantity, price);
+        // When: the summaries are requested
+        List<ShareTradeSummary> result = shareTradeService.getShareTradeSummaries(portfolio);
 
-        // Then: a new holding is created
-        assertNotNull(holding);
-        assertEquals(5, portfolio.getHoldings().size());
+        // Then: the repository is called to get the trade summaries
+        verify(shareTradeRepository).getShareTradeSummaries(portfolio.getUserId(), portfolio.getId());
 
-        // And: the holding was persisted
-        verify(holdingRepository).saveAndFlush(any());
-        assertNotNull(holding.getId());
+        // And: the price repository is NOT called
+        indices.forEach(index -> verify(priceHistoryRepository, never()).getMostRecent(index.getId()));
 
-        // And: the holding records the new trade
-        assertFalse(holding.getDealings().isEmpty());
-        DealingHistory dealing = holding.getDealings().get(0);
-        assertEquals(dateExecuted, dealing.getDateExecuted());
-        assertEquals(quantity, dealing.getQuantity());
-        assertEquals(price, dealing.getPrice());
-
-        // And: a notification event was issued
-        verify(portfolioEventSender).sendSharesTransacted(dealing);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = { 123, -123 }) // a buy and sell
-    public void testCreateShareTrade_ExistingHolding(int quantity) {
-        // Given: a share to be traded has been registered
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
-            .thenReturn(Optional.of(shareIndex));
-
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
-
-        // And: a portfolio belonging to that user
-        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
-        when(portfolioRepository.findByIdOptional(portfolio.getId()))
-            .thenReturn(Optional.of(portfolio));
-
-        // And: portfolio has several holdings including one for this share
-        IntStream.range(0, 4).forEach(i -> portfolio.add(mockShareIndex(s -> s.id(UUID.randomUUID()))));
-        Holding existingHolding = portfolio.add(shareIndex);
-        assertEquals(5, portfolio.getHoldings().size());
-
-        // And: the holding quantity is greater than this sale (to prevent errors)
-        if (quantity < 0) {
-            existingHolding.buy(
-                LocalDate.now().minusDays(100),
-                (-quantity) + 100,
-                BigDecimal.valueOf(22.22));
-        }
-
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        Holding holding = fixture.createShareTrade(userId, portfolio.getId(),
-            dateExecuted, shareIndex.getIdentity(), quantity, price);
-
-        // Then: the existing holding is returned
-        assertEquals(existingHolding, holding);
-
-        // And: no new holding is added to the portfolio
-        assertEquals(5, portfolio.getHoldings().size());
-
-        // And: the holding was persisted
-        verify(holdingRepository).saveAndFlush(any());
-        assertNotNull(holding.getId());
-
-        // And: the holding records the new trade
-        assertFalse(holding.getDealings().isEmpty());
-        DealingHistory dealing = holding.getDealings().stream()
-            .filter(d -> d.getDateExecuted().equals(dateExecuted))
-            .findFirst().orElse(null);
-        assertNotNull(dealing);
-        assertEquals(dateExecuted, dealing.getDateExecuted());
-        assertEquals(quantity, dealing.getQuantity());
-        assertEquals(price, dealing.getPrice());
-
-        // And: a notification event was issued
-        verify(portfolioEventSender).sendSharesTransacted(dealing);
+        // And: the result is empty
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testCreateShareTrade_PortfolioNotFound() {
-        // Given: a share to be traded has been registered
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
-            .thenReturn(Optional.of(shareIndex));
+    public void testGetShareTrades() {
+        // Given: a share index
+        ShareIndex index = mockShareIndex(s -> s.id(UUID.randomUUID()));
 
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
+        // And: a user's portfolio
+        Portfolio portfolio = mockPortfolio(UUID.randomUUID(), p -> p.id(UUID.randomUUID()));
 
-        // And: NO portfolio belonging to that user with the given ID
-        UUID portfolioId = UUID.randomUUID();
-        when(portfolioRepository.findByIdOptional(portfolioId))
-            .thenReturn(Optional.empty());
+        // When: the share index trades are requested
+        shareTradeService.getShareTrades(portfolio, index, 0, 10);
 
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        int quantity = 201;
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.createShareTrade(userId, portfolioId,
-                dateExecuted, shareIndex.getIdentity(), quantity, price));
-
-        // Then: the exception indicates the missing portfolio
-        assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
-        assertEquals("Portfolio", exception.getParameter("entity-type"));
-        assertEquals(portfolioId, exception.getParameter("entity-id"));
-
-        // And: no deal is persisted
-        verify(holdingRepository, never()).saveAndFlush(any());
-
-        // And: no notification event was issued
-        verifyNoInteractions(portfolioEventSender);
+        // Then: the repository is called to retrieve the selected page
+        verify(shareTradeRepository).getShareTrades(portfolio, index, 0, 10);
     }
 
-    @Test
-    public void testCreateShareTrade_ShareIndexNotFound() {
-        // Given: NO share of given ISIN is registered
-        ShareIndex.ShareIdentity shareIdentity = mockShareIdentity();
-        when(shareIndexService.getShareIndex(shareIdentity))
-            .thenReturn(Optional.empty());
-
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
-
-        // And: a portfolio belonging to that user
-        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
-        when(portfolioRepository.findByIdOptional(portfolio.getId()))
-            .thenReturn(Optional.of(portfolio));
-
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        int quantity = 201;
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-            fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIdentity, quantity, price));
-
-        // Then: the exception indicates the missing share index
-        assertEquals(CommonErrorCodes.ENTITY_NOT_FOUND, exception.getErrorCode());
-        assertEquals("ShareIndex", exception.getParameter("entity-type"));
-        assertEquals(shareIdentity, exception.getParameter("entity-id"));
-
-        // And: no deal is persisted
-        verify(holdingRepository, never()).saveAndFlush(any());
-
-        // And: no notification event was issued
-        verifyNoInteractions(portfolioEventSender);
-    }
-
-    @Test
-    public void testCreateShareTrade_zeroQuantity() {
-        // Given: a share to be traded has been registered
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
-            .thenReturn(Optional.of(shareIndex));
-
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
-
-        // And: a portfolio belonging to that user
-        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
-        when(portfolioRepository.findByIdOptional(portfolio.getId()))
-            .thenReturn(Optional.of(portfolio));
-
-        // And: portfolio has several holdings but none for this share
-        IntStream.range(0, 4).forEach(i -> portfolio.add(mockShareIndex(s -> s.id(UUID.randomUUID()))));
-        assertEquals(4, portfolio.getHoldings().size());
-
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        int quantity = 0;
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
-            fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIndex.getIdentity(), quantity, price));
-
-        // Then: the exception indicates the ISIN selected
-        assertEquals(SharesErrorCodes.ZERO_TRADE_QUANTITY, exception.getErrorCode());
-        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
-        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
-
-        // And: no deal is persisted
-        verify(holdingRepository, never()).saveAndFlush(any());
-
-        // And: no notification event was issued
-        verifyNoInteractions(portfolioEventSender);
-    }
-
-    @Test
-    public void testSaleExceedsHolding() {
-        // Given: a share to be traded has been registered
-        ShareIndex shareIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
-        when(shareIndexService.getShareIndex(shareIndex.getIdentity()))
-            .thenReturn(Optional.of(shareIndex));
-
-        // And: an authenticated user
-        UUID userId = UUID.randomUUID();
-
-        // And: a portfolio belonging to that user
-        Portfolio portfolio = mockPortfolio(userId, p -> p.id(UUID.randomUUID()));
-        when(portfolioRepository.findByIdOptional(portfolio.getId()))
-            .thenReturn(Optional.of(portfolio));
-
-        // And: portfolio has several dealings for this share
-        Holding existingHolding = portfolio.add(shareIndex);
-        for (int i = 5; i > 0; --i) {
-            existingHolding.buy(LocalDate.now().minusDays(i * 10L), 100, BigDecimal.valueOf(123.34));
-        }
-        assertEquals(5, existingHolding.getDealings().size());
-        assertEquals(500, existingHolding.getQuantity());
-
-        // And: dealing is for a sale of more than quantity held
-        int quantity = -(10 + existingHolding.getQuantity());
-
-        // When: the service is called
-        LocalDate dateExecuted = LocalDate.now().minusDays(1);
-        BigDecimal price = BigDecimal.valueOf(123.435);
-        SaleExceedsHoldingException exception = assertThrows(SaleExceedsHoldingException.class, () ->
-            fixture.createShareTrade(userId, portfolio.getId(),
-                dateExecuted, shareIndex.getIdentity(), quantity, price)
-        );
-
-        // Then: the exception indicates the ISIN selected
-        assertEquals(SharesErrorCodes.SALE_EXCEEDS_HOLDING, exception.getErrorCode());
-        assertEquals(shareIndex.getIdentity().getIsin(), exception.getParameter("isin"));
-        assertEquals(shareIndex.getIdentity().getTickerSymbol(), exception.getParameter("ticker-symbol"));
-        assertEquals(-quantity, (int)exception.getParameter("quantity"));
-        assertEquals(existingHolding.getQuantity(), (int)exception.getParameter("holding"));
-
-        // And: no deal is persisted
-        verify(holdingRepository, never()).saveAndFlush(any());
-
-        // And: no notification event was issued
-        verifyNoInteractions(portfolioEventSender);
+    private ShareTradeRepository.ShareTradeSummaryProjection mockTradeSummary(Portfolio portfolio,
+                                                                              ShareIndex shareIndex) {
+        return ShareTradeRepository.ShareTradeSummaryProjection.builder()
+            .portfolioId(portfolio.getId())
+            .shareIndexId(shareIndex.getId())
+            .isin(shareIndex.getIdentity().getIsin())
+            .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
+            .name(shareIndex.getName())
+            .quantity(randomNumbers.randomInt(1, 200))
+            .totalCost(BigDecimal.valueOf(randomNumbers.randomDouble(100, 1000)))
+            .currency(shareIndex.getCurrency().getCurrencyCode())
+            .build();
     }
 }

@@ -1,5 +1,12 @@
 import { Currency } from "./commons.model";
 
+export interface ShareId {
+  // The unique International Securities Identification Number (GB00B80QG052)
+  isin: string;
+
+  // The share's ticker symbol
+  tickerSymbol: string;
+}
 
 export interface ShareIndexResponse {
   id: string;

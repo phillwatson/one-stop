@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,7 +62,7 @@ public class PriceHistoryRepositoryTest {
 
     @Test
     public void testListPrices() {
-        // Given:
+        // Given: a share index
         ShareIndex shareIndex = shareIndexRepository.save(mockShareIndex());
 
         // And: the index has a collection of daily prices
@@ -235,6 +236,35 @@ public class PriceHistoryRepositoryTest {
             .orElse(0);
         assertEquals(batchSize - failedBatchSize,
             priceHistoryRepository.count("id.shareIndexId", shareIndex.getId()));
+    }
+
+    @Test
+    public void testGetMostRecent() {
+        // Given: a share index
+        ShareIndex shareIndex = shareIndexRepository.save(mockShareIndex());
+
+        // And: the index has a collection of daily prices
+        LocalDate startDate = LocalDate.now().minusDays(50);
+        LocalDate today = LocalDate.now();
+        LocalDate date = startDate;
+        List<PriceHistory> prices = new ArrayList<>();
+        while (date.isBefore(today)) {
+            prices.add(TestData.mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY));
+            date = date.plusDays(1);
+        }
+        priceHistoryRepository.saveAll(prices);
+        priceHistoryRepository.flush();
+
+        // When: the most recent price is requested
+        Optional<PriceHistory> mostRecent = priceHistoryRepository.getMostRecent(shareIndex);
+
+        // Then: a price is returned
+        assertNotNull(mostRecent);
+        assertTrue(mostRecent.isPresent());
+
+        // And: the correct price is returned
+        PriceHistory expected = prices.getLast();
+        assertEquals(expected.getId(), mostRecent.get().getId());
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)

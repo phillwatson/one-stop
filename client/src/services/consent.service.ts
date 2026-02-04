@@ -21,8 +21,8 @@ class UserConsentService {
       .then(response => response.headers["location"] as Location);
   }
 
-  cancelConsent(institutionId: string, purge: boolean = false) {
-    return http.delete(`/rails/consents/${institutionId}?purge=${purge}`);
+  cancelConsent(institutionId: string, purge: boolean = false): Promise<any> {
+    return http.delete<void>(`/rails/consents/${institutionId}?purge=${purge}`);
   }
 }
 

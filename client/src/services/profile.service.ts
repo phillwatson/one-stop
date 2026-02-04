@@ -12,9 +12,8 @@ class ProfileService {
       .then(response => response.data.authProviders);
   }
 
-  deleteAuthProvider(authProviderId: string): Promise<UserAuthProvider> {
-    return http.delete<UserAuthProvider>('/profiles/authproviders/' + authProviderId)
-      .then(response => response.data);
+  deleteAuthProvider(authProviderId: string): Promise<any> {
+    return http.delete<void>('/profiles/authproviders/' + authProviderId);
   }
 
   update(profile: UserProfile): Promise<UserProfile> {

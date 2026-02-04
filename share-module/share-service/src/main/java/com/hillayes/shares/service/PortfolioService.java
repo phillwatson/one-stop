@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
 
-    @Transactional
     public Portfolio createPortfolio(UUID userId, String portfolioName) {
         log.info("Creating portfolio [name: {}]", portfolioName);
         try {
@@ -33,7 +33,6 @@ public class PortfolioService {
         }
     }
 
-    @Transactional
     public Optional<Portfolio> updatePortfolio(UUID userId,
                                                UUID portfolioId,
                                                String portfolioName) {
@@ -50,20 +49,17 @@ public class PortfolioService {
         }
     }
 
-    @Transactional
     public Optional<Portfolio> getPortfolio(UUID userId, UUID portfolioId) {
         log.info("Getting portfolio [id: {}]", portfolioId);
         return portfolioRepository.findByIdOptional(portfolioId)
             .filter(portfolio -> userId.equals(portfolio.getUserId()));
     }
 
-    @Transactional
     public Page<Portfolio> listPortfolios(UUID userId, int pageIndex, int pageSize) {
         log.info("Listing user's portfolios [userId: {}, page: {}, pageSize: {}]", userId, pageIndex, pageSize);
         return portfolioRepository.getUsersPortfolios(userId, pageIndex, pageSize);
     }
 
-    @Transactional
     public Optional<Portfolio> deletePortfolio(UUID userId, UUID portfolioId) {
         log.info("Deleting portfolio [portfolioId: {}]", portfolioId);
         return portfolioRepository.findByIdOptional(portfolioId)

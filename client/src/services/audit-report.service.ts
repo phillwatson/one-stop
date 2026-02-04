@@ -49,7 +49,7 @@ class AuditReportService {
   }
 
   deleteAuditConfig(configId: string): Promise<any> {
-    return http.delete<any>(`/rails/audit/configs/${configId}`);
+    return http.delete<void>(`/rails/audit/configs/${configId}`);
   }
 
   getAuditIssueSummaries(): Promise<Array<AuditIssueSummary>> {
@@ -79,7 +79,7 @@ class AuditReportService {
   }
 
   deleteAuditIssue(issueId: string): Promise<any> {
-    return http.delete<any>(`/rails/audit/issues/${issueId}`);
+    return http.delete<void>(`/rails/audit/issues/${issueId}`);
   }
 }
 

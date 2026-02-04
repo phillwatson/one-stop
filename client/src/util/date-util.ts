@@ -16,6 +16,9 @@ export function getDefaultLocaleRegion(): string | undefined {
   return (locale) ? locale.region : undefined;
 }
 
+const defaultLocale = getDefaultLocale();
+//const defaultRegion = getDefaultLocaleRegion();
+
 export function toDate(dateStr?: string): Date | undefined {
   if (!dateStr) return undefined;
   return new Date(dateStr);
@@ -23,12 +26,12 @@ export function toDate(dateStr?: string): Date | undefined {
 
 export function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-GB");
+  return new Date(dateStr).toLocaleDateString(defaultLocale);
 }
 
 export function formatTime(dateStr?: string): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleTimeString("en-GB");
+  return new Date(dateStr).toLocaleTimeString(defaultLocale);
 }
 
 export function formatDateTime(dateStr?: string): string {
@@ -38,7 +41,12 @@ export function formatDateTime(dateStr?: string): string {
 
 export function toLocaleDate(date: Date): string {
   if (!date) return "";
-  return date.toLocaleDateString("en-GB");
+  return date.toLocaleDateString(defaultLocale);
+}
+
+export function toLocalDateTime(date: Date): string {
+  if (!date) return "";
+  return date.toLocaleString(defaultLocale);
 }
 
 export function toISODate(date: Date): string {
