@@ -18,7 +18,6 @@ export default function SharePortfolioDetail() {
     if (portfolioId) {
       PortfolioService.getPortfolio(portfolioId)
         .then(response => { setPortfolio(response); return response; })
-        .then(portfolio => PortfolioService.getPortfolioHoldings(portfolio.id))
         .catch(err => showMessage(err));
     }
   }, [ showMessage, portfolioId ]);

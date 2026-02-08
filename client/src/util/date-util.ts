@@ -13,7 +13,6 @@ export function getDefaultLocale(): Intl.Locale | undefined {
 
 export function getDefaultLocaleRegion(): string {
   const locale = getDefaultLocale();
-  console.log('Default locale: ' + locale);
   return locale?.region || 'en-gb';
 }
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,6 +12,7 @@ import { SxProps } from '@mui/material/styles';
 
 import { ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
+import ShareTradeSummaryRow from './trade-summary-row';
 
 interface Props {
   /**
@@ -27,6 +28,12 @@ const colhead: SxProps = {
 
 export default function ShareTradeSummaryList({ holdings }: Props) {
   const [ formatMoney ] = useMonetaryContext();
+
+  const [ selectedHolding, setSelectingHolding ] = useState<ShareTradeSummary | undefined>(undefined);
+
+  function selectHolding(holding: ShareTradeSummary) {
+    setSelectingHolding((holding === selectedHolding) ? undefined : holding);
+  }
 
   const totalCost = useMemo(() => {
     return holdings.reduce((sum, holding) => sum + holding.totalCost, 0);
@@ -59,46 +66,25 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
             {/* <TableCell sx={colhead}>ISIN</TableCell>
             <TableCell sx={colhead}>Ticker</TableCell> */}
             <TableCell sx={colhead} align="right">Latest Price</TableCell>
-            <TableCell sx={colhead} align="right">Avg. Price</TableCell>
             <TableCell sx={colhead} align="right">Quantity</TableCell>
+            <TableCell sx={colhead} align="right">Avg. Price</TableCell>
             <TableCell sx={colhead} align="right">Total Cost</TableCell>
             <TableCell sx={colhead} align="right">Current Value</TableCell>
             <TableCell sx={colhead} align="right">Gain/Loss</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {holdings.map((holding) => {
-            return (
-              <TableRow key={holding.shareindexId} hover>
-                <TableCell>{holding.name}</TableCell>
-                {/* <TableCell>{holding.shareId?.isin || '-'}</TableCell>
-                <TableCell>{holding.shareId?.tickerSymbol || '-'}</TableCell> */}
-                <TableCell align="right">
-                  {formatMoney(holding.latestPrice / 100, holding.currency)}
-                </TableCell>
-                <TableCell align="right">
-                  {formatMoney(holding.averagePrice / 100, holding.currency)}
-                </TableCell>
-                <TableCell align="right">{holding.quantity.toLocaleString()}</TableCell>
-                <TableCell align="right">
-                  {formatMoney(holding.totalCost / 100, holding.currency)}
-                </TableCell>
-                <TableCell align="right">
-                  {formatMoney(holding.currentValue / 100, holding.currency)}
-                </TableCell>
-                <TableCell 
-                  align="right"
-                  sx={{
-                    color: holding.gainLoss >= 0 ? '#2e7d32' : '#d32f2f',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {formatMoney(holding.gainLoss / 100, holding.currency)}
-                  {' '}({holding.gainLossPercent.toFixed(2)}%)
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {
+            holdings.map(holding =>
+              <ShareTradeSummaryRow
+                holding={ holding }
+                selected={ holding === selectedHolding }
+                showTrades={ holding === selectedHolding }
+                onClick={ selectHolding }/>
+            )
+          }
+
+
           <TableRow key="total" sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
             <TableCell colSpan={4} sx={{ fontWeight: 'bold' }}>Total</TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold' }}>

@@ -1,7 +1,7 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { PortfolioRequest, PortfolioResponse, ShareTradeSummary, ShareTradeResponse } from '../model/share-portfolio.model';
+import { PortfolioRequest, PortfolioResponse, ShareTradeSummary, ShareTrade } from '../model/share-portfolio.model';
 import { toISODate } from '../util/date-util';
 
 class PortfolioService {
@@ -49,7 +49,7 @@ class PortfolioService {
         return http.delete<void>(`/shares/portfolios/${portfolioId}`);
     }
 
-    recordShareTrade(portfolioId: string, shareIndexId: string, dateExecuted: Date, quantity: number, price: number): Promise<ShareTradeResponse> {
+    recordShareTrade(portfolioId: string, shareIndexId: string, dateExecuted: Date, quantity: number, price: number): Promise<ShareTrade> {
         const request = {
             shareIndexId: shareIndexId,
             dateExecuted: toISODate(dateExecuted),
@@ -57,7 +57,7 @@ class PortfolioService {
             pricePerShare: price
         };
         return http.post(`/shares/portfolios/${portfolioId}/trades`, request)
-            .then(response => response.data as ShareTradeResponse)
+            .then(response => response.data as ShareTrade)
             .then(response => {
                 response.dateExecuted = new Date(response.dateExecuted);
                 return response;
@@ -78,25 +78,41 @@ class PortfolioService {
             });
     }
 
-    getShareTrades(portfolioId: string, shareindexId: string): Promise<ShareTradeResponse[]> {
-        return http.get(`/shares/portfolios/${portfolioId}/trades/${shareindexId}`)
-            .then(response => response.data as ShareTradeResponse[])
+    getShareTrades(portfolioId: string, shareIndexId: string, page: number = 0, pageSize: number = 100): Promise<PaginatedList<ShareTrade>> {
+        return http.get<PaginatedList<ShareTrade>>(`/shares/portfolios/${portfolioId}/trades/${shareIndexId}`, { params: { "page": page, "page-size": pageSize }})
+            .then(response => response.data)
             .then(trades => {
-                trades.forEach(trade => trade.dateExecuted = new Date(trade.dateExecuted));
+                if (trades.items) {
+                    trades.items.forEach(trade => {
+                      trade.dateExecuted = new Date(trade.dateExecuted);
+                      trade.totalCost = trade.quantity * trade.pricePerShare;
+                    });
+                }
                 return trades;
             });
     }
 
-    getShareTrade(tradeId: string): Promise<ShareTradeResponse> {
+
+    async fetchShareTrades(portfolioId: string, shareIndexId: string): Promise<Array<ShareTrade>> {
+        var response = await this.getShareTrades(portfolioId, shareIndexId, 0, 100);
+        var trades = response.items as Array<ShareTrade>;
+        while (response.links.next) {
+        response = await this.getShareTrades(portfolioId, shareIndexId, response.page + 1, 100);
+        trades = trades.concat(response.items);
+        }
+        return trades;
+    }
+
+    getShareTrade(tradeId: string): Promise<ShareTrade> {
         return http.get(`/shares/trades/${tradeId}`)
-            .then(response => response.data as ShareTradeResponse)
+            .then(response => response.data as ShareTrade)
             .then(trade => {
                 trade.dateExecuted = new Date(trade.dateExecuted);
                 return trade;
             });
     }
 
-    updateShareTrade(tradeId: string, shareIndexId: string, dateExecuted: Date, quantity: number, price: number): Promise<ShareTradeResponse> {
+    updateShareTrade(tradeId: string, shareIndexId: string, dateExecuted: Date, quantity: number, price: number): Promise<ShareTrade> {
         const request = {
             shareIndexId: shareIndexId,
             dateExecuted: toISODate(dateExecuted),
@@ -104,7 +120,7 @@ class PortfolioService {
             pricePerShare: price
         };
         return http.put(`/shares/trades/${tradeId}`, request)
-            .then(response => response.data as ShareTradeResponse)
+            .then(response => response.data as ShareTrade)
             .then(trade => {
                 trade.dateExecuted = new Date(trade.dateExecuted);
                 return trade;

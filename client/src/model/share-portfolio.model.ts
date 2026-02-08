@@ -31,7 +31,7 @@ export interface ShareTradeSummary {
   portfolioId: string;
 
   // The internal share index ID.
-  shareindexId: string;
+  shareIndexId: string;
 
   // The share stock identifier
   shareId: ShareId;
@@ -51,16 +51,25 @@ export interface ShareTradeSummary {
   // The latest closing price of the share, in minor currency units.
   latestPrice: number;
 
+  // The following are calculated on retrieval - see PortfolioService.getPortfolioHoldings
+
+  // The average price paid per share, in minor currency units.
   averagePrice: number;
+  
+  // The current total value of the holding, in minor currency units.
   currentValue: number;
+
+  // The total gain or loss for the holding, in minor currency units.
   gainLoss: number;
+
+  // The total gain or loss for the holding, as a percentage of the total cost.
   gainLossPercent: number;
 }
 
 /**
  * Summarizes a share holding within a user's portfolio.
  */
-export interface ShareTradeResponse {
+export interface ShareTrade {
   // The unique ID of the holding record
   id: string;
 
@@ -75,4 +84,7 @@ export interface ShareTradeResponse {
 
   // The price per share at which the trade was executed, in minor currency units
   pricePerShare: number;
+
+  // The total price paid for the holding in minor currency units.
+  totalCost: number;
 }
