@@ -22,6 +22,8 @@ import { ShareIndex } from "../../model/share-indices.model";
 
 dayjs.extend(utc);
 
+const FLOAT_REGEX = /^-?\d*(\.\d+)?$/;
+
 interface TradeDialogProps {
   open: boolean;
   onCancel: () => void;
@@ -59,19 +61,19 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
 
   function validateForm(): boolean {
     const p = price?.trim() || '';
-    const validPrice = (p.length > 0) && (p.match(/^-?\d*(\.\d+)?$/) !== null);
+    const validPrice = (p.length > 0) && (p.match(FLOAT_REGEX) !== null);
 
     const q = quantity?.trim() || '';
-    const validQuantity = (q.length > 0) && (q.match(/^\d*$/) !== null);
+    const validQuantity = (q.length > 0) && (q.match(FLOAT_REGEX) !== null);
 
     return shareIndex !== undefined
       && dateExecuted !== undefined
       && (validPrice && parseFloat(price) > 0)
-      && (validQuantity && parseInt(quantity) !== 0);
+      && (validQuantity && parseFloat(quantity) !== 0);
   }
 
   function handleConfirm() {
-    props.onConfirm(shareIndex!, dateExecuted.toDate(), parseInt(quantity), parseFloat(price));
+    props.onConfirm(shareIndex!, dateExecuted.toDate(), parseFloat(quantity), parseFloat(price));
   }
 
   return (

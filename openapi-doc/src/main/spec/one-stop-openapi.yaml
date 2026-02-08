@@ -3675,10 +3675,10 @@ components:
           description: The name of the share
           example: HSBC FTSE 250 Index Accumulation C
         quantity:
-          type: integer
-          format: int64
+          type: number
+          format: double
           description: The number of shares held
-          example: 150
+          example: 150.2322
         totalCost:
           type: number
           format: double
@@ -3716,10 +3716,10 @@ components:
           description: The date and time the dealing was executed
           example: 2019-07-15
         quantity:
-          type: integer
-          format: int32
+          type: number
+          format: double
           description: The number of shares traded. Negative for SELL, positive for BUY.
-          example: 150
+          example: 150.6321
         pricePerShare:
           type: number
           format: double

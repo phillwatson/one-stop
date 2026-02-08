@@ -7,12 +7,14 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import Collapse from '@mui/material/Collapse';
 import Box from '@mui/material/Box';
 import { SxProps } from '@mui/material/styles';
 
 import { ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import ShareTradeSummaryRow from './trade-summary-row';
+import ShareTradeList from './share-trade-list';
 
 interface Props {
   /**
@@ -76,14 +78,26 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
         <TableBody>
           {
             holdings.map(holding =>
-              <ShareTradeSummaryRow
-                holding={ holding }
-                selected={ holding === selectedHolding }
-                showTrades={ holding === selectedHolding }
-                onClick={ selectHolding }/>
+              <>
+                <ShareTradeSummaryRow
+                  holding={ holding }
+                  selected={ holding === selectedHolding }
+                  onClick={ selectHolding }/>
+
+                <TableRow>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }}></TableCell>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                    <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+                      <Box paddingTop={1} paddingBottom={1}>
+                        <Typography variant="h6">Trades</Typography>
+                        <ShareTradeList holding={ holding } />
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+                </TableRow>
+              </>
             )
           }
-
 
           <TableRow key="total" sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
             <TableCell colSpan={4} sx={{ fontWeight: 'bold' }}>Total</TableCell>

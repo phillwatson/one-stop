@@ -97,7 +97,7 @@ public class ShareTradeRepository extends RepositoryBase<ShareTrade, UUID> {
         private String name;
 
         @Column(name = "quantity")
-        private long quantity;
+        private BigDecimal quantity;
 
         @Column(name = "total_cost")
         private BigDecimal totalCost;

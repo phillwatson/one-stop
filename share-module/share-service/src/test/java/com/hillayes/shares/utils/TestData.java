@@ -130,7 +130,7 @@ public class TestData {
             .portfolioId(portfolio.getId())
             .shareIndexId(shareIndex.getId())
             .dateExecuted(LocalDate.now().minusDays(randomNumbers.randomInt(1, 40)))
-            .quantity(randomNumbers.randomInt())
+            .quantity(BigDecimal.valueOf(randomNumbers.randomFloat(100, 20000)))
             .price(BigDecimal.valueOf(randomNumbers.randomFloat(0, 20000)));
 
         if (modifier != null) {
@@ -156,7 +156,7 @@ public class TestData {
                 .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
                 .build())
             .name(shareIndex.getName())
-            .quantity(randomNumbers.randomInt(100, 200))
+            .quantity(BigDecimal.valueOf(randomNumbers.randomInt(100, 200)))
             .currency(Currency.getInstance(shareIndex.getCurrency().getCurrencyCode()))
             .totalCost(BigDecimal.valueOf(randomNumbers.randomFloat(50000, 200000)))
             .latestPrice(BigDecimal.valueOf(randomNumbers.randomFloat(100, 2000)));

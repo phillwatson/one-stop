@@ -119,7 +119,7 @@ public class TemplateRepositoryTest {
             .companyTickerSymbol(randomStrings.nextAlphabetic(4))
             .dateExecuted(LocalDate.now())
             .purchase(quantity > 0)
-            .quantity(Math.abs(quantity))
+            .quantity(BigDecimal.valueOf(Math.abs(quantity)))
             .price(BigDecimal.valueOf(123.45))
             .build();
 

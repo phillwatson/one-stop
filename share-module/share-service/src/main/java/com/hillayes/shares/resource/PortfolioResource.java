@@ -165,7 +165,7 @@ public class PortfolioResource {
 
         ShareTrade shareTrade = shareTradeService.recordShareTrade(portfolio, shareIndex,
             request.getDateExecuted(),
-            request.getQuantity(),
+            BigDecimal.valueOf(request.getQuantity()),
             BigDecimal.valueOf(request.getPricePerShare()));
 
         return Response.ok(marshal(shareTrade)).build();
@@ -229,7 +229,7 @@ public class PortfolioResource {
             .shareIndexId(summary.getShareIndexId())
             .shareId(marshal(summary.getShareIdentity()))
             .name(summary.getName())
-            .quantity(summary.getQuantity())
+            .quantity(summary.getQuantity().doubleValue())
             .totalCost(summary.getTotalCost().doubleValue())
             .currency(summary.getCurrency().getCurrencyCode())
             .latestPrice(summary.getLatestPrice().doubleValue());
@@ -240,7 +240,7 @@ public class PortfolioResource {
             .id(shareTrade.getId())
             .shareIndexId(shareTrade.getShareIndexId())
             .dateExecuted(shareTrade.getDateExecuted())
-            .quantity(shareTrade.getQuantity())
+            .quantity(shareTrade.getQuantity().doubleValue())
             .pricePerShare(shareTrade.getPrice().doubleValue());
     }
 

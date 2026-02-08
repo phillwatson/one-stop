@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static com.hillayes.notification.TestUtils.randomStrings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,8 +34,8 @@ public class UserService_UserDeletedTest {
         // given: an existing user record
         User existingUser =  User.builder()
             .id(UUID.randomUUID())
-            .email(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(20))
+            .email(randomStrings.nextAlphanumeric(30))
+            .preferredName(randomStrings.nextAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
         when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));

@@ -42,7 +42,7 @@ export interface ShareTradeSummary {
   // The share's trading currency
   currency: Currency;
 
-  // The total number of shares held.
+  // The total number of shares held. Allows fractional values.
   quantity: number;
 
   // The total price paid for the holding in minor currency units.
@@ -79,7 +79,7 @@ export interface ShareTrade {
   // The date on which the trade occurred
   dateExecuted: Date;
 
-  // The number of shares traded.
+  // The number of shares traded. Allows fractional values.
   quantity: number;
 
   // The price per share at which the trade was executed, in minor currency units
