@@ -12,7 +12,7 @@ export interface PortfolioRequest {
 /**
  * Describes a user's share portfolio
  */
-export interface PortfolioSummaryResponse {
+export interface PortfolioResponse {
   // The portfolio's internal Id
   id: string;
 
@@ -21,75 +21,51 @@ export interface PortfolioSummaryResponse {
 
   // The date and time the portfolio was created
   dateCreated: Date;
-
-  // The number of share indices within the portfolio
-  holdingCount: number;
 }
 
 /**
- * Describes a user's share portfolio and lists the share holding within it.
+ * A summary of a portfolio's holdings in a particular share.
  */
-export interface PortfolioResponse extends PortfolioSummaryResponse {
-  // The list of the user's portfolios
-  holdings: Array<HoldingResponse>;
+export interface ShareTradeSummary {
+  // The portfolio's internal Id
+  portfolioId: string;
+
+  // The internal share index ID.
+  shareindexId: string;
+
+  // The share stock identifier
+  shareId: ShareId;
+
+  // The share's name
+  name: string;
+
+  // The share's trading currency
+  currency: Currency;
+
+  // The total number of shares held.
+  quantity: number;
+
+  // The total price paid for the holding in minor currency units.
+  totalCost: number;
+
+  // The latest closing price of the share, in minor currency units.
+  latestPrice: number;
+
+  averagePrice: number;
+  currentValue: number;
+  gainLoss: number;
+  gainLossPercent: number;
 }
 
 /**
  * Summarizes a share holding within a user's portfolio.
  */
-export interface HoldingResponse {
+export interface ShareTradeResponse {
   // The unique ID of the holding record
   id: string;
 
-  // The unique ID of the share index record
-  shareIndexId: string;
-
-  // The share stock identifier
-  shareId: ShareId;
-
-  // The name of the share
-  name: string;
-
-  // The number of shares held in the portfolio
-  quantity: number;
-
-  // The total price paid for the holding in minor currency units
-  totalCost: string;
-
-  // The latest market value of the holding in minor currency units
-  latestValue: string;
-
-  // The ISO-4217 currency code in which the shares are traded.
-  currency: Currency;
-
-  // The list of all dealings for the holding
-  dealings: Array<DealingHistoryResponse>;
-}
-
-/**
- * Details the trade of a share holding within a user's portfolio
- */
-export interface DealingHistoryResponse {
-  // The dealing Id
-  id: string;
-
-  // The date and time the dealing was executed
-  dateExecuted: Date;
-
-  // The number of shares dealt. Negative for SELL, positive for BUY.
-  quantity: number;
-
-  // The price per share at which the dealing was executed, in minor currency units
-  pricePerShare: number;
-}
-
-/**
- * Describes a request for a share trade to be recorded within a user's portfolio.
- * The request parameters will identify the user's portfolio.
- */
-export interface TradeRequest {
-  // The share index being traded.
-  shareId: ShareId;
+  // The internal share index ID.
+  shareindexId: string;
 
   // The date on which the trade occurred
   dateExecuted: Date;

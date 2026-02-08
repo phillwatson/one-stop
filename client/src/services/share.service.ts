@@ -1,18 +1,18 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { HistoricalPriceResponse, ShareIndexResponse } from '../model/share-indices.model';
+import { HistoricalPriceResponse, ShareIndex } from '../model/share-indices.model';
 import { minDate, startOfMonth } from "../util/date-util";
 
 class ShareService {
-  getIndices(page: number = 0, pageSize: number = 100): Promise<PaginatedList<ShareIndexResponse>> {
-    return http.get<PaginatedList<ShareIndexResponse>>('/shares/indices', { params: { "page": page, "page-size": pageSize }})
+  getIndices(page: number = 0, pageSize: number = 100): Promise<PaginatedList<ShareIndex>> {
+    return http.get<PaginatedList<ShareIndex>>('/shares/indices', { params: { "page": page, "page-size": pageSize }})
       .then(response => response.data);
   }
 
-  async fetchAllIndices(): Promise<Array<ShareIndexResponse>> {
+  async fetchAllIndices(): Promise<Array<ShareIndex>> {
     var response = await this.getIndices(0, 100);
-    var indices = response.items as Array<ShareIndexResponse>;
+    var indices = response.items as Array<ShareIndex>;
     while (response.links.next) {
       response = await this.getIndices(response.page + 1, 100);
       indices = indices.concat(response.items);

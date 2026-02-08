@@ -11,9 +11,10 @@ export function getDefaultLocale(): Intl.Locale | undefined {
   return undefined;
 }
 
-export function getDefaultLocaleRegion(): string | undefined {
+export function getDefaultLocaleRegion(): string {
   const locale = getDefaultLocale();
-  return (locale) ? locale.region : undefined;
+  console.log('Default locale: ' + locale);
+  return locale?.region || 'en-gb';
 }
 
 const defaultLocale = getDefaultLocale();
