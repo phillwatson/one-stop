@@ -19,7 +19,7 @@ import Typography from '@mui/material/Typography';
 import { SxProps } from '@mui/material/styles';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
-import { PortfolioSummaryResponse } from '../../model/share-portfolio.model';
+import { PortfolioResponse } from '../../model/share-portfolio.model';
 import PortfolioService from '../../services/portfolio.service';
 import { toLocalDateTime } from '../../util/date-util';
 
@@ -28,7 +28,7 @@ interface Props {
    * Callback function that receives the selected portfolio.
    * @param portfolio The selected portfolio, or undefined if deselected.
    */
-  onSelectPortfolio?: (portfolio: PortfolioSummaryResponse | undefined) => void;
+  onSelectPortfolio?: (portfolio: PortfolioResponse | undefined) => void;
 }
 
 const colhead: SxProps = {
@@ -53,7 +53,7 @@ interface CreatePortfolioDialogProps {
 
 interface DeletePortfolioDialogProps {
   open: boolean;
-  portfolio: PortfolioSummaryResponse | undefined;
+  portfolio: PortfolioResponse | undefined;
   confirmationText: string;
   onConfirmationTextChange: (text: string) => void;
   onCancel: () => void;
@@ -141,7 +141,7 @@ function DeletePortfolioDialog(props: DeletePortfolioDialogProps) {
  */
 export default function PortfolioList(props: Props) {
   const showMessage = useMessageDispatch();
-  const [portfolios, setPortfolios] = useState<PortfolioSummaryResponse[]>([]);
+  const [portfolios, setPortfolios] = useState<PortfolioResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | undefined>();
 
@@ -150,7 +150,7 @@ export default function PortfolioList(props: Props) {
   const [creating, setCreating] = useState<boolean>(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState<PortfolioSummaryResponse | undefined>();
+  const [portfolioToDelete, setPortfolioToDelete] = useState<PortfolioResponse | undefined>();
   const [deleteConfirmationText, setDeleteConfirmationText] = useState<string>('');
   const [deleting, setDeleting] = useState<boolean>(false);
 
@@ -166,7 +166,7 @@ export default function PortfolioList(props: Props) {
     refreshPortfolios();
   }, [ refreshPortfolios ]);
 
-  function handleSelectPortfolio(portfolio?: PortfolioSummaryResponse) {
+  function handleSelectPortfolio(portfolio?: PortfolioResponse) {
     const newSelectedId = portfolio?.id;
     setSelectedPortfolioId(newSelectedId);
     
@@ -197,7 +197,7 @@ export default function PortfolioList(props: Props) {
       .finally(() => setCreating(false));
   }
 
-  function handleOpenDeleteDialog(portfolio: PortfolioSummaryResponse, event: React.MouseEvent) {
+  function handleOpenDeleteDialog(portfolio: PortfolioResponse, event: React.MouseEvent) {
     event.stopPropagation();
     setPortfolioToDelete(portfolio);
     setDeleteConfirmationText('');
@@ -239,12 +239,6 @@ export default function PortfolioList(props: Props) {
         </Typography>
       }
 
-      <Box sx={{ mb: 2 }}>
-        <Button variant="contained" onClick={ handleOpenCreateDialog } sx={{ mt: 2 }} >
-          Create Portfolio
-        </Button>
-      </Box>
-
       { (portfolios.length > 0) &&
         <TableContainer>
           <Table size='small'>
@@ -252,7 +246,6 @@ export default function PortfolioList(props: Props) {
               <TableRow>
                 <TableCell sx={colhead} align='left'>Name</TableCell>
                 <TableCell sx={colhead} align='center'>Created</TableCell>
-                <TableCell sx={colhead} align='center'>Holdings</TableCell>
                 <TableCell sx={colhead} align='center' width="40px"></TableCell>
               </TableRow>
             </TableHead>
@@ -269,7 +262,6 @@ export default function PortfolioList(props: Props) {
                     <TableCell align='center'>
                       { toLocalDateTime(portfolio.dateCreated) }
                     </TableCell>
-                    <TableCell align='center'>{portfolio.holdingCount}</TableCell>
                     <TableCell align='center' width="40px">
                       <Tooltip title="Delete portfolio">
                         <IconButton size="small" onClick={(e) => handleOpenDeleteDialog(portfolio, e)} >
@@ -284,6 +276,12 @@ export default function PortfolioList(props: Props) {
           </Table>
         </TableContainer>
       }
+
+      <Box sx={{ mb: 2 }} display="flex" justifyContent="end">
+        <Button variant="contained" onClick={ handleOpenCreateDialog } sx={{ mt: 2 }} >
+          New Portfolio
+        </Button>
+      </Box>
 
       <CreatePortfolioDialog
         open={createDialogOpen}

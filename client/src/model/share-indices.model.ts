@@ -8,7 +8,7 @@ export interface ShareId {
   tickerSymbol: string;
 }
 
-export interface ShareIndexResponse {
+export interface ShareIndex {
   id: string;
   shareId: string;
   name: string;
@@ -16,7 +16,7 @@ export interface ShareIndexResponse {
   provider: string;
 }
 
-export const NULL_INDEX: ShareIndexResponse = {
+export const NULL_INDEX: ShareIndex = {
   id: '',
   shareId: '',
   name: '',

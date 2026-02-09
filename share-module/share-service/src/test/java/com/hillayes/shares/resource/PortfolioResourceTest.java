@@ -287,7 +287,7 @@ public class PortfolioResourceTest extends TestBase {
             assertEquals(expected.getShareIdentity().getIsin(), summary.getShareId().getIsin());
             assertEquals(expected.getShareIdentity().getTickerSymbol(), summary.getShareId().getTickerSymbol());
             assertEquals(expected.getName(), summary.getName());
-            assertEquals(expected.getQuantity(), summary.getQuantity());
+            assertEquals(expected.getQuantity().doubleValue(), summary.getQuantity());
             assertEquals(expected.getTotalCost().doubleValue(), summary.getTotalCost());
             assertEquals(expected.getCurrency().getCurrencyCode(), summary.getCurrency());
             assertEquals(expected.getLatestPrice().doubleValue(), summary.getLatestPrice());
@@ -378,7 +378,7 @@ public class PortfolioResourceTest extends TestBase {
             .thenReturn(Optional.of(portfolio));
 
         when(shareTradeService.recordShareTrade(eq(portfolio), eq(index),
-            any(LocalDate.class), anyInt(), any(BigDecimal.class)))
+            any(LocalDate.class), any(BigDecimal.class), any(BigDecimal.class)))
             .then(invocation ->
                 ShareTrade.builder()
                     .id(UUID.randomUUID())
@@ -395,7 +395,7 @@ public class PortfolioResourceTest extends TestBase {
         ShareTradeRequest request = new ShareTradeRequest()
             .shareIndexId(index.getId())
             .dateExecuted(LocalDate.now().minusDays(10))
-            .quantity(randomNumbers.randomInt(2, 200))
+            .quantity(randomNumbers.randomDouble(2, 200))
             .pricePerShare(randomNumbers.randomDouble(1000, 2000));
 
         // When: the trades for the share are requested
@@ -415,7 +415,9 @@ public class PortfolioResourceTest extends TestBase {
         verify(shareIndexService).getShareIndex(index.getId());
         verify(portfolioService).getPortfolio(userId, portfolio.getId());
         verify(shareTradeService).recordShareTrade(portfolio, index,
-            request.getDateExecuted(), request.getQuantity(), BigDecimal.valueOf(request.getPricePerShare()));
+            request.getDateExecuted(),
+            BigDecimal.valueOf(request.getQuantity()),
+            BigDecimal.valueOf(request.getPricePerShare()));
 
         // And: the new trade is returned
         assertNotNull(response);

@@ -3,12 +3,12 @@ import PortfoliosIcon from '@mui/icons-material/AssessmentOutlined';
 
 import PageHeader from '../components/page-header/page-header';
 import PortfolioList from '../components/share-portfolios/portfolio-list';
-import { PortfolioSummaryResponse } from '../model/share-portfolio.model';
+import { PortfolioResponse } from '../model/share-portfolio.model';
 
 export default function SharePortfolios() {
   const navigate = useNavigate();
 
-  function showPortfolio(portfolio?: PortfolioSummaryResponse) {
+  function showPortfolio(portfolio?: PortfolioResponse) {
     if (portfolio) {
       navigate(`/shares/portfolios/${portfolio?.id}`);
     }

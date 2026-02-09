@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Checkbox, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
 
-import { ShareIndexResponse } from "../../model/share-indices.model";
+import { ShareIndex } from "../../model/share-indices.model";
 
 interface Props {
-  shareIndices: ShareIndexResponse[],
-  excludedIndices?: ShareIndexResponse[],
+  shareIndices: ShareIndex[],
+  excludedIndices?: ShareIndex[],
   label?: string,
-  onSelectIndices?: (value: ShareIndexResponse[]) => void;
+  onSelectIndices?: (value: ShareIndex[]) => void;
 }
 
 export default function MultiShareIndexSelector(props: Props) {
@@ -19,9 +19,9 @@ export default function MultiShareIndexSelector(props: Props) {
     return props.shareIndices.filter(item => props.excludedIndices!.findIndex(excl => excl.id === item.id) === -1)
   }, [ props.shareIndices, props.excludedIndices]);
 
-  const [ selectedIndices, setSelectedIndices ] = useState<ShareIndexResponse[]>([]);
+  const [ selectedIndices, setSelectedIndices ] = useState<ShareIndex[]>([]);
 
-  function selectIndex(shareIndex: ShareIndexResponse) {
+  function selectIndex(shareIndex: ShareIndex) {
     if (selectedIndices.findIndex(s => s.id === shareIndex.id) >= 0) {
       setSelectedIndices(prev => prev.filter(item => item.id !== shareIndex.id));
     } else {

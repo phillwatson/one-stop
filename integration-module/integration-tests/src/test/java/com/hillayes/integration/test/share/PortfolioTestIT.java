@@ -77,7 +77,7 @@ public class PortfolioTestIT extends ApiTestBase {
                     .shareIndexId(shareIndex.get().getId())
                     .dateExecuted(LocalDate.now().minusDays(2))
                     .pricePerShare(123.45)
-                    .quantity(100);
+                    .quantity(100.00);
                 ShareTradeResponse shareTrade = portfolioApi.createShareTrade(portfolio.getId(), buyRequest);
 
                 // Then: the trade is recorded
@@ -103,7 +103,7 @@ public class PortfolioTestIT extends ApiTestBase {
                     .shareIndexId(shareIndex.get().getId())
                     .dateExecuted(LocalDate.now().minusDays(1))
                     .pricePerShare(257.23)
-                    .quantity(-10);
+                    .quantity(-10.0);
                 shareTrade = portfolioApi.createShareTrade(portfolio.getId(), sellRequest);
 
                 // Then: the trade is recorded
