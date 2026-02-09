@@ -9,18 +9,18 @@ import PageHeader from '../components/page-header/page-header';
 import ShareIndexSelector from '../components/shares/share-index-selector';
 import ShareIndexGraph from '../components/shares/index-price-graph';
 import ShareService from "../services/share.service";
-import { ShareIndexResponse } from '../model/share-indices.model';
+import { ShareIndex } from '../model/share-indices.model';
 import MultiShareIndexSelector from '../components/shares/multi-share-index-selector';
 import { useMessageDispatch } from '../contexts/messages/context';
 
-const EMPTY_ARRAY = [] as ShareIndexResponse[];
+const EMPTY_ARRAY = [] as ShareIndex[];
 
 export default function SharePrices() {
   const showMessage = useMessageDispatch();
-  const [ shareIndices, setShareIndices ] = useState<ShareIndexResponse[]>([]);
+  const [ shareIndices, setShareIndices ] = useState<ShareIndex[]>([]);
   const [ dateRange, setDateRange ] = useState<Dayjs[]>([ dayjs(), dayjs() ]);
-  const [ selectedIndex, setSelectedIndex ] = useState<ShareIndexResponse | undefined>(undefined);
-  const [ comparisons, setComparisons ] = useState<ShareIndexResponse[]>([]);
+  const [ selectedIndex, setSelectedIndex ] = useState<ShareIndex | undefined>(undefined);
+  const [ comparisons, setComparisons ] = useState<ShareIndex[]>([]);
 
   const exlusions = useMemo(() => {
     return (selectedIndex !== undefined) ? [ selectedIndex ] : EMPTY_ARRAY;

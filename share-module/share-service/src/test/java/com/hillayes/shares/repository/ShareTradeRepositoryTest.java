@@ -52,7 +52,8 @@ public class ShareTradeRepositoryTest {
                         for (int i = 1; i < 3; i++) {
                             int index = i;
                             shareTradeRepository.save(mockShareTrade(portfolio, shareIndex, t ->
-                                t.quantity(10 * index).price(BigDecimal.valueOf(100 * index))
+                                t.quantity(BigDecimal.valueOf(10 * index))
+                                    .price(BigDecimal.valueOf(100 * index))
                             ));
                         }
                     });
@@ -82,7 +83,7 @@ public class ShareTradeRepositoryTest {
                     assertEquals(shareIndex.getIdentity().getTickerSymbol(), summary.getTickerSymbol());
                     assertEquals(shareIndex.getName(), summary.getName());
                     assertEquals(shareIndex.getCurrency().getCurrencyCode(), summary.getCurrency());
-                    assertEquals(30, summary.getQuantity());
+                    assertEquals(30.0, summary.getQuantity().doubleValue());
                     assertEquals(5000.0, summary.getTotalCost().doubleValue());
                 });
             })
@@ -91,13 +92,7 @@ public class ShareTradeRepositoryTest {
 
     @Test
     public void testShareTradeSummary_NonExist() {
-        // Given: a collection of shares
-        List<ShareIndex> indices = List.of(
-            shareIndexRepository.save(mockShareIndex()),
-            shareIndexRepository.save(mockShareIndex())
-        );
-
-        // And: a user's share portfolio
+        // Given: a user's share portfolio
         UUID userId = UUID.randomUUID();
         Portfolio portfolio = portfolioRepository.save(mockPortfolio(userId));
 

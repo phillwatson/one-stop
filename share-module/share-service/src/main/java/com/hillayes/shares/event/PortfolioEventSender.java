@@ -35,8 +35,8 @@ public class PortfolioEventSender {
             .companyName(shareIndex.getName())
             .tradeId(shareTrade.getId())
             .dateExecuted(shareTrade.getDateExecuted())
-            .purchase(shareTrade.getQuantity() > 0)
-            .quantity(Math.abs(shareTrade.getQuantity()))
+            .purchase(shareTrade.getQuantity().doubleValue() > 0)
+            .quantity(shareTrade.getQuantity().abs())
             .price(shareTrade.getPrice())
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .build());
@@ -58,8 +58,8 @@ public class PortfolioEventSender {
             .companyName(shareIndex.getName())
             .tradeId(shareTrade.getId())
             .dateExecuted(shareTrade.getDateExecuted())
-            .purchase(shareTrade.getQuantity() > 0)
-            .quantity(Math.abs(shareTrade.getQuantity()))
+            .purchase(shareTrade.getQuantity().doubleValue() > 0)
+            .quantity(shareTrade.getQuantity().abs())
             .price(shareTrade.getPrice())
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .build());
@@ -81,8 +81,8 @@ public class PortfolioEventSender {
             .companyName(shareIndex.getName())
             .tradeId(shareTrade.getId())
             .dateExecuted(shareTrade.getDateExecuted())
-            .purchase(shareTrade.getQuantity() > 0)
-            .quantity(Math.abs(shareTrade.getQuantity()))
+            .purchase(shareTrade.getQuantity().doubleValue() > 0)
+            .quantity(shareTrade.getQuantity().abs())
             .price(shareTrade.getPrice())
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .build());

@@ -7,7 +7,7 @@ import Switch from "@mui/material/Switch";
 import ShowPercentageIcon from '@mui/icons-material/Percent';
 import ShowPriceIcon from '@mui/icons-material/AttachMoney';
 import ShareService from "../../services/share.service";
-import { ShareIndexResponse, HistoricalPriceResponse } from "../../model/share-indices.model";
+import { ShareIndex, HistoricalPriceResponse } from "../../model/share-indices.model";
 import { useMessageDispatch } from '../../contexts/messages/context';
 import { formatDate, startOfDay } from "../../util/date-util";
 
@@ -117,7 +117,7 @@ class Comparison {
   /**
    * The share index being viewed and compared.
    */
-  shareIndex: ShareIndexResponse;
+  shareIndex: ShareIndex;
 
   /**
    * The historical prices for the share index.
@@ -129,7 +129,7 @@ class Comparison {
    */
   colour: string;
 
-  constructor(shareIndex: ShareIndexResponse, prices: Array<HistoricalPriceResponse>) {
+  constructor(shareIndex: ShareIndex, prices: Array<HistoricalPriceResponse>) {
     this.shareIndex = shareIndex;
     this.prices = prices;
     this.colour = stringToColour(shareIndex.id)
@@ -161,8 +161,8 @@ function filterPrices(fromDate: Date, toDate: Date, prices: HistoricalPriceRespo
  * The properties for the ShareIndexGraph component.
  */
 interface Props {
-  shareIndex?: ShareIndexResponse;
-  compareWith?: ShareIndexResponse[];
+  shareIndex?: ShareIndex;
+  compareWith?: ShareIndex[];
   fromDate: Date;
   toDate: Date;
 }

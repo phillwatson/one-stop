@@ -143,7 +143,7 @@ public class ShareTradeServiceTest {
 
         // When: a trade is recorded
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 100;
+        BigDecimal quantity = BigDecimal.valueOf(100);
         BigDecimal pricePerShare = BigDecimal.TEN;
         ShareTrade shareTrade = shareTradeService
             .recordShareTrade(portfolio, shareIndex, dateExecuted, quantity, pricePerShare);
@@ -176,7 +176,7 @@ public class ShareTradeServiceTest {
 
         // When: a trade is recorded
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 0;
+        BigDecimal quantity = BigDecimal.valueOf(0);
         BigDecimal pricePerShare = BigDecimal.TEN;
         ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
             shareTradeService.recordShareTrade(portfolio, shareIndex, dateExecuted, quantity, pricePerShare));
@@ -210,7 +210,7 @@ public class ShareTradeServiceTest {
 
         // When: the share trade is updated
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 100;
+        BigDecimal quantity = BigDecimal.valueOf(100);
         BigDecimal pricePerShare = BigDecimal.TEN;
         Optional<ShareTrade> result = shareTradeService
             .updateShareTrade(portfolio.getUserId(), shareTrade.getId(), dateExecuted, quantity, pricePerShare);
@@ -257,7 +257,7 @@ public class ShareTradeServiceTest {
 
         // When: the share trade is updated by another user
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 100;
+        BigDecimal quantity = BigDecimal.valueOf(100);
         BigDecimal pricePerShare = BigDecimal.TEN;
         UUID invalidUserId = UUID.randomUUID();
         Optional<ShareTrade> result = shareTradeService
@@ -294,7 +294,7 @@ public class ShareTradeServiceTest {
 
         // When: the share trade is updated by another user
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 100;
+        BigDecimal quantity = BigDecimal.valueOf(100);
         BigDecimal pricePerShare = BigDecimal.TEN;
         UUID invalidTradeId = UUID.randomUUID();
         Optional<ShareTrade> result = shareTradeService
@@ -330,7 +330,7 @@ public class ShareTradeServiceTest {
 
         // When: the share trade is updated
         LocalDate dateExecuted = LocalDate.now().minusDays(10);
-        int quantity = 0;
+        BigDecimal quantity = BigDecimal.valueOf(0);
         BigDecimal pricePerShare = BigDecimal.TEN;
         ZeroTradeQuantityException exception = assertThrows(ZeroTradeQuantityException.class, () ->
             shareTradeService.updateShareTrade(portfolio.getUserId(), shareTrade.getId(), dateExecuted, quantity, pricePerShare));
@@ -566,7 +566,7 @@ public class ShareTradeServiceTest {
             .isin(shareIndex.getIdentity().getIsin())
             .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
             .name(shareIndex.getName())
-            .quantity(randomNumbers.randomInt(1, 200))
+            .quantity(BigDecimal.valueOf(randomNumbers.randomInt(1, 200)))
             .totalCost(BigDecimal.valueOf(randomNumbers.randomDouble(100, 1000)))
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .build();

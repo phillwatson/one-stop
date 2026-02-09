@@ -55,7 +55,7 @@ public class ShareTradeResource {
         ShareTrade shareTrade = shareTradeService
             .updateShareTrade(userId, shareTradeId,
                 request.getDateExecuted(),
-                request.getQuantity(),
+                BigDecimal.valueOf(request.getQuantity()),
                 BigDecimal.valueOf(request.getPricePerShare()))
             .orElseThrow(() -> new NotFoundException("ShareTrade", shareTradeId));
 
@@ -81,7 +81,7 @@ public class ShareTradeResource {
             .id(shareTrade.getId())
             .shareIndexId(shareTrade.getShareIndexId())
             .dateExecuted(shareTrade.getDateExecuted())
-            .quantity(shareTrade.getQuantity())
+            .quantity(shareTrade.getQuantity().doubleValue())
             .pricePerShare(shareTrade.getPrice().doubleValue());
     }
 }

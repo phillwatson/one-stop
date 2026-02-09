@@ -65,7 +65,7 @@ public class ShareTradeDeleted {
     /**
      * The number of shares bought or sold. Always positive
      */
-    private int quantity;
+    private BigDecimal quantity;
 
     /**
      * The price paid or received for each share.

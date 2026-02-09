@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static com.hillayes.notification.TestUtils.randomStrings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,8 +46,8 @@ public class UserService_UserUpdatedTest {
             .id(UUID.randomUUID())
             .dateCreated(Instant.now().minus(Duration.ofSeconds(20000)))
             .dateUpdated(null)
-            .email(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(20))
+            .email(randomStrings.nextAlphanumeric(30))
+            .preferredName(randomStrings.nextAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
         when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
@@ -59,13 +58,13 @@ public class UserService_UserUpdatedTest {
         User user = User.builder()
             .dateUpdated(Instant.now())
             .id(existingUser.getId())
-            .email(randomAlphanumeric(30)) // different from existing user
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
+            .email(randomStrings.nextAlphanumeric(30)) // different from existing user
+            .username(randomStrings.nextAlphanumeric(12))
+            .title(randomStrings.nextAlphanumeric(5))
+            .givenName(randomStrings.nextAlphanumeric(20))
+            .familyName(randomStrings.nextAlphanumeric(20))
+            .preferredName(randomStrings.nextAlphanumeric(20))
+            .phoneNumber(randomStrings.nextNumeric(12))
             .locale(Locale.ENGLISH)
             .build();
 
@@ -119,8 +118,8 @@ public class UserService_UserUpdatedTest {
             .id(UUID.randomUUID())
             .dateCreated(Instant.now().minus(Duration.ofSeconds(20000)))
             .dateUpdated(Instant.now().minus(Duration.ofSeconds(10000)))
-            .email(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(20))
+            .email(randomStrings.nextAlphanumeric(30))
+            .preferredName(randomStrings.nextAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
         when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
@@ -131,13 +130,13 @@ public class UserService_UserUpdatedTest {
         User user = User.builder()
             .dateUpdated(Instant.now())
             .id(existingUser.getId())
-            .email(randomAlphanumeric(30)) // different from existing user
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
+            .email(randomStrings.nextAlphanumeric(30)) // different from existing user
+            .username(randomStrings.nextAlphanumeric(12))
+            .title(randomStrings.nextAlphanumeric(5))
+            .givenName(randomStrings.nextAlphanumeric(20))
+            .familyName(randomStrings.nextAlphanumeric(20))
+            .preferredName(randomStrings.nextAlphanumeric(20))
+            .phoneNumber(randomStrings.nextNumeric(12))
             .locale(Locale.ENGLISH)
             .build();
 
@@ -190,8 +189,8 @@ public class UserService_UserUpdatedTest {
         User existingUser =  User.builder()
             .dateUpdated(Instant.now().minus(Duration.ofSeconds(10000)))
             .id(UUID.randomUUID())
-            .email(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(20))
+            .email(randomStrings.nextAlphanumeric(30))
+            .preferredName(randomStrings.nextAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
         when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
@@ -200,12 +199,12 @@ public class UserService_UserUpdatedTest {
         User user = User.builder()
             .dateUpdated(Instant.now())
             .id(existingUser.getId())
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
+            .username(randomStrings.nextAlphanumeric(12))
+            .title(randomStrings.nextAlphanumeric(5))
+            .givenName(randomStrings.nextAlphanumeric(20))
+            .familyName(randomStrings.nextAlphanumeric(20))
+            .preferredName(randomStrings.nextAlphanumeric(20))
+            .phoneNumber(randomStrings.nextNumeric(12))
             .email(existingUser.getEmail()) // the same as original
             .locale(Locale.ENGLISH)
             .build();
@@ -239,13 +238,13 @@ public class UserService_UserUpdatedTest {
         User user = User.builder()
             .dateUpdated(Instant.now())
             .id(UUID.randomUUID())
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
-            .email(randomAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(12))
+            .title(randomStrings.nextAlphanumeric(5))
+            .givenName(randomStrings.nextAlphanumeric(20))
+            .familyName(randomStrings.nextAlphanumeric(20))
+            .preferredName(randomStrings.nextAlphanumeric(20))
+            .phoneNumber(randomStrings.nextNumeric(12))
+            .email(randomStrings.nextAlphanumeric(30))
             .locale(Locale.ENGLISH)
             .build();
 
@@ -275,8 +274,8 @@ public class UserService_UserUpdatedTest {
         User existingUser =  User.builder()
             .id(UUID.randomUUID())
             .dateUpdated(Instant.now().minus(Duration.ofSeconds(1000)))
-            .email(randomAlphanumeric(30))
-            .preferredName(randomAlphanumeric(20))
+            .email(randomStrings.nextAlphanumeric(30))
+            .preferredName(randomStrings.nextAlphanumeric(20))
             .locale(Locale.CHINESE)
             .build();
         when(userRepository.findByIdOptional(existingUser.getId())).thenReturn(Optional.of(existingUser));
@@ -285,13 +284,13 @@ public class UserService_UserUpdatedTest {
         User user = User.builder()
             .dateUpdated(Instant.now().minus(Duration.ofSeconds(2000)))
             .id(existingUser.getId())
-            .email(randomAlphanumeric(30))
-            .username(randomAlphanumeric(12))
-            .title(randomAlphanumeric(5))
-            .givenName(randomAlphanumeric(20))
-            .familyName(randomAlphanumeric(20))
-            .preferredName(randomAlphanumeric(20))
-            .phoneNumber(randomNumeric(12))
+            .email(randomStrings.nextAlphanumeric(30))
+            .username(randomStrings.nextAlphanumeric(12))
+            .title(randomStrings.nextAlphanumeric(5))
+            .givenName(randomStrings.nextAlphanumeric(20))
+            .familyName(randomStrings.nextAlphanumeric(20))
+            .preferredName(randomStrings.nextAlphanumeric(20))
+            .phoneNumber(randomStrings.nextNumeric(12))
             .locale(Locale.ENGLISH)
             .build();
 
