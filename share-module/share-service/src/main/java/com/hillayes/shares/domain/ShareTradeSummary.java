@@ -25,7 +25,7 @@ public class ShareTradeSummary {
     @ToString.Include
     private String name;
 
-    private long quantity;
+    private BigDecimal quantity;
 
     private BigDecimal totalCost;
 

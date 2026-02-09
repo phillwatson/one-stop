@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-import { NULL_INDEX, ShareIndexResponse } from "../../model/share-indices.model";
+import { NULL_INDEX, ShareIndex } from "../../model/share-indices.model";
 
 interface Props {
-  shareIndices: ShareIndexResponse[],
-  onSelect?: (value?: ShareIndexResponse) => void;
+  shareIndices: ShareIndex[],
+  onSelect?: (value?: ShareIndex) => void;
 }
 
 export default function ShareIndexSelector(props: Props) {
-  const [ index, setIndex ] = useState<ShareIndexResponse>(NULL_INDEX);
+  const [ index, setIndex ] = useState<ShareIndex>(NULL_INDEX);
 
   function selectIndex(indexId: string) {
-    var selected: ShareIndexResponse | undefined = undefined;
+    var selected: ShareIndex | undefined = undefined;
     if (indexId !== undefined && indexId.length > 0) {
       selected = props.shareIndices.find(index => index.id === indexId);
     }

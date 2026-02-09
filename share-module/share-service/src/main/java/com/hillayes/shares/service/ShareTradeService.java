@@ -83,12 +83,12 @@ public class ShareTradeService {
     public ShareTrade recordShareTrade(Portfolio portfolio,
                                        ShareIndex shareIndex,
                                        LocalDate dateExecuted,
-                                       int quantity,
+                                       BigDecimal quantity,
                                        BigDecimal pricePerShare) {
         log.info("Creating a share trade [portfolio: {}, date: {}, shareIndexId: {}, quantity: {}, price: {}]",
             portfolio.getName(), dateExecuted, shareIndex.getId(), quantity, pricePerShare);
 
-        if (quantity == 0) {
+        if (BigDecimal.ZERO.equals(quantity)) {
             throw new ZeroTradeQuantityException(shareIndex);
         }
 
@@ -121,7 +121,7 @@ public class ShareTradeService {
     public Optional<ShareTrade> updateShareTrade(UUID userId,
                                                  UUID shareTradeId,
                                                  LocalDate dateExecuted,
-                                                 int quantity,
+                                                 BigDecimal quantity,
                                                  BigDecimal pricePerShare) {
         log.info("Creating a share trade [shareTradeId: {}, date: {}, quantity: {}, price: {}]",
             shareTradeId, dateExecuted, quantity, pricePerShare);
@@ -133,7 +133,7 @@ public class ShareTradeService {
         }
 
         ShareIndex shareIndex = shareIndexRepository.findById(shareTrade.getShareIndexId());
-        if (quantity == 0) {
+        if (BigDecimal.ZERO.equals(quantity)) {
             throw new ZeroTradeQuantityException(shareIndex);
         }
 

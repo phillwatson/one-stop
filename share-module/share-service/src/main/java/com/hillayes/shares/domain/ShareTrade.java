@@ -46,7 +46,7 @@ public class ShareTrade {
      */
     @Column(name = "quantity", nullable = false)
     @Setter
-    private int quantity;
+    private BigDecimal quantity;
 
     /**
      * The price paid or received for each share.
@@ -61,6 +61,6 @@ public class ShareTrade {
      */
     @Transient
     public BigDecimal getValue() {
-        return BigDecimal.valueOf(quantity * price.doubleValue());
+        return quantity.multiply(price);
     }
 }
