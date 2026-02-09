@@ -26,9 +26,10 @@ public class ExponentialBackoffStrategyTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testExceptionHandler() {
         BackoffStrategy<Void> fixture =
-            new ExponentialBackoffStrategy(null, Duration.ofMillis(100), 1.0, 3)
+            new ExponentialBackoffStrategy<>(null, Duration.ofMillis(100), 1.0, 3)
             .setExceptionHandler((e, retryCount) -> retryCount < 4);
 
         AtomicInteger counter = new AtomicInteger(0);

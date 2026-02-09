@@ -83,15 +83,15 @@ export default function ShareTradeList({ holding }: Props) {
             <TableCell>{toLocaleDate(summary.trade.dateExecuted)}</TableCell>
             <TableCell>{ summary.trade.quantity > 0 ? 'Buy' : 'Sell' }</TableCell>
             <TableCell align="right">{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
-            <TableCell align="right">{formatMoney(summary.trade.pricePerShare / 100, holding.currency)}</TableCell>
-            <TableCell align="right">{formatMoney(summary.trade.totalCost / 100, holding.currency)}</TableCell>
+            <TableCell align="right">{formatMoney(summary.trade.pricePerShare, holding.currency, true)}</TableCell>
+            <TableCell align="right">{formatMoney(summary.trade.totalCost, holding.currency)}</TableCell>
             <TableCell align="right"
               sx={{
                 color: summary.gainLoss >= 0 ? '#2e7d32' : '#d32f2f',
                 fontWeight: 'bold'
               }}
             >
-              {formatMoney(summary.gainLoss / 100, holding.currency)}
+              {formatMoney(summary.gainLoss, holding.currency)}
               {' '}{ summary.trade.quantity > 0 ? '(' + summary.gainLossPercent.toFixed(2) + '%)' : ''}
             </TableCell>
           </TableRow>

@@ -27,18 +27,18 @@ export default function ShareTradeSummaryRow({ holding, selected, onClick }: Pro
         <TableCell>{holding.shareId?.isin || '-'}</TableCell>
         <TableCell>{holding.shareId?.tickerSymbol || '-'}</TableCell>
       */}
-      <TableCell align="right">{formatMoney(holding.latestPrice / 100, holding.currency)}</TableCell>
+      <TableCell align="right">{formatMoney(holding.latestPrice, holding.currency, true)}</TableCell>
       <TableCell align="right">{holding.quantity.toLocaleString()}</TableCell>
-      <TableCell align="right">{formatMoney(holding.averagePrice / 100, holding.currency)}</TableCell>
-      <TableCell align="right">{formatMoney(holding.totalCost / 100, holding.currency)}</TableCell>
-      <TableCell align="right">{formatMoney(holding.currentValue / 100, holding.currency)}</TableCell>
+      <TableCell align="right">{formatMoney(holding.averagePrice, holding.currency, true)}</TableCell>
+      <TableCell align="right">{formatMoney(holding.totalCost, holding.currency, true)}</TableCell>
+      <TableCell align="right">{formatMoney(holding.currentValue, holding.currency, true)}</TableCell>
       <TableCell align="right"
         sx={{
           color: holding.gainLoss >= 0 ? '#2e7d32' : '#d32f2f',
           fontWeight: 'bold'
         }}
       >
-        {formatMoney(holding.gainLoss / 100, holding.currency)}
+        {formatMoney(holding.gainLoss, holding.currency, true)}
         {' '}({holding.gainLossPercent.toFixed(2)}%)
       </TableCell>
     </TableRow>

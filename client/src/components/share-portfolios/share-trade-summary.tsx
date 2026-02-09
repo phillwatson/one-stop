@@ -102,10 +102,10 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
           <TableRow key="total" sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
             <TableCell colSpan={4} sx={{ fontWeight: 'bold' }}>Total</TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalCost / 100, holdings[0].currency)}
+              {formatMoney(totalCost, holdings[0].currency, true)}
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalValue / 100, holdings[0].currency)}
+              {formatMoney(totalValue, holdings[0].currency, true)}
             </TableCell>
             <TableCell 
               align="right"
@@ -114,7 +114,7 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
                 color: gainLoss >= 0 ? '#2e7d32' : '#d32f2f'
               }}
             >
-              {formatMoney(gainLoss / 100, holdings[0].currency)}
+              {formatMoney(gainLoss, holdings[0].currency, true)}
               {' '}({totalCost > 0 ? ((gainLoss / totalCost) * 100).toFixed(2) : '0.00'}%)
             </TableCell>
           </TableRow>
