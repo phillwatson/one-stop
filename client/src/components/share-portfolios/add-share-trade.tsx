@@ -12,13 +12,17 @@ import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@m
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import 'dayjs/locale/de';
+import 'dayjs/locale/en-gb';
+import 'dayjs/locale/zh-cn';
 import dayjs, { Dayjs } from 'dayjs';
-import { getDefaultLocaleRegion } from '../../util/date-util';
+import { defaultLocale } from '../../util/date-util';
 import utc from 'dayjs/plugin/utc';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import ShareService from '../../services/share.service';
 import { ShareIndex } from "../../model/share-indices.model";
+import { ShareTrade } from "../../model/share-portfolio.model";
 
 dayjs.extend(utc);
 
@@ -26,8 +30,9 @@ const FLOAT_REGEX = /^-?\d*(\.\d+)?$/;
 
 interface TradeDialogProps {
   open: boolean;
+  shareTrade?: ShareTrade;
   onCancel: () => void;
-  onConfirm: (shareIndex: ShareIndex, dateExecuted: Date, quantity: number, price: number) => void;
+  onConfirm: (tradeId: string | undefined, shareIndex: ShareIndex, dateExecuted: Date, quantity: number, price: number) => void;
   isCreating: boolean;
 }
 
@@ -42,16 +47,32 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
 
   useEffect(() => {
     ShareService.fetchAllIndices()
-      .then(response => { setShareIndices(response); return response; })
+      .then(indices => { setShareIndices(indices); return indices; })
       .catch(err => showMessage(err));
   }, [ showMessage ]);
+
+  useEffect(() => {
+    if (props.shareTrade) {
+      if (props.shareTrade.shareIndexId !== undefined) {
+        setShareIndex(shareIndices.find(index => index.id === props.shareTrade?.shareIndexId))
+      } else {
+        setShareIndex(undefined);
+      }
+
+      setDateExecuted(dayjs(props.shareTrade.dateExecuted));
+      setQuantity(props.shareTrade.quantity.toString())
+      setPrice(props.shareTrade.pricePerShare.toString());
+
+    }
+    }, [ props.shareTrade, shareIndices ]);
 
   function selectIndex(event: SelectChangeEvent) {
     setShareIndex(shareIndices.find(s => s.id === event.target.value));
   }
 
   function enterQuantity(event: ChangeEvent) {
-    const value: string = (event.target as HTMLInputElement).value;    setQuantity(value);
+    const value: string = (event.target as HTMLInputElement).value;
+    setQuantity(value);
   }
 
   function enterPrice(event: ChangeEvent) {
@@ -73,16 +94,27 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
   }
 
   function handleConfirm() {
-    props.onConfirm(shareIndex!, dateExecuted.toDate(), parseFloat(quantity), parseFloat(price));
+    props.onConfirm(props.shareTrade?.id, shareIndex!, dateExecuted.toDate(), parseFloat(quantity), parseFloat(price));
   }
 
   return (
     <Dialog open={props.open} onClose={props.onCancel} fullWidth>
-      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>Record New Trade</DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
+        { (props.shareTrade?.id ? 'Amend Trade' : 'Record New Trade') }
+      </DialogTitle>
       <DialogContent>
-        <LocalizationProvider dateAdapter={ AdapterDayjs }
-            adapterLocale={ getDefaultLocaleRegion() }>
           <Stack spacing={3} paddingTop={3} direction="column">
+            { props?.shareTrade?.shareIndexId !== undefined &&
+              <TextField
+                id="share-index"
+                label="Share Index"
+                variant="standard"
+                fullWidth
+                value={shareIndex?.name}
+                disabled
+              />
+            }
+            { props?.shareTrade?.shareIndexId === undefined &&
               <FormControl fullWidth margin="normal" sx={{ marginBottom: 3 }}>
                 <InputLabel id="select-index-label">Share Index</InputLabel>
                 <Select id="select-index" labelId="select-index-label" label="Share Index"
@@ -94,11 +126,14 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
                   }
                 </Select>
               </FormControl>
+            }
 
             <Stack spacing={2} direction="row">
-              <DatePicker disableFuture label="Execution Date"
-                value={ dateExecuted }
-                onChange={ (value: Dayjs | null) => { setDateExecuted(value || dayjs()) }}/>
+              <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ defaultLocale.toLowerCase() }>
+                <DatePicker disableFuture label="Execution Date"
+                  value={ dateExecuted }
+                  onChange={ (value: Dayjs | null) => { setDateExecuted(value || dayjs()) }}/>
+              </LocalizationProvider>
 
               <TextField
                 id="quantity"
@@ -119,7 +154,6 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
               />
             </Stack>
           </Stack>
-        </LocalizationProvider>
       </DialogContent>
 
       <DialogActions>
@@ -129,7 +163,7 @@ export default function AddShareTradeDialog(props: TradeDialogProps) {
           variant="contained"
           disabled={!validateForm() || props.isCreating}
         >
-          Create
+          { (props.shareTrade?.id ? 'Update' : 'Create') }
         </Button>
       </DialogActions>
     </Dialog>

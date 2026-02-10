@@ -71,10 +71,10 @@ export interface ShareTradeSummary {
  */
 export interface ShareTrade {
   // The unique ID of the holding record
-  id: string;
+  id: string | undefined;
 
   // The internal share index ID.
-  shareindexId: string;
+  shareIndexId: string;
 
   // The date on which the trade occurred
   dateExecuted: Date;

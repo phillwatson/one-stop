@@ -11,31 +11,41 @@ import Collapse from '@mui/material/Collapse';
 import Box from '@mui/material/Box';
 import { SxProps } from '@mui/material/styles';
 
-import { ShareTradeSummary } from '../../model/share-portfolio.model';
+import { ShareTrade, ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import ShareTradeSummaryRow from './trade-summary-row';
 import ShareTradeList from './share-trade-list';
-
-interface Props {
-  /**
-   * Array of share trade summaries to display
-   */
-  holdings: ShareTradeSummary[];
-}
+import Button from '@mui/material/Button';
 
 const colhead: SxProps = {
   fontWeight: 'bold',
   backgroundColor: '#f5f5f5'
 };
 
-export default function ShareTradeSummaryList({ holdings }: Props) {
+const gain: SxProps = {
+  color: '#2e7d32',
+  fontWeight: 'bold'
+};
+
+const loss: SxProps = {
+  color: '#d32f2f',
+  fontWeight: 'bold'
+};
+
+interface Props {
+  /**
+   * Array of share trade summaries to display
+   */
+  holdings: ShareTradeSummary[];
+  onAddTrade?: (holding: ShareTradeSummary) => void;
+  onDeleteTrade?: (trade: ShareTrade) => void;
+  onEditTrade?: (trade: ShareTrade) => void;
+}
+
+export default function ShareTradeSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   const [ selectedHolding, setSelectingHolding ] = useState<ShareTradeSummary | undefined>(undefined);
-
-  function selectHolding(holding: ShareTradeSummary) {
-    setSelectingHolding((holding === selectedHolding) ? undefined : holding);
-  }
 
   const totalCost = useMemo(() => {
     return holdings.reduce((sum, holding) => sum + holding.totalCost, 0);
@@ -59,14 +69,19 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
     );
   }
 
+  function selectHolding(holding: ShareTradeSummary) {
+    setSelectingHolding((holding === selectedHolding) ? undefined : holding);
+  }
+
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell sx={colhead}>Share Name</TableCell>
-            {/* <TableCell sx={colhead}>ISIN</TableCell>
-            <TableCell sx={colhead}>Ticker</TableCell> */}
+            <TableCell sx={colhead} width='210px' style={{ maxWidth: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Share Name
+            </TableCell>
+
             <TableCell sx={colhead} align="right">Latest Price</TableCell>
             <TableCell sx={colhead} align="right">Quantity</TableCell>
             <TableCell sx={colhead} align="right">Avg. Price</TableCell>
@@ -85,12 +100,18 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
                   onClick={ selectHolding }/>
 
                 <TableRow>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }}></TableCell>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }}>
+                    { onAddTrade && 
+                      <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+                        <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
+                      </Collapse>
+                    }
+                  </TableCell>
                   <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                     <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
-                      <Box paddingTop={1} paddingBottom={1}>
+                      <Box paddingTop={1} paddingBottom={2}>
                         <Typography variant="h6">Trades</Typography>
-                        <ShareTradeList holding={ holding } />
+                        <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
                       </Box>
                     </Collapse>
                   </TableCell>
@@ -102,19 +123,13 @@ export default function ShareTradeSummaryList({ holdings }: Props) {
           <TableRow key="total" sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
             <TableCell colSpan={4} sx={{ fontWeight: 'bold' }}>Total</TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalCost, holdings[0].currency, true)}
+              {formatMoney(totalCost / 100, holdings[0].currency)}
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalValue, holdings[0].currency, true)}
+              {formatMoney(totalValue / 100, holdings[0].currency)}
             </TableCell>
-            <TableCell 
-              align="right"
-              sx={{
-                fontWeight: 'bold',
-                color: gainLoss >= 0 ? '#2e7d32' : '#d32f2f'
-              }}
-            >
-              {formatMoney(gainLoss, holdings[0].currency, true)}
+            <TableCell align="right" sx={ gainLoss >= 0 ? gain : loss }>
+              {formatMoney(gainLoss / 100, holdings[0].currency)}
               {' '}({totalCost > 0 ? ((gainLoss / totalCost) * 100).toFixed(2) : '0.00'}%)
             </TableCell>
           </TableRow>
