@@ -10,8 +10,14 @@ interface MonetaryContextValue {
    * of the given currency. If the context has hidden monetary values, the result
    * will be a masked value; showing the currency symbol but no indication of the
    * true value.
+   * 
+   * @param amount the amount to be formatted.
+   * @param currency the currency to be used in formatting the amount.
+   * @param minorUnits whether the amount is given in minor units, and should be
+   *  converted to major units and formatted with more fraction digits.
+   * @returns a string representing the formatted monetary value.
    */
-  format: (amount: number, currency: Currency) => string;
+  format: (amount: number, currency: Currency, minorUnits?: boolean) => string;
 
   /**
    * Indicates whether monetary values are currently to be hidden.
@@ -30,9 +36,9 @@ interface MonetaryContextValue {
  * display; and a format function to allow the caller to format a monerary value.
  */
 const MonetaryContext = createContext<MonetaryContextValue>({
-  format: (amount: number, currency: Currency) => { return "" },
+  format: (amount: number, currency: Currency, minorUnits?: boolean) => { return "" },
   hidden: false,
-  setHidden: (value: boolean) => {}
+  setHidden: (value: boolean) => {},
 });
 
 /**
@@ -47,7 +53,11 @@ const MonetaryContext = createContext<MonetaryContextValue>({
  *  formatMoney(1234.55, 'GPB');
  * ```
  */
-export default function useMonetaryContext(): [ (amount: number, currency: Currency) => string, boolean, (value: boolean) => void ] {
+export default function useMonetaryContext(): [
+  (amount: number, currency: Currency, minorUnits?: boolean) => string,
+  boolean,
+  (value: boolean) => void
+] {
   const x = useContext(MonetaryContext);
   return [ x.format, x.hidden, x.setHidden ];
 }
@@ -62,14 +72,28 @@ const formatters = {
 }
 
 /**
+ * A collection of monetary value formatters according to currency rules; keyed on the currency.
+ * These are used to format values originally given in minor currency units, and a more precise
+ * number of fraction digits.
+ */
+const formattersMinor = {
+  'EUR': { formatter: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 4 }) },
+  'GBP': { formatter: new Intl.NumberFormat('en-EN', { style: 'currency', currency: 'GBP', minimumFractionDigits: 4 }) },
+  'USD': { formatter: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 4 }) },
+}
+
+/**
  * The provider that suppliers and maintains the monetary context.
  * @param props a collection of UI child nodes.
  */
 export function MonetaryFormatProvider(props: PropsWithChildren) {
   const [ hidden, setHidden ] = useState<boolean>(false)
 
-  function format(amount: number, currency: Currency): string {
-    const result = formatters[currency].formatter.format( (hidden) ? 9999.99 : amount );
+  function format(amount: number, currency: Currency, minorUnits?: boolean): string {
+    const result = (minorUnits) 
+      ? formattersMinor[currency].formatter.format( (hidden) ? 9999.9999 : amount / 100 )
+      : formatters[currency].formatter.format( (hidden) ? 9999.99 : amount );
+
     return (hidden) ? result.replaceAll('9', '#') : result;
   }
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.commons.Strings;
 import com.hillayes.commons.json.MapperFactory;
+import com.hillayes.ftmarket.api.domain.CurrencyUnits;
 import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
@@ -28,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @Slf4j
@@ -38,6 +40,7 @@ public class MarketsClient {
         DateTimeFormatter.ofPattern("eeee, LLLL dd, uuuu");
     private static final TypeReference<Map<String,String>> MAP_TYPE_REFERENCE =
         new TypeReference<>() {};
+    private static final Pattern PRICE_CURRENCY = Pattern.compile("^Price \\((.*)\\)");
 
     private static final ObjectMapper OBJECT_MAPPER = MapperFactory.defaultMapper();
     private final String host;
@@ -71,11 +74,18 @@ public class MarketsClient {
                 return Optional.empty();
             }
 
+            String currencyCode = extractCurrencyCode(doc);
+            CurrencyUnits currencyUnits = CurrencyUnits.MAJOR;
+            if ((Strings.isBlank(currencyCode)) || ("GBX".equals(currencyCode))) {
+                currencyCode = "GBP";
+                currencyUnits = CurrencyUnits.MINOR;
+            }
             return Optional.of(IsinIssueLookup.builder()
                 .isin(symbol)
                 .issueId(issueId)
                 .name(extractName(doc))
-                .currencyCode(extractCurrencyCode(doc))
+                .currencyCode(currencyCode)
+                .currencyUnits(currencyUnits)
                 .build()
             );
         } catch (IOException e) {
@@ -122,28 +132,43 @@ public class MarketsClient {
 
     private String extractCurrencyCode(Document doc) {
         String result = null;
-        Element input = doc.selectFirst("input[name=currencyCode]");
-        if (input != null) {
-            Attribute attribute = input.attribute("value");
-            if (attribute != null) {
-                result = attribute.getValue();
-            }
-        }
 
-        if (result == null) {
-            Elements profileRows = doc.select("table.mod-profile-and-investment-app__table--profile tr");
-            result = profileRows.stream()
-                .filter(row -> row.firstElementChild() != null)
-                .filter(row -> row.firstElementChild().hasText())
-                .filter(row -> row.firstElementChild().text().toLowerCase().contains("currency"))
-                .map(row -> row.child(1).text())
-                .findFirst().orElse(null);
+        Element price = doc.selectFirst("ul.mod-tearsheet-overview__quote__bar");
+        if (price != null) {
+            result = price.children().stream()
+                .map(Element::text)
+                .filter(text -> text.toLowerCase().contains("price ("))
+                .findAny()
+                .map(PRICE_CURRENCY::matcher)
+                .filter(m -> m.find() && m.groupCount() > 0)
+                .map(m -> m.group(1))
+                .orElse(null);
         }
+//
+//        if (result == null) {
+//            Element input = doc.selectFirst("input[name=currencyCode]");
+//            if (input != null) {
+//                Attribute attribute = input.attribute("value");
+//                if (attribute != null) {
+//                    result = attribute.getValue();
+//                }
+//            }
+//        }
+//
+//        if (result == null) {
+//            Elements profileRows = doc.select("table.mod-profile-and-investment-app__table--profile tr");
+//            result = profileRows.stream()
+//                .filter(row -> row.firstElementChild() != null)
+//                .filter(row -> row.firstElementChild().hasText())
+//                .filter(row -> row.firstElementChild().text().toLowerCase().contains("currency"))
+//                .map(row -> row.child(1).text())
+//                .findFirst().orElse(null);
+//        }
 
         return result;
     }
 
-    public List<PriceData> getPrices(String issueId, LocalDate startDate, LocalDate endDate) {
+    public List<PriceData> getPrices(String issueId, CurrencyUnits currencyUnits, LocalDate startDate, LocalDate endDate) {
         log.info("Retrieving share prices [issueId: {}, startDate: {}, endDate: {}]", issueId, startDate, endDate);
         try {
             //https://markets.ft.com/data/equities/ajax/get-historical-prices?startDate=2025/08/28&endDate=2025/09/28&symbol=74137468
@@ -171,10 +196,10 @@ public class MarketsClient {
 
                     return new PriceData(
                         LocalDate.parse(date, DATE_PARSER),
-                        BigDecimal.valueOf(Double.parseDouble(cols.get(1).text().replace(",", ""))),
-                        BigDecimal.valueOf(Double.parseDouble(cols.get(2).text().replace(",", ""))),
-                        BigDecimal.valueOf(Double.parseDouble(cols.get(3).text().replace(",", ""))),
-                        BigDecimal.valueOf(Double.parseDouble(cols.get(4).text().replace(",", ""))),
+                        parsePrice(cols.get(1).text(), currencyUnits),
+                        parsePrice(cols.get(2).text(), currencyUnits),
+                        parsePrice(cols.get(3).text(), currencyUnits),
+                        parsePrice(cols.get(4).text(), currencyUnits),
                         Long.valueOf(volume.replace(",", ""))
                     );
                 })
@@ -191,5 +216,13 @@ public class MarketsClient {
                     "endDate", endDate
                 ));
         }
+    }
+
+    BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
+    private BigDecimal parsePrice(String text, CurrencyUnits units) {
+        BigDecimal value = BigDecimal.valueOf(Double.parseDouble(text.replace(",", "")));
+
+        // ensure price is recorded in minor units
+        return (units == CurrencyUnits.MAJOR) ? value.multiply(ONE_HUNDRED) : value;
     }
 }

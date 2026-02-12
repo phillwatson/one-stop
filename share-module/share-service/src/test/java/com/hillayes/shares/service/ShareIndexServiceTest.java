@@ -120,7 +120,8 @@ public class ShareIndexServiceTest {
         Map<ShareIndex.ShareIdentity, ShareInfo> shareIds = IntStream.range(0, 10)
             .mapToObj(i -> mockShareIdentity())
             .collect(Collectors.toMap(id -> id, id ->
-                    new ShareInfo(id.getIsin(), id.getTickerSymbol(), randomStrings.nextAlphanumeric(20), "GBP")));
+                    new ShareInfo(id.getIsin(), id.getTickerSymbol(),
+                        randomStrings.nextAlphanumeric(20), "GBP")));
 
         // And: the providers will return the share info for those identities
         when(shareProviderApi.getShareInfo(anyString(), anyString())).then(invocation -> {

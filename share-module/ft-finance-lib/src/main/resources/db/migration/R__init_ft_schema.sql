@@ -7,3 +7,7 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.isin_issue_lookup (
     name varchar(256) NULL,
     currency_code varchar(12)
 );
+
+-- add column to indicate the units in which prices are delivered
+ALTER TABLE IF EXISTS ${flyway:defaultSchema}.isin_issue_lookup
+    ADD COLUMN IF NOT EXISTS currency_units varchar(20) NOT NULL DEFAULT 'MINOR';
