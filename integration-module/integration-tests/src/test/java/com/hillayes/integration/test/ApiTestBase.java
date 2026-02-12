@@ -13,7 +13,7 @@ import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.DockerComposeContainer;
+import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 
 import java.io.File;
@@ -66,7 +66,7 @@ public abstract class ApiTestBase {
     // a semaphore to ensure that the docker containers are only initialized once
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static DockerComposeContainer<?> dockerContainers;
+    private static ComposeContainer dockerContainers;
 
     @BeforeAll
     public static void beforeAll() {
@@ -87,8 +87,8 @@ public abstract class ApiTestBase {
         return SimServer.WIREMOCK_PORT;
     }
 
-    private static DockerComposeContainer<?> initContainers() {
-        return new DockerComposeContainer<>(
+    private static ComposeContainer initContainers() {
+        return new ComposeContainer(
             new File("../../docker-compose.yaml"),
             resourceFile("/docker-compose.test.yaml"))
             .withExposedService("client", CLIENT_PORT)
