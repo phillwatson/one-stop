@@ -110,6 +110,7 @@ public class EventPacket {
      * ClassCastException.
      */
     @JsonIgnore
+    @SuppressWarnings("unchecked")
     public <T> T getPayloadContent() {
         if ((payloadContent == null) && (payload != null)) {
             try {

@@ -11,7 +11,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { debounce } from '@mui/material';
 
 import dayjs, { Dayjs } from 'dayjs';
-import { getDefaultLocaleRegion } from '../../util/date-util';
+import { defaultLocale } from '../../util/date-util';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 
@@ -53,7 +53,7 @@ export default function DateRangeSelector(props: Props) {
   const debouncedSetDateRange = debounce((value: Dayjs[]) => { props.onSelect(value) }, 600);
 
   return (
-    <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={getDefaultLocaleRegion()}>
+    <LocalizationProvider dateAdapter={ AdapterDayjs } adapterLocale={ defaultLocale.toLowerCase() }>
       <Grid container direction="row" spacing={ 3 } justifyContent="space-evenly">
         <Grid>
           <FormControl sx={{ width: { xs: 180, md: 220 }}}>

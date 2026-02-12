@@ -45,6 +45,7 @@ public class ShareTradeRepository extends RepositoryBase<ShareTrade, UUID> {
             "inner join shares.share_index s on t.share_index_id = s.id " +
             "order by s.name";
 
+    @SuppressWarnings("unchecked")
     public List<ShareTradeSummaryProjection> getShareTradeSummaries(UUID userId,
                                                                     UUID portfolioId) {
         return getEntityManager().createNativeQuery(SELECT_SUMMARIES, ShareTradeSummaryProjection.class)
