@@ -78,7 +78,7 @@ export default function ShareTradeSummaryList({ holdings, onAddTrade, onDeleteTr
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell sx={colhead} width='210px' style={{ maxWidth: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <TableCell sx={colhead} width='172px' style={{ maxWidth: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Share Name
             </TableCell>
 
