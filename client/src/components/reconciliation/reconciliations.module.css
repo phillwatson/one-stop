@@ -1,9 +1,9 @@
 .reconciled {
-  font-style: italic;
+  font-style: inherit;
 }
 
 .unreconciled {
-  font-style: inherit;
+  font-style: italic;
 }
 
 .pending {
