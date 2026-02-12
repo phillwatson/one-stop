@@ -31,6 +31,7 @@ public class PriceLookupService {
         IsinIssueLookup lookup = isinLookupService.lookupIssueId(symbol)
             .orElseThrow(() -> new IsinNotFoundException(ShareProvider.FT_MARKET_DATA, symbol));
 
-        return Optional.ofNullable(marketsClient.getPrices(lookup.getIssueId(), startDate, endDate));
+        return Optional.ofNullable(marketsClient.getPrices(lookup.getIssueId(),
+            lookup.getCurrencyUnits(), startDate, endDate));
     }
 }

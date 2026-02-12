@@ -13,11 +13,10 @@ export function getDefaultLocale(): Intl.Locale | undefined {
 
 export function getDefaultLocaleRegion(): string {
   const locale = getDefaultLocale();
-  return locale?.region || 'en-gb';
+  return locale?.region || 'GB';
 }
 
-const defaultLocale = getDefaultLocale();
-//const defaultRegion = getDefaultLocaleRegion();
+export const defaultLocale = getDefaultLocale()?.baseName || 'en-GB';
 
 export function toDate(dateStr?: string): Date | undefined {
   if (!dateStr) return undefined;

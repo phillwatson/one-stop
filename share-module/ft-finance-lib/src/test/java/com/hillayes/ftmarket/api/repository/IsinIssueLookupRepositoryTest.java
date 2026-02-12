@@ -1,5 +1,6 @@
 package com.hillayes.ftmarket.api.repository;
 
+import com.hillayes.ftmarket.api.domain.CurrencyUnits;
 import com.hillayes.ftmarket.api.domain.IsinIssueLookup;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -69,6 +70,8 @@ public class IsinIssueLookupRepositoryTest {
             .isin(randomStrings.nextAlphanumeric(10))
             .issueId(randomStrings.nextAlphanumeric(10))
             .name(randomStrings.nextAlphanumeric(30))
+            .currencyCode("GBP")
+            .currencyUnits(CurrencyUnits.MINOR)
             .build();
     }
 }
