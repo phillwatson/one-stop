@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 
-import { Box, Paper } from '@mui/material';
+import { Stack, Grid, Paper, Box } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -51,6 +51,15 @@ export default function CategoryTransactions(props: Props) {
     refresh();
   }, [ refresh ]);
 
+  const debitCredits = useMemo(() =>
+    transactions.reduce(
+      (result, transaction) => {
+        (transaction.amount < 0) ? result[0] -= transaction.amount : result[1] += transaction.amount;
+        return result;
+      },
+      [0, 0]
+    ), [ transactions ]);
+
   useEffect(() => {
     reconcilations.onSubmit=refresh;
     return () => {
@@ -72,7 +81,17 @@ export default function CategoryTransactions(props: Props) {
   return(
     <>
       <Paper sx={{ marginTop: 1, padding: 2 }} elevation={ props.elevation || 3 }>
-        <Box sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>{ props.category.categoryName }</Box>
+        <Stack spacing={ 1 } marginTop={ 1 } marginBottom={ 1 } direction='column' alignItems='center'>
+          <Stack sx={{ textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold' }}>
+            { props.category.categoryName }
+          </Stack>
+          <Stack spacing={ 4 } direction='row'>
+            <Box>Debits: { formatMoney(debitCredits[0], 'GBP')}</Box>
+            <Box>Credits: { formatMoney(debitCredits[1], 'GBP')}</Box>
+            <Box>Total: { formatMoney(debitCredits[1] - debitCredits[0], 'GBP')}</Box>
+          </Stack>
+        </Stack>
+
         <Table size="small" aria-label="transactions">
           <caption><i>
             { noTransactions ? 'there are no' : transactions.length } {' '}

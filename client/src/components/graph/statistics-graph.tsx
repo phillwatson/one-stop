@@ -217,6 +217,18 @@ export default function StatisticsGraph(props: Props) {
       </Paper>
 
       <Paper sx={{ marginTop: 1, padding: 2 }} elevation={ props.elevation || 3 }>
+        <Grid container spacing={ 4 } marginBottom={ 1 } alignItems='center' justifyContent='center'>
+          <Grid>
+            Debits: { formatMoney(grandTotals.debits, 'GBP')}
+          </Grid>
+          <Grid>
+            Credits: { formatMoney(grandTotals.credits, 'GBP')}
+          </Grid>
+          <Grid>
+            Total: { formatMoney(grandTotals.total, 'GBP')}
+          </Grid>
+        </Grid>
+
         <Grid container spacing={2} alignItems={"center"} justifyContent={"center"}>
           <Grid>
             <PieChart height={ 450 } width={ 400 } margin={{ top: 0, right: 8, bottom: 0, left: 8 }}
@@ -244,18 +256,6 @@ export default function StatisticsGraph(props: Props) {
                 )
               }
             </Stack>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={4} alignItems={"center"} justifyContent={"center"} marginTop={ 1 }>
-          <Grid>
-            Debits: { formatMoney(grandTotals.debits, 'GBP')}
-          </Grid>
-          <Grid>
-            Credits: { formatMoney(grandTotals.credits, 'GBP')}
-          </Grid>
-          <Grid>
-            Total: { formatMoney(grandTotals.total, 'GBP')}
           </Grid>
         </Grid>
       </Paper>
