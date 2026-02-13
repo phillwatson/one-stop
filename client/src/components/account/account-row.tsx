@@ -7,7 +7,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import GraphIcon from '@mui/icons-material/Equalizer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
@@ -41,10 +40,6 @@ export default function AccountList(props: Props) {
     props.onSelect(props.account);
   }
 
-  function exportAccount() {
-    closeMenu();
-  }
-
   function showAccount(accountId: string) {
     closeMenu();
     navigation(`/accounts/${accountId}/transactions`);
@@ -70,10 +65,6 @@ export default function AccountList(props: Props) {
           <MenuItem onClick={() => showGraph(props.accountId)} >
             <ListItemIcon><GraphIcon fontSize="small"/></ListItemIcon>
             <ListItemText>Show Graph...</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={exportAccount}>
-            <ListItemIcon><FileDownloadIcon fontSize="small"/></ListItemIcon>
-            <ListItemText>Export...</ListItemText>
           </MenuItem>
         </Menu>
     );
