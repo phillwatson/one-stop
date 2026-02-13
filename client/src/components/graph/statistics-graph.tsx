@@ -244,13 +244,14 @@ export default function StatisticsGraph(props: Props) {
                 <FormControlLabel key={ stat.categoryName }
                   label={ `${stat.categoryName} (${ formatMoney(stat.total, 'GBP')})` }
                   style={{ padding: 0, margin: 0 }}
+                  onClick={ e => {
+                    e.preventDefault();
+                    selectStat(stat);
+                  }}
                   control= {
                     <Switch key={ stat.categoryName } name={ stat.categoryName } checked={ stat.selected }
                       style={{ color: stat.selected ? stat.colour : undefined }}
-                      onChange={ e => {
-                        toggleCategory(stat.categoryId, e.target.checked);
-                        selectStat(stat);
-                      }}/>
+                      onClick={ () => toggleCategory(stat.categoryId, !stat.selected) }/>
                   }
                 />
                 )
