@@ -8,8 +8,8 @@ aggregated fashion.
 
 ## Architecture
 One-Stop has been designed using an event-driven, modulith service architecture,
-where each service has a specific area of responsibility; and deployed as a
-single Docker image.
+where each service has a specific area of responsibility; and the whole is deployed
+as a single Docker image.
 
 ![Architecture](./docs/one-stop-arch.png)
 
