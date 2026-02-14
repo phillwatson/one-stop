@@ -1,8 +1,24 @@
 quarkus:
   hibernate-orm:
+    database:
+      # allows tests to apply migrations without conflicting with other modules
+      default-schema: notifications
     log:
       sql: true
       bind-parameters: true
+
+  flyway:
+    migrate-at-start: true
+    default-schema: ${quarkus.hibernate-orm.database.default-schema}
+
+  log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG
 
 one-stop:
   auth:

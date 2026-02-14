@@ -7,7 +7,6 @@ networks:
 
 volumes:
   db-data:
-  broker-data:
   management-data:
   grafana-data:
 
@@ -49,48 +48,6 @@ services:
         max-size: "500k"
         max-file: "1"
 
-  broker:
-    restart: unless-stopped
-    image: redpandadata/redpanda:v25.2.5
-    networks:
-      - onestop-event-network
-    hostname: redpanda
-    command:
-      - redpanda
-      - start
-      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-        # Address the broker advertises to clients that connect to the Kafka API.
-        # Use the internal addresses to connect to the Redpanda brokers' from inside the same Docker network.
-        # Use the external addresses to connect to the Redpanda brokers' from outside the Docker network.
-      - --advertise-kafka-addr internal://broker:9092,external://localhost:19092
-      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
-        # Address the broker advertises to clients that connect to the HTTP Proxy.
-      - --advertise-pandaproxy-addr internal://broker:8082,external://localhost:18082
-      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
-        # Redpanda brokers use the RPC API to communicate with each other internally.
-      - --rpc-addr broker:33145
-      - --advertise-rpc-addr broker:33145
-        # Tells Seastar (the framework Redpanda uses under the hood) to use 1 core on the system.
-      - --smp 1
-        # The amount of memory to make available to Redpanda.
-      - --memory 1G
-        # Mode dev-container uses well-known configuration properties for development in containers.
-      - --mode dev-container
-        # enable logs for debugging.
-      - --default-log-level=info
-    ports:
-      - "18081:18081"
-      - "18082:18082"
-      - "19092:19092"
-      - "19644:9644"
-    volumes:
-      - broker-data:/var/lib/redpanda/data
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
   db:
     restart: unless-stopped
     image: postgres:17.6-alpine3.21
@@ -112,101 +69,15 @@ services:
         max-size: "500k"
         max-file: "1"
 
-  user-service:
+  one-stop-service:
     restart: unless-stopped
-    image: ghcr.io/phillwatson/user-service:1.0.0
+    image: ghcr.io/phillwatson/one-stop-main:1.0.0
     depends_on:
       - db
-      - broker
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
       QUARKUS_DATASOURCE_USERNAME: one-stop
       QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
-    networks:
-      - onestop-db-network
-      - onestop-event-network
-      - onestop-http-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
-  rail-service:
-    restart: unless-stopped
-    image: ghcr.io/phillwatson/rail-service:1.0.0
-    depends_on:
-      - db
-      - broker
-    environment:
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
-      QUARKUS_DATASOURCE_USERNAME: one-stop
-      QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
-    networks:
-      - onestop-db-network
-      - onestop-event-network
-      - onestop-http-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
-  share-service:
-    restart: unless-stopped
-    image: ghcr.io/phillwatson/share-service:1.0.0
-    depends_on:
-      - db
-      - broker
-    environment:
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
-      QUARKUS_DATASOURCE_USERNAME: one-stop
-      QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
-    networks:
-      - onestop-db-network
-      - onestop-event-network
-      - onestop-http-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
-  audit-service:
-    restart: unless-stopped
-    image: ghcr.io/phillwatson/audit-service:1.0.0
-    depends_on:
-      - db
-      - broker
-    environment:
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
-      QUARKUS_DATASOURCE_USERNAME: one-stop
-      QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
-    networks:
-      - onestop-db-network
-      - onestop-event-network
-      - onestop-http-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500k"
-        max-file: "1"
-
-  notification-service:
-    restart: unless-stopped
-    image: ghcr.io/phillwatson/notification-service:1.0.0
-    depends_on:
-      - db
-      - broker
-    environment:
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
-      QUARKUS_DATASOURCE_USERNAME: one-stop
-      QUARKUS_DATASOURCE_PASSWORD: password
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
     networks:
       - onestop-db-network
       - onestop-event-network
@@ -221,9 +92,7 @@ services:
     restart: unless-stopped
     image: ghcr.io/phillwatson/client:1.0.0
     depends_on:
-      - rail-service
-      - user-service
-      - notification-service
+      - one-stop-service
     ports:
       - "80:80"
     networks:

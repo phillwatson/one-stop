@@ -13,12 +13,6 @@
 
     <dependencies>
         <dependency>
-            <!-- causes build of docker images on package -->
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-container-image-jib</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
@@ -43,22 +37,13 @@
 
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
+            <artifactId>events-common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>management-lib</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
     <profiles>
         <profile>
@@ -68,10 +53,6 @@
                     <name>native</name>
                 </property>
             </activation>
-            <properties>
-                <!-- see https://quarkus.io/guides/writing-native-applications-tips -->
-                <quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator</quarkus.native.additional-build-args>
-            </properties>
         </profile>
     </profiles>
 </project>

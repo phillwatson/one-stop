@@ -14,6 +14,7 @@ import java.util.function.Consumer;
  * transactions to the category.
  */
 @Entity
+@Table(schema = "rails", name = "category")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor

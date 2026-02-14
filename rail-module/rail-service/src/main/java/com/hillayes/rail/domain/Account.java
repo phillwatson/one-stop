@@ -13,6 +13,7 @@ import java.util.UUID;
  * consent.
  */
 @Entity
+@Table(schema = "rails", name = "account")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor

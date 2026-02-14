@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hillayes</groupId>
+        <artifactId>one-stop</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>one-stop-main</artifactId>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <!--
+                 see https://quarkus.io/guides/writing-native-applications-tips
+                 This resource is actually located in the user-service resources folder,
+                 but referenced here for the modulith build. In the microservice build
+                 this entry would be in the user-service/pom.xml.
+                -->
+                <quarkus.native.additional-build-args>-H:DynamicProxyConfigurationResources=proxy-config.json</quarkus.native.additional-build-args>
+<!--                <quarkus.native.additional-build-args>-H:DynamicProxyConfigurationResources=proxy-config.json,&#45;&#45;initialize-at-run-time=io.restassured.path.xml.mapper.factory.DefaultJAXBObjectMapperFactory</quarkus.native.additional-build-args>-->
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <!-- causes build of docker images on package -->
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>audit-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>notification-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>rail-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>share-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>user-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
