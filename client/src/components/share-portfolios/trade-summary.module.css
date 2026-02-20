@@ -1,0 +1,69 @@
+.money {
+  text-align: right;
+}
+
+.gain {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.loss {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.holdingheader {
+  padding: 5px;
+  white-space: nowrap;
+}
+
+.holdingrow {
+  width: 100%;
+  margin: 0;
+  padding: 0px;
+  padding-top: 5px;
+  padding-bottom: 7px;
+  font-weight: bold;
+  border-top: 1px solid whitesmoke;
+}
+
+.holdingtotal {
+  width: 100%;
+  margin: 0;
+  margin-top: 5px;
+  padding: 0;
+  padding-top: 15px;
+  padding-bottom: 7px;
+  font-weight: normal;
+  border-top: 3px double lightgrey;
+}
+
+.holdingrow:hover {
+  background-color: whitesmoke;
+}
+
+.holdingname {
+  padding: 0;
+  margin: 0;
+  min-width: 27%;
+}
+
+.holdingcell {
+  padding: 0;
+  margin: 0;
+  min-width: 12%;
+  white-space: nowrap;
+}
+
+.selected   {
+  border: 1px solid lightgrey;
+  border-radius: 12px;
+  margin-bottom: 7px;
+  margin-top: 0px;
+}
+
+.selected > .holdingrow   {
+  border: 0;
+  border-radius: 12px 12px 0px 0px;
+  background-color: whitesmoke;
+}

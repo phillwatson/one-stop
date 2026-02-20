@@ -9,6 +9,7 @@ import { ShareIndex } from "../../model/share-indices.model";
 import ShareTradeSummaryList from "./share-trade-summary";
 import AddShareTradeDialog from "./add-share-trade";
 import ConfirmationDialog from "../dialogs/confirm-dialog";
+import ShareTradeGraph from "./share-trade-graph";
 
 interface Props {
   portfolio?: PortfolioResponse;
@@ -104,6 +105,7 @@ export default function ShareTradeEditor(props: Props) {
   return (
     <>
       <Box>
+        {/* <ShareTradeGraph holdings={ holdings } /> */}
         <ShareTradeSummaryList holdings={ holdings }
           onAddTrade={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }

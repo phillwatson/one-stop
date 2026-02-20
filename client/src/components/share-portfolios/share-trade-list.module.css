@@ -1,0 +1,13 @@
+.money {
+  text-align: right;
+}
+
+.gain {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.loss {
+  color: #d32f2f;
+  font-weight: bold;
+}

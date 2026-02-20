@@ -1,27 +1,18 @@
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
+import { PropsWithChildren } from 'react';
+import Stack from '@mui/material/Stack';
+import Container from '@mui/material/Container';
 
 import { ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import { SxProps } from '@mui/material/styles';
+import styles from './trade-summary.module.css';
 
-interface Props {
+interface Props extends PropsWithChildren {
   holding: ShareTradeSummary;
   selected?: boolean;
   onClick?: (holding: ShareTradeSummary) => void;
 }
 
-const gain: SxProps = {
-  color: '#2e7d32',
-  fontWeight: 'bold'
-};
-
-const loss: SxProps = {
-  color: '#d32f2f',
-  fontWeight: 'bold'
-};
-
-export default function ShareTradeSummaryRow({ holding, selected, onClick }: Props) {
+export default function ShareTradeSummaryRow({ holding, selected, onClick, children }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   function selectRow(holding: ShareTradeSummary) {
@@ -31,22 +22,21 @@ export default function ShareTradeSummaryRow({ holding, selected, onClick }: Pro
   }
 
   return (
-    <TableRow key={holding.shareIndexId} hover selected={ selected }
-      component="tr" onClick={ () => selectRow(holding) } >
-      <TableCell>{holding.name}</TableCell>
-      {/*
-        <TableCell>{holding.shareId?.isin || '-'}</TableCell>
-        <TableCell>{holding.shareId?.tickerSymbol || '-'}</TableCell>
-      */}
-      <TableCell align="right">{formatMoney(holding.latestPrice, holding.currency, true)}</TableCell>
-      <TableCell align="right">{holding.quantity.toLocaleString()}</TableCell>
-      <TableCell align="right">{formatMoney(holding.averagePrice, holding.currency, true)}</TableCell>
-      <TableCell align="right">{formatMoney(holding.totalCost / 100, holding.currency)}</TableCell>
-      <TableCell align="right">{formatMoney(holding.currentValue / 100, holding.currency)}</TableCell>
-      <TableCell align="right" sx={ holding.gainLoss >= 0 ? gain : loss }>
-        {formatMoney(holding.gainLoss / 100, holding.currency)}
-        <br/>({holding.gainLossPercent.toFixed(2)}%)
-      </TableCell>
-    </TableRow>
+    <div className={`${ selected ? styles.selected : ''}`} >
+      <Stack direction='row' onClick={ () => selectRow(holding) } className={`${styles.holdingrow}`} >
+        <Container className={`${styles.holdingname}`}>{ holding.name }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(holding.latestPrice, holding.currency, true) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ holding.quantity.toLocaleString() }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(holding.averagePrice, holding.currency, true) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(holding.totalCost / 100, holding.currency) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(holding.currentValue / 100, holding.currency) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money } ${ holding.gainLoss >= 0 ? styles.gain : styles.loss }`}>
+          {formatMoney(holding.gainLoss / 100, holding.currency)}
+          <br/>({holding.gainLossPercent.toFixed(2)}%)
+        </Container>
+      </Stack>
+      
+      { children }
+    </div>
   );
 }

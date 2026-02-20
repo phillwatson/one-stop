@@ -193,9 +193,7 @@ export default function ShareIndexGraph(props: Props) {
       Promise.all(requests)
         .then(responses => responses.sort((a, b) => a.shareIndex.name.localeCompare(b.shareIndex.name)))
         .then(response => setPrices(response))
-        .catch(err => {
-          showMessage(err);
-        });
+        .catch(err => showMessage(err));
     } else {
       setPrices([]);
     }

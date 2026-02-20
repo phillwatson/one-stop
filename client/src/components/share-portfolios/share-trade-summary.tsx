@@ -1,36 +1,18 @@
 import { useMemo, useState } from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Collapse from '@mui/material/Collapse';
 import Box from '@mui/material/Box';
-import { SxProps } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Container from '@mui/material/Container';
 
 import { ShareTrade, ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import ShareTradeSummaryRow from './trade-summary-row';
 import ShareTradeList from './share-trade-list';
-import Button from '@mui/material/Button';
 
-const colhead: SxProps = {
-  fontWeight: 'bold',
-  backgroundColor: '#f5f5f5'
-};
-
-const gain: SxProps = {
-  color: '#2e7d32',
-  fontWeight: 'bold'
-};
-
-const loss: SxProps = {
-  color: '#d32f2f',
-  fontWeight: 'bold'
-};
+import styles from './trade-summary.module.css';
 
 interface Props {
   /**
@@ -74,67 +56,56 @@ export default function ShareTradeSummaryList({ holdings, onAddTrade, onDeleteTr
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell sx={colhead} width='172px' style={{ maxWidth: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Share Name
-            </TableCell>
+    <Paper style={{ width: '100%', fontSize: '14px' }}>
+      <Stack direction='row' className={`${styles.holdingheader}`}>
+        <Container className={`${styles.holdingname}`}>Name</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Latest Price</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Quantity</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Avg. Price</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Cost</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Value</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>Gain/Loss</Container>
+      </Stack>
 
-            <TableCell sx={colhead} align="right">Latest Price</TableCell>
-            <TableCell sx={colhead} align="right">Quantity</TableCell>
-            <TableCell sx={colhead} align="right">Avg. Price</TableCell>
-            <TableCell sx={colhead} align="right">Total Cost</TableCell>
-            <TableCell sx={colhead} align="right">Current Value</TableCell>
-            <TableCell sx={colhead} align="right">Gain/Loss</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {
-            holdings.map(holding =>
-              <>
-                <ShareTradeSummaryRow
-                  holding={ holding }
-                  selected={ holding === selectedHolding }
-                  onClick={ selectHolding }/>
+      {
+        holdings.map(holding =>
+          <>
+            <ShareTradeSummaryRow key={ holding.shareIndexId }
+              holding={ holding }
+              selected={ holding === selectedHolding }
+              onClick={ selectHolding }
+              children={
 
-                <TableRow>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }}>
-                    { onAddTrade && 
-                      <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
-                        <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
-                      </Collapse>
-                    }
-                  </TableCell>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
-                      <Box paddingTop={1} paddingBottom={2}>
-                        <Typography variant="h6">Trades</Typography>
-                        <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
-                      </Box>
-                    </Collapse>
-                  </TableCell>
-                </TableRow>
-              </>
-            )
-          }
+            <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+              <Stack direction='row' className={`${styles.trades}`} >
+                <Container key="options">
+                  { onAddTrade && 
+                    <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
+                  }
+                </Container>
+                <Container key="pp" style={{ paddingTop: '1px', paddingBottom: '12px' }}>
+                    <Typography variant="h6">Trades</Typography>
+                    <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
+                </Container>
+              </Stack>
+            </Collapse>
+              }/>
+          </>
+        )
+      }
 
-          <TableRow key="total" sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
-            <TableCell colSpan={4} sx={{ fontWeight: 'bold' }}>Total</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalCost / 100, holdings[0].currency)}
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              {formatMoney(totalValue / 100, holdings[0].currency)}
-            </TableCell>
-            <TableCell align="right" sx={ gainLoss >= 0 ? gain : loss }>
-              {formatMoney(gainLoss / 100, holdings[0].currency)}
-              {' '}({totalCost > 0 ? ((gainLoss / totalCost) * 100).toFixed(2) : '0.00'}%)
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+      <Stack direction='row' className={`${styles.holdingtotal}`}>
+        <Container className={`${styles.holdingname}`}>Total:</Container>
+        <Container className={`${styles.holdingcell}`}></Container>
+        <Container className={`${styles.holdingcell}`}></Container>
+        <Container className={`${styles.holdingcell}`}></Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(totalCost / 100, holdings[0].currency) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money }`}>{ formatMoney(totalValue / 100, holdings[0].currency) }</Container>
+        <Container className={`${styles.holdingcell} ${ styles.money } ${ gainLoss >= 0 ? styles.gain : styles.loss }`}>
+          {formatMoney(gainLoss / 100, holdings[0].currency)}
+          <br/>({totalCost > 0 ? ((gainLoss / totalCost) * 100).toFixed(2) : '0.00'}%)
+        </Container>
+      </Stack>
+    </Paper>
   );
 }
