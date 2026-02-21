@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,6 +11,7 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/ModeEdit';
+import { SxProps } from '@mui/material/styles';
 
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
@@ -17,7 +19,21 @@ import PortfolioService from '../../services/portfolio.service';
 import { ShareTradeSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { toLocaleDate } from '../../util/date-util';
 import { Currency } from '../../model/commons.model';
-import styles from './share-trade-list.module.css';
+
+const money: SxProps = {
+  textAlign: 'right'
+}
+
+const gain: SxProps = {
+  color: '#2e7d32',
+  fontWeight: 'bold'
+}
+
+const loss: SxProps = {
+  color: '#d32f2f',
+  fontWeight: 'bold'
+}
+
 
 type TradeFunction = (trade: ShareTrade) => void;
 
@@ -61,8 +77,9 @@ function HoverOptions({ summary, onDeleteTrade, onEditTrade }: RowProps) {
   }
 
   return (
-    <Stack direction='row' spacing='3px' zIndex='1000' position='absolute' top='0' right='0'
-           bgcolor='#f5fafc' borderRadius='3' padding='0' paddingLeft='25px' paddingRight='14px'>
+    <Stack direction='row' spacing='3px' bgcolor='whitesmoke'
+           zIndex='1000' position='absolute' top='1px' right='0'
+           padding='0px 14px 0px 25px'>
       { onEditTrade &&
         <Tooltip title="Amend">
           <IconButton size="small" onClick={() => onEditTrade(summary.trade) }>
@@ -94,17 +111,22 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
      >
       <TableCell>{ summary.trade.quantity > 0 ? 'Buy' : 'Sell' }</TableCell>
       <TableCell>{toLocaleDate(summary.trade.dateExecuted)}</TableCell>
-      <TableCell className={`${ styles.money }`}>{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
-      <TableCell className={`${ styles.money }`}>{formatMoney(summary.trade.pricePerShare, summary.currency, true)}</TableCell>
-      <TableCell className={`${ styles.money }`}>{formatMoney(summary.trade.totalCost / 100, summary.currency)}</TableCell>
-      <TableCell className={`${ styles.money } ${ summary.gainLoss >= 0 ? styles.gain : styles.loss }`} >
-        {formatMoney(summary.gainLoss / 100, summary.currency)}</TableCell>
-      <TableCell className={`${ styles.money } ${ summary.gainLoss >= 0 ? styles.gain : styles.loss }`} >
-        {' '}{ summary.trade.quantity > 0 ? '(' + summary.gainLossPercent.toFixed(2) + '%)' : ''}
+      <TableCell sx={money}>{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
+      <TableCell sx={money}>{formatMoney(summary.trade.pricePerShare, summary.currency, true)}</TableCell>
+      <TableCell sx={money}>{formatMoney(summary.trade.totalCost / 100, summary.currency)}</TableCell>
+      <TableCell sx={money}>
+        <Container sx={summary.gainLoss >= 0 ? gain : loss} style={{ padding: 0, margin: 0 }}>
+          {formatMoney(summary.gainLoss / 100, summary.currency)}
+        </Container>
+      </TableCell>
+      <TableCell sx={money}>
+        <Container sx={summary.gainLoss >= 0 ? gain : loss} style={{ padding: 0, margin: 0 }}>
+          {' '}{ summary.trade.quantity > 0 ? '(' + summary.gainLossPercent.toFixed(2) + '%)' : ''}
 
-        { showOptions &&
-          <HoverOptions summary={ summary } onEditTrade={ onEditTrade } onDeleteTrade={ onDeleteTrade }/>
-        }
+          { showOptions &&
+            <HoverOptions summary={ summary } onEditTrade={ onEditTrade } onDeleteTrade={ onDeleteTrade }/>
+          }
+        </Container>
       </TableCell>
     </TableRow>
   )
@@ -138,11 +160,11 @@ export default function ShareTradeList({ holding, onDeleteTrade, onEditTrade }: 
         <TableRow>
           <TableCell>Type</TableCell>
           <TableCell>Date</TableCell>
-          <TableCell className={`${ styles.money }`} >Quantity</TableCell>
-          <TableCell className={`${ styles.money }`} >Price</TableCell>
-          <TableCell className={`${ styles.money }`} >Total</TableCell>
-          <TableCell className={`${ styles.money }`} >Gain/Loss</TableCell>
-          <TableCell className={`${ styles.money }`} ></TableCell>
+          <TableCell sx={money} >Quantity</TableCell>
+          <TableCell sx={money} >Price</TableCell>
+          <TableCell sx={money} >Total</TableCell>
+          <TableCell sx={money} >Gain/Loss</TableCell>
+          <TableCell sx={money} ></TableCell>
         </TableRow>
       </TableHead>
       <TableBody>

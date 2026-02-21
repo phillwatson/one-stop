@@ -6,10 +6,10 @@ import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
 import { PortfolioResponse, ShareTrade, ShareTradeSummary } from "../../model/share-portfolio.model";
 import { ShareIndex } from "../../model/share-indices.model";
-import HoldingSummaryList from "./holding-summary-list";
+import HoldingsSummaryList from "./holdings-summary-list";
 import AddShareTradeDialog from "./add-share-trade";
 import ConfirmationDialog from "../dialogs/confirm-dialog";
-import ShareTradeGraph from "./share-trade-graph";
+import HoldingsGraph from "./holdings-graph";
 
 interface Props {
   portfolio?: PortfolioResponse;
@@ -106,7 +106,7 @@ export default function HoldingsEditor(props: Props) {
     <>
       <Box>
         {/* <ShareTradeGraph holdings={ holdings } /> */}
-        <HoldingSummaryList holdings={ holdings }
+        <HoldingsSummaryList holdings={ holdings }
           onAddTrade={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }
           onEditTrade={ handleOpenAmendTrade }/>

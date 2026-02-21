@@ -24,7 +24,7 @@ interface Props {
   onEditTrade?: (trade: ShareTrade) => void;
 }
 
-export default function HoldingSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
+export default function HoldingsSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   const [ selectedHolding, setSelectingHolding ] = useState<ShareTradeSummary | undefined>(undefined);
@@ -57,7 +57,7 @@ export default function HoldingSummaryList({ holdings, onAddTrade, onDeleteTrade
 
   return (
     <Paper style={{ width: '100%', fontSize: '14px' }}>
-      <Stack direction='row' className={`${styles.holdingheader}`}>
+      <Stack key="header" direction='row' className={`${styles.holdingheader}`}>
         <Container className={`${styles.holdingname}`}>Name</Container>
         <Container className={`${styles.holdingcell} ${ styles.money }`}>Latest Price</Container>
         <Container className={`${styles.holdingcell} ${ styles.money }`}>Quantity</Container>
@@ -69,31 +69,27 @@ export default function HoldingSummaryList({ holdings, onAddTrade, onDeleteTrade
 
       {
         holdings.map(holding =>
-          <>
-            <HoldingSummaryRow key={ holding.shareIndexId }
-              holding={ holding }
-              selected={ holding === selectedHolding }
-              onClick={ selectHolding }
-              children={
-                <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
-                  <Stack direction='row'>
-                    <Container key="options" style={{ alignContent: 'center' }}>
-                      { onAddTrade && 
-                        <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
-                      }
-                    </Container>
-                    <Container key="pp" style={{ paddingTop: '1px', paddingBottom: '12px' }}>
-                        <Typography variant="h6">Trades</Typography>
-                        <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
-                    </Container>
-                  </Stack>
-                </Collapse>
-              }/>
-          </>
+          <HoldingSummaryRow key={ holding.shareIndexId } holding={ holding }
+            selected={ holding === selectedHolding } onClick={ selectHolding }
+            children={
+              <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+                <Stack direction='row'>
+                  <Container key={ "options_" + holding.shareIndexId } style={{ alignContent: 'center' }}>
+                    { onAddTrade && 
+                      <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
+                    }
+                  </Container>
+                  <Container key={ "trades_" + holding.shareIndexId } style={{ paddingTop: '1px', paddingBottom: '12px' }}>
+                      <Typography variant="h6">Trades</Typography>
+                      <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
+                  </Container>
+                </Stack>
+              </Collapse>
+            }/>
         )
       }
 
-      <Stack direction='row' className={`${styles.holdingtotal}`}>
+      <Stack key="totals" direction='row' className={`${styles.holdingtotal}`}>
         <Container className={`${styles.holdingname}`}>Total:</Container>
         <Container className={`${styles.holdingcell}`}></Container>
         <Container className={`${styles.holdingcell}`}></Container>

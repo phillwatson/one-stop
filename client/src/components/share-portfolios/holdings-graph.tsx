@@ -60,7 +60,7 @@ interface Props {
   holdings: ShareTradeSummary[];
 }
 
-export default function ShareTradeGraph({ holdings }: Props) {
+export default function HoldingsGraph({ holdings }: Props) {
   const showMessage = useMessageDispatch();
   const [ holdingData, setHoldingData ] = useState<Array<ShareHolding>>([]);
 
