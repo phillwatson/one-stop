@@ -8,7 +8,6 @@ import { ShareTradeSummary, ShareTrade } from '../../model/share-portfolio.model
 import { HistoricalPriceResponse } from "../../model/share-indices.model";
 import { formatDate } from "../../util/date-util";
 
-
 /**
  * Encapsulates a share index and its associated historical prices for view and comparison.
  */
@@ -27,30 +26,26 @@ class ShareHolding {
 
   values: Array<any> = [];
 
-  constructor(holding: ShareTradeSummary, trades: Array<ShareTrade>) {
+  constructor(holding: ShareTradeSummary, trades: Array<ShareTrade>, prices: Array<HistoricalPriceResponse>) {
     this.holding = holding;
     this.trades = trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime());
+    this.prices = prices;
+
+    var tradeIndex = 0;
+    var quantity = 0;
+    var nextTrade: ShareTrade | undefined = (this.trades.length > 0) ? this.trades[0] : undefined;
+
+    this.values = this.prices.map(price => {
+      while ((nextTrade) && (nextTrade.dateExecuted <= price.date)) {
+        quantity += nextTrade.quantity;
+        nextTrade = (++tradeIndex < this.trades.length) ? this.trades[tradeIndex] : undefined;
+      }
+      return {
+        date: price.date,
+        price: (price.close * quantity) / 100.0
+      };
+    });
   }
-
-  setPrices(value: Array<HistoricalPriceResponse>) {
-    this.prices = value;
-
-    // var tradeIndex = 0;
-    // var quantity = 0;
-    // var nextTrade: ShareTrade | undefined = (this.trades.length > 0) ? this.trades[0] : undefined;
-
-    // this.values = this.prices.map(price => {
-    //   while ((nextTrade) && (nextTrade.dateExecuted <= price.date)) {
-    //     quantity += nextTrade.quantity;
-    //     nextTrade = (++tradeIndex < this.trades.length) ? this.trades[tradeIndex] : undefined;
-    //   }
-    //   return {
-    //     date: price.date,
-    //     price: (price.close * quantity) / 100.0
-    //   };
-    // })
-  }
-
 }
 
 interface Props {
@@ -63,36 +58,25 @@ interface Props {
 export default function HoldingsGraph({ holdings }: Props) {
   const showMessage = useMessageDispatch();
   const [ holdingData, setHoldingData ] = useState<Array<ShareHolding>>([]);
+  const [ fromDate, setFromDate ] = useState<Date>(new Date(Date.now() - ((30 * 24 * 60 * 60) * 1000)));
+  const [ toDate, setToDate ] = useState<Date>(new Date(Date.now()));
 
   useEffect(() => {
     // retrieve trade history for each holding
     const requests = holdings
-      .map(holding => PortfolioService
-        .fetchShareTrades(holding.portfolioId, holding.shareIndexId)
-        .then(trades => new ShareHolding(holding, trades))
+      // fetch the trades for each holding
+      .map(holding => PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId)
+        // fetch the historical prices each holding - filtered according to date range
+        .then(trades => ShareService.getPrices(holding.shareIndexId, fromDate, toDate)
+          .then(prices => new ShareHolding(holding, trades, prices))
+        )
       );
 
     // wait for requests to complete
     Promise.all(requests)
       .then(holdings => setHoldingData(holdings))
       .catch(err => showMessage(err));
-  }, [ showMessage, holdings ]);
-
-  useEffect(() => {
-    const toDate = new Date(Date.now());
-    const fromDate = new Date(toDate.getTime() - ((30 * 24 * 60 * 60) * 1000));
-
-    // Fetch the historical prices each share holding - filtered according to date range
-    const requests = holdingData
-      .map(holding => ShareService.getPrices(holding.holding.shareIndexId, fromDate, toDate)
-        .then(response => response.filter(p => ((p.date >= fromDate) && (p.date <= toDate))))
-        .then(response => holding.setPrices(response))
-      );
-
-    // wait for requests to complete
-    Promise.all(requests)
-      .catch(err => showMessage(err));
-  }, [ showMessage, holdingData ]);
+  }, [ showMessage, holdings, fromDate, toDate ]);
 
 return (
   <>
