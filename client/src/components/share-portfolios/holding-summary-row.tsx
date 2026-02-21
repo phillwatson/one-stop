@@ -4,7 +4,7 @@ import Container from '@mui/material/Container';
 
 import { ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import styles from './trade-summary.module.css';
+import styles from './holding-summary.module.css';
 
 interface Props extends PropsWithChildren {
   holding: ShareTradeSummary;
@@ -12,7 +12,7 @@ interface Props extends PropsWithChildren {
   onClick?: (holding: ShareTradeSummary) => void;
 }
 
-export default function ShareTradeSummaryRow({ holding, selected, onClick, children }: Props) {
+export default function HoldingSummaryRow({ holding, selected, onClick, children }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   function selectRow(holding: ShareTradeSummary) {

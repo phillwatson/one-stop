@@ -9,10 +9,10 @@ import Container from '@mui/material/Container';
 
 import { ShareTrade, ShareTradeSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import ShareTradeSummaryRow from './trade-summary-row';
+import HoldingSummaryRow from './holding-summary-row';
 import ShareTradeList from './share-trade-list';
 
-import styles from './trade-summary.module.css';
+import styles from './holding-summary.module.css';
 
 interface Props {
   /**
@@ -24,7 +24,7 @@ interface Props {
   onEditTrade?: (trade: ShareTrade) => void;
 }
 
-export default function ShareTradeSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
+export default function HoldingSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   const [ selectedHolding, setSelectingHolding ] = useState<ShareTradeSummary | undefined>(undefined);
@@ -70,25 +70,24 @@ export default function ShareTradeSummaryList({ holdings, onAddTrade, onDeleteTr
       {
         holdings.map(holding =>
           <>
-            <ShareTradeSummaryRow key={ holding.shareIndexId }
+            <HoldingSummaryRow key={ holding.shareIndexId }
               holding={ holding }
               selected={ holding === selectedHolding }
               onClick={ selectHolding }
               children={
-
-            <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
-              <Stack direction='row' className={`${styles.trades}`} >
-                <Container key="options">
-                  { onAddTrade && 
-                    <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
-                  }
-                </Container>
-                <Container key="pp" style={{ paddingTop: '1px', paddingBottom: '12px' }}>
-                    <Typography variant="h6">Trades</Typography>
-                    <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
-                </Container>
-              </Stack>
-            </Collapse>
+                <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+                  <Stack direction='row'>
+                    <Container key="options" style={{ alignContent: 'center' }}>
+                      { onAddTrade && 
+                        <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
+                      }
+                    </Container>
+                    <Container key="pp" style={{ paddingTop: '1px', paddingBottom: '12px' }}>
+                        <Typography variant="h6">Trades</Typography>
+                        <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
+                    </Container>
+                  </Stack>
+                </Collapse>
               }/>
           </>
         )
