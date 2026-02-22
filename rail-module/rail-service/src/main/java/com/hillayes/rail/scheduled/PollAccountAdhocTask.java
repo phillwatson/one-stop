@@ -256,7 +256,7 @@ public class PollAccountAdhocTask extends AbstractNamedAdhocTask<PollAccountAdho
         Set<String> existing = (account.getId() == null)
             ? Set.of()
             : accountTransactionRepository.findByInternalId(details.stream()
-                .unordered()
+                .unordered().parallel()
                 .map(RailTransaction::getId)
                 .distinct()
                 .toList())
