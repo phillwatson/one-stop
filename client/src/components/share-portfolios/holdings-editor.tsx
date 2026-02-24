@@ -105,7 +105,8 @@ export default function HoldingsEditor(props: Props) {
 
   return (
     <>
-      <Box>
+      <Box paddingLeft={{ xs: 0, sm: '5px', md: '25px', lg: '80px', xl: '200px' }}
+           paddingRight={{ xs: 0, sm: '5px', md: '25px', lg: '80px', xl: '200px' }} >
 
         { holdings && holdings.length > 0 &&
           <HoldingsGraph holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
