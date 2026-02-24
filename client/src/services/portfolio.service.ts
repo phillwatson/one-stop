@@ -1,7 +1,7 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { PortfolioRequest, PortfolioResponse, ShareTradeSummary, ShareTrade } from '../model/share-portfolio.model';
+import { PortfolioRequest, PortfolioResponse, ShareHoldingSummary, ShareTrade } from '../model/share-portfolio.model';
 import { toISODate } from '../util/date-util';
 
 class PortfolioService {
@@ -64,9 +64,9 @@ class PortfolioService {
             });
     }
 
-    getPortfolioHoldings(portfolioId: string): Promise<ShareTradeSummary[]> {
+    getPortfolioHoldings(portfolioId: string): Promise<ShareHoldingSummary[]> {
         return http.get(`/shares/portfolios/${portfolioId}/trades`)
-            .then(response => response.data as ShareTradeSummary[])
+            .then(response => response.data as ShareHoldingSummary[])
             .then(holdings => {
                 holdings.forEach(holding => {
                     holding.averagePrice = holding.quantity > 0 ? holding.totalCost / holding.quantity : 0;

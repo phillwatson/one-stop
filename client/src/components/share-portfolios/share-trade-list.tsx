@@ -16,7 +16,7 @@ import { SxProps } from '@mui/material/styles';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
-import { ShareTradeSummary, ShareTrade } from '../../model/share-portfolio.model';
+import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { toLocaleDate } from '../../util/date-util';
 import { Currency } from '../../model/commons.model';
 
@@ -53,7 +53,7 @@ interface TradeSummary {
   gainLossPercent: number;
 }
 
-function calcTradeSummary(holding: ShareTradeSummary, trade: ShareTrade): TradeSummary {
+function calcTradeSummary(holding: ShareHoldingSummary, trade: ShareTrade): TradeSummary {
   const currentValue = holding.latestPrice * trade.quantity;
   const gainLoss = currentValue - trade.totalCost;
   return {
@@ -134,7 +134,7 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
 
 
 interface Props {
-  holding: ShareTradeSummary;
+  holding: ShareHoldingSummary;
   onDeleteTrade?: TradeFunction;
   onEditTrade?: TradeFunction;
 }

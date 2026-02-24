@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
-import { PortfolioResponse, ShareTrade, ShareTradeSummary } from "../../model/share-portfolio.model";
+import { PortfolioResponse, ShareTrade, ShareHoldingSummary } from "../../model/share-portfolio.model";
 import { ShareIndex } from "../../model/share-indices.model";
 import HoldingsSummaryList from "./holdings-summary-list";
 import AddShareTradeDialog from "./add-share-trade";
@@ -17,7 +17,8 @@ interface Props {
 
 export default function HoldingsEditor(props: Props) {
   const showMessage = useMessageDispatch();
-  const [holdings, setHoldings] = useState<Array<ShareTradeSummary>>([])
+  const [holdings, setHoldings] = useState<Array<ShareHoldingSummary>>([])
+  const [selectedHolding, setSelectedHolding] = useState<ShareHoldingSummary | undefined>();
   const [selectedTrade, setSelectedTrade] = useState<ShareTrade | undefined>();
   const [shareTradeDialogOpen, setShareTradeDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -105,11 +106,12 @@ export default function HoldingsEditor(props: Props) {
   return (
     <>
       <Box>
-        <HoldingsGraph holdings={ holdings } />
+        <HoldingsGraph holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
         <HoldingsSummaryList holdings={ holdings }
-          onAddTrade={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
+          onAddHolding={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }
-          onEditTrade={ handleOpenAmendTrade }/>
+          onEditTrade={ handleOpenAmendTrade }
+          onSelectHolding={ setSelectedHolding } />
       </Box>
 
       <Box sx={{ mb: 2 }} display="flex" justifyContent="end">

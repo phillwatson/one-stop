@@ -5,7 +5,7 @@ import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
 import ShareService from '../../services/share.service';
-import { ShareTradeSummary, ShareTrade } from '../../model/share-portfolio.model';
+import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { HistoricalPriceResponse } from "../../model/share-indices.model";
 import { formatShortDate, startOfDay } from "../../util/date-util";
 
@@ -32,7 +32,7 @@ class ShareHolding {
   /**
    * The share index being viewed and compared.
    */
-  holding: ShareTradeSummary;
+  holding: ShareHoldingSummary;
 
   trades: Array<ShareTrade> = [];
 
@@ -45,7 +45,7 @@ class ShareHolding {
 
   colour: string;
 
-  constructor(holding: ShareTradeSummary, trades: Array<ShareTrade>, prices: Array<HistoricalPriceResponse>) {
+  constructor(holding: ShareHoldingSummary, trades: Array<ShareTrade>, prices: Array<HistoricalPriceResponse>) {
     this.holding = holding;
     this.trades = trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime());
     this.prices = prices;
@@ -73,7 +73,7 @@ interface Props {
   /**
    * Array of share trade summaries to display
    */
-  holdings: ShareTradeSummary[];
+  holdings: ShareHoldingSummary[];
 }
 
 export default function HoldingsGraph({ holdings }: Props) {
@@ -123,15 +123,14 @@ export default function HoldingsGraph({ holdings }: Props) {
 return (
   <>
     { holdingData.length > 0 && 
-       <LineChart height={ 500 }
-        grid={{ vertical: false, horizontal: true }}
-        hideLegend
+       <LineChart height={ 400 } margin={{ left: 0 }}
+        grid={{ vertical: false, horizontal: true }} hideLegend
         xAxis={[{
             id: 'dates', dataKey: 'date', scaleType: 'time',
             valueFormatter: (date) => formatShortDate(date),
             height: 45, tickLabelStyle: { angle: 0, textAnchor: 'middle' },
           }]}
-        yAxis={[{ width: 70 }]}
+        yAxis={[{ width: 90, valueFormatter: (value: number) => formatMoney(value, 'GBP') }]}
         dataset={ values }
         series={ (
           [{

@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 
-import { ShareTrade, ShareTradeSummary } from '../../model/share-portfolio.model';
+import { ShareTrade, ShareHoldingSummary } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import HoldingSummaryRow from './holding-summary-row';
 import ShareTradeList from './share-trade-list';
@@ -18,16 +18,17 @@ interface Props {
   /**
    * Array of share trade summaries to display
    */
-  holdings: ShareTradeSummary[];
-  onAddTrade?: (holding: ShareTradeSummary) => void;
+  holdings: ShareHoldingSummary[];
+  onAddHolding?: (holding: ShareHoldingSummary) => void;
   onDeleteTrade?: (trade: ShareTrade) => void;
   onEditTrade?: (trade: ShareTrade) => void;
+  onSelectHolding?: (holding?: ShareHoldingSummary) => void;
 }
 
-export default function HoldingsSummaryList({ holdings, onAddTrade, onDeleteTrade, onEditTrade }: Props) {
+export default function HoldingsSummaryList({ holdings, onAddHolding, onDeleteTrade, onEditTrade, onSelectHolding }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
-  const [ selectedHolding, setSelectingHolding ] = useState<ShareTradeSummary | undefined>(undefined);
+  const [ selectedHolding, setSelectingHolding ] = useState<ShareHoldingSummary | undefined>(undefined);
 
   const totalCost = useMemo(() => {
     return holdings.reduce((sum, holding) => sum + holding.totalCost, 0);
@@ -51,8 +52,12 @@ export default function HoldingsSummaryList({ holdings, onAddTrade, onDeleteTrad
     );
   }
 
-  function selectHolding(holding: ShareTradeSummary) {
-    setSelectingHolding((holding === selectedHolding) ? undefined : holding);
+  function selectHolding(holding: ShareHoldingSummary) {
+    const newSelection = (holding === selectedHolding) ? undefined : holding;
+    setSelectingHolding(newSelection);
+    if (onSelectHolding) {
+      onSelectHolding(newSelection);
+    }
   }
 
   return (
@@ -75,8 +80,8 @@ export default function HoldingsSummaryList({ holdings, onAddTrade, onDeleteTrad
               <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
                 <Stack direction='row'>
                   <Container key={ "options_" + holding.shareIndexId } style={{ alignContent: 'center' }}>
-                    { onAddTrade && 
-                      <Button variant="text" onClick={ () => onAddTrade(holding) }>Record new trade</Button>
+                    { onAddHolding && 
+                      <Button variant="text" onClick={ () => onAddHolding(holding) }>Record new trade</Button>
                     }
                   </Container>
                   <Container key={ "trades_" + holding.shareIndexId } style={{ paddingTop: '1px', paddingBottom: '12px' }}>
