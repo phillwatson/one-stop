@@ -17,7 +17,7 @@ interface MonetaryContextValue {
    *  converted to major units and formatted with more fraction digits.
    * @returns a string representing the formatted monetary value.
    */
-  format: (amount: number, currency: Currency, minorUnits?: boolean) => string;
+  format: (amount: number | null | undefined, currency: Currency, minorUnits?: boolean) => string;
 
   /**
    * Indicates whether monetary values are currently to be hidden.
@@ -36,7 +36,7 @@ interface MonetaryContextValue {
  * display; and a format function to allow the caller to format a monerary value.
  */
 const MonetaryContext = createContext<MonetaryContextValue>({
-  format: (amount: number, currency: Currency, minorUnits?: boolean) => { return "" },
+  format: (amount: number | null | undefined, currency: Currency, minorUnits?: boolean) => { return "" },
   hidden: false,
   setHidden: (value: boolean) => {},
 });
@@ -54,7 +54,7 @@ const MonetaryContext = createContext<MonetaryContextValue>({
  * ```
  */
 export default function useMonetaryContext(): [
-  (amount: number, currency: Currency, minorUnits?: boolean) => string,
+  (amount: number | null | undefined, currency: Currency, minorUnits?: boolean) => string,
   boolean,
   (value: boolean) => void
 ] {
@@ -89,7 +89,10 @@ const formattersMinor = {
 export function MonetaryFormatProvider(props: PropsWithChildren) {
   const [ hidden, setHidden ] = useState<boolean>(false)
 
-  function format(amount: number, currency: Currency, minorUnits?: boolean): string {
+  function format(amount: number | null | undefined, currency: Currency, minorUnits?: boolean): string {
+    if ((amount === null) || (amount === undefined))
+      return '';
+
     const result = (minorUnits) 
       ? formattersMinor[currency].formatter.format( (hidden) ? 9999.9999 : amount / 100 )
       : formatters[currency].formatter.format( (hidden) ? 9999.99 : amount );

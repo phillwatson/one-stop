@@ -15,19 +15,21 @@
 .holdingheader {
   padding: 5px;
   white-space: nowrap;
+  background-color: whitesmoke;
+  border-bottom: 1px solid lightgrey;
 }
 
 .holdingrow {
   width: 100%;
   margin: 0;
-  padding: 5px 0px 7px 0px;
+  padding: 15px 0px 15px 0px;
   font-weight: bold;
   border-top: 1px solid whitesmoke;
 }
 
 .holdingtotal {
   width: 100%;
-  margin: 5px 0px 0px 0px;
+  margin: 0px 0px 0px 0px;
   padding: 15px 0px 7px 0px;
   font-weight: normal;
   background-color: whitesmoke;
@@ -52,7 +54,7 @@
 }
 
 .selected   {
-  border: 1px solid lightgrey;
+  border: 1px solid rgb(198, 220, 240);
   border-radius: 12px;
   margin: 0px 7px 7px 7px;
 }
@@ -60,7 +62,7 @@
 .selected .holdingrow   {
   border: 0;
   border-radius: 12px 12px 0px 0px;
-  background-color: whitesmoke;
+  background-color: rgb(198, 220, 240);
   margin: 0px;
 }
 

@@ -28,6 +28,15 @@ export function formatDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString(defaultLocale);
 }
 
+const shortDateOptions: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "short"
+}
+export function formatShortDate(dateStr?: string) {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString(defaultLocale, shortDateOptions);
+}
+
 export function formatTime(dateStr?: string): string {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleTimeString(defaultLocale);

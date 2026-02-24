@@ -223,7 +223,7 @@ export default function ShareIndexGraph(props: Props) {
     return prices
       .flatMap((comparison) =>
         comparison.prices.flatMap((price, index, array) => ({
-          id: index,
+          id: price.date.getTime(),
           date: price.date,
           name: comparison.shareIndex.name,
           growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0

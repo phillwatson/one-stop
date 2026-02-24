@@ -105,7 +105,7 @@ export default function HoldingsEditor(props: Props) {
   return (
     <>
       <Box>
-        {/* <ShareTradeGraph holdings={ holdings } /> */}
+        <HoldingsGraph holdings={ holdings } />
         <HoldingsSummaryList holdings={ holdings }
           onAddTrade={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }
