@@ -106,8 +106,11 @@ export default function HoldingsEditor(props: Props) {
   return (
     <>
       <Box>
-        <HoldingsGraph holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
-        <HoldingsSummaryList holdings={ holdings }
+
+        { holdings && holdings.length > 0 &&
+          <HoldingsGraph holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
+        }
+        <HoldingsSummaryList holdings={ holdings } selectedHolding={ selectedHolding }
           onAddHolding={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }
           onEditTrade={ handleOpenAmendTrade }

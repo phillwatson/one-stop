@@ -10,22 +10,6 @@ import { HistoricalPriceResponse } from "../../model/share-indices.model";
 import { formatShortDate, startOfDay } from "../../util/date-util";
 
 /**
- * Generates a colour code based on the input string.
- * @param str the string to generate a colour for.
- * @returns the colour code.
- */
-const stringToColour = (str: string) => {
-  let hash = 0;
-  str.split('').forEach(char => { hash = char.charCodeAt(0) + ((hash << 5) - hash) })
-  let colour = '#'
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 3)) & 0xff
-    colour += value.toString(16).padStart(2, '0')
-  }
-  return colour;
-}
-
-/**
  * Encapsulates a share index and its associated historical prices for view and comparison.
  */
 class ShareHolding {
@@ -43,25 +27,21 @@ class ShareHolding {
 
   values: Array<any> = [];
 
-  colour: string;
-
   constructor(holding: ShareHoldingSummary, trades: Array<ShareTrade>, prices: Array<HistoricalPriceResponse>) {
     this.holding = holding;
     this.trades = trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime());
     this.prices = prices;
-    this.colour = stringToColour(holding.shareIndexId);
 
     var tradeIndex = 0;
     var quantity = 0;
     var nextTrade: ShareTrade | undefined = (this.trades.length > 0) ? this.trades[0] : undefined;
 
-    this.values = this.prices.map((price, index) => {
+    this.values = this.prices.map(price => {
       while ((nextTrade) && (nextTrade.dateExecuted <= price.date)) {
         quantity += nextTrade.quantity;
         nextTrade = (++tradeIndex < this.trades.length) ? this.trades[tradeIndex] : undefined;
       }
       return {
-        id: index,
         date: startOfDay(price.date),
         value: (price.close * quantity) / 100.0
       };

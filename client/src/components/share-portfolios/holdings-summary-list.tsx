@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Collapse from '@mui/material/Collapse';
@@ -19,16 +19,15 @@ interface Props {
    * Array of share trade summaries to display
    */
   holdings: ShareHoldingSummary[];
+  selectedHolding?: ShareHoldingSummary;
   onAddHolding?: (holding: ShareHoldingSummary) => void;
   onDeleteTrade?: (trade: ShareTrade) => void;
   onEditTrade?: (trade: ShareTrade) => void;
   onSelectHolding?: (holding?: ShareHoldingSummary) => void;
 }
 
-export default function HoldingsSummaryList({ holdings, onAddHolding, onDeleteTrade, onEditTrade, onSelectHolding }: Props) {
+export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHolding, onDeleteTrade, onEditTrade, onSelectHolding }: Props) {
   const [ formatMoney ] = useMonetaryContext();
-
-  const [ selectedHolding, setSelectingHolding ] = useState<ShareHoldingSummary | undefined>(undefined);
 
   const totalCost = useMemo(() => {
     return holdings.reduce((sum, holding) => sum + holding.totalCost, 0);
@@ -54,7 +53,6 @@ export default function HoldingsSummaryList({ holdings, onAddHolding, onDeleteTr
 
   function selectHolding(holding: ShareHoldingSummary) {
     const newSelection = (holding === selectedHolding) ? undefined : holding;
-    setSelectingHolding(newSelection);
     if (onSelectHolding) {
       onSelectHolding(newSelection);
     }
