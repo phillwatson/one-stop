@@ -17,7 +17,7 @@ import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
 import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
-import { toLocaleDate } from '../../util/date-util';
+import { formatShortDate } from '../../util/date-util';
 import { Currency } from '../../model/commons.model';
 
 const money: SxProps = {
@@ -110,7 +110,7 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
         sx={{ position: 'relative' }}
      >
       <TableCell>{ summary.trade.quantity > 0 ? 'Buy' : 'Sell' }</TableCell>
-      <TableCell>{toLocaleDate(summary.trade.dateExecuted)}</TableCell>
+      <TableCell>{formatShortDate(summary.trade.dateExecuted)}</TableCell>
       <TableCell sx={money}>{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
       <TableCell sx={money}>{formatMoney(summary.trade.pricePerShare, summary.currency, true)}</TableCell>
       <TableCell sx={money}>{formatMoney(summary.trade.totalCost / 100, summary.currency)}</TableCell>

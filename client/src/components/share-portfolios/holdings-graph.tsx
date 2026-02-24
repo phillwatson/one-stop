@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { areaElementClasses, LineChart } from "@mui/x-charts";
+import { Dayjs } from 'dayjs';
 
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { useMessageDispatch } from '../../contexts/messages/context';
@@ -50,20 +51,20 @@ class ShareHolding {
 }
 
 interface Props {
-  /**
-   * Array of share trade summaries to display
-   */
+  // Array of share trade summaries to displau
   holdings: ShareHoldingSummary[];
+
+  // The date range to be covered by the graph
+  dateRange: Dayjs[];
 }
 
-export default function HoldingsGraph({ holdings }: Props) {
+export default function HoldingsGraph({ holdings, dateRange }: Props) {
   const [ formatMoney ] = useMonetaryContext();
   const showMessage = useMessageDispatch();
   const [ holdingData, setHoldingData ] = useState<Array<ShareHolding>>([]);
-  const [ fromDate, setFromDate ] = useState<Date>(new Date(Date.now() - ((360 * 24 * 60 * 60) * 1000)));
-  const [ toDate, setToDate ] = useState<Date>(new Date(Date.now()));
+
   const values = useMemo(() => {
-    return holdingData
+    return holdingData.length === 0 ? [] : holdingData
       .flatMap(holding =>
         holding.values.flatMap((value) => ({
           id: value.date.getTime(),
@@ -89,7 +90,7 @@ export default function HoldingsGraph({ holdings }: Props) {
       // fetch the trades for each holding
       .map(holding => PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId)
         // fetch the historical prices each holding - filtered according to date range
-        .then(trades => ShareService.getPrices(holding.shareIndexId, fromDate, toDate)
+        .then(trades => ShareService.getPrices(holding.shareIndexId, dateRange[0].toDate(), dateRange[1].toDate())
           .then(prices => new ShareHolding(holding, trades, prices))
         )
       );
@@ -98,7 +99,7 @@ export default function HoldingsGraph({ holdings }: Props) {
     Promise.all(requests)
       .then(holdings => setHoldingData(holdings))
       .catch(err => showMessage(err));
-  }, [ showMessage, holdings, fromDate, toDate ]);
+  }, [ showMessage, holdings, dateRange ]);
 
 return (
   <>
@@ -107,7 +108,7 @@ return (
         grid={{ vertical: false, horizontal: true }} hideLegend
         xAxis={[{
             id: 'dates', dataKey: 'date', scaleType: 'time',
-            valueFormatter: (date) => formatShortDate(date),
+            valueFormatter: (date) => formatShortDate(date, true),
             height: 45, tickLabelStyle: { angle: 0, textAnchor: 'middle' },
           }]}
         yAxis={[{ width: 90, valueFormatter: (value: number) => formatMoney(value, 'GBP') }]}

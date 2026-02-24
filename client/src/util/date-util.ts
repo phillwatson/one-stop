@@ -23,26 +23,31 @@ export function toDate(dateStr?: string): Date | undefined {
   return new Date(dateStr);
 }
 
-export function formatDate(dateStr?: string): string {
+export function formatDate(dateStr?: string | Date): string {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString(defaultLocale);
 }
 
 const shortDateOptions: Intl.DateTimeFormatOptions = {
   year: "numeric",
+  month: "short",
+  day: "numeric"
+}
+const shortDateOptionsWithoutDay: Intl.DateTimeFormatOptions = {
+  year: "numeric",
   month: "short"
 }
-export function formatShortDate(dateStr?: string) {
+export function formatShortDate(dateStr?: string | Date, withoutDay: boolean = false): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString(defaultLocale, shortDateOptions);
+  return new Date(dateStr).toLocaleDateString(defaultLocale, withoutDay ? shortDateOptionsWithoutDay : shortDateOptions);
 }
 
-export function formatTime(dateStr?: string): string {
+export function formatTime(dateStr?: string | Date): string {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleTimeString(defaultLocale);
 }
 
-export function formatDateTime(dateStr?: string): string {
+export function formatDateTime(dateStr?: string | Date): string {
   if (!dateStr) return "";
   return formatDate(dateStr) + ' ' + formatTime(dateStr);
 }

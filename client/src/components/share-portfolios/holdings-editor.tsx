@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import dayjs, { Dayjs } from 'dayjs';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 
@@ -10,6 +11,7 @@ import HoldingsSummaryList from "./holdings-summary-list";
 import AddShareTradeDialog from "./add-share-trade";
 import ConfirmationDialog from "../dialogs/confirm-dialog";
 import HoldingsGraph from "./holdings-graph";
+import SimpleDateRange from "../graph/simple-date-range";
 
 interface Props {
   portfolio?: PortfolioResponse;
@@ -18,6 +20,7 @@ interface Props {
 export default function HoldingsEditor(props: Props) {
   const showMessage = useMessageDispatch();
   const [holdings, setHoldings] = useState<Array<ShareHoldingSummary>>([])
+  const [dateRange, setDateRange] = useState<Dayjs[]>([ dayjs().subtract(365, 'days'), dayjs() ]);
   const [selectedHolding, setSelectedHolding] = useState<ShareHoldingSummary | undefined>();
   const [selectedTrade, setSelectedTrade] = useState<ShareTrade | undefined>();
   const [shareTradeDialogOpen, setShareTradeDialogOpen] = useState<boolean>(false);
@@ -109,7 +112,10 @@ export default function HoldingsEditor(props: Props) {
            paddingRight={{ xs: 0, sm: '5px', md: '25px', lg: '80px', xl: '200px' }} >
 
         { holdings && holdings.length > 0 &&
-          <HoldingsGraph holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
+        <>
+          <SimpleDateRange dateRange={ dateRange } onSelect={ setDateRange }/>
+          <HoldingsGraph dateRange={ dateRange } holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
+          </>
         }
         <HoldingsSummaryList holdings={ holdings } selectedHolding={ selectedHolding }
           onAddHolding={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
