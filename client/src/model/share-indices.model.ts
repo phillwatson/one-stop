@@ -24,7 +24,7 @@ export const NULL_INDEX: ShareIndex = {
   provider: ''
 };
 
-export interface HistoricalPriceResponse {
+export interface SharePrice {
   date: Date;
   open: number;
   high: number;

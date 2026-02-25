@@ -4,15 +4,15 @@ import PortfoliosIcon from '@mui/icons-material/AssessmentOutlined';
 
 import { useMessageDispatch } from '../contexts/messages/context';
 import PortfolioService from '../services/portfolio.service';
-import { PortfolioResponse } from '../model/share-portfolio.model';
+import { Portfolio } from '../model/share-portfolio.model';
 import PageHeader from '../components/page-header/page-header';
-import ShareTradeEditor from '../components/share-portfolios/share-trade-editor';
+import HoldingsEditor from '../components/share-portfolios/holdings-editor';
 
 export default function SharePortfolioDetail() {
   const { portfolioId } = useParams();
 
   const showMessage = useMessageDispatch();
-  const [ portfolio, setPortfolio ] = useState<PortfolioResponse|undefined>();
+  const [ portfolio, setPortfolio ] = useState<Portfolio|undefined>();
 
   useEffect(() => {
     if (portfolioId) {
@@ -24,7 +24,7 @@ export default function SharePortfolioDetail() {
 
   return (
     <PageHeader title={portfolio?.name || ''} icon={ <PortfoliosIcon /> }>
-      <ShareTradeEditor portfolio={portfolio} />
+      <HoldingsEditor portfolio={portfolio} />
     </PageHeader>
   );
 }

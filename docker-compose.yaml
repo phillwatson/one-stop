@@ -13,6 +13,7 @@ volumes:
 
 services:
   metrics-service:
+    profiles: [ management ]
     restart: unless-stopped
     image: prom/prometheus:v3.7.3
     ports:
@@ -33,6 +34,7 @@ services:
         max-file: "1"
 
   metrics-client: # admin/admin
+    profiles: [ management ]
     restart: unless-stopped
     image: grafana/grafana:12.4.0-19363970803
     ports:
