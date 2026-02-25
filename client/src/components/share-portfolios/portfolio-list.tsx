@@ -19,7 +19,7 @@ import Typography from '@mui/material/Typography';
 import { SxProps } from '@mui/material/styles';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
-import { PortfolioResponse } from '../../model/share-portfolio.model';
+import { Portfolio } from '../../model/share-portfolio.model';
 import PortfolioService from '../../services/portfolio.service';
 import { toLocalDateTime } from '../../util/date-util';
 
@@ -28,7 +28,7 @@ interface Props {
    * Callback function that receives the selected portfolio.
    * @param portfolio The selected portfolio, or undefined if deselected.
    */
-  onSelectPortfolio?: (portfolio: PortfolioResponse | undefined) => void;
+  onSelectPortfolio?: (portfolio: Portfolio | undefined) => void;
 }
 
 const colhead: SxProps = {
@@ -53,7 +53,7 @@ interface CreatePortfolioDialogProps {
 
 interface DeletePortfolioDialogProps {
   open: boolean;
-  portfolio: PortfolioResponse | undefined;
+  portfolio: Portfolio | undefined;
   confirmationText: string;
   onConfirmationTextChange: (text: string) => void;
   onCancel: () => void;
@@ -141,7 +141,7 @@ function DeletePortfolioDialog(props: DeletePortfolioDialogProps) {
  */
 export default function PortfolioList(props: Props) {
   const showMessage = useMessageDispatch();
-  const [portfolios, setPortfolios] = useState<PortfolioResponse[]>([]);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | undefined>();
 
@@ -150,7 +150,7 @@ export default function PortfolioList(props: Props) {
   const [creating, setCreating] = useState<boolean>(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState<PortfolioResponse | undefined>();
+  const [portfolioToDelete, setPortfolioToDelete] = useState<Portfolio | undefined>();
   const [deleteConfirmationText, setDeleteConfirmationText] = useState<string>('');
   const [deleting, setDeleting] = useState<boolean>(false);
 
@@ -166,7 +166,7 @@ export default function PortfolioList(props: Props) {
     refreshPortfolios();
   }, [ refreshPortfolios ]);
 
-  function handleSelectPortfolio(portfolio?: PortfolioResponse) {
+  function handleSelectPortfolio(portfolio?: Portfolio) {
     const newSelectedId = portfolio?.id;
     setSelectedPortfolioId(newSelectedId);
     
@@ -197,7 +197,7 @@ export default function PortfolioList(props: Props) {
       .finally(() => setCreating(false));
   }
 
-  function handleOpenDeleteDialog(portfolio: PortfolioResponse, event: React.MouseEvent) {
+  function handleOpenDeleteDialog(portfolio: Portfolio, event: React.MouseEvent) {
     event.stopPropagation();
     setPortfolioToDelete(portfolio);
     setDeleteConfirmationText('');

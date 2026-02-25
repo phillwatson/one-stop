@@ -2,8 +2,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import ReconciledIcon from '@mui/icons-material/RadioButtonChecked';
 import UnReconciledIcon from '@mui/icons-material/RadioButtonUnchecked';
-import NotesIcon from '@mui/icons-material/NotesRounded';
-
+import NotesIcon from '@mui/icons-material/StickyNote2Outlined';
 import { TransactionDetail } from "../../model/account.model";
 import useReconcileTransactions from './reconcile-transactions-context';
 import { useCallback } from 'react';
