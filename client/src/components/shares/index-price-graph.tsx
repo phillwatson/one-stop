@@ -7,7 +7,7 @@ import Switch from "@mui/material/Switch";
 import ShowPercentageIcon from '@mui/icons-material/Percent';
 import ShowPriceIcon from '@mui/icons-material/AttachMoney';
 import ShareService from "../../services/share.service";
-import { ShareIndex, HistoricalPriceResponse } from "../../model/share-indices.model";
+import { ShareIndex, SharePrice } from "../../model/share-indices.model";
 import { useMessageDispatch } from '../../contexts/messages/context';
 import { formatDate, startOfDay } from "../../util/date-util";
 
@@ -77,8 +77,8 @@ function calcResolution(fromDate: Date, toDate: Date): Resolution {
   // calculate difference in days
   const diff = (toDate.getTime() - fromDate.getTime()) / 86400000;
 
-  if (diff < 64)  return Resolution.DAILY;
-  if (diff < 367) return Resolution.WEEKLY;
+  if (diff < 367)  return Resolution.DAILY;
+  if (diff < 731) return Resolution.WEEKLY;
   return Resolution.MONTHLY;
 }
 
@@ -122,14 +122,14 @@ class Comparison {
   /**
    * The historical prices for the share index.
    */
-  prices: Array<HistoricalPriceResponse>;
+  prices: Array<SharePrice>;
 
   /**
    * The colour assigned to the share index for graphing purposes.
    */
   colour: string;
 
-  constructor(shareIndex: ShareIndex, prices: Array<HistoricalPriceResponse>) {
+  constructor(shareIndex: ShareIndex, prices: Array<SharePrice>) {
     this.shareIndex = shareIndex;
     this.prices = prices;
     this.colour = stringToColour(shareIndex.id)
@@ -143,7 +143,7 @@ class Comparison {
  * @param prices the historical prices to filter.
  * @returns the filtered historical prices.
  */
-function filterPrices(fromDate: Date, toDate: Date, prices: HistoricalPriceResponse[]): HistoricalPriceResponse[] {
+function filterPrices(fromDate: Date, toDate: Date, prices: SharePrice[]): SharePrice[] {
   let resolution = calcResolution(fromDate, toDate);
   let next = startOfDay(fromDate);
   return prices

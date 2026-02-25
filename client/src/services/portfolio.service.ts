@@ -1,13 +1,13 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { PortfolioRequest, PortfolioResponse, ShareHoldingSummary, ShareTrade } from '../model/share-portfolio.model';
+import { PortfolioRequest, Portfolio, ShareHoldingSummary, ShareTrade } from '../model/share-portfolio.model';
 import { toISODate } from '../util/date-util';
 
 class PortfolioService {
-    createPortfolio(name: string): Promise<PortfolioResponse> {
+    createPortfolio(name: string): Promise<Portfolio> {
         const request = { name: name } as PortfolioRequest;
-        return http.post<PortfolioResponse>('/shares/portfolios', request)
+        return http.post<Portfolio>('/shares/portfolios', request)
             .then(response => response.data)
             .then(response => {
                 response.dateCreated = new Date(response.dateCreated);
@@ -15,8 +15,8 @@ class PortfolioService {
             });
     }
 
-    getPortfolios(page: number = 0, pageSize: number = 100): Promise<PaginatedList<PortfolioResponse>> {
-        return http.get<PaginatedList<PortfolioResponse>>('/shares/portfolios', { params: { "page": page, "page-size": pageSize }})
+    getPortfolios(page: number = 0, pageSize: number = 100): Promise<PaginatedList<Portfolio>> {
+        return http.get<PaginatedList<Portfolio>>('/shares/portfolios', { params: { "page": page, "page-size": pageSize }})
             .then(response => response.data)
             .then(portfolios => {
                 if (portfolios.items) {
@@ -26,16 +26,16 @@ class PortfolioService {
             });
     }
 
-    getPortfolio(portfolioId: string): Promise<PortfolioResponse> {
+    getPortfolio(portfolioId: string): Promise<Portfolio> {
         return http.get(`/shares/portfolios/${portfolioId}`)
-            .then(response => response.data as PortfolioResponse)
+            .then(response => response.data as Portfolio)
             .then(portfolio => {
                 portfolio.dateCreated = new Date(portfolio.dateCreated);
                 return portfolio;
             });
     }
 
-    updatePortfolio(portfolioId: string, name: string): Promise<PortfolioResponse> {
+    updatePortfolio(portfolioId: string, name: string): Promise<Portfolio> {
         const request = { name: name } as PortfolioRequest;
         return http.put(`/shares/portfolios/${portfolioId}`, request)
             .then(response => response.data)

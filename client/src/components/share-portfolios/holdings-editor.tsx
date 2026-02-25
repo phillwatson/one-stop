@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
 import ShareService from '../../services/share.service';
-import { PortfolioResponse, ShareTrade, ShareHoldingSummary } from "../../model/share-portfolio.model";
-import { HistoricalPriceResponse, ShareIndex } from "../../model/share-indices.model";
+import { Portfolio, ShareTrade, ShareHoldingSummary } from "../../model/share-portfolio.model";
+import { SharePrice, ShareIndex } from "../../model/share-indices.model";
 import HoldingsSummaryList from "./holdings-summary-list";
 import AddShareTradeDialog from "./add-share-trade";
 import ConfirmationDialog from "../dialogs/confirm-dialog";
@@ -15,12 +15,12 @@ import HoldingsGraph from "./holdings-graph";
 import SimpleDateRange from "../graph/simple-date-range";
 
 interface Props {
-  portfolio?: PortfolioResponse;
+  portfolio?: Portfolio;
 }
 
 export interface HoldingPrices {
   holding: ShareHoldingSummary; 
-  prices?: Array<HistoricalPriceResponse>;
+  prices?: Array<SharePrice>;
 }
 
 export default function HoldingsEditor(props: Props) {
@@ -28,7 +28,7 @@ export default function HoldingsEditor(props: Props) {
 
   const [holdings, setHoldings] = useState<Array<ShareHoldingSummary>>([])
   const [trades, setTrades] = useState<Map<string,ShareTrade[]>>(new Map());
-  const [dateRange, setDateRange] = useState<Dayjs[]>([ dayjs().subtract(365, 'days'), dayjs() ]);
+  const [dateRange, setDateRange] = useState<Dayjs[]>([]);
   const [holdingPrices, setHoldingPrices] = useState<Array<HoldingPrices>>([]);
 
   const [selectedHolding, setSelectedHolding] = useState<ShareHoldingSummary | undefined>();
@@ -65,6 +65,10 @@ export default function HoldingsEditor(props: Props) {
   }, [ showMessage, holdings ])
 
   useEffect(() => {
+    if (dateRange.length === 0) {
+      return;
+    }
+
     // fetch the historical prices each holding - filtered according to date range
     const requests = holdings.map(holding =>
       ShareService.getPrices(holding.shareIndexId, dateRange[0].toDate(), dateRange[1].toDate())
@@ -158,7 +162,7 @@ export default function HoldingsEditor(props: Props) {
 
         { holdings.length > 0 &&
         <>
-          <SimpleDateRange dateRange={ dateRange } onSelect={ setDateRange }/>
+          <SimpleDateRange onSelect={ setDateRange }/>
           <HoldingsGraph holdingPrices={ selectedHolding
               ? holdingPrices.filter(h => h.holding.shareIndexId === selectedHolding.shareIndexId)
               : holdingPrices }

@@ -12,7 +12,7 @@ export interface PortfolioRequest {
 /**
  * Describes a user's share portfolio
  */
-export interface PortfolioResponse {
+export interface Portfolio {
   // The portfolio's internal Id
   id: string;
 

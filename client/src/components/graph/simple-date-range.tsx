@@ -6,11 +6,6 @@ import { useEffect, useState } from 'react';
 
 dayjs.extend(utc);
 
-interface Props {
-  dateRange: Dayjs[];
-  onSelect: (value: Dayjs[]) => void;
-}
-
 export enum Range {
   ONE_WEEK = '1W',
   ONE_MONTH = '1M',
@@ -22,10 +17,15 @@ export enum Range {
 
 const ALL_RANGES: Range[] = Object.keys(Range).map((name: string) => Range[name as keyof typeof Range]);
 
-export default function SimpleDateRange({ onSelect }: Props) {
-  const [selectedRange, setSelectedRange] = useState<Range | Range.ONE_YEAR>();
+interface Props {
+  defaultRange?: Range;
+  onSelect: (value: Dayjs[]) => void;
+}
 
-  useEffect(() => setSelectedRange(Range.ONE_YEAR), []);
+export default function SimpleDateRange({ defaultRange, onSelect }: Props) {
+  const [selectedRange, setSelectedRange] = useState<Range>();
+
+  useEffect(() => setSelectedRange(defaultRange || Range.SIX_MONTHS), [ defaultRange ]);
 
   useEffect(() => {
     if ((! onSelect) || (selectedRange === undefined)) {
