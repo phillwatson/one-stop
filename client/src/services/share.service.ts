@@ -1,7 +1,7 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { HistoricalPriceResponse, ShareIndex } from '../model/share-indices.model';
+import { SharePrice, ShareIndex } from '../model/share-indices.model';
 import { minDate, startOfMonth } from "../util/date-util";
 
 class ShareService {
@@ -32,11 +32,11 @@ class ShareService {
    * @returns the selected page of prices, in ascending date order.
    */
   getIndexPrices(shareId: string, fromDate: Date, toDate: Date,
-                 page: number = 0, pageSize: number = 100): Promise<PaginatedList<HistoricalPriceResponse>> {
+                 page: number = 0, pageSize: number = 100): Promise<PaginatedList<SharePrice>> {
     const fromDateStr = fromDate.toISOString().substring(0, 10);
     const toDateStr = toDate.toISOString().substring(0, 10);
 
-    return http.get<PaginatedList<HistoricalPriceResponse>>(`/shares/indices/${shareId}/prices`,
+    return http.get<PaginatedList<SharePrice>>(`/shares/indices/${shareId}/prices`,
       { params: { "from-date": fromDateStr, "to-date": toDateStr, "page": page, "page-size": pageSize }})
       .then(response => response.data)
       .then(response => {
@@ -57,7 +57,7 @@ class ShareService {
    * @param toDate the end of the date range (exclusive).
    * @returns the array of prices, in ascending date order.
    */
-  getPrices(shareIndexId: string, fromDate: Date, toDate: Date): Promise<Array<HistoricalPriceResponse>> {
+  getPrices(shareIndexId: string, fromDate: Date, toDate: Date): Promise<Array<SharePrice>> {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -83,7 +83,7 @@ class ShareService {
     return Promise.all(requests)
       .then(responses => responses.filter(r => r.length > 0))
       .then(responses => responses.toSorted((a, b) => a[0].date.getTime() - b[0].date.getTime()))
-      .then(responses => responses.reduce((all, current) => all.concat(current)))
+      .then(responses => responses.reduce((all, current) => all.concat(current), []))
       .catch(err => {
         throw err;
       });

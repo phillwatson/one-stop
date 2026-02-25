@@ -12,7 +12,7 @@ export interface PortfolioRequest {
 /**
  * Describes a user's share portfolio
  */
-export interface PortfolioResponse {
+export interface Portfolio {
   // The portfolio's internal Id
   id: string;
 
@@ -26,7 +26,7 @@ export interface PortfolioResponse {
 /**
  * A summary of a portfolio's holdings in a particular share.
  */
-export interface ShareTradeSummary {
+export interface ShareHoldingSummary {
   // The portfolio's internal Id
   portfolioId: string;
 

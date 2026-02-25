@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,31 +13,27 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/ModeEdit';
 import { SxProps } from '@mui/material/styles';
 
-import PortfolioService from '../../services/portfolio.service';
-import { ShareTradeSummary, ShareTrade } from '../../model/share-portfolio.model';
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import { toLocaleDate } from '../../util/date-util';
+import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
+import { formatShortDate } from '../../util/date-util';
 import { Currency } from '../../model/commons.model';
-import Stack from '@mui/material/Stack';
 
-type TradeFunction = (trade: ShareTrade) => void;
-
-const colhead: SxProps = {
-  fontWeight: 'bold',
-  backgroundColor: '#f5f5f5'
-};
+const money: SxProps = {
+  textAlign: 'right'
+}
 
 const gain: SxProps = {
   color: '#2e7d32',
-  fontWeight: 'bold',
-  position: 'relative'
-};
+  fontWeight: 'bold'
+}
 
 const loss: SxProps = {
   color: '#d32f2f',
-  fontWeight: 'bold',
-  position: 'relative'
-};
+  fontWeight: 'bold'
+}
+
+
+type TradeFunction = (trade: ShareTrade) => void;
 
 interface TradeSummary {
   // The trade
@@ -53,7 +51,7 @@ interface TradeSummary {
   gainLossPercent: number;
 }
 
-function calcTradeSummary(holding: ShareTradeSummary, trade: ShareTrade): TradeSummary {
+function calcTradeSummary(holding: ShareHoldingSummary, trade: ShareTrade): TradeSummary {
   const currentValue = holding.latestPrice * trade.quantity;
   const gainLoss = currentValue - trade.totalCost;
   return {
@@ -77,8 +75,9 @@ function HoverOptions({ summary, onDeleteTrade, onEditTrade }: RowProps) {
   }
 
   return (
-    <Stack direction='row' spacing='3px' zIndex='1000' position='absolute' top='0' right='0'
-           bgcolor='#f5fafc' borderRadius='3' padding='0' paddingLeft='25px' paddingRight='14px'>
+    <Stack direction='row' spacing='3px' bgcolor='whitesmoke'
+           zIndex='1000' position='absolute' top='1px' right='0'
+           padding='0px 14px 0px 25px'>
       { onEditTrade &&
         <Tooltip title="Amend">
           <IconButton size="small" onClick={() => onEditTrade(summary.trade) }>
@@ -103,23 +102,29 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
   const [ showOptions, setShowOptions ] = useState<boolean>(false);
 
   return (
-    <TableRow key={summary.trade.id} hover
+    <TableRow hover
         onMouseEnter={ () => setShowOptions(true) }
         onMouseLeave={ () => setShowOptions(false) }
         sx={{ position: 'relative' }}
      >
       <TableCell>{ summary.trade.quantity > 0 ? 'Buy' : 'Sell' }</TableCell>
-      <TableCell>{toLocaleDate(summary.trade.dateExecuted)}</TableCell>
-      <TableCell align="right">{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
-      <TableCell align="right">{formatMoney(summary.trade.pricePerShare, summary.currency, true)}</TableCell>
-      <TableCell align="right">{formatMoney(summary.trade.totalCost / 100, summary.currency)}</TableCell>
-      <TableCell align="right" sx={ summary.gainLoss >= 0 ? gain : loss } >
-        {formatMoney(summary.gainLoss / 100, summary.currency)}
-        {' '}{ summary.trade.quantity > 0 ? '(' + summary.gainLossPercent.toFixed(2) + '%)' : ''}
+      <TableCell>{formatShortDate(summary.trade.dateExecuted)}</TableCell>
+      <TableCell sx={money}>{Math.abs(summary.trade.quantity).toLocaleString()}</TableCell>
+      <TableCell sx={money}>{formatMoney(summary.trade.pricePerShare, summary.currency, true)}</TableCell>
+      <TableCell sx={money}>{formatMoney(summary.trade.totalCost / 100, summary.currency)}</TableCell>
+      <TableCell sx={money}>
+        <Container sx={summary.gainLoss >= 0 ? gain : loss} style={{ padding: 0, margin: 0 }}>
+          {formatMoney(summary.gainLoss / 100, summary.currency)}
+        </Container>
+      </TableCell>
+      <TableCell sx={money}>
+        <Container sx={summary.gainLoss >= 0 ? gain : loss} style={{ padding: 0, margin: 0 }}>
+          {' '}{ summary.trade.quantity > 0 ? '(' + summary.gainLossPercent.toFixed(2) + '%)' : ''}
 
-        { showOptions &&
-          <HoverOptions summary={ summary } onEditTrade={ onEditTrade } onDeleteTrade={ onDeleteTrade }/>
-        }
+          { showOptions &&
+            <HoverOptions summary={ summary } onEditTrade={ onEditTrade } onDeleteTrade={ onDeleteTrade }/>
+          }
+        </Container>
       </TableCell>
     </TableRow>
   )
@@ -127,19 +132,12 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
 
 
 interface Props {
-  holding: ShareTradeSummary;
+  holding: ShareHoldingSummary;
+  trades: ShareTrade[];
   onDeleteTrade?: TradeFunction;
   onEditTrade?: TradeFunction;
 }
-export default function ShareTradeList({ holding, onDeleteTrade, onEditTrade }: Props) {
-  const [ trades, setTrades ] = useState<ShareTrade[]>([]);
-
-  useEffect(() => {
-    PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId)
-      .then(response => setTrades(response)
-    )
-  }, [holding]);
-
+export default function ShareTradeList({ holding, trades, onDeleteTrade, onEditTrade }: Props) {
   if (trades.length === 0) {
     return (
       <Box>No trades exist.</Box>
@@ -150,19 +148,20 @@ export default function ShareTradeList({ holding, onDeleteTrade, onEditTrade }: 
     <Table size="small" aria-label="trades" style={{ minWidth: '700px' }}>
       <TableHead>
         <TableRow>
-          <TableCell sx={colhead}>Type</TableCell>
-          <TableCell sx={colhead}>Date</TableCell>
-          <TableCell sx={colhead} align="right">Quantity</TableCell>
-          <TableCell sx={colhead} align="right">Price</TableCell>
-          <TableCell sx={colhead} align="right">Total</TableCell>
-          <TableCell sx={colhead} align="right">Gain/Loss</TableCell>
+          <TableCell>Type</TableCell>
+          <TableCell>Date</TableCell>
+          <TableCell sx={money} >Quantity</TableCell>
+          <TableCell sx={money} >Price</TableCell>
+          <TableCell sx={money} >Total</TableCell>
+          <TableCell sx={money} >Gain/Loss</TableCell>
+          <TableCell sx={money} ></TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         { trades.length > 0 && trades
           .map(trade => calcTradeSummary(holding, trade))
           .map(summary => (
-            <TradeRow summary={ summary } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade } />
+            <TradeRow key={ summary.trade.id } summary={ summary } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade } />
         )) }
       </TableBody>
     </Table>
