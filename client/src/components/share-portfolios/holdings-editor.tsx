@@ -5,8 +5,9 @@ import Button from "@mui/material/Button";
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
+import ShareService from '../../services/share.service';
 import { PortfolioResponse, ShareTrade, ShareHoldingSummary } from "../../model/share-portfolio.model";
-import { ShareIndex } from "../../model/share-indices.model";
+import { HistoricalPriceResponse, ShareIndex } from "../../model/share-indices.model";
 import HoldingsSummaryList from "./holdings-summary-list";
 import AddShareTradeDialog from "./add-share-trade";
 import ConfirmationDialog from "../dialogs/confirm-dialog";
@@ -17,12 +18,22 @@ interface Props {
   portfolio?: PortfolioResponse;
 }
 
+export interface HoldingPrices {
+  holding: ShareHoldingSummary; 
+  prices?: Array<HistoricalPriceResponse>;
+}
+
 export default function HoldingsEditor(props: Props) {
   const showMessage = useMessageDispatch();
+
   const [holdings, setHoldings] = useState<Array<ShareHoldingSummary>>([])
+  const [trades, setTrades] = useState<Map<string,ShareTrade[]>>(new Map());
   const [dateRange, setDateRange] = useState<Dayjs[]>([ dayjs().subtract(365, 'days'), dayjs() ]);
+  const [holdingPrices, setHoldingPrices] = useState<Array<HoldingPrices>>([]);
+
   const [selectedHolding, setSelectedHolding] = useState<ShareHoldingSummary | undefined>();
   const [selectedTrade, setSelectedTrade] = useState<ShareTrade | undefined>();
+
   const [shareTradeDialogOpen, setShareTradeDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
@@ -36,6 +47,40 @@ export default function HoldingsEditor(props: Props) {
       setHoldings([]);
     }
   }, [ showMessage, props.portfolio ])
+
+  useEffect(() => {
+    // fetch the trades for each holding
+    const requests = holdings
+      .map(holding => PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId));
+
+    // wait for requests to complete
+    Promise.all(requests)
+      // convert the results to a Map, indexed by the share-index-id
+      .then(allTrades => allTrades.reduce((result, trades) =>
+        (trades.length > 0) ? result.set(trades[0].shareIndexId, trades) : result
+        , new Map<string,ShareTrade[]>())
+      )
+      .then(result => setTrades(result))
+      .catch(err => showMessage(err));
+  }, [ showMessage, holdings ])
+
+  useEffect(() => {
+    // fetch the historical prices each holding - filtered according to date range
+    const requests = holdings.map(holding =>
+      ShareService.getPrices(holding.shareIndexId, dateRange[0].toDate(), dateRange[1].toDate())
+        .then(prices => (
+          {
+            holding: holding,
+            prices: prices
+          } as HoldingPrices
+        ))
+      );
+
+    // wait for requests to complete
+    Promise.all(requests)
+      .then(prices => setHoldingPrices(prices))
+      .catch(err => showMessage(err));
+  }, [ showMessage, dateRange, holdings ])
 
   useEffect(() => {
     refreshHoldings();
@@ -111,13 +156,17 @@ export default function HoldingsEditor(props: Props) {
       <Box paddingLeft={{ xs: 0, sm: '5px', md: '25px', lg: '80px', xl: '200px' }}
            paddingRight={{ xs: 0, sm: '5px', md: '25px', lg: '80px', xl: '200px' }} >
 
-        { holdings && holdings.length > 0 &&
+        { holdings.length > 0 &&
         <>
           <SimpleDateRange dateRange={ dateRange } onSelect={ setDateRange }/>
-          <HoldingsGraph dateRange={ dateRange } holdings={ selectedHolding ? [ selectedHolding ] : holdings } />
-          </>
+          <HoldingsGraph holdingPrices={ selectedHolding
+              ? holdingPrices.filter(h => h.holding.shareIndexId === selectedHolding.shareIndexId)
+              : holdingPrices }
+              holdingTrades={ trades }
+          />
+        </>
         }
-        <HoldingsSummaryList holdings={ holdings } selectedHolding={ selectedHolding }
+        <HoldingsSummaryList holdings={ holdings } selectedHolding={ selectedHolding } holdingTrades={ trades }
           onAddHolding={ (holding) => handleOpenAddTrade(holding.shareIndexId) }
           onDeleteTrade={ handleDeleteTrade }
           onEditTrade={ handleOpenAmendTrade }

@@ -15,18 +15,27 @@ import ShareTradeList from './share-trade-list';
 import styles from './holding-summary.module.css';
 
 interface Props {
-  /**
-   * Array of share trade summaries to display
-   */
+  // Array of share trade summaries to display
   holdings: ShareHoldingSummary[];
+
+  // The selected holding
   selectedHolding?: ShareHoldingSummary;
+
+  // A map of trades made against the above holdings - indexed by share-index-id
+  holdingTrades: Map<string,Array<ShareTrade>>;
+
   onAddHolding?: (holding: ShareHoldingSummary) => void;
   onDeleteTrade?: (trade: ShareTrade) => void;
   onEditTrade?: (trade: ShareTrade) => void;
   onSelectHolding?: (holding?: ShareHoldingSummary) => void;
 }
 
-export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHolding, onDeleteTrade, onEditTrade, onSelectHolding }: Props) {
+function isSelected(holding: ShareHoldingSummary, selected?: ShareHoldingSummary) {
+  return selected && selected.shareIndexId === holding.shareIndexId
+}
+
+export default function HoldingsSummaryList({ holdings, selectedHolding, holdingTrades,
+                                              onAddHolding, onDeleteTrade, onEditTrade, onSelectHolding }: Props) {
   const [ formatMoney ] = useMonetaryContext();
 
   const totalCost = useMemo(() => {
@@ -41,7 +50,7 @@ export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHo
     return totalValue - totalCost;
   }, [totalValue, totalCost]);
 
-  if (!holdings || holdings.length === 0) {
+  if (holdings.length === 0) {
     return (
       <Box sx={{ padding: 2 }}>
         <Typography variant="body1" color="textSecondary">
@@ -52,7 +61,7 @@ export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHo
   }
 
   function selectHolding(holding: ShareHoldingSummary) {
-    const newSelection = (holding === selectedHolding) ? undefined : holding;
+    const newSelection = (isSelected(holding, selectedHolding)) ? undefined : holding;
     if (onSelectHolding) {
       onSelectHolding(newSelection);
     }
@@ -73,9 +82,9 @@ export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHo
       {
         holdings.map(holding =>
           <HoldingSummaryRow key={ holding.shareIndexId } holding={ holding }
-            selected={ holding === selectedHolding } onClick={ selectHolding }
+            selected={ isSelected(holding, selectedHolding) } onClick={ selectHolding }
             children={
-              <Collapse in={ holding === selectedHolding} timeout="auto" unmountOnExit>
+              <Collapse in={ isSelected(holding, selectedHolding) } timeout="auto" unmountOnExit>
                 <Stack direction='row'>
                   <Container key={ "options_" + holding.shareIndexId } style={{ alignContent: 'center' }}>
                     { onAddHolding && 
@@ -84,7 +93,8 @@ export default function HoldingsSummaryList({ holdings, selectedHolding, onAddHo
                   </Container>
                   <Container key={ "trades_" + holding.shareIndexId } style={{ paddingTop: '1px', paddingBottom: '12px' }}>
                       <Typography variant="h6">Trades</Typography>
-                      <ShareTradeList holding={ holding } onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
+                      <ShareTradeList holding={ holding } trades={ holdingTrades.get(holding.shareIndexId) || [] }
+                        onDeleteTrade={ onDeleteTrade } onEditTrade={ onEditTrade }/>
                   </Container>
                 </Stack>
               </Collapse>

@@ -12,7 +12,7 @@ interface Props {
 }
 
 export enum Range {
-  FIVE_DAYS = '5D',
+  ONE_WEEK = '1W',
   ONE_MONTH = '1M',
   SIX_MONTHS = '6M',
   YTD = 'YTD',
@@ -35,7 +35,7 @@ export default function SimpleDateRange({ onSelect }: Props) {
     let toDate = dayjs().startOf('day');
     let fromDate = toDate;
     switch (selectedRange) {
-      case Range.FIVE_DAYS:   fromDate = toDate.subtract(7, 'days'); break;
+      case Range.ONE_WEEK:    fromDate = toDate.subtract(7, 'days'); break;
       case Range.ONE_MONTH:   fromDate = toDate.subtract(1, 'month'); break;
       case Range.SIX_MONTHS:  fromDate = toDate.subtract(6, 'month'); break;
       case Range.YTD:         fromDate = toDate.date(1).month(0); break;

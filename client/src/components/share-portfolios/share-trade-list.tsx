@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
@@ -14,8 +14,6 @@ import EditIcon from '@mui/icons-material/ModeEdit';
 import { SxProps } from '@mui/material/styles';
 
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import { useMessageDispatch } from '../../contexts/messages/context';
-import PortfolioService from '../../services/portfolio.service';
 import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { formatShortDate } from '../../util/date-util';
 import { Currency } from '../../model/commons.model';
@@ -135,19 +133,11 @@ function TradeRow({ summary, onDeleteTrade, onEditTrade }: RowProps) {
 
 interface Props {
   holding: ShareHoldingSummary;
+  trades: ShareTrade[];
   onDeleteTrade?: TradeFunction;
   onEditTrade?: TradeFunction;
 }
-export default function ShareTradeList({ holding, onDeleteTrade, onEditTrade }: Props) {
-  const showMessage = useMessageDispatch();
-  const [ trades, setTrades ] = useState<ShareTrade[]>([]);
-
-  useEffect(() => {
-    PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId)
-      .then(response => setTrades(response))
-      .catch(err => showMessage(err));
-  }, [ showMessage, holding ]);
-
+export default function ShareTradeList({ holding, trades, onDeleteTrade, onEditTrade }: Props) {
   if (trades.length === 0) {
     return (
       <Box>No trades exist.</Box>

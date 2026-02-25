@@ -1,37 +1,40 @@
 import { useEffect, useState, useMemo } from "react";
 import { areaElementClasses, LineChart } from "@mui/x-charts";
-import { Dayjs } from 'dayjs';
 
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
-import { useMessageDispatch } from '../../contexts/messages/context';
-import PortfolioService from '../../services/portfolio.service';
-import ShareService from '../../services/share.service';
 import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { HistoricalPriceResponse } from "../../model/share-indices.model";
 import { formatShortDate, startOfDay } from "../../util/date-util";
+import { HoldingPrices } from "./holdings-editor";
+
+interface Props {
+  // Array of portfolio holdings and their prices over a date range
+  holdingPrices: Array<HoldingPrices>;
+
+  // A map of trades made against the above holdings - indexed by share-index-id
+  holdingTrades: Map<string,Array<ShareTrade>>;
+}
 
 /**
  * Encapsulates a share index and its associated historical prices for view and comparison.
  */
 class ShareHolding {
-  /**
-   * The share index being viewed and compared.
-   */
+  // The share index being viewed and compared.
   holding: ShareHoldingSummary;
 
-  trades: Array<ShareTrade> = [];
-
-  /**
-   * The historical prices for the share index.
-   */
+  // The historical prices for the share index.
   prices: Array<HistoricalPriceResponse> = [];
 
+  // The historical trades made on the holding
+  trades: Array<ShareTrade> = [];
+
+  // The calculated historical value of the holding
   values: Array<any> = [];
 
-  constructor(holding: ShareHoldingSummary, trades: Array<ShareTrade>, prices: Array<HistoricalPriceResponse>) {
-    this.holding = holding;
-    this.trades = trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime());
-    this.prices = prices;
+  constructor(holdingPrices: HoldingPrices, trades?: Array<ShareTrade>) {
+    this.holding = holdingPrices.holding;
+    this.trades = trades ? trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime()) : [];
+    this.prices = holdingPrices.prices || [];
 
     var tradeIndex = 0;
     var quantity = 0;
@@ -50,17 +53,8 @@ class ShareHolding {
   }
 }
 
-interface Props {
-  // Array of share trade summaries to displau
-  holdings: ShareHoldingSummary[];
-
-  // The date range to be covered by the graph
-  dateRange: Dayjs[];
-}
-
-export default function HoldingsGraph({ holdings, dateRange }: Props) {
+export default function HoldingsGraph({ holdingPrices, holdingTrades }: Props) {
   const [ formatMoney ] = useMonetaryContext();
-  const showMessage = useMessageDispatch();
   const [ holdingData, setHoldingData ] = useState<Array<ShareHolding>>([]);
 
   const values = useMemo(() => {
@@ -86,20 +80,11 @@ export default function HoldingsGraph({ holdings, dateRange }: Props) {
 
   useEffect(() => {
     // retrieve trade history for each holding
-    const requests = holdings
-      // fetch the trades for each holding
-      .map(holding => PortfolioService.fetchShareTrades(holding.portfolioId, holding.shareIndexId)
-        // fetch the historical prices each holding - filtered according to date range
-        .then(trades => ShareService.getPrices(holding.shareIndexId, dateRange[0].toDate(), dateRange[1].toDate())
-          .then(prices => new ShareHolding(holding, trades, prices))
-        )
+    setHoldingData(holdingPrices
+      // identify the trades for each holding
+      .map(record => new ShareHolding(record, holdingTrades.get(record.holding.shareIndexId)))
       );
-
-    // wait for requests to complete
-    Promise.all(requests)
-      .then(holdings => setHoldingData(holdings))
-      .catch(err => showMessage(err));
-  }, [ showMessage, holdings, dateRange ]);
+  }, [ holdingPrices, holdingTrades ]);
 
 return (
   <>
