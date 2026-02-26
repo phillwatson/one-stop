@@ -4,7 +4,7 @@ import { areaElementClasses, LineChart } from "@mui/x-charts";
 import useMonetaryContext from '../../contexts/monetary/monetary-context';
 import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.model';
 import { SharePrice } from "../../model/share-indices.model";
-import { formatShortDate, startOfDay } from "../../util/date-util";
+import { formatShortDate, formatDate, startOfDay } from "../../util/date-util";
 import { HoldingPrices } from "./holdings-editor";
 
 interface Props {
@@ -50,15 +50,21 @@ class ShareHolding {
     var quantity = 0;
     var nextTrade: ShareTrade | undefined = (this.trades.length > 0) ? this.trades[0] : undefined;
 
-    this.values = this.prices.map((price, index, array) => {
+    var initialValue = NaN;
+    this.values = this.prices.map(price => {
       while ((nextTrade) && (nextTrade.dateExecuted <= price.date)) {
         quantity += nextTrade.quantity;
         nextTrade = (++tradeIndex < this.trades.length) ? this.trades[tradeIndex] : undefined;
       }
+
+      const value = (price.close * quantity) / 100.0
+      if ((quantity > 0) && (isNaN(initialValue))) {
+        initialValue = value;
+      }
       return {
         date: startOfDay(price.date),
-        value: (price.close * quantity) / 100.0,
-        growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
+        value: value,
+        growth: quantity > 0 ? ((value - initialValue) / initialValue) * 100 : 0
       };
     });
   }
@@ -120,14 +126,14 @@ return (
         grid={{ vertical: false, horizontal: true }} hideLegend
         xAxis={[{
             id: 'dates', dataKey: 'date', scaleType: 'time',
-            valueFormatter: (date, context) => formatShortDate(date, (context.location === 'tick')),
-            height: 45, tickLabelStyle: { angle: 0, textAnchor: 'middle' },
+            valueFormatter: (date, context) => (context.location === 'tick') ? formatDate(date) : formatShortDate(date),
+            height: 75, tickLabelStyle: { angle: -40, textAnchor: 'end' }
           }]}
         yAxis={[{ width: 90, valueFormatter: (value: number) => formatMoney(value, 'GBP') }]}
         dataset={ values }
         series={ (
           [{
-            id: 'values', label: 'Value', dataKey: 'value',
+            id: 'values', dataKey: 'value',
             curve: 'linear', showMark: false, area: true,
             baseline: 'min', color: axisColour,
             valueFormatter: (value, context) => {
