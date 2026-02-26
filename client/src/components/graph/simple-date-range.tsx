@@ -9,9 +9,11 @@ dayjs.extend(utc);
 export enum Range {
   ONE_WEEK = '1W',
   ONE_MONTH = '1M',
+  THREE_MONTH = '3M',
   SIX_MONTHS = '6M',
   YTD = 'YTD',
   ONE_YEAR = '1Y',
+  TWO_YEARS = '2Y',
   FIVE_YEARS = '5Y'
 }
 
@@ -37,9 +39,11 @@ export default function SimpleDateRange({ defaultRange, onSelect }: Props) {
     switch (selectedRange) {
       case Range.ONE_WEEK:    fromDate = toDate.subtract(7, 'days'); break;
       case Range.ONE_MONTH:   fromDate = toDate.subtract(1, 'month'); break;
+      case Range.THREE_MONTH: fromDate = toDate.subtract(3, 'month'); break;
       case Range.SIX_MONTHS:  fromDate = toDate.subtract(6, 'month'); break;
       case Range.YTD:         fromDate = toDate.date(1).month(0); break;
       case Range.ONE_YEAR:    fromDate = toDate.subtract(1, 'year'); break;
+      case Range.TWO_YEARS:   fromDate = toDate.subtract(2, 'year'); break;
       case Range.FIVE_YEARS:  fromDate = toDate.subtract(5, 'year'); break;
     }
 

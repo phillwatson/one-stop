@@ -9,7 +9,7 @@ import ShowPriceIcon from '@mui/icons-material/AttachMoney';
 import ShareService from "../../services/share.service";
 import { ShareIndex, SharePrice } from "../../model/share-indices.model";
 import { useMessageDispatch } from '../../contexts/messages/context';
-import { formatDate, startOfDay } from "../../util/date-util";
+import { formatShortDate, formatDate, startOfDay } from "../../util/date-util";
 
 /**
  * Provides a visual indication of the selection between price and percentage growth.
@@ -267,8 +267,9 @@ export default function ShareIndexGraph(props: Props) {
         dataset={ dataset }
         grid={{ vertical: false, horizontal: true }}
         xAxis={[{
-            id: 'dates', dataKey: 'date', scaleType: 'time', valueFormatter: (date) => formatDate(date),
-            label: 'Date', height: 95, tickLabelStyle: { angle: -40, textAnchor: 'end' }
+            id: 'dates', dataKey: 'date', scaleType: 'time',
+            valueFormatter: (date, context) => (context.location === 'tick') ? formatDate(date) : formatShortDate(date),
+            height: 75, tickLabelStyle: { angle: -40, textAnchor: 'end' }
           }]}
         yAxis={ percentageView
             ? [{ id: 'percentage', label: 'Growth (%)', valueFormatter: percentageFormatter }]
@@ -278,7 +279,7 @@ export default function ShareIndexGraph(props: Props) {
         { percentageView
           ? (prices.length === 1) 
             ? [{
-                id: 'single', label: 'growth', dataKey: 'growth',
+                id: 'single', label: 'Growth', dataKey: 'growth',
                 curve: 'linear', showMark: false, valueFormatter: percentageFormatter,
                 area: true, baseline: 'min', color: axisColour
               }]
@@ -290,7 +291,7 @@ export default function ShareIndexGraph(props: Props) {
                 color: comparison.colour
               }))
           : [{
-              id: 'single', label: 'closing price', dataKey: 'closing',
+              id: 'single', label: 'Closing Price', dataKey: 'closing',
               curve: 'linear', showMark: false,
               area: true, baseline: 'min', color: axisColour
             }]
