@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 
 import Box from '@mui/material/Box';
@@ -18,6 +18,7 @@ import SideBar from '../components/side-bar/side-bar';
 import { AppMenu } from "../components/app-menu";
 import MenuItemDef from "../components/app-menu/menu-item-def";
 import ProfileService from "../services/profile.service";
+import { setLogoutFunction } from "../services/http-common";
 import SignIn from "./sign-in";
 
 const appTitle = "One Stop";
@@ -35,10 +36,14 @@ export default function MainPage() {
   };
 
   const logout = useCallback(() => {
-    closeMenu();
-    ProfileService.logout()
+    ProfileService
+      .logout() // clears the auth tokens
       .finally(() => setUser(undefined) );
   }, [ setUser ]);
+
+  useEffect(() => {
+    setLogoutFunction(logout);
+  }, [ logout ]);
 
   const mainMenuItems: MenuItemDef[] = useMemo(() => ([
       { label: 'Accounts', route: 'accounts', icon: <AccountsIcon/>, action: closeMenu },
@@ -48,12 +53,12 @@ export default function MainPage() {
       { label: 'Audit Issues', route: 'reports/audit/issues', icon: <AuditIssuesIcon/>, action: closeMenu },
       { label: 'Share Prices', route: 'shares/prices', icon: <SharePricesIcon />, action: closeMenu },
       { label: 'Share Portfolios', route: 'shares/portfolios', icon: <PortfoliosIcon />, action: closeMenu },
-      { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
+      { label: 'Logout', route: '/', icon: <Logout/>, action: () => { closeMenu(); logout(); } }
     ]), [ logout ]);
 
   const profileMenuItems: MenuItemDef[] = useMemo(() => ([
       { label: 'Profile', route: 'profile', icon: <ProfileIcon/> },
-      { label: 'Logout', route: '/', icon: <Logout/>, action: logout }
+      { label: 'Logout', route: '/', icon: <Logout/>, action:  () => { closeMenu(); logout(); } }
     ]), [ logout ]);
 
   return (!user)
