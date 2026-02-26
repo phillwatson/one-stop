@@ -16,7 +16,7 @@ export default function PageHeader(props: Props) {
     <Box paddingLeft={{ xs: 0, sm: 1 }} paddingRight={{ xs: 0, sm: 1 }} paddingTop={ 1 }>
       <Typography sx={{ typography: { xs: "h5", sm: "h4" } }} noWrap>
       { props.icon && 
-        <Badge sx={{ scale: '1.5', margin: 0, paddingLeft: '9px', paddingRight: '12px', verticalAlign: 'baseline' }}>
+        <Badge sx={{ color: 'primary.main', scale: '1.5', margin: 0, paddingLeft: '9px', paddingRight: '12px', verticalAlign: 'baseline' }}>
           { props.icon }
         </Badge>
       }
