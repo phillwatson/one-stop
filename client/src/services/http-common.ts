@@ -4,10 +4,29 @@ import axios, {
   AxiosRequestConfig,
   AxiosError
 } from "axios";
+import { createRef } from 'react';
 
 import getLocation from "./location-service";
 
 const NOOP: Promise<any> = Promise.resolve();
+ 
+// Create a ref to hold the logout function
+type logoutFunctionRef = () => void;
+const logoutFunction = createRef<logoutFunctionRef>();
+ 
+// A method to set the logout function in the ref
+// This will be called from the MainPage component
+export function setLogoutFunction(value: logoutFunctionRef) {
+  logoutFunction.current = value;
+};
+ 
+// Calls the logout function from the ref - this will be called
+// from the HTTP interceptor on auth failure
+function logout() {
+  if (logoutFunction.current) {
+    logoutFunction.current();
+  }
+};
 
 class HttpService {
   private http: AxiosInstance;
@@ -88,9 +107,9 @@ class HttpService {
           .catch(() => {
             console.log(error);
 
-            // will cause a refresh of profile context - leading to login page
-            //window.location.reload();
-            return Promise.reject(error);
+            // return to login page
+            logout();
+            return Promise.resolve(({ data: null })); // an empty response
           })
 
           // always delete refresh promise
