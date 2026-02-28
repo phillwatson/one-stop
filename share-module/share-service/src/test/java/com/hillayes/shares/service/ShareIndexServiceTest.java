@@ -166,6 +166,72 @@ public class ShareIndexServiceTest {
     }
 
     @Test
+    public void testRegisterShareIndices_Duplicates() {
+        // Given: a collection of new share identities
+        Map<ShareIndex.ShareIdentity, ShareInfo> shareIds = IntStream.range(0, 10)
+            .mapToObj(i -> mockShareIdentity())
+            .collect(Collectors.toMap(id -> id, id ->
+                new ShareInfo(id.getIsin(), id.getTickerSymbol(),
+                    randomStrings.nextAlphanumeric(20), "GBP")));
+
+        // And: the providers will return the share info for those identities
+        when(shareProviderApi.getShareInfo(anyString(), anyString())).then(invocation -> {
+            String isin = invocation.getArgument(0);
+            String ticker = invocation.getArgument(1);
+            return shareIds.entrySet().stream()
+                .filter(info -> {
+                    ShareIndex.ShareIdentity id = info.getKey();
+                    return isin.equals(id.getIsin()) && ticker.equals(id.getTickerSymbol());
+                })
+                .map(Map.Entry::getValue)
+                .findFirst();
+        });
+
+        // And: one of them is already registered
+        ShareIndex existing = shareIds.entrySet().stream().findFirst()
+            .map(entry -> mockShareIndex(s -> s
+                .id(UUID.randomUUID())
+                .identity(entry.getKey())
+                .name(entry.getValue().getName())
+                .currency(entry.getValue().getCurrency())
+                .provider(shareProviderApi.getProviderId())
+            )).orElse(null);
+        when(shareIndexRepository.findByIdentity(existing.getIdentity()))
+            .thenReturn(Optional.of(existing));
+
+        // When: the service is called
+        Collection<ShareIndex> result = fixture.registerShareIndices(shareIds.keySet());
+
+        // Then: the result is the same size
+        assertNotNull(result);
+        assertEquals(shareIds.size(), result.size());
+
+        // And: each index has the same properties as given
+        shareIds.forEach((expected, info) -> {
+            ShareIndex actual = result.stream()
+                .filter(s -> s.getIdentity().getIsin().equals(expected.getIsin()))
+                .findFirst().orElse(null);
+
+            assertNotNull(actual);
+            assertNotNull(actual.getId());
+            assertEquals(expected.getIsin(), actual.getIdentity().getIsin());
+            assertEquals(expected.getTickerSymbol(), actual.getIdentity().getTickerSymbol());
+            assertEquals(info.getName(), actual.getName());
+            assertEquals(info.getCurrency(), actual.getCurrency());
+            assertEquals(shareProviderApi.getProviderId(), actual.getProvider());
+        });
+
+        // And: the repository was called to look for each index
+        verify(shareIndexRepository, times(shareIds.size())).findByIdentity(any(ShareIndex.ShareIdentity.class));
+
+        // And: the repository was called for each index except the existing one
+        verify(shareIndexRepository, times(shareIds.size() - 1)).saveAndFlush(any(ShareIndex.class));
+
+        // And: a task was queued for each index except the existing one
+        verify(pollShareIndexAdhocTask, times(shareIds.size() - 1)).queueTask(any(UUID.class));
+    }
+
+    @Test
     public void testRegisterShareIndices_EmptyList() {
         // When: the service is called with an empty list
         Collection<ShareIndex> result = fixture.registerShareIndices(List.of());

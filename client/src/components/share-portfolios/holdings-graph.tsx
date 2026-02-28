@@ -6,24 +6,18 @@ import { ShareHoldingSummary, ShareTrade } from '../../model/share-portfolio.mod
 import { SharePrice } from "../../model/share-indices.model";
 import { formatShortDate, formatDate, startOfDay } from "../../util/date-util";
 import { HoldingPrices } from "./holdings-editor";
+import { stringToColour } from "../../util/string-util";
+import { percentageFormatter } from "../../util/number-util";
 
 interface Props {
+  showPercentages?: boolean;
+
   // Array of portfolio holdings and their prices over a date range
   holdingPrices: Array<HoldingPrices>;
 
   // A map of trades made against the above holdings - indexed by share-index-id
   holdingTrades: Map<string,Array<ShareTrade>>;
 }
-
-
-/**
- * A number formatter to format numbers as percentages.
- */
-const percentFormat = new Intl.NumberFormat(undefined, {
-    style: 'percent',
-    minimumSignificantDigits: 1,
-    maximumSignificantDigits: 3,
-  });
 
 /**
  * Encapsulates a share index and its associated historical prices for view and comparison.
@@ -41,36 +35,33 @@ class ShareHolding {
   // The calculated historical value of the holding
   values: Array<any> = [];
 
+  colour: string;
+
   constructor(holdingPrices: HoldingPrices, trades?: Array<ShareTrade>) {
     this.holding = holdingPrices.holding;
     this.trades = trades ? trades.sort((a, b) => a.dateExecuted.getTime() - b.dateExecuted.getTime()) : [];
     this.prices = holdingPrices.prices || [];
+    this.colour = stringToColour(this.holding.shareIndexId);
 
     var tradeIndex = 0;
     var quantity = 0;
     var nextTrade: ShareTrade | undefined = (this.trades.length > 0) ? this.trades[0] : undefined;
 
-    var initialValue = NaN;
     this.values = this.prices.map(price => {
       while ((nextTrade) && (nextTrade.dateExecuted <= price.date)) {
         quantity += nextTrade.quantity;
         nextTrade = (++tradeIndex < this.trades.length) ? this.trades[tradeIndex] : undefined;
       }
 
-      const value = (price.close * quantity) / 100.0
-      if ((quantity > 0) && (isNaN(initialValue))) {
-        initialValue = value;
-      }
       return {
         date: startOfDay(price.date),
-        value: value,
-        growth: quantity > 0 ? ((value - initialValue) / initialValue) * 100 : 0
+        value: (price.close * quantity) / 100.0
       };
     });
   }
 }
 
-export default function HoldingsGraph({ holdingPrices, holdingTrades }: Props) {
+export default function HoldingsGraph({ showPercentages, holdingPrices, holdingTrades }: Props) {
   const [ formatMoney ] = useMonetaryContext();
   const [ holdingData, setHoldingData ] = useState<Array<ShareHolding>>([]);
 
@@ -81,7 +72,7 @@ export default function HoldingsGraph({ holdingPrices, holdingTrades }: Props) {
         holding.values.flatMap((value) => ({
           id: value.date.getTime(),
           date: value.date,
-          value: value.value
+          value: value.value,
         }))
       )
       // sum all holding values of the same date to create single row
@@ -101,6 +92,29 @@ export default function HoldingsGraph({ holdingPrices, holdingTrades }: Props) {
         return item;
       });
   }, [ holdingData ]);
+
+  const percentages = useMemo(() => {
+    return holdingData.length === 0 ? [] : holdingData
+      // simplify holdings into one large array
+      .flatMap(holding =>
+        holding.prices.flatMap((price, index, array) => ({
+          id: price.date.getTime(),
+          name: holding.holding.name,
+          date: price.date,
+          growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
+        }))
+      )
+      .reduce((acc, obj) => {
+        let entry: any = acc.find(item => item['id'] === obj['id']);
+        if (entry === undefined) {
+          entry = { id: obj.id, date: obj.date };
+          acc.push(entry);
+        }
+        
+        entry[obj.name] = obj.growth
+        return acc;
+      }, [] as any[]);
+  }, [ holdingData ])
 
   useEffect(() => {
     // retrieve trade history for each holding
@@ -123,38 +137,42 @@ return (
   <>
     { holdingData.length > 0 && 
        <LineChart height={ 400 } margin={{ left: 0 }}
+        dataset={ showPercentages ? percentages : values }
         grid={{ vertical: false, horizontal: true }} hideLegend
         xAxis={[{
             id: 'dates', dataKey: 'date', scaleType: 'time',
             valueFormatter: (date, context) => (context.location === 'tick') ? formatDate(date) : formatShortDate(date),
             height: 75, tickLabelStyle: { angle: -40, textAnchor: 'end' }
           }]}
-        yAxis={[{ width: 90, valueFormatter: (value: number) => formatMoney(value, 'GBP') }]}
-        dataset={ values }
-        series={ (
-          [{
-            id: 'values', dataKey: 'value',
-            curve: 'linear', showMark: false, area: true,
-            baseline: 'min', color: axisColour,
-            valueFormatter: (value, context) => {
-              let result = formatMoney(value, 'GBP');
-              const growth = (holdingData.length === 1)
-                ? holdingData[0].values[context.dataIndex].growth
-                : values[context.dataIndex].growth;
-
-              result += ' (' + percentFormat.format(growth / 100) + ')';
-              return result;
-            }
-          }])}
+        yAxis={ showPercentages
+          ? [{ id: 'percentages', label: 'Growth (%)', valueFormatter: percentageFormatter }]
+          : [{ width: 90, valueFormatter: (value: number) => formatMoney(value, 'GBP') }]
+        }
+        series={ showPercentages
+          ? holdingData.map(holding => ({
+                id: holding.holding.shareIndexId,
+                label: holding.holding.name,
+                dataKey: holding.holding.name,
+                curve: 'linear', showMark: false, valueFormatter: percentageFormatter,
+                color: holding.colour
+            }))
+          : [{
+              id: 'values', dataKey: 'value',
+              curve: 'linear', showMark: false, area: true,
+              baseline: 'min', color: axisColour,
+              valueFormatter: (value, context) => formatMoney(value, 'GBP') +
+                  ' (' + percentageFormatter(values[context.dataIndex].growth) + ')'
+            }]
+          }
         
         sx={{
           [`& .${areaElementClasses.root}[data-series="values"]`]: {
-            fill: "url('#percentage')",
+            fill: "url('#gradient')",
             filter: 'none' // Remove the default filtering
           },
         }}>
         <defs>
-          <linearGradient id="percentage" gradientTransform="rotate(90)" >
+          <linearGradient id="gradient" gradientTransform="rotate(90)" >
             <stop offset="0" stopColor={ axisColour } />
             <stop offset="100%" stopColor="#FFFFFF50" />
           </linearGradient>

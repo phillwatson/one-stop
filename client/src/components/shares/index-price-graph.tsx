@@ -10,6 +10,8 @@ import ShareService from "../../services/share.service";
 import { ShareIndex, SharePrice } from "../../model/share-indices.model";
 import { useMessageDispatch } from '../../contexts/messages/context';
 import { formatShortDate, formatDate, startOfDay } from "../../util/date-util";
+import { stringToColour } from "../../util/string-util";
+import { percentageFormatter } from "../../util/number-util";
 
 /**
  * Provides a visual indication of the selection between price and percentage growth.
@@ -22,40 +24,6 @@ function toggleViewIcon(checked: boolean) {
       { checked ? <ShowPercentageIcon /> : <ShowPriceIcon /> }
     </Avatar>
   )
-}
-
-/**
- * A number formatter to format numbers as percentages.
- */
-const percentFormat = new Intl.NumberFormat(undefined, {
-    style: 'percent',
-    minimumSignificantDigits: 1,
-    maximumSignificantDigits: 3,
-  });
-
-/**
- * Formats a number as a percentage string.
- * @param value the number to format.
- * @returns the formatted percentage string.
- */
-function percentageFormatter(value: number | null): string {
-  return value === null ? '' : percentFormat.format(value / 100);
-}
-
-/**
- * Generates a colour code based on the input string.
- * @param str the string to generate a colour for.
- * @returns the colour code.
- */
-const stringToColour = (str: string) => {
-  let hash = 0;
-  str.split('').forEach(char => { hash = char.charCodeAt(0) + ((hash << 5) - hash) })
-  let colour = '#'
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 3)) & 0xff
-    colour += value.toString(16).padStart(2, '0')
-  }
-  return colour
 }
 
 /**
@@ -299,12 +267,12 @@ export default function ShareIndexGraph(props: Props) {
         
         sx={{
           [`& .${areaElementClasses.root}[data-series="single"]`]: {
-            fill: "url('#percentage')",
+            fill: "url('#gradient')",
             filter: 'none' // Remove the default filtering
           },
         }}>
         <defs>
-          <linearGradient id="percentage" gradientTransform="rotate(90)" >
+          <linearGradient id="gradient" gradientTransform="rotate(90)" >
             <stop offset="0" stopColor={ axisColour } />
             <stop offset="100%" stopColor="#FFFFFF50" />
           </linearGradient>

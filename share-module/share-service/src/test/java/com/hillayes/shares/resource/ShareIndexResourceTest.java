@@ -131,8 +131,13 @@ public class ShareIndexResourceTest extends TestBase {
     @Test
     @TestSecurity(user = userIdStr, roles = "user")
     public void testRegisterShareIndices_Duplicate() {
-        // Given: a request with a duplicate share index entries
-        RegisterShareIndexRequest duplicateShareIndex = mockRegisterShareIndexRequest();
+        // Given: an existing share index
+        ShareIndex existingIndex = mockShareIndex(s -> s.id(UUID.randomUUID()));
+
+        // And: a request with a duplicate share index entry
+        RegisterShareIndexRequest duplicateShareIndex = mockRegisterShareIndexRequest()
+            .isin(existingIndex.getIdentity().getIsin())
+            .tickerSymbol(existingIndex.getIdentity().getTickerSymbol());
         List<RegisterShareIndexRequest> request = List.of(
             duplicateShareIndex
         );
@@ -140,39 +145,40 @@ public class ShareIndexResourceTest extends TestBase {
         // And: and the service will register the indices
         when(shareIndexService.registerShareIndices(anyList())).thenCallRealMethod();
         when(shareIndexService.registerShareIndex(any()))
-            .thenThrow(new DuplicateShareIndexException(request.get(0).getIsin(), request.get(0).getTickerSymbol(), null));
+            .thenReturn(existingIndex);
 
         // When: client calls the endpoint
-        ServiceErrorResponse response = given()
+        List<ShareIndexResponse> response = given()
             .request()
             .contentType(JSON)
             .body(request)
             .when()
             .post("/api/v1/shares/indices")
             .then()
-            .statusCode(409)
+            .statusCode(200)
             .contentType(JSON)
             .extract()
-            .as(ServiceErrorResponse.class);
+            .as(SHARE_INDEX_LIST);
 
-        // Then: the share index service is called to save the index
+        // Then: the share index service is called with the entire list
         verify(shareIndexService).registerShareIndices(anyList());
-        verify(shareIndexService).registerShareIndex(any());
 
-        // And: the response describes the ISIN conflict
+        // And: the share index service is called for each share in the request
+        verify(shareIndexService, times(request.size())).registerShareIndex(any());
+
+        // And: the response contains each registered share
         assertNotNull(response);
-        assertEquals(ErrorSeverity.INFO, response.getSeverity());
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
+        assertEquals(request.size(), response.size());
+        request.forEach(expected -> {
+            ShareIndexResponse actual = response.stream()
+                .filter(s -> s.getShareId().getIsin().equals(expected.getIsin()))
+                .findFirst().orElse(null);
 
-        ServiceError serviceError = response.getErrors().get(0);
-        assertEquals("DUPLICATE_SHARE_ISIN", serviceError.getMessageId());
-
-        Map<String, String> contextAttributes = serviceError.getContextAttributes();
-        assertNotNull(contextAttributes);
-        assertEquals(2, contextAttributes.size());
-        assertEquals(duplicateShareIndex.getIsin(), contextAttributes.get("isin"));
-        assertEquals(duplicateShareIndex.getTickerSymbol(), contextAttributes.get("ticker-symbol"));
+            assertNotNull(actual);
+            assertNotNull(actual.getId());
+            assertEquals(expected.getIsin(), actual.getShareId().getIsin());
+            assertEquals(expected.getTickerSymbol(), actual.getShareId().getTickerSymbol());
+        });
     }
 
     @Test
