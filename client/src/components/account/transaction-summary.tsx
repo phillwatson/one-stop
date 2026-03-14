@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 import { Paper } from '@mui/material';
 import Table from '@mui/material/Table';
@@ -14,6 +14,8 @@ import AccountService from '../../services/account.service';
 import { TransactionDetail } from '../../model/account.model';
 import { formatDate } from '../../util/date-util';
 import AddSelector from '../categories/add-selector';
+import useReconcileTransactions from '../reconciliation/reconcile-transactions-context';
+import ReconcilationButton from "../reconciliation/reconciliation-button";
 
 const colhead: SxProps = {
   fontWeight: 'bold'
@@ -31,16 +33,28 @@ interface TransactionsList {
 export default function TransactionSummaryList(props: Props) {
   const showMessage = useMessageDispatch();
   const [ formatMoney ] = useMonetaryContext();
+  const reconcilations = useReconcileTransactions();
 
   const [transactions, setTransactions] = useState<TransactionsList>({ page: [], total: 0});
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail>();
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
 
-  useEffect(() => {
-    AccountService.getTransactions(props.accountId, 0, 10)
+  const refresh = useCallback(() => {
+    AccountService.getTransactions(props.accountId, 0, 15)
       .then(response => setTransactions({ page: response.items, total: response.total }))
       .catch(err => showMessage(err))
   }, [props.accountId, showMessage]);
+
+  useEffect(() => {
+    refresh();
+  }, [ refresh ]);
+
+  useEffect(() => {
+    reconcilations.onSubmit=refresh;
+    return () => {
+      reconcilations.onSubmit=undefined;
+    }
+  }, [ reconcilations, refresh ]);
 
   function addToCategory(transaction: TransactionDetail) {
     setSelectedTransaction(transaction);
@@ -64,15 +78,23 @@ export default function TransactionSummaryList(props: Props) {
               <TableCell sx={colhead}>Additional Info</TableCell>
               <TableCell sx={colhead} align="right">Debit</TableCell>
               <TableCell sx={colhead} align="right">Credit</TableCell>
+              <TableCell sx={colhead} align="center">Reconciled</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             { transactions.page.map(transaction => (
-              <TableRow key={transaction.id} onClick={() => addToCategory(transaction)}>
+              <TableRow key={transaction.id} onClick={() => addToCategory(transaction)} className={ reconcilations.rowClassname(transaction) }>
                 <TableCell>{formatDate(transaction.bookingDateTime)}</TableCell>
                 <TableCell>{transaction.additionalInformation}</TableCell>
                 <TableCell align="right">{transaction.amount < 0 ? formatMoney(0 - transaction.amount, transaction.currency) : ''}</TableCell>
                 <TableCell align="right">{transaction.amount > 0 ? formatMoney(transaction.amount, transaction.currency) : ''}</TableCell>
+                <TableCell align="center">
+                  <ReconcilationButton
+                    transaction={ transaction }
+                    onUpdate={ updated => {
+                      setTransactions(prev => { return { ...prev, page: prev.page.map(i => i.id === updated.id ? updated : i) }});
+                    }}/>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
