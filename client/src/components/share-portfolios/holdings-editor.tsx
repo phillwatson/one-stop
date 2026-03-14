@@ -1,7 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { Dayjs } from 'dayjs';
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import Avatar from "@mui/material/Avatar";
+import Switch from "@mui/material/Switch";
+import ShowPercentageIcon from '@mui/icons-material/Percent';
+import ShowPriceIcon from '@mui/icons-material/AttachMoney';
 
 import { useMessageDispatch } from '../../contexts/messages/context';
 import PortfolioService from '../../services/portfolio.service';
@@ -23,6 +29,19 @@ export interface HoldingPrices {
   prices?: Array<SharePrice>;
 }
 
+/**
+ * Provides a visual indication of the selection between value and percentage growth.
+ * @param checked if true, indicates percentage growth is selected.
+ * @returns the icon to display.
+ */
+function toggleViewIcon(checked: boolean) {
+  return (
+    <Avatar sx={{ width: 22, height: 22, bgcolor: '#ebfcf4', color: 'black' }}>
+      { checked ? <ShowPercentageIcon /> : <ShowPriceIcon /> }
+    </Avatar>
+  )
+}
+
 export default function HoldingsEditor(props: Props) {
   const showMessage = useMessageDispatch();
 
@@ -33,6 +52,7 @@ export default function HoldingsEditor(props: Props) {
 
   const [selectedHolding, setSelectedHolding] = useState<ShareHoldingSummary | undefined>();
   const [selectedTrade, setSelectedTrade] = useState<ShareTrade | undefined>();
+  const [showPercentages, setShowPercentages ] = useState<boolean>(false);
 
   const [shareTradeDialogOpen, setShareTradeDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -162,8 +182,18 @@ export default function HoldingsEditor(props: Props) {
 
         { holdings.length > 0 &&
         <>
-          <SimpleDateRange onSelect={ setDateRange }/>
-          <HoldingsGraph holdingPrices={ selectedHolding
+          <Stack direction='row' justifyContent='center'>
+            <SimpleDateRange onSelect={ setDateRange }/>
+          </Stack>
+          <br/>
+          <Tooltip title='toggle breakdown view' placement='bottom'>
+            <Switch color='default' icon={ toggleViewIcon(false) } checkedIcon={ toggleViewIcon(true) }
+              checked={ showPercentages } value={ showPercentages }
+              onChange={ e => setShowPercentages(e.target.checked) }
+            ></Switch>
+          </Tooltip>
+
+          <HoldingsGraph showPercentages={ showPercentages } holdingPrices={ selectedHolding
               ? holdingPrices.filter(h => h.holding.shareIndexId === selectedHolding.shareIndexId)
               : holdingPrices }
               holdingTrades={ trades }

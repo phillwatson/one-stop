@@ -46,41 +46,42 @@ public class ShareIndexService {
 
     public ShareIndex registerShareIndex(ShareIndex.ShareIdentity identity) {
         log.info("Creating new ShareIndex [identity: {}]", identity);
-        try {
-            ShareIndex shareIndex = providerFactory.getAll()
-                .map(provider -> {
-                    try {
-                        return provider.getShareInfo(identity.getIsin(), identity.getTickerSymbol())
-                            .map(info -> ShareIndex.builder()
-                                .identity(ShareIndex.ShareIdentity.builder()
-                                    .isin(info.getIsin())
-                                    .tickerSymbol(info.getTickerSymbol())
-                                    .build())
-                                .name(info.getName())
-                                .currency(info.getCurrency())
-                                .provider(provider.getProviderId())
-                                .build()
-                            );
-                    } catch (Exception e) {
-                        log.warn("Share Provider failure.", e);
-                        return Optional.<ShareIndex>empty();
-                    }
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("ShareIndex", identity));
+        ShareIndex shareIndex = providerFactory.getAll()
+            .map(provider -> {
+                try {
+                    return provider.getShareInfo(identity.getIsin(), identity.getTickerSymbol())
+                        .map(info -> ShareIndex.builder()
+                            .identity(ShareIndex.ShareIdentity.builder()
+                                .isin(info.getIsin())
+                                .tickerSymbol(info.getTickerSymbol())
+                                .build())
+                            .name(info.getName())
+                            .currency(info.getCurrency())
+                            .provider(provider.getProviderId())
+                            .build()
+                        );
+                } catch (Exception e) {
+                    log.warn("Share Provider failure.", e);
+                    return Optional.<ShareIndex>empty();
+                }
+            })
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("ShareIndex", identity));
 
-            ShareIndex index = shareIndexRepository.saveAndFlush(shareIndex);
-
-            // queue task to retrieve share prices
-            pollShareIndexAdhocTask.queueTask(index.getId());
-
-            log.debug("Created ShareIndex [identity: {}, id: {}]", index.getIdentity(), index.getId());
-            return index;
-        } catch (ConstraintViolationException e) {
-            throw new DuplicateShareIndexException(identity, e);
-        }
+        return getShareIndex(identity)
+            .map(index -> {
+                log.debug("ShareIndex already exists [identity: {}, id: {}]", index.getIdentity(), index.getId());
+                return index;
+            })
+            .orElseGet(() -> {
+                // save record and queue task to retrieve share prices
+                ShareIndex index = shareIndexRepository.saveAndFlush(shareIndex);
+                pollShareIndexAdhocTask.queueTask(index.getId());
+                log.debug("Created ShareIndex [identity: {}, id: {}]", index.getIdentity(), index.getId());
+                return index;
+            });
     }
 
     public Page<ShareIndex> listShareIndices(int pageIndex, int pageSize) {
