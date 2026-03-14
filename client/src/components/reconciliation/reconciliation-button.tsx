@@ -30,13 +30,13 @@ export default function ReconcilationButton(props: Props) {
           reconcilations.add(props.transaction);
       }}>
         { isReconciled()
-            ? <ReconciledIcon fontSize="small" />
+            ? <ReconciledIcon fontSize="small"/>
             : <UnReconciledIcon fontSize="small" />
         }
       </IconButton>
 
       <Tooltip title={ props.transaction.notes }>
-        <IconButton size="small" style={{ padding: 4, margin: 0, color: props.transaction.notes ? '#000000ff' : '#0000006e' }}
+        <IconButton size="small" style={{ padding: 4, margin: 0, color: props.transaction.notes ? '#1870e2' : '#0000006e' }}
           onClick={ event => {
             event.stopPropagation();
             reconcilations.openDialog(props.transaction, props.onUpdate);
