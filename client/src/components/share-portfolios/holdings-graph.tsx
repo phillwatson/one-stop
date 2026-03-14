@@ -88,7 +88,8 @@ export default function HoldingsGraph({ showPercentages, holdingPrices, holdingT
       }, [] as any[])
       // calculate growth across all holdings
       .map((item, index, array) => {
-        item.growth = index > 0 ? ((item.value - array[0].value) / array[0].value) * 100 : 0
+        let initial = index > 0 ? array.find(i => i.value !== 0)?.value || 0 : 0;
+        item.growth = index > 0 ? ((item.value - initial) / initial) * 100 : 0
         return item;
       });
   }, [ holdingData ]);
@@ -97,12 +98,15 @@ export default function HoldingsGraph({ showPercentages, holdingPrices, holdingT
     return holdingData.length === 0 ? [] : holdingData
       // simplify holdings into one large array
       .flatMap(holding =>
-        holding.prices.flatMap((price, index, array) => ({
-          id: price.date.getTime(),
-          name: holding.holding.name,
-          date: price.date,
-          growth: index > 0 ? ((price.close - array[0].close) / array[0].close) * 100 : 0
-        }))
+        holding.prices.flatMap((price, index, array) => {
+          let initial = (index > 0) ? array.find(i => i.close !== 0)?.close || 0 : 0;
+          return ({
+            id: price.date.getTime(),
+            name: holding.holding.name,
+            date: price.date,
+            growth: index > 0 ? ((price.close - initial) / initial) * 100 : 0
+          })
+        })
       )
       .reduce((acc, obj) => {
         let entry: any = acc.find(item => item['id'] === obj['id']);
