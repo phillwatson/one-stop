@@ -1,7 +1,7 @@
 import { Currency } from "./commons.model";
 
 export interface ShareId {
-  // The unique International Securities Identification Number (GB00B80QG052)
+  // The unique International Securities Identification Number (e.g. GB00B80QG052)
   isin: string;
 
   // The share's ticker symbol
@@ -31,4 +31,16 @@ export interface SharePrice {
   low: number;
   close: number;
   volume: number;
+}
+
+/**
+ * Used to register a share index for future access to it's price history.
+ * Either the share's ISIN or ticker symbol can be used.
+ */
+export interface RegisterShareIndexRequest {
+  // The unique International Securities Identification Number (e.g. GB00B80QG052)
+  isin?: string;
+
+  // The share's ticker symbol
+  tickerSymbol?: string;
 }

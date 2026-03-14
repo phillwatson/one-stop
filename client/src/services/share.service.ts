@@ -1,7 +1,7 @@
 import http from './http-common';
 
 import PaginatedList from '../model/paginated-list.model';
-import { SharePrice, ShareIndex } from '../model/share-indices.model';
+import { SharePrice, ShareIndex, RegisterShareIndexRequest } from '../model/share-indices.model';
 import { minDate, startOfMonth } from "../util/date-util";
 
 class ShareService {
@@ -87,6 +87,22 @@ class ShareService {
       .catch(err => {
         throw err;
       });
+  }
+
+  /**
+   * Register the share index so that its price history can be retrieved.
+   * @param isin the unique International Securities Identification Number (e.g. GB00B80QG052)
+   * @returns 
+   */
+  registerShareIndex(isin: string): Promise<ShareIndex> {
+    const request: RegisterShareIndexRequest = {
+      isin: isin
+    }
+
+    // The service actually accepts an array of registrations, and returns
+    // the identifiers for each registration. We only want to register one.
+    return http.post<Array<ShareIndex>>('/shares/indices', [ request ])
+      .then(response => response.data[0]);
   }
 }
 

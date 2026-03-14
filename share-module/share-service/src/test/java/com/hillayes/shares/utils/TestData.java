@@ -43,7 +43,7 @@ public class TestData {
 
     public static ShareIndex mockShareIndex(Consumer<ShareIndex.Builder> modifier) {
         ShareIndex.Builder builder = ShareIndex.builder()
-            .identity(mockShareIdentity(null))
+            .identity(mockShareIdentity())
             .name(randomStrings.nextAlphanumeric(30))
             .currency(Currency.getInstance("GBP"))
             .provider(ShareProvider.FT_MARKET_DATA);
