@@ -43,16 +43,16 @@ export default function TransactionSummaryList(props: Props) {
     AccountService.getTransactions(props.accountId, 0, 15)
       .then(response => setTransactions({ page: response.items, total: response.total }))
       .catch(err => showMessage(err))
-  }, [props.accountId, showMessage]);
+  }, [ props.accountId, showMessage ]);
 
   useEffect(() => {
     refresh();
   }, [ refresh ]);
 
   useEffect(() => {
-    reconcilations.onSubmit=refresh;
+    reconcilations.onSubmit = refresh;
     return () => {
-      reconcilations.onSubmit=undefined;
+      reconcilations.onSubmit = undefined;
     }
   }, [ reconcilations, refresh ]);
 
