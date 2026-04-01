@@ -10,6 +10,10 @@ interface Props {
   onSelectIndices?: (value: ShareIndex[]) => void;
 }
 
+function listText(item: ShareIndex) {
+  return item.name + ' (' + (item.shareId.isin || item.shareId.tickerSymbol) + ')';
+}
+
 export default function MultiShareIndexSelector(props: Props) {
   // a list of items for selection - without the exclusions
   const listedItems = useMemo(() => {
@@ -52,7 +56,7 @@ export default function MultiShareIndexSelector(props: Props) {
                   />
                 </ListItemIcon>
 
-                <ListItemText id={ item.id } key={ item.id } primary={ item.name } />
+                <ListItemText id={ item.id } key={ item.id } primary={ listText(item) } />
               </ListItemButton>
             </ListItem>
           )}

@@ -29,7 +29,7 @@ export default function ShareIndexSelector(props: Props) {
         <Select labelId="select-index" label="Select Index" value={ index.id || ''}
           onChange={(e) => selectIndex(e.target.value as string)}>
           { props.shareIndices.map(item =>
-            <MenuItem value={ item.id } key={ item.id }>{ item.name }</MenuItem>
+            <MenuItem value={ item.id } key={ item.id }>{ item.name } ({item.shareId.isin || item.shareId.tickerSymbol})</MenuItem>
           )}
         </Select>
       </FormControl>    
