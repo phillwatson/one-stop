@@ -38,6 +38,7 @@
         <module>share-module</module>
         <module>user-service</module>
 
+        <module>one-stop-main</module>
         <module>integration-module</module>
     </modules>
 
@@ -208,11 +209,6 @@
             </dependency>
             <dependency>
                 <groupId>com.hillayes</groupId>
-                <artifactId>events-lib</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.hillayes</groupId>
                 <artifactId>outbox-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -306,6 +302,11 @@
                 <artifactId>integration-tests</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>one-stop-main</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -337,11 +338,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-messaging-kafka</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-test-security</artifactId>
