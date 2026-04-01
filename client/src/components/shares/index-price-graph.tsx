@@ -215,8 +215,10 @@ export default function ShareIndexGraph(props: Props) {
   const axisColour = useMemo(() => {
     if (prices.length === 1) {
       const len = prices[0].prices.length;
-      const growing = prices[0].prices[0].close < prices[0].prices[len - 1].close;
-      return growing ? '#7AAF7A' : '#F08080';
+      if (len > 0) {
+        const growing = prices[0].prices[0].close < prices[0].prices[len - 1].close;
+        return growing ? '#7AAF7A' : '#F08080';
+      }
     }
 
     return 'green';

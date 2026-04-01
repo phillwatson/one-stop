@@ -2,15 +2,15 @@ import { Currency } from "./commons.model";
 
 export interface ShareId {
   // The unique International Securities Identification Number (e.g. GB00B80QG052)
-  isin: string;
+  isin?: string;
 
   // The share's ticker symbol
-  tickerSymbol: string;
+  tickerSymbol?: string;
 }
 
 export interface ShareIndex {
   id: string;
-  shareId: string;
+  shareId: ShareId;
   name: string;
   currency: Currency;
   provider: string;
@@ -18,7 +18,7 @@ export interface ShareIndex {
 
 export const NULL_INDEX: ShareIndex = {
   id: '',
-  shareId: '',
+  shareId: { },
   name: '',
   currency: 'GBP',
   provider: ''
