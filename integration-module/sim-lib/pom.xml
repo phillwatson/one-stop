@@ -11,6 +11,12 @@
 
     <artifactId>sim-lib</artifactId>
 
+    <properties>
+        <!-- enable compilation tests image by default -->
+        <skip.compile>false</skip.compile>
+        <skip.its>false</skip.its>
+    </properties>
+
     <dependencies>
         <dependency>
             <!-- causes build of docker images on package -->
