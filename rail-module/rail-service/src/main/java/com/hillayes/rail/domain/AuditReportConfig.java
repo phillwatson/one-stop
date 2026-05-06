@@ -160,6 +160,15 @@ public class AuditReportConfig {
     }
 
     /**
+     * Returns the value of the parameter with the given name as a Boolean.
+     * @param name The name of the parameter.
+     * @return The value of the parameter as a Boolean.
+     */
+    public Optional<Boolean> getBoolean(String name) {
+        return getString(name).map(Boolean::parseBoolean);
+    }
+
+    /**
      * Identifies the source of the transactions to be analysed by the report.
      */
     public enum ReportSource {

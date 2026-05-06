@@ -32,6 +32,9 @@ import java.util.UUID;
 @ApplicationScoped
 @Slf4j
 public class OutgoingVelocityReport extends AuditReportTemplate {
+    // true if reconciled transactions are to be excluded
+    private static final String PARAM_EXCLUDE_RECONCILED = "excludeReconciled";
+
     // the number of days over which the overall activity is averaged
     private static final String PARAM_MAJOR_AVERAGE_DAYS = "majorAverageDays";
     private static final Long PARAM_MAJOR_AVERAGE_DAYS_DEFAULT = 30L;
@@ -47,6 +50,8 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
 
     // a list of parameters that the user can set when running this report
     private static final List<Parameter> PARAMETERS = List.of(
+        new Parameter(PARAM_EXCLUDE_RECONCILED, "Consider reconciled transactions for stats but exclude from results",
+            ParameterType.BOOLEAN, "false"),
         new Parameter(PARAM_MAJOR_AVERAGE_DAYS, "The number of days over which the overall velocity is averaged",
             ParameterType.LONG, PARAM_MAJOR_AVERAGE_DAYS_DEFAULT.toString()),
         new Parameter(PARAM_MINOR_AVERAGE_DAYS, "The number of days over which the recent velocity is averaged",
@@ -89,6 +94,8 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
             .orElse(PARAM_MINOR_AVERAGE_DAYS_DEFAULT);
         Double velocityFactor = reportConfig.getDouble(PARAM_VELOCITY_FACTOR)
             .orElse(PARAM_VELOCITY_FACTOR_DEFAULT);
+        Boolean excludeReconciled = reportConfig.getBoolean(PARAM_EXCLUDE_RECONCILED)
+            .orElse(Boolean.FALSE);
 
         Instant majorStartDate = Instant.now().minus(Duration.ofDays(majorAverageDays)).truncatedTo(ChronoUnit.DAYS);
         Instant minorStartDate = Instant.now().minus(Duration.ofDays(minorAverageDays)).truncatedTo(ChronoUnit.DAYS);
@@ -135,6 +142,7 @@ public class OutgoingVelocityReport extends AuditReportTemplate {
         if (minorAverage >= velocityThreshold) {
             // report all outgoing transactions within the minor average period that have not already been reported
             issues = transactions.stream()
+                .filter(t -> !excludeReconciled || !t.isReconciled())
                 .filter(t -> t.getAmount().getAmount() < 0)
                 .filter(t -> t.getBookingDateTime().compareTo(minorStartDate) >= 0)
                 .filter(t -> !existingIssues.contains(t.getId()))

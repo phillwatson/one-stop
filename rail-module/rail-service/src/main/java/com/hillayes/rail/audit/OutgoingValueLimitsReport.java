@@ -21,6 +21,9 @@ import static java.util.function.UnaryOperator.identity;
 @ApplicationScoped
 @Slf4j
 public class OutgoingValueLimitsReport extends AuditReportTemplate {
+    // true if reconciled transactions are to be excluded
+    private static final String PARAM_EXCLUDE_RECONCILED = "excludeReconciled";
+
     // the number of days over which the average outgoing transaction amount is calculated
     private static final String PARAM_AVERAGE_DAYS = "averageDays";
     private static final Long PARAM_AVERAGE_DAYS_DEFAULT = 30L;
@@ -36,6 +39,8 @@ public class OutgoingValueLimitsReport extends AuditReportTemplate {
 
     // a list of parameters that the user can set when running this report
     private static final List<Parameter> PARAMETERS = List.of(
+        new Parameter(PARAM_EXCLUDE_RECONCILED, "Consider reconciled transactions for stats but exclude from results",
+            ParameterType.BOOLEAN, "false"),
         new Parameter(PARAM_AVERAGE_DAYS, "The number of days over which the average outgoing transaction amount is calculated",
             ParameterType.LONG, PARAM_AVERAGE_DAYS_DEFAULT.toString()),
         new Parameter(PARAM_REPORT_DAYS, "The number of days over which the outgoing transactions are analysed for issues",
@@ -75,6 +80,8 @@ public class OutgoingValueLimitsReport extends AuditReportTemplate {
             .orElse(PARAM_REPORT_DAYS_DEFAULT);
         Double thresholdFactor = reportConfig.getDouble(PARAM_THRESHOLD_FACTOR)
             .orElse(PARAM_THRESHOLD_FACTOR_DEFAULT);
+        Boolean excludeReconciled = reportConfig.getBoolean(PARAM_EXCLUDE_RECONCILED)
+            .orElse(Boolean.FALSE);
 
         Instant startDate = Instant.now().minus(Duration.ofDays(averageDays)).truncatedTo(ChronoUnit.DAYS);
         Instant endDate = Instant.now().plus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS);
@@ -103,6 +110,7 @@ public class OutgoingValueLimitsReport extends AuditReportTemplate {
                 // does any outgoing transaction within the report days exceed the audit threshold
                 Instant inclDate = Instant.now().minus(Duration.ofDays(reportDays)).truncatedTo(ChronoUnit.DAYS);
                 return transactions.stream()
+                    .filter(t -> !excludeReconciled || !t.isReconciled())
                     .filter(t -> t.getAmount().getAmount() < 0)
                     .filter(t -> t.getBookingDateTime().compareTo(inclDate) >= 0)
                     .filter(t -> t.getAmount().getAmount() <= threshold)
