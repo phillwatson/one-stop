@@ -27,17 +27,17 @@ const balanceRow: SxProps = {
 
 export default function AccountList(props: Props) {
   const [ formatMoney ] = useMonetaryContext();
-  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<string | undefined>(undefined);
 
   function isSelected(accountId: string) {
-    return selectedAccounts.find(id => id === accountId) !== undefined;
+    return selectedAccount === accountId;
   }
 
   function handleSelectAccount(account: AccountDetail) {
     if (isSelected(account.id)) {
-      setSelectedAccounts(selectedAccounts.filter(id => id !== account.id))
+      setSelectedAccount(undefined)
     } else {
-      setSelectedAccounts([...selectedAccounts, account.id])
+      setSelectedAccount(account.id)
     }
   }
 
