@@ -165,9 +165,9 @@ export default function EditAuditReportConfig(props: Props) {
   }, [ selectedTemplate, props.reportConfig?.templateName, props.reportConfig?.parameters ]);
 
 
-  function setParameter(name: string, value: string) {
+  function setParameter(name: string, value: string | boolean | number) {
     setReportConfig(prev => {
-      prev.parameters[name] = value;
+      prev.parameters[name] = value.toString();
       return ({ ...prev })
     })
   }
@@ -268,10 +268,19 @@ export default function EditAuditReportConfig(props: Props) {
                       </TableCell>
                       <TableCell>{ param.defaultValue }</TableCell>
                       <TableCell>
-                        <TextField id={ param.name } variant="outlined" fullWidth margin="none"
-                          type={ param.type === 'BOOLEAN' ? 'checkbox' : param.type === 'DOUBLE'|| param.type === 'LONG' ? 'number' : 'text' }
-                          value={ reportConfig.parameters[param.name] || param.defaultValue || '' }
-                          onChange={ e => setParameter(param.name, e.target.value) }/>
+                        { param.type === 'BOOLEAN' ?
+                          <Switch id={ param.name }
+                            checked={ reportConfig.parameters[param.name]?.toLowerCase() === 'true' }
+                            onChange={ e => setParameter(param.name, e.target.checked) }/>
+                        : param.type === 'DOUBLE' || param.type === 'LONG' ?
+                          <TextField id={ param.name } variant="standard" fullWidth margin="none" type="number"
+                            value={ reportConfig.parameters[param.name] || param.defaultValue || '' }
+                            onChange={ e => setParameter(param.name, e.target.value) }/>
+                        :
+                          <TextField id={ param.name } variant="standard" fullWidth margin="none" type="text"
+                            value={ reportConfig.parameters[param.name] || param.defaultValue || '' }
+                            onChange={ e => setParameter(param.name, e.target.value) }/>
+                        }
                       </TableCell>
                     </TableRow>
                   )}
