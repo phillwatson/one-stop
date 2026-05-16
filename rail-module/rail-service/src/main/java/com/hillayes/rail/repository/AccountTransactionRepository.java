@@ -11,10 +11,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -132,16 +130,19 @@ public class AccountTransactionRepository extends RepositoryBase<AccountTransact
     public List<MonetaryAmount> findTotals(TransactionFilter filter) {
         EntityManager entityManager = getEntityManager();
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<MonetaryAmount> query = builder.createQuery(MonetaryAmount.class);
+
+        CriteriaQuery<Tuple> query = builder.createTupleQuery();
         Root<AccountTransaction> root = query.from(AccountTransaction.class);
 
         Path<Object> amount = root.get("amount");
-        query.multiselect(
-                amount.get("currency"),
-                builder.sum(amount.get("amount")))
+        CompoundSelection<Tuple> tuple = builder.tuple(amount.get("currency"), builder.sum(amount.get("amount")));
+
+        query.select(tuple)
             .groupBy(amount.get("currency"))
             .where(filter.toPredicate(builder, root));
-        return entityManager.createQuery(query).getResultList();
+        return entityManager.createQuery(query).getResultStream()
+            .map(t -> MonetaryAmount.of(t.get(0).toString(), t.get(1, Long.class)))
+            .toList();
     }
 
     public List<AccountTransaction> listAll(Collection<UUID> transactionIds){
