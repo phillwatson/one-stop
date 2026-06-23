@@ -245,6 +245,15 @@ export default function ShareIndexGraph(props: Props) {
             ? [{ id: 'percentage', label: 'Growth (%)', valueFormatter: percentageFormatter }]
             : [{ id: 'price', label: 'Price' }]
           }
+        slotProps={{
+          legend: {
+            direction: 'horizontal',
+            position: { 
+              vertical: 'bottom',
+              horizontal: 'center'
+            }
+          }
+        }}
         series=
         { percentageView
           ? (prices.length === 1) 
