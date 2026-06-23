@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Checkbox, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+import { Checkbox, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, FormControlLabel } from "@mui/material";
 
 import { ShareIndex } from "../../model/share-indices.model";
 
@@ -33,6 +33,10 @@ export default function MultiShareIndexSelector(props: Props) {
     }
   }
 
+  function clearAll() {
+    setSelectedIndices([]);
+  }
+
   // call the callback on selection update
   const callback = props.onSelectIndices;
   useEffect(() => {
@@ -43,8 +47,12 @@ export default function MultiShareIndexSelector(props: Props) {
 
   return (
       <FormControl fullWidth>
-        <Typography gutterBottom noWrap={ true }> { props.label || 'Select Indices' } </Typography>
-
+        <Typography noWrap={ true }> { props.label || 'Select Indices' } </Typography>
+        <FormControlLabel label="Clear All" sx={{ margin: 0 }}
+          control={ <Checkbox checked={ selectedIndices.length > 0 } disabled={ selectedIndices.length === 0 } 
+            onChange={ clearAll } slotProps={{ input: { 'aria-label': 'controlled' } }}
+          /> }
+        />
         <List sx={{ height: '250px', overflow: 'auto', border: '1px solid lightgrey', borderRadius: '1%' }}>
           { listedItems.map(item =>
             <ListItem key={ item.id } dense disableGutters disablePadding>
