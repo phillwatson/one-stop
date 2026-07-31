@@ -1,4 +1,3 @@
-
 export function getDefaultLocale(): Intl.Locale | undefined {
   const dateTimeOptions = Intl.DateTimeFormat().resolvedOptions();
   if (dateTimeOptions) {
@@ -83,28 +82,30 @@ export function maxDate(dateA: Date, dateB: Date): Date {
 }
 
 export function startOfDay(date: Date, plusDays: number = 0): Date {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const day = date.getDate();
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
 
-  let result = new Date();
-  result.setUTCHours(0);
-  result.setUTCMinutes(0);
-  result.setUTCSeconds(0);
-  result.setUTCMilliseconds(0);
-  result.setUTCFullYear(year);
-  result.setUTCMonth(month);
-  result.setUTCDate(day);
+  if (plusDays !== 0) {
+    result.setDate(result.getDate() + plusDays);
+  }
 
-  if (plusDays > 0)
-    result.setDate(plusDays);
   return result;
 }
 
+/**
+ * Calculates the start of the month for the given date, with the time set to 00:00:00.000.
+ * 
+ * @param date the date for which the start of the month is to be returned.
+ * @param plusMonth on optional number of months to add to the date before returning the start of the month.
+ * @returns the start of the month for the given date, with the time set to 00:00:00.000.
+ */
 export function startOfMonth(date: Date, plusMonth: number = 0): Date {
-  let result = startOfDay(date);
+  const result = startOfDay(date);
   result.setDate(1);
-  if (plusMonth > 0)
+
+  if (plusMonth !== 0) {
     result.setMonth(result.getMonth() + plusMonth);
+  }
+
   return result;
 }
