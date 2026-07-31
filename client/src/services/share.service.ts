@@ -58,6 +58,7 @@ class ShareService {
    * @returns the array of prices, in ascending date order.
    */
   getPrices(shareIndexId: string, fromDate: Date, toDate: Date): Promise<Array<SharePrice>> {
+    // never retrieve prices for future dates
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 

@@ -3654,7 +3654,7 @@ components:
         - shareId
         - name
         - quantity
-        - totalCost
+        - averagePrice
         - currency
         - latestPrice
       properties:
@@ -3679,10 +3679,10 @@ components:
           format: double
           description: The number of shares held
           example: 150.2322
-        totalCost:
+        averagePrice:
           type: number
           format: double
-          description: The total price paid for the holding in minor currency units
+          description: The average price paid per share in minor currency units
           example: 2341234.123
         currency:
           type: string

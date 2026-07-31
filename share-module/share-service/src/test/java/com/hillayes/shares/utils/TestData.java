@@ -3,7 +3,6 @@ package com.hillayes.shares.utils;
 import com.hillayes.shares.api.domain.PriceData;
 import com.hillayes.shares.api.domain.ShareProvider;
 import com.hillayes.shares.domain.*;
-import com.hillayes.shares.repository.ShareTradeRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -158,7 +157,7 @@ public class TestData {
             .name(shareIndex.getName())
             .quantity(BigDecimal.valueOf(randomNumbers.randomInt(100, 200)))
             .currency(Currency.getInstance(shareIndex.getCurrency().getCurrencyCode()))
-            .totalCost(BigDecimal.valueOf(randomNumbers.randomFloat(50000, 200000)))
+            .averagePrice(BigDecimal.valueOf(randomNumbers.randomFloat(50000, 200000)))
             .latestPrice(BigDecimal.valueOf(randomNumbers.randomFloat(100, 2000)));
 
         if (modifier != null) {

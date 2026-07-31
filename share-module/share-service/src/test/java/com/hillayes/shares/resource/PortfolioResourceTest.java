@@ -288,7 +288,7 @@ public class PortfolioResourceTest extends TestBase {
             assertEquals(expected.getShareIdentity().getTickerSymbol(), summary.getShareId().getTickerSymbol());
             assertEquals(expected.getName(), summary.getName());
             assertEquals(expected.getQuantity().doubleValue(), summary.getQuantity());
-            assertEquals(expected.getTotalCost().doubleValue(), summary.getTotalCost());
+            assertEquals(expected.getAveragePrice().doubleValue(), summary.getAveragePrice());
             assertEquals(expected.getCurrency().getCurrencyCode(), summary.getCurrency());
             assertEquals(expected.getLatestPrice().doubleValue(), summary.getLatestPrice());
         });

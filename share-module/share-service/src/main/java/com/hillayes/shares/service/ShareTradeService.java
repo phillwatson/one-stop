@@ -52,7 +52,7 @@ public class ShareTradeService {
                 .name(summary.getName())
                 .quantity(summary.getQuantity())
                 .currency(Currency.getInstance(summary.getCurrency()))
-                .totalCost(summary.getTotalCost())
+                .averagePrice(summary.getAveragePrice())
                 .latestPrice(priceHistoryRepository.getMostRecent(summary.getShareIndexId())
                     .map(PriceHistory::getClose)
                     .orElse(BigDecimal.ZERO))

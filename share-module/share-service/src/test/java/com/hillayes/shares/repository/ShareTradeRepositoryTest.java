@@ -52,10 +52,16 @@ public class ShareTradeRepositoryTest {
                         for (int i = 1; i < 3; i++) {
                             int index = i;
                             shareTradeRepository.save(mockShareTrade(portfolio, shareIndex, t ->
-                                t.quantity(BigDecimal.valueOf(10 * index))
-                                    .price(BigDecimal.valueOf(100 * index))
+                                t.quantity(BigDecimal.valueOf(12 * index))
+                                    .price(BigDecimal.valueOf(24 * index))
                             ));
                         }
+
+                        // record a sale - these aren't counted towards average price
+                        shareTradeRepository.save(mockShareTrade(portfolio, shareIndex, t ->
+                            t.quantity(BigDecimal.valueOf(-20))
+                                .price(BigDecimal.valueOf(25))
+                        ));
                     });
                     return portfolio;
                 })
@@ -83,8 +89,8 @@ public class ShareTradeRepositoryTest {
                     assertEquals(shareIndex.getIdentity().getTickerSymbol(), summary.getTickerSymbol());
                     assertEquals(shareIndex.getName(), summary.getName());
                     assertEquals(shareIndex.getCurrency().getCurrencyCode(), summary.getCurrency());
-                    assertEquals(30.0, summary.getQuantity().doubleValue());
-                    assertEquals(5000.0, summary.getTotalCost().doubleValue());
+                    assertEquals(16.0, summary.getQuantity().doubleValue());
+                    assertEquals(40.0, summary.getAveragePrice().doubleValue());
                 });
             })
         );

@@ -69,7 +69,7 @@ class PortfolioService {
             .then(response => response.data as ShareHoldingSummary[])
             .then(holdings => {
                 holdings.forEach(holding => {
-                    holding.averagePrice = holding.quantity > 0 ? holding.totalCost / holding.quantity : 0;
+                    holding.totalCost = holding.quantity * holding.averagePrice;
                     holding.currentValue = holding.latestPrice * holding.quantity;
                     holding.gainLoss = holding.currentValue - holding.totalCost;
                     holding.gainLossPercent = holding.totalCost > 0 ? ((holding.gainLoss / holding.totalCost) * 100) : 0;

@@ -230,7 +230,7 @@ public class PortfolioResource {
             .shareId(marshal(summary.getShareIdentity()))
             .name(summary.getName())
             .quantity(summary.getQuantity().doubleValue())
-            .totalCost(summary.getTotalCost().doubleValue())
+            .averagePrice(summary.getAveragePrice().doubleValue())
             .currency(summary.getCurrency().getCurrencyCode())
             .latestPrice(summary.getLatestPrice().doubleValue());
     }
