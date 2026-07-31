@@ -21,7 +21,7 @@ public class TransactionDetail {
     public CurrencyAmount transactionAmount;
     public String additionalInformation;
     public String additionalInformationStructured;
-    public String balanceAfterTransaction;
+    public BalanceAfterTransaction balanceAfterTransaction;
     public String bankTransactionCode;
     public String checkId;
     public AccountReference creditorAccount;
