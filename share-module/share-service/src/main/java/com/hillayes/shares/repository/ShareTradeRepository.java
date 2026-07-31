@@ -25,7 +25,8 @@ public class ShareTradeRepository extends RepositoryBase<ShareTrade, UUID> {
             "  t.portfolio_id, " +
             "  t.share_index_id, " +
             "  sum(t.quantity) as quantity, " +
-            "  sum(t.price * t.quantity) as total_cost " +
+            "  sum((case when t.quantity < 0 then 0 else t.quantity end)) as purchased, " +
+            "  sum(t.price * (case when t.quantity < 0 then 0 else t.quantity end)) as purchase_cost " +
             "from shares.share_trade t " +
             "where t.user_id = :userId " +
             "and t.portfolio_id = :portfolioId " +
@@ -39,7 +40,7 @@ public class ShareTradeRepository extends RepositoryBase<ShareTrade, UUID> {
             "  s.ticker_symbol, " +
             "  s.name, " +
             "  t.quantity, " +
-            "  t.total_cost, " +
+            "  t.purchase_cost / t.purchased as average_price, " +
             "  s.currency_code " +
             "from (" + SELECT_TRADE_SUMMARIES + ") t " +
             "inner join shares.share_index s on t.share_index_id = s.id " +
@@ -100,8 +101,8 @@ public class ShareTradeRepository extends RepositoryBase<ShareTrade, UUID> {
         @Column(name = "quantity")
         private BigDecimal quantity;
 
-        @Column(name = "total_cost")
-        private BigDecimal totalCost;
+        @Column(name = "average_price")
+        private BigDecimal averagePrice;
 
         @Column(name = "currency_code")
         private String currency;
