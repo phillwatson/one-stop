@@ -500,7 +500,7 @@ public class ShareTradeServiceTest {
             assertEquals(expected.getName(), summary.getName());
             assertEquals(expected.getCurrency(), summary.getCurrency().getCurrencyCode());
             assertEquals(expected.getQuantity(), summary.getQuantity());
-            assertEquals(expected.getTotalCost(), summary.getTotalCost());
+            assertEquals(expected.getAveragePrice(), summary.getAveragePrice());
 
             PriceHistory priceHistory = prices.get(summary.getShareIndexId());
             assertNotNull(priceHistory);
@@ -567,7 +567,7 @@ public class ShareTradeServiceTest {
             .tickerSymbol(shareIndex.getIdentity().getTickerSymbol())
             .name(shareIndex.getName())
             .quantity(BigDecimal.valueOf(randomNumbers.randomInt(1, 200)))
-            .totalCost(BigDecimal.valueOf(randomNumbers.randomDouble(100, 1000)))
+            .averagePrice(BigDecimal.valueOf(randomNumbers.randomDouble(100, 1000)))
             .currency(shareIndex.getCurrency().getCurrencyCode())
             .build();
     }

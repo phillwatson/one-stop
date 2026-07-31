@@ -27,7 +27,7 @@ public class ShareTradeSummary {
 
     private BigDecimal quantity;
 
-    private BigDecimal totalCost;
+    private BigDecimal averagePrice;
 
     private Currency currency;
 

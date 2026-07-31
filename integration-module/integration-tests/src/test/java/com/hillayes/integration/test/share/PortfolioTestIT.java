@@ -119,10 +119,7 @@ public class PortfolioTestIT extends ApiTestBase {
                 assertEquals(1, holdings.size());
                 ShareTradeSummaryResponse summary = holdings.getFirst();
                 assertEquals(buyRequest.getQuantity() + sellRequest.getQuantity(), summary.getQuantity());
-                assertEquals(
-                    (buyRequest.getPricePerShare() * buyRequest.getQuantity()) +
-                            (sellRequest.getPricePerShare() * sellRequest.getQuantity()),
-                    summary.getTotalCost());
+                assertEquals(buyRequest.getPricePerShare(), summary.getAveragePrice());
 
                 // And: an email is sent to the user confirming the sale
                 emailSim.verifyEmailSent(user.getEmail(), "Your sale of shares in " + shareIndex.get().getName());
