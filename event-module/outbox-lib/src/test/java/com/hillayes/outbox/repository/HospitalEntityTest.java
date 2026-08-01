@@ -1,6 +1,5 @@
 package com.hillayes.outbox.repository;
 
-import com.hillayes.events.domain.EventPacket;
 import com.hillayes.events.domain.Topic;
 import com.hillayes.events.events.auth.UserAuthenticated;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HospitalEntityTest {
     @Test
-    public void testFromEventPacket() {
+    public void testFromEventEntity() {
         // given: an event payload
         UserAuthenticated payload = UserAuthenticated.builder()
             .userId(UUID.randomUUID())
@@ -20,30 +19,25 @@ public class HospitalEntityTest {
             .build();
 
         // and: an event packet to serialize the payload
-        EventPacket eventPacket = new EventPacket(
-            UUID.randomUUID(),
-            Topic.USER_AUTH,
-            UUID.randomUUID().toString(),
-            0, Instant.now(),
-            "key", payload.getClass().getName(), EventPacket.serialize(payload)
-        );
+        EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.USER_AUTH, "key", payload);
 
         // when: the event packet is converted to a hospital entity
-        HospitalEntity hospitalEntity = HospitalEntity.fromEventPacket(eventPacket,  "mock consumer", "mock reason", "mock cause");
+        Throwable error = new RuntimeException("mock cause");
+        HospitalEntity hospitalEntity = HospitalEntity.fromEventEntity(eventEntity,  "mock consumer", error);
 
         // then: the hospital entity is created with correct values
         assertNotNull(hospitalEntity);
         assertNull(hospitalEntity.getId());
         assertNotNull(hospitalEntity.getTimestamp());
-        assertEquals(eventPacket.getId(), hospitalEntity.getEventId());
-        assertEquals(eventPacket.getCorrelationId(), hospitalEntity.getCorrelationId());
-        assertEquals(eventPacket.getKey(), hospitalEntity.getKey());
-        assertEquals(eventPacket.getTopic(), hospitalEntity.getTopic());
-        assertEquals(eventPacket.getRetryCount(), hospitalEntity.getRetryCount());
-        assertEquals(eventPacket.getPayloadClass(), hospitalEntity.getPayloadClass());
-        assertEquals(eventPacket.getPayload(), hospitalEntity.getPayload());
+        assertEquals(eventEntity.getId(), hospitalEntity.getEventId());
+        assertEquals(eventEntity.getCorrelationId(), hospitalEntity.getCorrelationId());
+        assertEquals(eventEntity.getKey(), hospitalEntity.getKey());
+        assertEquals(eventEntity.getTopic(), hospitalEntity.getTopic());
+        assertEquals(eventEntity.getRetryCount(), hospitalEntity.getRetryCount());
+        assertEquals(eventEntity.getPayloadClass(), hospitalEntity.getPayloadClass());
+        assertEquals(eventEntity.getPayload(), hospitalEntity.getPayload());
         assertEquals("mock consumer", hospitalEntity.getConsumer());
-        assertEquals("mock reason", hospitalEntity.getReason());
+        assertEquals(RuntimeException.class.getName(), hospitalEntity.getReason());
         assertEquals("mock cause", hospitalEntity.getCause());
     }
 }

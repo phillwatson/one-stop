@@ -10,7 +10,7 @@ import java.util.UUID;
  * Records the transactions that have been identified as issues by an audit report.
  */
 @Entity
-@Table(name = "audit_issue")
+@Table(schema = "rails", name = "audit_issue")
 @Getter
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor

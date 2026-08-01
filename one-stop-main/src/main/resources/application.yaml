@@ -1,0 +1,27 @@
+smallrye:
+  config:
+    mapping:
+      validate-unknown: false # ignore unknown config properties
+
+# configure production datasource
+"%prod":
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      #username: one-stop
+      #password: password
+      jdbc:
+        url: jdbc:postgresql://db:5432/one-stop
+
+quarkus:
+  flyway:
+    migrate-at-start: true
+
+  log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG

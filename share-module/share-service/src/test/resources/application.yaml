@@ -1,5 +1,8 @@
 quarkus:
   hibernate-orm:
+    database:
+      # allows tests to apply migrations without conflicting with other modules
+      default-schema: shares
     log:
       sql: true
       bind-parameters: true
