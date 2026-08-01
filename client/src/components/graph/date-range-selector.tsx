@@ -28,8 +28,10 @@ const StaticRanges: Array<StaticRange> = [
   { name: 'This Year',      range: [ now.month(0).date(1), tomorrow ] },
   { name: 'Last Year',      range: [ now.month(0).date(1).subtract(1, 'year'), now.month(0).date(1) ] },
   { name: 'Past 30 Days',   range: [ now.subtract(30, 'day'), tomorrow ] },
+  { name: 'Past 3 Months',  range: [ now.subtract(3, 'month'), tomorrow ] },
   { name: 'Past 6 Months',  range: [ now.subtract(6, 'month'), tomorrow ] },
-  { name: 'Past 12 Months', range: [ now.subtract(12, 'month'), tomorrow ] }
+  { name: 'Past 12 Months', range: [ now.subtract(1, 'year'), tomorrow ] },
+  { name: 'Past 24 Months', range: [ now.subtract(2, 'year'), tomorrow ] }
 ]
 
 interface Props {
