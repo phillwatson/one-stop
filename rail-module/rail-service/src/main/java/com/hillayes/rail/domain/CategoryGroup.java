@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 @Entity
 @Table(name = "category_group")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -85,7 +85,7 @@ public class CategoryGroup {
      * @return The new category.
      */
     public Category addCategory(String name,
-                                Consumer<Category.Builder> modifier) {
+                                Consumer<Category.CategoryBuilder> modifier) {
         String newName = Strings.trimOrNull(name);
         if (newName == null) {
             throw new MissingParameterException("Category.name");
@@ -98,7 +98,7 @@ public class CategoryGroup {
                 throw new CategoryAlreadyExistsException(c);
             });
 
-        Category.Builder builder = Category.builder()
+        Category.CategoryBuilder builder = Category.builder()
             .group(this)
             .name(name);
 

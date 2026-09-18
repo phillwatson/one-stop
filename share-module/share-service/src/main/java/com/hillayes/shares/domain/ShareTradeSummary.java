@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.UUID;
 
-@Builder(builderClassName = "Builder")
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)

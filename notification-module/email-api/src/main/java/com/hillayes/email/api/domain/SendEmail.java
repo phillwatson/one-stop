@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Encapsulates the email properties that should be supported by the SendEmail Service Provdier.
  */
-@Builder(builderClassName = "Builder")
+@Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SendEmail {

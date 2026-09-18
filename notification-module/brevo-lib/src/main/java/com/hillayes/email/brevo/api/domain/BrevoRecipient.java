@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-@Builder(builderClassName = "Builder")
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -66,7 +66,7 @@ public class UserOnboardResourceTest extends TestBase {
     public void testRegisterAndOnboarding() {
         // given: a register-user request
         UserRegisterRequest registerRequest = new UserRegisterRequest()
-            .email(insecure().nextAlphanumeric(30));
+            .email(insecure().nextAlphanumeric(30) + "@work.com");
 
         // and: no other user has that email address
         when(userRepository.findByEmail(registerRequest.getEmail().toLowerCase()))

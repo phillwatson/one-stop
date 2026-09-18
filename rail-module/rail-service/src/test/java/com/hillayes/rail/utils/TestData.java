@@ -43,8 +43,8 @@ public class TestData {
         return mockAccount(userId, (a) -> a.userConsentId(userConsentId));
     }
 
-    public static Account mockAccount(UUID userId, Consumer<Account.Builder> modifier) {
-        Account.Builder builder = Account.builder()
+    public static Account mockAccount(UUID userId, Consumer<Account.AccountBuilder> modifier) {
+        Account.AccountBuilder builder = Account.builder()
             .id(UUID.randomUUID())
             .userId(userId)
             .userConsentId(UUID.randomUUID())
@@ -66,8 +66,8 @@ public class TestData {
     }
 
     public static AccountBalance mockAccountBalance(Account account,
-                                                    Consumer<AccountBalance.Builder> modifier) {
-        AccountBalance.Builder builder = AccountBalance.builder()
+                                                    Consumer<AccountBalance.AccountBalanceBuilder> modifier) {
+        AccountBalance.AccountBalanceBuilder builder = AccountBalance.builder()
             .id(UUID.randomUUID())
             .accountId(account.getId())
             .balanceType(RandomStringUtils.insecure().nextAlphanumeric(30))
@@ -86,7 +86,7 @@ public class TestData {
     }
 
     public static AccountTransaction mockAccountTransaction(Account account,
-                                                            Consumer<AccountTransaction.Builder> modifier) {
+                                                            Consumer<AccountTransaction.AccountTransactionBuilder> modifier) {
         return mockAccountTransaction(c -> {
             c.accountId(account.getId());
             c.userId(account.getUserId());
@@ -96,8 +96,8 @@ public class TestData {
         });
     }
 
-    public static AccountTransaction mockAccountTransaction(Consumer<AccountTransaction.Builder> modifier) {
-        AccountTransaction.Builder builder = AccountTransaction.builder()
+    public static AccountTransaction mockAccountTransaction(Consumer<AccountTransaction.AccountTransactionBuilder> modifier) {
+        AccountTransaction.AccountTransactionBuilder builder = AccountTransaction.builder()
             .id(UUID.randomUUID())
             .userId(UUID.randomUUID())
             .accountId(UUID.randomUUID())
@@ -129,8 +129,8 @@ public class TestData {
     }
 
     public static AuditReportConfig mockAuditReportConfig(UUID userId,
-                                                          Consumer<AuditReportConfig.Builder> modifier) {
-        AuditReportConfig.Builder builder = AuditReportConfig.builder()
+                                                          Consumer<AuditReportConfig.AuditReportConfigBuilder> modifier) {
+        AuditReportConfig.AuditReportConfigBuilder builder = AuditReportConfig.builder()
             .disabled(false)
             .userId(userId)
             .name(RandomStringUtils.insecure().nextAlphanumeric(30))
@@ -161,13 +161,13 @@ public class TestData {
     }
 
     public static AuditIssue mockAuditIssue(AuditReportConfig reportConfig,
-                                            Consumer<AuditIssue.Builder> modifier) {
+                                            Consumer<AuditIssue.AuditIssueBuilder> modifier) {
         return mockAuditIssue(reportConfig.getUserId(), reportConfig.getId(), modifier);
     }
 
     public static AuditIssue mockAuditIssue(UUID userId, UUID reportConfigId,
-                                            Consumer<AuditIssue.Builder> modifier) {
-        AuditIssue.Builder builder = AuditIssue.builder()
+                                            Consumer<AuditIssue.AuditIssueBuilder> modifier) {
+        AuditIssue.AuditIssueBuilder builder = AuditIssue.builder()
             .userId(userId)
             .reportConfigId(reportConfigId)
             .bookingDateTime(Instant.now().minus(Duration.ofDays(2)))

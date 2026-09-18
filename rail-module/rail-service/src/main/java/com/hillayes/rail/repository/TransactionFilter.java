@@ -16,7 +16,7 @@ import java.util.*;
  * A filter for transactions. Each property is an optional value that can be used
  * to filter the transactions.
  */
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
