@@ -608,7 +608,7 @@ public class AccountTransactionRepositoryTest {
     }
 
     private AccountTransaction mockTransaction(Account account, LocalDate bookingDate,
-                                               Consumer<AccountTransaction.Builder> modifier) {
+                                               Consumer<AccountTransaction.AccountTransactionBuilder> modifier) {
         return TestData.mockAccountTransaction(transaction -> {
             transaction.id(null);
             transaction.userId(account.getUserId());

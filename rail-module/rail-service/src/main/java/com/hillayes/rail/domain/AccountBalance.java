@@ -10,7 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(schema = "rails", name = "account_balance")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

@@ -24,7 +24,7 @@ import java.util.UUID;
 @Entity
 @Table(schema = "rails", name = "category_selector")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

@@ -20,7 +20,7 @@ import java.util.*;
 @Table(schema = "rails", name = "audit_report_config")
 @Getter
 @Setter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

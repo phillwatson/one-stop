@@ -214,7 +214,7 @@ public class UserAdminResourceTest extends TestBase {
             .familyName(insecure().nextAlphanumeric(15))
             .preferredName(insecure().nextAlphanumeric(10))
             .addRolesItem(UserRole.ADMIN)
-            .email(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30) + "@work.com")
             .phone(insecure().nextNumeric(10));
 
         // when: the admin makes an update requests
@@ -260,7 +260,7 @@ public class UserAdminResourceTest extends TestBase {
             .familyName(insecure().nextAlphanumeric(15))
             .preferredName(insecure().nextAlphanumeric(10))
             .addRolesItem(UserRole.ADMIN)
-            .email(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30) + "@work.com")
             .phone(insecure().nextNumeric(10));
 
         // when: the admin makes an update requests

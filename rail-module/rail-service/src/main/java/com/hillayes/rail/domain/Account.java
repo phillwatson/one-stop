@@ -15,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(schema = "rails", name = "account")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

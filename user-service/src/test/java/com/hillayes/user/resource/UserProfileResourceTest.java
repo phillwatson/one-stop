@@ -39,7 +39,7 @@ public class UserProfileResourceTest extends TestBase {
             .title(insecure().nextAlphanumeric(10))
             .givenName(insecure().nextAlphanumeric(20))
             .familyName(insecure().nextAlphanumeric(20))
-            .email(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20) + "@work.com")
             .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)
@@ -107,7 +107,7 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: the user requests an update to their profile
         UserProfileRequest request = new UserProfileRequest()
-            .email(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30) + "@work.com")
             .username(insecure().nextAlphanumeric(30))
             .title(insecure().nextAlphanumeric(30))
             .givenName(insecure().nextAlphanumeric(30))
@@ -150,7 +150,7 @@ public class UserProfileResourceTest extends TestBase {
 
         // and: the user requests an update to their profile
         UserProfileRequest request = new UserProfileRequest()
-            .email(insecure().nextAlphanumeric(30))
+            .email(insecure().nextAlphanumeric(30) + "@work.com")
             .username(insecure().nextAlphanumeric(30))
             .title(insecure().nextAlphanumeric(30))
             .givenName(insecure().nextAlphanumeric(30))
@@ -189,7 +189,7 @@ public class UserProfileResourceTest extends TestBase {
             .title(insecure().nextAlphanumeric(10))
             .givenName(insecure().nextAlphanumeric(20))
             .familyName(insecure().nextAlphanumeric(20))
-            .email(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20) + "@work.com")
             .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)
@@ -243,7 +243,7 @@ public class UserProfileResourceTest extends TestBase {
             .title(insecure().nextAlphanumeric(10))
             .givenName(insecure().nextAlphanumeric(20))
             .familyName(insecure().nextAlphanumeric(20))
-            .email(insecure().nextAlphanumeric(20))
+            .email(insecure().nextAlphanumeric(20) + "@work.com")
             .phoneNumber(insecure().nextNumeric(10))
             .passwordHash(UUID.randomUUID().toString())
             .locale(Locale.ENGLISH)

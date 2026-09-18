@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 @Entity
 @Table(schema = "rails", name = "category")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -79,8 +79,8 @@ public class Category {
      * @return The category, to allow method chaining.
      */
     public Category add(UUID accountId,
-                        Consumer<CategorySelector.Builder> modifier) {
-        CategorySelector.Builder builder = CategorySelector.builder()
+                        Consumer<CategorySelector.CategorySelectorBuilder> modifier) {
+        CategorySelector.CategorySelectorBuilder builder = CategorySelector.builder()
             .category(this)
             .accountId(accountId);
 
