@@ -16,15 +16,14 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm-panache</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.hillayes</groupId>
-            <artifactId>events-lib</artifactId>
+            <artifactId>events-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>executor-lib</artifactId>
         </dependency>
     </dependencies>
 </project>

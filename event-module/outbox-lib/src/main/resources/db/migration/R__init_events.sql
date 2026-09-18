@@ -10,7 +10,10 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.events (
   topic varchar(256) NOT NULL,
   key varchar(256) NULL,
   payload_class text NULL,
-  payload text NULL
+  payload text NULL,
+  consumer text NULL,
+  reason text NULL,
+  cause text NULL
 );
 
 CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.message_hospital (
@@ -19,11 +22,11 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.message_hospital (
   correlation_id varchar(256) NOT NULL,
   retry_count smallint NOT NULL DEFAULT 0,
   "timestamp" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  consumer text NULL,
-  reason text NULL,
-  cause text NULL,
   topic varchar(256) NOT NULL,
   key varchar(256) NULL,
   payload_class text NULL,
-  payload text NULL
+  payload text NULL,
+  consumer text NULL,
+  reason text NULL,
+  cause text NULL
 );

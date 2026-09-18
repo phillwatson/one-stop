@@ -10,7 +10,7 @@ import java.util.Currency;
 import java.util.UUID;
 
 @Entity
-@Table(name = "share_index")
+@Table(schema = "shares", name = "share_index")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
