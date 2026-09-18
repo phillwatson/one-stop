@@ -63,7 +63,7 @@ public class UserProfileTestIT extends ApiTestBase {
                 .familyName(randomStrings.nextAlphanumeric(20))
                 .preferredName(randomStrings.nextAlphanumeric(20))
                 .locale(Locale.CHINESE.toLanguageTag())
-                .email(randomStrings.nextAlphanumeric(20))
+                .email(randomStrings.nextAlphanumeric(20) + "@work.com")
                 .phone(randomStrings.nextNumeric(10));
             UserProfileResponse updateProfileResponse = userProfileApi.updateProfile(updateProfileRequest);
 
