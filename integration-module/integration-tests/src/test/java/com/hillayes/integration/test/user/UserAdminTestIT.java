@@ -104,7 +104,7 @@ public class UserAdminTestIT extends ApiTestBase {
 
                 UserUpdateRequest updateRequest = new UserUpdateRequest()
                     .username(randomStrings.nextAlphanumeric(20))
-                    .email(randomStrings.nextAlphabetic(20))
+                    .email(randomStrings.nextAlphabetic(20) + "@work.com")
                     .preferredName(randomStrings.nextAlphanumeric(20))
                     .title(randomStrings.nextAlphabetic(5))
                     .givenName(randomStrings.nextAlphanumeric(20))

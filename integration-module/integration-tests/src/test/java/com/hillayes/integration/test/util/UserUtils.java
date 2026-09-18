@@ -29,7 +29,7 @@ public class UserUtils {
             .username(randomStrings.nextAlphanumeric(20))
             .givenName(randomStrings.nextAlphanumeric(10))
             .password(randomStrings.nextAlphanumeric(30))
-            .email(randomStrings.nextAlphanumeric(30));
+            .email(randomStrings.nextAlphanumeric(30) + "@work.com");
 
         if (modifier != null) {
             modifier.accept(result);
