@@ -40,8 +40,8 @@ public class TestData {
         return mockShareIndex(null);
     }
 
-    public static ShareIndex mockShareIndex(Consumer<ShareIndex.Builder> modifier) {
-        ShareIndex.Builder builder = ShareIndex.builder()
+    public static ShareIndex mockShareIndex(Consumer<ShareIndex.ShareIndexBuilder> modifier) {
+        ShareIndex.ShareIndexBuilder builder = ShareIndex.builder()
             .identity(mockShareIdentity())
             .name(randomStrings.nextAlphanumeric(30))
             .currency(Currency.getInstance("GBP"))
@@ -64,14 +64,14 @@ public class TestData {
     }
 
     public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
-                                                Consumer<PriceHistory.Builder> modifier) {
+                                                Consumer<PriceHistory.PriceHistoryBuilder> modifier) {
         return mockPriceHistory(shareIndex, date, SharePriceResolution.DAILY, modifier);
     }
 
     public static PriceHistory mockPriceHistory(ShareIndex shareIndex, LocalDate date,
                                                 SharePriceResolution resolution,
-                                                Consumer<PriceHistory.Builder> modifier) {
-        PriceHistory.Builder builder = PriceHistory.builder()
+                                                Consumer<PriceHistory.PriceHistoryBuilder> modifier) {
+        PriceHistory.PriceHistoryBuilder builder = PriceHistory.builder()
             .id(PriceHistory.PrimaryKey.builder()
                 .shareIndexId(shareIndex.getId())
                 .resolution(resolution)
@@ -105,8 +105,8 @@ public class TestData {
     }
 
     public static Portfolio mockPortfolio(UUID userId,
-                                          Consumer<Portfolio.Builder> modifier) {
-        Portfolio.Builder builder = Portfolio.builder()
+                                          Consumer<Portfolio.PortfolioBuilder> modifier) {
+        Portfolio.PortfolioBuilder builder = Portfolio.builder()
             .userId(userId)
             .name(randomStrings.nextAlphanumeric(30))
             .dateCreated(Instant.now().minus(Duration.ofDays(90)));
@@ -123,8 +123,8 @@ public class TestData {
     }
 
     public static ShareTrade mockShareTrade(Portfolio portfolio, ShareIndex shareIndex,
-                                            Consumer<ShareTrade.Builder> modifier) {
-        ShareTrade.Builder builder = ShareTrade.builder()
+                                            Consumer<ShareTrade.ShareTradeBuilder> modifier) {
+        ShareTrade.ShareTradeBuilder builder = ShareTrade.builder()
             .userId(portfolio.getUserId())
             .portfolioId(portfolio.getId())
             .shareIndexId(shareIndex.getId())
@@ -146,8 +146,8 @@ public class TestData {
 
     public static ShareTradeSummary mockShareTradeSummary(Portfolio portfolio,
                                                           ShareIndex shareIndex,
-                                                          Consumer<ShareTradeSummary.Builder> modifier) {
-        ShareTradeSummary.Builder builder = ShareTradeSummary.builder()
+                                                          Consumer<ShareTradeSummary.ShareTradeSummaryBuilder> modifier) {
+        ShareTradeSummary.ShareTradeSummaryBuilder builder = ShareTradeSummary.builder()
             .portfolioId(portfolio.getId())
             .shareIndexId(shareIndex.getId())
             .shareIdentity(ShareIndex.ShareIdentity.builder()

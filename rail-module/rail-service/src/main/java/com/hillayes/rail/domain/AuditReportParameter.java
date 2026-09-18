@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "audit_report_parameter")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

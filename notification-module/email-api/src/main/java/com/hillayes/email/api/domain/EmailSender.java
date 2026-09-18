@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
-@Builder(builderClassName = "Builder")
+@Builder
 @ToString(onlyExplicitlyIncluded = true)
 @Getter
 public class EmailSender {

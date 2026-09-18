@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "audit_issue")
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -72,7 +72,7 @@ public class AuditIssue {
      * @return a new, un-persisted, issue for the identified report and transaction.
      */
     public static AuditIssue issueFor(AuditReportConfig reportConfig, AccountTransaction transaction) {
-        return new Builder()
+        return new AuditIssueBuilder()
             .userId(reportConfig.getUserId())
             .reportConfigId(reportConfig.getId())
             .transactionId(transaction.getId())
