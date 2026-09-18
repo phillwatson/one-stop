@@ -37,7 +37,7 @@ public class UserOnboardTestIT extends ApiTestBase {
 
         // given: a request to register a user by email
         UserRegisterRequest registerRequest = new UserRegisterRequest()
-            .email(randomStrings.nextAlphanumeric(30));
+            .email(randomStrings.nextAlphanumeric(30) + "@work.com");
 
         // when: the request is sent to the service
         userOnboardApi.registerUser(registerRequest);
