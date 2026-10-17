@@ -1,23 +1,48 @@
 quarkus:
   hibernate-orm:
+    database:
+      # allows tests to apply migrations without conflicting with other modules
+      default-schema: rails
     log:
       sql: true
       bind-parameters: true
 
+  flyway:
+    migrate-at-start: true
+    default-schema: ${quarkus.hibernate-orm.database.default-schema}
+
+  rest-client:
+    nordigen-api:
+      url: http://localhost:8089
+
   log:
+    min-level: TRACE
+    level: INFO
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
     category:
       "org.apache.http.wire":
+        level: DEBUG
+      "io.quarkus.smallrye.jwt.runtime.auth.MpJwtValidator":
+        level: INFO
+      "org.jose4j.jwk":
+        level: INFO
+      "com.hillayes":
         level: DEBUG
 
 one-stop:
   auth:
     xsrf:
       secret: "this is a secret for xsrf tokens"
-#
-#  nordigen:
-#    secret:
-#      id: e9309c
-#      key: 8653cb
+
+  tests: # properties only used for testing
+    nordigen:
+      port: 8089
+
+  nordigen:
+    secret:
+      id: e9309c
+      key: 8653cb
 
   yapily:
     secret:
