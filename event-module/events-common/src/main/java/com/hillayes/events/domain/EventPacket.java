@@ -8,7 +8,9 @@ import com.hillayes.commons.json.MapperFactory;
 import com.hillayes.events.exceptions.EventPayloadDeserializationException;
 import com.hillayes.events.exceptions.EventPayloadSerializationException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -87,6 +89,16 @@ public class EventPacket {
     private transient Object payloadContent;
 
     /**
+     * The exception class, if any, that caused the event to be retried.
+     */
+    private String reason;
+
+    /**
+     * The exception message of the exception that caused the event to be retried.
+     */
+    private String cause;
+
+    /**
      * A no-args constructor for JSON deserialization.
      */
     protected EventPacket() {}
@@ -94,6 +106,14 @@ public class EventPacket {
     public EventPacket(UUID id, Topic topic, String correlationId,
                        int retryCount, Instant timestamp,
                        String key, String payloadClass, String payload) {
+        this(id, topic, correlationId, retryCount, timestamp, key,
+         payloadClass, payload, null, null);
+    }
+
+    public EventPacket(UUID id, Topic topic, String correlationId,
+                       int retryCount, Instant timestamp,
+                       String key, String payloadClass, String payload,
+                       String reason, String cause) {
         this.id = id;
         this.topic = topic;
         this.correlationId = correlationId;
@@ -102,6 +122,8 @@ public class EventPacket {
         this.key = key;
         this.payloadClass = payloadClass;
         this.payload = payload;
+        this.reason = reason;
+        this.cause = cause;
     }
 
     /**
