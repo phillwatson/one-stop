@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.scheduled_tasks (
   PRIMARY KEY (task_name, task_instance)
 );
 
-CREATE INDEX execution_time_idx ON ${flyway:defaultSchema}.scheduled_tasks (execution_time);
-CREATE INDEX last_heartbeat_idx ON ${flyway:defaultSchema}.scheduled_tasks (last_heartbeat);
+CREATE INDEX IF NOT EXISTS execution_time_idx ON ${flyway:defaultSchema}.scheduled_tasks (execution_time);
+CREATE INDEX IF NOT EXISTS last_heartbeat_idx ON ${flyway:defaultSchema}.scheduled_tasks (last_heartbeat);

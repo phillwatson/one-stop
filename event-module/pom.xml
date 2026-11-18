@@ -15,7 +15,6 @@
 
     <modules>
         <module>events-common</module>
-        <module>events-lib</module>
         <module>outbox-lib</module>
     </modules>
 </project>

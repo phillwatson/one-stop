@@ -7,17 +7,15 @@ their bank accounts and view the transactions from multiple accounts in an
 aggregated fashion.
 
 ## Architecture
-One-Stop has been designed using an event-driven, microservice architecture,
-where each service has a specific area of responsibility. However, to keep the
-PoC build simple, the Maven model of parent POM and sub-modules has been
-adopted; with each module having the same version as the parent. Each service
-module will generate its own Docker Image.
+One-Stop has been designed using an event-driven, modulith service architecture,
+where each service has a specific area of responsibility; and the whole is deployed
+as a single Docker image.
 
 ![Architecture](./docs/one-stop-arch.png)
 
-An alternative implementation is presented in the branch "modulith". That
-implementation demonstrates how the same application can be built, and maintained,
-as a monolith application.
+An alternative implementation is presented in the "main" branch. That implementation
+demonstrates how the same application can be built, and maintained, as a collection
+of independent microservices; each deployed as a separate Docker image.
 
 ### Structure
 The project consists of a parent POM with a number of sub-modules. The sub-modules
@@ -132,9 +130,6 @@ https://gocardless.com/bank-account-data/
 The application also supports Yapily. Sandbox sign-up and access is free:
 https://docs.yapily.com/
 ```yaml
-# the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
-
 # the Nordigen/GoCardless authentication keys
 ONE_STOP_RAILS_SECRET_ID: "<the secret ID issued by Nordigen>"
 ONE_STOP_RAILS_SECRET_KEY: "<the secret issue by Nordigen>"
@@ -149,9 +144,6 @@ In order to use the notification service, you will need to obtain an API key fro
 Brevo (previously known as Send-In-Blue). Sign-up and access is free:
 https://www.brevo.com/
 ```yaml
-# the secret used to generate and verify the XSRF token
-ONE_STOP_AUTH_XSRF_SECRET: "<any string value 18+ chars - must be same as user service>"
-
 # the Brevo (SendInBlue) Email-Service key
 ONE_STOP_EMAIL_API_KEY: "<the secret issue by Brevo (previously Send-In-Blue)>"
 
@@ -240,8 +232,8 @@ All non-native docker images are built with remote JVM debugging enabled. In
 order to connect to the images the debug port 5005 must be exposed. Each
 container should expose that internal port on a unique port - to avoid clashes.
 ```yaml
-  user-service:
-    image: one-stop/user-service:1.0.0-SNAPSHOT
+  one-stop-service:
+    image: one-stop/one-stop-main:1.0.0-SNAPSHOT
     ports:
       - "8181:8080"
       - "5001:5005"

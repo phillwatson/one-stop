@@ -15,20 +15,16 @@ services:
         max-size: "500k"
         max-file: "1"
 
-  user-service:
-    image: ghcr.io/phillwatson/user-service:1.0.0-SNAPSHOT
+  one-stop-service:
+    image: ghcr.io/phillwatson/one-stop-main:1.0.0-SNAPSHOT
     ports:
       - "8181:8080"
       - "5001:5005"
     environment:
-      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
-
-  rail-service:
-    image: ghcr.io/phillwatson/rail-service:1.0.0-SNAPSHOT
-    ports:
-      - "8182:8080"
-      - "5002:5005"
-    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/one-stop
+      QUARKUS_DATASOURCE_USERNAME: one-stop
+      QUARKUS_DATASOURCE_PASSWORD: password
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
       ONE_STOP_NORDIGEN_SECRET_ID: "abcdef"
       ONE_STOP_NORDIGEN_SECRET_KEY: "abcdef"
       ONE_STOP_YAPILY_SECRET_ID: "abcdef"
@@ -36,35 +32,10 @@ services:
       ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
       QUARKUS_REST_CLIENT_NORDIGEN_API_URL: ${REST_CLIENT_NORDIGEN_API_URL}
       QUARKUS_REST_CLIENT_YAPILY_API_URL: ${REST_CLIENT_YAPILY_API_URL}
-
-  share-service:
-    image: ghcr.io/phillwatson/share-service:1.0.0-SNAPSHOT
-    ports:
-      - "8185:8080"
-      - "5005:5005"
-    environment:
-      QUARKUS_LOG_LEVEL: "INFO"
-      QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
-      QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: "false"
-      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
+      QUARKUS_REST_CLIENT_BREVO_API_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
+      ONE_STOP_EMAIL_API_KEY: "abcdef"
       ONE_STOP_ALPHA_VANTAGE_SECRET_KEY: "ABCDEF12345"
       ONE_STOP_SHARES_FT_MARKET_URL: ${ONE_STOP_SHARES_FT_MARKET_URL}
-
-  notification-service:
-    image: ghcr.io/phillwatson/notification-service:1.0.0-SNAPSHOT
-    ports:
-      - "8184:8080"
-      - "5004:5005"
-    environment:
-      ONE_STOP_EMAIL_API_KEY: "abcdef"
-      QUARKUS_REST_CLIENT_BREVO_API_URL: ${ONE_STOP_EMAIL_SERVICE_URL}
-      ONE_STOP_AUTH_XSRF_SECRET: "this is a secret for xsrf tokens"
-
-  audit-service:
-    image: ghcr.io/phillwatson/audit-service:1.0.0-SNAPSHOT
-    ports:
-      - "8183:8080"
-      - "5003:5005"
 
   client:
     image: ghcr.io/phillwatson/client:1.0.0-SNAPSHOT

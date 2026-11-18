@@ -46,12 +46,13 @@ public class EventEntityTest {
         // and: an event entity is created
         EventEntity eventEntity = EventEntity.forInitialDelivery(Topic.USER_AUTH, "test-key", event);
 
-        // and: the event entity is converted to a packet
-        EventPacket eventPacket = eventEntity.toEventPacket();
+        // and: the retry count is initially zero
+        assertEquals(0, eventEntity.getRetryCount());
 
         // when: the event entity is to be redelivered
         Instant redeliveryTime = Instant.now().plusSeconds(60);
-        EventEntity redelivery = EventEntity.forRedelivery(eventPacket, redeliveryTime);
+        Throwable error = new RuntimeException("Mock error");
+        EventEntity redelivery = EventEntity.forRedelivery(eventEntity, error, redeliveryTime);
 
         // then: the redelivery event entity matches the original
         assertNull(eventEntity.getId());
@@ -65,7 +66,7 @@ public class EventEntityTest {
         assertEquals(eventEntity.getTimestamp().toEpochMilli(), redelivery.getTimestamp().toEpochMilli(), 100);
 
         // and: the retry count is incremented
-        assertEquals(eventEntity.getRetryCount() + 1, redelivery.getRetryCount());
+        assertEquals(1, redelivery.getRetryCount());
     }
 
     @Test
